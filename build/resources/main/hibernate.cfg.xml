@@ -1,0 +1,28 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+	<session-factory>
+		<property name="hibernate.current_session_context_class">thread</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.DB2Dialect</property>
+		<property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
+		<property name="hibernate.connection.driver_class">com.ibm.db2.jcc.DB2Driver</property>
+		<property name="hibernate.connection.username">user</property>
+		<property name="hibernate.connection.password">password</property>
+		<property name="hibernate.connection.url">jdbc:db2://localhost:9000/DB0TSOC</property>
+		<property name="hibernate.default_schema">CWSINT</property>
+		<property name="connection_pool_size">10</property>
+		<property name="show_sql">true</property>
+
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.Allegation" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.StaffPerson" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.ReferralClient" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.Referral" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.Reporter" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.CrossReport" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.CmsDocument" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.CmsDocReferralClient" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.CmsDocumentBlobSegment"/>
+	</session-factory>
+</hibernate-configuration>

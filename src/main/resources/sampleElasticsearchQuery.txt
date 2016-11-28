@@ -1,0 +1,15 @@
+curl -XGET "http://10.10.15.61:9200/cms_documents/referral_doc/_search" -d'
+{
+ "fields": ["cms_document.date", "cms_document.author", "cms_document.name",  "cms_document.title"],
+ "query": {
+    "match": {
+      "cms_document.content": "julie"
+    }
+ },
+ "highlight": {
+   "fields": {
+     "cms_document.content": {
+     }
+   }
+ }
+}'

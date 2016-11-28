@@ -1,0 +1,7 @@
+elasticsearch.host: localhost
+elasticsearch.port: 9300
+elasticsearch.cluster: elasticsearch_CWS-NS3
+elasticsearch.clientnode: javaclient
+elasticsearch.clientport: 10080
+indexName: cms_documents_1
+indexType: referral_doc
