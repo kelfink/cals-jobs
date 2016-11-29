@@ -21,7 +21,7 @@ import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.model.cms.DocumentMetadata;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
-import gov.ca.cwds.rest.api.persistence.cms.CmsDocReferralClient;
+import gov.ca.cwds.rest.api.domain.cms.CmsDocReferralClient;
 import gov.ca.cwds.rest.jdbi.CrudsDao;
 import gov.ca.cwds.rest.jdbi.cms.CmsDocReferralClientDao;
 import gov.ca.cwds.rest.jdbi.cms.CmsDocumentDao;
@@ -82,7 +82,8 @@ public class DocumentIndexerJob implements Job {
 
     // classes from the API project are not integrated with GUICE so construct by hand
     SessionFactory sessionFactory = injector.getInstance(SessionFactory.class);
-    CrudsDao<CmsDocReferralClient> cmsDocDao = new CmsDocReferralClientDao(sessionFactory);
+    CrudsDao<gov.ca.cwds.rest.api.persistence.cms.CmsDocReferralClient> cmsDocDao =
+        new CmsDocReferralClientDao(sessionFactory);
     CrudsDao<gov.ca.cwds.rest.api.persistence.cms.CmsDocument> docDao =
         new CmsDocumentDao(sessionFactory);
     CmsDocReferralClientService cmsDocReferralClientService = new CmsDocReferralClientService(
@@ -138,8 +139,7 @@ public class DocumentIndexerJob implements Job {
 
   private void indexDocument(DocumentMetadata documentMetadata) throws Exception {
     String document = "";
-    gov.ca.cwds.rest.api.domain.legacy.CmsDocReferralClient response =
-        cmsDocReferralClientService.find(documentMetadata.getHandle());
+    CmsDocReferralClient response = cmsDocReferralClientService.find(documentMetadata.getHandle());
 
     if (response != null) {
       document = MAPPER.writeValueAsString(response);
