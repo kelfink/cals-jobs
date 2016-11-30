@@ -19,11 +19,20 @@ public class JobsGuiceInjector extends AbstractModule {
   @Override
   protected void configure() {
     bind(DocumentMetadataDao.class).to(DocumentMetadataDaoImpl.class);
+
+
   }
 
   @Provides
-  SessionFactory sessionFactory() {
-    return new Configuration().configure().buildSessionFactory();
+  @CmsSessionFactory
+  SessionFactory cmsSessionFactory() {
+    return new Configuration().configure("cms-hibernate.cfg.xml").buildSessionFactory();
+  }
+
+  @Provides
+  @NsSessionFactory
+  SessionFactory nsSessionFactory() {
+    return new Configuration().configure("ns-hibernate.cfg.xml").buildSessionFactory();
   }
 
 }

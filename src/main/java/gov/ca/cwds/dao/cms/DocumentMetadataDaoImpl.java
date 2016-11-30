@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 import gov.ca.cwds.dao.DaoException;
 import gov.ca.cwds.dao.DocumentMetadataDao;
 import gov.ca.cwds.data.model.cms.DocumentMetadata;
+import gov.ca.cwds.jobs.inject.CmsSessionFactory;
 
 /**
  * Implementation of {@link DocumentMetadataDao} which is backed by Hibernate
@@ -43,7 +44,7 @@ public class DocumentMetadataDaoImpl implements DocumentMetadataDao {
    * @param sessionFactory the sessionFactory
    */
   @Inject
-  public DocumentMetadataDaoImpl(SessionFactory sessionFactory) {
+  public DocumentMetadataDaoImpl(@CmsSessionFactory SessionFactory sessionFactory) {
     this.sessionFactory = sessionFactory;
   }
 

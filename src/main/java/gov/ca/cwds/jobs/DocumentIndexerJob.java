@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -100,12 +101,16 @@ public class DocumentIndexerJob extends JobBasedOnLastSuccessfulRunTime {
     try {
       List<DocumentMetadata> results =
           documentMetadataDao.findByLastJobRunTimeMinusOneMinute(lastSuccessfulRunTime);
+      LOGGER.info(MessageFormat.format("Found {0} documents to index", results.size()));
       Date currentTime = new Date();
 
       elasticsearchDao.start();
       for (DocumentMetadata documentMetadata : results) {
         indexDocument(documentMetadata);
       }
+      LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
+      LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
+          DATE_FORMAT.format(currentTime)));
       return currentTime;
     } catch (IOException e) {
       throw new JobsException("Could not parse configuration file", e);

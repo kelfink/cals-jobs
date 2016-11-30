@@ -19,7 +19,7 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LogManager.getLogger(JobBasedOnLastSuccessfulRunTime.class);
 
-  private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  protected DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   @Override
   final public void run() {
@@ -33,7 +33,7 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
 
       String timestring = bufferedReader.readLine();
       bufferedReader.close();
-      return dateFormat.parse(timestring);
+      return DATE_FORMAT.parse(timestring);
     } catch (FileNotFoundException e) {
       throw new JobsException(e);
     } catch (IOException e) {
@@ -44,16 +44,18 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
   }
 
   private void writeLastSuccessfulRunTime(Date datetime) {
-    try (BufferedWriter writedtparm =
-        new BufferedWriter(new FileWriter(getTimestampParamterFilename()))) {
-      writedtparm.write(dateFormat.format(datetime));
-    } catch (IOException e) {
-      throw new JobsException("Could not write the timestamp parameter file", e);
+    if (datetime != null) {
+      try (BufferedWriter writedtparm =
+          new BufferedWriter(new FileWriter(getTimestampParamterFilename()))) {
+        writedtparm.write(DATE_FORMAT.format(datetime));
+      } catch (IOException e) {
+        throw new JobsException("Could not write the timestamp parameter file", e);
+      }
     }
   }
 
   private String getTimestampParamterFilename() {
-    return this.getClass().getName() + ".time";
+    return this.getClass().getSimpleName() + ".time";
   }
 
   /**
