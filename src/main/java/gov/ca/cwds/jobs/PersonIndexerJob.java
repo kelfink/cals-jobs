@@ -2,8 +2,6 @@ package gov.ca.cwds.jobs;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -19,33 +17,30 @@ import com.google.inject.Injector;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
+import gov.ca.cwds.rest.api.domain.DomainObject;
+import gov.ca.cwds.rest.api.domain.PostedPerson;
 import gov.ca.cwds.rest.api.persistence.ns.Person;
 import gov.ca.cwds.rest.jdbi.ns.PersonDao;
 
-public class PersonIndexerJob implements Job {
+public class PersonIndexerJob extends JobBasedOnLastSuccessfulRunTime {
 
   private static final Logger LOGGER = LogManager.getLogger(PersonIndexerJob.class);
 
   private static ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
   private static ObjectMapper MAPPER = new ObjectMapper();
-  private static DateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   private PersonDao personDao;
   private ElasticsearchDao elasticsearchDao;
-  private Date lastJobRunTime;
 
-  public PersonIndexerJob(PersonDao personDao, ElasticsearchDao elasticsearchDao,
-      Date lastJobRunTime) {
+  public PersonIndexerJob(PersonDao personDao, ElasticsearchDao elasticsearchDao) {
     super();
     this.personDao = personDao;
     this.elasticsearchDao = elasticsearchDao;
-    this.lastJobRunTime = lastJobRunTime;
   }
 
   public static void main(String... args) throws Exception {
-    if (args.length != 2) {
-      throw new Error(
-          "Usage: java gov.ca.cwds.jobs.PersonIndexerJob configFileLocation lastJobRunTime(yyyy-MM-dd HH:mm:ss)");
+    if (args.length != 1) {
+      throw new Error("Usage: java gov.ca.cwds.jobs.PersonIndexerJob configFileLocation");
     }
 
     Injector injector = Guice.createInjector(new JobsGuiceInjector());
@@ -57,9 +52,8 @@ public class PersonIndexerJob implements Job {
         YAML_MAPPER.readValue(file, ElasticsearchConfiguration.class);
     ElasticsearchDao elasticsearchDao = new ElasticsearchDao(configuration);
 
-    Date lastJobRunTime = DATEFORMAT.parse(args[1]);
 
-    PersonIndexerJob job = new PersonIndexerJob(personDao, elasticsearchDao, lastJobRunTime);
+    PersonIndexerJob job = new PersonIndexerJob(personDao, elasticsearchDao);
     try {
       job.run();
     } catch (JobsException e) {
@@ -72,16 +66,25 @@ public class PersonIndexerJob implements Job {
   /*
    * (non-Javadoc)
    * 
-   * @see gov.ca.cwds.jobs.Job#run()
+   * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
   @Override
-  public void run() {
+  public Date _run(Date lastSuccessfulRunTime) {
     try {
-      List<Person> results = personDao.findAllUpdatedAfter(lastJobRunTime);
+      List<Person> results = personDao.findAllUpdatedAfter(lastSuccessfulRunTime);
+      Date currentTime = new Date();
       elasticsearchDao.start();
       for (Person person : results) {
-        indexDocument(person);
+        PostedPerson postedPerson = new PostedPerson(person);
+        gov.ca.cwds.rest.api.elasticsearch.ns.Person esPerson =
+            new gov.ca.cwds.rest.api.elasticsearch.ns.Person(postedPerson,
+                DomainObject.cookTimestamp(person.getLastUpdatedTime()));
+        esPerson.setId(person.getId().toString());
+
+
+        indexDocument(esPerson);
       }
+      return currentTime;
     } catch (IOException e) {
       throw new JobsException("Could not parse configuration file", e);
     } catch (Exception e) {
@@ -95,9 +98,9 @@ public class PersonIndexerJob implements Job {
     }
   }
 
-  private void indexDocument(Person person) throws Exception {
+  private void indexDocument(gov.ca.cwds.rest.api.elasticsearch.ns.Person person) throws Exception {
     String document = MAPPER.writeValueAsString(person);
-    elasticsearchDao.index(document, person.getPrimaryKey().toString());
+    elasticsearchDao.index(document, person.getId().toString());
   }
 }
 

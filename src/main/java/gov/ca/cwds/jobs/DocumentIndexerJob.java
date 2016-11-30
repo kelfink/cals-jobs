@@ -2,8 +2,6 @@ package gov.ca.cwds.jobs;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -32,17 +30,15 @@ import gov.ca.cwds.rest.services.cms.CmsDocReferralClientService;
  * 
  * @author CWDS API Team
  */
-public class DocumentIndexerJob implements Job {
+public class DocumentIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   private static final Logger LOGGER = LogManager.getLogger(DocumentIndexerJob.class);
 
   private static ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
   private static ObjectMapper MAPPER = new ObjectMapper();
-  private static DateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   private DocumentMetadataDao documentMetadataDao;
   private ElasticsearchDao elasticsearchDao;
   private CmsDocReferralClientService cmsDocReferralClientService;
-  private Date lastJobRunTime;
 
 
   /**
@@ -51,24 +47,20 @@ public class DocumentIndexerJob implements Job {
    * @param documentMetadataDao The documentMetadataDao
    * @param elasticsearchDao The elasticsearchDao
    * @param cmsDocReferralClientService The cmsDocReferralClientService
-   * @param lastJobRunTime The last time the job ran
    */
   public DocumentIndexerJob(DocumentMetadataDao documentMetadataDao,
-      ElasticsearchDao elasticsearchDao, CmsDocReferralClientService cmsDocReferralClientService,
-      Date lastJobRunTime) {
+      ElasticsearchDao elasticsearchDao, CmsDocReferralClientService cmsDocReferralClientService) {
     super();
     this.documentMetadataDao = documentMetadataDao;
     this.elasticsearchDao = elasticsearchDao;
     this.cmsDocReferralClientService = cmsDocReferralClientService;
-    this.lastJobRunTime = lastJobRunTime;
   }
 
 
 
   public static void main(String... args) throws Exception {
-    if (args.length != 2) {
-      throw new Error(
-          "Usage: java gov.ca.cwds.jobs.DocumentIndexLoader configFileLocation lastJobRunTime(yyyy-MM-dd HH:mm:ss)");
+    if (args.length != 1) {
+      throw new Error("Usage: java gov.ca.cwds.jobs.DocumentIndexLoader configFileLocation");
     }
     Injector injector = Guice.createInjector(new JobsGuiceInjector());
     DocumentMetadataDao documentMetadataDao = injector.getInstance(DocumentMetadataDao.class);
@@ -77,8 +69,6 @@ public class DocumentIndexerJob implements Job {
     ElasticsearchConfiguration configuration =
         YAML_MAPPER.readValue(file, ElasticsearchConfiguration.class);
     ElasticsearchDao elasticSearchDao = new ElasticsearchDao(configuration);
-
-    Date lastJobRunTime = DATEFORMAT.parse(args[1]);
 
     // classes from the API project are not integrated with GUICE so construct by hand
     SessionFactory sessionFactory = injector.getInstance(SessionFactory.class);
@@ -89,8 +79,8 @@ public class DocumentIndexerJob implements Job {
     CmsDocReferralClientService cmsDocReferralClientService = new CmsDocReferralClientService(
         (CmsDocReferralClientDao) cmsDocDao, (CmsDocumentDao) docDao);
 
-    DocumentIndexerJob job = new DocumentIndexerJob(documentMetadataDao, elasticSearchDao,
-        cmsDocReferralClientService, lastJobRunTime);
+    DocumentIndexerJob job =
+        new DocumentIndexerJob(documentMetadataDao, elasticSearchDao, cmsDocReferralClientService);
     try {
       job.run();
     } catch (JobsException e) {
@@ -103,38 +93,32 @@ public class DocumentIndexerJob implements Job {
   /*
    * (non-Javadoc)
    * 
-   * @see gov.ca.cwds.jobs.Job#run()
+   * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
   @Override
-  public void run() {
+  public Date _run(Date lastSuccessfulRunTime) {
     try {
       List<DocumentMetadata> results =
-          documentMetadataDao.findByLastJobRunTimeMinusOneMinute(lastJobRunTime);
+          documentMetadataDao.findByLastJobRunTimeMinusOneMinute(lastSuccessfulRunTime);
+      Date currentTime = new Date();
 
       elasticsearchDao.start();
       for (DocumentMetadata documentMetadata : results) {
         indexDocument(documentMetadata);
       }
+      return currentTime;
     } catch (IOException e) {
       throw new JobsException("Could not parse configuration file", e);
     } catch (Exception e) {
       throw new JobsException(e);
+    } finally {
+      try {
+        elasticsearchDao.stop();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
 
-    // TODO - handle this through Rundek?????
-    // /** Write the last run timestamp to parm file */
-    // DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    // Date date = new Date();
-    // String tsparm = dateFormat.format(date);
-    //
-    // try (BufferedWriter writedtparm = new BufferedWriter(new FileWriter("parmfile.txt"))) {
-    // writedtparm.write(tsparm);
-    // } catch (IOException e) {
-    // LOGGER.error("Could not write the timestamp parameter file");
-    // throw e;
-    // } finally {
-    // sessionFactory.close();
-    // }
   }
 
   private void indexDocument(DocumentMetadata documentMetadata) throws Exception {
