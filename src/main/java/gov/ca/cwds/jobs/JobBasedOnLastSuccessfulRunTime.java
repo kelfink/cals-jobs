@@ -23,7 +23,9 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
 
   @Override
   final public void run() {
-    writeLastSuccessfulRunTime(_run(determineLastSuccessfulRunTime()));
+    Date lastRunTime = determineLastSuccessfulRunTime();
+    Date curentTimeRunTime = _run(lastRunTime);
+    writeLastSuccessfulRunTime(curentTimeRunTime);
   }
 
   private Date determineLastSuccessfulRunTime() {
