@@ -9,14 +9,15 @@
 		<property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
 		<property name="hibernate.connection.driver_class">com.ibm.db2.jcc.DB2Driver</property>
 		<property name="hibernate.connection.username">db2inst1</property>
-		<property name="hibernate.connection.password">db2inst1</property>
-		<property name="hibernate.connection.url">jdbc:db2://10.10.31.171:50000/DB0TDEV</property>
+		<property name="hibernate.connection.password">1password</property>
+		<property name="hibernate.connection.url">jdbc:db2://localhost:50000/DB0TDEV</property>
 		<property name="hibernate.default_schema">CWSINT</property>
 		<property name="connection_pool_size">10</property>
 		<property name="show_sql">true</property>
 
 		<mapping class="gov.ca.cwds.data.model.cms.DocumentMetadata" />
 		<mapping class="gov.ca.cwds.rest.api.persistence.cms.Client" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.Reporter" />
 		
 	</session-factory>
 </hibernate-configuration>

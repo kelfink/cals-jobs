@@ -1,7 +1,5 @@
 elasticsearch.host: 10.10.15.61
 elasticsearch.port: 9300
 elasticsearch.cluster: elasticsearch
-elasticsearch.clientnode: javaclient
-elasticsearch.clientport: 10080
-indexName: cms_documents_1
-indexType: referral_doc
+elasticsearch.indexName: people
+elasticsearch.indexType: reporter
