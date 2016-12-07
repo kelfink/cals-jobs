@@ -18,6 +18,7 @@
 		<mapping class="gov.ca.cwds.data.model.cms.DocumentMetadata" />
 		<mapping class="gov.ca.cwds.rest.api.persistence.cms.Client" />
 		<mapping class="gov.ca.cwds.rest.api.persistence.cms.Reporter" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.OtherClientName" />
 		
 	</session-factory>
 </hibernate-configuration>
