@@ -47,7 +47,7 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
 
   public static void main(String... args) throws Exception {
     if (args.length != 1) {
-      throw new Error("Usage: java gov.ca.cwds.jobs.PersonIndexerJob configFileLocation");
+      throw new Error("Usage: java gov.ca.cwds.jobs.ClientIndexerJob configFileLocation");
     }
 
     Injector injector = Guice.createInjector(new JobsGuiceInjector());
