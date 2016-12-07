@@ -1,12 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
-import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
-import gov.ca.cwds.jobs.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
-import gov.ca.cwds.rest.api.persistence.cms.Reporter;
-import gov.ca.cwds.rest.jdbi.cms.ReporterDao;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -22,6 +15,13 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+
+import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
+import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
+import gov.ca.cwds.jobs.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
+import gov.ca.cwds.rest.api.persistence.cms.Reporter;
+import gov.ca.cwds.rest.jdbi.cms.ReporterDao;
 
 /**
  * Job to load reporters from CMS into ElasticSearch
@@ -78,7 +78,8 @@ public class ReporterIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      List<Reporter> results = reporterDao.findAllUpdatedAfter(lastSuccessfulRunTime);
+      List<Reporter> results = null;// TODO : put this back when api code is updated.
+                                    // reporterDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       Date currentTime = new Date();
       elasticsearchDao.start();
