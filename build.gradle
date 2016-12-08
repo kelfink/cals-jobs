@@ -51,6 +51,7 @@ dependencies {
 }
 
 shadowJar {
+  classifier = ''
   baseName = (System.properties.getProperty('baseName') != null) ? System.properties.getProperty('baseName') : 'DocumentIndexerJob'
   mergeServiceFiles()	
   manifest {
