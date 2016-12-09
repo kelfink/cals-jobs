@@ -38,15 +38,17 @@ public class ReporterIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   private ReporterDao reporterDao;
   private ElasticsearchDao elasticsearchDao;
 
-  public ReporterIndexerJob(ReporterDao reporterDao, ElasticsearchDao elasticsearchDao) {
-    super();
+  public ReporterIndexerJob(ReporterDao reporterDao, ElasticsearchDao elasticsearchDao,
+      String lastJobRunTimeFilename) {
+    super(lastJobRunTimeFilename);
     this.reporterDao = reporterDao;
     this.elasticsearchDao = elasticsearchDao;
   }
 
   public static void main(String... args) throws Exception {
     if (args.length != 1) {
-      throw new Error("Usage: java gov.ca.cwds.jobs.ReporterIndexerJob configFileLocation");
+      throw new Error(
+          "Usage: java gov.ca.cwds.jobs.ReporterIndexerJob esconfigFileLocation lastJobRunTimeFilename");
     }
 
     Injector injector = Guice.createInjector(new JobsGuiceInjector());
@@ -60,7 +62,7 @@ public class ReporterIndexerJob extends JobBasedOnLastSuccessfulRunTime {
         YAML_MAPPER.readValue(file, ElasticsearchConfiguration.class);
     ElasticsearchDao elasticsearchDao = new ElasticsearchDao(configuration);
 
-    ReporterIndexerJob job = new ReporterIndexerJob(reporterDao, elasticsearchDao);
+    ReporterIndexerJob job = new ReporterIndexerJob(reporterDao, elasticsearchDao, args[1]);
     try {
       job.run();
     } catch (JobsException e) {
