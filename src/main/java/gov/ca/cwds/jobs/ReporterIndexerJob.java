@@ -46,7 +46,7 @@ public class ReporterIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   }
 
   public static void main(String... args) throws Exception {
-    if (args.length != 1) {
+    if (args.length != 2) {
       throw new Error(
           "Usage: java gov.ca.cwds.jobs.ReporterIndexerJob esconfigFileLocation lastJobRunTimeFilename");
     }
@@ -80,9 +80,8 @@ public class ReporterIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      List<Reporter> results = null;// TODO : put this back when api code is updated.
-                                    // reporterDao.findAllUpdatedAfter(lastSuccessfulRunTime);
-      LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
+      List<Reporter> results = reporterDao.findAllUpdatedAfter(lastSuccessfulRunTime);
+      LOGGER.info(MessageFormat.format("Found {0} reporters to index", results.size()));
       Date currentTime = new Date();
       elasticsearchDao.start();
       for (Reporter reporter : results) {
