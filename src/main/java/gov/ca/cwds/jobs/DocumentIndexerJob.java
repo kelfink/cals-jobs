@@ -48,10 +48,12 @@ public class DocumentIndexerJob extends JobBasedOnLastSuccessfulRunTime {
    * @param documentMetadataDao The documentMetadataDao
    * @param elasticsearchDao The elasticsearchDao
    * @param cmsDocReferralClientService The cmsDocReferralClientService
+   * @param lastJobRunTimeFilename The lastJobRunTimeFilename
    */
   public DocumentIndexerJob(DocumentMetadataDao documentMetadataDao,
-      ElasticsearchDao elasticsearchDao, CmsDocReferralClientService cmsDocReferralClientService) {
-    super();
+      ElasticsearchDao elasticsearchDao, CmsDocReferralClientService cmsDocReferralClientService,
+      String lastJobRunTimeFilename) {
+    super(lastJobRunTimeFilename);
     this.documentMetadataDao = documentMetadataDao;
     this.elasticsearchDao = elasticsearchDao;
     this.cmsDocReferralClientService = cmsDocReferralClientService;
@@ -60,8 +62,9 @@ public class DocumentIndexerJob extends JobBasedOnLastSuccessfulRunTime {
 
 
   public static void main(String... args) throws Exception {
-    if (args.length != 1) {
-      throw new Error("Usage: java gov.ca.cwds.jobs.DocumentIndexLoader configFileLocation");
+    if (args.length != 2) {
+      throw new Error(
+          "Usage: java gov.ca.cwds.jobs.DocumentIndexLoader esconfigFileLocation lastJobRunTimeFilename");
     }
     Injector injector = Guice.createInjector(new JobsGuiceInjector());
     DocumentMetadataDao documentMetadataDao = injector.getInstance(DocumentMetadataDao.class);
@@ -80,8 +83,8 @@ public class DocumentIndexerJob extends JobBasedOnLastSuccessfulRunTime {
     CmsDocReferralClientService cmsDocReferralClientService = new CmsDocReferralClientService(
         (CmsDocReferralClientDao) cmsDocDao, (CmsDocumentDao) docDao);
 
-    DocumentIndexerJob job =
-        new DocumentIndexerJob(documentMetadataDao, elasticSearchDao, cmsDocReferralClientService);
+    DocumentIndexerJob job = new DocumentIndexerJob(documentMetadataDao, elasticSearchDao,
+        cmsDocReferralClientService, args[1]);
     try {
       job.run();
     } catch (JobsException e) {

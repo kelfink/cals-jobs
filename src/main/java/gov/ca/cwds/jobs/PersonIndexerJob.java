@@ -39,15 +39,17 @@ public class PersonIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   private PersonDao personDao;
   private ElasticsearchDao elasticsearchDao;
 
-  public PersonIndexerJob(PersonDao personDao, ElasticsearchDao elasticsearchDao) {
-    super();
+  public PersonIndexerJob(PersonDao personDao, ElasticsearchDao elasticsearchDao,
+      String lastJobRunTimeFilename) {
+    super(lastJobRunTimeFilename);
     this.personDao = personDao;
     this.elasticsearchDao = elasticsearchDao;
   }
 
   public static void main(String... args) throws Exception {
-    if (args.length != 1) {
-      throw new Error("Usage: java gov.ca.cwds.jobs.PersonIndexerJob configFileLocation");
+    if (args.length != 2) {
+      throw new Error(
+          "Usage: java gov.ca.cwds.jobs.PersonIndexerJob esconfigFileLocation lastJobRunTimeFilename");
     }
 
     Injector injector = Guice.createInjector(new JobsGuiceInjector());
@@ -63,7 +65,7 @@ public class PersonIndexerJob extends JobBasedOnLastSuccessfulRunTime {
     ElasticsearchDao elasticsearchDao = new ElasticsearchDao(configuration);
 
 
-    PersonIndexerJob job = new PersonIndexerJob(personDao, elasticsearchDao);
+    PersonIndexerJob job = new PersonIndexerJob(personDao, elasticsearchDao, args[1]);
     try {
       job.run();
     } catch (JobsException e) {

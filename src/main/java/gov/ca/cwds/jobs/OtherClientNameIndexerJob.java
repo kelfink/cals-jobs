@@ -1,12 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
-import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
-import gov.ca.cwds.jobs.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
-import gov.ca.cwds.rest.api.persistence.cms.OtherClientName;
-import gov.ca.cwds.rest.jdbi.cms.OtherClientNameDao;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -22,6 +15,13 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+
+import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
+import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
+import gov.ca.cwds.jobs.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
+import gov.ca.cwds.rest.api.persistence.cms.OtherClientName;
+import gov.ca.cwds.rest.jdbi.cms.OtherClientNameDao;
 
 /**
  * Job to load OtherClientName from CMS into ElasticSearch
@@ -39,15 +39,16 @@ public class OtherClientNameIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   private ElasticsearchDao elasticsearchDao;
 
   public OtherClientNameIndexerJob(OtherClientNameDao otherClientNameDao,
-      ElasticsearchDao elasticsearchDao) {
-    super();
+      ElasticsearchDao elasticsearchDao, String lastJobRunTimeFilename) {
+    super(lastJobRunTimeFilename);
     this.otherClientNameDao = otherClientNameDao;
     this.elasticsearchDao = elasticsearchDao;
   }
 
   public static void main(String... args) throws Exception {
-    if (args.length != 1) {
-      throw new Error("Usage: java gov.ca.cwds.jobs.OtherClientNameIndexerJob configFileLocation");
+    if (args.length != 2) {
+      throw new Error(
+          "Usage: java gov.ca.cwds.jobs.OtherClientNameIndexerJob esconfigFileLocation lastJobRunTimeFilename");
     }
 
     Injector injector = Guice.createInjector(new JobsGuiceInjector());
@@ -62,7 +63,7 @@ public class OtherClientNameIndexerJob extends JobBasedOnLastSuccessfulRunTime {
     ElasticsearchDao elasticsearchDao = new ElasticsearchDao(configuration);
 
     OtherClientNameIndexerJob job =
-        new OtherClientNameIndexerJob(otherClientNameDao, elasticsearchDao);
+        new OtherClientNameIndexerJob(otherClientNameDao, elasticsearchDao, args[1]);
     try {
       job.run();
     } catch (JobsException e) {
@@ -77,11 +78,11 @@ public class OtherClientNameIndexerJob extends JobBasedOnLastSuccessfulRunTime {
    * 
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
-  @SuppressWarnings("null")
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      List<OtherClientName> results = otherClientNameDao.findAllUpdatedAfter(lastSuccessfulRunTime);;
+      List<OtherClientName> results =
+          otherClientNameDao.findAllUpdatedAfter(lastSuccessfulRunTime);;
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       Date currentTime = new Date();
       elasticsearchDao.start();
