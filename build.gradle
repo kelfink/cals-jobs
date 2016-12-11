@@ -1,4 +1,4 @@
-buildscript {
+ buildscript {
     repositories {
         jcenter()
     }
@@ -65,7 +65,7 @@ publishing {
     shadow(MavenPublication) {
       from components.shadow
       groupId 'gov.ca.cwds.jobs'
-      artifactId ((System.properties.getProperty('baseName') != null) ? System.properties.getProperty('baseName') : 'DocumentIndexerJob')
+      artifactId 'jobs'
         version version + ((System.properties.getProperty('build') != null ) ? '.' + System.properties.getProperty('build') : '')
     }
   }
