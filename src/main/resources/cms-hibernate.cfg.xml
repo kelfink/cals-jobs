@@ -19,6 +19,8 @@
 		<mapping class="gov.ca.cwds.rest.api.persistence.cms.Client" />
 		<mapping class="gov.ca.cwds.rest.api.persistence.cms.Reporter" />
 		<mapping class="gov.ca.cwds.rest.api.persistence.cms.OtherClientName" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.Attorney" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.ServiceProvider" />
 		
 	</session-factory>
 </hibernate-configuration>
