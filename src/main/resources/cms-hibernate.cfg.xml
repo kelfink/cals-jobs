@@ -25,6 +25,7 @@
 		<mapping class="gov.ca.cwds.rest.api.persistence.cms.OtherAdultInPlacemtHome" />
 		<mapping class="gov.ca.cwds.rest.api.persistence.cms.CollateralIndividual" />
 		<mapping class="gov.ca.cwds.rest.api.persistence.cms.EducationProviderContact" />
+		<mapping class="gov.ca.cwds.rest.api.persistence.cms.OtherChildInPlacemtHome" />
 		
 	</session-factory>
 </hibernate-configuration>
