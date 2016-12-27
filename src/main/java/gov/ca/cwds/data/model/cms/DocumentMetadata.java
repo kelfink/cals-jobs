@@ -18,6 +18,7 @@ import org.hibernate.annotations.NamedNativeQuery;
 @Entity
 @Table(name = "TSCNTRLT")
 public class DocumentMetadata {
+
   @Id
   @Column(name = "DOC_HANDLE")
   private String handle;

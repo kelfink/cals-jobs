@@ -10,7 +10,9 @@ import gov.ca.cwds.data.model.cms.DocumentMetadata;
  * 
  * @author CWDS API Team
  */
+@FunctionalInterface
 public interface DocumentMetadataDao extends Dao {
 
   public List<DocumentMetadata> findByLastJobRunTimeMinusOneMinute(Date lastJobRunTime);
+
 }

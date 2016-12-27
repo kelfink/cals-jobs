@@ -22,8 +22,8 @@ import gov.ca.cwds.dao.DaoException;
  */
 public class ElasticsearchDao {
 
-
   private static final Logger LOGGER = LogManager.getLogger(ElasticsearchDao.class);
+
   private Client client;
   private String host;
   private int port;

@@ -77,8 +77,8 @@ public class OtherAdultInPlacemtHomeIndexerJob extends JobBasedOnLastSuccessfulR
     }
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * {@inheritDoc}
    * 
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
@@ -90,7 +90,6 @@ public class OtherAdultInPlacemtHomeIndexerJob extends JobBasedOnLastSuccessfulR
           otherAdultInPlacemtHomeDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       Date currentTime = new Date();
-
 
       elasticsearchDao.start();
       for (OtherAdultInPlacemtHome otherAdultInPlacemtHome : results) {
@@ -110,7 +109,6 @@ public class OtherAdultInPlacemtHomeIndexerJob extends JobBasedOnLastSuccessfulR
                 otherAdultInPlacemtHome.getClass().getName(),
                 MAPPER.writeValueAsString(otherAdultInPlacemtHome));
         indexDocument(esPerson);
-
       }
       LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
       LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
@@ -124,7 +122,8 @@ public class OtherAdultInPlacemtHomeIndexerJob extends JobBasedOnLastSuccessfulR
       try {
         elasticsearchDao.stop();
       } catch (Exception e) {
-        e.printStackTrace();
+        LOGGER.error(e.getMessage(), e);
+        throw new JobsException(e);
       }
     }
   }

@@ -11,16 +11,14 @@ import gov.ca.cwds.dao.cms.DocumentMetadataDaoImpl;
 
 public class JobsGuiceInjector extends AbstractModule {
 
-  /*
-   * (non-Javadoc)
+  /**
+   * {@inheritDoc}
    * 
    * @see com.google.inject.AbstractModule#configure()
    */
   @Override
   protected void configure() {
     bind(DocumentMetadataDao.class).to(DocumentMetadataDaoImpl.class);
-
-
   }
 
   @Provides
