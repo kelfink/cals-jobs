@@ -73,8 +73,8 @@ public class OtherClientNameIndexerJob extends JobBasedOnLastSuccessfulRunTime {
     }
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * {@inheritDoc}
    * 
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
@@ -94,7 +94,6 @@ public class OtherClientNameIndexerJob extends JobBasedOnLastSuccessfulRunTime {
                 "", // SSN
                 otherClientName.getClass().getName(), MAPPER.writeValueAsString(otherClientName));
         indexDocument(esPerson);
-
       }
       LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
       LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
