@@ -18,10 +18,11 @@ import com.google.inject.Key;
 
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
-import gov.ca.cwds.jobs.inject.CmsSessionFactory;
+import gov.ca.cwds.data.cms.ServiceProviderDao;
+import gov.ca.cwds.data.persistence.cms.ServiceProvider;
+import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
-import gov.ca.cwds.rest.api.persistence.cms.ServiceProvider;
-import gov.ca.cwds.rest.jdbi.cms.ServiceProviderDao;
+import gov.ca.cwds.rest.api.domain.es.Person;
 
 /**
  * Job to load service providers from CMS into ElasticSearch
@@ -30,7 +31,7 @@ import gov.ca.cwds.rest.jdbi.cms.ServiceProviderDao;
  */
 public class ServiceProviderIndexerJob extends JobBasedOnLastSuccessfulRunTime {
 
-  private static final Logger LOGGER = LogManager.getLogger(PersonIndexerJob.class);
+  private static final Logger LOGGER = LogManager.getLogger(ServiceProviderIndexerJob.class);
 
   private static ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
   private static ObjectMapper MAPPER = new ObjectMapper();
@@ -90,12 +91,11 @@ public class ServiceProviderIndexerJob extends JobBasedOnLastSuccessfulRunTime {
 
       elasticsearchDao.start();
       for (ServiceProvider serviceProvider : results) {
-        gov.ca.cwds.rest.api.elasticsearch.ns.Person esPerson =
-            new gov.ca.cwds.rest.api.elasticsearch.ns.Person(serviceProvider.getPrimaryKey(),
-                serviceProvider.getFirstName(), serviceProvider.getLastName(), "", // Gender
-                nodate, // DOB
-                "", // SSN
-                serviceProvider.getClass().getName(), MAPPER.writeValueAsString(serviceProvider));
+        Person esPerson = new Person(serviceProvider.getPrimaryKey(),
+            serviceProvider.getFirstName(), serviceProvider.getLastName(), "", // Gender
+            nodate, // DOB
+            "", // SSN
+            serviceProvider.getClass().getName(), MAPPER.writeValueAsString(serviceProvider));
         indexDocument(esPerson);
 
       }
@@ -116,7 +116,7 @@ public class ServiceProviderIndexerJob extends JobBasedOnLastSuccessfulRunTime {
     }
   }
 
-  private void indexDocument(gov.ca.cwds.rest.api.elasticsearch.ns.Person person) throws Exception {
+  private void indexDocument(Person person) throws Exception {
     String document = MAPPER.writeValueAsString(person);
     elasticsearchDao.index(document, person.getId().toString());
   }

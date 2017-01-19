@@ -20,7 +20,7 @@ import com.google.inject.Singleton;
 import gov.ca.cwds.dao.DaoException;
 import gov.ca.cwds.dao.DocumentMetadataDao;
 import gov.ca.cwds.data.model.cms.DocumentMetadata;
-import gov.ca.cwds.jobs.inject.CmsSessionFactory;
+import gov.ca.cwds.inject.CmsSessionFactory;
 
 /**
  * Implementation of {@link DocumentMetadataDao} which is backed by Hibernate

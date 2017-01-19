@@ -18,13 +18,14 @@ import com.google.inject.Key;
 
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
-import gov.ca.cwds.jobs.inject.CmsSessionFactory;
+import gov.ca.cwds.data.cms.EducationProviderContactDao;
+import gov.ca.cwds.data.persistence.cms.EducationProviderContact;
+import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
-import gov.ca.cwds.rest.api.persistence.cms.EducationProviderContact;
-import gov.ca.cwds.rest.jdbi.cms.EducationProviderContactDao;
+import gov.ca.cwds.rest.api.domain.es.Person;
 
 public class EducationProviderContactIndexerJob extends JobBasedOnLastSuccessfulRunTime {
-  private static final Logger LOGGER = LogManager.getLogger(PersonIndexerJob.class);
+  private static final Logger LOGGER = LogManager.getLogger(CollateralIndividualIndexerJob.class);
 
   private static ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
   private static ObjectMapper MAPPER = new ObjectMapper();
@@ -85,14 +86,12 @@ public class EducationProviderContactIndexerJob extends JobBasedOnLastSuccessful
 
       elasticsearchDao.start();
       for (EducationProviderContact educationProviderContact : results) {
-        gov.ca.cwds.rest.api.elasticsearch.ns.Person esPerson =
-            new gov.ca.cwds.rest.api.elasticsearch.ns.Person(
-                educationProviderContact.getPrimaryKey(), educationProviderContact.getFirstName(),
-                educationProviderContact.getLastName(), "", // Gender
-                nodate, // DOB
-                "", // SSN
-                educationProviderContact.getClass().getName(),
-                MAPPER.writeValueAsString(educationProviderContact));
+        Person esPerson = new Person(educationProviderContact.getPrimaryKey(),
+            educationProviderContact.getFirstName(), educationProviderContact.getLastName(), "", // Gender
+            nodate, // DOB
+            "", // SSN
+            educationProviderContact.getClass().getName(),
+            MAPPER.writeValueAsString(educationProviderContact));
         indexDocument(esPerson);
 
       }
@@ -113,7 +112,7 @@ public class EducationProviderContactIndexerJob extends JobBasedOnLastSuccessful
     }
   }
 
-  private void indexDocument(gov.ca.cwds.rest.api.elasticsearch.ns.Person person) throws Exception {
+  private void indexDocument(Person person) throws Exception {
     String document = MAPPER.writeValueAsString(person);
     elasticsearchDao.index(document, person.getId().toString());
   }

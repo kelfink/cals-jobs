@@ -13,7 +13,7 @@
 		<property name="connection_pool_size">10</property>
 		<property name="show_sql">true</property>
 
-		<mapping class="gov.ca.cwds.rest.api.persistence.ns.Person" />
-		<mapping class="gov.ca.cwds.rest.api.persistence.ns.Address" />
+		<mapping class="gov.ca.cwds.data.persistence.ns.Person" />
+		<mapping class="gov.ca.cwds.data.persistence.ns.Address" />
 	</session-factory>
 </hibernate-configuration>

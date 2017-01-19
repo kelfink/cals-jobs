@@ -18,11 +18,12 @@ import com.google.inject.Key;
 
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
-import gov.ca.cwds.jobs.inject.CmsSessionFactory;
+import gov.ca.cwds.data.cms.ClientDao;
+import gov.ca.cwds.data.persistence.cms.Client;
+import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
-import gov.ca.cwds.rest.api.domain.DomainObject;
-import gov.ca.cwds.rest.api.persistence.cms.Client;
-import gov.ca.cwds.rest.jdbi.cms.ClientDao;
+import gov.ca.cwds.rest.api.domain.DomainChef;
+import gov.ca.cwds.rest.api.domain.es.Person;
 
 /**
  * Job to load clients from CMS into ElasticSearch
@@ -31,7 +32,7 @@ import gov.ca.cwds.rest.jdbi.cms.ClientDao;
  */
 public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
 
-  private static final Logger LOGGER = LogManager.getLogger(PersonIndexerJob.class);
+  private static final Logger LOGGER = LogManager.getLogger(ClientIndexerJob.class);
 
   private static ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
   private static ObjectMapper MAPPER = new ObjectMapper();
@@ -88,11 +89,10 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
       Date currentTime = new Date();
       elasticsearchDao.start();
       for (Client client : results) {
-        gov.ca.cwds.rest.api.elasticsearch.ns.Person esPerson =
-            new gov.ca.cwds.rest.api.elasticsearch.ns.Person(client.getId().toString(),
-                client.getCommonFirstName(), client.getCommonLastName(), client.getGenderCode(),
-                DomainObject.cookDate(client.getBirthDate()), client.getSocialSecurityNumber(),
-                client.getClass().getName(), MAPPER.writeValueAsString(client));
+        Person esPerson = new Person(client.getId().toString(), client.getCommonFirstName(),
+            client.getCommonLastName(), client.getGenderCode(),
+            DomainChef.cookDate(client.getBirthDate()), client.getSocialSecurityNumber(),
+            client.getClass().getName(), MAPPER.writeValueAsString(client));
         indexDocument(esPerson);
       }
       LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
@@ -112,7 +112,7 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
     }
   }
 
-  private void indexDocument(gov.ca.cwds.rest.api.elasticsearch.ns.Person person) throws Exception {
+  private void indexDocument(Person person) throws Exception {
     String document = MAPPER.writeValueAsString(person);
     elasticsearchDao.index(document, person.getId().toString());
   }

@@ -8,6 +8,8 @@ import com.google.inject.Provides;
 
 import gov.ca.cwds.dao.DocumentMetadataDao;
 import gov.ca.cwds.dao.cms.DocumentMetadataDaoImpl;
+import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.inject.NsSessionFactory;
 
 public class JobsGuiceInjector extends AbstractModule {
 

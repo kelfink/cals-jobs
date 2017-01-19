@@ -18,10 +18,11 @@ import com.google.inject.Key;
 
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
-import gov.ca.cwds.jobs.inject.CmsSessionFactory;
+import gov.ca.cwds.data.cms.AttorneyDao;
+import gov.ca.cwds.data.persistence.cms.Attorney;
+import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
-import gov.ca.cwds.rest.api.persistence.cms.Attorney;
-import gov.ca.cwds.rest.jdbi.cms.AttorneyDao;
+import gov.ca.cwds.rest.api.domain.es.Person;
 
 /**
  * Job to load attornies from CMS into ElasticSearch
@@ -30,7 +31,7 @@ import gov.ca.cwds.rest.jdbi.cms.AttorneyDao;
  */
 public class AttorneyIndexerJob extends JobBasedOnLastSuccessfulRunTime {
 
-  private static final Logger LOGGER = LogManager.getLogger(PersonIndexerJob.class);
+  private static final Logger LOGGER = LogManager.getLogger(AttorneyIndexerJob.class);
 
   private static ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
   private static ObjectMapper MAPPER = new ObjectMapper();
@@ -89,12 +90,11 @@ public class AttorneyIndexerJob extends JobBasedOnLastSuccessfulRunTime {
 
       elasticsearchDao.start();
       for (Attorney attorney : results) {
-        gov.ca.cwds.rest.api.elasticsearch.ns.Person esPerson =
-            new gov.ca.cwds.rest.api.elasticsearch.ns.Person(attorney.getPrimaryKey(),
-                attorney.getFirstName(), attorney.getLastName(), "", // Gender
-                nodate, // DOB
-                "", // SSN
-                attorney.getClass().getName(), MAPPER.writeValueAsString(attorney));
+        Person esPerson = new Person(attorney.getPrimaryKey(), attorney.getFirstName(),
+            attorney.getLastName(), "", // Gender
+            nodate, // DOB
+            "", // SSN
+            attorney.getClass().getName(), MAPPER.writeValueAsString(attorney));
         indexDocument(esPerson);
 
       }
@@ -115,7 +115,7 @@ public class AttorneyIndexerJob extends JobBasedOnLastSuccessfulRunTime {
     }
   }
 
-  private void indexDocument(gov.ca.cwds.rest.api.elasticsearch.ns.Person person) throws Exception {
+  private void indexDocument(Person person) throws Exception {
     String document = MAPPER.writeValueAsString(person);
     elasticsearchDao.index(document, person.getId().toString());
   }

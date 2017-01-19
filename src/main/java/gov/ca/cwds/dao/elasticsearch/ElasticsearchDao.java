@@ -92,11 +92,21 @@ public class ElasticsearchDao {
         .setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(document).execute()
         .actionGet();
 
-    LOGGER.info("Created document:\nindex: " + response.getIndex() + "\ndoc type: "
-        + response.getType() + "\nid: " + response.getId() + "\nversion: " + response.getVersion()
-        + "\ncreated: " + response.isCreated());
+    boolean created = response.isCreated();
+    if (created) {
+      LOGGER.info("Created document:\nindex: " + response.getIndex() + "\ndoc type: "
+          + response.getType() + "\nid: " + response.getId() + "\nversion: " + response.getVersion()
+          + "\ncreated: " + response.isCreated());
+      LOGGER.info("Created document --- index:{}, doc type:{},id:{},version:{},created:{}",
+          response.getIndex(), response.getType(), response.getId(), response.getVersion(),
+          response.isCreated());
+    } else {
+      LOGGER.warn("Document not created --- index:{}, doc type:{},id:{},version:{},created:{}",
+          response.getIndex(), response.getType(), response.getId(), response.getVersion(),
+          response.isCreated());
+    }
 
-    return response.isCreated();
+    return created;
   }
 
   public String getHost() {

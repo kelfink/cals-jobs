@@ -18,12 +18,13 @@ import com.google.inject.Key;
 
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
-import gov.ca.cwds.jobs.inject.CmsSessionFactory;
+import gov.ca.cwds.data.cms.ClientDao;
+import gov.ca.cwds.data.cms.SubstituteCareProviderDao;
+import gov.ca.cwds.data.persistence.cms.SubstituteCareProvider;
+import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
-import gov.ca.cwds.rest.api.domain.DomainObject;
-import gov.ca.cwds.rest.api.persistence.cms.SubstituteCareProvider;
-import gov.ca.cwds.rest.jdbi.cms.ClientDao;
-import gov.ca.cwds.rest.jdbi.cms.SubstituteCareProviderDao;
+import gov.ca.cwds.rest.api.domain.DomainChef;
+import gov.ca.cwds.rest.api.domain.es.Person;
 
 /**
  * Job to load substituteCareProvider from CMS into ElasticSearch
@@ -31,7 +32,7 @@ import gov.ca.cwds.rest.jdbi.cms.SubstituteCareProviderDao;
  * @author CWDS API Team
  */
 public class SubstituteCareProviderIndexJob extends JobBasedOnLastSuccessfulRunTime {
-  private static final Logger LOGGER = LogManager.getLogger(PersonIndexerJob.class);
+  private static final Logger LOGGER = LogManager.getLogger(SubstituteCareProviderIndexJob.class);
 
   private static ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
   private static ObjectMapper MAPPER = new ObjectMapper();
@@ -90,14 +91,13 @@ public class SubstituteCareProviderIndexJob extends JobBasedOnLastSuccessfulRunT
       Date currentTime = new Date();
       elasticsearchDao.start();
       for (SubstituteCareProvider substituteCareProvider : results) {
-        gov.ca.cwds.rest.api.elasticsearch.ns.Person esPerson =
-            new gov.ca.cwds.rest.api.elasticsearch.ns.Person(substituteCareProvider.getPrimaryKey(),
-                substituteCareProvider.getFirstName(), substituteCareProvider.getLastName(),
-                substituteCareProvider.getGenderIndicator(),
-                DomainObject.cookDate(substituteCareProvider.getBirthDate()),
-                substituteCareProvider.getSocialSecurityNumber(),
-                substituteCareProvider.getClass().getName(),
-                MAPPER.writeValueAsString(substituteCareProvider));
+        Person esPerson = new Person(substituteCareProvider.getPrimaryKey(),
+            substituteCareProvider.getFirstName(), substituteCareProvider.getLastName(),
+            substituteCareProvider.getGenderIndicator(),
+            DomainChef.cookDate(substituteCareProvider.getBirthDate()),
+            substituteCareProvider.getSocialSecurityNumber(),
+            substituteCareProvider.getClass().getName(),
+            MAPPER.writeValueAsString(substituteCareProvider));
         indexDocument(esPerson);
 
       }
@@ -118,7 +118,7 @@ public class SubstituteCareProviderIndexJob extends JobBasedOnLastSuccessfulRunT
     }
   }
 
-  private void indexDocument(gov.ca.cwds.rest.api.elasticsearch.ns.Person person) throws Exception {
+  private void indexDocument(Person person) throws Exception {
     String document = MAPPER.writeValueAsString(person);
     elasticsearchDao.index(document, person.getId().toString());
   }

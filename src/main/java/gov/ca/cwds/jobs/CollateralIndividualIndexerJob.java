@@ -18,14 +18,15 @@ import com.google.inject.Key;
 
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
-import gov.ca.cwds.jobs.inject.CmsSessionFactory;
+import gov.ca.cwds.data.cms.CollateralIndividualDao;
+import gov.ca.cwds.data.persistence.cms.CollateralIndividual;
+import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
-import gov.ca.cwds.rest.api.persistence.cms.CollateralIndividual;
-import gov.ca.cwds.rest.jdbi.cms.CollateralIndividualDao;
+import gov.ca.cwds.rest.api.domain.es.Person;
 
 
 public class CollateralIndividualIndexerJob extends JobBasedOnLastSuccessfulRunTime {
-  private static final Logger LOGGER = LogManager.getLogger(PersonIndexerJob.class);
+  private static final Logger LOGGER = LogManager.getLogger(CollateralIndividualIndexerJob.class);
 
   private static ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
   private static ObjectMapper MAPPER = new ObjectMapper();
@@ -85,13 +86,12 @@ public class CollateralIndividualIndexerJob extends JobBasedOnLastSuccessfulRunT
 
       elasticsearchDao.start();
       for (CollateralIndividual collateralIndividual : results) {
-        gov.ca.cwds.rest.api.elasticsearch.ns.Person esPerson =
-            new gov.ca.cwds.rest.api.elasticsearch.ns.Person(collateralIndividual.getPrimaryKey(),
-                collateralIndividual.getFirstName(), collateralIndividual.getLastName(), "", // Gender
-                nodate, // DOB
-                "", // SSN
-                collateralIndividual.getClass().getName(),
-                MAPPER.writeValueAsString(collateralIndividual));
+        Person esPerson = new Person(collateralIndividual.getPrimaryKey(),
+            collateralIndividual.getFirstName(), collateralIndividual.getLastName(), "", // Gender
+            nodate, // DOB
+            "", // SSN
+            collateralIndividual.getClass().getName(),
+            MAPPER.writeValueAsString(collateralIndividual));
         indexDocument(esPerson);
 
       }
@@ -112,7 +112,7 @@ public class CollateralIndividualIndexerJob extends JobBasedOnLastSuccessfulRunT
     }
   }
 
-  private void indexDocument(gov.ca.cwds.rest.api.elasticsearch.ns.Person person) throws Exception {
+  private void indexDocument(Person person) throws Exception {
     String document = MAPPER.writeValueAsString(person);
     elasticsearchDao.index(document, person.getId().toString());
   }
