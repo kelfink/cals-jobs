@@ -24,7 +24,7 @@ project.ext {
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
 }
 
-version = 0.12
+version = 0.14
 
 repositories {
     mavenCentral()
@@ -42,7 +42,7 @@ dependencies {
   	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
 	compile group: 'com.google.inject', name: 'guice', version: '4.1.0'
 	compile group: "org.postgresql", name: "postgresql", version: "9.4.1208.jre7"
-	compile group: "gov.ca.cwds.api", name: "api", version: "0.12.398"
+	compile group: "gov.ca.cwds.api", name: "api", version: "0.14.472"
     
     
     compile fileTree(dir: 'lib', include: ['*.jar'])
