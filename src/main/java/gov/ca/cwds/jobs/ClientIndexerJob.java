@@ -113,7 +113,7 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   }
 
   private void indexDocument(Person person) throws Exception {
-    String document = MAPPER.writeValueAsString(person);
+    final String document = MAPPER.writeValueAsString(person);
     elasticsearchDao.index(document, person.getId().toString());
   }
 }
