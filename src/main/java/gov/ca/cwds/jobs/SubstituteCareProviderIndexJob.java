@@ -56,8 +56,6 @@ public class SubstituteCareProviderIndexJob extends JobBasedOnLastSuccessfulRunT
     Injector injector = Guice.createInjector(new JobsGuiceInjector());
     SessionFactory sessionFactory =
         injector.getInstance(Key.get(SessionFactory.class, CmsSessionFactory.class));
-
-
     ClientDao clientDao = new ClientDao(sessionFactory);
 
     File file = new File(args[0]);
@@ -65,8 +63,8 @@ public class SubstituteCareProviderIndexJob extends JobBasedOnLastSuccessfulRunT
         YAML_MAPPER.readValue(file, ElasticsearchConfiguration.class);
     ElasticsearchDao elasticsearchDao = new ElasticsearchDao(configuration);
 
-
-    ClientIndexerJob job = new ClientIndexerJob(clientDao, elasticsearchDao, args[1]);
+    ClientIndexerJob job = new ClientIndexerJob(clientDao, elasticsearchDao, args[1],
+        injector.getInstance(ObjectMapper.class));
     try {
       job.run();
     } catch (JobsException e) {

@@ -27,25 +27,24 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
   }
 
   @Override
-  final public void run() {
-    Date lastRunTime = determineLastSuccessfulRunTime();
-    Date curentTimeRunTime = _run(lastRunTime);
+  public final void run() {
+    final Date lastRunTime = determineLastSuccessfulRunTime();
+    final Date curentTimeRunTime = _run(lastRunTime);
     writeLastSuccessfulRunTime(curentTimeRunTime);
   }
 
   private Date determineLastSuccessfulRunTime() {
-    try {
-      FileReader fileReader = new FileReader(lastJobRunTimeFilename);
-      BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-      String timestring = bufferedReader.readLine();
-      bufferedReader.close();
-      return DATE_FORMAT.parse(timestring);
+    try (BufferedReader bufferedReader =
+        new BufferedReader(new FileReader(lastJobRunTimeFilename))) {
+      return DATE_FORMAT.parse(bufferedReader.readLine().trim());
     } catch (FileNotFoundException e) {
+      LOGGER.error("Caught FileNotFoundException: {}", e.getMessage(), e);
       throw new JobsException(e);
     } catch (IOException e) {
+      LOGGER.error("Caught IOException: {}", e.getMessage(), e);
       throw new JobsException(e);
     } catch (ParseException e) {
+      LOGGER.error("Caught ParseException: {}", e.getMessage(), e);
       throw new JobsException(e);
     }
   }

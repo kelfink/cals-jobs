@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.Guice;
@@ -48,11 +49,11 @@ public class ReporterIndexerJob extends JobBasedOnLastSuccessfulRunTime {
 
   public static void main(String... args) throws Exception {
     if (args.length != 2) {
-      throw new Error(
+      throw new JobsException(
           "Usage: java gov.ca.cwds.jobs.ReporterIndexerJob esconfigFileLocation lastJobRunTimeFilename");
     }
 
-    Injector injector = Guice.createInjector(new JobsGuiceInjector());
+    final Injector injector = Guice.createInjector(new JobsGuiceInjector());
     SessionFactory sessionFactory =
         injector.getInstance(Key.get(SessionFactory.class, CmsSessionFactory.class));
 
@@ -73,8 +74,8 @@ public class ReporterIndexerJob extends JobBasedOnLastSuccessfulRunTime {
     }
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * {@inheritDoc}
    * 
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
@@ -92,7 +93,6 @@ public class ReporterIndexerJob extends JobBasedOnLastSuccessfulRunTime {
             "", // SSN
             reporter.getClass().getName(), MAPPER.writeValueAsString(reporter));
         indexDocument(esPerson);
-
       }
       LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
       LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
@@ -106,13 +106,14 @@ public class ReporterIndexerJob extends JobBasedOnLastSuccessfulRunTime {
       try {
         elasticsearchDao.stop();
       } catch (Exception e) {
-        e.printStackTrace();
+        LOGGER.error(e);
       }
     }
   }
 
-  private void indexDocument(Person person) throws Exception {
+  private void indexDocument(Person person) throws JsonProcessingException {
     String document = MAPPER.writeValueAsString(person);
     elasticsearchDao.index(document, person.getId().toString());
   }
+
 }

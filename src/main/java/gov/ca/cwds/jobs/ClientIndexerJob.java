@@ -10,9 +10,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 
@@ -34,39 +36,37 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
 
   private static final Logger LOGGER = LogManager.getLogger(ClientIndexerJob.class);
 
-  private static ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
-  private static ObjectMapper MAPPER = new ObjectMapper();
+  private final ObjectMapper mapper;
+  private final ClientDao clientDao;
+  private final ElasticsearchDao elasticsearchDao;
 
-  private ClientDao clientDao;
-  private ElasticsearchDao elasticsearchDao;
-
-  public ClientIndexerJob(ClientDao clientDao, ElasticsearchDao elasticsearchDao,
-      String lastJobRunTimeFilename) {
+  @Inject
+  public ClientIndexerJob(final ClientDao clientDao, final ElasticsearchDao elasticsearchDao,
+      final String lastJobRunTimeFilename, final ObjectMapper mapper) {
     super(lastJobRunTimeFilename);
     this.clientDao = clientDao;
     this.elasticsearchDao = elasticsearchDao;
+    this.mapper = mapper;
   }
 
   public static void main(String... args) throws Exception {
     if (args.length != 2) {
-      throw new Error(
-          "Usage: java gov.ca.cwds.jobs.ClientIndexerJob esconfigFileLocation lastJobRunTimeFilename");
+      throw new JobsException("Usage: java " + ClientIndexerJob.class.getName()
+          + "<ES config file> <last job runtime file>");
     }
 
-    Injector injector = Guice.createInjector(new JobsGuiceInjector());
-    SessionFactory sessionFactory =
+    final Injector injector = Guice.createInjector(new JobsGuiceInjector());
+    final SessionFactory sessionFactory =
         injector.getInstance(Key.get(SessionFactory.class, CmsSessionFactory.class));
 
+    final ClientDao clientDao = new ClientDao(sessionFactory);
+    final File file = new File(args[0]);
+    final ElasticsearchConfiguration configuration =
+        new ObjectMapper(new YAMLFactory()).readValue(file, ElasticsearchConfiguration.class);
+    final ElasticsearchDao elasticsearchDao = new ElasticsearchDao(configuration);
 
-    ClientDao clientDao = new ClientDao(sessionFactory);
-
-    File file = new File(args[0]);
-    ElasticsearchConfiguration configuration =
-        YAML_MAPPER.readValue(file, ElasticsearchConfiguration.class);
-    ElasticsearchDao elasticsearchDao = new ElasticsearchDao(configuration);
-
-
-    ClientIndexerJob job = new ClientIndexerJob(clientDao, elasticsearchDao, args[1]);
+    ClientIndexerJob job = new ClientIndexerJob(clientDao, elasticsearchDao, args[1],
+        injector.getInstance(ObjectMapper.class));
     try {
       job.run();
     } catch (JobsException e) {
@@ -76,29 +76,31 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
     }
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * {@inheritDoc}
    * 
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      List<Client> results = clientDao.findAllUpdatedAfter(lastSuccessfulRunTime);
+      final List<Client> results = clientDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
-      Date currentTime = new Date();
+      final Date startTime = new Date();
       elasticsearchDao.start();
       for (Client client : results) {
-        Person esPerson = new Person(client.getId().toString(), client.getCommonFirstName(),
+        final String json = mapper.writeValueAsString(client);
+        LOGGER.debug("client: {}", json);
+        final Person esPerson = new Person(client.getId().toString(), client.getCommonFirstName(),
             client.getCommonLastName(), client.getGenderCode(),
             DomainChef.cookDate(client.getBirthDate()), client.getSocialSecurityNumber(),
-            client.getClass().getName(), MAPPER.writeValueAsString(client));
+            client.getClass().getName(), json);
         indexDocument(esPerson);
       }
       LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
       LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
-          DATE_FORMAT.format(currentTime)));
-      return currentTime;
+          DATE_FORMAT.format(startTime)));
+      return startTime;
     } catch (IOException e) {
       throw new JobsException("Could not parse configuration file", e);
     } catch (Exception e) {
@@ -107,13 +109,13 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
       try {
         elasticsearchDao.stop();
       } catch (Exception e) {
-        e.printStackTrace();
+        LOGGER.error(e);
       }
     }
   }
 
-  private void indexDocument(Person person) throws Exception {
-    final String document = MAPPER.writeValueAsString(person);
+  private void indexDocument(Person person) throws JsonProcessingException {
+    final String document = mapper.writeValueAsString(person);
     elasticsearchDao.index(document, person.getId().toString());
   }
 }

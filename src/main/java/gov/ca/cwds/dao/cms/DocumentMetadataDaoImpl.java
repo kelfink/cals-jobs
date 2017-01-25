@@ -23,7 +23,7 @@ import gov.ca.cwds.data.model.cms.DocumentMetadata;
 import gov.ca.cwds.inject.CmsSessionFactory;
 
 /**
- * Implementation of {@link DocumentMetadataDao} which is backed by Hibernate
+ * Implementation of {@link DocumentMetadataDao}, backed by Hibernate.
  * 
  * @author CWDS API Team
  */
@@ -33,8 +33,12 @@ public class DocumentMetadataDaoImpl implements DocumentMetadataDao {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(DocumentMetadataDaoImpl.class);
 
-  private String TIMESTAMP_FORMAT = "YYYY-MM-DD HH24:MI:SS";
-  private DateFormat dateFormat = new SimpleDateFormat(TIMESTAMP_FORMAT);
+  private static final String TIMESTAMP_FORMAT = "YYYY-MM-DD HH24:MI:SS";
+
+  /**
+   * WARNING: NOT thread safe!
+   */
+  private final DateFormat dateFormat = new SimpleDateFormat(TIMESTAMP_FORMAT);
 
   private SessionFactory sessionFactory;
 
@@ -48,23 +52,23 @@ public class DocumentMetadataDaoImpl implements DocumentMetadataDao {
     this.sessionFactory = sessionFactory;
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * {@inheritDoc}
    * 
-   * @see gov.ca.cwds.dao.cms.DocumentMetadataDao#findByLastJobRunTimeMinusOneMinute(java.util.Date)
+   * @see DocumentMetadataDao#findByLastJobRunTimeMinusOneMinute(java.util.Date)
    */
   @SuppressWarnings({"unchecked"})
   @Override
   public List<DocumentMetadata> findByLastJobRunTimeMinusOneMinute(Date lastJobRunTime) {
-    // TODO - abstract out the transaction management
-    Session session = sessionFactory.getCurrentSession();
+    // TODO - abstract out transaction management.
+    // See story #134542407.
+    final Session session = sessionFactory.getCurrentSession();
     Transaction txn = null;
     try {
       txn = session.beginTransaction();
       Query query = session.getNamedQuery("findByLastJobRunTimeMinusOneMinute")
           .setString("lastJobRunTime", dateFormat.format(lastJobRunTime));
-      ImmutableList.Builder<DocumentMetadata> documentMetadatas =
-          new ImmutableList.Builder<DocumentMetadata>();
+      ImmutableList.Builder<DocumentMetadata> documentMetadatas = new ImmutableList.Builder<>();
       documentMetadatas.addAll(query.list());
       txn.commit();
       return documentMetadatas.build();
