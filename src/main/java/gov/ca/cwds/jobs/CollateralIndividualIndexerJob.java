@@ -11,7 +11,17 @@ import gov.ca.cwds.data.cms.CollateralIndividualDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.CollateralIndividual;
 import gov.ca.cwds.inject.CmsSessionFactory;
+<<<<<<< HEAD
 import gov.ca.cwds.jobs.inject.LastRunFile;
+=======
+import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
+
+public class CollateralIndividualIndexerJob extends JobBasedOnLastSuccessfulRunTime {
+  private static final Logger LOGGER = LogManager.getLogger(CollateralIndividualIndexerJob.class);
+
+  private static ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
+  private static ObjectMapper MAPPER = new ObjectMapper();
+>>>>>>> minor modification for java docs
 
 
 /**
