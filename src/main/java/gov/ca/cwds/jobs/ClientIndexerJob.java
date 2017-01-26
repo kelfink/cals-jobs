@@ -8,22 +8,18 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 
-import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.persistence.cms.Client;
-import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
+import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.es.Person;
 
@@ -42,7 +38,7 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
 
   @Inject
   public ClientIndexerJob(final ClientDao clientDao, final ElasticsearchDao elasticsearchDao,
-      final String lastJobRunTimeFilename, final ObjectMapper mapper) {
+      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper) {
     super(lastJobRunTimeFilename);
     this.clientDao = clientDao;
     this.elasticsearchDao = elasticsearchDao;
@@ -55,24 +51,15 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
           + "<ES config file> <last job runtime file>");
     }
 
-    final Injector injector = Guice.createInjector(new JobsGuiceInjector());
-    final SessionFactory sessionFactory =
-        injector.getInstance(Key.get(SessionFactory.class, CmsSessionFactory.class));
+    final Injector injector =
+        Guice.createInjector(new JobsGuiceInjector(new File(args[0]), args[1]));
+    final ClientIndexerJob job = injector.getInstance(ClientIndexerJob.class);
 
-    final ClientDao clientDao = new ClientDao(sessionFactory);
-    final File file = new File(args[0]);
-    final ElasticsearchConfiguration configuration =
-        new ObjectMapper(new YAMLFactory()).readValue(file, ElasticsearchConfiguration.class);
-    final ElasticsearchDao elasticsearchDao = new ElasticsearchDao(configuration);
-
-    ClientIndexerJob job = new ClientIndexerJob(clientDao, elasticsearchDao, args[1],
-        injector.getInstance(ObjectMapper.class));
+    // try (SessionFactory sessionFactory = injector.getInstance(SessionFactory.class).) {
     try {
       job.run();
     } catch (JobsException e) {
       LOGGER.error("Unable to complete job", e);
-    } finally {
-      sessionFactory.close();
     }
   }
 
