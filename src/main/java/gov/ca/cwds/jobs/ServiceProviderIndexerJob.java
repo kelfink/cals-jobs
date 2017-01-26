@@ -84,12 +84,12 @@ public class ServiceProviderIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   public Date _run(Date lastSuccessfulRunTime) {
 
     try {
+      elasticsearchDao.start();
       List<ServiceProvider> results = serviceProviderDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       Date currentTime = new Date();
       String nodate = new String();
 
-      elasticsearchDao.start();
       for (ServiceProvider serviceProvider : results) {
         Person esPerson = new Person(serviceProvider.getPrimaryKey(),
             serviceProvider.getFirstName(), serviceProvider.getLastName(), "", // Gender

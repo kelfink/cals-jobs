@@ -83,12 +83,12 @@ public class AttorneyIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   public Date _run(Date lastSuccessfulRunTime) {
 
     try {
+      elasticsearchDao.start();
       List<Attorney> results = attorneyDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       Date currentTime = new Date();
       String nodate = new String();
 
-      elasticsearchDao.start();
       for (Attorney attorney : results) {
         Person esPerson = new Person(attorney.getPrimaryKey(), attorney.getFirstName(),
             attorney.getLastName(), "", // Gender

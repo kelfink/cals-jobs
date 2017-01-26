@@ -82,10 +82,10 @@ public class ReporterIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
+      elasticsearchDao.start();
       List<Reporter> results = reporterDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       LOGGER.info(MessageFormat.format("Found {0} reporters to index", results.size()));
       Date currentTime = new Date();
-      elasticsearchDao.start();
       for (Reporter reporter : results) {
         Person esPerson = new Person(reporter.getPrimaryKey(), reporter.getFirstName(),
             reporter.getLastName(), "", // Gender

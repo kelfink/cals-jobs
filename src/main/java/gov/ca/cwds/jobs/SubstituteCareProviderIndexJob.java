@@ -84,11 +84,11 @@ public class SubstituteCareProviderIndexJob extends JobBasedOnLastSuccessfulRunT
   public Date _run(Date lastSuccessfulRunTime) {
 
     try {
+      elasticsearchDao.start();
       List<SubstituteCareProvider> results =
           substituteCareProviderDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       Date currentTime = new Date();
-      elasticsearchDao.start();
       for (SubstituteCareProvider substituteCareProvider : results) {
         Person esPerson = new Person(substituteCareProvider.getPrimaryKey(),
             substituteCareProvider.getFirstName(), substituteCareProvider.getLastName(),

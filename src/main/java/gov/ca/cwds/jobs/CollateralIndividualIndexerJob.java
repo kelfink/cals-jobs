@@ -78,13 +78,13 @@ public class CollateralIndividualIndexerJob extends JobBasedOnLastSuccessfulRunT
   public Date _run(Date lastSuccessfulRunTime) {
 
     try {
+      elasticsearchDao.start();
       List<CollateralIndividual> results =
           collateralIndividualDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       Date currentTime = new Date();
       String nodate = new String();
 
-      elasticsearchDao.start();
       for (CollateralIndividual collateralIndividual : results) {
         Person esPerson = new Person(collateralIndividual.getPrimaryKey(),
             collateralIndividual.getFirstName(), collateralIndividual.getLastName(), "", // Gender

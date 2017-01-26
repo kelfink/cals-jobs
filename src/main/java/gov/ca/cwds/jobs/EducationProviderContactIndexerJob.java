@@ -78,13 +78,13 @@ public class EducationProviderContactIndexerJob extends JobBasedOnLastSuccessful
   public Date _run(Date lastSuccessfulRunTime) {
 
     try {
+      elasticsearchDao.start();
       List<EducationProviderContact> results =
           educationProviderContactDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       Date currentTime = new Date();
       String nodate = new String();
 
-      elasticsearchDao.start();
       for (EducationProviderContact educationProviderContact : results) {
         Person esPerson = new Person(educationProviderContact.getPrimaryKey(),
             educationProviderContact.getFirstName(), educationProviderContact.getLastName(), "", // Gender

@@ -82,11 +82,11 @@ public class OtherClientNameIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
+      elasticsearchDao.start();
       List<OtherClientName> results =
           otherClientNameDao.findAllUpdatedAfter(lastSuccessfulRunTime);;
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       Date currentTime = new Date();
-      elasticsearchDao.start();
       for (OtherClientName otherClientName : results) {
         Person esPerson = new Person(otherClientName.getPrimaryKey().getId1(),
             otherClientName.getFirstName(), otherClientName.getLastName(), "", // Gender

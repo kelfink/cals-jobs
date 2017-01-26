@@ -88,12 +88,12 @@ public class OtherAdultInPlacemtHomeIndexerJob extends JobBasedOnLastSuccessfulR
   public Date _run(Date lastSuccessfulRunTime) {
 
     try {
+      elasticsearchDao.start();
       List<OtherAdultInPlacemtHome> results =
           otherAdultInPlacemtHomeDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       Date currentTime = new Date();
 
-      elasticsearchDao.start();
       for (OtherAdultInPlacemtHome otherAdultInPlacemtHome : results) {
         String fullname = otherAdultInPlacemtHome.getName();
         StringTokenizer namestr = new StringTokenizer(fullname);
