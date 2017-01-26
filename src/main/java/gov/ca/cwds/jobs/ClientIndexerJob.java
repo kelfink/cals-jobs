@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -69,7 +73,7 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
         Guice.createInjector(new JobsGuiceInjector(new File(args[0]), args[1]));
     final ClientIndexerJob job = injector.getInstance(ClientIndexerJob.class);
 
-    // Let session factory and elasticsearch dao close themselves automatically.
+    // Let session factory and ElasticSearch dao close themselves automatically.
     try (SessionFactory sessionFactory = job.sessionFactory;
         ElasticsearchDao esDao = job.elasticsearchDao) {
       job.run();
@@ -90,29 +94,56 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       final Date startTime = new Date();
       elasticsearchDao.start();
+
+      final BulkProcessor bulkProcessor =
+          BulkProcessor.builder(elasticsearchDao.getClient(), new BulkProcessor.Listener() {
+            @Override
+            public void beforeBulk(long executionId, BulkRequest request) {
+              LOGGER.info("Going to execute new bulk composed of {} actions",
+                  request.numberOfActions());
+            }
+
+            @Override
+            public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
+              LOGGER.info("Executed bulk composed of {} actions", request.numberOfActions());
+            }
+
+            @Override
+            public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
+              LOGGER.warn("Error executing bulk", failure);
+            }
+          }).setBulkActions(500).build();
+
       for (Client client : results) {
         final String json = mapper.writeValueAsString(client);
-        LOGGER.debug("client: {}", json);
+        // LOGGER.debug("client: {}", json);
         final Person esPerson = new Person(client.getId().toString(), client.getCommonFirstName(),
             client.getCommonLastName(), client.getGenderCode(),
             DomainChef.cookDate(client.getBirthDate()), client.getSocialSecurityNumber(),
             client.getClass().getName(), json);
-        indexDocument(esPerson);
+
+        // Index one document at time. Slow.
+        // indexDocument(esPerson);
+
+        // Bulk indexing! Much faster.
+        bulkProcessor.add(elasticsearchDao.prepareIndexRequest(mapper.writeValueAsString(esPerson),
+            esPerson.getId().toString()));
       }
+
+      // Give it time to finish the last batch.
+      bulkProcessor.awaitClose(10, TimeUnit.SECONDS);
+
       LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
       LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
           jobDateFormat.format(startTime)));
       return startTime;
+
     } catch (IOException e) {
-      throw new JobsException("Could not parse configuration file", e);
+      LOGGER.error("IOException: {}", e.getMessage(), e);
+      throw new JobsException("IOException: " + e.getMessage(), e);
     } catch (Exception e) {
-      throw new JobsException(e);
-      // } finally {
-      // try {
-      // elasticsearchDao.stop();
-      // } catch (Exception e) {
-      // LOGGER.error(e);
-      // }
+      LOGGER.error("General Exception: {}", e.getMessage(), e);
+      throw new JobsException("General Exception: " + e.getMessage(), e);
     }
   }
 

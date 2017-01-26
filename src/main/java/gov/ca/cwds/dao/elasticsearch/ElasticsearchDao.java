@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.WriteConsistencyLevel;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -122,6 +123,11 @@ public class ElasticsearchDao implements Closeable {
     return created;
   }
 
+  public IndexRequest prepareIndexRequest(String document, String id) {
+    return client.prepareIndex(indexName, indexType, id)
+        .setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(document).request();
+  }
+
   /**
    * Getter for configured host.
    * 
@@ -158,5 +164,9 @@ public class ElasticsearchDao implements Closeable {
       LOGGER.error(msg, e);
       throw new IOException(msg, e);
     }
+  }
+
+  public Client getClient() {
+    return client;
   }
 }
