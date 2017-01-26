@@ -1,5 +1,7 @@
 package gov.ca.cwds.dao.elasticsearch;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -15,21 +17,20 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import gov.ca.cwds.dao.DaoException;
 
 /**
- * A client for Elasticsearch
+ * A client DAO for Elasticsearch.
  * 
  * @author CWDS API Team
- *
  */
-public class ElasticsearchDao {
+public class ElasticsearchDao implements Closeable {
 
   private static final Logger LOGGER = LogManager.getLogger(ElasticsearchDao.class);
 
-  private Client client;
   private String host;
   private int port;
   private String clusterName;
   private String indexName;
   private String indexType;
+  private Client client;
 
   /**
    * Constructor
@@ -63,18 +64,30 @@ public class ElasticsearchDao {
     this.indexType = configuration.getIndexType();
   }
 
+  /**
+   * Start the ES client.
+   */
   public void start() {
     Settings settings = Settings.settingsBuilder().put("cluster.name", clusterName).build();
     try {
       this.client = TransportClient.builder().settings(settings).build()
           .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(host), port));
     } catch (UnknownHostException e) {
-      throw new DaoException(e);
+      final String msg = "Caught UnknownHostException: " + e.getMessage();
+      LOGGER.error(msg, e);
+      throw new DaoException(msg, e);
     }
   }
 
+  /**
+   * Stop the ES client, if started.
+   * 
+   * @throws Exception on disconnect
+   */
   public void stop() throws Exception {
-    this.client.close();
+    if (client != null) {
+      this.client.close();
+    }
   }
 
   /**
@@ -109,15 +122,41 @@ public class ElasticsearchDao {
     return created;
   }
 
+  /**
+   * Getter for configured host.
+   * 
+   * @return ES host
+   */
   public String getHost() {
     return host;
   }
 
+  /**
+   * Getter for configured port.
+   * 
+   * @return ES port
+   */
   public int getPort() {
     return port;
   }
 
+  /**
+   * Getter for configured cluster name.
+   * 
+   * @return ES cluster name
+   */
   public String getClusterName() {
     return clusterName;
+  }
+
+  @Override
+  public void close() throws IOException {
+    try {
+      stop();
+    } catch (Exception e) {
+      final String msg = "Error closing ElasticSearch DAO: " + e.getMessage();
+      LOGGER.error(msg, e);
+      throw new IOException(msg, e);
+    }
   }
 }

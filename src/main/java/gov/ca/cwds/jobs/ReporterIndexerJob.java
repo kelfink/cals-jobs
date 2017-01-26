@@ -96,7 +96,7 @@ public class ReporterIndexerJob extends JobBasedOnLastSuccessfulRunTime {
       }
       LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
       LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
-          DATE_FORMAT.format(currentTime)));
+          jobDateFormat.format(currentTime)));
       return currentTime;
     } catch (IOException e) {
       throw new JobsException("Could not parse configuration file", e);

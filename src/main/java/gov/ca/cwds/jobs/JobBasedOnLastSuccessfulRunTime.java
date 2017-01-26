@@ -19,7 +19,7 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LogManager.getLogger(JobBasedOnLastSuccessfulRunTime.class);
 
-  protected DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  protected DateFormat jobDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
   private String lastJobRunTimeFilename;
 
   public JobBasedOnLastSuccessfulRunTime(String lastJobRunTimeFilename) {
@@ -36,7 +36,7 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
   private Date determineLastSuccessfulRunTime() {
     try (BufferedReader bufferedReader =
         new BufferedReader(new FileReader(lastJobRunTimeFilename))) {
-      return DATE_FORMAT.parse(bufferedReader.readLine().trim());
+      return jobDateFormat.parse(bufferedReader.readLine().trim());
     } catch (FileNotFoundException e) {
       LOGGER.error("Caught FileNotFoundException: {}", e.getMessage(), e);
       throw new JobsException(e);
@@ -53,7 +53,7 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
     if (datetime != null) {
       try (
           BufferedWriter writedtparm = new BufferedWriter(new FileWriter(lastJobRunTimeFilename))) {
-        writedtparm.write(DATE_FORMAT.format(datetime));
+        writedtparm.write(jobDateFormat.format(datetime));
       } catch (IOException e) {
         throw new JobsException("Could not write the timestamp parameter file", e);
       }

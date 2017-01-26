@@ -39,6 +39,15 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   private final ElasticsearchDao elasticsearchDao;
   private final SessionFactory sessionFactory;
 
+  /**
+   * Construct batch job instance with all required dependencies.
+   * 
+   * @param clientDao Client DAO
+   * @param elasticsearchDao ElasticSearch DAO
+   * @param lastJobRunTimeFilename last batch run date in format yyyy-MM-dd HH:mm:ss
+   * @param mapper Jackson ObjectMapper
+   * @param sessionFactory Hibernate session factory
+   */
   @Inject
   public ClientIndexerJob(final ClientDao clientDao, final ElasticsearchDao elasticsearchDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
@@ -60,8 +69,9 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
         Guice.createInjector(new JobsGuiceInjector(new File(args[0]), args[1]));
     final ClientIndexerJob job = injector.getInstance(ClientIndexerJob.class);
 
-    // Let session factory close itself automatically.
-    try (SessionFactory sessionFactory = job.sessionFactory) {
+    // Let session factory and elasticsearch dao close themselves automatically.
+    try (SessionFactory sessionFactory = job.sessionFactory;
+        ElasticsearchDao esDao = job.elasticsearchDao) {
       job.run();
     } catch (JobsException e) {
       LOGGER.error("Unable to complete job", e);
@@ -91,18 +101,18 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
       }
       LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
       LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
-          DATE_FORMAT.format(startTime)));
+          jobDateFormat.format(startTime)));
       return startTime;
     } catch (IOException e) {
       throw new JobsException("Could not parse configuration file", e);
     } catch (Exception e) {
       throw new JobsException(e);
-    } finally {
-      try {
-        elasticsearchDao.stop();
-      } catch (Exception e) {
-        LOGGER.error(e);
-      }
+      // } finally {
+      // try {
+      // elasticsearchDao.stop();
+      // } catch (Exception e) {
+      // LOGGER.error(e);
+      // }
     }
   }
 
