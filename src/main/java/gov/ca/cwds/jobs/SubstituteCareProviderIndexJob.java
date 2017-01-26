@@ -41,7 +41,8 @@ public class SubstituteCareProviderIndexJob extends JobBasedOnLastSuccessfulRunT
   private ElasticsearchDao elasticsearchDao;
 
   public SubstituteCareProviderIndexJob(SubstituteCareProviderDao substituteCareProviderDao,
-      ElasticsearchDao elasticsearchDao, String lastJobRunTimeFilename) {
+      ElasticsearchDao elasticsearchDao, String lastJobRunTimeFilename,
+      @CmsSessionFactory SessionFactory sessionFactory) {
     super(lastJobRunTimeFilename);
     this.substituteCareProviderDao = substituteCareProviderDao;
     this.elasticsearchDao = elasticsearchDao;
@@ -64,7 +65,7 @@ public class SubstituteCareProviderIndexJob extends JobBasedOnLastSuccessfulRunT
     ElasticsearchDao elasticsearchDao = new ElasticsearchDao(configuration);
 
     ClientIndexerJob job = new ClientIndexerJob(clientDao, elasticsearchDao, args[1],
-        injector.getInstance(ObjectMapper.class));
+        injector.getInstance(ObjectMapper.class), sessionFactory);
     try {
       job.run();
     } catch (JobsException e) {

@@ -78,12 +78,6 @@ public class JobsGuiceInjector extends AbstractModule {
     return null;
   }
 
-  // @Provides
-  // @CmsSessionFactory
-  // SessionFactory cmsSessionFactory() {
-  // return new Configuration().configure("cms-hibernate.cfg.xml").buildSessionFactory();
-  // }
-
   @Provides
   @NsSessionFactory
   SessionFactory nsSessionFactory() {

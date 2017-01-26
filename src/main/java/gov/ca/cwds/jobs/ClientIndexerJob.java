@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +19,7 @@ import com.google.inject.Injector;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.persistence.cms.Client;
+import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.rest.api.domain.DomainChef;
@@ -35,14 +37,17 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
   private final ObjectMapper mapper;
   private final ClientDao clientDao;
   private final ElasticsearchDao elasticsearchDao;
+  private final SessionFactory sessionFactory;
 
   @Inject
   public ClientIndexerJob(final ClientDao clientDao, final ElasticsearchDao elasticsearchDao,
-      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper) {
+      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory) {
     super(lastJobRunTimeFilename);
     this.clientDao = clientDao;
     this.elasticsearchDao = elasticsearchDao;
     this.mapper = mapper;
+    this.sessionFactory = sessionFactory;
   }
 
   public static void main(String... args) throws Exception {
@@ -55,8 +60,8 @@ public class ClientIndexerJob extends JobBasedOnLastSuccessfulRunTime {
         Guice.createInjector(new JobsGuiceInjector(new File(args[0]), args[1]));
     final ClientIndexerJob job = injector.getInstance(ClientIndexerJob.class);
 
-    // try (SessionFactory sessionFactory = injector.getInstance(SessionFactory.class).) {
-    try {
+    // Let session factory close itself automatically.
+    try (SessionFactory sessionFactory = job.sessionFactory) {
       job.run();
     } catch (JobsException e) {
       LOGGER.error("Unable to complete job", e);
