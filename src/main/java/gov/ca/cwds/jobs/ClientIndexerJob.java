@@ -1,38 +1,27 @@
 package gov.ca.cwds.jobs;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Guice;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.persistence.cms.Client;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
 /**
- * Job to load clients from CMS into ElasticSearch
+ * Job to load Clients from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */
 public class ClientIndexerJob extends BasePersonIndexerJob<Client> {
 
   private static final Logger LOGGER = LogManager.getLogger(ClientIndexerJob.class);
-
-  private final ObjectMapper mapper;
-  private final ClientDao clientDao;
-  private final ElasticsearchDao elasticsearchDao;
-  private final SessionFactory sessionFactory;
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -48,10 +37,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<Client> {
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory) {
     super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    this.clientDao = clientDao;
-    this.elasticsearchDao = elasticsearchDao;
-    this.mapper = mapper;
-    this.sessionFactory = sessionFactory;
   }
 
   /**
@@ -68,18 +53,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<Client> {
    * @param args command line arguments
    */
   public static void main(String... args) {
-    final JobOptions opts = parseCommandLine(args);
-    final Injector injector =
-        Guice.createInjector(new JobsGuiceInjector(new File(opts.esConfigLoc), opts.lastRunLoc));
-
-    // Let session factory and ElasticSearch dao close themselves automatically.
-    try (final ClientIndexerJob job = injector.getInstance(ClientIndexerJob.class)) {
-      job.run();
-    } catch (JobsException e) {
-      LOGGER.error("Unable to complete job: {}", e.getMessage(), e);
-    } catch (IOException e) {
-      LOGGER.error("Unable to close resource: {}", e.getMessage(), e);
-    }
+    runJob(ClientIndexerJob.class, args);
   }
 
 }

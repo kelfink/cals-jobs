@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Date;
@@ -23,19 +24,28 @@ import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Guice;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.IPersonAware;
+import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.es.Person;
 
 /**
  * Base person batch job to load clients from CMS into ElasticSearch.
+ * 
+ * <p>
+ * This class implements {@link AutoCloseable} and automatically closes common resources, such as
+ * {@link ElasticsearchDao}.
+ * </p>
  * 
  * @author CWDS API Team
  * @param <T> Person persistence type
@@ -46,25 +56,25 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
 
   protected final ObjectMapper mapper;
-  protected final BaseDaoImpl<T> personDao;
+  protected final BaseDaoImpl<T> jobDao;
   protected final ElasticsearchDao elasticsearchDao;
   protected final SessionFactory sessionFactory;
 
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param personDao Client DAO
+   * @param jobDao Person DAO, such as {@link ClientDao}
    * @param elasticsearchDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public BasePersonIndexerJob(final BaseDaoImpl<T> personDao,
-      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
-      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
+  public BasePersonIndexerJob(final BaseDaoImpl<T> jobDao, final ElasticsearchDao elasticsearchDao,
+      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory) {
     super(lastJobRunTimeFilename);
-    this.personDao = personDao;
+    this.jobDao = jobDao;
     this.elasticsearchDao = elasticsearchDao;
     this.mapper = mapper;
     this.sessionFactory = sessionFactory;
@@ -149,6 +159,38 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
+   * Prepare a batch job with all required dependencies.
+   * 
+   * @param klass batch job class
+   * @param args command line arguments
+   * @return batch job, ready to run
+   */
+  public static <T extends BasePersonIndexerJob<?>> T newJob(final Class<T> klass, String... args) {
+    final JobOptions opts = parseCommandLine(args);
+    final Injector injector =
+        Guice.createInjector(new JobsGuiceInjector(new File(opts.esConfigLoc), opts.lastRunLoc));
+    return injector.getInstance(klass);
+  }
+
+  /**
+   * Batch job entry point.
+   * 
+   * @param klass batch job class
+   * @param args command line arguments
+   */
+  public static <T extends BasePersonIndexerJob<?>> void runJob(final Class<T> klass,
+      String... args) {
+    // Let session factory and ElasticSearch dao close themselves automatically.
+    try (final T job = newJob(klass, args)) {
+      job.run();
+    } catch (JobsException e) {
+      LOGGER.error("Unable to complete job: {}", e.getMessage(), e);
+    } catch (IOException e) {
+      LOGGER.error("Unable to close resource: {}", e.getMessage(), e);
+    }
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
@@ -156,7 +198,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      final List<T> results = personDao.findAllUpdatedAfter(lastSuccessfulRunTime);
+      final List<T> results = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       final Date startTime = new Date();
       elasticsearchDao.start();
@@ -177,7 +219,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
             public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
               LOGGER.warn("Error executing bulk", failure);
             }
-          }).setBulkActions(500).build();
+          }).setBulkActions(1000).build();
 
       for (T person : results) {
         final String json = mapper.writeValueAsString(person);
@@ -216,9 +258,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @param person {@link Person} document to index
    * @throws JsonProcessingException if JSON cannot be read
    */
-  protected void indexDocument(Person person) throws JsonProcessingException {
+  protected void indexDocument(T person) throws JsonProcessingException {
     final String document = mapper.writeValueAsString(person);
-    elasticsearchDao.index(document, person.getId().toString());
+    elasticsearchDao.index(document, person.getPrimaryKey().toString());
   }
 
   @Override
