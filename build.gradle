@@ -42,7 +42,7 @@ dependencies {
   	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
 	compile group: 'com.google.inject', name: 'guice', version: '4.1.0'
 	compile group: "org.postgresql", name: "postgresql", version: "9.4.1208.jre7"
-	compile group: "gov.ca.cwds.api", name: "api", version: "0.15.505"
+	compile group: "gov.ca.cwds.api", name: "api", version: "0.15.507"
     
     
     compile fileTree(dir: 'lib', include: ['*.jar'])

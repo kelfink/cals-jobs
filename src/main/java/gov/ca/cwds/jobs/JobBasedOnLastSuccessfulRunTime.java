@@ -33,7 +33,12 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
     writeLastSuccessfulRunTime(curentTimeRunTime);
   }
 
-  private Date determineLastSuccessfulRunTime() {
+  /**
+   * Reads the last run file and returns the last run date.
+   * 
+   * @return last successful run date/time as a Java Date.
+   */
+  protected Date determineLastSuccessfulRunTime() {
     try (BufferedReader bufferedReader =
         new BufferedReader(new FileReader(lastJobRunTimeFilename))) {
       return jobDateFormat.parse(bufferedReader.readLine().trim());
@@ -61,11 +66,20 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
   }
 
   /**
+   * Execute the batch job. Child classes must provide an implementation.
    * 
    * @param lastSuccessfulRunTime The last successful run
-   * 
    * @return The time of the latest run if successful.
    */
   public abstract Date _run(Date lastSuccessfulRunTime);
+
+  /**
+   * Getter for last job run time.
+   * 
+   * @return last time the job ran successfully, in format {@link #jobDateFormat}
+   */
+  public String getLastJobRunTimeFilename() {
+    return lastJobRunTimeFilename;
+  }
 
 }

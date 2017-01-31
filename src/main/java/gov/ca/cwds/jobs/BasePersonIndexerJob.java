@@ -2,6 +2,9 @@ package gov.ca.cwds.jobs;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +18,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -32,6 +36,7 @@ import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.IPersonAware;
 import gov.ca.cwds.data.cms.ClientDao;
+import gov.ca.cwds.data.cms.IBatchBucketDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
@@ -55,10 +60,48 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
 
+  private static final String CMD_LINE_ES_CONFIG = "config";
+  private static final String CMD_LINE_LAST_RUN = "last-run-file";
+  private static final String CMD_LINE_BUCKET_RANGE = "bucket-range";
+  private static final String CMD_LINE_BUCKET_TOTAL = "total-buckets";
+  private static final String CMD_LINE_THREADS = "thread-num";
+
+  public static enum JobCmdLineOption {
+
+    ES_CONFIG(JobOptions.makeOpt("c", CMD_LINE_ES_CONFIG, "ElasticSearch configuration file", true,
+        1, String.class, ',')),
+
+    LAST_RUN_FILE(JobOptions.makeOpt("l", CMD_LINE_LAST_RUN,
+        "last run date file (yyyy-MM-dd HH:mm:ss)", false, 1, String.class, ',')),
+
+    BUCKET_RANGE(JobOptions.makeOpt("r", CMD_LINE_BUCKET_RANGE, "bucket range (-r 20-24)", false, 2,
+        Integer.class, '-')),
+
+    BUCKET_TOTAL(JobOptions.makeOpt("b", CMD_LINE_BUCKET_TOTAL, "total buckets", false, 1,
+        Integer.class, ',')),
+
+    THREADS(
+        JobOptions.makeOpt("t", CMD_LINE_THREADS, "# of threads", false, 1, Integer.class, ','));
+
+    private final Option opt;
+
+    JobCmdLineOption(Option opt) {
+      this.opt = opt;
+    }
+
+    public final Option getOpt() {
+      return opt;
+    }
+
+  }
+
   protected final ObjectMapper mapper;
   protected final BaseDaoImpl<T> jobDao;
   protected final ElasticsearchDao elasticsearchDao;
   protected final SessionFactory sessionFactory;
+
+  protected JobOptions opts;
+  protected long currentBucket = 0L;
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -85,142 +128,221 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * 
    * @author CWDS API Team
    */
-  protected static final class JobOptions {
+  public static final class JobOptions implements Serializable {
+
+    /**
+     * Base serialization version. Increment by class change.
+     */
+    private static final long serialVersionUID = 1L;
 
     /**
      * Location of Elasticsearch configuration file.
      */
-    public String esConfigLoc;
+    private final String esConfigLoc;
 
     /**
      * Location of last run file.
      */
-    public String lastRunLoc;
+    private final String lastRunLoc;
 
     /**
      * Whether to run in periodic "last run" mode or "initial" mode. Defaults to true.
      */
-    public boolean lastRunMode = true;
+    private final boolean lastRunMode;
 
     /**
-     * If running in "initial" mode, which bucket of records will this job instance load?
+     * When running in "initial load" mode, specifies the starting bucket of records to be processed
+     * by this job.
      * <p>
-     * Required for "initial" mode.
+     * Required for "initial load" mode.
      * </p>
      */
-    public long bucket;
+    private final long startBucket;
 
     /**
-     * If running in "initial" mode, how many total buckets are there?
+     * When running in "initial load" mode, specifies the ending bucket of records to be processed
+     * by this job.
      * <p>
-     * Required for "initial" mode.
+     * Required for "initial load" mode.
      * </p>
      */
-    public long totalBuckets;
-  }
+    private final long endBucket;
 
-  /**
-   * Define a command line option.
-   * 
-   * @param shortOpt single letter option name
-   * @param longOpt long option name
-   * @param description option description
-   * @return command line option
-   */
-  protected static Option makeOpt(String shortOpt, String longOpt, String description) {
-    return Option.builder(shortOpt).argName(longOpt).longOpt(longOpt).desc(description)
-        .numberOfArgs(0).build();
-  }
+    /**
+     * When running in "initial load" mode, specifies the total number buckets for all related batch
+     * runs.
+     * <p>
+     * Required for "initial load" mode.
+     * </p>
+     */
+    private final long totalBuckets;
 
-  /**
-   * Define a command line option.
-   * 
-   * @param shortOpt single letter option name
-   * @param longOpt long option name
-   * @param description option description
-   * @param required true if required
-   * @param argc number of arguments to this option
-   * @param type arguments' Java class
-   * @return command line option
-   */
-  protected static Option makeOpt(String shortOpt, String longOpt, String description,
-      boolean required, int argc, Class<?> type) {
-    return Option.builder(shortOpt).argName(longOpt).required(required).longOpt(longOpt)
-        .desc(description).numberOfArgs(argc).type(type).build();
-  }
+    /**
+     * Total threads to allocate to this batch run. Defaults to all available cores.
+     */
+    private final long threadCount;
 
-  /**
-   * Define command line options.
-   * 
-   * @return command line option definitions
-   */
-  protected static Options buildCmdLineOptions() {
-    Options ret = new Options();
-    ret.addOption(
-        makeOpt("c", "config", "ElasticSearch configuration file", true, 1, String.class));
-
-    // RUN MODE: mutually exclusive choice.
-    OptionGroup group = new OptionGroup();
-    group.setRequired(true);
-    group.addOption(makeOpt("l", "last-run-file", "last run date file (yyyy-MM-dd HH:mm:ss)", false,
-        1, String.class));
-    group.addOption(makeOpt("X", "initial-load", "initial load"));
-    ret.addOptionGroup(group);
-
-    return ret;
-  }
-
-  /**
-   * Print usage and exit.
-   */
-  protected static void printUsage() {
-    new HelpFormatter().printHelp("Batch loader", buildCmdLineOptions());
-    // System.exit(-1);
-  }
-
-  /**
-   * Parse the command line return the job settings.
-   * 
-   * @param args command line to parse
-   * @return JobOptions defining this job
-   * @throws ParseException if unable to parse command line
-   */
-  public static JobOptions parseCommandLine(String[] args) throws ParseException {
-    JobOptions ret = new JobOptions();
-    try {
-      Options options = buildCmdLineOptions();
-      CommandLineParser parser = new DefaultParser();
-      CommandLine cmd = parser.parse(options, args);
-
-      for (Option opt : cmd.getOptions()) {
-        switch (opt.getArgName()) {
-          case "config":
-            LOGGER.info("ES config file  = " + opt.getValue());
-            ret.esConfigLoc = opt.getValue().trim();
-            break;
-
-          case "last-run-file":
-            ret.lastRunMode = true;
-            ret.lastRunLoc = opt.getValue().trim();
-            LOGGER.info("last run file = " + ret.lastRunLoc);
-            break;
-
-          case "initial-load":
-            LOGGER.info("INITIAL LOAD!");
-            ret.lastRunMode = false;
-            break;
-
-          default:
-            break;
-        }
-      }
-    } catch (ParseException e) {
-      printUsage();
-      LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
-      throw e;
+    private JobOptions(String esConfigLoc, String lastRunLoc, boolean lastRunMode, long startBucket,
+        long endBucket, long totalBuckets, long threadCount) {
+      this.esConfigLoc = esConfigLoc;
+      this.lastRunLoc = lastRunLoc;
+      this.lastRunMode = lastRunMode;
+      this.startBucket = startBucket;
+      this.endBucket = endBucket;
+      this.totalBuckets = totalBuckets;
+      this.threadCount = threadCount;
     }
 
-    return ret;
+    public final String getEsConfigLoc() {
+      return esConfigLoc;
+    }
+
+    public final String getLastRunLoc() {
+      return lastRunLoc;
+    }
+
+    public final boolean isLastRunMode() {
+      return lastRunMode;
+    }
+
+    public final long getStartBucket() {
+      return startBucket;
+    }
+
+    public final long getEndBucket() {
+      return endBucket;
+    }
+
+    public final long getTotalBuckets() {
+      return totalBuckets;
+    }
+
+    public final long getThreadCount() {
+      return threadCount;
+    }
+
+    /**
+     * Define a command line option.
+     * 
+     * @param shortOpt single letter option name
+     * @param longOpt long option name
+     * @param description option description
+     * @return command line option
+     */
+    protected static Option makeOpt(String shortOpt, String longOpt, String description) {
+      return Option.builder(shortOpt).argName(longOpt).longOpt(longOpt).desc(description)
+          .numberOfArgs(0).build();
+    }
+
+    /**
+     * Define a command line option.
+     * 
+     * @param shortOpt single letter option name
+     * @param longOpt long option name
+     * @param description option description
+     * @param required true if required
+     * @param argc number of arguments to this option
+     * @param type arguments' Java class
+     * @param sep argument separator
+     * @return command line option
+     */
+    protected static Option makeOpt(String shortOpt, String longOpt, String description,
+        boolean required, int argc, Class<?> type, char sep) {
+      return Option.builder(shortOpt).argName(longOpt).required(required).longOpt(longOpt)
+          .desc(description).numberOfArgs(argc).type(type).valueSeparator(sep).build();
+    }
+
+    /**
+     * Define command line options.
+     * 
+     * @return command line option definitions
+     */
+    protected static Options buildCmdLineOptions() {
+      Options ret = new Options();
+      ret.addOption(JobCmdLineOption.ES_CONFIG.getOpt());
+      ret.addOption(JobCmdLineOption.THREADS.getOpt());
+      ret.addOption(JobCmdLineOption.BUCKET_RANGE.getOpt());
+
+      // RUN MODE: mutually exclusive choice.
+      OptionGroup group = new OptionGroup();
+      group.setRequired(true);
+      group.addOption(JobCmdLineOption.LAST_RUN_FILE.getOpt());
+      group.addOption(JobCmdLineOption.BUCKET_TOTAL.getOpt());
+      ret.addOptionGroup(group);
+
+      return ret;
+    }
+
+    /**
+     * Print usage.
+     */
+    protected static void printUsage() {
+      try (final StringWriter sw = new StringWriter()) {
+        new HelpFormatter().printHelp(new PrintWriter(sw), 100, "Batch loader",
+            StringUtils.leftPad("", 90, '=') + "\nUSAGE: java <job class> ...\n"
+                + StringUtils.leftPad("", 90, '='),
+            buildCmdLineOptions(), 4, 8, StringUtils.leftPad("", 90, '='), true);
+        LOGGER.error(sw.toString());
+      } catch (IOException e) {
+        throw new JobsException("ERROR PRINTING HELP! How ironic. :-)", e);
+      }
+    }
+
+    /**
+     * Parse the command line return the job settings.
+     * 
+     * @param args command line to parse
+     * @return JobOptions defining this job
+     * @throws ParseException if unable to parse command line
+     */
+    public static JobOptions parseCommandLine(String[] args) throws ParseException {
+      String esConfigLoc = null;
+      String lastRunLoc = null;
+      boolean lastRunMode = false;
+      long startBucket = 0L;
+      long endBucket = 0L;
+      long totalBuckets = 0L;
+      long threadCount = 0L;
+
+      try {
+        Options options = buildCmdLineOptions();
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = parser.parse(options, args);
+
+        // Java clincher: case statements only take constants. Even compile-time constants, like
+        // enum members, evaluated at compile time, are not considered "constants."
+        for (Option opt : cmd.getOptions()) {
+          switch (opt.getArgName()) {
+            case CMD_LINE_ES_CONFIG:
+              LOGGER.info("ES config file  = " + opt.getValue());
+              esConfigLoc = opt.getValue().trim();
+              break;
+
+            case CMD_LINE_LAST_RUN:
+              lastRunMode = true;
+              lastRunLoc = opt.getValue().trim();
+              LOGGER.info("last run file = " + lastRunLoc);
+              break;
+
+            case CMD_LINE_BUCKET_TOTAL:
+              LOGGER.info("INITIAL LOAD!");
+              lastRunMode = false;
+              break;
+
+            default:
+              break;
+          }
+        }
+      } catch (ParseException e) {
+        printUsage();
+        LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
+        throw e;
+      }
+
+      return new JobOptions(esConfigLoc, lastRunLoc, lastRunMode, startBucket, endBucket,
+          totalBuckets, threadCount);
+    }
+
   }
 
   /**
@@ -233,14 +355,20 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    */
   public static <T extends BasePersonIndexerJob<?>> T newJob(final Class<T> klass, String... args)
       throws ParseException {
-    final JobOptions opts = parseCommandLine(args);
+    final JobOptions opts = JobOptions.parseCommandLine(args);
     final Injector injector =
         Guice.createInjector(new JobsGuiceInjector(new File(opts.esConfigLoc), opts.lastRunLoc));
-    return injector.getInstance(klass);
+    final T ret = injector.getInstance(klass);
+    ret.setOpts(opts);
+    return ret;
   }
 
   /**
    * Batch job entry point.
+   * 
+   * <p>
+   * This method closes Hibernate session factory and ElasticSearch DAO automatically.
+   * </p>
    * 
    * @param klass batch job class
    * @param args command line arguments
@@ -248,7 +376,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    */
   public static <T extends BasePersonIndexerJob<?>> void runJob(final Class<T> klass,
       String... args) throws ParseException {
-    // Session factory and ElasticSearch dao will close themselves automatically.
+
+    // Close resources automatically.
     try (final T job = newJob(klass, args)) {
       job.run();
     } catch (JobsException e) {
@@ -259,6 +388,25 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
+   * 
+   * @param lastSuccessfulRunTime last time the batch ran successfully.
+   * @return List of results to process
+   * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
+   */
+  protected List<T> nextResults(Date lastSuccessfulRunTime) {
+    List<T> ret;
+    if (this.opts != null && this.opts.lastRunMode) {
+      ret = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
+    } else {
+      // TODO: #138163381: Enforce this interface at compile time, not at runtime.
+      IBatchBucketDao<T> bucketDao = (IBatchBucketDao<T>) jobDao;
+      ret = bucketDao.bucketList(this.opts.getStartBucket(), this.opts.getTotalBuckets());
+    }
+
+    return ret;
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
@@ -266,7 +414,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      final List<T> results = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
+      final List<T> results = nextResults(lastSuccessfulRunTime);
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       final Date startTime = new Date();
       elasticsearchDao.start();
@@ -305,7 +453,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       }
 
       // Give it time to finish the last batch.
-      bulkProcessor.awaitClose(20, TimeUnit.SECONDS);
+      LOGGER.info("Waiting on ElasticSearch to finish last batch");
+      bulkProcessor.awaitClose(30, TimeUnit.SECONDS);
+
+      // Result stats:
       LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
       LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
           jobDateFormat.format(startTime)));
@@ -340,6 +491,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     if (this.sessionFactory != null) {
       this.sessionFactory.close();
     }
+  }
+
+  public JobOptions getOpts() {
+    return opts;
+  }
+
+  public void setOpts(JobOptions opts) {
+    this.opts = opts;
   }
 
 }
