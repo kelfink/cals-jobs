@@ -351,6 +351,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @param klass batch job class
    * @param args command line arguments
    * @return batch job, ready to run
+   * @param <T> Person persistence type
    * @throws ParseException if unable to parse command line
    */
   public static <T extends BasePersonIndexerJob<?>> T newJob(final Class<T> klass, String... args)
@@ -372,6 +373,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * 
    * @param klass batch job class
    * @param args command line arguments
+   * @param <T> Person persistence type
    * @throws ParseException if unable to parse command line
    */
   public static <T extends BasePersonIndexerJob<?>> void runJob(final Class<T> klass,
