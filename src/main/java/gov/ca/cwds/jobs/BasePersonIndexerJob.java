@@ -44,7 +44,7 @@ import gov.ca.cwds.rest.api.domain.es.Person;
  * 
  * <p>
  * This class implements {@link AutoCloseable} and automatically closes common resources, such as
- * {@link ElasticsearchDao}.
+ * {@link ElasticsearchDao} and Hibernate {@link SessionFactory}.
  * </p>
  * 
  * @author CWDS API Team
@@ -80,30 +80,86 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     this.sessionFactory = sessionFactory;
   }
 
+  /**
+   * Represents batch job options from the command line.
+   * 
+   * @author CWDS API Team
+   */
   protected static final class JobOptions {
+
+    /**
+     * Location of Elasticsearch configuration file.
+     */
     public String esConfigLoc;
+
+    /**
+     * Location of last run file.
+     */
     public String lastRunLoc;
+
+    /**
+     * Whether to run in periodic "last run" mode or "initial" mode. Defaults to true.
+     */
     public boolean lastRunMode = true;
+
+    /**
+     * If running in "initial" mode, which bucket of records will this job instance load?
+     * <p>
+     * Required for "initial" mode.
+     * </p>
+     */
+    public long bucket;
+
+    /**
+     * If running in "initial" mode, how many total buckets are there?
+     * <p>
+     * Required for "initial" mode.
+     * </p>
+     */
+    public long totalBuckets;
   }
 
-  protected static Option makeOpt(String single, String longName, String description) {
-    return Option.builder(single).argName(longName).longOpt(longName).desc(description)
+  /**
+   * Define a command line option.
+   * 
+   * @param shortOpt single letter option name
+   * @param longOpt long option name
+   * @param description option description
+   * @return command line option
+   */
+  protected static Option makeOpt(String shortOpt, String longOpt, String description) {
+    return Option.builder(shortOpt).argName(longOpt).longOpt(longOpt).desc(description)
         .numberOfArgs(0).build();
   }
 
-  protected static Option makeOpt(String single, String longName, String description,
+  /**
+   * Define a command line option.
+   * 
+   * @param shortOpt single letter option name
+   * @param longOpt long option name
+   * @param description option description
+   * @param required true if required
+   * @param argc number of arguments to this option
+   * @param type arguments' Java class
+   * @return command line option
+   */
+  protected static Option makeOpt(String shortOpt, String longOpt, String description,
       boolean required, int argc, Class<?> type) {
-    return Option.builder(single).argName(longName).required(required).longOpt(longName)
+    return Option.builder(shortOpt).argName(longOpt).required(required).longOpt(longOpt)
         .desc(description).numberOfArgs(argc).type(type).build();
   }
 
+  /**
+   * Define command line options.
+   * 
+   * @return command line option definitions
+   */
   protected static Options buildCmdLineOptions() {
     Options ret = new Options();
-
     ret.addOption(
         makeOpt("c", "config", "ElasticSearch configuration file", true, 1, String.class));
 
-    // MODE
+    // RUN MODE: mutually exclusive choice.
     OptionGroup group = new OptionGroup();
     group.setRequired(true);
     group.addOption(makeOpt("l", "last-run-file", "last run date file (yyyy-MM-dd HH:mm:ss)", false,
@@ -118,11 +174,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * Print usage and exit.
    */
   protected static void printUsage() {
-    new HelpFormatter().printHelp("Client batch loader", buildCmdLineOptions());
-    System.exit(-1);
+    new HelpFormatter().printHelp("Batch loader", buildCmdLineOptions());
+    // System.exit(-1);
   }
 
-  public static JobOptions parseCommandLine(String[] args) {
+  /**
+   * Parse the command line return the job settings.
+   * 
+   * @param args command line to parse
+   * @return JobOptions defining this job
+   * @throws ParseException if unable to parse command line
+   */
+  public static JobOptions parseCommandLine(String[] args) throws ParseException {
     JobOptions ret = new JobOptions();
     try {
       Options options = buildCmdLineOptions();
@@ -153,6 +216,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       }
     } catch (ParseException e) {
       printUsage();
+      LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
+      throw e;
     }
 
     return ret;
@@ -164,8 +229,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @param klass batch job class
    * @param args command line arguments
    * @return batch job, ready to run
+   * @throws ParseException if unable to parse command line
    */
-  public static <T extends BasePersonIndexerJob<?>> T newJob(final Class<T> klass, String... args) {
+  public static <T extends BasePersonIndexerJob<?>> T newJob(final Class<T> klass, String... args)
+      throws ParseException {
     final JobOptions opts = parseCommandLine(args);
     final Injector injector =
         Guice.createInjector(new JobsGuiceInjector(new File(opts.esConfigLoc), opts.lastRunLoc));
@@ -177,10 +244,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * 
    * @param klass batch job class
    * @param args command line arguments
+   * @throws ParseException if unable to parse command line
    */
   public static <T extends BasePersonIndexerJob<?>> void runJob(final Class<T> klass,
-      String... args) {
-    // Let session factory and ElasticSearch dao close themselves automatically.
+      String... args) throws ParseException {
+    // Session factory and ElasticSearch dao will close themselves automatically.
     try (final T job = newJob(klass, args)) {
       job.run();
     } catch (JobsException e) {
@@ -265,8 +333,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   @Override
   public void close() throws IOException {
-    this.elasticsearchDao.close();
-    this.sessionFactory.close();
+    if (this.elasticsearchDao != null) {
+      this.elasticsearchDao.close();
+    }
+
+    if (this.sessionFactory != null) {
+      this.sessionFactory.close();
+    }
   }
 
 }

@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs;
 
-import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -40,20 +40,18 @@ public class ClientIndexerJob extends BasePersonIndexerJob<Client> {
   }
 
   /**
-   * Print usage and exit.
-   */
-  protected static void printUsage() {
-    new HelpFormatter().printHelp("Client batch loader", buildCmdLineOptions());
-    System.exit(-1);
-  }
-
-  /**
    * Batch job entry point.
    * 
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runJob(ClientIndexerJob.class, args);
+    LOGGER.info("Run Client indexer job");
+    try {
+      runJob(ClientIndexerJob.class, args);
+    } catch (ParseException e) {
+      LOGGER.error(e);
+      throw new JobsException("STOPPING BATCH", e);
+    }
   }
 
 }

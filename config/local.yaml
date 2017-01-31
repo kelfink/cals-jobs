@@ -1,5 +1,5 @@
-elasticsearch.host: 10.200.3.171
+elasticsearch.host: 127.0.0.1
 elasticsearch.port: 9300
-elasticsearch.cluster: elasticsearch
+elasticsearch.cluster: elasticsearch_CWS-NS3
 elasticsearch.indexName: people
 elasticsearch.indexType: person
