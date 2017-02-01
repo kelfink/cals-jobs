@@ -310,7 +310,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         CommandLine cmd = parser.parse(options, args);
 
         // Java clincher: case statements only take constants. Even compile-time constants, like
-        // enum members, evaluated at compile time, are not considered "constants."
+        // enum members (evaluated at compile time), are not considered "constants."
         for (Option opt : cmd.getOptions()) {
           switch (opt.getArgName()) {
             case CMD_LINE_ES_CONFIG:
@@ -327,6 +327,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
             case CMD_LINE_BUCKET_TOTAL:
               LOGGER.info("INITIAL LOAD!");
               lastRunMode = false;
+              totalBuckets = Long.parseLong(opt.getValue());
+              break;
+
+            case CMD_LINE_BUCKET_RANGE:
+              lastRunMode = false;
+              startBucket = Long.parseLong(opt.getValues()[0]);
+              endBucket = Long.parseLong(opt.getValues()[1]);
               break;
 
             default:
@@ -390,6 +397,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
+   * Fetch all records for the next batch run, either by bucket or last successful run date.
    * 
    * @param lastSuccessfulRunTime last time the batch ran successfully.
    * @return List of results to process
@@ -416,50 +424,54 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      final List<T> results = nextResults(lastSuccessfulRunTime);
-      LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       final Date startTime = new Date();
       elasticsearchDao.start();
 
-      final BulkProcessor bulkProcessor =
-          BulkProcessor.builder(elasticsearchDao.getClient(), new BulkProcessor.Listener() {
-            @Override
-            public void beforeBulk(long executionId, BulkRequest request) {
-              LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
-            }
+      final List<T> results = nextResults(lastSuccessfulRunTime);
+      if (results != null && results.isEmpty()) {
+        LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
 
-            @Override
-            public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-              LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
-            }
+        final BulkProcessor bulkProcessor =
+            BulkProcessor.builder(elasticsearchDao.getClient(), new BulkProcessor.Listener() {
+              @Override
+              public void beforeBulk(long executionId, BulkRequest request) {
+                LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
+              }
 
-            @Override
-            public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-              LOGGER.warn("Error executing bulk", failure);
-            }
-          }).setBulkActions(1000).build();
+              @Override
+              public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
+                LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
+              }
 
-      for (T person : results) {
-        final String json = mapper.writeValueAsString(person);
-        IPersonAware pers = (IPersonAware) person;
-        final Person esPerson = new Person(person.getPrimaryKey().toString(), pers.getFirstName(),
-            pers.getLastName(), pers.getGender(), DomainChef.cookDate(pers.getBirthDate()),
-            pers.getSsn(), pers.getClass().getName(), json);
+              @Override
+              public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
+                LOGGER.warn("Error executing bulk", failure);
+              }
+            }).setBulkActions(1000).build();
 
-        // Index one document at time. Slow.
-        // indexDocument(esPerson);
+        for (T person : results) {
+          final String json = mapper.writeValueAsString(person);
+          IPersonAware pers = (IPersonAware) person;
+          final Person esPerson = new Person(person.getPrimaryKey().toString(), pers.getFirstName(),
+              pers.getLastName(), pers.getGender(), DomainChef.cookDate(pers.getBirthDate()),
+              pers.getSsn(), pers.getClass().getName(), json);
 
-        // Bulk indexing! Much faster.
-        bulkProcessor.add(elasticsearchDao.prepareIndexRequest(mapper.writeValueAsString(esPerson),
-            esPerson.getId().toString()));
+          // Index one document at time. Slow.
+          // indexDocument(esPerson);
+
+          // Bulk indexing! Much faster.
+          bulkProcessor.add(elasticsearchDao.prepareIndexRequest(
+              mapper.writeValueAsString(esPerson), esPerson.getId().toString()));
+        }
+
+        // Give it time to finish the last batch.
+        LOGGER.info("Waiting on ElasticSearch to finish last batch");
+        bulkProcessor.awaitClose(30, TimeUnit.SECONDS);
+
+        // Result stats:
+        LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
       }
 
-      // Give it time to finish the last batch.
-      LOGGER.info("Waiting on ElasticSearch to finish last batch");
-      bulkProcessor.awaitClose(30, TimeUnit.SECONDS);
-
-      // Result stats:
-      LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
       LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
           jobDateFormat.format(startTime)));
       return startTime;

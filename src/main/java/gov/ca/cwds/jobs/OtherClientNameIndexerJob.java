@@ -88,7 +88,7 @@ public class OtherClientNameIndexerJob extends JobBasedOnLastSuccessfulRunTime {
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
       Date currentTime = new Date();
       for (OtherClientName otherClientName : results) {
-        Person esPerson = new Person(otherClientName.getPrimaryKey().getId1(),
+        final Person esPerson = new Person(otherClientName.getPrimaryKey().toString(),
             otherClientName.getFirstName(), otherClientName.getLastName(), "", // Gender
             "", // DOB
             "", // SSN
