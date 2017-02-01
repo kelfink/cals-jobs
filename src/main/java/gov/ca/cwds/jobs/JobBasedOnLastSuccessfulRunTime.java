@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,26 +40,31 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
    * @return last successful run date/time as a Java Date.
    */
   protected Date determineLastSuccessfulRunTime() {
-    try (BufferedReader bufferedReader =
-        new BufferedReader(new FileReader(lastJobRunTimeFilename))) {
-      return jobDateFormat.parse(bufferedReader.readLine().trim());
-    } catch (FileNotFoundException e) {
-      LOGGER.error("Caught FileNotFoundException: {}", e.getMessage(), e);
-      throw new JobsException(e);
-    } catch (IOException e) {
-      LOGGER.error("Caught IOException: {}", e.getMessage(), e);
-      throw new JobsException(e);
-    } catch (ParseException e) {
-      LOGGER.error("Caught ParseException: {}", e.getMessage(), e);
-      throw new JobsException(e);
+    Date ret = null;
+
+    if (!StringUtils.isBlank(this.lastJobRunTimeFilename)) {
+      try (BufferedReader bufferedReader =
+          new BufferedReader(new FileReader(lastJobRunTimeFilename))) {
+        ret = jobDateFormat.parse(bufferedReader.readLine().trim());
+      } catch (FileNotFoundException e) {
+        LOGGER.error("Caught FileNotFoundException: {}", e.getMessage(), e);
+        throw new JobsException(e);
+      } catch (IOException e) {
+        LOGGER.error("Caught IOException: {}", e.getMessage(), e);
+        throw new JobsException(e);
+      } catch (ParseException e) {
+        LOGGER.error("Caught ParseException: {}", e.getMessage(), e);
+        throw new JobsException(e);
+      }
     }
+
+    return ret;
   }
 
   private void writeLastSuccessfulRunTime(Date datetime) {
-    if (datetime != null) {
-      try (
-          BufferedWriter writedtparm = new BufferedWriter(new FileWriter(lastJobRunTimeFilename))) {
-        writedtparm.write(jobDateFormat.format(datetime));
+    if (datetime != null && !StringUtils.isBlank(this.lastJobRunTimeFilename)) {
+      try (BufferedWriter w = new BufferedWriter(new FileWriter(lastJobRunTimeFilename))) {
+        w.write(jobDateFormat.format(datetime));
       } catch (IOException e) {
         throw new JobsException("Could not write the timestamp parameter file", e);
       }

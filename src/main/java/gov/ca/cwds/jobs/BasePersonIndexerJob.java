@@ -404,13 +404,16 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
   protected List<T> nextResults(Date lastSuccessfulRunTime) {
-    List<T> ret;
+    List<T> ret = null;
     if (this.opts != null && this.opts.lastRunMode) {
       ret = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
     } else {
       // TODO: #138163381: Enforce this interface at compile time, not at runtime.
       IBatchBucketDao<T> bucketDao = (IBatchBucketDao<T>) jobDao;
-      ret = bucketDao.bucketList(this.opts.getStartBucket(), this.opts.getTotalBuckets());
+      currentBucket = currentBucket == 0 ? this.opts.getStartBucket() : currentBucket + 1;
+      if (currentBucket <= this.opts.getEndBucket()) {
+        ret = bucketDao.bucketList(currentBucket, this.opts.getTotalBuckets());
+      }
     }
 
     return ret;
@@ -428,7 +431,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       elasticsearchDao.start();
 
       final List<T> results = nextResults(lastSuccessfulRunTime);
-      if (results != null && results.isEmpty()) {
+      if (results != null && !results.isEmpty()) {
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
 
         final BulkProcessor bulkProcessor =
@@ -450,11 +453,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
             }).setBulkActions(1000).build();
 
         for (T person : results) {
-          final String json = mapper.writeValueAsString(person);
           IPersonAware pers = (IPersonAware) person;
           final Person esPerson = new Person(person.getPrimaryKey().toString(), pers.getFirstName(),
               pers.getLastName(), pers.getGender(), DomainChef.cookDate(pers.getBirthDate()),
-              pers.getSsn(), pers.getClass().getName(), json);
+              pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(person));
 
           // Index one document at time. Slow.
           // indexDocument(esPerson);

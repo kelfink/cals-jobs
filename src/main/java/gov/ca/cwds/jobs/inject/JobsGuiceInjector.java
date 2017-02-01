@@ -34,7 +34,12 @@ public class JobsGuiceInjector extends AbstractModule {
 
   public JobsGuiceInjector(File esConfigFileLoc, String lastJobRunTimeFilename) {
     this.esConfig = esConfigFileLoc;
-    this.lastJobRunTimeFilename = lastJobRunTimeFilename;
+
+    if (!StringUtils.isBlank(lastJobRunTimeFilename)) {
+      this.lastJobRunTimeFilename = lastJobRunTimeFilename;
+    } else {
+      this.lastJobRunTimeFilename = "";
+    }
   }
 
   /**
@@ -53,9 +58,8 @@ public class JobsGuiceInjector extends AbstractModule {
     // Must declare as singleton, otherwise Guice creates a new instance each time.
     bind(ObjectMapper.class).asEagerSingleton();
 
-    if (!StringUtils.isBlank(this.lastJobRunTimeFilename)) {
-      bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
-    }
+    // Required for annotation injection.
+    bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
 
     // Register CMS system code translator.
     bind(ISystemCodeDao.class).to(SystemCodeDaoFileImpl.class);
