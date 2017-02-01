@@ -9,6 +9,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -410,16 +411,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected List<T> nextResults(Date lastSuccessfulRunTime) {
     List<T> ret = null;
     if (this.opts != null && this.opts.lastRunMode) {
-      if (currentBucket == 0) {
+      if (this.currentBucket == 0) {
         ret = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
-        currentBucket++;
+        this.currentBucket++;
       }
     } else {
       // TODO: #138163381: Enforce this interface at compile time, not at runtime.
       IBatchBucketDao<T> bucketDao = (IBatchBucketDao<T>) jobDao;
-      currentBucket = currentBucket == 0 ? this.opts.getStartBucket() : currentBucket + 1;
-      if (currentBucket <= this.opts.getEndBucket()) {
-        ret = bucketDao.bucketList(currentBucket, this.opts.getTotalBuckets());
+      this.currentBucket =
+          this.currentBucket == 0 ? this.opts.getStartBucket() : this.currentBucket + 1;
+      if (this.currentBucket <= this.opts.getEndBucket()) {
+        LOGGER.warn("pull bucket #{}", this.currentBucket);
+        ret = bucketDao.bucketList(this.currentBucket, this.opts.getTotalBuckets());
       }
     }
 
@@ -455,22 +458,33 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
             }
           }).setBulkActions(1000).build();
 
+      LOGGER.warn("availableProcessors={}", Runtime.getRuntime().availableProcessors());
+
       // Process each bucket or the last run date, as requested.
       List<T> results = nextResults(lastSuccessfulRunTime);
       int recsProcessed = 0;
       while (results != null && !results.isEmpty()) {
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
 
-        for (T person : results) {
-          IPersonAware pers = (IPersonAware) person;
-          final Person esPerson = new Person(person.getPrimaryKey().toString(), pers.getFirstName(),
-              pers.getLastName(), pers.getGender(), DomainChef.cookDate(pers.getBirthDate()),
-              pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(person));
+        // BulkProcessor is thread safe.
+        results.parallelStream().forEach(new Consumer<T>() {
+          @Override
+          public void accept(T person) {
+            try {
+              IPersonAware pers = (IPersonAware) person;
+              final Person esPerson = new Person(person.getPrimaryKey().toString(),
+                  pers.getFirstName(), pers.getLastName(), pers.getGender(),
+                  DomainChef.cookDate(pers.getBirthDate()), pers.getSsn(),
+                  pers.getClass().getName(), mapper.writeValueAsString(person));
 
-          // Bulk indexing! Much faster.
-          bulkProcessor.add(esDao.prepareIndexRequest(mapper.writeValueAsString(esPerson),
-              esPerson.getId().toString()));
-        }
+              // Bulk indexing! MUCH faster than indexing one doc at a time.
+              bulkProcessor.add(esDao.prepareIndexRequest(mapper.writeValueAsString(esPerson),
+                  esPerson.getId().toString()));
+            } catch (JsonProcessingException e) {
+              throw new JobsException("JSON error", e);
+            }
+          }
+        });
 
         // Track counts.
         recsProcessed += results.size();
@@ -489,9 +503,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
           jobDateFormat.format(startTime)));
       return startTime;
 
-    } catch (IOException e) {
-      LOGGER.error("IOException: {}", e.getMessage(), e);
-      throw new JobsException("IOException: " + e.getMessage(), e);
+    } catch (JobsException e) {
+      LOGGER.error("JobsException: {}", e.getMessage(), e);
+      throw e;
     } catch (Exception e) {
       LOGGER.error("General Exception: {}", e.getMessage(), e);
       throw new JobsException("General Exception: " + e.getMessage(), e);
@@ -505,8 +519,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @throws JsonProcessingException if JSON cannot be read
    */
   protected void indexDocument(T person) throws JsonProcessingException {
-    final String document = mapper.writeValueAsString(person);
-    esDao.index(document, person.getPrimaryKey().toString());
+    esDao.index(mapper.writeValueAsString(person), person.getPrimaryKey().toString());
   }
 
   @Override
