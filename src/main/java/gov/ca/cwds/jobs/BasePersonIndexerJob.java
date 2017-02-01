@@ -97,7 +97,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   protected final ObjectMapper mapper;
   protected final BaseDaoImpl<T> jobDao;
-  protected final ElasticsearchDao elasticsearchDao;
+  protected final ElasticsearchDao esDao;
   protected final SessionFactory sessionFactory;
 
   protected JobOptions opts;
@@ -118,7 +118,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       @CmsSessionFactory SessionFactory sessionFactory) {
     super(lastJobRunTimeFilename);
     this.jobDao = jobDao;
-    this.elasticsearchDao = elasticsearchDao;
+    this.esDao = elasticsearchDao;
     this.mapper = mapper;
     this.sessionFactory = sessionFactory;
   }
@@ -336,6 +336,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
               endBucket = Long.parseLong(opt.getValues()[1]);
               break;
 
+            case CMD_LINE_THREADS:
+              threadCount = Long.parseLong(opt.getValue());
+              break;
+
             default:
               break;
           }
@@ -406,7 +410,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected List<T> nextResults(Date lastSuccessfulRunTime) {
     List<T> ret = null;
     if (this.opts != null && this.opts.lastRunMode) {
-      ret = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
+      if (currentBucket == 0) {
+        ret = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
+        currentBucket++;
+      }
     } else {
       // TODO: #138163381: Enforce this interface at compile time, not at runtime.
       IBatchBucketDao<T> bucketDao = (IBatchBucketDao<T>) jobDao;
@@ -428,29 +435,31 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   public Date _run(Date lastSuccessfulRunTime) {
     try {
       final Date startTime = new Date();
-      elasticsearchDao.start();
+      esDao.start();
 
-      final List<T> results = nextResults(lastSuccessfulRunTime);
-      if (results != null && !results.isEmpty()) {
+      final BulkProcessor bulkProcessor =
+          BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
+            @Override
+            public void beforeBulk(long executionId, BulkRequest request) {
+              LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
+            }
+
+            @Override
+            public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
+              LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
+            }
+
+            @Override
+            public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
+              LOGGER.warn("Error executing bulk", failure);
+            }
+          }).setBulkActions(1000).build();
+
+      // Process each bucket or the last run date, as requested.
+      List<T> results = nextResults(lastSuccessfulRunTime);
+      int recsProcessed = 0;
+      while (results != null && !results.isEmpty()) {
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
-
-        final BulkProcessor bulkProcessor =
-            BulkProcessor.builder(elasticsearchDao.getClient(), new BulkProcessor.Listener() {
-              @Override
-              public void beforeBulk(long executionId, BulkRequest request) {
-                LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
-              }
-
-              @Override
-              public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-                LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
-              }
-
-              @Override
-              public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-                LOGGER.warn("Error executing bulk", failure);
-              }
-            }).setBulkActions(1000).build();
 
         for (T person : results) {
           IPersonAware pers = (IPersonAware) person;
@@ -458,22 +467,24 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
               pers.getLastName(), pers.getGender(), DomainChef.cookDate(pers.getBirthDate()),
               pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(person));
 
-          // Index one document at time. Slow.
-          // indexDocument(esPerson);
-
           // Bulk indexing! Much faster.
-          bulkProcessor.add(elasticsearchDao.prepareIndexRequest(
-              mapper.writeValueAsString(esPerson), esPerson.getId().toString()));
+          bulkProcessor.add(esDao.prepareIndexRequest(mapper.writeValueAsString(esPerson),
+              esPerson.getId().toString()));
         }
 
-        // Give it time to finish the last batch.
-        LOGGER.info("Waiting on ElasticSearch to finish last batch");
-        bulkProcessor.awaitClose(30, TimeUnit.SECONDS);
+        // Track counts.
+        recsProcessed += results.size();
 
-        // Result stats:
-        LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
+        // Pull next bucket.
+        results = nextResults(lastSuccessfulRunTime);
       }
 
+      // Give it time to finish the last batch.
+      LOGGER.info("Waiting on ElasticSearch to finish last batch");
+      bulkProcessor.awaitClose(30, TimeUnit.SECONDS);
+
+      // Result stats:
+      LOGGER.info(MessageFormat.format("Indexed {0} people", recsProcessed));
       LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
           jobDateFormat.format(startTime)));
       return startTime;
@@ -495,13 +506,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    */
   protected void indexDocument(T person) throws JsonProcessingException {
     final String document = mapper.writeValueAsString(person);
-    elasticsearchDao.index(document, person.getPrimaryKey().toString());
+    esDao.index(document, person.getPrimaryKey().toString());
   }
 
   @Override
   public void close() throws IOException {
-    if (this.elasticsearchDao != null) {
-      this.elasticsearchDao.close();
+    if (this.esDao != null) {
+      this.esDao.close();
     }
 
     if (this.sessionFactory != null) {
