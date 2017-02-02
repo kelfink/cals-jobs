@@ -25,21 +25,33 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.JobsException;
 
+/**
+ * Guice module which constructs and manages common class instances for batch jobs.
+ * 
+ * @author CWDS API Team
+ */
 public class JobsGuiceInjector extends AbstractModule {
 
   private File esConfig;
   private String lastJobRunTimeFilename;
 
-  public JobsGuiceInjector() {}
+  /**
+   * Default constructor.
+   */
+  public JobsGuiceInjector() {
+    // Default, no-op.
+  }
 
+  /**
+   * Usual constructor.
+   * 
+   * @param esConfigFileLoc location of Elasticsearch configuration file
+   * @param lastJobRunTimeFilename location of last run file
+   */
   public JobsGuiceInjector(File esConfigFileLoc, String lastJobRunTimeFilename) {
     this.esConfig = esConfigFileLoc;
-
-    if (!StringUtils.isBlank(lastJobRunTimeFilename)) {
-      this.lastJobRunTimeFilename = lastJobRunTimeFilename;
-    } else {
-      this.lastJobRunTimeFilename = "";
-    }
+    this.lastJobRunTimeFilename =
+        !StringUtils.isBlank(lastJobRunTimeFilename) ? lastJobRunTimeFilename : "";
   }
 
   /**
@@ -49,13 +61,12 @@ public class JobsGuiceInjector extends AbstractModule {
    */
   @Override
   protected void configure() {
-
     bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
         .toInstance(new Configuration().configure("cms-hibernate.cfg.xml").buildSessionFactory());
     bind(DocumentMetadataDao.class).to(DocumentMetadataDaoImpl.class);
     bind(ClientDao.class);
 
-    // Must declare as singleton, otherwise Guice creates a new instance each time.
+    // Instantiate as a singleton, else Guice creates a new instance each time.
     bind(ObjectMapper.class).asEagerSingleton();
 
     // Required for annotation injection.
@@ -67,6 +78,11 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(CmsSystemCodeSerializer.class).asEagerSingleton();
   }
 
+  /**
+   * Produces an Elasticsearch configuration, if available.
+   * 
+   * @return ES configuration
+   */
   @Provides
   ElasticsearchDao esDao() {
     if (esConfig != null) {

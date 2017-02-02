@@ -8,8 +8,9 @@ import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+import java.util.stream.LongStream;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -37,7 +38,6 @@ import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.IPersonAware;
 import gov.ca.cwds.data.cms.ClientDao;
-import gov.ca.cwds.data.cms.IBatchBucketDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
@@ -67,6 +67,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final String CMD_LINE_BUCKET_TOTAL = "total-buckets";
   private static final String CMD_LINE_THREADS = "thread-num";
 
+  /**
+   * Definitions of batch job command line options.
+   * 
+   * @author CWDS API Team
+   */
   public static enum JobCmdLineOption {
 
     ES_CONFIG(JobOptions.makeOpt("c", CMD_LINE_ES_CONFIG, "ElasticSearch configuration file", true,
@@ -102,7 +107,28 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected final SessionFactory sessionFactory;
 
   protected JobOptions opts;
-  protected long currentBucket = 0L;
+
+  protected BulkProcessor bp;
+
+  protected BulkProcessor buildBulkProcessor() {
+    return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
+      @Override
+      public void beforeBulk(long executionId, BulkRequest request) {
+        LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
+      }
+
+      @Override
+      public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
+        LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
+      }
+
+      @Override
+      public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
+        LOGGER.error("Error executing bulk", failure);
+      }
+    }).setBulkActions(1000).build();
+  }
+
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -194,10 +220,20 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       this.threadCount = threadCount;
     }
 
+    /**
+     * Getter for location of Elasticsearch configuration file.
+     * 
+     * @return location of Elasticsearch configuration file
+     */
     public final String getEsConfigLoc() {
       return esConfigLoc;
     }
 
+    /**
+     * Getter for location of last run date/time file.
+     * 
+     * @return location of last run file
+     */
     public final String getLastRunLoc() {
       return lastRunLoc;
     }
@@ -401,6 +437,21 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     }
   }
 
+  protected void addToBatch(final Person p) {
+    try {
+      IPersonAware pers = (IPersonAware) p;
+      final Person esPerson = new Person(p.getId(), pers.getFirstName(), pers.getLastName(),
+          pers.getGender(), DomainChef.cookDate(pers.getBirthDate()), pers.getSsn(),
+          pers.getClass().getName(), mapper.writeValueAsString(p));
+
+      // Bulk indexing! MUCH faster than indexing one doc at a time.
+      bp.add(esDao.prepareIndexRequest(mapper.writeValueAsString(esPerson),
+          esPerson.getId().toString()));
+    } catch (JsonProcessingException e) {
+      throw new JobsException("JSON error", e);
+    }
+  }
+
   /**
    * Fetch all records for the next batch run, either by bucket or last successful run date.
    * 
@@ -408,25 +459,99 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @return List of results to process
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
-  protected List<T> nextResults(Date lastSuccessfulRunTime) {
-    List<T> ret = null;
-    if (this.opts != null && this.opts.lastRunMode) {
-      if (this.currentBucket == 0) {
-        ret = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
-        this.currentBucket++;
+
+  protected Date processLastRun(Date lastSuccessfulRunTime) {
+    try {
+      final Date startTime = new Date();
+      esDao.start();
+      this.bp = buildBulkProcessor();
+
+      final List<T> results = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);;
+      int recsProcessed = 0;
+      if (results != null && !results.isEmpty()) {
+        LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
+
+        // BulkProcessor is thread safe.
+        results.parallelStream().forEach((p) -> {
+          try {
+            IPersonAware pers = (IPersonAware) p;
+            final Person esPerson = new Person(p.getPrimaryKey().toString(), pers.getFirstName(),
+                pers.getLastName(), pers.getGender(), DomainChef.cookDate(pers.getBirthDate()),
+                pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(p));
+
+            // Bulk indexing! MUCH faster than indexing one doc at a time.
+            bp.add(esDao.prepareIndexRequest(mapper.writeValueAsString(esPerson),
+                esPerson.getId().toString()));
+          } catch (JsonProcessingException e) {
+            throw new JobsException("JSON error", e);
+          }
+        });
+
+        // Track counts.
+        recsProcessed += results.size();
       }
-    } else {
-      // TODO: #138163381: Enforce this interface at compile time, not at runtime.
-      IBatchBucketDao<T> bucketDao = (IBatchBucketDao<T>) jobDao;
-      this.currentBucket =
-          this.currentBucket == 0 ? this.opts.getStartBucket() : this.currentBucket + 1;
-      if (this.currentBucket <= this.opts.getEndBucket()) {
-        LOGGER.warn("pull bucket #{}", this.currentBucket);
-        ret = bucketDao.bucketList(this.currentBucket, this.opts.getTotalBuckets());
-      }
+
+      // Give it time to finish the last batch.
+      LOGGER.info("Waiting on ElasticSearch to finish last batch");
+      bp.awaitClose(30, TimeUnit.SECONDS);
+
+      // Result stats:
+      LOGGER.info(MessageFormat.format("Indexed {0} people", recsProcessed));
+      LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
+          jobDateFormat.format(startTime)));
+      return startTime;
+
+    } catch (JobsException e) {
+      LOGGER.error("JobsException: {}", e.getMessage(), e);
+      throw e;
+    } catch (Exception e) {
+      LOGGER.error("General Exception: {}", e.getMessage(), e);
+      throw new JobsException("General Exception: " + e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Process a single bucket in a batch of buckets. This method runs on thread, and therefore, all
+   * shared resources (DAO's, mappers, etc.) must be thread-safe or else you must construct or clone
+   * instances as needed.
+   * 
+   * <p>
+   * Note that both BulkProcessor are ElasticsearchDao are thread-safe.
+   * </p>
+   * 
+   * @param bucket the bucket number to process
+   * @return number of records processed in this bucket
+   */
+  protected int processBucket(long bucket) {
+    final long totalBuckets = this.opts.getTotalBuckets();
+    LOGGER.warn("pull bucket #{} of #{}", bucket, totalBuckets);
+    final List<T> results = jobDao.bucketList(bucket, totalBuckets);
+
+    int recsProcessed = 0;
+    if (results != null && !results.isEmpty()) {
+      LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
+
+      //
+      results.stream().forEach((p) -> {
+        try {
+          IPersonAware pers = (IPersonAware) p;
+          final Person esPerson = new Person(p.getPrimaryKey().toString(), pers.getFirstName(),
+              pers.getLastName(), pers.getGender(), DomainChef.cookDate(pers.getBirthDate()),
+              pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(p));
+
+          // Bulk indexing! MUCH faster than indexing one doc at a time.
+          bp.add(esDao.prepareIndexRequest(mapper.writeValueAsString(esPerson),
+              esPerson.getId().toString()));
+        } catch (JsonProcessingException e) {
+          throw new JobsException("JSON error", e);
+        }
+      });
+
+      // Track counts.
+      recsProcessed += results.size();
     }
 
-    return ret;
+    return recsProcessed;
   }
 
   /**
@@ -439,70 +564,31 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     try {
       final Date startTime = new Date();
       esDao.start();
+      this.bp = buildBulkProcessor();
 
-      final BulkProcessor bulkProcessor =
-          BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
-            @Override
-            public void beforeBulk(long executionId, BulkRequest request) {
-              LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
-            }
+      if (this.opts == null || this.opts.lastRunMode) {
+        return processLastRun(lastSuccessfulRunTime);
+      } else {
+        LOGGER.warn("availableProcessors={}", Runtime.getRuntime().availableProcessors());
+        final ForkJoinPool pool = new ForkJoinPool();
+        // final ForkJoinTask
+        pool.submit(
+            () -> LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket())
+                .parallel().forEach(p -> this.processBucket(p)))
+            .get();
 
-            @Override
-            public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-              LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
-            }
+        int recsProcessed = 0;
 
-            @Override
-            public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-              LOGGER.warn("Error executing bulk", failure);
-            }
-          }).setBulkActions(1000).build();
+        // Give it time to finish the last batch.
+        LOGGER.info("Waiting on ElasticSearch to finish last batch");
+        bp.awaitClose(30, TimeUnit.SECONDS);
 
-      LOGGER.warn("availableProcessors={}", Runtime.getRuntime().availableProcessors());
-
-      // Process each bucket or the last run date, as requested.
-      List<T> results = nextResults(lastSuccessfulRunTime);
-      int recsProcessed = 0;
-      while (results != null && !results.isEmpty()) {
-        LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
-
-        // BulkProcessor is thread safe.
-        results.parallelStream().forEach(new Consumer<T>() {
-          @Override
-          public void accept(T person) {
-            try {
-              IPersonAware pers = (IPersonAware) person;
-              final Person esPerson = new Person(person.getPrimaryKey().toString(),
-                  pers.getFirstName(), pers.getLastName(), pers.getGender(),
-                  DomainChef.cookDate(pers.getBirthDate()), pers.getSsn(),
-                  pers.getClass().getName(), mapper.writeValueAsString(person));
-
-              // Bulk indexing! MUCH faster than indexing one doc at a time.
-              bulkProcessor.add(esDao.prepareIndexRequest(mapper.writeValueAsString(esPerson),
-                  esPerson.getId().toString()));
-            } catch (JsonProcessingException e) {
-              throw new JobsException("JSON error", e);
-            }
-          }
-        });
-
-        // Track counts.
-        recsProcessed += results.size();
-
-        // Pull next bucket.
-        results = nextResults(lastSuccessfulRunTime);
+        // Result stats:
+        LOGGER.info(MessageFormat.format("Indexed {0} people", recsProcessed));
+        LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
+            jobDateFormat.format(startTime)));
+        return startTime;
       }
-
-      // Give it time to finish the last batch.
-      LOGGER.info("Waiting on ElasticSearch to finish last batch");
-      bulkProcessor.awaitClose(30, TimeUnit.SECONDS);
-
-      // Result stats:
-      LOGGER.info(MessageFormat.format("Indexed {0} people", recsProcessed));
-      LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
-          jobDateFormat.format(startTime)));
-      return startTime;
-
     } catch (JobsException e) {
       LOGGER.error("JobsException: {}", e.getMessage(), e);
       throw e;
@@ -533,10 +619,20 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     }
   }
 
+  /**
+   * Getter for this job's options.
+   * 
+   * @return this job's options
+   */
   public JobOptions getOpts() {
     return opts;
   }
 
+  /**
+   * Setter for this job's options.
+   * 
+   * @param opts this job's options
+   */
   public void setOpts(JobOptions opts) {
     this.opts = opts;
   }
