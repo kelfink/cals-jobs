@@ -571,7 +571,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       } else {
         LOGGER.warn("availableProcessors={}", Runtime.getRuntime().availableProcessors());
         final ForkJoinPool pool = new ForkJoinPool();
-        // final ForkJoinTask
         pool.submit(
             () -> LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket())
                 .parallel().forEach(p -> this.processBucket(p)))

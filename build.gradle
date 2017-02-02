@@ -80,6 +80,7 @@ publishing {
 cobertura {
 	coverageFormats = ['xml', 'html']
 	coverageIgnoreTrivial = true
+	coverageExcludes  = ['org.slf4j.Logger.*', '.*gov\\.ca\\.cwds\\.jobs\\..*BasePersonIndexer.*']
 	coverageIgnores = ['org.slf4j.Logger.*']
 	coverageReportDir = new File("$buildDir/reports/cobertura")
 }
