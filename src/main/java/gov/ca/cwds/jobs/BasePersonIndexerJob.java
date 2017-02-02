@@ -8,8 +8,8 @@ import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 
 import org.apache.commons.cli.CommandLine;
@@ -72,22 +72,32 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * 
    * @author CWDS API Team
    */
-  public static enum JobCmdLineOption {
+  public enum JobCmdLineOption {
 
-    ES_CONFIG(JobOptions.makeOpt("c", CMD_LINE_ES_CONFIG, "ElasticSearch configuration file", true,
-        1, String.class, ',')),
+    /**
+     * ElasticSearch configuration file.
+     */
+    ES_CONFIG(JobOptions.makeOpt("c", CMD_LINE_ES_CONFIG, "ElasticSearch configuration file", true, 1, String.class, ',')),
 
-    LAST_RUN_FILE(JobOptions.makeOpt("l", CMD_LINE_LAST_RUN,
-        "last run date file (yyyy-MM-dd HH:mm:ss)", false, 1, String.class, ',')),
+    /**
+     * last run date file (yyyy-MM-dd HH:mm:ss)
+     */
+    LAST_RUN_FILE(JobOptions.makeOpt("l", CMD_LINE_LAST_RUN, "last run date file (yyyy-MM-dd HH:mm:ss)", false, 1, String.class, ',')),
 
-    BUCKET_RANGE(JobOptions.makeOpt("r", CMD_LINE_BUCKET_RANGE, "bucket range (-r 20-24)", false, 2,
-        Integer.class, '-')),
+    /**
+     * bucket range (-r 20-24).
+     */
+    BUCKET_RANGE(JobOptions.makeOpt("r", CMD_LINE_BUCKET_RANGE, "bucket range (-r 20-24)", false, 2, Integer.class, '-')),
 
-    BUCKET_TOTAL(JobOptions.makeOpt("b", CMD_LINE_BUCKET_TOTAL, "total buckets", false, 1,
-        Integer.class, ',')),
+    /**
+     * total buckets.
+     */
+    BUCKET_TOTAL(JobOptions.makeOpt("b", CMD_LINE_BUCKET_TOTAL, "total buckets", false, 1, Integer.class, ',')),
 
-    THREADS(
-        JobOptions.makeOpt("t", CMD_LINE_THREADS, "# of threads", false, 1, Integer.class, ','));
+    /**
+     * Number of threads (optional).
+     */
+    THREADS(JobOptions.makeOpt("t", CMD_LINE_THREADS, "# of threads", false, 1, Integer.class, ','));
 
     private final Option opt;
 
@@ -95,6 +105,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       this.opt = opt;
     }
 
+    /**
+     * Getter for the type's command line option definition.
+     * 
+     * @return command line option definition
+     */
     public final Option getOpt() {
       return opt;
     }
@@ -107,28 +122,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected final SessionFactory sessionFactory;
 
   protected JobOptions opts;
-
   protected BulkProcessor bp;
-
-  protected BulkProcessor buildBulkProcessor() {
-    return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
-      @Override
-      public void beforeBulk(long executionId, BulkRequest request) {
-        LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
-      }
-
-      @Override
-      public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-        LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
-      }
-
-      @Override
-      public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-        LOGGER.error("Error executing bulk", failure);
-      }
-    }).setBulkActions(1000).build();
-  }
-
+  protected AtomicInteger recsProcessed = new AtomicInteger(0);
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -148,6 +143,30 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     this.esDao = elasticsearchDao;
     this.mapper = mapper;
     this.sessionFactory = sessionFactory;
+  }
+
+  /**
+   * Instantiate one Elasticsearch BulkProcessor for this batch run.
+   * 
+   * @return Elasticsearch BulkProcessor
+   */
+  protected BulkProcessor buildBulkProcessor() {
+    return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
+      @Override
+      public void beforeBulk(long executionId, BulkRequest request) {
+        LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
+      }
+
+      @Override
+      public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
+        LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
+      }
+
+      @Override
+      public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
+        LOGGER.error("Error executing bulk", failure);
+      }
+    }).setBulkActions(1000).build();
   }
 
   /**
@@ -238,22 +257,47 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       return lastRunLoc;
     }
 
+    /**
+     * Getter for last run mode.
+     * 
+     * @return last run mode
+     */
     public final boolean isLastRunMode() {
       return lastRunMode;
     }
 
+    /**
+     * Getter for starting bucket.
+     * 
+     * @return starting bucket
+     */
     public final long getStartBucket() {
       return startBucket;
     }
 
+    /**
+     * Getter for last bucket.
+     * 
+     * @return last bucket
+     */
     public final long getEndBucket() {
       return endBucket;
     }
 
+    /**
+     * Getter for total buckets.
+     * 
+     * @return total buckets
+     */
     public final long getTotalBuckets() {
       return totalBuckets;
     }
 
+    /**
+     * Getter for thread count.
+     * 
+     * @return thread count
+     */
     public final long getThreadCount() {
       return threadCount;
     }
@@ -437,21 +481,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     }
   }
 
-  protected void addToBatch(final Person p) {
-    try {
-      IPersonAware pers = (IPersonAware) p;
-      final Person esPerson = new Person(p.getId(), pers.getFirstName(), pers.getLastName(),
-          pers.getGender(), DomainChef.cookDate(pers.getBirthDate()), pers.getSsn(),
-          pers.getClass().getName(), mapper.writeValueAsString(p));
-
-      // Bulk indexing! MUCH faster than indexing one doc at a time.
-      bp.add(esDao.prepareIndexRequest(mapper.writeValueAsString(esPerson),
-          esPerson.getId().toString()));
-    } catch (JsonProcessingException e) {
-      throw new JobsException("JSON error", e);
-    }
-  }
-
   /**
    * Fetch all records for the next batch run, either by bucket or last successful run date.
    * 
@@ -459,19 +488,17 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @return List of results to process
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
-
   protected Date processLastRun(Date lastSuccessfulRunTime) {
     try {
       final Date startTime = new Date();
       esDao.start();
       this.bp = buildBulkProcessor();
 
-      final List<T> results = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);;
-      int recsProcessed = 0;
+      final List<T> results = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       if (results != null && !results.isEmpty()) {
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
 
-        // BulkProcessor is thread safe.
+        // BulkProcessor is thread-safe.
         results.parallelStream().forEach((p) -> {
           try {
             IPersonAware pers = (IPersonAware) p;
@@ -488,7 +515,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         });
 
         // Track counts.
-        recsProcessed += results.size();
+        recsProcessed.getAndAdd(results.size());
       }
 
       // Give it time to finish the last batch.
@@ -527,11 +554,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     LOGGER.warn("pull bucket #{} of #{}", bucket, totalBuckets);
     final List<T> results = jobDao.bucketList(bucket, totalBuckets);
 
-    int recsProcessed = 0;
     if (results != null && !results.isEmpty()) {
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
 
-      //
       results.stream().forEach((p) -> {
         try {
           IPersonAware pers = (IPersonAware) p;
@@ -548,10 +573,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       });
 
       // Track counts.
-      recsProcessed += results.size();
+      recsProcessed.getAndAdd(results.size());
     }
 
-    return recsProcessed;
+    return recsProcessed.get();
   }
 
   /**
@@ -567,16 +592,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       this.bp = buildBulkProcessor();
 
       if (this.opts == null || this.opts.lastRunMode) {
+        LOGGER.warn("LAST RUN MODE!");
         return processLastRun(lastSuccessfulRunTime);
       } else {
+        LOGGER.warn("BUCKET MODE!");
         LOGGER.warn("availableProcessors={}", Runtime.getRuntime().availableProcessors());
-        final ForkJoinPool pool = new ForkJoinPool();
-        pool.submit(
-            () -> LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket())
-                .parallel().forEach(p -> this.processBucket(p)))
-            .get();
 
-        int recsProcessed = 0;
+        LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).parallel()
+            .forEach(b -> this.processBucket(b));
 
         // Give it time to finish the last batch.
         LOGGER.info("Waiting on ElasticSearch to finish last batch");
