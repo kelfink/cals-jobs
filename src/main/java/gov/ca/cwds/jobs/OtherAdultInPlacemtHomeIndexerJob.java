@@ -14,7 +14,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
 /**
- * Job to load OtherAdultInPlacemtHome from CMS into ElasticSearch.
+ * Job to load Other Adult In Placement Home from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */
@@ -46,7 +46,7 @@ public class OtherAdultInPlacemtHomeIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Run OtherAdultInPlacemtHome indexer job");
+    LOGGER.info("Run Other Adult In Placement Home indexer job");
     try {
       runJob(OtherAdultInPlacemtHomeIndexerJob.class, args);
     } catch (JobsException e) {

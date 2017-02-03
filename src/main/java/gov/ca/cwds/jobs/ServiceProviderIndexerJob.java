@@ -44,7 +44,7 @@ public class ServiceProviderIndexerJob extends BasePersonIndexerJob<ServiceProvi
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Run ServiceProvider indexer job");
+    LOGGER.info("Run Service Provider indexer job");
     try {
       runJob(ServiceProviderIndexerJob.class, args);
     } catch (JobsException e) {
