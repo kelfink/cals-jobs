@@ -22,6 +22,7 @@ import gov.ca.cwds.data.cms.CollateralIndividualDao;
 import gov.ca.cwds.data.cms.EducationProviderContactDao;
 import gov.ca.cwds.data.cms.OtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.cms.OtherChildInPlacemtHomeDao;
+import gov.ca.cwds.data.cms.OtherClientNameDao;
 import gov.ca.cwds.data.cms.ReporterDao;
 import gov.ca.cwds.data.cms.ServiceProviderDao;
 import gov.ca.cwds.data.persistence.cms.CmsSystemCodeCacheService;
@@ -78,6 +79,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(CollateralIndividualDao.class);
     bind(OtherAdultInPlacemtHomeDao.class);
     bind(OtherChildInPlacemtHomeDao.class);
+    bind(OtherClientNameDao.class);
     bind(ServiceProviderDao.class);
     bind(EducationProviderContactDao.class);
 
