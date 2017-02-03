@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -48,9 +47,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<Client> {
     LOGGER.info("Run Client indexer job");
     try {
       runJob(ClientIndexerJob.class, args);
-    } catch (ParseException e) {
-      LOGGER.error(e);
-      throw new JobsException("STOPPING BATCH", e);
+    } catch (JobsException e) {
+      LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
+      throw e;
     }
   }
 

@@ -16,7 +16,10 @@ import gov.ca.cwds.dao.cms.DocumentMetadataDaoImpl;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
+import gov.ca.cwds.data.cms.AttorneyDao;
 import gov.ca.cwds.data.cms.ClientDao;
+import gov.ca.cwds.data.cms.CollateralIndividualDao;
+import gov.ca.cwds.data.cms.ReporterDao;
 import gov.ca.cwds.data.persistence.cms.CmsSystemCodeCacheService;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeDao;
@@ -63,8 +66,12 @@ public class JobsGuiceInjector extends AbstractModule {
   protected void configure() {
     bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
         .toInstance(new Configuration().configure("cms-hibernate.cfg.xml").buildSessionFactory());
+
     bind(DocumentMetadataDao.class).to(DocumentMetadataDaoImpl.class);
     bind(ClientDao.class);
+    bind(ReporterDao.class);
+    bind(AttorneyDao.class);
+    bind(CollateralIndividualDao.class);
 
     // Instantiate as a singleton, else Guice creates a new instance each time.
     bind(ObjectMapper.class).asEagerSingleton();

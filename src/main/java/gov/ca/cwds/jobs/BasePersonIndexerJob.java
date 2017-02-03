@@ -374,9 +374,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
      * 
      * @param args command line to parse
      * @return JobOptions defining this job
-     * @throws ParseException if unable to parse command line
+     * @throws JobsException if unable to parse command line
      */
-    public static JobOptions parseCommandLine(String[] args) throws ParseException {
+    public static JobOptions parseCommandLine(String[] args) throws JobsException {
       String esConfigLoc = null;
       String lastRunLoc = null;
       boolean lastRunMode = false;
@@ -428,7 +428,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       } catch (ParseException e) {
         printUsage();
         LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
-        throw e;
+        throw new JobsException("Error parsing command line: " + e.getMessage(), e);
       }
 
       return new JobOptions(esConfigLoc, lastRunLoc, lastRunMode, startBucket, endBucket,
@@ -466,18 +466,23 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @param klass batch job class
    * @param args command line arguments
    * @param <T> Person persistence type
-   * @throws ParseException if unable to parse command line
+   * @throws JobsException unexpected runtime error
    */
   public static <T extends BasePersonIndexerJob<?>> void runJob(final Class<T> klass,
-      String... args) throws ParseException {
+      String... args) throws JobsException {
 
     // Close resources automatically.
     try (final T job = newJob(klass, args)) {
       job.run();
-    } catch (JobsException e) {
-      LOGGER.error("Unable to complete job: {}", e.getMessage(), e);
+    } catch (ParseException e) {
+      LOGGER.error("Unable to parse command line: {}", e.getMessage(), e);
+      throw new JobsException("Unable to parse command line: " + e.getMessage(), e);
     } catch (IOException e) {
       LOGGER.error("Unable to close resource: {}", e.getMessage(), e);
+      throw new JobsException("Unable to close resource: " + e.getMessage(), e);
+    } catch (JobsException e) {
+      LOGGER.error("Unable to complete job: {}", e.getMessage(), e);
+      throw e;
     }
   }
 

@@ -1,119 +1,56 @@
 package gov.ca.cwds.jobs;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.Date;
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
+import com.google.inject.Inject;
 
-import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
 import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.cms.ReporterDao;
 import gov.ca.cwds.data.persistence.cms.Reporter;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
-import gov.ca.cwds.rest.api.domain.es.Person;
+import gov.ca.cwds.jobs.inject.LastRunFile;
 
 /**
  * Job to load reporters from CMS into ElasticSearch
  * 
  * @author CWDS API Team
  */
-public class ReporterIndexerJob extends JobBasedOnLastSuccessfulRunTime {
+public class ReporterIndexerJob extends BasePersonIndexerJob<Reporter> {
 
   private static final Logger LOGGER = LogManager.getLogger(ReporterIndexerJob.class);
 
-  private static ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
-  private static ObjectMapper MAPPER = new ObjectMapper();
-
-  private ReporterDao reporterDao;
-  private ElasticsearchDao elasticsearchDao;
-
-  public ReporterIndexerJob(ReporterDao reporterDao, ElasticsearchDao elasticsearchDao,
-      String lastJobRunTimeFilename) {
-    super(lastJobRunTimeFilename);
-    this.reporterDao = reporterDao;
-    this.elasticsearchDao = elasticsearchDao;
-  }
-
-  public static void main(String... args) throws Exception {
-    if (args.length != 2) {
-      throw new JobsException(
-          "Usage: java gov.ca.cwds.jobs.ReporterIndexerJob esconfigFileLocation lastJobRunTimeFilename");
-    }
-
-    final Injector injector = Guice.createInjector(new JobsGuiceInjector());
-    SessionFactory sessionFactory =
-        injector.getInstance(Key.get(SessionFactory.class, CmsSessionFactory.class));
-
-    ReporterDao reporterDao = new ReporterDao(sessionFactory);
-
-    File file = new File(args[0]);
-    ElasticsearchConfiguration configuration =
-        YAML_MAPPER.readValue(file, ElasticsearchConfiguration.class);
-    ElasticsearchDao elasticsearchDao = new ElasticsearchDao(configuration);
-
-    ReporterIndexerJob job = new ReporterIndexerJob(reporterDao, elasticsearchDao, args[1]);
-    try {
-      job.run();
-    } catch (JobsException e) {
-      LOGGER.error("Unable to complete job", e);
-    } finally {
-      sessionFactory.close();
-    }
+  /**
+   * Construct batch job instance with all required dependencies.
+   * 
+   * @param reporterDao Client DAO
+   * @param elasticsearchDao ElasticSearch DAO
+   * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
+   * @param mapper Jackson ObjectMapper
+   * @param sessionFactory Hibernate session factory
+   */
+  @Inject
+  public ReporterIndexerJob(final ReporterDao reporterDao, final ElasticsearchDao elasticsearchDao,
+      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory) {
+    super(reporterDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   /**
-   * {@inheritDoc}
+   * Batch job entry point.
    * 
-   * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
+   * @param args command line arguments
    */
-  @Override
-  public Date _run(Date lastSuccessfulRunTime) {
+  public static void main(String... args) {
+    LOGGER.info("Run Reporter indexer job");
     try {
-      elasticsearchDao.start();
-      List<Reporter> results = reporterDao.findAllUpdatedAfter(lastSuccessfulRunTime);
-      LOGGER.info(MessageFormat.format("Found {0} reporters to index", results.size()));
-      Date currentTime = new Date();
-      for (Reporter reporter : results) {
-        Person esPerson = new Person(reporter.getPrimaryKey(), reporter.getFirstName(),
-            reporter.getLastName(), "", // Gender
-            "", // DOB
-            "", // SSN
-            reporter.getClass().getName(), MAPPER.writeValueAsString(reporter));
-        indexDocument(esPerson);
-      }
-      LOGGER.info(MessageFormat.format("Indexed {0} people", results.size()));
-      LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
-          jobDateFormat.format(currentTime)));
-      return currentTime;
-    } catch (IOException e) {
-      throw new JobsException("Could not parse configuration file", e);
-    } catch (Exception e) {
-      throw new JobsException(e);
-    } finally {
-      try {
-        elasticsearchDao.stop();
-      } catch (Exception e) {
-        LOGGER.error(e);
-      }
+      runJob(ReporterIndexerJob.class, args);
+    } catch (JobsException e) {
+      LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
+      throw e;
     }
-  }
-
-  private void indexDocument(Person person) throws JsonProcessingException {
-    String document = MAPPER.writeValueAsString(person);
-    elasticsearchDao.index(document, person.getId().toString());
   }
 
 }
