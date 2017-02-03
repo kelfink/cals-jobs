@@ -19,7 +19,9 @@ import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.AttorneyDao;
 import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.cms.CollateralIndividualDao;
+import gov.ca.cwds.data.cms.OtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.cms.ReporterDao;
+import gov.ca.cwds.data.cms.ServiceProviderDao;
 import gov.ca.cwds.data.persistence.cms.CmsSystemCodeCacheService;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeDao;
@@ -72,6 +74,8 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ReporterDao.class);
     bind(AttorneyDao.class);
     bind(CollateralIndividualDao.class);
+    bind(OtherAdultInPlacemtHomeDao.class);
+    bind(ServiceProviderDao.class);
 
     // Instantiate as a singleton, else Guice creates a new instance each time.
     bind(ObjectMapper.class).asEagerSingleton();
@@ -105,6 +109,11 @@ public class JobsGuiceInjector extends AbstractModule {
     return null;
   }
 
+  /**
+   * Provides Hibernate session factory for PostgreSQL.
+   * 
+   * @return PostgreSQL Hibernate session factory
+   */
   @Provides
   @NsSessionFactory
   SessionFactory nsSessionFactory() {
