@@ -1,5 +1,3 @@
-elasticsearch.host: 127.0.0.1
+elasticsearch.host: es.dev.cwds.tabordasolutions.net
 elasticsearch.port: 9300
-elasticsearch.cluster: elasticsearch_CWS-NS3
-elasticsearch.indexName: people
-elasticsearch.indexType: person
+elasticsearch.cluster: elasticsearch

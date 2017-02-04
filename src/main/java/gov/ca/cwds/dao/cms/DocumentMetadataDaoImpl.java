@@ -17,8 +17,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import gov.ca.cwds.dao.DaoException;
 import gov.ca.cwds.dao.DocumentMetadataDao;
+import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.model.cms.DocumentMetadata;
 import gov.ca.cwds.inject.CmsSessionFactory;
 

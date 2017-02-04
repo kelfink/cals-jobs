@@ -34,10 +34,10 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.IPersonAware;
 import gov.ca.cwds.data.cms.ClientDao;
+import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
@@ -60,6 +60,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     extends JobBasedOnLastSuccessfulRunTime implements AutoCloseable {
 
   private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
+
+  private static final String INDEX_PERSON = "person";
+  private static final String DOCUMENT_TYPE_PERSON = "people";
 
   private static final String CMD_LINE_ES_CONFIG = "config";
   private static final String CMD_LINE_LAST_RUN = "last-run-file";
@@ -496,7 +499,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected Date processLastRun(Date lastSuccessfulRunTime) {
     try {
       final Date startTime = new Date();
-      esDao.start();
       this.bp = buildBulkProcessor();
 
       final List<T> results = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
@@ -512,8 +514,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
                 pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(p));
 
             // Bulk indexing! MUCH faster than indexing one doc at a time.
-            bp.add(esDao.prepareIndexRequest(mapper.writeValueAsString(esPerson),
-                esPerson.getId().toString()));
+            bp.add(
+                esDao.prepareIndexRequest(mapper.writeValueAsString(esPerson), esPerson.getId()));
           } catch (JsonProcessingException e) {
             throw new JobsException("JSON error", e);
           }
@@ -570,8 +572,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
               pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(p));
 
           // Bulk indexing! MUCH faster than indexing one doc at a time.
-          bp.add(esDao.prepareIndexRequest(mapper.writeValueAsString(esPerson),
-              esPerson.getId().toString()));
+          bp.add(esDao.prepareIndexRequest(mapper.writeValueAsString(esPerson), esPerson.getId()));
         } catch (JsonProcessingException e) {
           throw new JobsException("JSON error", e);
         }
@@ -593,7 +594,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   public Date _run(Date lastSuccessfulRunTime) {
     try {
       final Date startTime = new Date();
-      esDao.start();
       this.bp = buildBulkProcessor();
 
       if (this.opts == null || this.opts.lastRunMode) {
@@ -632,7 +632,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @throws JsonProcessingException if JSON cannot be read
    */
   protected void indexDocument(T person) throws JsonProcessingException {
-    esDao.index(mapper.writeValueAsString(person), person.getPrimaryKey().toString());
+    esDao.index(INDEX_PERSON, DOCUMENT_TYPE_PERSON, mapper.writeValueAsString(person),
+        person.getPrimaryKey().toString());
   }
 
   @Override

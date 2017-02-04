@@ -1,8 +1,15 @@
 package gov.ca.cwds.jobs.inject;
 
 import java.io.File;
+import java.net.InetAddress;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -13,8 +20,6 @@ import com.google.inject.Provides;
 
 import gov.ca.cwds.dao.DocumentMetadataDao;
 import gov.ca.cwds.dao.cms.DocumentMetadataDaoImpl;
-import gov.ca.cwds.dao.elasticsearch.ElasticsearchConfiguration;
-import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.AttorneyDao;
 import gov.ca.cwds.data.cms.ClientDao;
@@ -25,13 +30,15 @@ import gov.ca.cwds.data.cms.OtherChildInPlacemtHomeDao;
 import gov.ca.cwds.data.cms.OtherClientNameDao;
 import gov.ca.cwds.data.cms.ReporterDao;
 import gov.ca.cwds.data.cms.ServiceProviderDao;
+import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.CmsSystemCodeCacheService;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeDao;
 import gov.ca.cwds.data.persistence.cms.SystemCodeDaoFileImpl;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
-import gov.ca.cwds.jobs.JobsException;
+import gov.ca.cwds.rest.ElasticsearchConfiguration;
+import gov.ca.cwds.rest.api.ApiException;
 
 /**
  * Guice module which constructs and manages common class instances for batch jobs.
@@ -39,6 +46,7 @@ import gov.ca.cwds.jobs.JobsException;
  * @author CWDS API Team
  */
 public class JobsGuiceInjector extends AbstractModule {
+  private static final Logger LOGGER = LogManager.getLogger(JobsGuiceInjector.class);
 
   private File esConfig;
   private String lastJobRunTimeFilename;
@@ -82,6 +90,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(OtherClientNameDao.class);
     bind(ServiceProviderDao.class);
     bind(EducationProviderContactDao.class);
+    bind(ElasticsearchDao.class);
 
     // Instantiate as a singleton, else Guice creates a new instance each time.
     bind(ObjectMapper.class).asEagerSingleton();
@@ -95,24 +104,25 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(CmsSystemCodeSerializer.class).asEagerSingleton();
   }
 
-  /**
-   * Produces an Elasticsearch configuration, if available.
-   * 
-   * @return ES configuration
-   */
   @Provides
-  ElasticsearchDao esDao() {
+  public Client elasticsearchClient() {
+
+    Client client = null;
     if (esConfig != null) {
       try {
-        final ElasticsearchConfiguration configuration = new ObjectMapper(new YAMLFactory())
+        final ElasticsearchConfiguration config = new ObjectMapper(new YAMLFactory())
             .readValue(esConfig, ElasticsearchConfiguration.class);
-        return new ElasticsearchDao(configuration);
+        Settings settings = Settings.settingsBuilder()
+            .put("cluster.name", config.getElasticsearchCluster()).build();
+        client = TransportClient.builder().settings(settings).build().addTransportAddress(
+            new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
+                Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {
-        throw new JobsException(e);
+        LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
+        throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
       }
     }
-
-    return null;
+    return client;
   }
 
   /**

@@ -5,6 +5,7 @@ package gov.ca.cwds.jobs;
  * 
  * @author CWDS API Team
  */
+@FunctionalInterface
 public interface Job {
 
   /**

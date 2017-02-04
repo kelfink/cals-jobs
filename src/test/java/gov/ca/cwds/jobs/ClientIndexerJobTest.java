@@ -8,8 +8,8 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.cms.ClientDao;
+import gov.ca.cwds.data.es.ElasticsearchDao;
 
 public class ClientIndexerJobTest {
 

@@ -17,7 +17,6 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
 
-  @SuppressWarnings("unused")
   private static final Logger LOGGER = LogManager.getLogger(JobBasedOnLastSuccessfulRunTime.class);
 
   protected DateFormat jobDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

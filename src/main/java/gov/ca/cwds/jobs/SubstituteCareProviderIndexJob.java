@@ -7,8 +7,8 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.dao.elasticsearch.ElasticsearchDao;
 import gov.ca.cwds.data.cms.SubstituteCareProviderDao;
+import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.SubstituteCareProvider;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
@@ -35,7 +35,8 @@ public class SubstituteCareProviderIndexJob extends BasePersonIndexerJob<Substit
   public SubstituteCareProviderIndexJob(final SubstituteCareProviderDao substituteCareProviderDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(substituteCareProviderDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    super(substituteCareProviderDao, elasticsearchDao, lastJobRunTimeFilename, mapper,
+        sessionFactory);
   }
 
   /**
