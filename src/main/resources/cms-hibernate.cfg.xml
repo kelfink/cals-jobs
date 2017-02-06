@@ -23,7 +23,7 @@
 		<mapping class="gov.ca.cwds.data.persistence.cms.SubstituteCareProvider" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.OtherAdultInPlacemtHome" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.CollateralIndividual" />
-		<mappint class="gov.ca.cwds.data.persistence.cms.ClientCollateral" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.ClientCollateral" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.EducationProviderContact" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.OtherChildInPlacemtHome" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.EducationProviderContact" />
