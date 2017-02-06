@@ -125,7 +125,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected final SessionFactory sessionFactory;
 
   protected JobOptions opts;
-  protected BulkProcessor bp;
+  // protected BulkProcessor bp;
   protected AtomicInteger recsProcessed = new AtomicInteger(0);
 
   /**
@@ -499,7 +499,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected Date processLastRun(Date lastSuccessfulRunTime) {
     try {
       final Date startTime = new Date();
-      this.bp = buildBulkProcessor();
+      final BulkProcessor bp = buildBulkProcessor();
 
       final List<T> results = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
       if (results != null && !results.isEmpty()) {
@@ -564,6 +564,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     if (results != null && !results.isEmpty()) {
       LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
 
+      final BulkProcessor bp = buildBulkProcessor();
       results.stream().forEach((p) -> {
         try {
           IPersonAware pers = (IPersonAware) p;
@@ -577,6 +578,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
           throw new JobsException("JSON error", e);
         }
       });
+
+      try {
+        bp.awaitClose(30, TimeUnit.SECONDS);
+      } catch (InterruptedException e2) {
+        throw new JobsException("ES bulk processor interrupted!", e2);
+      }
 
       // Track counts.
       recsProcessed.getAndAdd(results.size());
@@ -594,7 +601,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   public Date _run(Date lastSuccessfulRunTime) {
     try {
       final Date startTime = new Date();
-      this.bp = buildBulkProcessor();
+      // this.bp = buildBulkProcessor();
 
       if (this.opts == null || this.opts.lastRunMode) {
         LOGGER.warn("LAST RUN MODE!");
@@ -608,7 +615,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
         // Give it time to finish the last batch.
         LOGGER.info("Waiting on ElasticSearch to finish last batch");
-        bp.awaitClose(30, TimeUnit.SECONDS);
+        // bp.awaitClose(30, TimeUnit.SECONDS);
 
         // Result stats:
         LOGGER.info(MessageFormat.format("Indexed {0} people", recsProcessed));
