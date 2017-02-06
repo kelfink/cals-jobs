@@ -40,11 +40,18 @@ import gov.ca.cwds.data.persistence.cms.CmsDocumentBlobSegment;
 import gov.ca.cwds.data.persistence.cms.CmsSystemCodeCacheService;
 import gov.ca.cwds.data.persistence.cms.CollateralIndividual;
 import gov.ca.cwds.data.persistence.cms.CrossReport;
+import gov.ca.cwds.data.persistence.cms.EducationProviderContact;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeDao;
+import gov.ca.cwds.data.persistence.cms.OtherAdultInPlacemtHome;
+import gov.ca.cwds.data.persistence.cms.OtherChildInPlacemtHome;
+import gov.ca.cwds.data.persistence.cms.OtherClientName;
 import gov.ca.cwds.data.persistence.cms.Referral;
 import gov.ca.cwds.data.persistence.cms.ReferralClient;
 import gov.ca.cwds.data.persistence.cms.Reporter;
+import gov.ca.cwds.data.persistence.cms.ServiceProvider;
+import gov.ca.cwds.data.persistence.cms.StaffPerson;
+import gov.ca.cwds.data.persistence.cms.SubstituteCareProvider;
 import gov.ca.cwds.data.persistence.cms.SystemCodeDaoFileImpl;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
@@ -94,15 +101,13 @@ public class JobsGuiceInjector extends AbstractModule {
             .addAnnotatedClass(ClientCollateral.class).addAnnotatedClass(CmsDocReferralClient.class)
             .addAnnotatedClass(CmsDocument.class).addAnnotatedClass(CmsDocumentBlobSegment.class)
             .addAnnotatedClass(CollateralIndividual.class).addAnnotatedClass(CrossReport.class)
-            // .addAnnotatedClass(EducationProviderContact.class)
-            // .addAnnotatedClass(OtherAdultInPlacemtHome.class)
-            // .addAnnotatedClass(OtherChildInPlacemtHome.class)
-            // .addAnnotatedClass(OtherClientName.class)
-            .addAnnotatedClass(Referral.class).addAnnotatedClass(ReferralClient.class)
-            .addAnnotatedClass(Reporter.class)
-            // .addAnnotatedClass(ServiceProvider.class).addAnnotatedClass(StaffPerson.class)
-            // .addAnnotatedClass(SubstituteCareProvider.class)
-            .buildSessionFactory());
+            .addAnnotatedClass(EducationProviderContact.class)
+            .addAnnotatedClass(OtherAdultInPlacemtHome.class)
+            .addAnnotatedClass(OtherChildInPlacemtHome.class)
+            .addAnnotatedClass(OtherClientName.class).addAnnotatedClass(Referral.class)
+            .addAnnotatedClass(ReferralClient.class).addAnnotatedClass(Reporter.class)
+            .addAnnotatedClass(ServiceProvider.class).addAnnotatedClass(StaffPerson.class)
+            .addAnnotatedClass(SubstituteCareProvider.class).buildSessionFactory());
 
     bind(DocumentMetadataDao.class).to(DocumentMetadataDaoImpl.class);
     bind(ClientDao.class);

@@ -119,13 +119,34 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   }
 
+  /**
+   * Jackson ObjectMapper.
+   */
   protected final ObjectMapper mapper;
+
+  /**
+   * Main DAO for the supported persistence class.
+   */
   protected final BaseDaoImpl<T> jobDao;
+
+  /**
+   * Elasticsearch client DAO.
+   */
   protected final ElasticsearchDao esDao;
+
+  /**
+   * Hibernate session factory.
+   */
   protected final SessionFactory sessionFactory;
 
+  /**
+   * Command line options for this job.
+   */
   protected JobOptions opts;
-  // protected BulkProcessor bp;
+
+  /**
+   * Thread-safe count across all worker threads.
+   */
   protected AtomicInteger recsProcessed = new AtomicInteger(0);
 
   /**
@@ -601,7 +622,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   public Date _run(Date lastSuccessfulRunTime) {
     try {
       final Date startTime = new Date();
-      // this.bp = buildBulkProcessor();
 
       if (this.opts == null || this.opts.lastRunMode) {
         LOGGER.warn("LAST RUN MODE!");
@@ -615,7 +635,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
         // Give it time to finish the last batch.
         LOGGER.info("Waiting on ElasticSearch to finish last batch");
-        // bp.awaitClose(30, TimeUnit.SECONDS);
 
         // Result stats:
         LOGGER.info(MessageFormat.format("Indexed {0} people", recsProcessed));
