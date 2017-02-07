@@ -84,14 +84,10 @@ public class ServiceProviderIndexerJobTest {
   }
 
   @Test
-  public void testFindAllByBucket() throws Exception {
+  public void testFindAllByBucketNamedQueryExist() throws Exception {
     Query query =
         session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ServiceProvider.findAllByBucket");
     assertThat(query, is(notNullValue()));
   }
-}>>>>>>>#138160209-Search:
+}
 
-Identify Person-
-Filter out
-Sealed and
-Sensitive clients
