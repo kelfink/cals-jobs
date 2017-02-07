@@ -1,0 +1,41 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<!-- NOTE: Connect to Taborda VPN to run integration tests (test package 
+	gov.ca.cwds.rest.jbdi.cms). -->
+<hibernate-configuration>
+	<session-factory>
+		<property name="hibernate.current_session_context_class">thread</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.DB2Dialect</property>
+		<property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
+		<property name="hibernate.connection.driver_class">com.ibm.db2.jcc.DB2Driver</property>
+		<property name="hibernate.connection.username">db2inst1</property>
+		<property name="hibernate.connection.password">jyN3Ec3DRHmk</property>
+		<property name="hibernate.connection.url">jdbc:db2://legacy.db.jenkins.cwds.tabordasolutions.net:50000/DB0TDEV</property>
+		<property name="hibernate.default_schema">CWSINT</property>
+		<property name="connection_pool_size">10</property>
+		<property name="show_sql">true</property>
+
+		<mapping class="gov.ca.cwds.data.persistence.cms.Allegation" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.StaffPerson" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.ReferralClient" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.Referral" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.Reporter" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.Client" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.OtherClientName" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.Attorney" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.ServiceProvider" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.OtherAdultInPlacemtHome" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.SubstituteCareProvider" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.OtherChildInPlacemtHome" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.CollateralIndividual" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.ClientCollateral" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.EducationProviderContact" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.CrossReport" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.CmsDocument" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.CmsDocReferralClient" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.CmsDocumentBlobSegment"/>
+		
+	</session-factory>
+</hibernate-configuration>

@@ -1,8 +1,8 @@
 package gov.ca.cwds.jobs;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.ca.cwds.data.cms.ServiceProviderDao;
+import gov.ca.cwds.data.cms.OtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
@@ -24,17 +24,16 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
  *
  */
 @SuppressWarnings("javadoc")
-public class ServiceProviderIndexerJobTest {
-
+public class OtherAdultInPlacementHomeTest {
   @SuppressWarnings("unused")
-  private static ServiceProviderDao serviceProviderDao;
+  private static OtherAdultInPlacemtHomeDao otherAdultInPlacementHomeDao;
   private static SessionFactory sessionFactory;
   private Session session;
 
   @BeforeClass
   public static void beforeClass() {
     sessionFactory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
-    serviceProviderDao = new ServiceProviderDao(sessionFactory);
+    otherAdultInPlacementHomeDao = new OtherAdultInPlacemtHomeDao(sessionFactory);
   }
 
   @AfterClass
@@ -55,43 +54,41 @@ public class ServiceProviderIndexerJobTest {
 
   @Test
   public void testType() throws Exception {
-    assertThat(ServiceProviderIndexerJob.class, notNullValue());
+    assertThat(OtherAdultInPlacemtHomeIndexerJob.class, notNullValue());
   }
 
   @Test
   public void testInstantiation() throws Exception {
-    ServiceProviderDao serviceProviderDao = null;
+    OtherAdultInPlacemtHomeDao otherAdultInPlacementHomeDao = null;
     ElasticsearchDao elasticsearchDao = null;
     String lastJobRunTimeFilename = null;
     ObjectMapper mapper = null;
     SessionFactory sessionFactory = null;
-    ServiceProviderIndexerJob target = new ServiceProviderIndexerJob(serviceProviderDao,
-        elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    OtherAdultInPlacemtHomeIndexerJob target =
+        new OtherAdultInPlacemtHomeIndexerJob(otherAdultInPlacementHomeDao, elasticsearchDao,
+            lastJobRunTimeFilename, mapper, sessionFactory);
     assertThat(target, notNullValue());
   }
 
   @Test
-  public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-    Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.cms.ServiceProvider.findAllUpdatedAfter");
-    assertThat(query, is(notNullValue()));
-  }
-
-  @Test
-  public void testFindAllNamedQueryExist() throws Exception {
-    Query query = session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ServiceProvider.findAll");
-    assertThat(query, is(notNullValue()));
-  }
-
-  @Test
-  public void testFindAllByBucket() throws Exception {
+  public void testfindAllNamedQueryExists() throws Exception {
     Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ServiceProvider.findAllByBucket");
+        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.OtherAdultInPlacemtHome.findAll");
     assertThat(query, is(notNullValue()));
   }
-}>>>>>>>#138160209-Search:
 
-Identify Person-
-Filter out
-Sealed and
-Sensitive clients
+  @Test
+  public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
+    Query query = session.getNamedQuery(
+        "gov.ca.cwds.data.persistence.cms.OtherAdultInPlacemtHome.findAllUpdatedAfter");
+    assertThat(query, is(notNullValue()));
+  }
+
+  @Test
+  public void testFindAllByBucketNamedQueryExists() throws Exception {
+    Query query = session
+        .getNamedQuery("gov.ca.cwds.data.persistence.cms.OtherAdultInPlacemtHome.findAllByBucket");
+    assertThat(query, is(notNullValue()));
+  }
+
+}

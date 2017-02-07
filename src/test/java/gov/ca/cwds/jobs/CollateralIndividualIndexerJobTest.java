@@ -1,8 +1,8 @@
 package gov.ca.cwds.jobs;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.ca.cwds.data.cms.ServiceProviderDao;
+import gov.ca.cwds.data.cms.CollateralIndividualDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
@@ -24,17 +24,16 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
  *
  */
 @SuppressWarnings("javadoc")
-public class ServiceProviderIndexerJobTest {
-
+public class CollateralIndividualIndexerJobTest {
   @SuppressWarnings("unused")
-  private static ServiceProviderDao serviceProviderDao;
+  private static CollateralIndividualDao collateralIndividualDao;
   private static SessionFactory sessionFactory;
   private Session session;
 
   @BeforeClass
   public static void beforeClass() {
     sessionFactory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
-    serviceProviderDao = new ServiceProviderDao(sessionFactory);
+    collateralIndividualDao = new CollateralIndividualDao(sessionFactory);
   }
 
   @AfterClass
@@ -55,43 +54,40 @@ public class ServiceProviderIndexerJobTest {
 
   @Test
   public void testType() throws Exception {
-    assertThat(ServiceProviderIndexerJob.class, notNullValue());
+    assertThat(CollateralIndividualIndexerJob.class, notNullValue());
   }
 
   @Test
   public void testInstantiation() throws Exception {
-    ServiceProviderDao serviceProviderDao = null;
+    CollateralIndividualDao collateralIndividualDao = null;
     ElasticsearchDao elasticsearchDao = null;
     String lastJobRunTimeFilename = null;
     ObjectMapper mapper = null;
     SessionFactory sessionFactory = null;
-    ServiceProviderIndexerJob target = new ServiceProviderIndexerJob(serviceProviderDao,
-        elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    CollateralIndividualIndexerJob target = new CollateralIndividualIndexerJob(
+        collateralIndividualDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
     assertThat(target, notNullValue());
+  }
+
+  @Test
+  public void testfindAllNamedQueryExists() throws Exception {
+    Query query =
+        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.CollateralIndividual.findAll");
+    assertThat(query, is(notNullValue()));
   }
 
   @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
     Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.cms.ServiceProvider.findAllUpdatedAfter");
+        .getNamedQuery("gov.ca.cwds.data.persistence.cms.CollateralIndividual.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
 
   @Test
-  public void testFindAllNamedQueryExist() throws Exception {
-    Query query = session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ServiceProvider.findAll");
+  public void testFindAllByBucketNamedQueryExists() throws Exception {
+    Query query = session
+        .getNamedQuery("gov.ca.cwds.data.persistence.cms.CollateralIndividual.findAllByBucket");
     assertThat(query, is(notNullValue()));
   }
 
-  @Test
-  public void testFindAllByBucket() throws Exception {
-    Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ServiceProvider.findAllByBucket");
-    assertThat(query, is(notNullValue()));
-  }
-}>>>>>>>#138160209-Search:
-
-Identify Person-
-Filter out
-Sealed and
-Sensitive clients
+}
