@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.cms.SubstituteCareProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.SubstituteCareProviderIndexJob;
 
 /**
  * @author CWDS API Team
@@ -33,7 +32,7 @@ public class SubstituteCareProviderIndexerJobTest {
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
+    sessionFactory = new Configuration().configure("cms-hibernate.cfg.xml").buildSessionFactory();
     substituteCareProviderDao = new SubstituteCareProviderDao(sessionFactory);
   }
 

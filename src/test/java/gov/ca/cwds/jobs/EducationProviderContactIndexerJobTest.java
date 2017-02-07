@@ -33,7 +33,7 @@ public class EducationProviderContactIndexerJobTest {
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
+    sessionFactory = new Configuration().configure("cms-hibernate.cfg.xml").buildSessionFactory();
     educationProviderContactDao = new EducationProviderContactDao(sessionFactory);
   }
 
