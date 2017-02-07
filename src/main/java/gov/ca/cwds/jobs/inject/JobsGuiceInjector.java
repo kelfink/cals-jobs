@@ -95,6 +95,8 @@ public class JobsGuiceInjector extends AbstractModule {
    */
   @Override
   protected void configure() {
+    // Register all known CMS entity classes with Hibernate.
+    // Note that method addPackage() is not working as hoped.
     bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
         .toInstance(new Configuration().configure("cms-hibernate.cfg.xml")
             .addPackage("gov.ca.cwds.data.persistence.cms").addAnnotatedClass(Allegation.class)
@@ -109,6 +111,7 @@ public class JobsGuiceInjector extends AbstractModule {
             .addAnnotatedClass(ServiceProvider.class).addAnnotatedClass(StaffPerson.class)
             .addAnnotatedClass(SubstituteCareProvider.class).buildSessionFactory());
 
+    // Register required DAO classes.
     bind(DocumentMetadataDao.class).to(DocumentMetadataDaoImpl.class);
     bind(ClientDao.class);
     bind(ReporterDao.class);

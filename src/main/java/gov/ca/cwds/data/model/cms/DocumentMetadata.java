@@ -16,7 +16,7 @@ import org.hibernate.annotations.NamedNativeQuery;
  */
 @NamedNativeQueries({@NamedNativeQuery(name = "findByLastJobRunTimeMinusOneMinute",
     query = "SELECT CNT.DOC_HANDLE AS DOC_HANDLE, DECODE(CNT.CMPRS_PRG, 'DELETED', 'DELETED', 'DELETE02', 'DELETED', 'ACTIVE') AS DOC_STATUS,"
-        + "CNT.LST_UPD_TS AS LST_UPD_TS  FROM CWSINT.TSCNTRLT CNT WHERE CNT.DOC_HANDLE <> 'DUMMY' AND CMPRS_PRG = 'CWSCMP01'"
+        + "CNT.LST_UPD_TS AS LST_UPD_TS  FROM {h-schema}TSCNTRLT CNT WHERE CNT.DOC_HANDLE <> 'DUMMY' AND CMPRS_PRG = 'CWSCMP01'"
         + "AND CNT.LST_UPD_TS > TIMESTAMP_FORMAT(:lastJobRunTime, 'YYYY-MM-DD HH24:MI:SS') - 1 MINUTE;",
     resultClass = DocumentMetadata.class)})
 @Entity
