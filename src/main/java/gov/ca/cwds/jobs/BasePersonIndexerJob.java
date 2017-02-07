@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,65 +49,10 @@ import gov.ca.cwds.rest.api.domain.es.Person;
 public abstract class BasePersonIndexerJob<T extends PersistentObject>
     extends JobBasedOnLastSuccessfulRunTime implements AutoCloseable {
 
-  static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
+  private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
 
   private static final String INDEX_PERSON = "person";
   private static final String DOCUMENT_TYPE_PERSON = "people";
-
-  static final String CMD_LINE_ES_CONFIG = "config";
-  static final String CMD_LINE_LAST_RUN = "last-run-file";
-  static final String CMD_LINE_BUCKET_RANGE = "bucket-range";
-  static final String CMD_LINE_BUCKET_TOTAL = "total-buckets";
-  static final String CMD_LINE_THREADS = "thread-num";
-
-  /**
-   * Definitions of batch job command line options.
-   * 
-   * @author CWDS API Team
-   */
-  public enum JobCmdLineOption {
-
-    /**
-     * ElasticSearch configuration file.
-     */
-    ES_CONFIG(JobOptions.makeOpt("c", CMD_LINE_ES_CONFIG, "ElasticSearch configuration file", true, 1, String.class, ',')),
-
-    /**
-     * last run date file (yyyy-MM-dd HH:mm:ss)
-     */
-    LAST_RUN_FILE(JobOptions.makeOpt("l", CMD_LINE_LAST_RUN, "last run date file (yyyy-MM-dd HH:mm:ss)", false, 1, String.class, ',')),
-
-    /**
-     * bucket range (-r 20-24).
-     */
-    BUCKET_RANGE(JobOptions.makeOpt("r", CMD_LINE_BUCKET_RANGE, "bucket range (-r 20-24)", false, 2, Integer.class, '-')),
-
-    /**
-     * total buckets.
-     */
-    BUCKET_TOTAL(JobOptions.makeOpt("b", CMD_LINE_BUCKET_TOTAL, "total buckets", false, 1, Integer.class, ',')),
-
-    /**
-     * Number of threads (optional).
-     */
-    THREADS(JobOptions.makeOpt("t", CMD_LINE_THREADS, "# of threads", false, 1, Integer.class, ','));
-
-    private final Option opt;
-
-    JobCmdLineOption(Option opt) {
-      this.opt = opt;
-    }
-
-    /**
-     * Getter for the type's command line option definition.
-     * 
-     * @return command line option definition
-     */
-    public final Option getOpt() {
-      return opt;
-    }
-
-  }
 
   /**
    * Jackson ObjectMapper.
@@ -323,9 +267,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
               pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(p));
 
           // Bulk indexing! MUCH faster than indexing one doc at a time.
-          bp.add(new IndexRequest(ElasticsearchDao.DEFAULT_PERSON_IDX_NM,
-              ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE, esp.getId())
-                  .source(mapper.writeValueAsString(esp)));
+          bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
+          // bp.add(new IndexRequest(ElasticsearchDao.DEFAULT_PERSON_IDX_NM,
+          // ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE, esp.getId())
+          // .source(mapper.writeValueAsString(esp)));
         } catch (JsonProcessingException e) {
           throw new JobsException("JSON error", e);
         }

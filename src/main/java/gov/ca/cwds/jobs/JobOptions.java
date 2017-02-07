@@ -14,8 +14,8 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
-
-import gov.ca.cwds.jobs.BasePersonIndexerJob.JobCmdLineOption;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Represents batch job options from the command line.
@@ -28,6 +28,14 @@ public final class JobOptions implements Serializable {
    * Base serialization version. Increment by class change.
    */
   private static final long serialVersionUID = 1L;
+
+  private static final Logger LOGGER = LogManager.getLogger(JobOptions.class);
+
+  static final String CMD_LINE_ES_CONFIG = "config";
+  static final String CMD_LINE_LAST_RUN = "last-run-file";
+  static final String CMD_LINE_BUCKET_RANGE = "bucket-range";
+  static final String CMD_LINE_BUCKET_TOTAL = "total-buckets";
+  static final String CMD_LINE_THREADS = "thread-num";
 
   /**
    * Location of Elasticsearch configuration file.
@@ -211,7 +219,7 @@ public final class JobOptions implements Serializable {
           StringUtils.leftPad("", 90, '=') + "\nUSAGE: java <job class> ...\n"
               + StringUtils.leftPad("", 90, '='),
           buildCmdLineOptions(), 4, 8, StringUtils.leftPad("", 90, '='), true);
-      BasePersonIndexerJob.LOGGER.error(sw.toString());
+      LOGGER.error(sw.toString());
     } catch (IOException e) {
       throw new JobsException("ERROR PRINTING HELP! How ironic. :-)", e);
     }
@@ -242,30 +250,30 @@ public final class JobOptions implements Serializable {
       // enum members (evaluated at compile time), are not considered "constants."
       for (Option opt : cmd.getOptions()) {
         switch (opt.getArgName()) {
-          case BasePersonIndexerJob.CMD_LINE_ES_CONFIG:
-            BasePersonIndexerJob.LOGGER.info("ES config file  = " + opt.getValue());
+          case CMD_LINE_ES_CONFIG:
+            LOGGER.info("ES config file  = " + opt.getValue());
             esConfigLoc = opt.getValue().trim();
             break;
 
-          case BasePersonIndexerJob.CMD_LINE_LAST_RUN:
+          case CMD_LINE_LAST_RUN:
             lastRunMode = true;
             lastRunLoc = opt.getValue().trim();
-            BasePersonIndexerJob.LOGGER.info("last run file = " + lastRunLoc);
+            LOGGER.info("last run file = " + lastRunLoc);
             break;
 
-          case BasePersonIndexerJob.CMD_LINE_BUCKET_TOTAL:
-            BasePersonIndexerJob.LOGGER.info("INITIAL LOAD!");
+          case CMD_LINE_BUCKET_TOTAL:
+            LOGGER.info("INITIAL LOAD!");
             lastRunMode = false;
             totalBuckets = Long.parseLong(opt.getValue());
             break;
 
-          case BasePersonIndexerJob.CMD_LINE_BUCKET_RANGE:
+          case CMD_LINE_BUCKET_RANGE:
             lastRunMode = false;
             startBucket = Long.parseLong(opt.getValues()[0]);
             endBucket = Long.parseLong(opt.getValues()[1]);
             break;
 
-          case BasePersonIndexerJob.CMD_LINE_THREADS:
+          case CMD_LINE_THREADS:
             threadCount = Long.parseLong(opt.getValue());
             break;
 
@@ -275,7 +283,7 @@ public final class JobOptions implements Serializable {
       }
     } catch (ParseException e) {
       printUsage();
-      BasePersonIndexerJob.LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
+      LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
       throw new JobsException("Error parsing command line: " + e.getMessage(), e);
     }
 
