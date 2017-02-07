@@ -11,6 +11,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
+/**
+ * @author CWDS API Team
+ *
+ */
+@SuppressWarnings("javadoc")
 public class ClientIndexerJobTest {
 
   @Test
