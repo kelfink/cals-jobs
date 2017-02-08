@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.index.IndexRequest;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -125,7 +124,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
         LOGGER.error("Error executing bulk", failure);
       }
-    }).setBulkActions(2000).build();
+    }).setBulkActions(1000).build();
   }
 
   /**
@@ -202,16 +201,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
                 pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(p));
 
             // Bulk indexing! MUCH faster than indexing one doc at a time.
-            bp.add(new IndexRequest(ElasticsearchDao.DEFAULT_PERSON_IDX_NM,
-                ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE, esp.getId())
-                    .source(mapper.writeValueAsString(esp)));
+            bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
           } catch (JsonProcessingException e) {
             throw new JobsException("JSON error", e);
           }
         });
-
-        // Finish the job.
-        bp.flush();
 
         // Track counts.
         recsProcessed.getAndAdd(results.size());
@@ -268,16 +262,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
           // Bulk indexing! MUCH faster than indexing one doc at a time.
           bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
-          // bp.add(new IndexRequest(ElasticsearchDao.DEFAULT_PERSON_IDX_NM,
-          // ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE, esp.getId())
-          // .source(mapper.writeValueAsString(esp)));
         } catch (JsonProcessingException e) {
           throw new JobsException("JSON error", e);
         }
       });
-
-      // Finish the job.
-      bp.flush();
 
       try {
         bp.awaitClose(30, TimeUnit.SECONDS);
