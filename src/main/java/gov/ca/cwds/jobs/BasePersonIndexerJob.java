@@ -12,13 +12,9 @@ import java.util.stream.LongStream;
 import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.client.Requests;
-import org.elasticsearch.cluster.metadata.IndexMetaData;
-import org.elasticsearch.common.settings.Settings;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -54,8 +50,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
 
-  private static final String INDEX_PERSON = "person";
-  private static final String DOCUMENT_TYPE_PERSON = "people";
+  private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
+  private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
 
   /**
    * Jackson ObjectMapper.
@@ -181,34 +177,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
-   * Check whether Elasticsearch already has the chosen index.
-   * 
-   * @param index index name or alias
-   * @return whether the index exists
-   */
-  public boolean doesIndexExist(final String index) {
-    final IndexMetaData indexMetaData = esDao.getClient().admin().cluster()
-        .state(Requests.clusterStateRequest()).actionGet().getState().getMetaData().index(index);
-    return indexMetaData != null;
-  }
-
-  /**
-   * Create an index before blasting documents into it.
-   * 
-   * @param index index name or alias
-   * @param numShards number of shards
-   * @param numReplicas number of replicas
-   */
-  public void createIndex(final String index, int numShards, int numReplicas) {
-    LOGGER.warn("CREATE ES INDEX {} with {} shards and {} replicas",
-        ElasticsearchDao.DEFAULT_PERSON_IDX_NM, numShards, numReplicas);
-    final Settings indexSettings = Settings.settingsBuilder().put("number_of_shards", numShards)
-        .put("number_of_replicas", numReplicas).build();
-    CreateIndexRequest indexRequest = new CreateIndexRequest(index, indexSettings);
-    esDao.getClient().admin().indices().create(indexRequest).actionGet();
-  }
-
-  /**
    * Fetch all records for the next batch run, either by bucket or last successful run date.
    * 
    * @param lastSuccessfulRunTime last time the batch ran successfully.
@@ -218,14 +186,16 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected Date processLastRun(Date lastSuccessfulRunTime) {
     try {
       final Date startTime = new Date();
-      final BulkProcessor bp = buildBulkProcessor();
 
+      // One bulk processor "last run" operations. BulkProcessor is thread-safe.
+      final BulkProcessor bp = buildBulkProcessor();
       final List<T> results = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
+
       if (results != null && !results.isEmpty()) {
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
 
-        // BulkProcessor is thread-safe.
-        results.parallelStream().forEach((p) -> {
+        // Spawn a reasonable number of threads to process all results.
+        results.parallelStream().forEach(p -> {
           try {
             IPersonAware pers = (IPersonAware) p;
             final Person esp = new Person(p.getPrimaryKey().toString(), pers.getFirstName(),
@@ -247,12 +217,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       LOGGER.info("Waiting on ElasticSearch to finish last batch");
       bp.awaitClose(30, TimeUnit.SECONDS);
 
-      // Result stats:
-      LOGGER.info(MessageFormat.format("Indexed {0} people", recsProcessed));
-      LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
-          jobDateFormat.format(startTime)));
       return startTime;
-
     } catch (JobsException e) {
       LOGGER.error("JobsException: {}", e.getMessage(), e);
       throw e;
@@ -285,7 +250,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       // One bulk processor per bucket/thread.
       final BulkProcessor bp = buildBulkProcessor();
 
-      results.stream().forEach((p) -> {
+      // One thread per bucket up to max cores.
+      // Therefore, this method call for this bucket runs on one thread only.
+      results.stream().forEach(p -> {
         try {
           IPersonAware pers = (IPersonAware) p;
           final Person esp = new Person(p.getPrimaryKey().toString(), pers.getFirstName(),
@@ -322,11 +289,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     try {
       final Date startTime = new Date();
 
-      if (!doesIndexExist(ElasticsearchDao.DEFAULT_PERSON_IDX_NM)) {
-        LOGGER.warn("ES INDEX {} DOES NOT EXIST!!", ElasticsearchDao.DEFAULT_PERSON_IDX_NM);
-        createIndex(ElasticsearchDao.DEFAULT_PERSON_IDX_NM, 5, 1);
-        Thread.sleep(3000L);
-      }
+      // If the people index is missing, create it.
+      esDao.createIndexIfNeeded(ElasticsearchDao.DEFAULT_PERSON_IDX_NM);
 
       if (this.opts == null || this.opts.lastRunMode) {
         LOGGER.warn("LAST RUN MODE!");
@@ -336,7 +300,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         LOGGER.warn("availableProcessors={}", Runtime.getRuntime().availableProcessors());
 
         LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).parallel()
-            .forEach(b -> this.processBucket(b));
+            .forEach(this::processBucket);
 
         // Give it time to finish the last batch.
         LOGGER.info("Waiting on ElasticSearch to finish last batch");
