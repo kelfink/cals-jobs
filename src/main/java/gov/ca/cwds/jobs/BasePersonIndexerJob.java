@@ -299,6 +299,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         LOGGER.warn("BUCKET MODE!");
         LOGGER.warn("availableProcessors={}", Runtime.getRuntime().availableProcessors());
 
+        // Lambda runs a number of threads up to max processor cores.
+        // Queued jobs wait until a worker thread is available.
         LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).parallel()
             .forEach(this::processBucket);
 
