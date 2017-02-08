@@ -268,7 +268,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
       try {
         bp.awaitClose(20, TimeUnit.SECONDS);
-      } catch (InterruptedException e2) {
+      } catch (Exception e2) {
         throw new JobsException("ES bulk processor interrupted!", e2);
       }
 
