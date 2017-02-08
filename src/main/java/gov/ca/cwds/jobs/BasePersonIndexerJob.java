@@ -12,9 +12,13 @@ import java.util.stream.LongStream;
 import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.client.Requests;
+import org.elasticsearch.cluster.metadata.IndexMetaData;
+import org.elasticsearch.common.settings.Settings;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -177,6 +181,34 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
+   * Check whether Elasticsearch already has the chosen index.
+   * 
+   * @param index index name or alias
+   * @return whether the index exists
+   */
+  public boolean doesIndexExist(final String index) {
+    final IndexMetaData indexMetaData = esDao.getClient().admin().cluster()
+        .state(Requests.clusterStateRequest()).actionGet().getState().getMetaData().index(index);
+    return indexMetaData != null;
+  }
+
+  /**
+   * Create an index before blasting documents into it.
+   * 
+   * @param index index name or alias
+   * @param numShards number of shards
+   * @param numReplicas number of replicas
+   */
+  public void createIndex(final String index, int numShards, int numReplicas) {
+    LOGGER.warn("CREATE ES INDEX {} with {} shards and {} replicas",
+        ElasticsearchDao.DEFAULT_PERSON_IDX_NM, numShards, numReplicas);
+    final Settings indexSettings = Settings.settingsBuilder().put("number_of_shards", numShards)
+        .put("number_of_replicas", numReplicas).build();
+    CreateIndexRequest indexRequest = new CreateIndexRequest(index, indexSettings);
+    esDao.getClient().admin().indices().create(indexRequest).actionGet();
+  }
+
+  /**
    * Fetch all records for the next batch run, either by bucket or last successful run date.
    * 
    * @param lastSuccessfulRunTime last time the batch ran successfully.
@@ -268,7 +300,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       });
 
       try {
-        bp.awaitClose(30, TimeUnit.SECONDS);
+        bp.awaitClose(20, TimeUnit.SECONDS);
       } catch (InterruptedException e2) {
         throw new JobsException("ES bulk processor interrupted!", e2);
       }
@@ -289,6 +321,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   public Date _run(Date lastSuccessfulRunTime) {
     try {
       final Date startTime = new Date();
+
+      if (!doesIndexExist(ElasticsearchDao.DEFAULT_PERSON_IDX_NM)) {
+        LOGGER.warn("ES INDEX {} DOES NOT EXIST!!", ElasticsearchDao.DEFAULT_PERSON_IDX_NM);
+        createIndex(ElasticsearchDao.DEFAULT_PERSON_IDX_NM, 5, 1);
+        Thread.sleep(3000L);
+      }
 
       if (this.opts == null || this.opts.lastRunMode) {
         LOGGER.warn("LAST RUN MODE!");

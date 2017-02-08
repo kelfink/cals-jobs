@@ -14,7 +14,7 @@
 		<Root level="INFO">
 			<AppenderRef ref="ASYNC" />
 		</Root>
-		<logger name="gov.ca.cwds" level="DEBUG">
+		<logger name="gov.ca.cwds" level="DEBUG" additivity="false">
 			<AppenderRef ref="ASYNC" />
 		</logger>
 	</Loggers>
