@@ -1,0 +1,22 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<!-- NOTE: Connect to Taborda VPN to run integration tests (test package 
+	gov.ca.cwds.rest.jbdi.cms). -->
+<hibernate-configuration>
+	<session-factory>
+		<property name="hibernate.current_session_context_class">thread</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQL82Dialect</property>
+		<property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
+		<property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+		<property name="hibernate.connection.username">postgres</property>
+		<property name="hibernate.connection.password">brIWLuo04rkt</property>
+		<property name="hibernate.connection.url">jdbc:postgresql://ns.db.jenkins.cwds.tabordasolutions.net:5432/cwdsns</property>
+		<property name="connection_pool_size">10</property>
+		<property name="show_sql">true</property>
+
+		<mapping class="gov.ca.cwds.data.persistence.ns.Person" />
+		<mapping class="gov.ca.cwds.data.persistence.ns.Address" />
+	</session-factory>
+</hibernate-configuration>

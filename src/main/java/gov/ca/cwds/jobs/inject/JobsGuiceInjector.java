@@ -59,7 +59,8 @@ import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 
 /**
- * Guice module which constructs and manages common class instances for batch jobs.
+ * Guice dependency injection (DI), module which constructs and manages common class instances for
+ * batch jobs.
  * 
  * @author CWDS API Team
  */
@@ -89,14 +90,18 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   /**
+   * Register all known CMS entity classes with Hibernate. Note that method addPackage() is not
+   * working as hoped.
+   * 
+   * <p>
+   * Parent class:
+   * </p>
    * {@inheritDoc}
    * 
    * @see com.google.inject.AbstractModule#configure()
    */
   @Override
   protected void configure() {
-    // Register all known CMS entity classes with Hibernate.
-    // Note that method addPackage() is not working as hoped.
     bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
         .toInstance(new Configuration().configure("cms-hibernate.cfg.xml")
             .addPackage("gov.ca.cwds.data.persistence.cms").addAnnotatedClass(Allegation.class)
@@ -137,6 +142,11 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(CmsSystemCodeSerializer.class).asEagerSingleton();
   }
 
+  /**
+   * Instantiate the singleton ElasticSearch client on demand.
+   * 
+   * @return initialized singleton ElasticSearch client
+   */
   @Provides
   public Client elasticsearchClient() {
     Client client = null;
@@ -166,6 +176,7 @@ public class JobsGuiceInjector extends AbstractModule {
   @Provides
   @NsSessionFactory
   SessionFactory nsSessionFactory() {
+    // NOTE: Configuration.configure() only looks for the named file, not resources in jar files.
     return new Configuration().configure("ns-hibernate.cfg.xml").buildSessionFactory();
   }
 

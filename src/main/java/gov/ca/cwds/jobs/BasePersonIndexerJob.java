@@ -251,7 +251,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       final BulkProcessor bp = buildBulkProcessor();
 
       // One thread per bucket up to max cores.
-      // Therefore, this method call for this bucket runs on one thread only.
+      // This bucket runs on one thread only. No parallel stream.
       results.stream().forEach(p -> {
         try {
           IPersonAware pers = (IPersonAware) p;

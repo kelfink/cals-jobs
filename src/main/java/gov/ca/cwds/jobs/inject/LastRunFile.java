@@ -7,6 +7,11 @@ import java.lang.annotation.Target;
 
 import com.google.inject.BindingAnnotation;
 
+/**
+ * Marker annotation identifies batch jobs that implement the "last run" policy.
+ * 
+ * @author CWDS API Team
+ */
 @BindingAnnotation
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
