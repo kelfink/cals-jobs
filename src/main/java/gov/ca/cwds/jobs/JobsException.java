@@ -1,9 +1,19 @@
 package gov.ca.cwds.jobs;
 
+/**
+ * Base class of batch job runtime exceptions. Specialized exceptions should extend this class.
+ * 
+ * @author CWDS API Team
+ */
 @SuppressWarnings("serial")
 public class JobsException extends RuntimeException {
 
-  public JobsException() {}
+  /**
+   * Default, no-op ctor.
+   */
+  public JobsException() {
+    // Default, no-op.
+  }
 
   public JobsException(String message) {
     super(message);

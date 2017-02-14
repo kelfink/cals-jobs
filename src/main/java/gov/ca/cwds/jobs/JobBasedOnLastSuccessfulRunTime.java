@@ -15,13 +15,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Abstract base class for all batch jobs based on last successful run time.
+ * 
+ * @author CWDS API Team
+ */
 public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
 
   private static final Logger LOGGER = LogManager.getLogger(JobBasedOnLastSuccessfulRunTime.class);
 
   protected DateFormat jobDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
   private String lastJobRunTimeFilename;
 
+  /**
+   * Default constructor.
+   * 
+   * @param lastJobRunTimeFilename location of last run time file
+   */
   public JobBasedOnLastSuccessfulRunTime(String lastJobRunTimeFilename) {
     this.lastJobRunTimeFilename = lastJobRunTimeFilename;
   }
