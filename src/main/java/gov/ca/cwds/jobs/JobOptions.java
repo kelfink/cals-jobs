@@ -84,7 +84,7 @@ public final class JobOptions implements Serializable {
    */
   private final long threadCount;
 
-  private JobOptions(String esConfigLoc, String lastRunLoc, boolean lastRunMode, long startBucket,
+  JobOptions(String esConfigLoc, String lastRunLoc, boolean lastRunMode, long startBucket,
       long endBucket, long totalBuckets, long threadCount) {
     this.esConfigLoc = esConfigLoc;
     this.lastRunLoc = lastRunLoc;
