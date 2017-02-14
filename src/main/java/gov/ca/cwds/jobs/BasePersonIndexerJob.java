@@ -215,7 +215,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
       // Give it time to finish the last batch.
       LOGGER.info("Waiting on ElasticSearch to finish last batch");
-      bp.awaitClose(30, TimeUnit.SECONDS);
+      bp.awaitClose(45, TimeUnit.SECONDS);
 
       return startTime;
     } catch (JobsException e) {
@@ -245,7 +245,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     final List<T> results = jobDao.bucketList(bucket, totalBuckets);
 
     if (results != null && !results.isEmpty()) {
-      LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
+      LOGGER.info("bucket #{} found {} people to index", bucket, results.size());
 
       // One bulk processor per bucket/thread.
       final BulkProcessor bp = buildBulkProcessor();
@@ -267,7 +267,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       });
 
       try {
-        bp.awaitClose(20, TimeUnit.SECONDS);
+        bp.awaitClose(45, TimeUnit.SECONDS);
       } catch (Exception e2) {
         throw new JobsException("ES bulk processor interrupted!", e2);
       }
@@ -294,6 +294,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
       if (this.opts == null || this.opts.lastRunMode) {
         LOGGER.warn("LAST RUN MODE!");
+
+        // Result stats:
+        LOGGER.info(MessageFormat.format("Indexed {0} people", recsProcessed));
+        LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
+            jobDateFormat.format(startTime)));
         return processLastRun(lastSuccessfulRunTime);
       } else {
         LOGGER.warn("BUCKET MODE!");
@@ -306,11 +311,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
         // Give it time to finish the last batch.
         LOGGER.info("Waiting on ElasticSearch to finish last batch");
-
-        // Result stats:
-        LOGGER.info(MessageFormat.format("Indexed {0} people", recsProcessed));
-        LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
-            jobDateFormat.format(startTime)));
         return startTime;
       }
     } catch (JobsException e) {
