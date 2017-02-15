@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 
-import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -19,6 +18,7 @@ import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -134,16 +134,21 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @param args command line arguments
    * @return batch job, ready to run
    * @param <T> Person persistence type
-   * @throws ParseException if unable to parse command line
+   * @throws JobsException if unable to parse command line or load dependencies
    */
   public static <T extends BasePersonIndexerJob<?>> T newJob(final Class<T> klass, String... args)
-      throws ParseException {
-    final JobOptions opts = JobOptions.parseCommandLine(args);
-    final Injector injector =
-        Guice.createInjector(new JobsGuiceInjector(new File(opts.esConfigLoc), opts.lastRunLoc));
-    final T ret = injector.getInstance(klass);
-    ret.setOpts(opts);
-    return ret;
+      throws JobsException {
+    try {
+      final JobOptions opts = JobOptions.parseCommandLine(args);
+      final Injector injector =
+          Guice.createInjector(new JobsGuiceInjector(new File(opts.esConfigLoc), opts.lastRunLoc));
+      final T ret = injector.getInstance(klass);
+      ret.setOpts(opts);
+      return ret;
+    } catch (CreationException e) {
+      LOGGER.error("Unable to create dependencies: {}", e.getMessage(), e);
+      throw new JobsException("Unable to create dependencies: " + e.getMessage(), e);
+    }
   }
 
   /**
@@ -164,9 +169,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     // Close resources automatically.
     try (final T job = newJob(klass, args)) {
       job.run();
-    } catch (ParseException e) {
-      LOGGER.error("Unable to parse command line: {}", e.getMessage(), e);
-      throw new JobsException("Unable to parse command line: " + e.getMessage(), e);
     } catch (IOException e) {
       LOGGER.error("Unable to close resource: {}", e.getMessage(), e);
       throw new JobsException("Unable to close resource: " + e.getMessage(), e);
@@ -290,6 +292,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       final Date startTime = new Date();
 
       // If the people index is missing, create it.
+      LOGGER.debug("Create people index if missing");
       esDao.createIndexIfNeeded(ElasticsearchDao.DEFAULT_PERSON_IDX_NM);
 
       if (this.opts == null || this.opts.lastRunMode) {

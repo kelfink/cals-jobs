@@ -281,6 +281,10 @@ public final class JobOptions implements Serializable {
             break;
         }
       }
+    } catch (NumberFormatException e) {
+      printUsage();
+      LOGGER.error("Invalid numeric argument: {}", e.getMessage(), e);
+      throw new JobsException("Invalid numeric argument: " + e.getMessage(), e);
     } catch (ParseException e) {
       printUsage();
       LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
