@@ -32,7 +32,17 @@ public enum JobCmdLineOption {
   /**
    * Number of threads (optional).
    */
-  THREADS(JobOptions.makeOpt("t", JobOptions.CMD_LINE_THREADS, "# of threads", false, 1, Integer.class, ','));
+  THREADS(JobOptions.makeOpt("t", JobOptions.CMD_LINE_THREADS, "# of threads", false, 1, Integer.class, ',')),
+
+  /**
+   * Minimum key, inclusive.
+   */
+  MIN_ID(JobOptions.makeOpt("m", JobOptions.CMD_LINE_MIN_ID, "minimum identifier, inclusive", false, 1, String.class, ',')),
+
+  /**
+   * Maximum key, inclusive.
+   */
+  MAX_ID(JobOptions.makeOpt("x", JobOptions.CMD_LINE_MAX_ID, "maximum identifier, exclusive", false, 1, String.class, ','));
 
   private final Option opt;
 

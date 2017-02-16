@@ -236,6 +236,8 @@ public final class JobOptions implements Serializable {
     ret.addOption(JobCmdLineOption.ES_CONFIG.getOpt());
     ret.addOption(JobCmdLineOption.THREADS.getOpt());
     ret.addOption(JobCmdLineOption.BUCKET_RANGE.getOpt());
+    ret.addOption(JobCmdLineOption.MIN_ID.getOpt());
+    ret.addOption(JobCmdLineOption.MAX_ID.getOpt());
 
     // RUN MODE: mutually exclusive choice.
     OptionGroup group = new OptionGroup();

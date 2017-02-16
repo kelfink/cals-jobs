@@ -248,7 +248,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     final String minId =
         StringUtils.isBlank(this.getOpts().getMinId()) ? " " : this.getOpts().getMinId();
     final String maxId = this.getOpts().getMaxId();
-    final List<T> results = StringUtils.isNotBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
+    final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
         : jobDao.partitionedBucketList(bucket, totalBuckets, minId, maxId);
 
     if (results != null && !results.isEmpty()) {
