@@ -36,6 +36,8 @@ public final class JobOptions implements Serializable {
   static final String CMD_LINE_BUCKET_RANGE = "bucket-range";
   static final String CMD_LINE_BUCKET_TOTAL = "total-buckets";
   static final String CMD_LINE_THREADS = "thread-num";
+  static final String CMD_LINE_MIN_ID = "min_id";
+  static final String CMD_LINE_MAX_ID = "max_id";
 
   /**
    * Location of Elasticsearch configuration file.
@@ -84,8 +86,23 @@ public final class JobOptions implements Serializable {
    */
   private final long threadCount;
 
+  private final String minId;
+
+  private final String maxId;
+
+  /**
+   * Construct from all settings.
+   * 
+   * @param esConfigLoc location of Elasticsearch configuration file
+   * @param lastRunLoc location of last run file
+   * @param lastRunMode is last run mode or not
+   * @param startBucket starting bucket number
+   * @param endBucket ending bucket number
+   * @param totalBuckets total buckets
+   * @param threadCount number of simultaneous threads
+   */
   JobOptions(String esConfigLoc, String lastRunLoc, boolean lastRunMode, long startBucket,
-      long endBucket, long totalBuckets, long threadCount) {
+      long endBucket, long totalBuckets, long threadCount, String minId, String maxId) {
     this.esConfigLoc = esConfigLoc;
     this.lastRunLoc = lastRunLoc;
     this.lastRunMode = lastRunMode;
@@ -93,6 +110,8 @@ public final class JobOptions implements Serializable {
     this.endBucket = endBucket;
     this.totalBuckets = totalBuckets;
     this.threadCount = threadCount;
+    this.minId = minId;
+    this.maxId = maxId;
   }
 
   /**
@@ -156,6 +175,24 @@ public final class JobOptions implements Serializable {
    */
   public final long getThreadCount() {
     return threadCount;
+  }
+
+  /**
+   * Getter for minimum key value for this batch run
+   * 
+   * @return minimum key value for this batch run
+   */
+  public String getMinId() {
+    return minId;
+  }
+
+  /**
+   * Getter for maximum key value for this batch run
+   * 
+   * @return maximum key value for this batch run
+   */
+  public String getMaxId() {
+    return maxId;
   }
 
   /**
@@ -241,6 +278,9 @@ public final class JobOptions implements Serializable {
     long totalBuckets = 0L;
     long threadCount = 0L;
 
+    String minId = " ";
+    String maxId = "9999999999";
+
     try {
       Options options = buildCmdLineOptions();
       CommandLineParser parser = new DefaultParser();
@@ -277,6 +317,14 @@ public final class JobOptions implements Serializable {
             threadCount = Long.parseLong(opt.getValue());
             break;
 
+          case CMD_LINE_MIN_ID:
+            minId = opt.getValue().trim();
+            break;
+
+          case CMD_LINE_MAX_ID:
+            maxId = opt.getValue().trim();
+            break;
+
           default:
             break;
         }
@@ -292,7 +340,7 @@ public final class JobOptions implements Serializable {
     }
 
     return new JobOptions(esConfigLoc, lastRunLoc, lastRunMode, startBucket, endBucket,
-        totalBuckets, threadCount);
+        totalBuckets, threadCount, minId, maxId);
   }
 
 }

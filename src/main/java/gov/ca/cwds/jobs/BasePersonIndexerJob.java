@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -244,7 +245,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected int processBucket(long bucket) {
     final long totalBuckets = this.opts.getTotalBuckets();
     LOGGER.warn("pull bucket #{} of #{}", bucket, totalBuckets);
-    final List<T> results = jobDao.bucketList(bucket, totalBuckets);
+    final String minId =
+        StringUtils.isBlank(this.getOpts().getMinId()) ? " " : this.getOpts().getMinId();
+    final String maxId = this.getOpts().getMaxId();
+    final List<T> results = StringUtils.isNotBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
+        : jobDao.partitionedBucketList(bucket, totalBuckets, minId, maxId);
 
     if (results != null && !results.isEmpty()) {
       LOGGER.info("bucket #{} found {} people to index", bucket, results.size());
