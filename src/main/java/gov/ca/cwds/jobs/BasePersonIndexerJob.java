@@ -112,7 +112,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
-        LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
+        LOGGER.debug("Ready to execute bulk of {} actions", request.numberOfActions());
       }
 
       @Override
@@ -309,8 +309,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
         // Lambda runs a number of threads up to max processor cores.
         // Queued jobs wait until a worker thread is available.
-        LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).parallel()
-            .forEach(this::processBucket);
+        LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).sorted()
+            .parallel().forEach(this::processBucket);
 
         // Give it time to finish the last batch.
         LOGGER.info("Waiting on ElasticSearch to finish last batch");
@@ -326,7 +326,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
-   * Indexes a single document. Prefer batch mode.
+   * Indexes a <strong>SINGLE</strong> document. Prefer batch mode.
    * 
    * @param person {@link Person} document to index
    * @throws JsonProcessingException if JSON cannot be read
