@@ -252,7 +252,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         : jobDao.partitionedBucketList(bucket, totalBuckets, minId, maxId);
 
     if (results != null && !results.isEmpty()) {
-      LOGGER.info("bucket #{} found {} people to index", bucket, results.size());
+      LOGGER.warn("bucket #{} found {} people to index", bucket, results.size());
 
       // One bulk processor per bucket/thread.
       final BulkProcessor bp = buildBulkProcessor();
@@ -318,7 +318,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
             .parallel().forEach(this::processBucket);
 
         // Give it time to finish the last batch.
-        LOGGER.info("Waiting on ElasticSearch to finish last batch");
+        LOGGER.warn("Waiting on ElasticSearch to finish last batch");
         return startTime;
       }
     } catch (JobsException e) {

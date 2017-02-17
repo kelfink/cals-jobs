@@ -128,7 +128,6 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(OtherClientNameDao.class);
     bind(ServiceProviderDao.class);
     bind(EducationProviderContactDao.class);
-    bind(ElasticsearchDao.class);
 
     // Instantiate as a singleton, else Guice creates a new instance each time.
     bind(ObjectMapper.class).asEagerSingleton();
@@ -140,6 +139,9 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ISystemCodeDao.class).to(SystemCodeDaoFileImpl.class);
     bind(ISystemCodeCache.class).to(CmsSystemCodeCacheService.class).asEagerSingleton();
     bind(CmsSystemCodeSerializer.class).asEagerSingleton();
+
+    // Only one instance of ES DAO.
+    bind(ElasticsearchDao.class).asEagerSingleton();
   }
 
   /**

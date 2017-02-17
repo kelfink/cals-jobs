@@ -1,5 +1,6 @@
 package gov.ca.cwds.dao.cms;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -13,10 +14,21 @@ import org.hibernate.annotations.Type;
  * 
  * @author CWDS API Team
  */
-public class CmsReplicaCommon {
+public class CmsReplicaCommon implements Serializable {
 
   /**
-   * Languages.
+   * Base serialization version.
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
+   * CRUD operations on replication column IBMSNAP_OPERATION.
+   * 
+   * <ul>
+   * <li>I: Insert</li>
+   * <li>U: Update</li>
+   * <li>D: Delete</li>
+   * </ul>
    * 
    * @author CWDS API Team
    */
