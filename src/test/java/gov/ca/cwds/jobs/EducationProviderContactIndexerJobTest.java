@@ -33,7 +33,8 @@ public class EducationProviderContactIndexerJobTest {
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = new Configuration().configure("cms-hibernate.cfg.xml").buildSessionFactory();
+    sessionFactory =
+        new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
     educationProviderContactDao = new EducationProviderContactDao(sessionFactory);
   }
 
@@ -85,10 +86,11 @@ public class EducationProviderContactIndexerJobTest {
     assertThat(query, is(notNullValue()));
   }
 
-  @Test
-  public void testFindAllByBucketNamedQueryExists() throws Exception {
-    Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.cms.EducationProviderContact.findAllByBucket");
-    assertThat(query, is(notNullValue()));
-  }
+  // @Test
+  // public void testFindAllByBucketNamedQueryExists() throws Exception {
+  // Query query = session
+  // .getNamedQuery("gov.ca.cwds.data.persistence.cms.EducationProviderContact.findAllByBucket");
+  // assertThat(query, is(notNullValue()));
+  // }
+  //
 }

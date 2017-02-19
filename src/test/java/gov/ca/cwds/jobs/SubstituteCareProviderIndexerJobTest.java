@@ -32,7 +32,8 @@ public class SubstituteCareProviderIndexerJobTest {
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = new Configuration().configure("cms-hibernate.cfg.xml").buildSessionFactory();
+    sessionFactory =
+        new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
     substituteCareProviderDao = new SubstituteCareProviderDao(sessionFactory);
   }
 

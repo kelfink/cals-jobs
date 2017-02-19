@@ -32,7 +32,8 @@ public class AttorneyIndexerJobTest {
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = new Configuration().configure("cms-hibernate.cfg.xml").buildSessionFactory();
+    sessionFactory =
+        new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
     attorneyDao = new AttorneyDao(sessionFactory);
   }
 

@@ -380,9 +380,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         ret = processLastRun(lastSuccessfulRunTime);
       } else {
         LOGGER.warn("BUCKET MODE!");
-
-        // Lambda runs a number of threads up to max processor cores.
-        // Queued jobs wait until a worker thread is available.
         LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).sorted()
             .parallel().forEach(this::processBucket);
         ret = startTime;

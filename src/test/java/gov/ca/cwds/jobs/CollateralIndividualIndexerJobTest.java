@@ -32,7 +32,8 @@ public class CollateralIndividualIndexerJobTest {
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = new Configuration().configure("cms-hibernate.cfg.xml").buildSessionFactory();
+    sessionFactory =
+        new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
     collateralIndividualDao = new CollateralIndividualDao(sessionFactory);
   }
 
@@ -71,8 +72,8 @@ public class CollateralIndividualIndexerJobTest {
 
   @Test
   public void testfindAllNamedQueryExists() throws Exception {
-    Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.CollateralIndividual.findAll");
+    Query query = session.getNamedQuery(
+        "gov.ca.cwds.data.persistence.cms.CollateralIndividual.findPartitionedBuckets");
     assertThat(query, is(notNullValue()));
   }
 
@@ -83,11 +84,11 @@ public class CollateralIndividualIndexerJobTest {
     assertThat(query, is(notNullValue()));
   }
 
-  @Test
-  public void testFindAllByBucketNamedQueryExists() throws Exception {
-    Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.cms.CollateralIndividual.findAllByBucket");
-    assertThat(query, is(notNullValue()));
-  }
+  // @Test
+  // public void testFindAllByBucketNamedQueryExists() throws Exception {
+  // Query query = session
+  // .getNamedQuery("gov.ca.cwds.data.persistence.cms.CollateralIndividual.findAllByBucket");
+  // assertThat(query, is(notNullValue()));
+  // }
 
 }
