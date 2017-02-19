@@ -61,7 +61,7 @@ public final class JobOptions implements Serializable {
    * Required for "initial load" mode.
    * </p>
    */
-  private final long startBucket;
+  private long startBucket;
 
   /**
    * When running in "initial load" mode, specifies the ending bucket of records to be processed by
@@ -70,7 +70,7 @@ public final class JobOptions implements Serializable {
    * Required for "initial load" mode.
    * </p>
    */
-  private final long endBucket;
+  private long endBucket;
 
   /**
    * When running in "initial load" mode, specifies the total number buckets for all related batch
@@ -79,16 +79,16 @@ public final class JobOptions implements Serializable {
    * Required for "initial load" mode.
    * </p>
    */
-  private final long totalBuckets;
+  private long totalBuckets;
 
   /**
    * Total threads to allocate to this batch run. Defaults to all available cores.
    */
-  private final long threadCount;
+  private long threadCount;
 
-  private final String minId;
+  private String minId;
 
-  private final String maxId;
+  private String maxId;
 
   /**
    * Construct from all settings.
@@ -343,6 +343,30 @@ public final class JobOptions implements Serializable {
 
     return new JobOptions(esConfigLoc, lastRunLoc, lastRunMode, startBucket, endBucket,
         totalBuckets, threadCount, minId, maxId);
+  }
+
+  public void setStartBucket(long startBucket) {
+    this.startBucket = startBucket;
+  }
+
+  public void setEndBucket(long endBucket) {
+    this.endBucket = endBucket;
+  }
+
+  public void setThreadCount(long threadCount) {
+    this.threadCount = threadCount;
+  }
+
+  public void setMinId(String minId) {
+    this.minId = minId;
+  }
+
+  public void setMaxId(String maxId) {
+    this.maxId = maxId;
+  }
+
+  public void setTotalBuckets(long totalBuckets) {
+    this.totalBuckets = totalBuckets;
   }
 
 }

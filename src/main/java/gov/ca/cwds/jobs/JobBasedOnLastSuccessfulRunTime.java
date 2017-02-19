@@ -24,6 +24,9 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
 
   private static final Logger LOGGER = LogManager.getLogger(JobBasedOnLastSuccessfulRunTime.class);
 
+  /**
+   * Last run file date format.
+   */
   protected DateFormat jobDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   private String lastJobRunTimeFilename;

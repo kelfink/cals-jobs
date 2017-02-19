@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -56,6 +57,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
+  private static final int DEFAULT_BATCH_WAIT = 45;
 
   /**
    * Guice Injector used for all Job instances during the life of this batch JVM.
@@ -259,7 +261,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
       // Give it time to finish the last batch.
       LOGGER.info("Waiting on ElasticSearch to finish last batch");
-      bp.awaitClose(45, TimeUnit.SECONDS);
+      bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
 
       return startTime;
     } catch (JobsException e) {
@@ -315,7 +317,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       });
 
       try {
-        bp.awaitClose(45, TimeUnit.SECONDS);
+        bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
       } catch (Exception e2) {
         throw new JobsException("ES bulk processor interrupted!", e2);
       }
@@ -328,40 +330,69 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
+   * Lambda runs a number of threads up to max processor cores. Queued jobs wait until a worker
+   * thread is available.
+   * 
    * {@inheritDoc}
    * 
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
+    Date ret;
     try {
       final Date startTime = new Date();
 
       // If the people index is missing, create it.
       LOGGER.debug("Create people index if missing");
       esDao.createIndexIfNeeded(ElasticsearchDao.DEFAULT_PERSON_IDX_NM);
+      LOGGER.debug("availableProcessors={}", Runtime.getRuntime().availableProcessors());
 
-      if (this.opts == null || this.opts.lastRunMode) {
+      // Smart/auto mode:
+      // If the last run is more than 15 years old, the assume that this job populating
+      // ElasticSearch for the first time.
+
+      final Calendar cal = Calendar.getInstance();
+      cal.add(Calendar.YEAR, -15);
+      final boolean autoMode = this.opts.lastRunMode && lastSuccessfulRunTime.before(cal.getTime());
+
+      if (autoMode) {
+        LOGGER.warn("AUTO MODE!");
+
+        if (!this.getPartitionRanges().isEmpty()) {
+          getOpts().setStartBucket(1);
+          getOpts().setStartBucket(8);
+          getOpts().setTotalBuckets(8);
+
+          for (Pair<String, String> pair : this.getPartitionRanges()) {
+            getOpts().setMinId(pair.getLeft());
+            getOpts().setMaxId(pair.getRight());
+
+            LOGGER.warn("Process partition range {} to {}", getOpts().getMinId(),
+                getOpts().getMaxId());
+            LongStream.rangeClosed(1L, 8L).sorted().parallel().forEach(this::processBucket);
+          }
+        }
+
+        ret = startTime;
+      } else if (this.opts == null || this.opts.lastRunMode) {
         LOGGER.warn("LAST RUN MODE!");
-
-        // Result stats:
-        LOGGER.info(MessageFormat.format("Indexed {0} people", recsProcessed));
-        LOGGER.info(MessageFormat.format("Updating last succesful run time to {0}",
-            jobDateFormat.format(startTime)));
-        return processLastRun(lastSuccessfulRunTime);
+        ret = processLastRun(lastSuccessfulRunTime);
       } else {
         LOGGER.warn("BUCKET MODE!");
-        LOGGER.warn("availableProcessors={}", Runtime.getRuntime().availableProcessors());
 
         // Lambda runs a number of threads up to max processor cores.
         // Queued jobs wait until a worker thread is available.
         LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).sorted()
             .parallel().forEach(this::processBucket);
-
-        // Give it time to finish the last batch.
-        LOGGER.warn("Waiting on ElasticSearch to finish last batch");
-        return startTime;
+        ret = startTime;
       }
+
+      // Result stats:
+      LOGGER.info(MessageFormat.format("Indexed {0} people", recsProcessed));
+      LOGGER.info(MessageFormat.format("Updating last successful run time to {0}",
+          jobDateFormat.format(startTime)));
+      return ret;
     } catch (JobsException e) {
       LOGGER.error("JobsException: {}", e.getMessage(), e);
       throw e;
