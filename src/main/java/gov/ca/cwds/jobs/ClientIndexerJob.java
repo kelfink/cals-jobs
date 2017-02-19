@@ -1,5 +1,9 @@
 package gov.ca.cwds.jobs;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -36,6 +40,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<Client> {
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory) {
     super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  }
+
+  @Override
+  protected List<Pair<String, String>> getPartitionRanges() {
+    return new ArrayList<>(0);
   }
 
   /**

@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -10,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -29,6 +31,7 @@ import gov.ca.cwds.data.IPersonAware;
 import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.Client;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
@@ -53,6 +56,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
+
+  /**
+   * Guice Injector used for all Job instances during the life of this batch JVM.
+   */
+  protected static Injector injector;
 
   /**
    * Jackson ObjectMapper.
@@ -105,6 +113,17 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
+   * Return a list of partition keys to optimize batch SELECT statements. See Client native named
+   * query "findPartitionedBuckets".
+   * 
+   * @return list of partition key pairs
+   * @see Client
+   */
+  protected List<Pair<String, String>> getPartitionRanges() {
+    return new ArrayList<>(0);
+  }
+
+  /**
    * Instantiate one Elasticsearch BulkProcessor for this batch run.
    * 
    * @return Elasticsearch BulkProcessor
@@ -129,6 +148,30 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
+   * Build the Guice Injector once, which is used for all Job instances during the life of this
+   * batch JVM.
+   * 
+   * @param opts command line options
+   * @param args command line options
+   * @return Guice Injector
+   * @throws JobsException if unable to construct dependencies
+   */
+  protected static synchronized Injector buildInjector(final JobOptions opts, final String... args)
+      throws JobsException {
+    if (injector == null) {
+      try {
+        injector = Guice
+            .createInjector(new JobsGuiceInjector(new File(opts.esConfigLoc), opts.lastRunLoc));
+      } catch (CreationException e) {
+        LOGGER.error("Unable to create dependencies: {}", e.getMessage(), e);
+        throw new JobsException("Unable to create dependencies: " + e.getMessage(), e);
+      }
+    }
+
+    return injector;
+  }
+
+  /**
    * Prepare a batch job with all required dependencies.
    * 
    * @param klass batch job class
@@ -141,9 +184,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       throws JobsException {
     try {
       final JobOptions opts = JobOptions.parseCommandLine(args);
-      final Injector injector =
-          Guice.createInjector(new JobsGuiceInjector(new File(opts.esConfigLoc), opts.lastRunLoc));
-      final T ret = injector.getInstance(klass);
+      final T ret = buildInjector(opts, args).getInstance(klass);
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
