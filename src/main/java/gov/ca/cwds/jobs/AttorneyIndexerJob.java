@@ -7,9 +7,9 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.data.cms.AttorneyDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.Attorney;
+import gov.ca.cwds.data.persistence.cms.ReplicatedAttorney;
+import gov.ca.cwds.data.persistence.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
@@ -18,23 +18,23 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * 
  * @author CWDS API Team
  */
-public class AttorneyIndexerJob extends BasePersonIndexerJob<Attorney> {
+public class AttorneyIndexerJob extends BasePersonIndexerJob<ReplicatedAttorney> {
 
   private static final Logger LOGGER = LogManager.getLogger(AttorneyIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param mainDao Attorney DAO
+   * @param mainDao ReplicatedAttorney DAO
    * @param elasticsearchDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public AttorneyIndexerJob(final AttorneyDao mainDao, final ElasticsearchDao elasticsearchDao,
-      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory) {
+  public AttorneyIndexerJob(final ReplicatedAttorneyDao mainDao,
+      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
+      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
     super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
@@ -44,7 +44,7 @@ public class AttorneyIndexerJob extends BasePersonIndexerJob<Attorney> {
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Run Attorney indexer job");
+    LOGGER.info("Run ReplicatedAttorney indexer job");
     try {
       runJob(AttorneyIndexerJob.class, args);
     } catch (JobsException e) {

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.cms.AttorneyDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.persistence.cms.ReplicatedAttorneyDao;
 
 /**
  * @author CWDS API Team
@@ -60,7 +61,7 @@ public class AttorneyIndexerJobTest {
 
   @Test
   public void testInstantiation() throws Exception {
-    AttorneyDao attorneyDao = null;
+    ReplicatedAttorneyDao attorneyDao = null;
     ElasticsearchDao elasticsearchDao = null;
     String lastJobRunTimeFilename = null;
     ObjectMapper mapper = null;
