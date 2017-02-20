@@ -349,11 +349,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       LOGGER.debug("availableProcessors={}", Runtime.getRuntime().availableProcessors());
 
       // Smart/auto mode:
-      // If the last run is more than 15 years old, the assume that this job populating
+      // If the last run is more than 50 years old, the assume that this job populating
       // ElasticSearch for the first time.
 
       final Calendar cal = Calendar.getInstance();
-      cal.add(Calendar.YEAR, -15);
+      cal.add(Calendar.YEAR, -50);
       final boolean autoMode = this.opts.lastRunMode && lastSuccessfulRunTime.before(cal.getTime());
 
       if (autoMode) {
