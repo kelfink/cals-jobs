@@ -27,7 +27,6 @@ import gov.ca.cwds.data.cms.EducationProviderContactDao;
 import gov.ca.cwds.data.cms.OtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.cms.OtherChildInPlacemtHomeDao;
 import gov.ca.cwds.data.cms.OtherClientNameDao;
-import gov.ca.cwds.data.cms.ReporterDao;
 import gov.ca.cwds.data.cms.ServiceProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.Allegation;
@@ -50,7 +49,8 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedAttorney;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.data.persistence.cms.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.ReplicatedClientDao;
-import gov.ca.cwds.data.persistence.cms.Reporter;
+import gov.ca.cwds.data.persistence.cms.ReplicatedReporter;
+import gov.ca.cwds.data.persistence.cms.ReplicatedReporterDao;
 import gov.ca.cwds.data.persistence.cms.ServiceProvider;
 import gov.ca.cwds.data.persistence.cms.StaffPerson;
 import gov.ca.cwds.data.persistence.cms.SubstituteCareProvider;
@@ -114,14 +114,14 @@ public class JobsGuiceInjector extends AbstractModule {
         .addAnnotatedClass(OtherAdultInPlacemtHome.class)
         .addAnnotatedClass(OtherChildInPlacemtHome.class).addAnnotatedClass(OtherClientName.class)
         .addAnnotatedClass(Referral.class).addAnnotatedClass(ReferralClient.class)
-        .addAnnotatedClass(Reporter.class).addAnnotatedClass(ServiceProvider.class)
+        .addAnnotatedClass(ReplicatedReporter.class).addAnnotatedClass(ServiceProvider.class)
         .addAnnotatedClass(StaffPerson.class).addAnnotatedClass(SubstituteCareProvider.class)
         .addAnnotatedClass(ReplicatedClient.class).buildSessionFactory());
 
     // Register required DAO classes.
     bind(DocumentMetadataDao.class).to(DocumentMetadataDaoImpl.class);
     bind(ReplicatedClientDao.class);
-    bind(ReporterDao.class);
+    bind(ReplicatedReporterDao.class);
     bind(ReplicatedAttorneyDao.class);
     bind(ClientCollateralDao.class);
     bind(CollateralIndividualDao.class);

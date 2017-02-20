@@ -1,5 +1,9 @@
 package gov.ca.cwds.jobs;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -7,9 +11,9 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.data.cms.ReporterDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.Reporter;
+import gov.ca.cwds.data.persistence.cms.ReplicatedReporter;
+import gov.ca.cwds.data.persistence.cms.ReplicatedReporterDao;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
@@ -18,7 +22,7 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * 
  * @author CWDS API Team
  */
-public class ReporterIndexerJob extends BasePersonIndexerJob<Reporter> {
+public class ReporterIndexerJob extends BasePersonIndexerJob<ReplicatedReporter> {
 
   private static final Logger LOGGER = LogManager.getLogger(ReporterIndexerJob.class);
 
@@ -32,10 +36,32 @@ public class ReporterIndexerJob extends BasePersonIndexerJob<Reporter> {
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public ReporterIndexerJob(final ReporterDao reporterDao, final ElasticsearchDao elasticsearchDao,
-      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory) {
+  public ReporterIndexerJob(final ReplicatedReporterDao reporterDao,
+      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
+      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
     super(reporterDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  }
+
+  @Override
+  protected List<Pair<String, String>> getPartitionRanges() {
+    List<Pair<String, String>> ret = new ArrayList<>();
+    ret.add(Pair.of(" ", "CpE9999999"));
+    ret.add(Pair.of("CpE9999999", "EE99999998"));
+    ret.add(Pair.of("EE99999998", "GUE9999997"));
+    ret.add(Pair.of("GUE9999997", "I999999996"));
+    ret.add(Pair.of("I999999996", "LpE9999995"));
+    ret.add(Pair.of("LpE9999995", "NE99999994"));
+    ret.add(Pair.of("NE99999994", "PUE9999993"));
+    ret.add(Pair.of("PUE9999993", "R999999992"));
+    ret.add(Pair.of("R999999992", "UpE9999991"));
+    ret.add(Pair.of("UpE9999991", "WE99999990"));
+    ret.add(Pair.of("WE99999990", "YUE999999Z"));
+    ret.add(Pair.of("YUE999999Z", "099999999Y"));
+    ret.add(Pair.of("099999999Y", "3pE999999X"));
+    ret.add(Pair.of("3pE999999X", "5E9999999W"));
+    ret.add(Pair.of("5E9999999W", "7UE999999V"));
+    ret.add(Pair.of("7UE999999V", "999999999U"));
+    return ret;
   }
 
   /**
