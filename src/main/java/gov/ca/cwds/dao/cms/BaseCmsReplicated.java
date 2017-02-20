@@ -49,5 +49,13 @@ public class BaseCmsReplicated implements Serializable, CmsReplicatedEntity {
     return replicationDate;
   }
 
+  public void setReplicationOperation(CmsReplicationOperation replicationOperation) {
+    this.replicationOperation = replicationOperation;
+  }
+
+  public void setReplicationDate(Date replicationDate) {
+    this.replicationDate = replicationDate;
+  }
+
 }
 

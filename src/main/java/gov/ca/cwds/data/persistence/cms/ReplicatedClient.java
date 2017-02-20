@@ -7,7 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
@@ -16,7 +15,6 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import gov.ca.cwds.dao.cms.BaseCmsReplicated;
 import gov.ca.cwds.dao.cms.CmsReplicatedEntity;
 import gov.ca.cwds.dao.cms.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -59,21 +57,32 @@ public class ReplicatedClient extends Client implements CmsReplicatedEntity {
    */
   private static final long serialVersionUID = 6160989831851057517L;
 
-  @Transient
-  private BaseCmsReplicated replicated = new BaseCmsReplicated();
-
   @Enumerated(EnumType.STRING)
   @Column(name = "IBMSNAP_OPERATION", updatable = false)
-  @Override
-  public CmsReplicationOperation getReplicationOperation() {
-    return replicated.getReplicationOperation();
-  }
+  private CmsReplicationOperation replicationOperation;
 
   @Type(type = "timestamp")
   @Column(name = "IBMSNAP_LOGMARKER", updatable = false)
+  private Date replicationDate;
+
+  @Override
+  public CmsReplicationOperation getReplicationOperation() {
+    return replicationOperation;
+  }
+
+  @Override
+  public void setReplicationOperation(CmsReplicationOperation replicationOperation) {
+    this.replicationOperation = replicationOperation;
+  }
+
   @Override
   public Date getReplicationDate() {
-    return replicated.getReplicationDate();
+    return replicationDate;
+  }
+
+  @Override
+  public void setReplicationDate(Date replicationDate) {
+    this.replicationDate = replicationDate;
   }
 
 }

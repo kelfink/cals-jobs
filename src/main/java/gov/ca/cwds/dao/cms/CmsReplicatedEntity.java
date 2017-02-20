@@ -25,4 +25,7 @@ public interface CmsReplicatedEntity extends Serializable {
    */
   Date getReplicationDate();
 
+  void setReplicationOperation(CmsReplicationOperation replicationOperation);
+
+  void setReplicationDate(Date replicationDate);
 }
