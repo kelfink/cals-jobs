@@ -28,11 +28,11 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.data.BaseDaoImpl;
-import gov.ca.cwds.data.IPersonAware;
 import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.Client;
+import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
@@ -243,7 +243,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         // Spawn a reasonable number of threads to process all results.
         results.parallelStream().forEach(p -> {
           try {
-            IPersonAware pers = (IPersonAware) p;
+            ApiPersonAware pers = (ApiPersonAware) p;
             final Person esp = new Person(p.getPrimaryKey().toString(), pers.getFirstName(),
                 pers.getLastName(), pers.getGender(), DomainChef.cookDate(pers.getBirthDate()),
                 pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(p));
@@ -304,7 +304,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       // This bucket runs on one thread only. No parallel stream.
       results.stream().forEach(p -> {
         try {
-          IPersonAware pers = (IPersonAware) p;
+          ApiPersonAware pers = (ApiPersonAware) p;
           final Person esp = new Person(p.getPrimaryKey().toString(), pers.getFirstName(),
               pers.getLastName(), pers.getGender(), DomainChef.cookDate(pers.getBirthDate()),
               pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(p));
