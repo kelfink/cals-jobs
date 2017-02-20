@@ -84,11 +84,12 @@ public class ServiceProviderIndexerJobTest {
     assertThat(query, is(notNullValue()));
   }
 
-  @Test
-  public void testFindAllByBucketNamedQueryExist() throws Exception {
-    Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ServiceProvider.findAllByBucket");
-    assertThat(query, is(notNullValue()));
-  }
+  // @Test
+  // public void testFindAllByBucketNamedQueryExist() throws Exception {
+  // Query query =
+  // session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ServiceProvider.findAllByBucket");
+  // assertThat(query, is(notNullValue()));
+  // }
+
 }
 
