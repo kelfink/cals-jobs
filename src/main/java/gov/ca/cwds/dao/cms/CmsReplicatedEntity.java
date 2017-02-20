@@ -19,24 +19,10 @@ public interface CmsReplicatedEntity extends Serializable {
   CmsReplicationOperation getReplicationOperation();
 
   /**
-   * Setter for replication operation.
-   * 
-   * @param replicationOperation replication operation
-   */
-  void setReplicationOperation(CmsReplicationOperation replicationOperation);
-
-  /**
    * Getter for replication date.
    * 
    * @return replication date
    */
   Date getReplicationDate();
-
-  /**
-   * Getter for replication date.
-   * 
-   * @param replicationDate replication date
-   */
-  void setReplicationDate(Date replicationDate);
 
 }

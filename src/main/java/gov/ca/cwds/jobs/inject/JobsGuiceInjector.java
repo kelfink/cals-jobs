@@ -23,7 +23,6 @@ import gov.ca.cwds.dao.cms.DocumentMetadataDaoImpl;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.AttorneyDao;
 import gov.ca.cwds.data.cms.ClientCollateralDao;
-import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.cms.CollateralIndividualDao;
 import gov.ca.cwds.data.cms.EducationProviderContactDao;
 import gov.ca.cwds.data.cms.OtherAdultInPlacemtHomeDao;
@@ -48,6 +47,8 @@ import gov.ca.cwds.data.persistence.cms.OtherChildInPlacemtHome;
 import gov.ca.cwds.data.persistence.cms.OtherClientName;
 import gov.ca.cwds.data.persistence.cms.Referral;
 import gov.ca.cwds.data.persistence.cms.ReferralClient;
+import gov.ca.cwds.data.persistence.cms.ReplicatedClient;
+import gov.ca.cwds.data.persistence.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.persistence.cms.Reporter;
 import gov.ca.cwds.data.persistence.cms.ServiceProvider;
 import gov.ca.cwds.data.persistence.cms.StaffPerson;
@@ -114,11 +115,12 @@ public class JobsGuiceInjector extends AbstractModule {
             .addAnnotatedClass(OtherClientName.class).addAnnotatedClass(Referral.class)
             .addAnnotatedClass(ReferralClient.class).addAnnotatedClass(Reporter.class)
             .addAnnotatedClass(ServiceProvider.class).addAnnotatedClass(StaffPerson.class)
-            .addAnnotatedClass(SubstituteCareProvider.class).buildSessionFactory());
+            .addAnnotatedClass(SubstituteCareProvider.class)
+            .addAnnotatedClass(ReplicatedClient.class).buildSessionFactory());
 
     // Register required DAO classes.
     bind(DocumentMetadataDao.class).to(DocumentMetadataDaoImpl.class);
-    bind(ClientDao.class);
+    bind(ReplicatedClientDao.class);
     bind(ReporterDao.class);
     bind(AttorneyDao.class);
     bind(ClientCollateralDao.class);

@@ -29,7 +29,9 @@ public class BaseCmsReplicated implements Serializable, CmsReplicatedEntity {
   @Column(name = "IBMSNAP_LOGMARKER", updatable = false)
   private Date replicationDate;
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see gov.ca.cwds.dao.cms.CmsReplicatedEntity#getReplicationOperation()
    */
   @Override
@@ -37,28 +39,14 @@ public class BaseCmsReplicated implements Serializable, CmsReplicatedEntity {
     return replicationOperation;
   }
 
-  /* (non-Javadoc)
-   * @see gov.ca.cwds.dao.cms.CmsReplicatedEntity#setReplicationOperation(gov.ca.cwds.dao.cms.CmsReplicaCommon.CmsReplicationOperation)
-   */
-  @Override
-  public void setReplicationOperation(CmsReplicationOperation replicationOperation) {
-    this.replicationOperation = replicationOperation;
-  }
-
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see gov.ca.cwds.dao.cms.CmsReplicatedEntity#getReplicationDate()
    */
   @Override
   public Date getReplicationDate() {
     return replicationDate;
-  }
-
-  /* (non-Javadoc)
-   * @see gov.ca.cwds.dao.cms.CmsReplicatedEntity#setReplicationDate(java.util.Date)
-   */
-  @Override
-  public void setReplicationDate(Date replicationDate) {
-    this.replicationDate = replicationDate;
   }
 
 }
