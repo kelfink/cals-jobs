@@ -12,6 +12,7 @@
 		<property name="hibernate.connection.password">${DB_CMS_PASSWORD}</property>
 		<property name="hibernate.connection.url">${DB_CMS_JDBC_URL}</property>
 		<property name="hibernate.default_schema">${DB_CMS_SCHEMA}</property>
+	
 		<property name="connection_pool_size">10</property>
 		<property name="show_sql">true</property>
 

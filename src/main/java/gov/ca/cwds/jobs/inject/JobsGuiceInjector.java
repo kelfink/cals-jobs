@@ -105,7 +105,7 @@ public class JobsGuiceInjector extends AbstractModule {
   @Override
   protected void configure() {
     bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class).toInstance(new Configuration()
-        .configure("cms-hibernate.cfg.xml").addPackage("gov.ca.cwds.data.persistence.cms")
+        .configure("jobs-cms-hibernate.cfg.xml").addPackage("gov.ca.cwds.data.persistence.cms")
         .addAnnotatedClass(Allegation.class).addAnnotatedClass(ReplicatedAttorney.class)
         .addAnnotatedClass(ClientCollateral.class).addAnnotatedClass(CmsDocReferralClient.class)
         .addAnnotatedClass(CmsDocument.class).addAnnotatedClass(CmsDocumentBlobSegment.class)
