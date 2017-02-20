@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.cms.CollateralIndividualDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.persistence.cms.ReplicatedCollateralIndividualDao;
 
 /**
  * @author CWDS API Team
@@ -60,7 +61,7 @@ public class CollateralIndividualIndexerJobTest {
 
   @Test
   public void testInstantiation() throws Exception {
-    CollateralIndividualDao collateralIndividualDao = null;
+    ReplicatedCollateralIndividualDao collateralIndividualDao = null;
     ElasticsearchDao elasticsearchDao = null;
     String lastJobRunTimeFilename = null;
     ObjectMapper mapper = null;
