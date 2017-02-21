@@ -53,7 +53,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 @Table(name = "REPTR_T")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ReplicatedCollateralIndividual extends CollateralIndividual
+public class ReplicatedCollateralIndividual extends BaseCollateralIndividual
     implements CmsReplicatedEntity {
 
   /**

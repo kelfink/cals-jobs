@@ -48,7 +48,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
             + "trim(z.RPTR_ST_NM) as RPTR_ST_NM, trim(z.RPTR_ST_NO) as RPTR_ST_NO, "
             + "trim(z.SUFX_TLDSC) as SUFX_TLDSC, z.RPTR_ZIPNO, z.LST_UPD_ID, z.LST_UPD_TS, "
             + "z.FKREFERL_T, z.FKLAW_ENFT, z.ZIP_SFX_NO, z.CNTY_SPFCD "
-            + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
+            + ", 'U' as IBMSNAP_OPERATION, z.LST_UPD_TS as IBMSNAP_LOGMARKER "
             + "from ( select mod(y.rn, CAST(:total_buckets AS INTEGER)) + 1 as bucket, y.* "
             + "from ( select row_number() over (order by 1) as rn, x.* "
             + "from {h-schema}REPTR_T x WHERE x.FKREFERL_T >= :min_id and x.FKREFERL_T < :max_id "
@@ -58,7 +58,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 @Table(name = "REPTR_T")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ReplicatedReporter extends Reporter implements CmsReplicatedEntity {
+public class ReplicatedReporter extends BaseReporter implements CmsReplicatedEntity {
 
   /**
    * 
