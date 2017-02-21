@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
 import gov.ca.cwds.data.cms.SubstituteCareProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
@@ -60,7 +61,7 @@ public class SubstituteCareProviderIndexerJobTest {
 
   @Test
   public void testInstantiation() throws Exception {
-    SubstituteCareProviderDao substituteCareProviderDao = null;
+    ReplicatedSubstituteCareProviderDao substituteCareProviderDao = null;
     ElasticsearchDao elasticsearchDao = null;
     String lastJobRunTimeFilename = null;
     ObjectMapper mapper = null;

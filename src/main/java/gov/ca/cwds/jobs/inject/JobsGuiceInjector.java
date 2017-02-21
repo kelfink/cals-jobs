@@ -26,6 +26,7 @@ import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
+import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.EducationProviderContactDao;
 import gov.ca.cwds.data.cms.OtherAdultInPlacemtHomeDao;
@@ -51,8 +52,8 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedCollateralIndividual;
 import gov.ca.cwds.data.persistence.cms.ReplicatedOtherClientName;
 import gov.ca.cwds.data.persistence.cms.ReplicatedReporter;
 import gov.ca.cwds.data.persistence.cms.ReplicatedServiceProvider;
+import gov.ca.cwds.data.persistence.cms.ReplicatedSubstituteCareProvider;
 import gov.ca.cwds.data.persistence.cms.StaffPerson;
-import gov.ca.cwds.data.persistence.cms.SubstituteCareProvider;
 import gov.ca.cwds.data.persistence.cms.SystemCodeDaoFileImpl;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
@@ -117,7 +118,7 @@ public class JobsGuiceInjector extends AbstractModule {
             .addAnnotatedClass(ReplicatedOtherClientName.class).addAnnotatedClass(Referral.class)
             .addAnnotatedClass(ReferralClient.class).addAnnotatedClass(ReplicatedReporter.class)
             .addAnnotatedClass(ReplicatedServiceProvider.class).addAnnotatedClass(StaffPerson.class)
-            .addAnnotatedClass(SubstituteCareProvider.class)
+            .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
             .addAnnotatedClass(ReplicatedClient.class).buildSessionFactory());
 
     // Register required DAO classes.
@@ -131,6 +132,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(OtherChildInPlacemtHomeDao.class);
     bind(ReplicatedOtherClientNameDao.class);
     bind(ReplicatedServiceProviderDao.class);
+    bind(ReplicatedSubstituteCareProviderDao.class);
     bind(EducationProviderContactDao.class);
 
     // Instantiate as a singleton, else Guice creates a new instance each time.

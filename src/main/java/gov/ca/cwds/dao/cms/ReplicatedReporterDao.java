@@ -5,13 +5,12 @@ import org.hibernate.SessionFactory;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.data.BaseDaoImpl;
-import gov.ca.cwds.data.persistence.cms.ReplicatedAttorney;
 import gov.ca.cwds.data.persistence.cms.ReplicatedReporter;
 import gov.ca.cwds.data.std.BatchBucketDao;
 import gov.ca.cwds.inject.CmsSessionFactory;
 
 /**
- * Hibernate DAO for DB2 {@link ReplicatedAttorney}.
+ * Hibernate DAO for DB2 {@link ReplicatedReporter}.
  * 
  * @author CWDS API Team
  * @see CmsSessionFactory

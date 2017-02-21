@@ -1,5 +1,9 @@
 package gov.ca.cwds.jobs;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -7,18 +11,19 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.data.cms.SubstituteCareProviderDao;
+import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.SubstituteCareProvider;
+import gov.ca.cwds.data.persistence.cms.ReplicatedSubstituteCareProvider;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
 /**
- * Job to load reporters from CMS into ElasticSearch
+ * Job to load Substitute Care Providers from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */
-public class SubstituteCareProviderIndexJob extends BasePersonIndexerJob<SubstituteCareProvider> {
+public class SubstituteCareProviderIndexJob
+    extends BasePersonIndexerJob<ReplicatedSubstituteCareProvider> {
 
   private static final Logger LOGGER = LogManager.getLogger(SubstituteCareProviderIndexJob.class);
 
@@ -32,11 +37,19 @@ public class SubstituteCareProviderIndexJob extends BasePersonIndexerJob<Substit
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public SubstituteCareProviderIndexJob(final SubstituteCareProviderDao substituteCareProviderDao,
+  public SubstituteCareProviderIndexJob(
+      final ReplicatedSubstituteCareProviderDao substituteCareProviderDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
     super(substituteCareProviderDao, elasticsearchDao, lastJobRunTimeFilename, mapper,
         sessionFactory);
+  }
+
+  @Override
+  protected List<Pair<String, String>> getPartitionRanges() {
+    List<Pair<String, String>> ret = new ArrayList<>();
+    ret.add(Pair.of(" ", "999999999U"));
+    return ret;
   }
 
   /**
