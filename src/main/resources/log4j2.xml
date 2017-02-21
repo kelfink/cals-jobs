@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
+
 	<Appenders>
 		<Console name="Console">
 			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
@@ -14,7 +15,7 @@
 		<Root level="INFO">
 			<AppenderRef ref="ASYNC" />
 		</Root>
-		<logger name="gov.ca.cwds" level="DEBUG" additivity="false">
+		<logger name="gov.ca.cwds" level="INFO" additivity="false">
 			<AppenderRef ref="ASYNC" />
 		</logger>
 	</Loggers>
