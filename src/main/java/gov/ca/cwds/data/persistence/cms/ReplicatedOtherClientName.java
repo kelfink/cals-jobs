@@ -20,45 +20,33 @@ import gov.ca.cwds.dao.cms.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.PersistentObject;
 
 /**
- * {@link PersistentObject} representing a Reporter as a {@link CmsReplicatedEntity}.
+ * {@link PersistentObject} representing an Other Client Name as a {@link CmsReplicatedEntity}.
  * 
  * @author CWDS API Team
  */
 @NamedNativeQueries({
     @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.ReplicatedReporter.findAllUpdatedAfter",
-        query = "select trim(z.RPTR_BDGNO) as RPTR_BDGNO, trim(z.RPTR_CTYNM) as RPTR_CTYNM, "
-            + "z.COL_RELC, z.CMM_MTHC, z.CNFWVR_IND, z.FDBACK_DOC, z.RPTR_EMPNM, "
-            + "z.FEEDBCK_DT, z.FB_RQR_IND, z.RPTR_FSTNM, trim(z.RPTR_LSTNM) as RPTR_LSTNM, "
-            + "z.MNRPTR_IND, z.MSG_EXT_NO, z.MSG_TEL_NO, trim(z.MID_INI_NM) as MID_INI_NM, "
-            + "trim(z.NMPRFX_DSC) as NMPRFX_DSC, z.PRM_TEL_NO, z.PRM_EXT_NO, z.STATE_C, "
-            + "trim(z.RPTR_ST_NM) as RPTR_ST_NM, trim(z.RPTR_ST_NO) as RPTR_ST_NO, "
-            + "trim(z.SUFX_TLDSC) as SUFX_TLDSC, z.RPTR_ZIPNO, z.LST_UPD_ID, z.LST_UPD_TS, "
-            + "z.FKREFERL_T, z.FKLAW_ENFT, z.ZIP_SFX_NO, z.CNTY_SPFCD "
+        name = "gov.ca.cwds.data.persistence.cms.ReplicatedOtherClientName.findAllUpdatedAfter",
+        query = "select z.THIRD_ID, z.FIRST_NM, z.LAST_NM, z.MIDDLE_NM, z.NMPRFX_DSC, "
+            + "z.NAME_TPC, z.SUFX_TLDSC, z.LST_UPD_ID, z.LST_UPD_TS, z.FKCLIENT_T "
             + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
             + "from {h-schema}REPTR_T z WHERE z.IBMSNAP_LOGMARKER >= :after for read only ",
-        resultClass = ReplicatedReporter.class),
+        resultClass = ReplicatedOtherClientName.class),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.ReplicatedReporter.findPartitionedBuckets",
-        query = "select trim(z.RPTR_BDGNO) as RPTR_BDGNO, trim(z.RPTR_CTYNM) as RPTR_CTYNM, "
-            + "z.COL_RELC, z.CMM_MTHC, z.CNFWVR_IND, z.FDBACK_DOC, z.RPTR_EMPNM, "
-            + "z.FEEDBCK_DT, z.FB_RQR_IND, z.RPTR_FSTNM, trim(z.RPTR_LSTNM) as RPTR_LSTNM, "
-            + "z.MNRPTR_IND, z.MSG_EXT_NO, z.MSG_TEL_NO, trim(z.MID_INI_NM) as MID_INI_NM, "
-            + "trim(z.NMPRFX_DSC) as NMPRFX_DSC, z.PRM_TEL_NO, z.PRM_EXT_NO, z.STATE_C, "
-            + "trim(z.RPTR_ST_NM) as RPTR_ST_NM, trim(z.RPTR_ST_NO) as RPTR_ST_NO, "
-            + "trim(z.SUFX_TLDSC) as SUFX_TLDSC, z.RPTR_ZIPNO, z.LST_UPD_ID, z.LST_UPD_TS, "
-            + "z.FKREFERL_T, z.FKLAW_ENFT, z.ZIP_SFX_NO, z.CNTY_SPFCD "
+        query = "select z.THIRD_ID, z.FIRST_NM, z.LAST_NM, z.MIDDLE_NM, z.NMPRFX_DSC, "
+            + "z.NAME_TPC, z.SUFX_TLDSC, z.LST_UPD_ID, z.LST_UPD_TS, z.FKCLIENT_T "
             + ", 'U' as IBMSNAP_OPERATION, z.LST_UPD_TS as IBMSNAP_LOGMARKER "
             + "from ( select mod(y.rn, CAST(:total_buckets AS INTEGER)) + 1 as bucket, y.* "
             + "from ( select row_number() over (order by 1) as rn, x.* "
-            + "from {h-schema}REPTR_T x WHERE x.FKREFERL_T >= :min_id and x.FKREFERL_T < :max_id "
+            + "from {h-schema}OCL_NM_T x WHERE x.FKREFERL_T >= :min_id and x.FKREFERL_T < :max_id "
             + ") y ) z where z.bucket = :bucket_num for read only",
-        resultClass = ReplicatedReporter.class)})
+        resultClass = ReplicatedOtherClientName.class)})
 @Entity
-@Table(name = "REPTR_T")
+@Table(name = "OCL_NM_T")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ReplicatedReporter extends BaseReporter implements CmsReplicatedEntity {
+public class ReplicatedOtherClientName extends BaseOtherClientName implements CmsReplicatedEntity {
 
   /**
    * 

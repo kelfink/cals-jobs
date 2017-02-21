@@ -146,7 +146,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
         LOGGER.error("Error executing bulk", failure);
       }
-    }).setBulkActions(1000).build();
+    }).setBulkActions(1500).build();
   }
 
   /**
