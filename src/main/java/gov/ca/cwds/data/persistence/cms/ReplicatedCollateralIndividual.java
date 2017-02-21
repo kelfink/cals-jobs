@@ -44,6 +44,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
             + "z.SUFX_TLDSC, z.ZIP_NO, z.LST_UPD_ID, z.LST_UPD_TS, z.ZIP_SFX_NO, "
             + "z.COMNT_DSC, z.GENDER_CD, z.BIRTH_DT, z.MRTL_STC, z.EMAIL_ADDR, "
             + "z.ESTBLSH_CD, z.ESTBLSH_ID, z.RESOST_IND "
+            + ", 'U' as IBMSNAP_OPERATION, z.LST_UPD_TS as IBMSNAP_LOGMARKER "
             + "from ( select mod(y.rn, CAST(:total_buckets AS INTEGER)) + 1 as bucket, y.* "
             + "from ( select row_number() over (order by 1) as rn, x.* "
             + "from {h-schema}COLTRL_T x WHERE x.IDENTIFIER >= :min_id and x.IDENTIFIER < :max_id "
