@@ -16,9 +16,9 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.data.cms.AttorneyDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.ReplicatedAttorneyDao;
 
 /**
  * @author CWDS API Team
