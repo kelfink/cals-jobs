@@ -25,11 +25,11 @@ import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
+import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.EducationProviderContactDao;
 import gov.ca.cwds.data.cms.OtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.cms.OtherChildInPlacemtHomeDao;
-import gov.ca.cwds.data.cms.ServiceProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.Allegation;
 import gov.ca.cwds.data.persistence.cms.CmsDocReferralClient;
@@ -50,7 +50,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.ReplicatedCollateralIndividual;
 import gov.ca.cwds.data.persistence.cms.ReplicatedOtherClientName;
 import gov.ca.cwds.data.persistence.cms.ReplicatedReporter;
-import gov.ca.cwds.data.persistence.cms.ServiceProvider;
+import gov.ca.cwds.data.persistence.cms.ReplicatedServiceProvider;
 import gov.ca.cwds.data.persistence.cms.StaffPerson;
 import gov.ca.cwds.data.persistence.cms.SubstituteCareProvider;
 import gov.ca.cwds.data.persistence.cms.SystemCodeDaoFileImpl;
@@ -116,12 +116,13 @@ public class JobsGuiceInjector extends AbstractModule {
             .addAnnotatedClass(OtherChildInPlacemtHome.class)
             .addAnnotatedClass(ReplicatedOtherClientName.class).addAnnotatedClass(Referral.class)
             .addAnnotatedClass(ReferralClient.class).addAnnotatedClass(ReplicatedReporter.class)
-            .addAnnotatedClass(ServiceProvider.class).addAnnotatedClass(StaffPerson.class)
+            .addAnnotatedClass(ReplicatedServiceProvider.class).addAnnotatedClass(StaffPerson.class)
             .addAnnotatedClass(SubstituteCareProvider.class)
             .addAnnotatedClass(ReplicatedClient.class).buildSessionFactory());
 
     // Register required DAO classes.
     bind(DocumentMetadataDao.class).to(DocumentMetadataDaoImpl.class);
+
     bind(ReplicatedClientDao.class);
     bind(ReplicatedReporterDao.class);
     bind(ReplicatedAttorneyDao.class);
@@ -129,7 +130,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(OtherAdultInPlacemtHomeDao.class);
     bind(OtherChildInPlacemtHomeDao.class);
     bind(ReplicatedOtherClientNameDao.class);
-    bind(ServiceProviderDao.class);
+    bind(ReplicatedServiceProviderDao.class);
     bind(EducationProviderContactDao.class);
 
     // Instantiate as a singleton, else Guice creates a new instance each time.
