@@ -7,9 +7,9 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.data.cms.EducationProviderContactDao;
+import gov.ca.cwds.dao.cms.ReplicatedEducationProviderContactDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.EducationProviderContact;
+import gov.ca.cwds.data.persistence.cms.ReplicatedEducationProviderContact;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
@@ -19,7 +19,7 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * @author CWDS API Team
  */
 public class EducationProviderContactIndexerJob
-    extends BasePersonIndexerJob<EducationProviderContact> {
+    extends BasePersonIndexerJob<ReplicatedEducationProviderContact> {
 
   private static final Logger LOGGER =
       LogManager.getLogger(EducationProviderContactIndexerJob.class);
@@ -34,7 +34,7 @@ public class EducationProviderContactIndexerJob
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public EducationProviderContactIndexerJob(final EducationProviderContactDao mainDao,
+  public EducationProviderContactIndexerJob(final ReplicatedEducationProviderContactDao mainDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
     super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);

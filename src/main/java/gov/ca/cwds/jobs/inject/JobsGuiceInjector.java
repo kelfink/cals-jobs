@@ -23,12 +23,12 @@ import gov.ca.cwds.dao.cms.DocumentMetadataDaoImpl;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
+import gov.ca.cwds.dao.cms.ReplicatedEducationProviderContactDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
-import gov.ca.cwds.data.cms.EducationProviderContactDao;
 import gov.ca.cwds.data.cms.OtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.cms.OtherChildInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
@@ -39,7 +39,6 @@ import gov.ca.cwds.data.persistence.cms.CmsDocumentBlobSegment;
 import gov.ca.cwds.data.persistence.cms.CmsSystemCodeCacheService;
 import gov.ca.cwds.data.persistence.cms.CollateralIndividual;
 import gov.ca.cwds.data.persistence.cms.CrossReport;
-import gov.ca.cwds.data.persistence.cms.EducationProviderContact;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeDao;
 import gov.ca.cwds.data.persistence.cms.OtherAdultInPlacemtHome;
@@ -49,6 +48,7 @@ import gov.ca.cwds.data.persistence.cms.ReferralClient;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAttorney;
 import gov.ca.cwds.data.persistence.cms.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.ReplicatedCollateralIndividual;
+import gov.ca.cwds.data.persistence.cms.ReplicatedEducationProviderContact;
 import gov.ca.cwds.data.persistence.cms.ReplicatedOtherClientName;
 import gov.ca.cwds.data.persistence.cms.ReplicatedReporter;
 import gov.ca.cwds.data.persistence.cms.ReplicatedServiceProvider;
@@ -112,7 +112,7 @@ public class JobsGuiceInjector extends AbstractModule {
             .addAnnotatedClass(CmsDocumentBlobSegment.class)
             .addAnnotatedClass(ReplicatedCollateralIndividual.class)
             .addAnnotatedClass(CollateralIndividual.class).addAnnotatedClass(CrossReport.class)
-            .addAnnotatedClass(EducationProviderContact.class)
+            .addAnnotatedClass(ReplicatedEducationProviderContact.class)
             .addAnnotatedClass(OtherAdultInPlacemtHome.class)
             .addAnnotatedClass(OtherChildInPlacemtHome.class)
             .addAnnotatedClass(ReplicatedOtherClientName.class).addAnnotatedClass(Referral.class)
@@ -133,7 +133,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ReplicatedOtherClientNameDao.class);
     bind(ReplicatedServiceProviderDao.class);
     bind(ReplicatedSubstituteCareProviderDao.class);
-    bind(EducationProviderContactDao.class);
+    bind(ReplicatedEducationProviderContactDao.class);
 
     // Instantiate as a singleton, else Guice creates a new instance each time.
     bind(ObjectMapper.class).asEagerSingleton();
