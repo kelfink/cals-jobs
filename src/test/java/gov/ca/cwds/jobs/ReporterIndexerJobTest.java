@@ -1,10 +1,8 @@
 package gov.ca.cwds.jobs;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -71,18 +69,19 @@ public class ReporterIndexerJobTest {
     assertThat(target, notNullValue());
   }
 
-  @Test
-  public void testfindAllNamedQueryExists() throws Exception {
-    Query query = session.getNamedQuery("gov.ca.cwds.data.persistence.cms.Reporter.findAll");
-    assertThat(query, is(notNullValue()));
-  }
-
-  @Test
-  public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-    Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.Reporter.findAllUpdatedAfter");
-    assertThat(query, is(notNullValue()));
-  }
+  // @Test
+  // public void testfindAllNamedQueryExists() throws Exception {
+  // Query query =
+  // session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ReplicatedReporter.findAll");
+  // assertThat(query, is(notNullValue()));
+  // }
+  //
+  // @Test
+  // public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
+  // Query query = session
+  // .getNamedQuery("gov.ca.cwds.data.persistence.cms.ReplicatedReporter.findAllUpdatedAfter");
+  // assertThat(query, is(notNullValue()));
+  // }
 
   // @Test
   // public void testFindAllByBucketNamedQueryExists() throws Exception {
