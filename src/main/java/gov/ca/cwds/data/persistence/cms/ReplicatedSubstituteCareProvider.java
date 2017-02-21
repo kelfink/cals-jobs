@@ -40,7 +40,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
             + "from {h-schema}SB_PVDRT z WHERE z.IBMSNAP_LOGMARKER >= :after for read only ",
         resultClass = ReplicatedReporter.class),
     @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.ReplicatedSubstituteCareProvider.findPartitionedBuckets",
+        name = "gov.ca.cwds.data.persistence.cms.ReplicatedSubstituteCareProvider.findAllByBucket",
         query = "select z.IDENTIFIER, z.ADD_TEL_NO, z.ADD_EXT_NO, z.YR_INC_AMT, "
             + "z.BIRTH_DT, z.CA_DLIC_NO, z.CITY_NM, z.EDUCATION, z.EMAIL_ADDR, "
             + "z.EMPLYR_NM, z.EMPL_STAT, z.ETH_UD_CD, z.FIRST_NM, z.FRG_ADRT_B, "
@@ -52,8 +52,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
             + ", 'U' as IBMSNAP_OPERATION, z.LST_UPD_TS as IBMSNAP_LOGMARKER "
             + "from ( select mod(y.rn, CAST(:total_buckets AS INTEGER)) + 1 as bucket, y.* "
             + "from ( select row_number() over (order by 1) as rn, x.* "
-            + "from {h-schema}SB_PVDRT x WHERE x.IDENTIFIER >= :min_id and x.IDENTIFIER < :max_id "
-            + ") y ) z where z.bucket = :bucket_num for read only",
+            + "from {h-schema}SB_PVDRT x ) y ) z where z.bucket = :bucket_num for read only",
         resultClass = ReplicatedSubstituteCareProvider.class)})
 @Entity
 @Table(name = "SB_PVDRT")

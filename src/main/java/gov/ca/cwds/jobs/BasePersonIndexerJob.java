@@ -358,20 +358,27 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
       if (autoMode) {
         LOGGER.warn("AUTO MODE!");
+        getOpts().setStartBucket(1);
+        getOpts().setEndBucket(8);
+        getOpts().setTotalBuckets(8);
 
         if (!this.getPartitionRanges().isEmpty()) {
-          getOpts().setStartBucket(1);
-          getOpts().setStartBucket(8);
-          getOpts().setTotalBuckets(8);
-
+          LOGGER.warn("PARTITIONS");
           for (Pair<String, String> pair : this.getPartitionRanges()) {
             getOpts().setMinId(pair.getLeft());
             getOpts().setMaxId(pair.getRight());
 
             LOGGER.warn("Process partition range {} to {}", getOpts().getMinId(),
                 getOpts().getMaxId());
-            LongStream.rangeClosed(1L, 8L).sorted().parallel().forEach(this::processBucket);
+            LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).sorted()
+                .parallel().forEach(this::processBucket);
           }
+        } else {
+          LOGGER.warn("NO PARTITIONS");
+          getOpts().setMaxId(null);
+          getOpts().setMinId(null);
+          LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).sorted()
+              .parallel().forEach(this::processBucket);
         }
 
         ret = startTime;

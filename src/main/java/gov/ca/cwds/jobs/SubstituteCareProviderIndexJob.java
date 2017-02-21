@@ -1,9 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -43,13 +39,6 @@ public class SubstituteCareProviderIndexJob
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
     super(substituteCareProviderDao, elasticsearchDao, lastJobRunTimeFilename, mapper,
         sessionFactory);
-  }
-
-  @Override
-  protected List<Pair<String, String>> getPartitionRanges() {
-    List<Pair<String, String>> ret = new ArrayList<>();
-    ret.add(Pair.of(" ", "999999999U"));
-    return ret;
   }
 
   /**
