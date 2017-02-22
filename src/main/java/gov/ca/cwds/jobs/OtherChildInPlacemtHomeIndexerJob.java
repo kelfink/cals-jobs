@@ -7,9 +7,9 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.data.cms.OtherChildInPlacemtHomeDao;
+import gov.ca.cwds.dao.cms.ReplicatedOtherChildInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.OtherChildInPlacemtHome;
+import gov.ca.cwds.data.persistence.cms.ReplicatedOtherChildInPlacemtHome;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
@@ -19,7 +19,7 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * @author CWDS API Team
  */
 public class OtherChildInPlacemtHomeIndexerJob
-    extends BasePersonIndexerJob<OtherChildInPlacemtHome> {
+    extends BasePersonIndexerJob<ReplicatedOtherChildInPlacemtHome> {
 
   private static final Logger LOGGER =
       LogManager.getLogger(OtherChildInPlacemtHomeIndexerJob.class);
@@ -34,7 +34,7 @@ public class OtherChildInPlacemtHomeIndexerJob
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public OtherChildInPlacemtHomeIndexerJob(final OtherChildInPlacemtHomeDao mainDao,
+  public OtherChildInPlacemtHomeIndexerJob(final ReplicatedOtherChildInPlacemtHomeDao mainDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
     super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
