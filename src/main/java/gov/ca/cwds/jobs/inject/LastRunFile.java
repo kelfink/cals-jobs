@@ -7,10 +7,13 @@ import java.lang.annotation.Target;
 
 import com.google.inject.BindingAnnotation;
 
+import gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime;
+
 /**
  * Marker annotation identifies batch jobs that implement the "last run" policy.
  * 
  * @author CWDS API Team
+ * @see JobBasedOnLastSuccessfulRunTime
  */
 @BindingAnnotation
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})

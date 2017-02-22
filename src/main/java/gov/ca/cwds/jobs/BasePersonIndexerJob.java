@@ -47,8 +47,21 @@ import gov.ca.cwds.rest.api.domain.es.Person;
  * {@link ElasticsearchDao} and Hibernate {@link SessionFactory}.
  * </p>
  * 
+ * <p>
+ * <strong>Auto mode ("smart" mode)</strong> takes the same parameters as last run and determines
+ * whether the job has never been run. If the last run date is older than 50 years, then then assume
+ * that the job is populating ElasticSearch for the first time and run all initial batch loads.
+ * </p>
+ * 
+ * <h3>Command Line:</h3>
+ * 
+ * <pre>
+ * {@code java gov.ca.cwds.jobs.ClientIndexerJob -c config/local.yaml -l /Users/CWS-NS3/client_indexer_time.txt}
+ * </pre>
+ * 
  * @author CWDS API Team
  * @param <T> Person persistence type
+ * @see JobOptions
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject>
     extends JobBasedOnLastSuccessfulRunTime implements AutoCloseable {
@@ -126,7 +139,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
-   * Instantiate one Elasticsearch BulkProcessor for this batch run.
+   * Instantiate one Elasticsearch BulkProcessor per working thread.
    * 
    * @return Elasticsearch BulkProcessor
    */
@@ -139,7 +152,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
       @Override
       public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-        LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
+        LOGGER.debug("Executed bulk of {} actions", request.numberOfActions());
       }
 
       @Override
@@ -158,8 +171,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @return Guice Injector
    * @throws JobsException if unable to construct dependencies
    */
-  protected static synchronized Injector buildInjector(final JobOptions opts, final String... args)
-      throws JobsException {
+  protected static synchronized Injector buildInjector(final JobOptions opts) throws JobsException {
     if (injector == null) {
       try {
         injector = Guice
@@ -186,7 +198,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       throws JobsException {
     try {
       final JobOptions opts = JobOptions.parseCommandLine(args);
-      final T ret = buildInjector(opts, args).getInstance(klass);
+      final T ret = buildInjector(opts).getInstance(klass);
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
@@ -260,7 +272,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       }
 
       // Give it time to finish the last batch.
-      LOGGER.info("Waiting on ElasticSearch to finish last batch");
+      LOGGER.warn("Waiting on ElasticSearch to finish last batch");
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
 
       return startTime;
@@ -330,8 +342,37 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
+   * Process all buckets using default parallelism without partitions.
+   */
+  protected void processBuckets() {
+    LOGGER.warn("Process buckets");
+    LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).sorted().parallel()
+        .forEach(this::processBucket);
+  }
+
+  /**
+   * Process all partitions by buckets using default parallelism.
+   */
+  protected void processBucketPartitions() {
+    LOGGER.warn("PROCESS EACH PARTITION");
+    for (Pair<String, String> pair : this.getPartitionRanges()) {
+      getOpts().setMinId(pair.getLeft());
+      getOpts().setMaxId(pair.getRight());
+      LOGGER.warn("PROCESS PARTITION RANGE \"{}\" to \"{}\"", getOpts().getMinId(),
+          getOpts().getMaxId());
+      processBuckets();
+    }
+  }
+
+  /**
    * Lambda runs a number of threads up to max processor cores. Queued jobs wait until a worker
    * thread is available.
+   * 
+   * <p>
+   * Auto mode ("smart" mode) takes the same parameters as last run and determines whether the job
+   * has never been run. If the last run date is older than 50 years, then then assume that the job
+   * is populating ElasticSearch for the first time and run all initial batch loads.
+   * </p>
    * 
    * {@inheritDoc}
    * 
@@ -349,9 +390,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       LOGGER.debug("availableProcessors={}", Runtime.getRuntime().availableProcessors());
 
       // Smart/auto mode:
-      // If the last run is more than 50 years old, the assume that this job populating
-      // ElasticSearch for the first time.
-
       final Calendar cal = Calendar.getInstance();
       cal.add(Calendar.YEAR, -50);
       final boolean autoMode = this.opts.lastRunMode && lastSuccessfulRunTime.before(cal.getTime());
@@ -363,22 +401,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         getOpts().setTotalBuckets(8);
 
         if (!this.getPartitionRanges().isEmpty()) {
-          LOGGER.warn("PARTITIONS");
-          for (Pair<String, String> pair : this.getPartitionRanges()) {
-            getOpts().setMinId(pair.getLeft());
-            getOpts().setMaxId(pair.getRight());
-
-            LOGGER.warn("Process partition range {} to {}", getOpts().getMinId(),
-                getOpts().getMaxId());
-            LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).sorted()
-                .parallel().forEach(this::processBucket);
-          }
+          processBucketPartitions();
         } else {
-          LOGGER.warn("NO PARTITIONS");
           getOpts().setMaxId(null);
           getOpts().setMinId(null);
-          LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).sorted()
-              .parallel().forEach(this::processBucket);
+          processBuckets();
         }
 
         ret = startTime;
@@ -386,16 +413,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         LOGGER.warn("LAST RUN MODE!");
         ret = processLastRun(lastSuccessfulRunTime);
       } else {
-        LOGGER.warn("BUCKET MODE!");
-        LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).sorted()
-            .parallel().forEach(this::processBucket);
+        LOGGER.warn("DIRECT BUCKET MODE!");
+        processBuckets();
         ret = startTime;
       }
 
       // Result stats:
-      LOGGER.info(MessageFormat.format("Indexed {0} people", recsProcessed));
-      LOGGER.info(MessageFormat.format("Updating last successful run time to {0}",
-          jobDateFormat.format(startTime)));
+      LOGGER.info("Indexed {0} people", recsProcessed);
+      LOGGER.info("Updating last successful run time to {0}", jobDateFormat.format(startTime));
       return ret;
     } catch (JobsException e) {
       LOGGER.error("JobsException: {}", e.getMessage(), e);

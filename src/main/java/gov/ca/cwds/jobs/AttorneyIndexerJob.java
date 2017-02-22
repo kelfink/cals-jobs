@@ -9,7 +9,7 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.ReplicatedAttorney;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 

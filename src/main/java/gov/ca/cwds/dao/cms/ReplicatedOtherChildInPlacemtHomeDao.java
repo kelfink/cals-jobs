@@ -5,7 +5,7 @@ import org.hibernate.SessionFactory;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.data.BaseDaoImpl;
-import gov.ca.cwds.data.persistence.cms.ReplicatedOtherChildInPlacemtHome;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherChildInPlacemtHome;
 import gov.ca.cwds.data.std.BatchBucketDao;
 import gov.ca.cwds.inject.CmsSessionFactory;
 

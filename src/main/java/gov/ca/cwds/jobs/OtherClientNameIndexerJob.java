@@ -13,7 +13,7 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.ReplicatedOtherClientName;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
