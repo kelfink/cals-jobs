@@ -167,7 +167,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * batch JVM.
    * 
    * @param opts command line options
-   * @param args command line options
    * @return Guice Injector
    * @throws JobsException if unable to construct dependencies
    */
