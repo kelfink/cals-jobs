@@ -71,6 +71,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
   private static final int DEFAULT_BATCH_WAIT = 45;
+  private static final int DEFAULT_BUCKETS = 4;
 
   /**
    * Guice Injector used for all Job instances during the life of this batch JVM.
@@ -396,8 +397,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       if (autoMode) {
         LOGGER.warn("AUTO MODE!");
         getOpts().setStartBucket(1);
-        getOpts().setEndBucket(8);
-        getOpts().setTotalBuckets(8);
+        getOpts().setEndBucket(DEFAULT_BUCKETS);
+        getOpts().setTotalBuckets(DEFAULT_BUCKETS);
 
         if (!this.getPartitionRanges().isEmpty()) {
           processBucketPartitions();
