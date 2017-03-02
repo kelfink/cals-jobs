@@ -18,8 +18,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
-import gov.ca.cwds.dao.DocumentMetadataDao;
-import gov.ca.cwds.dao.cms.DocumentMetadataDaoImpl;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
@@ -32,18 +30,9 @@ import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.Allegation;
-import gov.ca.cwds.data.persistence.cms.CmsDocReferralClient;
-import gov.ca.cwds.data.persistence.cms.CmsDocument;
-import gov.ca.cwds.data.persistence.cms.CmsDocumentBlobSegment;
 import gov.ca.cwds.data.persistence.cms.CmsSystemCodeCacheService;
-import gov.ca.cwds.data.persistence.cms.CollateralIndividual;
-import gov.ca.cwds.data.persistence.cms.CrossReport;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeDao;
-import gov.ca.cwds.data.persistence.cms.Referral;
-import gov.ca.cwds.data.persistence.cms.ReferralClient;
-import gov.ca.cwds.data.persistence.cms.StaffPerson;
 import gov.ca.cwds.data.persistence.cms.SystemCodeDaoFileImpl;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
@@ -106,23 +95,30 @@ public class JobsGuiceInjector extends AbstractModule {
   protected void configure() {
     bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
         .toInstance(new Configuration().configure("jobs-cms-hibernate.cfg.xml")
-            .addPackage("gov.ca.cwds.data.persistence.cms").addAnnotatedClass(Allegation.class)
             .addAnnotatedClass(ReplicatedAttorney.class)
-            .addAnnotatedClass(CmsDocReferralClient.class).addAnnotatedClass(CmsDocument.class)
-            .addAnnotatedClass(CmsDocumentBlobSegment.class)
             .addAnnotatedClass(ReplicatedCollateralIndividual.class)
-            .addAnnotatedClass(CollateralIndividual.class).addAnnotatedClass(CrossReport.class)
             .addAnnotatedClass(ReplicatedEducationProviderContact.class)
             .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
             .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
-            .addAnnotatedClass(ReplicatedOtherClientName.class).addAnnotatedClass(Referral.class)
-            .addAnnotatedClass(ReferralClient.class).addAnnotatedClass(ReplicatedReporter.class)
-            .addAnnotatedClass(ReplicatedServiceProvider.class).addAnnotatedClass(StaffPerson.class)
+            .addAnnotatedClass(ReplicatedOtherClientName.class)
+            .addAnnotatedClass(ReplicatedReporter.class)
+            .addAnnotatedClass(ReplicatedServiceProvider.class)
             .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
             .addAnnotatedClass(ReplicatedClient.class).buildSessionFactory());
 
+    // .addPackage("gov.ca.cwds.data.persistence.cms")
+    // .addAnnotatedClass(CmsDocReferralClient.class)
+    // .addAnnotatedClass(CmsDocument.class)
+    // .addAnnotatedClass(CmsDocumentBlobSegment.class)
+    // .addAnnotatedClass(Allegation.class)
+    // .addAnnotatedClass(CollateralIndividual.class)
+    // .addAnnotatedClass(CrossReport.class)
+    // .addAnnotatedClass(Referral.class)
+    // .addAnnotatedClass(ReferralClient.class)
+    // .addAnnotatedClass(StaffPerson.class)
+
     // Register required DAO classes.
-    bind(DocumentMetadataDao.class).to(DocumentMetadataDaoImpl.class);
+    // bind(DocumentMetadataDao.class).to(DocumentMetadataDaoImpl.class);
 
     bind(ReplicatedClientDao.class);
     bind(ReplicatedReporterDao.class);

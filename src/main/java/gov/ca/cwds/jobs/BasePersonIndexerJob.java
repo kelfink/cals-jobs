@@ -31,7 +31,7 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.cms.Client;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
@@ -128,11 +128,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
-   * Return a list of partition keys to optimize batch SELECT statements. See Client native named
-   * query "findPartitionedBuckets".
+   * Return a list of partition keys to optimize batch SELECT statements. See ReplicatedClient
+   * native named query "findPartitionedBuckets".
    * 
    * @return list of partition key pairs
-   * @see Client
+   * @see ReplicatedClient
    */
   protected List<Pair<String, String>> getPartitionRanges() {
     return new ArrayList<>(0);
