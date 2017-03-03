@@ -104,7 +104,10 @@ public class JobsGuiceInjector extends AbstractModule {
             .addAnnotatedClass(ReplicatedReporter.class)
             .addAnnotatedClass(ReplicatedServiceProvider.class)
             .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
-            .addAnnotatedClass(ReplicatedClient.class).buildSessionFactory());
+            .addAnnotatedClass(ReplicatedClient.class)
+            // .addAnnotatedClass(ClientAddress.class)
+            // .addAnnotatedClass(Address.class)
+            .buildSessionFactory());
 
     // .addPackage("gov.ca.cwds.data.persistence.cms")
     // .addAnnotatedClass(CmsDocReferralClient.class)
