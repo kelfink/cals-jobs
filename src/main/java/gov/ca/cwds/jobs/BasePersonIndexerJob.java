@@ -18,19 +18,26 @@ import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.hibernate.HibernateException;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.data.BaseDaoImpl;
+import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.ClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.inject.CmsSessionFactory;
@@ -285,6 +292,57 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     }
   }
 
+  public List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, List<Class<?>> entities,
+      long bucketNum, long totalBuckets, String minId, String maxId) {
+    final String namedQueryName = jobDao.getEntityClass().getName() + ".findPartitionedBuckets";
+    Session session = jobDao.getSessionFactory().getCurrentSession();
+
+    Transaction txn = null;
+    try {
+      txn = session.beginTransaction();
+      SQLQuery query =
+          session.createSQLQuery(session.getNamedQuery(namedQueryName).getQueryString());
+      query.setInteger("bucket_num", (int) bucketNum)
+          .setInteger("total_buckets", (int) totalBuckets).setString("min_id", minId)
+          .setString("max_id", maxId);
+
+      final String[] alphabet = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+          "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
+      int i = 0;
+      for (Class<?> klazz : entities) {
+        query.addEntity(alphabet[i++], klazz);
+      }
+
+      // Only pulls the last entity type. WRONG.
+      // query.setResultTransformer(RootEntityResultTransformer.INSTANCE);
+
+      // Nothing comes back. WRONG.
+      // query.setResultTransformer(new AliasToBeanResultTransformer(entities.get(0)));
+
+      // query.setResultTransformer(Transformers.TO_LIST);
+
+      ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
+
+      // [gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient@284f611d,
+      // gov.ca.cwds.data.persistence.cms.ClientAddress@e5b2b7ca]
+      final List<Object[]> raw = query.list();
+      List<T> answers = new ArrayList<>(raw.size());
+
+      for (Object[] arr : raw) {
+        answers.add((T) arr[0]);
+      }
+
+      results.addAll(answers);
+      txn.commit();
+      return results.build();
+    } catch (HibernateException h) {
+      if (txn != null) {
+        txn.rollback();
+      }
+      throw new DaoException(h);
+    }
+  }
+
   /**
    * Process a single bucket in a batch of buckets. This method runs on thread, and therefore, all
    * shared resources (DAO's, mappers, etc.) must be thread-safe or else you must construct or clone
@@ -303,8 +361,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     final String minId =
         StringUtils.isBlank(this.getOpts().getMinId()) ? " " : this.getOpts().getMinId();
     final String maxId = this.getOpts().getMaxId();
+    // final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
+    // : jobDao.partitionedBucketList(bucket, totalBuckets, minId, maxId);
+
+    List<Class<?>> entities = new ArrayList<>();
+    entities.add(ReplicatedClient.class);
+    entities.add(ClientAddress.class);
+
     final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
-        : jobDao.partitionedBucketList(bucket, totalBuckets, minId, maxId);
+        : partitionedBucketEntities(jobDao, entities, bucket, totalBuckets, minId, maxId);
 
     if (results != null && !results.isEmpty()) {
       LOGGER.warn("bucket #{} found {} people to index", bucket, results.size());
