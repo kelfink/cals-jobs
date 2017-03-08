@@ -30,7 +30,8 @@ import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.ClientAddress;
+import gov.ca.cwds.data.persistence.cms.ReplicatedAddress;
+import gov.ca.cwds.data.persistence.cms.ReplicatedClientAddress;
 import gov.ca.cwds.data.persistence.cms.CmsSystemCodeCacheService;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.ISystemCodeDao;
@@ -105,9 +106,8 @@ public class JobsGuiceInjector extends AbstractModule {
             .addAnnotatedClass(ReplicatedReporter.class)
             .addAnnotatedClass(ReplicatedServiceProvider.class)
             .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
-            .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ClientAddress.class)
-            // .addAnnotatedClass(Address.class)
-            .buildSessionFactory());
+            .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
+            .addAnnotatedClass(ReplicatedAddress.class).buildSessionFactory());
 
     // .addPackage("gov.ca.cwds.data.persistence.cms")
     // .addAnnotatedClass(CmsDocReferralClient.class)

@@ -37,7 +37,6 @@ import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.cms.ClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.inject.CmsSessionFactory;
@@ -78,7 +77,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
   private static final int DEFAULT_BATCH_WAIT = 45;
-  private static final int DEFAULT_BUCKETS = 4;
+  private static final int DEFAULT_BUCKETS = 1;
 
   /**
    * Guice Injector used for all Job instances during the life of this batch JVM.
@@ -292,7 +291,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     }
   }
 
-  public List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, List<Class<?>> entities,
+  protected List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, List<Class<?>> entities,
       long bucketNum, long totalBuckets, String minId, String maxId) {
     final String namedQueryName = jobDao.getEntityClass().getName() + ".findPartitionedBuckets";
     Session session = jobDao.getSessionFactory().getCurrentSession();
@@ -313,18 +312,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         query.addEntity(alphabet[i++], klazz);
       }
 
-      // Only pulls the last entity type. WRONG.
-      // query.setResultTransformer(RootEntityResultTransformer.INSTANCE);
+      query.addJoin("b", "a.clientAddresses");
+      query.addJoin("c", "b.addresses");
+      // query.setResultTransformer(Criteria.ROOT_ENTITY);
 
-      // Nothing comes back. WRONG.
-      // query.setResultTransformer(new AliasToBeanResultTransformer(entities.get(0)));
-
-      // query.setResultTransformer(Transformers.TO_LIST);
+      // NEXT OPTION:
+      // query.setResultTransformer(transformer)
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
-
-      // [gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient@284f611d,
-      // gov.ca.cwds.data.persistence.cms.ClientAddress@e5b2b7ca]
       final List<Object[]> raw = query.list();
       List<T> answers = new ArrayList<>(raw.size());
 
@@ -335,7 +330,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       results.addAll(answers);
       txn.commit();
       return results.build();
+
     } catch (HibernateException h) {
+      LOGGER.error("BATCH ERROR! ", h);
       if (txn != null) {
         txn.rollback();
       }
@@ -364,9 +361,16 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     // final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
     // : jobDao.partitionedBucketList(bucket, totalBuckets, minId, maxId);
 
+    // UNSUCCESSFUL ATTEMPTS:
+    // query.setResultTransformer(RootEntityResultTransformer.INSTANCE);
+    // .setResultTransformer(new AliasToBeanResultTransformer(getEntityClass()))
+    // .setResultTransformer(Transformers.TO_LIST)
+
+    // ATTEMPT: load entity list
     List<Class<?>> entities = new ArrayList<>();
     entities.add(ReplicatedClient.class);
-    entities.add(ClientAddress.class);
+    // entities.add(ReplicatedClientAddress.class);
+    // entities.add(ReplicatedAddress.class);
 
     final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
         : partitionedBucketEntities(jobDao, entities, bucket, totalBuckets, minId, maxId);
