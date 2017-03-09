@@ -309,9 +309,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
           "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
       int i = 0;
 
+      // TODO: new method params.
       query.addEntity(alphabet[i++], rootEntity);
-      query.addJoin("b", "a.clientAddresses");
-      query.addJoin("c", "b.addresses");
+      query.addJoin(alphabet[i++], "a.clientAddresses");
+      query.addJoin(alphabet[i++], "b.addresses");
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<Object[]> raw = query.list();
@@ -322,6 +323,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       }
 
       results.addAll(answers);
+      session.clear();
       txn.commit();
       return results.build();
 
