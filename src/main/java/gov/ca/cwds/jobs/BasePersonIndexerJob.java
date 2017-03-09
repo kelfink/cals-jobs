@@ -77,7 +77,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
   private static final int DEFAULT_BATCH_WAIT = 45;
-  private static final int DEFAULT_BUCKETS = 1;
+  private static final int DEFAULT_BUCKETS = 4;
 
   /**
    * Guice Injector used for all Job instances during the life of this batch JVM.
@@ -291,7 +291,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     }
   }
 
-  protected List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, List<Class<?>> entities,
+  protected List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, Class<?> rootEntity,
       long bucketNum, long totalBuckets, String minId, String maxId) {
     final String namedQueryName = jobDao.getEntityClass().getName() + ".findPartitionedBuckets";
     Session session = jobDao.getSessionFactory().getCurrentSession();
@@ -308,16 +308,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       final String[] alphabet = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
           "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
       int i = 0;
-      for (Class<?> klazz : entities) {
-        query.addEntity(alphabet[i++], klazz);
-      }
 
+      query.addEntity(alphabet[i++], rootEntity);
       query.addJoin("b", "a.clientAddresses");
       query.addJoin("c", "b.addresses");
-      // query.setResultTransformer(Criteria.ROOT_ENTITY);
-
-      // NEXT OPTION:
-      // query.setResultTransformer(transformer)
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<Object[]> raw = query.list();
@@ -358,25 +352,20 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     final String minId =
         StringUtils.isBlank(this.getOpts().getMinId()) ? " " : this.getOpts().getMinId();
     final String maxId = this.getOpts().getMaxId();
+
+    // ORIGINAL:
     // final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
     // : jobDao.partitionedBucketList(bucket, totalBuckets, minId, maxId);
 
-    // UNSUCCESSFUL ATTEMPTS:
-    // query.setResultTransformer(RootEntityResultTransformer.INSTANCE);
-    // .setResultTransformer(new AliasToBeanResultTransformer(getEntityClass()))
-    // .setResultTransformer(Transformers.TO_LIST)
-
-    // ATTEMPT: load entity list
-    List<Class<?>> entities = new ArrayList<>();
-    entities.add(ReplicatedClient.class);
-    // entities.add(ReplicatedClientAddress.class);
-    // entities.add(ReplicatedAddress.class);
-
     final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
-        : partitionedBucketEntities(jobDao, entities, bucket, totalBuckets, minId, maxId);
+        : partitionedBucketEntities(jobDao, jobDao.getEntityClass(), bucket, totalBuckets, minId,
+            maxId);
 
     if (results != null && !results.isEmpty()) {
       LOGGER.warn("bucket #{} found {} people to index", bucket, results.size());
+
+      // Track counts.
+      recsProcessed.getAndAdd(results.size());
 
       // One bulk processor per bucket/thread.
       final BulkProcessor bp = buildBulkProcessor();
@@ -403,8 +392,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         throw new JobsException("ES bulk processor interrupted!", e2);
       }
 
-      // Track counts.
-      recsProcessed.getAndAdd(results.size());
     }
 
     return recsProcessed.get();
