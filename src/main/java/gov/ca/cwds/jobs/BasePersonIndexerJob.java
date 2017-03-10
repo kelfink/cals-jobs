@@ -19,6 +19,7 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -299,8 +300,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     Transaction txn = null;
     try {
       txn = session.beginTransaction();
-      SQLQuery query =
-          session.createSQLQuery(session.getNamedQuery(namedQueryName).getQueryString());
+      final Query q = session.getNamedQuery(namedQueryName);
+      SQLQuery query = session.createSQLQuery(q.getQueryString());
       query.setInteger("bucket_num", (int) bucketNum)
           .setInteger("total_buckets", (int) totalBuckets).setString("min_id", minId)
           .setString("max_id", maxId);
@@ -308,6 +309,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       final String[] alphabet = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
           "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
       int i = 0;
+
+      LOGGER.info("named query comment: ", q.getComment());
 
       // TODO: new method params.
       query.addEntity(alphabet[i++], rootEntity);

@@ -41,7 +41,7 @@ dependencies {
 	compile group: 'com.google.inject', name: 'guice', version: '4.1.0'
 	compile group: "org.postgresql", name: "postgresql", version: "9.4.1208.jre7"
 	compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.0.0-rc4"
-	compile group: "gov.ca.cwds.api", name: "api", version: "0.16.616"
+	compile group: "gov.ca.cwds.api", name: "api", version: "0.17.650"
     
     
     compile fileTree(dir: 'lib', include: ['*.jar'])
