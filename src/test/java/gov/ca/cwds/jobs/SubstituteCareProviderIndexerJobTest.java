@@ -73,23 +73,16 @@ public class SubstituteCareProviderIndexerJobTest {
   }
 
   @Test
-  public void testfindAllNamedQueryExists() throws Exception {
-    Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.SubstituteCareProvider.findAll");
-    assertThat(query, is(notNullValue()));
-  }
-
-  @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
     Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.SubstituteCareProvider.findAllUpdatedAfter");
+        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
 
   @Test
   public void testFindAllByBucketNamedQueryExists() throws Exception {
-    Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.cms.SubstituteCareProvider.findAllByBucket");
+    Query query = session.getNamedQuery(
+        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider.findAllByBucket");
     assertThat(query, is(notNullValue()));
   }
 

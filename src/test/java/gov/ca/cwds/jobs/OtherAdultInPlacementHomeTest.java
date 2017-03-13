@@ -21,11 +21,12 @@ import gov.ca.cwds.data.cms.OtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
+ * 
  * @author CWDS API Team
- *
  */
 @SuppressWarnings("javadoc")
 public class OtherAdultInPlacementHomeTest {
+
   @SuppressWarnings("unused")
   private static OtherAdultInPlacemtHomeDao otherAdultInPlacementHomeDao;
   private static SessionFactory sessionFactory;

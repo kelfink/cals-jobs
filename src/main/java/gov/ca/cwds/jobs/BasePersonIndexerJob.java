@@ -306,23 +306,33 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
           .setInteger("total_buckets", (int) totalBuckets).setString("min_id", minId)
           .setString("max_id", maxId);
 
-      final String[] alphabet = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
-          "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
-      int i = 0;
+      // NamedQuery comments describe join conditions.
+      boolean hibernateJoins =
+          StringUtils.isNotBlank(q.getComment()) && !q.getComment().equals(namedQueryName);
 
-      LOGGER.info("named query comment: ", q.getComment());
-
-      // TODO: new method params.
-      query.addEntity(alphabet[i++], rootEntity);
-      query.addJoin(alphabet[i++], "a.clientAddresses");
-      query.addJoin(alphabet[i++], "b.addresses");
+      if (hibernateJoins) {
+        query.addEntity("a", rootEntity);
+        final String[] blocks = q.getComment().trim().split(";");
+        for (String block : blocks) {
+          final String[] terms = block.trim().split(",");
+          query.addJoin(terms[0], terms[1]);
+        }
+      } else {
+        query.addEntity("z", rootEntity);
+      }
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<Object[]> raw = query.list();
       List<T> answers = new ArrayList<>(raw.size());
 
-      for (Object[] arr : raw) {
-        answers.add((T) arr[0]);
+      if (hibernateJoins) {
+        for (Object[] arr : raw) {
+          answers.add((T) arr[0]);
+        }
+      } else {
+        for (Object obj : raw) {
+          answers.add((T) obj);
+        }
       }
 
       results.addAll(answers);

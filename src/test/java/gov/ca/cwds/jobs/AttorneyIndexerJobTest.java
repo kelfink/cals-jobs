@@ -21,11 +21,12 @@ import gov.ca.cwds.data.cms.AttorneyDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
+ * 
  * @author CWDS API Team
- *
  */
 @SuppressWarnings("javadoc")
 public class AttorneyIndexerJobTest {
+
   @SuppressWarnings("unused")
   private static AttorneyDao attorneyDao;
   private static SessionFactory sessionFactory;
@@ -73,17 +74,16 @@ public class AttorneyIndexerJobTest {
 
   @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-    Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.Attorney.findAllUpdatedAfter");
+    Query query = session.getNamedQuery(
+        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
 
   @Test
   public void testFindAllByBucketExists() throws Exception {
-    Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.Attorney.findAllByBucket");
+    Query query = session
+        .getNamedQuery("gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney.findAllByBucket");
     assertThat(query, is(notNullValue()));
   }
-
 
 }

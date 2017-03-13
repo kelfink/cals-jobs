@@ -17,14 +17,24 @@
 		<property name="connection_pool_size">10</property>
 		<property name="show_sql">true</property>
 
+<!-- 
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress" />
+ -->
+ 		
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName" />
+		
 		<mapping class="gov.ca.cwds.data.persistence.cms.Allegation" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.Client" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.StaffPerson" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.ReferralClient" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.Referral" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.Reporter" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.Client" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.OtherClientName" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.Attorney" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.ServiceProvider" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.OtherAdultInPlacemtHome" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.SubstituteCareProvider" />
@@ -36,6 +46,6 @@
 		<mapping class="gov.ca.cwds.data.persistence.cms.CmsDocument" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.CmsDocReferralClient" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.CmsDocumentBlobSegment"/>
-		
+ 		
 	</session-factory>
 </hibernate-configuration>
