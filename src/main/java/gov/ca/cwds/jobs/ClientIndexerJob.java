@@ -47,7 +47,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
     List<Pair<String, String>> ret = new ArrayList<>();
     // ret.add(Pair.of(" ", "9999999999"));
 
-    ret.add(Pair.of(" ", "B3bMRWu8NV"));
+    // ret.add(Pair.of(" ", "B3bMRWu8NV"));
     ret.add(Pair.of("B3bMRWu8NV", "DW5GzxJ30A"));
     ret.add(Pair.of("DW5GzxJ30A", "FNOBbaG6qq"));
     ret.add(Pair.of("FNOBbaG6qq", "HJf1EJe25X"));

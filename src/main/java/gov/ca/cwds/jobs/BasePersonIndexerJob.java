@@ -78,7 +78,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
   private static final int DEFAULT_BATCH_WAIT = 45;
-  private static final int DEFAULT_BUCKETS = 4;
+  // private static final int DEFAULT_BUCKETS = 4;
+  private static final int DEFAULT_BUCKETS = 1;
 
   /**
    * Guice Injector used for all Job instances during the life of this batch JVM.
@@ -302,9 +303,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       txn = session.beginTransaction();
       final Query q = session.getNamedQuery(namedQueryName);
       SQLQuery query = session.createSQLQuery(q.getQueryString());
-      query.setInteger("bucket_num", (int) bucketNum)
-          .setInteger("total_buckets", (int) totalBuckets).setString("min_id", minId)
-          .setString("max_id", maxId);
+      query
+          // .setInteger("bucket_num", (int) bucketNum)
+          // .setInteger("total_buckets", (int) totalBuckets)
+          .setString("min_id", minId).setString("max_id", maxId);
 
       // NamedQuery comments describe join conditions.
       boolean hibernateJoins =
