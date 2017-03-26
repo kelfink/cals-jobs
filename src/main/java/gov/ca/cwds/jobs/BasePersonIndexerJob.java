@@ -37,14 +37,26 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
+import gov.ca.cwds.data.std.ApiAddressAware;
+import gov.ca.cwds.data.std.ApiLanguageAware;
+import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
+import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
+import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.rest.api.domain.DomainChef;
+import gov.ca.cwds.rest.api.domain.es.AutoCompletePerson;
+import gov.ca.cwds.rest.api.domain.es.AutoCompletePerson.AutoCompleteLanguage;
 import gov.ca.cwds.rest.api.domain.es.Person;
 
 /**
@@ -81,6 +93,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final int DEFAULT_BATCH_WAIT = 45;
   // private static final int DEFAULT_BUCKETS = 4;
   private static final int DEFAULT_BUCKETS = 1;
+
+  private static ApiSystemCodeCache systemCodes;
 
   /**
    * Guice Injector used for all Job instances during the life of this batch JVM.
@@ -264,25 +278,64 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         // Spawn a reasonable number of threads to process all results.
         results.parallelStream().forEach(p -> {
           try {
-            ApiPersonAware pers = (ApiPersonAware) p;
+            ApiPersonAware pa = (ApiPersonAware) p;
+            List<String> languages = null;
+            List<ElasticSearchPerson.ElasticSearchPersonPhone> phones = null;
+            List<ElasticSearchPersonAddress> addresses = null;
 
-            // public ElasticSearchPerson(String id, String firstName, String lastName, String
-            // middleName,
-            // String nameSuffix, String gender, String birthDate, String ssn, String sourceType,
-            // String sourceJson, String highlight, List<ElasticSearchPersonAddress> addresses,
-            // List<ElasticSearchPersonPhone> phones, List<String> languages) {
+            if (p instanceof ApiMultipleLanguagesAware) {
+              ApiMultipleLanguagesAware mlx = ((ApiMultipleLanguagesAware) p);
+              languages = new ArrayList<>();
+              for (ApiLanguageAware lx : mlx.getLanguages()) {
+                languages
+                    .add(AutoCompleteLanguage.findBySysId(lx.getLanguageSysId()).getDescription());
+              }
+            } else if (p instanceof ApiLanguageAware) {
+              languages = new ArrayList<>();
+              ApiLanguageAware lx = (ApiLanguageAware) p;
+              languages
+                  .add(AutoCompleteLanguage.findBySysId(lx.getLanguageSysId()).getDescription());
+            }
 
+            if (p instanceof ApiMultiplePhonesAware) {
+              phones = new ArrayList<>();
+              ApiMultiplePhonesAware mphx = (ApiMultiplePhonesAware) p;
+              for (ApiPhoneAware phx : mphx.getPhones()) {
+                phones.add(new ElasticSearchPersonPhone(phx));
+              }
+            } else if (p instanceof ApiPhoneAware) {
+              phones = new ArrayList<>();
+              ApiPhoneAware phx = (ApiPhoneAware) p;
+              phones.add(new ElasticSearchPersonPhone(phx));
+            }
+
+            if (p instanceof ApiMultipleAddressesAware) {
+              addresses = new ArrayList<>();
+              ApiMultipleAddressesAware madrx = (ApiMultipleAddressesAware) p;
+              for (ApiAddressAware adrx : madrx.getAddresses()) {
+                addresses.add(
+                    new AutoCompletePerson.AutoCompletePersonAddress(adrx).toESPersonAddress());
+              }
+            } else if (p instanceof ApiPhoneAware) {
+              addresses = new ArrayList<>();
+              addresses.add(new AutoCompletePerson.AutoCompletePersonAddress((ApiAddressAware) p)
+                  .toESPersonAddress());
+            }
+
+            // Write persistence object to Elasticsearch Person document.
             final ElasticSearchPerson esp = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
-                pers.getFirstName(), // first name
-                pers.getLastName(), // last name
-                pers.getMiddleName(), // middle name
-                pers.getNameSuffix(), // name suffix
-                pers.getGender(), // gender
-                DomainChef.cookDate(pers.getBirthDate()), // birth date
-                pers.getSsn(), // ssn
-                pers.getClass().getName(), // type
+                pa.getFirstName(), // first name
+                pa.getLastName(), // last name
+                pa.getMiddleName(), // middle name
+                pa.getNameSuffix(), // name suffix
+                pa.getGender(), // gender
+                DomainChef.cookDate(pa.getBirthDate()), // birth date
+                pa.getSsn(), // ssn
+                pa.getClass().getName(), // type
                 mapper.writeValueAsString(p), // source
-                null, null, null, null);
+                null, // highlights
+                addresses, // address
+                phones, languages);
 
             // Bulk indexing! MUCH faster than indexing one doc at a time.
             bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
@@ -558,6 +611,25 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    */
   public void setOpts(JobOptions opts) {
     this.opts = opts;
+  }
+
+  /**
+   * Getter for CMS system code cache.
+   * 
+   * @return reference to CMS system code cache
+   */
+  public static ApiSystemCodeCache getSystemCodes() {
+    return systemCodes;
+  }
+
+  /**
+   * Store a reference to the singleton CMS system code cache for quick convenient access.
+   * 
+   * @param sysCodeCache CMS system code cache
+   */
+  @Inject
+  public static void setSystemCodes(@SystemCodeCache ApiSystemCodeCache sysCodeCache) {
+    systemCodes = sysCodeCache;
   }
 
 }
