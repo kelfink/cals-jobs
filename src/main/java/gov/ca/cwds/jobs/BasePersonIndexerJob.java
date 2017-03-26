@@ -36,6 +36,7 @@ import com.google.inject.Injector;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.cms.ClientDao;
+import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
@@ -264,9 +265,24 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         results.parallelStream().forEach(p -> {
           try {
             ApiPersonAware pers = (ApiPersonAware) p;
-            final Person esp = new Person(p.getPrimaryKey().toString(), pers.getFirstName(),
-                pers.getLastName(), pers.getGender(), DomainChef.cookDate(pers.getBirthDate()),
-                pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(p));
+
+            // public ElasticSearchPerson(String id, String firstName, String lastName, String
+            // middleName,
+            // String nameSuffix, String gender, String birthDate, String ssn, String sourceType,
+            // String sourceJson, String highlight, List<ElasticSearchPersonAddress> addresses,
+            // List<ElasticSearchPersonPhone> phones, List<String> languages) {
+
+            final ElasticSearchPerson esp = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
+                pers.getFirstName(), // first name
+                pers.getLastName(), // last name
+                pers.getMiddleName(), // middle name
+                pers.getNameSuffix(), // name suffix
+                pers.getGender(), // gender
+                DomainChef.cookDate(pers.getBirthDate()), // birth date
+                pers.getSsn(), // ssn
+                pers.getClass().getName(), // type
+                mapper.writeValueAsString(p), // source
+                null, null, null, null);
 
             // Bulk indexing! MUCH faster than indexing one doc at a time.
             bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
