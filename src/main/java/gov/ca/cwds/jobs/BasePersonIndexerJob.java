@@ -56,7 +56,6 @@ import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.es.AutoCompletePerson;
-import gov.ca.cwds.rest.api.domain.es.AutoCompletePerson.AutoCompleteLanguage;
 import gov.ca.cwds.rest.api.domain.es.Person;
 
 /**
@@ -274,12 +273,20 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       ApiMultipleLanguagesAware mlx = (ApiMultipleLanguagesAware) p;
       languages = new ArrayList<>();
       for (ApiLanguageAware lx : mlx.getLanguages()) {
-        languages.add(AutoCompleteLanguage.findBySysId(lx.getLanguageSysId()).getDescription());
+        final ElasticSearchPerson.ElasticSearchPersonLanguage lang =
+            ElasticSearchPerson.ElasticSearchPersonLanguage.findBySysId(lx.getLanguageSysId());
+        if (lang != null) {
+          languages.add(lang.getDescription());
+        }
       }
     } else if (p instanceof ApiLanguageAware) {
       languages = new ArrayList<>();
       ApiLanguageAware lx = (ApiLanguageAware) p;
-      languages.add(AutoCompleteLanguage.findBySysId(lx.getLanguageSysId()).getDescription());
+      final ElasticSearchPerson.ElasticSearchPersonLanguage lang =
+          ElasticSearchPerson.ElasticSearchPersonLanguage.findBySysId(lx.getLanguageSysId());
+      if (lang != null) {
+        languages.add(lang.getDescription());
+      }
     }
 
     if (p instanceof ApiMultiplePhonesAware) {
@@ -305,9 +312,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       addresses.add(new AutoCompletePerson.AutoCompletePersonAddress((ApiAddressAware) p)
           .toESPersonAddress());
     }
-
-    // TODO: translate name_suffix.
-    // getNameSuffix()
 
     // Write persistence object to Elasticsearch Person document.
     return new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
