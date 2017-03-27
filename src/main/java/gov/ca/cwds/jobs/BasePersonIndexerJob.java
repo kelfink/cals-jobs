@@ -258,6 +258,71 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
+   * Produce an ElasticSearchPerson suitable as an Elasticsearch person document.
+   * 
+   * @param p ApiPersonAware persistence object
+   * @return populated ElasticSearchPerson
+   * @throws JsonProcessingException if unable to serialize JSON
+   */
+  protected ElasticSearchPerson buildESPerson(T p) throws JsonProcessingException {
+    ApiPersonAware pa = (ApiPersonAware) p;
+    List<String> languages = null;
+    List<ElasticSearchPerson.ElasticSearchPersonPhone> phones = null;
+    List<ElasticSearchPersonAddress> addresses = null;
+
+    if (p instanceof ApiMultipleLanguagesAware) {
+      ApiMultipleLanguagesAware mlx = ((ApiMultipleLanguagesAware) p);
+      languages = new ArrayList<>();
+      for (ApiLanguageAware lx : mlx.getLanguages()) {
+        languages.add(AutoCompleteLanguage.findBySysId(lx.getLanguageSysId()).getDescription());
+      }
+    } else if (p instanceof ApiLanguageAware) {
+      languages = new ArrayList<>();
+      ApiLanguageAware lx = (ApiLanguageAware) p;
+      languages.add(AutoCompleteLanguage.findBySysId(lx.getLanguageSysId()).getDescription());
+    }
+
+    if (p instanceof ApiMultiplePhonesAware) {
+      phones = new ArrayList<>();
+      ApiMultiplePhonesAware mphx = (ApiMultiplePhonesAware) p;
+      for (ApiPhoneAware phx : mphx.getPhones()) {
+        phones.add(new ElasticSearchPersonPhone(phx));
+      }
+    } else if (p instanceof ApiPhoneAware) {
+      phones = new ArrayList<>();
+      ApiPhoneAware phx = (ApiPhoneAware) p;
+      phones.add(new ElasticSearchPersonPhone(phx));
+    }
+
+    if (p instanceof ApiMultipleAddressesAware) {
+      addresses = new ArrayList<>();
+      ApiMultipleAddressesAware madrx = (ApiMultipleAddressesAware) p;
+      for (ApiAddressAware adrx : madrx.getAddresses()) {
+        addresses.add(new AutoCompletePerson.AutoCompletePersonAddress(adrx).toESPersonAddress());
+      }
+    } else if (p instanceof ApiPhoneAware) {
+      addresses = new ArrayList<>();
+      addresses.add(new AutoCompletePerson.AutoCompletePersonAddress((ApiAddressAware) p)
+          .toESPersonAddress());
+    }
+
+    // Write persistence object to Elasticsearch Person document.
+    return new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
+        pa.getFirstName(), // first name
+        pa.getLastName(), // last name
+        pa.getMiddleName(), // middle name
+        pa.getNameSuffix(), // name suffix
+        pa.getGender(), // gender
+        DomainChef.cookDate(pa.getBirthDate()), // birth date
+        pa.getSsn(), // SSN
+        pa.getClass().getName(), // type
+        this.mapper.writeValueAsString(p), // source
+        null, // highlights
+        addresses, // address
+        phones, languages);
+  }
+
+  /**
    * Fetch all records for the next batch run, either by bucket or last successful run date.
    * 
    * @param lastSuccessfulRunTime last time the batch ran successfully.
@@ -278,67 +343,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         // Spawn a reasonable number of threads to process all results.
         results.parallelStream().forEach(p -> {
           try {
-            ApiPersonAware pa = (ApiPersonAware) p;
-            List<String> languages = null;
-            List<ElasticSearchPerson.ElasticSearchPersonPhone> phones = null;
-            List<ElasticSearchPersonAddress> addresses = null;
-
-            if (p instanceof ApiMultipleLanguagesAware) {
-              ApiMultipleLanguagesAware mlx = ((ApiMultipleLanguagesAware) p);
-              languages = new ArrayList<>();
-              for (ApiLanguageAware lx : mlx.getLanguages()) {
-                languages
-                    .add(AutoCompleteLanguage.findBySysId(lx.getLanguageSysId()).getDescription());
-              }
-            } else if (p instanceof ApiLanguageAware) {
-              languages = new ArrayList<>();
-              ApiLanguageAware lx = (ApiLanguageAware) p;
-              languages
-                  .add(AutoCompleteLanguage.findBySysId(lx.getLanguageSysId()).getDescription());
-            }
-
-            if (p instanceof ApiMultiplePhonesAware) {
-              phones = new ArrayList<>();
-              ApiMultiplePhonesAware mphx = (ApiMultiplePhonesAware) p;
-              for (ApiPhoneAware phx : mphx.getPhones()) {
-                phones.add(new ElasticSearchPersonPhone(phx));
-              }
-            } else if (p instanceof ApiPhoneAware) {
-              phones = new ArrayList<>();
-              ApiPhoneAware phx = (ApiPhoneAware) p;
-              phones.add(new ElasticSearchPersonPhone(phx));
-            }
-
-            if (p instanceof ApiMultipleAddressesAware) {
-              addresses = new ArrayList<>();
-              ApiMultipleAddressesAware madrx = (ApiMultipleAddressesAware) p;
-              for (ApiAddressAware adrx : madrx.getAddresses()) {
-                addresses.add(
-                    new AutoCompletePerson.AutoCompletePersonAddress(adrx).toESPersonAddress());
-              }
-            } else if (p instanceof ApiPhoneAware) {
-              addresses = new ArrayList<>();
-              addresses.add(new AutoCompletePerson.AutoCompletePersonAddress((ApiAddressAware) p)
-                  .toESPersonAddress());
-            }
-
             // Write persistence object to Elasticsearch Person document.
-            final ElasticSearchPerson esp = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
-                pa.getFirstName(), // first name
-                pa.getLastName(), // last name
-                pa.getMiddleName(), // middle name
-                pa.getNameSuffix(), // name suffix
-                pa.getGender(), // gender
-                DomainChef.cookDate(pa.getBirthDate()), // birth date
-                pa.getSsn(), // ssn
-                pa.getClass().getName(), // type
-                mapper.writeValueAsString(p), // source
-                null, // highlights
-                addresses, // address
-                phones, languages);
+            final ElasticSearchPerson esp = buildESPerson(p);
 
             // Bulk indexing! MUCH faster than indexing one doc at a time.
-            bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
+            bp.add(this.esDao.bulkAdd(this.mapper, esp.getId(), esp));
           } catch (JsonProcessingException e) {
             throw new JobsException("JSON error", e);
           }
@@ -460,10 +469,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       // This bucket runs on one thread only. No parallel stream.
       results.stream().forEach(p -> {
         try {
-          ApiPersonAware pers = (ApiPersonAware) p;
-          final Person esp = new Person(p.getPrimaryKey().toString(), pers.getFirstName(),
-              pers.getLastName(), pers.getGender(), DomainChef.cookDate(pers.getBirthDate()),
-              pers.getSsn(), pers.getClass().getName(), mapper.writeValueAsString(p));
+          final ElasticSearchPerson esp = buildESPerson(p);
 
           // Bulk indexing! MUCH faster than indexing one doc at a time.
           bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
