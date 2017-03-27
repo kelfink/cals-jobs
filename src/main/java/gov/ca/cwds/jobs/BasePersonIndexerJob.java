@@ -271,7 +271,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     List<ElasticSearchPersonAddress> addresses = null;
 
     if (p instanceof ApiMultipleLanguagesAware) {
-      ApiMultipleLanguagesAware mlx = ((ApiMultipleLanguagesAware) p);
+      ApiMultipleLanguagesAware mlx = (ApiMultipleLanguagesAware) p;
       languages = new ArrayList<>();
       for (ApiLanguageAware lx : mlx.getLanguages()) {
         languages.add(AutoCompleteLanguage.findBySysId(lx.getLanguageSysId()).getDescription());
@@ -305,6 +305,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       addresses.add(new AutoCompletePerson.AutoCompletePersonAddress((ApiAddressAware) p)
           .toESPersonAddress());
     }
+
+    // TODO: translate name_suffix.
+    // getNameSuffix()
 
     // Write persistence object to Elasticsearch Person document.
     return new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
