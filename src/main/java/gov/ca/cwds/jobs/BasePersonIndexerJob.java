@@ -574,8 +574,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       }
 
       // Result stats:
-      LOGGER.info("Indexed {0} people", recsProcessed);
-      LOGGER.info("Updating last successful run time to {0}", jobDateFormat.format(startTime));
+      LOGGER.info("Indexed {} people", recsProcessed);
+      LOGGER.info("Updating last successful run time to {}", jobDateFormat.format(startTime));
       return ret;
     } catch (JobsException e) {
       LOGGER.error("JobsException: {}", e.getMessage(), e);
