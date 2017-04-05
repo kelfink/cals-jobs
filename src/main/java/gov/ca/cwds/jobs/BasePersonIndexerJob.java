@@ -90,6 +90,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
   private static final int DEFAULT_BATCH_WAIT = 45;
+
   // private static final int DEFAULT_BUCKETS = 4;
   private static final int DEFAULT_BUCKETS = 1;
 
@@ -182,7 +183,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
         LOGGER.error("Error executing bulk", failure);
       }
-    }).setBulkActions(1500).build();
+    }).setBulkActions(1000).build();
   }
 
   /**
@@ -473,7 +474,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       final BulkProcessor bp = buildBulkProcessor();
 
       // One thread per bucket up to max cores.
-      // This bucket runs on one thread only. No parallel stream.
+      // Each bucket runs on one thread only. No parallel streams.
       results.stream().forEach(p -> {
         try {
           final ElasticSearchPerson esp = buildESPerson(p);
