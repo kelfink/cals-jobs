@@ -33,6 +33,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.cms.ClientDao;
@@ -93,6 +94,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   // private static final int DEFAULT_BUCKETS = 4;
   private static final int DEFAULT_BUCKETS = 1;
+
+  private static final String QUERY_BUCKET_LIST =
+      "select z.bucket, min(z.identifier) as minId, max(z.identifier) as maxId, count(*) as bucketCount "
+          + "from ( " + " select (y.rn / (total_cnt/10)) + 1 as bucket, y.rn, y.identifier "
+          + " from ( "
+          + "     select c.identifier, row_number() over (order by 1) as rn, count(*) over (order by 1) as total_cnt "
+          + "     from {h-schema}THE_TABLE c order by c.IDENTIFIER ) y " + " order by y.rn "
+          + ") z group by z.bucket for read only ";
 
   private static ApiSystemCodeCache systemCodes;
 
@@ -183,7 +192,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
         LOGGER.error("Error executing bulk", failure);
       }
-    }).setBulkActions(1000).build();
+    }).setBulkActions(1500).build();
   }
 
   /**
@@ -377,6 +386,31 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       LOGGER.error("General Exception: {}", e.getMessage(), e);
       throw new JobsException("General Exception: " + e.getMessage(), e);
     }
+  }
+
+  protected List<BatchBucket> buildBucketList(String table) {
+    List<BatchBucket> ret = new ArrayList<>();
+
+    Session session = jobDao.getSessionFactory().getCurrentSession();
+    Transaction txn = null;
+    try {
+      LOGGER.info("FETCH DYNAMIC BUCKET LIST FOR TABLE {}", table);
+      txn = session.beginTransaction();
+      final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
+          .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table), BatchBucket.class);
+
+      ret = q.getResultList();
+      session.clear();
+      txn.commit();
+    } catch (HibernateException h) {
+      LOGGER.error("BATCH ERROR! ", h);
+      if (txn != null) {
+        txn.rollback();
+      }
+      throw new DaoException(h);
+    }
+
+    return ret;
   }
 
   protected List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, Class<?> rootEntity,

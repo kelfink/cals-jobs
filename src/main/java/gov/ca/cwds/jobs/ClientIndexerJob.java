@@ -11,6 +11,7 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
+import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
@@ -45,9 +46,18 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
     List<Pair<String, String>> ret = new ArrayList<>();
+    List<BatchBucket> buckets = buildBucketList("CLIENT_T");
+
+    for (BatchBucket b : buckets) {
+      LOGGER.warn("DYNAMIC CLIENT BUCKET: {} to {}", b.getMinId(), b.getMaxId());
+      ret.add(Pair.of(b.getMinId(), b.getMaxId()));
+    }
+
+    // CROSS-PLATFORM APPROACH: make ranges platform independent.
+    // ret.add(Pair.of("0000000000", "2222222222"));
 
     // LINUX TEST (ASCII):
-    ret.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
+    // ret.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
 
     // PRODUCTION (EBCDIC):
     // ret.add(Pair.of(" ", "B3bMRWu8NV"));
