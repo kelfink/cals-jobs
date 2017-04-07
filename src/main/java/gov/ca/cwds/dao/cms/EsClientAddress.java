@@ -1,6 +1,7 @@
 package gov.ca.cwds.dao.cms;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -249,22 +250,137 @@ public class EsClientAddress implements Serializable {
   @Column(name = "CLT_IBMSNAP_LOGMARKER", updatable = false)
   private Date cltReplicationDate;
 
+  @Column(name = "CLT_LST_UPD_ID")
+  private String cltLastUpdatedId;
+
+  @Type(type = "timestamp")
+  @Column(name = "CLT_LST_UPD_TS")
+  private Date cltLastUpdatedTime;
+
   // ================
   // CL_ADDRT:
   // ================
 
-  // cla.LST_UPD_ID AS cla_LST_UPD_ID,
-  // cla.LST_UPD_TS AS cla_LST_UPD_TS,
-  // cla.ADDR_TPC AS cla_ADDR_TPC,
-  // cla.BK_INMT_ID AS cla_BK_INMT_ID,
-  // cla.EFF_END_DT AS cla_EFF_END_DT,
-  // cla.EFF_STRTDT AS cla_EFF_STRTDT,
-  // cla.FKADDRS_T AS cla_FKADDRS_T,
-  // cla.FKCLIENT_T AS cla_FKCLIENT_T,
-  // cla.FKREFERL_T AS cla_FKREFERL_T,
-  // cla.HOMLES_IND AS cla_HOMLES_IND,
-  // cla.IBMSNAP_LOGMARKER AS cla_IBMSNAP_LOGMARKER,
-  // cla.IBMSNAP_OPERATION AS cla_IBMSNAP_OPERATION,
+  @Enumerated(EnumType.STRING)
+  @Column(name = "CLA_IBMSNAP_OPERATION", updatable = false)
+  private CmsReplicationOperation claReplicationOperation;
+
+  @Type(type = "timestamp")
+  @Column(name = "CLA_IBMSNAP_LOGMARKER", updatable = false)
+  private Date claReplicationDate;
+
+  @Column(name = "CLA_LST_UPD_ID")
+  private String claLastUpdatedId;
+
+  @Type(type = "timestamp")
+  @Column(name = "CLA_LST_UPD_TS")
+  private Date claLastUpdatedTime;
+
+  @Column(name = "CLA_FKADDRS_T")
+  private String claFkAddress;
+
+  @Column(name = "CLA_FKCLIENT_T")
+  private String claFkClient;
+
+  @Column(name = "CLA_FKREFERL_T")
+  private String claFkReferral;
+
+  @Type(type = "short")
+  @Column(name = "CLA_ADDR_TPC")
+  private Short claAddressType;
+
+  @Column(name = "CLA_HOMLES_IND")
+  private String claHomelessInd;
+
+  @Column(name = "CLA_BK_INMT_ID")
+  private String claBkInmtId;
+
+  @Type(type = "date")
+  @Column(name = "CLA_EFF_END_DT")
+  private Date claEffectiveEndDate;
+
+  @Type(type = "date")
+  @Column(name = "CLA_EFF_STRTDT")
+  private Date claEffectiveStartDate;
+
+  // ================
+  // ADDRS_T:
+  // ================
+
+  @Id
+  @Column(name = "ADR_IDENTIFIER")
+  private String adrId;
+
+  @Column(name = "ADR_CITY_NM")
+  private String adrCity;
+
+  @Column(name = "ADR_EMRG_TELNO")
+  private BigDecimal adrEmergencyNumber;
+
+  @Type(type = "integer")
+  @Column(name = "ADR_EMRG_EXTNO")
+  private Integer adrEmergencyExtension;
+
+  @Column(name = "ADR_FRG_ADRT_B")
+  private String adrFrgAdrtB;
+
+  @Type(type = "short")
+  @Column(name = "ADR_GVR_ENTC")
+  private Short adrGovernmentEntityCd;
+
+  @Column(name = "ADR_MSG_TEL_NO")
+  private BigDecimal adrMessageNumber;
+
+  @Type(type = "integer")
+  @Column(name = "ADR_MSG_EXT_NO")
+  private Integer adrMessageExtension;
+
+  @Column(name = "ADR_HEADER_ADR")
+  private String adrHeaderAddress;
+
+  @Column(name = "ADR_PRM_TEL_NO")
+  private BigDecimal adrPrimaryNumber;
+
+  @Type(type = "integer")
+  @Column(name = "ADR_PRM_EXT_NO")
+  private Integer adrPrimaryExtension;
+
+  @Type(type = "short")
+  @Column(name = "ADR_STATE_C")
+  private Short adrState;
+
+  @Column(name = "ADR_STREET_NM")
+  private String adrStreetName;
+
+  @Column(name = "ADR_STREET_NO")
+  private String adrStreetNumber;
+
+  @Column(name = "ADR_ZIP_NO")
+  private String adrZip;
+
+  @Column(name = "ADR_ADDR_DSC")
+  private String adrAddressDescription;
+
+  @Type(type = "short")
+  @Column(name = "ADR_ZIP_SFX_NO")
+  private Short adrZip4;
+
+  @Column(name = "ADR_POSTDIR_CD")
+  private String adrPostDirCd;
+
+  @Column(name = "ADR_PREDIR_CD")
+  private String adrPreDirCd;
+
+  @Type(type = "short")
+  @Column(name = "ADR_ST_SFX_C")
+  private Short adrStreetSuffixCd;
+
+  @Type(type = "short")
+  @Column(name = "ADR_UNT_DSGC")
+  private Short adrUnitDesignationCd;
+
+  @Column(name = "ADR_UNIT_NO")
+  private String adrUnitNumber;
 
 
 }
