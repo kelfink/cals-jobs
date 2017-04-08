@@ -16,7 +16,10 @@ import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.ReplicatedAddress;
+import gov.ca.cwds.data.persistence.cms.ReplicatedClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 
 @Entity
 @Table(name = "ES_CLIENT_ADDRESS")
@@ -284,6 +287,9 @@ public class EsClientAddress implements Serializable, PersistentObject {
   @Column(name = "CLA_LST_UPD_TS")
   private Date claLastUpdatedTime;
 
+  @Column(name = "CLA_IDENTIFIER")
+  private String claId;
+
   @Column(name = "CLA_FKADDRS_T")
   private String claFkAddress;
 
@@ -389,6 +395,133 @@ public class EsClientAddress implements Serializable, PersistentObject {
 
   @Column(name = "ADR_UNIT_NO")
   private String adrUnitNumber;
+
+  /**
+   * Assumes that records are ordered by identifier.
+   * 
+   * @param last the last client processed
+   * @return normalized client
+   */
+  public ReplicatedClient normalize(ReplicatedClient last) {
+    final boolean isSame = last.getId().equals(this.cltId);
+    ReplicatedClient ret = isSame ? last : new ReplicatedClient();
+
+    if (!isSame) {
+      // Populate core client attributes.
+      ret.setAdjudicatedDelinquentIndicator(getCltAdjudicatedDelinquentIndicator());
+      ret.setAdoptionStatusCode(getCltAdoptionStatusCode());
+      ret.setAlienRegistrationNumber(getCltAlienRegistrationNumber());
+      ret.setBirthCity(getCltBirthCity());
+      ret.setBirthCountryCodeType(getCltBirthCountryCodeType());
+      ret.setBirthDate(getCltBirthDate());
+      ret.setBirthFacilityName(getCltBirthFacilityName());
+      ret.setBirthplaceVerifiedIndicator(getCltBirthplaceVerifiedIndicator());
+      ret.setBirthStateCodeType(getCltBirthStateCodeType());
+      ret.setChildClientIndicatorVar(getCltChildClientIndicatorVar());
+      ret.setClientIndexNumber(getCltClientIndexNumber());
+      ret.setCommentDescription(getCltCommentDescription());
+      ret.setCommonFirstName(getCltCommonFirstName());
+      ret.setCommonLastName(getCltCommonLastName());
+      ret.setCommonMiddleName(getCltCommonMiddleName());
+      ret.setConfidentialityActionDate(getCltConfidentialityActionDate());
+      ret.setConfidentialityInEffectIndicator(getCltConfidentialityInEffectIndicator());
+      ret.setCreationDate(getCltCreationDate());
+      ret.setCurrCaChildrenServIndicator(getCltCurrCaChildrenServIndicator());
+      ret.setCurrentlyOtherDescription(getCltCurrentlyOtherDescription());
+      ret.setCurrentlyRegionalCenterIndicator(getCltCurrentlyRegionalCenterIndicator());
+      ret.setDeathDate(getCltDeathDate());
+      ret.setDeathDateVerifiedIndicator(getCltDeathDateVerifiedIndicator());
+      ret.setDeathPlace(getCltDeathPlace());
+      ret.setDeathReasonText(getCltDeathReasonText());
+      ret.setDriverLicenseNumber(getCltDriverLicenseNumber());
+      ret.setDriverLicenseStateCodeType(getCltDriverLicenseStateCodeType());
+      ret.setEmailAddress(getCltEmailAddress());
+      ret.setEstimatedDobCode(getCltEstimatedDobCode());
+      ret.setEthUnableToDetReasonCode(getCltEthUnableToDetReasonCode());
+      ret.setFatherParentalRightTermDate(getCltFatherParentalRightTermDate());
+      ret.setCommonFirstName(getCltCommonFirstName());
+      ret.setGenderCode(getCltGenderCode());
+      ret.setHealthSummaryText(getCltHealthSummaryText());
+      ret.setHispanicOriginCode(getCltHispanicOriginCode());
+      ret.setHispUnableToDetReasonCode(getCltHispUnableToDetReasonCode());
+      ret.setId(getCltId());
+      ret.setImmigrationCountryCodeType(getCltImmigrationCountryCodeType());
+      ret.setImmigrationStatusType(getCltImmigrationStatusType());
+      ret.setIncapacitatedParentCode(getCltIncapacitatedParentCode());
+      ret.setIndividualHealthCarePlanIndicator(getCltIndividualHealthCarePlanIndicator());
+      ret.setCommonLastName(getCltCommonLastName());
+      ret.setLimitationOnScpHealthIndicator(getCltLimitationOnScpHealthIndicator());
+      ret.setLiterateCode(getCltLiterateCode());
+      ret.setMaritalCohabitatnHstryIndicatorVar(getCltMaritalCohabitatnHstryIndicatorVar());
+      ret.setMaritalStatusType(getCltMaritalStatusType());
+      ret.setCommonMiddleName(getCltCommonMiddleName());
+      ret.setMilitaryStatusCode(getCltMilitaryStatusCode());
+      ret.setMotherParentalRightTermDate(getCltMotherParentalRightTermDate());
+      ret.setNamePrefixDescription(getCltNamePrefixDescription());
+      ret.setNameType(getCltNameType());
+      ret.setOutstandingWarrantIndicator(getCltOutstandingWarrantIndicator());
+      ret.setPrevCaChildrenServIndicator(getCltPrevCaChildrenServIndicator());
+      ret.setPrevOtherDescription(getCltPrevOtherDescription());
+      ret.setPrevRegionalCenterIndicator(getCltPrevRegionalCenterIndicator());
+      ret.setPrimaryEthnicityType(getCltPrimaryEthnicityType());
+      ret.setPrimaryLanguageType(getCltPrimaryLanguageType());
+      ret.setReligionType(getCltReligionType());
+      ret.setSecondaryLanguageType(getCltSecondaryLanguageType());
+      ret.setSensitiveHlthInfoOnFileIndicator(getCltSensitiveHlthInfoOnFileIndicator());
+      ret.setSensitivityIndicator(getCltSensitivityIndicator());
+      ret.setSoc158PlacementCode(getCltSoc158PlacementCode());
+      ret.setSoc158SealedClientIndicator(getCltSoc158SealedClientIndicator());
+      ret.setSocialSecurityNumber(getCltSocialSecurityNumber());
+      ret.setSocialSecurityNumChangedCode(getCltSocialSecurityNumChangedCode());
+      ret.setSuffixTitleDescription(getCltSuffixTitleDescription());
+      ret.setTribalAncestryClientIndicatorVar(getCltTribalAncestryClientIndicatorVar());
+      ret.setTribalMembrshpVerifctnIndicatorVar(getCltTribalMembrshpVerifctnIndicatorVar());
+      ret.setUnemployedParentCode(getCltUnemployedParentCode());
+      ret.setZippyCreatedIndicator(getCltZippyCreatedIndicator());
+    }
+
+    // Client Address:
+    ReplicatedClientAddress rca = new ReplicatedClientAddress();
+    rca.setAddressType(getClaAddressType());
+    rca.setBkInmtId(getClaBkInmtId());
+    rca.setEffEndDt(getClaEffectiveEndDate());
+    rca.setEffStartDt(getClaEffectiveStartDate());
+    rca.setFkAddress(getClaFkAddress());
+    rca.setFkClient(getClaFkClient());
+    rca.setFkReferral(getClaFkReferral());
+    rca.setHomelessInd(getClaHomelessInd());
+    rca.setId(getClaId());
+    ret.addClientAddress(rca);
+
+    ReplicatedAddress adr = new ReplicatedAddress();
+    adr.setAddressDescription(getAdrAddressDescription());
+    adr.setId(getAdrId());
+    adr.setCity(getAdrCity());
+    adr.setEmergencyExtension(getAdrEmergencyExtension());
+    adr.setEmergencyNumber(getAdrEmergencyNumber());
+    adr.setFrgAdrtB(getAdrFrgAdrtB());
+    adr.setGovernmentEntityCd(getAdrGovernmentEntityCd());
+    adr.setHeaderAddress(getAdrHeaderAddress());
+    adr.setId(getAdrId());
+    adr.setMessageExtension(getAdrMessageExtension());
+    adr.setMessageNumber(getAdrMessageNumber());
+    adr.setPostDirCd(getAdrPostDirCd());
+    adr.setPreDirCd(getAdrPreDirCd());
+    adr.setPrimaryExtension(getAdrPrimaryExtension());
+    adr.setPrimaryNumber(getAdrPrimaryNumber());
+    adr.setState(getAdrState());
+    adr.setStateCd(getAdrState());
+    adr.setStreetName(getAdrStreetName());
+    adr.setStreetNumber(getAdrStreetNumber());
+    adr.setStreetSuffixCd(getAdrStreetSuffixCd());
+    adr.setUnitDesignationCd(getAdrUnitDesignationCd());
+    adr.setUnitNumber(getAdrUnitNumber());
+    adr.setZip(getAdrZip());
+    adr.setZip4(getAdrZip4());
+    rca.addAddress(adr);
+
+    return ret;
+  }
 
   public String getCltAdjudicatedDelinquentIndicator() {
     return cltAdjudicatedDelinquentIndicator;
@@ -1235,6 +1368,14 @@ public class EsClientAddress implements Serializable, PersistentObject {
   @Override
   public Serializable getPrimaryKey() {
     return null;
+  }
+
+  public String getClaId() {
+    return claId;
+  }
+
+  public void setClaId(String claId) {
+    this.claId = claId;
   }
 
 }
