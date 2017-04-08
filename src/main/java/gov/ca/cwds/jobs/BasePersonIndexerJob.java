@@ -24,6 +24,7 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.NativeQuery;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -472,6 +473,46 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
+   * LATEST INCARNATION.
+   * 
+   * @param jobDao DAO for this entity type
+   * @param minId start of range
+   * @param maxId end of range
+   * @return collection of entity
+   */
+  protected List<T> processBucketRange(BaseDaoImpl<T> jobDao, String minId, String maxId) {
+    final String namedQueryName = jobDao.getEntityClass().getName() + ".findBucketRange";
+    Session session = jobDao.getSessionFactory().getCurrentSession();
+
+    Transaction txn = null;
+    try {
+      txn = session.beginTransaction();
+      NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
+      q.setString("min_id", minId).setString("max_id", maxId);
+
+      ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
+      final List<T> answers = q.list();
+
+      String lastId = "";
+      for (T rec : answers) {
+
+      }
+
+      results.addAll(answers);
+      session.clear();
+      txn.commit();
+      return results.build();
+
+    } catch (HibernateException h) {
+      LOGGER.error("BATCH ERROR! ", h);
+      if (txn != null) {
+        txn.rollback();
+      }
+      throw new DaoException(h);
+    }
+  }
+
+  /**
    * Process a single bucket in a batch of buckets. This method runs on thread, and therefore, all
    * shared resources (DAO's, mappers, etc.) must be thread-safe or else you must construct or clone
    * instances as needed.
@@ -494,9 +535,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     // final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
     // : jobDao.partitionedBucketList(bucket, totalBuckets, minId, maxId);
 
-    final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
-        : partitionedBucketEntities(jobDao, jobDao.getEntityClass(), bucket, totalBuckets, minId,
-            maxId);
+    // final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
+    // : partitionedBucketEntities(jobDao, jobDao.getEntityClass(), bucket, totalBuckets, minId,
+    // maxId);
+
+    final List<T> results = processBucketRange(jobDao, minId, maxId);
 
     if (results != null && !results.isEmpty()) {
       LOGGER.warn("bucket #{} found {} people to index", bucket, results.size());
@@ -623,6 +666,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   /**
    * Indexes a <strong>SINGLE</strong> document. Prefer batch mode.
+   * 
+   * <p>
+   * <strong>TODO:</strong> Add document mapping after creating index.
+   * </p>
    * 
    * @param person {@link Person} document to index
    * @throws JsonProcessingException if JSON cannot be read
