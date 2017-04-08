@@ -6,7 +6,9 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
@@ -52,6 +54,7 @@ import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
+import gov.ca.cwds.data.std.ApiReduce;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
@@ -472,6 +475,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     }
   }
 
+  protected Class<?> getMqtEntityClass() {
+    return null;
+  }
+
+  protected boolean isReducer() {
+    return false;
+  }
+
   /**
    * LATEST INCARNATION.
    * 
@@ -481,7 +492,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @return collection of entity
    */
   protected List<T> processBucketRange(BaseDaoImpl<T> jobDao, String minId, String maxId) {
-    final String namedQueryName = jobDao.getEntityClass().getName() + ".findBucketRange";
+    final Class<?> entityClass =
+        getMqtEntityClass() != null ? getMqtEntityClass() : jobDao.getEntityClass();
+    final String namedQueryName = entityClass.getName() + ".findBucketRange";
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
     Transaction txn = null;
@@ -491,14 +504,19 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       q.setString("min_id", minId).setString("max_id", maxId);
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
-      final List<T> answers = q.list();
+      final List<T> recs = q.list();
 
-      String lastId = "";
-      for (T rec : answers) {
+      if (this.isReducer()) {
+        final int len = (int) (recs.size() * 1.25);
+        Map<Object, ReplicatedClient> map = new LinkedHashMap<>(len);
+        for (T rec : recs) {
+          ApiReduce<ReplicatedClient> reducer = (ApiReduce<ReplicatedClient>) rec;
+          reducer.reduce(map);
+        }
 
       }
 
-      results.addAll(answers);
+      results.addAll(recs);
       session.clear();
       txn.commit();
       return results.build();

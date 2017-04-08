@@ -3,6 +3,7 @@ package gov.ca.cwds.dao.cms;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,6 +21,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.ReplicatedClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
+import gov.ca.cwds.data.std.ApiReduce;
 
 @Entity
 @Table(name = "ES_CLIENT_ADDRESS")
@@ -27,7 +29,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
     query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
         + "WHERE CLT_IDENTIFIER BETWEEN :min_id AND :max_id ORDER BY CLT_IDENTIFIER, CLA_EFF_STRTDT FOR READ ONLY",
     resultClass = EsClientAddress.class, readOnly = true)
-public class EsClientAddress implements Serializable, PersistentObject {
+public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedClient> {
 
   // ================
   // CLIENT_T:
@@ -396,17 +398,17 @@ public class EsClientAddress implements Serializable, PersistentObject {
   @Column(name = "ADR_UNIT_NO")
   private String adrUnitNumber;
 
-  /**
-   * Assumes that records are ordered by identifier.
-   * 
-   * @param last the last client processed
-   * @return normalized client
-   */
-  public ReplicatedClient normalize(ReplicatedClient last) {
-    final boolean isSame = last.getId().equals(this.cltId);
-    ReplicatedClient ret = isSame ? last : new ReplicatedClient();
+  @Override
+  public Class<ReplicatedClient> getReductionClass() {
+    return ReplicatedClient.class;
+  }
 
-    if (!isSame) {
+  @Override
+  public void reduce(Map<Object, ReplicatedClient> map) {
+    final boolean isClientAdded = map.containsKey(this.cltId);
+    ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : new ReplicatedClient();
+
+    if (!isClientAdded) {
       // Populate core client attributes.
       ret.setAdjudicatedDelinquentIndicator(getCltAdjudicatedDelinquentIndicator());
       ret.setAdoptionStatusCode(getCltAdoptionStatusCode());
@@ -520,7 +522,7 @@ public class EsClientAddress implements Serializable, PersistentObject {
     adr.setZip4(getAdrZip4());
     rca.addAddress(adr);
 
-    return ret;
+    map.put(ret.getId(), ret);
   }
 
   public String getCltAdjudicatedDelinquentIndicator() {

@@ -13,8 +13,9 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.EsClientAddress;
-import gov.ca.cwds.dao.cms.ReplicatedClientAddressDao;
+import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
@@ -23,7 +24,7 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * 
  * @author CWDS API Team
  */
-public class ClientIndexerJob extends BasePersonIndexerJob<EsClientAddress> {
+public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
 
   private static final Logger LOGGER = LogManager.getLogger(ClientIndexerJob.class);
 
@@ -37,10 +38,20 @@ public class ClientIndexerJob extends BasePersonIndexerJob<EsClientAddress> {
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public ClientIndexerJob(final ReplicatedClientAddressDao clientDao,
+  public ClientIndexerJob(final ReplicatedClientDao clientDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
     super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  }
+
+  @Override
+  protected Class<?> getMqtEntityClass() {
+    return EsClientAddress.class;
+  }
+
+  @Override
+  protected boolean isReducer() {
+    return true;
   }
 
   @Override
