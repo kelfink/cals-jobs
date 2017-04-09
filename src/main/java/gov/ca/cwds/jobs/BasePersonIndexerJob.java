@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
@@ -54,7 +53,6 @@ import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
-import gov.ca.cwds.data.std.ApiReduce;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
@@ -84,7 +82,7 @@ import gov.ca.cwds.rest.api.domain.es.Person;
  * </pre>
  * 
  * @author CWDS API Team
- * @param <T> Person persistence type
+ * @param <T> storable Person persistence type
  * @see JobOptions
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject>
@@ -101,10 +99,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   private static final String QUERY_BUCKET_LIST =
       "select z.bucket, min(z.identifier) as minId, max(z.identifier) as maxId, count(*) as bucketCount "
-          + "from ( " + " select (y.rn / (total_cnt/10)) + 1 as bucket, y.rn, y.identifier "
-          + " from ( "
-          + "     select c.identifier, row_number() over (order by 1) as rn, count(*) over (order by 1) as total_cnt "
-          + "     from {h-schema}THE_TABLE c order by c.IDENTIFIER ) y " + " order by y.rn "
+          + "from ( " + " select (y.rn / (total_cnt/10)) + 1 as bucket, y.rn, y.identifier from ( "
+          + "  select c.identifier, row_number() over (order by 1) as rn, count(*) over (order by 1) as total_cnt "
+          + "  from {h-schema}THE_TABLE c order by c.IDENTIFIER ) y order by y.rn "
           + ") z group by z.bucket for read only ";
 
   private static ApiSystemCodeCache systemCodes;
@@ -475,12 +472,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     }
   }
 
-  protected Class<?> getMqtEntityClass() {
+  protected Class<?> getMqtClass() {
     return null;
   }
 
-  protected boolean isReducer() {
-    return false;
+  protected Collection<T> reduce(List<PersistentObject> recs) {
+    return (Collection<T>) recs;
   }
 
   /**
@@ -492,8 +489,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @return collection of entity
    */
   protected List<T> processBucketRange(BaseDaoImpl<T> jobDao, String minId, String maxId) {
-    final Class<?> entityClass =
-        getMqtEntityClass() != null ? getMqtEntityClass() : jobDao.getEntityClass();
+    final Class<?> entityClass = getMqtClass() != null ? getMqtClass() : jobDao.getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findBucketRange";
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
@@ -506,21 +502,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
 
-      if (this.isReducer()) {
-        final int len = (int) (recs.size() * 1.25);
-        Map<Object, ReplicatedClient> map = new LinkedHashMap<>(len);
-        for (T rec : recs) {
-          ApiReduce<ReplicatedClient> reducer = (ApiReduce<ReplicatedClient>) rec;
-          reducer.reduce(map);
-        }
-
-      }
-
-      results.addAll(recs);
+      results.addAll(reduce((List<PersistentObject>) recs));
       session.clear();
       txn.commit();
       return results.build();
-
     } catch (HibernateException h) {
       LOGGER.error("BATCH ERROR! ", h);
       if (txn != null) {
