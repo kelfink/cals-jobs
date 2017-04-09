@@ -50,7 +50,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
   }
 
   @Override
-  protected Class<?> getMqtClass() {
+  protected Class<? extends ApiReduce<? extends PersistentObject>> getMqtClass() {
     return EsClientAddress.class;
   }
 
