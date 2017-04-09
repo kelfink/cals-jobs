@@ -60,10 +60,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
   }
 
   @Override
-  protected List<ReplicatedClient> reduce(List<ApiReduce<? extends PersistentObject>> recs) {
+  // protected List<T> reduce(List<ApiReduce<? extends PersistentObject>> recs) {
+  protected List<ReplicatedClient> reduce(List<? extends PersistentObject> recs) {
     final int len = (int) (recs.size() * 1.25);
     Map<Object, ReplicatedClient> map = new LinkedHashMap<>(len);
-    for (ApiReduce<? extends PersistentObject> rec : recs) {
+    for (PersistentObject rec : recs) {
       ApiReduce<ReplicatedClient> reducer = (EsClientAddress) rec;
       reducer.reduce(map);
     }

@@ -94,8 +94,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
   private static final int DEFAULT_BATCH_WAIT = 45;
 
-  // private static final int DEFAULT_BUCKETS = 4;
-  private static final int DEFAULT_BUCKETS = 1;
+  private static final int DEFAULT_BUCKETS = 4;
+  // private static final int DEFAULT_BUCKETS = 1;
 
   private static final String QUERY_BUCKET_LIST =
       "select z.bucket, min(z.identifier) as minId, max(z.identifier) as maxId, count(*) as bucketCount "
@@ -389,6 +389,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     }
   }
 
+  /**
+   * Dynamically build the list of bucket ranges.
+   * 
+   * @param table the driver table
+   * @return batch buckets
+   */
   protected List<BatchBucket> buildBucketList(String table) {
     List<BatchBucket> ret = new ArrayList<>();
 
@@ -414,8 +420,22 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     return ret;
   }
 
+  /**
+   * Working approach tells Hibernate to collect results from native query into parent/child
+   * objects.
+   * 
+   * <p>
+   * Down side: complicated syntax. Must tell Hibernate how to join aliased tables.
+   * </p>
+   * 
+   * @param jobDao DAO for T
+   * @param rootEntity root parent entity class, typically type T
+   * @param minId start of identifier range
+   * @param maxId end of identifier range
+   * @return List of T entity
+   */
   protected List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, Class<?> rootEntity,
-      long bucketNum, long totalBuckets, String minId, String maxId) {
+      String minId, String maxId) {
     final String namedQueryName = jobDao.getEntityClass().getName() + ".findPartitionedBuckets";
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
@@ -424,10 +444,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       txn = session.beginTransaction();
       final Query q = session.getNamedQuery(namedQueryName);
       SQLQuery query = session.createSQLQuery(q.getQueryString());
-      query
-          // .setInteger("bucket_num", (int) bucketNum)
-          // .setInteger("total_buckets", (int) totalBuckets)
-          .setString("min_id", minId).setString("max_id", maxId);
+      query.setString("min_id", minId).setString("max_id", maxId);
 
       // NamedQuery comments describe join conditions.
       boolean hibernateJoins =
@@ -476,21 +493,36 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     return null;
   }
 
-  protected List<T> reduce(List<ApiReduce<? extends PersistentObject>> recs) {
-    return null;
+  /**
+   * Default reduce method just returns the input. Child classes may customize this method to reduce
+   * denormalized result sets to normalized entities.
+   * 
+   * @param recs entity records
+   * @return unmodified entity records
+   */
+  @SuppressWarnings("unchecked")
+  // protected List<T> reduce(List<ApiReduce<? extends PersistentObject>> recs) {
+  protected List<T> reduce(List<? extends PersistentObject> recs) {
+    return (List<T>) recs;
   }
 
+  /**
+   * True if the Job class intends to reduce denormalized results to normalized ones.
+   * 
+   * @return true if class overrides {@link #reduce(List)}
+   */
   protected boolean isReducer() {
     return false;
   }
 
   /**
-   * LATEST INCARNATION.
+   * Simple and clean approach to divide work into buckets: pull a unique range of identifiers so
+   * that no bucket results overlap.
    * 
-   * @param jobDao DAO for this entity type
-   * @param minId start of range
-   * @param maxId end of range
-   * @return collection of entity
+   * @param jobDao DAO for entity type T
+   * @param minId start of identifier range
+   * @param maxId end of identifier range
+   * @return collection of entity results
    */
   protected List<T> processBucketRange(BaseDaoImpl<T> jobDao, String minId, String maxId) {
     final Class<?> entityClass = getMqtClass() != null ? getMqtClass() : jobDao.getEntityClass();
@@ -507,15 +539,16 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       final List<T> recs = q.list();
 
       if (isReducer()) {
-        results.addAll(reduce((List<ApiReduce<? extends PersistentObject>>) recs));
+        results.addAll(reduce(recs));
       } else {
         results.addAll(recs);
       }
+
       session.clear();
       txn.commit();
       return results.build();
     } catch (HibernateException h) {
-      LOGGER.error("BATCH ERROR! ", h);
+      LOGGER.error("BATCH ERROR! {}", h.getMessage(), h);
       if (txn != null) {
         txn.rollback();
       }
@@ -529,7 +562,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * instances as needed.
    * 
    * <p>
-   * Note that both BulkProcessor are ElasticsearchDao are thread-safe.
+   * Thread safety: both BulkProcessor are ElasticsearchDao are thread-safe.
    * </p>
    * 
    * @param bucket the bucket number to process
@@ -546,10 +579,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     // final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
     // : jobDao.partitionedBucketList(bucket, totalBuckets, minId, maxId);
 
+    // Too complex, DB2 optimization challenges.
     // final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
     // : partitionedBucketEntities(jobDao, jobDao.getEntityClass(), bucket, totalBuckets, minId,
     // maxId);
 
+    // Simple and clean approach: process a unique range of identifiers.
     final List<T> results = processBucketRange(jobDao, minId, maxId);
 
     if (results != null && !results.isEmpty()) {
@@ -562,7 +597,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       final BulkProcessor bp = buildBulkProcessor();
 
       // One thread per bucket up to max cores.
-      // Each bucket runs on one thread only. No parallel streams.
+      // Each bucket runs on one thread only. No parallel streams here.
       results.stream().forEach(p -> {
         try {
           final ElasticSearchPerson esp = buildESPerson(p);
@@ -589,7 +624,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * Process all buckets using default parallelism without partitions.
    */
   protected void processBuckets() {
-    LOGGER.warn("Process buckets");
+    LOGGER.info("Process buckets");
     LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).sorted().parallel()
         .forEach(this::processBucket);
   }

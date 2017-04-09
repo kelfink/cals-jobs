@@ -25,7 +25,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiReduce;
 
 /**
- * Entity bean for Materialized Query Table, ES_CLIENT_ADDRESS.
+ * Entity bean for Materialized Query Table (MQT), ES_CLIENT_ADDRESS.
  * 
  * <p>
  * Implements {@link ApiReduce} and converts to {@link ReplicatedClient}.
