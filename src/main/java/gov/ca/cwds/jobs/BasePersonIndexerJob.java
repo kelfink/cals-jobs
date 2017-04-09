@@ -53,6 +53,7 @@ import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
+import gov.ca.cwds.data.std.ApiReduce;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
@@ -472,11 +473,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     }
   }
 
-  protected Class<?> getMqtClass() {
+  protected Class<? extends ApiReduce<? extends PersistentObject>> getMqtClass() {
     return null;
   }
 
-  protected Collection<T> reduce(List<PersistentObject> recs) {
+  protected Collection<T> reduce(List<ApiReduce<? extends PersistentObject>> recs) {
     return (Collection<T>) recs;
   }
 
@@ -502,7 +503,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
 
-      results.addAll(reduce((List<PersistentObject>) recs));
+      results.addAll(reduce((List<ApiReduce<? extends PersistentObject>>) recs));
       session.clear();
       txn.commit();
       return results.build();

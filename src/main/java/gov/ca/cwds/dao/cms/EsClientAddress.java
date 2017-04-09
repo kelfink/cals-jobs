@@ -12,6 +12,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
@@ -23,13 +24,28 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiReduce;
 
+/**
+ * Entity bean for Materialized Query Table, ES_CLIENT_ADDRESS.
+ * 
+ * <p>
+ * Implements {@link ApiReduce} and converts to {@link ReplicatedClient}.
+ * </p>
+ * 
+ * @author CWDS API Team
+ */
 @Entity
 @Table(name = "ES_CLIENT_ADDRESS")
 @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findBucketRange",
     query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
-        + "WHERE CLT_IDENTIFIER BETWEEN :min_id AND :max_id ORDER BY CLT_IDENTIFIER, CLA_EFF_STRTDT FOR READ ONLY",
+        + "WHERE CLT_IDENTIFIER BETWEEN :min_id AND :max_id "
+        + "ORDER BY CLT_IDENTIFIER, CLA_EFF_STRTDT FOR READ ONLY",
     resultClass = EsClientAddress.class, readOnly = true)
 public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedClient> {
+
+  /**
+   * Default.
+   */
+  private static final long serialVersionUID = 1L;
 
   // ================
   // CLIENT_T:
@@ -366,6 +382,7 @@ public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedCl
   private Short adrState;
 
   @Column(name = "ADR_STREET_NM")
+  @ColumnTransformer(read = "trim(ADR_STREET_NM)")
   private String adrStreetName;
 
   @Column(name = "ADR_STREET_NO")
@@ -483,44 +500,49 @@ public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedCl
     }
 
     // Client Address:
-    ReplicatedClientAddress rca = new ReplicatedClientAddress();
-    rca.setAddressType(getClaAddressType());
-    rca.setBkInmtId(getClaBkInmtId());
-    rca.setEffEndDt(getClaEffectiveEndDate());
-    rca.setEffStartDt(getClaEffectiveStartDate());
-    rca.setFkAddress(getClaFkAddress());
-    rca.setFkClient(getClaFkClient());
-    rca.setFkReferral(getClaFkReferral());
-    rca.setHomelessInd(getClaHomelessInd());
-    rca.setId(getClaId());
-    ret.addClientAddress(rca);
+    if (!StringUtils.isBlank(getClaId())) {
+      ReplicatedClientAddress rca = new ReplicatedClientAddress();
+      rca.setAddressType(getClaAddressType());
+      rca.setBkInmtId(getClaBkInmtId());
+      rca.setEffEndDt(getClaEffectiveEndDate());
+      rca.setEffStartDt(getClaEffectiveStartDate());
+      rca.setFkAddress(getClaFkAddress());
+      rca.setFkClient(getClaFkClient());
+      rca.setFkReferral(getClaFkReferral());
+      rca.setHomelessInd(getClaHomelessInd());
+      rca.setId(getClaId());
+      ret.addClientAddress(rca);
 
-    ReplicatedAddress adr = new ReplicatedAddress();
-    adr.setAddressDescription(getAdrAddressDescription());
-    adr.setId(getAdrId());
-    adr.setCity(getAdrCity());
-    adr.setEmergencyExtension(getAdrEmergencyExtension());
-    adr.setEmergencyNumber(getAdrEmergencyNumber());
-    adr.setFrgAdrtB(getAdrFrgAdrtB());
-    adr.setGovernmentEntityCd(getAdrGovernmentEntityCd());
-    adr.setHeaderAddress(getAdrHeaderAddress());
-    adr.setId(getAdrId());
-    adr.setMessageExtension(getAdrMessageExtension());
-    adr.setMessageNumber(getAdrMessageNumber());
-    adr.setPostDirCd(getAdrPostDirCd());
-    adr.setPreDirCd(getAdrPreDirCd());
-    adr.setPrimaryExtension(getAdrPrimaryExtension());
-    adr.setPrimaryNumber(getAdrPrimaryNumber());
-    adr.setState(getAdrState());
-    adr.setStateCd(getAdrState());
-    adr.setStreetName(getAdrStreetName());
-    adr.setStreetNumber(getAdrStreetNumber());
-    adr.setStreetSuffixCd(getAdrStreetSuffixCd());
-    adr.setUnitDesignationCd(getAdrUnitDesignationCd());
-    adr.setUnitNumber(getAdrUnitNumber());
-    adr.setZip(getAdrZip());
-    adr.setZip4(getAdrZip4());
-    rca.addAddress(adr);
+      // Address proper:
+      if (!StringUtils.isBlank(getAdrId())) {
+        ReplicatedAddress adr = new ReplicatedAddress();
+        adr.setAddressDescription(getAdrAddressDescription());
+        adr.setId(getAdrId());
+        adr.setCity(getAdrCity());
+        adr.setEmergencyExtension(getAdrEmergencyExtension());
+        adr.setEmergencyNumber(getAdrEmergencyNumber());
+        adr.setFrgAdrtB(getAdrFrgAdrtB());
+        adr.setGovernmentEntityCd(getAdrGovernmentEntityCd());
+        adr.setHeaderAddress(getAdrHeaderAddress());
+        adr.setId(getAdrId());
+        adr.setMessageExtension(getAdrMessageExtension());
+        adr.setMessageNumber(getAdrMessageNumber());
+        adr.setPostDirCd(getAdrPostDirCd());
+        adr.setPreDirCd(getAdrPreDirCd());
+        adr.setPrimaryExtension(getAdrPrimaryExtension());
+        adr.setPrimaryNumber(getAdrPrimaryNumber());
+        adr.setState(getAdrState());
+        adr.setStateCd(getAdrState());
+        adr.setStreetName(getAdrStreetName());
+        adr.setStreetNumber(getAdrStreetNumber());
+        adr.setStreetSuffixCd(getAdrStreetSuffixCd());
+        adr.setUnitDesignationCd(getAdrUnitDesignationCd());
+        adr.setUnitNumber(getAdrUnitNumber());
+        adr.setZip(getAdrZip());
+        adr.setZip4(getAdrZip4());
+        rca.addAddress(adr);
+      }
+    }
 
     map.put(ret.getId(), ret);
   }
