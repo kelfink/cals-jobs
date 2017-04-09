@@ -1,10 +1,10 @@
 package gov.ca.cwds.jobs;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -55,14 +55,20 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
   }
 
   @Override
-  protected Collection<ReplicatedClient> reduce(List<ApiReduce<? extends PersistentObject>> recs) {
+  protected boolean isReducer() {
+    return true;
+  }
+
+  @Override
+  protected List<ReplicatedClient> reduce(List<ApiReduce<? extends PersistentObject>> recs) {
     final int len = (int) (recs.size() * 1.25);
     Map<Object, ReplicatedClient> map = new LinkedHashMap<>(len);
     for (ApiReduce<? extends PersistentObject> rec : recs) {
       ApiReduce<ReplicatedClient> reducer = (EsClientAddress) rec;
       reducer.reduce(map);
     }
-    return map.values();
+
+    return map.values().stream().collect(Collectors.toList());
   }
 
   @Override

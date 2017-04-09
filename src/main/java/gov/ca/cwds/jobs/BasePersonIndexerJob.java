@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -477,8 +476,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     return null;
   }
 
-  protected Collection<T> reduce(List<ApiReduce<? extends PersistentObject>> recs) {
-    return (Collection<T>) recs;
+  protected List<T> reduce(List<ApiReduce<? extends PersistentObject>> recs) {
+    return null;
+  }
+
+  protected boolean isReducer() {
+    return false;
   }
 
   /**
@@ -503,7 +506,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
 
-      results.addAll(reduce((List<ApiReduce<? extends PersistentObject>>) recs));
+      if (isReducer()) {
+        results.addAll(reduce((List<ApiReduce<? extends PersistentObject>>) recs));
+      } else {
+        results.addAll(recs);
+      }
       session.clear();
       txn.commit();
       return results.build();
