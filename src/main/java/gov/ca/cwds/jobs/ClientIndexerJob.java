@@ -1,12 +1,10 @@
 package gov.ca.cwds.jobs;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -14,7 +12,6 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.EsClientAddress;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
@@ -60,7 +57,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
   }
 
   @Override
-  // protected List<T> reduce(List<ApiReduce<? extends PersistentObject>> recs) {
   protected List<ReplicatedClient> reduce(List<? extends PersistentObject> recs) {
     final int len = (int) (recs.size() * 1.25);
     Map<Object, ReplicatedClient> map = new LinkedHashMap<>(len);
@@ -70,19 +66,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
     }
 
     return map.values().stream().collect(Collectors.toList());
-  }
-
-  @Override
-  protected List<Pair<String, String>> getPartitionRanges() {
-    List<Pair<String, String>> ret = new ArrayList<>();
-    List<BatchBucket> buckets = buildBucketList("CLIENT_T");
-
-    for (BatchBucket b : buckets) {
-      LOGGER.warn("DYNAMIC CLIENT BUCKET: {} to {}", b.getMinId(), b.getMaxId());
-      ret.add(Pair.of(b.getMinId(), b.getMaxId()));
-    }
-
-    return ret;
   }
 
   /**

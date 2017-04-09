@@ -79,7 +79,7 @@ public final class JobOptions implements Serializable {
    * Required for "initial load" mode.
    * </p>
    */
-  private long totalBuckets;
+  private long totalBuckets = 10;
 
   /**
    * Total threads to allocate to this batch run. Defaults to all available cores.

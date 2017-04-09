@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 
+import javax.persistence.Table;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -97,9 +99,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final int DEFAULT_BUCKETS = 4;
   // private static final int DEFAULT_BUCKETS = 1;
 
+  // TODO: set total buckets.
   private static final String QUERY_BUCKET_LIST =
       "select z.bucket, min(z.identifier) as minId, max(z.identifier) as maxId, count(*) as bucketCount "
-          + "from ( " + " select (y.rn / (total_cnt/10)) + 1 as bucket, y.rn, y.identifier from ( "
+          + "from ( select (y.rn / (total_cnt/THE_TOTAL_BUCKETS)) + 1 as bucket, y.rn, y.identifier from ( "
           + "  select c.identifier, row_number() over (order by 1) as rn, count(*) over (order by 1) as total_cnt "
           + "  from {h-schema}THE_TABLE c order by c.IDENTIFIER ) y order by y.rn "
           + ") z group by z.bucket for read only ";
@@ -162,6 +165,21 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
+   * Get the table or view used to allocate bucket ranges. Called on full load only.
+   * 
+   * @return the table or view used to allocate bucket ranges
+   */
+  protected String getBucketDriverTable() {
+    String ret = null;
+    final Table tbl = this.jobDao.getEntityClass().getDeclaredAnnotation(Table.class);
+    if (tbl != null) {
+      ret = tbl.name();
+    }
+
+    return ret;
+  }
+
+  /**
    * Return a list of partition keys to optimize batch SELECT statements. See ReplicatedClient
    * native named query "findPartitionedBuckets".
    * 
@@ -169,7 +187,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @see ReplicatedClient
    */
   protected List<Pair<String, String>> getPartitionRanges() {
-    return new ArrayList<>(0);
+    List<Pair<String, String>> ret = new ArrayList<>();
+    List<BatchBucket> buckets = buildBucketList(getBucketDriverTable());
+
+    for (BatchBucket b : buckets) {
+      LOGGER.warn("BUCKET RANGE: {} to {}", b.getMinId(), b.getMaxId());
+      ret.add(Pair.of(b.getMinId(), b.getMaxId()));
+    }
+
+    return ret;
   }
 
   /**
@@ -390,11 +416,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
-   * Dynamically build the list of bucket ranges.
+   * Build the bucket list at runtime.
    * 
    * @param table the driver table
    * @return batch buckets
    */
+  @SuppressWarnings("unchecked")
   protected List<BatchBucket> buildBucketList(String table) {
     List<BatchBucket> ret = new ArrayList<>();
 
@@ -403,8 +430,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     try {
       LOGGER.info("FETCH DYNAMIC BUCKET LIST FOR TABLE {}", table);
       txn = session.beginTransaction();
+      final long totalBuckets = this.opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
-          .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table), BatchBucket.class);
+          .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
+              .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
 
       ret = q.getResultList();
       session.clear();
@@ -489,6 +518,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     }
   }
 
+  /**
+   * Getter for the job's MQT entity class, if any, or null if none.
+   * 
+   * @return MQT entity class
+   */
   protected Class<? extends ApiReduce<? extends PersistentObject>> getMqtClass() {
     return null;
   }
@@ -501,7 +535,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @return unmodified entity records
    */
   @SuppressWarnings("unchecked")
-  // protected List<T> reduce(List<ApiReduce<? extends PersistentObject>> recs) {
   protected List<T> reduce(List<? extends PersistentObject> recs) {
     return (List<T>) recs;
   }
