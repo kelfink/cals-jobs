@@ -43,7 +43,7 @@ import gov.ca.cwds.data.std.ApiReduce;
             + "ORDER BY CLT_IDENTIFIER, CLA_EFF_STRTDT FOR READ ONLY",
         resultClass = EsClientAddress.class, readOnly = true),
     @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findAllUpdatedAfter",
-        query = "WITH lrd AS ( SELECT :after AS lst_run FROM SYSIBM.SYSDUMMY1 ) "
+        query = "WITH lrd AS ( SELECT CAST(:after AS TIMESTAMP) AS lst_run FROM SYSIBM.SYSDUMMY1 ) "
             + "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x CROSS JOIN lrd "
             + "WHERE x.CLT_IBMSNAP_LOGMARKER > lrd.lst_run OR x.CLA_IBMSNAP_LOGMARKER > lrd.lst_run OR x.ADR_IBMSNAP_LOGMARKER > lrd.lst_run "
             + "ORDER BY x.clt_IDENTIFIER, x.cla_EFF_STRTDT FOR READ ONLY ",
@@ -350,6 +350,14 @@ public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedCl
   @Id
   @Column(name = "ADR_IDENTIFIER")
   private String adrId;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "ADR_IBMSNAP_OPERATION", updatable = false)
+  private CmsReplicationOperation adrReplicationOperation;
+
+  @Type(type = "timestamp")
+  @Column(name = "ADR_IBMSNAP_LOGMARKER", updatable = false)
+  private Date adrReplicationDate;
 
   @Column(name = "ADR_CITY_NM")
   private String adrCity;
@@ -1408,6 +1416,22 @@ public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedCl
 
   public void setClaId(String claId) {
     this.claId = claId;
+  }
+
+  public CmsReplicationOperation getAdrReplicationOperation() {
+    return adrReplicationOperation;
+  }
+
+  public void setAdrReplicationOperation(CmsReplicationOperation adrReplicationOperation) {
+    this.adrReplicationOperation = adrReplicationOperation;
+  }
+
+  public Date getAdrReplicationDate() {
+    return adrReplicationDate;
+  }
+
+  public void setAdrReplicationDate(Date adrReplicationDate) {
+    this.adrReplicationDate = adrReplicationDate;
   }
 
 }

@@ -97,10 +97,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
   private static final int DEFAULT_BATCH_WAIT = 45;
 
-  private static final int DEFAULT_BUCKETS = 4;
-  // private static final int DEFAULT_BUCKETS = 1;
+  private static final int DEFAULT_THREADS = 4;
+  // private static final int DEFAULT_THREADS = 1;
 
-  // TODO: set total buckets.
   private static final String QUERY_BUCKET_LIST =
       "select z.bucket, min(z.identifier) as minId, max(z.identifier) as maxId, count(*) as bucketCount "
           + "from ( select (y.rn / (total_cnt/THE_TOTAL_BUCKETS)) + 1 as bucket, y.rn, y.identifier from ( "
@@ -367,6 +366,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         phones, languages);
   }
 
+  /**
+   * Pull records changed since the last successful run.
+   * 
+   * <p>
+   * If this job defines a denormalized (MQT) entity, then pull from that. Otherwise, pull from the
+   * regular entity.
+   * </p>
+   * 
+   * @param jobDao DAO
+   * @param lastSuccessfulRunTime last successful run time
+   * @return List of normalized entities
+   */
   protected List<T> pullLastRunResults(BaseDaoImpl<T> jobDao, Date lastSuccessfulRunTime) {
     final Class<?> entityClass =
         getDenormalizedClass() != null ? getDenormalizedClass() : jobDao.getEntityClass();
@@ -582,7 +593,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @return default total buckets
    */
   protected int getJobTotalBuckets() {
-    return DEFAULT_BUCKETS;
+    return DEFAULT_THREADS;
   }
 
   /**
@@ -756,8 +767,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       if (autoMode) {
         LOGGER.warn("AUTO MODE!");
         getOpts().setStartBucket(1);
-        getOpts().setEndBucket(DEFAULT_BUCKETS);
-        getOpts().setTotalBuckets(DEFAULT_BUCKETS);
+        getOpts().setEndBucket(DEFAULT_THREADS);
+        getOpts().setTotalBuckets(DEFAULT_THREADS);
 
         if (!this.getPartitionRanges().isEmpty()) {
           processBucketPartitions();
