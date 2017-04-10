@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -366,6 +367,39 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         phones, languages);
   }
 
+  protected List<T> pullLastRunResults(BaseDaoImpl<T> jobDao, Date lastSuccessfulRunTime) {
+    final Class<?> entityClass =
+        getDenormalizedClass() != null ? getDenormalizedClass() : jobDao.getEntityClass();
+    final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
+    Session session = jobDao.getSessionFactory().getCurrentSession();
+
+    Transaction txn = null;
+    try {
+      txn = session.beginTransaction();
+      NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
+      q.setTimestamp("after", new Timestamp(lastSuccessfulRunTime.getTime()));
+
+      ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
+      final List<T> recs = q.list();
+
+      if (isReducer()) {
+        results.addAll(reduce(recs));
+      } else {
+        results.addAll(recs);
+      }
+
+      session.clear();
+      txn.commit();
+      return results.build();
+    } catch (HibernateException h) {
+      LOGGER.error("BATCH ERROR! {}", h.getMessage(), h);
+      if (txn != null) {
+        txn.rollback();
+      }
+      throw new DaoException(h);
+    }
+  }
+
   /**
    * Fetch all records for the next batch run, either by bucket or last successful run date.
    * 
@@ -379,7 +413,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
       // One bulk processor "last run" operations. BulkProcessor is thread-safe.
       final BulkProcessor bp = buildBulkProcessor();
-      final List<T> results = jobDao.findAllUpdatedAfter(lastSuccessfulRunTime);
+      final List<T> results = pullLastRunResults(jobDao, lastSuccessfulRunTime);
 
       if (results != null && !results.isEmpty()) {
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));

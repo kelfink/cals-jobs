@@ -14,6 +14,7 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
@@ -35,11 +36,18 @@ import gov.ca.cwds.data.std.ApiReduce;
  */
 @Entity
 @Table(name = "ES_CLIENT_ADDRESS")
-@NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findBucketRange",
-    query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
-        + "WHERE CLT_IDENTIFIER BETWEEN :min_id AND :max_id "
-        + "ORDER BY CLT_IDENTIFIER, CLA_EFF_STRTDT FOR READ ONLY",
-    resultClass = EsClientAddress.class, readOnly = true)
+@NamedNativeQueries({
+    @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findBucketRange",
+        query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
+            + "WHERE CLT_IDENTIFIER BETWEEN :min_id AND :max_id "
+            + "ORDER BY CLT_IDENTIFIER, CLA_EFF_STRTDT FOR READ ONLY",
+        resultClass = EsClientAddress.class, readOnly = true),
+    @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findAllUpdatedAfter",
+        query = "WITH lrd AS ( SELECT :after AS lst_run FROM SYSIBM.SYSDUMMY1 ) "
+            + "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x CROSS JOIN lrd "
+            + "WHERE x.CLT_IBMSNAP_LOGMARKER > lrd.lst_run OR x.CLA_IBMSNAP_LOGMARKER > lrd.lst_run OR x.ADR_IBMSNAP_LOGMARKER > lrd.lst_run  "
+            + "ORDER BY x.clt_IDENTIFIER, x.cla_EFF_STRTDT FOR READ ONLY ",
+        resultClass = EsClientAddress.class, readOnly = true)})
 public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedClient> {
 
   /**
