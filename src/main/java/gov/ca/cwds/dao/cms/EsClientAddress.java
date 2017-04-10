@@ -45,7 +45,7 @@ import gov.ca.cwds.data.std.ApiReduce;
     @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findAllUpdatedAfter",
         query = "WITH lrd AS ( SELECT :after AS lst_run FROM SYSIBM.SYSDUMMY1 ) "
             + "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x CROSS JOIN lrd "
-            + "WHERE x.CLT_IBMSNAP_LOGMARKER > lrd.lst_run OR x.CLA_IBMSNAP_LOGMARKER > lrd.lst_run OR x.ADR_IBMSNAP_LOGMARKER > lrd.lst_run  "
+            + "WHERE x.CLT_IBMSNAP_LOGMARKER > lrd.lst_run OR x.CLA_IBMSNAP_LOGMARKER > lrd.lst_run OR x.ADR_IBMSNAP_LOGMARKER > lrd.lst_run "
             + "ORDER BY x.clt_IDENTIFIER, x.cla_EFF_STRTDT FOR READ ONLY ",
         resultClass = EsClientAddress.class, readOnly = true)})
 public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedClient> {
