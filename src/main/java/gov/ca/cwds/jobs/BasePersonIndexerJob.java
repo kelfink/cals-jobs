@@ -430,7 +430,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     try {
       LOGGER.info("FETCH DYNAMIC BUCKET LIST FOR TABLE {}", table);
       txn = session.beginTransaction();
-      final long totalBuckets = this.opts.getTotalBuckets();
+      final long totalBuckets =
+          opts.getTotalBuckets() != 0L ? opts.getTotalBuckets() : getJobTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
               .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
@@ -462,7 +463,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @param minId start of identifier range
    * @param maxId end of identifier range
    * @return List of T entity
+   * @deprecated use method {@link #processBucketRange(BaseDaoImpl, String, String)}
    */
+  @Deprecated
   protected List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, Class<?> rootEntity,
       String minId, String maxId) {
     final String namedQueryName = jobDao.getEntityClass().getName() + ".findPartitionedBuckets";
@@ -523,7 +526,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * 
    * @return MQT entity class
    */
-  protected Class<? extends ApiReduce<? extends PersistentObject>> getMqtClass() {
+  protected Class<? extends ApiReduce<? extends PersistentObject>> getDenormalizedClass() {
     return null;
   }
 
@@ -537,6 +540,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   @SuppressWarnings("unchecked")
   protected List<T> reduce(List<? extends PersistentObject> recs) {
     return (List<T>) recs;
+  }
+
+  /**
+   * Override to customize the default number of buckets by job.
+   * 
+   * @return default total buckets
+   */
+  protected int getJobTotalBuckets() {
+    return DEFAULT_BUCKETS;
   }
 
   /**
@@ -558,7 +570,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @return collection of entity results
    */
   protected List<T> processBucketRange(BaseDaoImpl<T> jobDao, String minId, String maxId) {
-    final Class<?> entityClass = getMqtClass() != null ? getMqtClass() : jobDao.getEntityClass();
+    final Class<?> entityClass =
+        getDenormalizedClass() != null ? getDenormalizedClass() : jobDao.getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findBucketRange";
     Session session = jobDao.getSessionFactory().getCurrentSession();
 

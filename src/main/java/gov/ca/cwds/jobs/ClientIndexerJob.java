@@ -47,8 +47,13 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
   }
 
   @Override
-  protected Class<? extends ApiReduce<? extends PersistentObject>> getMqtClass() {
+  protected Class<? extends ApiReduce<? extends PersistentObject>> getDenormalizedClass() {
     return EsClientAddress.class;
+  }
+
+  @Override
+  protected int getJobTotalBuckets() {
+    return 16;
   }
 
   @Override
