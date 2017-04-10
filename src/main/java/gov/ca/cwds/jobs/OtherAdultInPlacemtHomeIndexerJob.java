@@ -27,17 +27,17 @@ public class OtherAdultInPlacemtHomeIndexerJob
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param mainDao OtherAdultInPlacemtHome DAO
+   * @param jobDao OtherAdultInPlacemtHome DAO
    * @param elasticsearchDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public OtherAdultInPlacemtHomeIndexerJob(final ReplicatedOtherAdultInPlacemtHomeDao mainDao,
+  public OtherAdultInPlacemtHomeIndexerJob(final ReplicatedOtherAdultInPlacemtHomeDao jobDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    super(jobDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   /**

@@ -712,7 +712,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * Process all buckets using default parallelism without partitions.
    */
   protected void processBuckets() {
-    LOGGER.info("Process buckets");
     LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).sorted().parallel()
         .forEach(this::processBucket);
   }
