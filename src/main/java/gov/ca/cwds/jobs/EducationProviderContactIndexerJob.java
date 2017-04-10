@@ -40,6 +40,11 @@ public class EducationProviderContactIndexerJob
     super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
+  @Override
+  protected int getJobTotalBuckets() {
+    return 12;
+  }
+
   /**
    * Batch job entry point.
    * 

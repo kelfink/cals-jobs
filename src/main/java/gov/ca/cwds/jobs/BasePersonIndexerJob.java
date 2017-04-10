@@ -96,9 +96,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
   private static final int DEFAULT_BATCH_WAIT = 45;
-
+  private static final int DEFAULT_BUCKETS = 4;
   private static final int DEFAULT_THREADS = 4;
-  // private static final int DEFAULT_THREADS = 1;
 
   private static final String QUERY_BUCKET_LIST =
       "select z.bucket, min(z.identifier) as minId, max(z.identifier) as maxId, count(*) as bucketCount "
@@ -181,7 +180,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   /**
    * Return a list of partition keys to optimize batch SELECT statements. See ReplicatedClient
-   * native named query "findPartitionedBuckets".
+   * native named query, "findPartitionedBuckets".
    * 
    * @return list of partition key pairs
    * @see ReplicatedClient
@@ -280,9 +279,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    */
   public static <T extends BasePersonIndexerJob<?>> void runJob(final Class<T> klass,
       String... args) throws JobsException {
-
-    // Close resources automatically.
-    try (final T job = newJob(klass, args)) {
+    try (final T job = newJob(klass, args)) { // Close resources automatically.
       job.run();
     } catch (IOException e) {
       LOGGER.error("Unable to close resource: {}", e.getMessage(), e);
@@ -344,7 +341,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       for (ApiAddressAware adrx : madrx.getAddresses()) {
         addresses.add(new AutoCompletePerson.AutoCompletePersonAddress(adrx).toESPersonAddress());
       }
-    } else if (p instanceof ApiPhoneAware) {
+    } else if (p instanceof ApiAddressAware) {
       addresses = new ArrayList<>();
       addresses.add(new AutoCompletePerson.AutoCompletePersonAddress((ApiAddressAware) p)
           .toESPersonAddress());
@@ -593,7 +590,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @return default total buckets
    */
   protected int getJobTotalBuckets() {
-    return DEFAULT_THREADS;
+    return DEFAULT_BUCKETS;
   }
 
   /**
@@ -767,7 +764,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       if (autoMode) {
         LOGGER.warn("AUTO MODE!");
         getOpts().setStartBucket(1);
-        getOpts().setEndBucket(DEFAULT_THREADS);
+        getOpts().setEndBucket(DEFAULT_BUCKETS);
         getOpts().setTotalBuckets(DEFAULT_THREADS);
 
         if (!this.getPartitionRanges().isEmpty()) {

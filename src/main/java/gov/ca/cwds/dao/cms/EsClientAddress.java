@@ -39,8 +39,8 @@ import gov.ca.cwds.data.std.ApiReduce;
 @NamedNativeQueries({
     @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findBucketRange",
         query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
-            + "WHERE CLT_IDENTIFIER BETWEEN :min_id AND :max_id "
-            + "ORDER BY CLT_IDENTIFIER, CLA_EFF_STRTDT FOR READ ONLY",
+            + "WHERE x.CLT_IDENTIFIER BETWEEN :min_id AND :max_id "
+            + "ORDER BY x.CLT_IDENTIFIER, x.CLA_EFF_STRTDT FOR READ ONLY",
         resultClass = EsClientAddress.class, readOnly = true),
     @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findAllUpdatedAfter",
         query = "WITH lrd AS ( SELECT CAST(:after AS TIMESTAMP) AS lst_run FROM SYSIBM.SYSDUMMY1 ) "
