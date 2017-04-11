@@ -96,8 +96,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
   private static final int DEFAULT_BATCH_WAIT = 45;
-  private static final int DEFAULT_BUCKETS = 4;
-  private static final int DEFAULT_THREADS = 4;
+  private static final int DEFAULT_BUCKETS = 1;
+  private static final int DEFAULT_THREADS = 1;
 
   private static final String QUERY_BUCKET_LIST =
       "select z.bucket, min(z.identifier) as minId, max(z.identifier) as maxId, count(*) as bucketCount "
@@ -763,8 +763,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       if (autoMode) {
         LOGGER.warn("AUTO MODE!");
         getOpts().setStartBucket(1);
-        getOpts().setEndBucket(DEFAULT_BUCKETS);
-        getOpts().setTotalBuckets(DEFAULT_BUCKETS);
+        getOpts().setEndBucket(1);
+        getOpts().setTotalBuckets(getJobTotalBuckets());
 
         if (this.getDenormalizedClass() != null || !this.getPartitionRanges().isEmpty()) {
           processBucketPartitions();

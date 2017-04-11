@@ -53,7 +53,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
 
   @Override
   protected int getJobTotalBuckets() {
-    return 16;
+    return 32;
   }
 
   @Override

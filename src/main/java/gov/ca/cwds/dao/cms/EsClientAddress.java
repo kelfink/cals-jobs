@@ -36,17 +36,18 @@ import gov.ca.cwds.data.std.ApiReduce;
  */
 @Entity
 @Table(name = "ES_CLIENT_ADDRESS")
-@NamedNativeQueries({
-    @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findBucketRange",
-        query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
-            + "WHERE x.CLT_IDENTIFIER BETWEEN :min_id AND :max_id "
-            + "ORDER BY x.CLT_IDENTIFIER, x.CLA_EFF_STRTDT FOR READ ONLY",
-        resultClass = EsClientAddress.class, readOnly = true),
+@NamedNativeQueries({@NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findBucketRange",
+    query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
+        + "WHERE x.CLT_IDENTIFIER BETWEEN :min_id AND :max_id "
+        // + "ORDER BY x.CLT_IDENTIFIER, x.CLA_EFF_STRTDT "
+        + "FOR READ ONLY",
+    resultClass = EsClientAddress.class, readOnly = true),
     @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findAllUpdatedAfter",
         query = "WITH lrd AS ( SELECT CAST(:after AS TIMESTAMP) AS lst_run FROM SYSIBM.SYSDUMMY1 ) "
             + "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x CROSS JOIN lrd "
             + "WHERE x.CLT_IBMSNAP_LOGMARKER > lrd.lst_run OR x.CLA_IBMSNAP_LOGMARKER > lrd.lst_run OR x.ADR_IBMSNAP_LOGMARKER > lrd.lst_run "
-            + "ORDER BY x.clt_IDENTIFIER, x.cla_EFF_STRTDT FOR READ ONLY ",
+            // + "ORDER BY x.clt_IDENTIFIER, x.cla_EFF_STRTDT "
+            + "FOR READ ONLY ",
         resultClass = EsClientAddress.class, readOnly = true)})
 public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedClient> {
 
