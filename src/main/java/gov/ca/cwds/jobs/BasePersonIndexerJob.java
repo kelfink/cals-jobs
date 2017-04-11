@@ -2,6 +2,9 @@ package gov.ca.cwds.jobs;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -27,6 +30,7 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.internal.SessionImpl;
 import org.hibernate.query.NativeQuery;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -60,6 +64,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+import gov.ca.cwds.rest.api.ApiException;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.es.AutoCompletePerson;
 import gov.ca.cwds.rest.api.domain.es.Person;
@@ -100,11 +105,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final int DEFAULT_THREADS = 1;
 
   private static final String QUERY_BUCKET_LIST =
-      "select z.bucket, min(z.identifier) as minId, max(z.identifier) as maxId, count(*) as bucketCount "
-          + "from ( select (y.rn / (total_cnt/THE_TOTAL_BUCKETS)) + 1 as bucket, y.rn, y.identifier from ( "
-          + "  select c.identifier, row_number() over (order by 1) as rn, count(*) over (order by 1) as total_cnt "
-          + "  from {h-schema}THE_TABLE c order by c.IDENTIFIER ) y order by y.rn "
-          + ") z group by z.bucket for read only ";
+      "SELECT z.bucket, MIN(z.identifier) AS minId, MAX(z.identifier) AS maxId, COUNT(*) AS bucketCount "
+          + "FROM (SELECT (y.rn / (total_cnt/THE_TOTAL_BUCKETS)) + 1 AS bucket, y.rn, y.identifier FROM ( "
+          + "SELECT c.identifier, ROW_NUMBER() OVER (ORDER BY 1) AS rn, COUNT(*) OVER (ORDER BY 1) AS total_cnt "
+          + "FROM {h-schema}THE_TABLE c ORDER BY c.IDENTIFIER) y ORDER BY y.rn "
+          + ") z GROUP BY z.bucket FOR READ ONLY ";
 
   private static ApiSystemCodeCache systemCodes;
 
@@ -142,6 +147,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * Thread-safe count across all worker threads.
    */
   protected AtomicInteger recsProcessed = new AtomicInteger(0);
+
+  protected ResultSet rs;
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -600,6 +607,28 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    */
   protected boolean isReducer() {
     return false;
+  }
+
+  protected void pullNextSet(BaseDaoImpl<T> jobDao) {
+    Session session = jobDao.getSessionFactory().getCurrentSession();
+    Connection con = ((SessionImpl) session).connection();
+
+    final String query =
+        "SELECT x.* FROM CWSRSQ.ES_CLIENT_ADDRESS x ORDER BY x.clt_identifier FOR READ ONLY";
+
+    try (Statement stmt = con.createStatement()) {
+      ResultSet rs = stmt.executeQuery(query);
+      rs.setFetchSize(1000);
+
+      while (rs.next()) {
+
+
+      }
+    } catch (Exception e) {
+      LOGGER.error("BATCH ERROR! {}", e.getMessage(), e);
+      throw new ApiException(e.getMessage(), e);
+    }
+
   }
 
   /**
