@@ -9,8 +9,12 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
@@ -30,7 +34,7 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.internal.SessionImpl;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.query.NativeQuery;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,6 +46,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
+import gov.ca.cwds.dao.cms.EsClientAddress;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.cms.ClientDao;
@@ -148,7 +153,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    */
   protected AtomicInteger recsProcessed = new AtomicInteger(0);
 
-  protected ResultSet rs;
+  protected LinkedBlockingDeque<EsClientAddress> denormalizedQueue =
+      new LinkedBlockingDeque<>(100000);
+
+  protected LinkedBlockingDeque<T> normalizedQueue = new LinkedBlockingDeque<>(100000);
+
+  protected boolean isJobDone = false;
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -609,26 +619,107 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     return false;
   }
 
-  protected void pullNextSet(BaseDaoImpl<T> jobDao) {
-    Session session = jobDao.getSessionFactory().getCurrentSession();
-    Connection con = ((SessionImpl) session).connection();
-
+  /**
+   * Single producer, staged consumers.
+   * 
+   * @param jobDao replicated entity DAO
+   */
+  protected void readMaterializedRecords() {
     final String query =
-        "SELECT x.* FROM CWSRSQ.ES_CLIENT_ADDRESS x ORDER BY x.clt_identifier FOR READ ONLY";
+        "SELECT x.* FROM CWSRS1.ES_CLIENT_ADDRESS x ORDER BY x.clt_identifier FOR READ ONLY";
 
-    try (Statement stmt = con.createStatement()) {
-      ResultSet rs = stmt.executeQuery(query);
-      rs.setFetchSize(1000);
+    try {
+      Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
+          .getService(ConnectionProvider.class).getConnection();
 
-      while (rs.next()) {
+      try (Statement stmt = con.createStatement()) {
+        ResultSet rs = stmt.executeQuery(query); // NOSONAR
+        rs.setFetchSize(1000);
 
-
+        while (rs.next()) {
+          EsClientAddress eca = EsClientAddress.produceFromResultSet(rs);
+          denormalizedQueue.add(eca);
+        }
+      } finally {
+        // TODO: handle finally clause
       }
+
+      con.commit();
+
     } catch (Exception e) {
+      // con.rollback();
       LOGGER.error("BATCH ERROR! {}", e.getMessage(), e);
       throw new ApiException(e.getMessage(), e);
     }
 
+    isJobDone = true;
+  }
+
+  protected void normalize() {
+    String lastId = "";
+    EsClientAddress eca;
+
+    Map<Object, ReplicatedClient> map = new LinkedHashMap<>();
+    try {
+      while (denormalizedQueue.poll(2, TimeUnit.SECONDS) != null) {
+        eca = denormalizedQueue.take();
+        if (!lastId.equals(eca.getCltId()) && !StringUtils.isBlank(lastId)) {
+
+          if (!map.isEmpty()) {
+            this.normalizedQueue.addAll((Collection<T>) map.values());
+          }
+
+          lastId = eca.getCltId();
+          map = new LinkedHashMap<>();
+        }
+
+        eca.reduce(map);
+      }
+    } catch (InterruptedException e) {
+      // Can safely ignore.
+      LOGGER.warn("Normalizer interrupted!");
+    }
+  }
+
+  protected int pushToElasticsearch() {
+    try {
+      while (normalizedQueue.poll(2, TimeUnit.SECONDS) != null) {
+        final List<T> results = new ArrayList<>();
+        final int drainCnt = normalizedQueue.drainTo(results);
+
+        // One bulk processor per bucket/thread.
+        final BulkProcessor bp = buildBulkProcessor();
+
+        // One thread per bucket up to max cores.
+        // Each bucket runs on one thread only. No parallel streams here.
+        results.stream().forEach(p -> {
+          try {
+            final ElasticSearchPerson esp = buildESPerson(p);
+
+            // Bulk indexing! MUCH faster than indexing one doc at a time.
+            bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
+          } catch (JsonProcessingException e) {
+            throw new JobsException("JSON error", e);
+          }
+        });
+
+        // Track counts.
+        recsProcessed.addAndGet(drainCnt);
+
+        try {
+          bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
+        } catch (Exception e2) {
+          throw new JobsException("ES bulk processor interrupted!", e2);
+        }
+
+      }
+
+    } catch (InterruptedException e) {
+      // Can safely ignore.
+      LOGGER.warn("Normalizer interrupted!");
+    }
+
+    return recsProcessed.get();
   }
 
   /**
@@ -749,14 +840,20 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * Process all partitions by buckets using default parallelism.
    */
   protected void processBucketPartitions() {
-    LOGGER.warn("PROCESS EACH PARTITION");
-    for (Pair<String, String> pair : this.getPartitionRanges()) {
-      getOpts().setMinId(pair.getLeft());
-      getOpts().setMaxId(pair.getRight());
-      LOGGER.warn("PROCESS PARTITION RANGE \"{}\" to \"{}\"", getOpts().getMinId(),
-          getOpts().getMaxId());
-      processBuckets();
-    }
+
+    // ENTRY POINT.
+    new Thread(this::readMaterializedRecords).start();
+    new Thread(this::normalize).start();
+    new Thread(this::pushToElasticsearch).start();
+
+    // LOGGER.warn("PROCESS EACH PARTITION");
+    // for (Pair<String, String> pair : this.getPartitionRanges()) {
+    // getOpts().setMinId(pair.getLeft());
+    // getOpts().setMaxId(pair.getRight());
+    // LOGGER.warn("PROCESS PARTITION RANGE \"{}\" to \"{}\"", getOpts().getMinId(),
+    // getOpts().getMaxId());
+    // processBuckets();
+    // }
   }
 
   /**

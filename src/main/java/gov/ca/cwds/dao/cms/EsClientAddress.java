@@ -15,6 +15,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
@@ -434,6 +436,10 @@ public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedCl
   @Column(name = "ADR_UNIT_NO")
   private String adrUnitNumber;
 
+  protected static CmsReplicationOperation strToRepOp(String op) {
+    return op != null ? CmsReplicationOperation.valueOf(op) : null;
+  }
+
   public static EsClientAddress produceFromResultSet(ResultSet rs) throws SQLException {
     EsClientAddress ret = new EsClientAddress();
 
@@ -504,13 +510,11 @@ public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedCl
     ret.setCltTribalMembrshpVerifctnIndicatorVar(rs.getString("CLT_TR_MBVRT_B"));
     ret.setCltUnemployedParentCode(rs.getString("CLT_UNEMPLY_CD"));
     ret.setCltZippyCreatedIndicator(rs.getString("CLT_ZIPPY_IND"));
-    ret.setCltReplicationOperation(
-        CmsReplicationOperation.valueOf(rs.getString("CLT_IBMSNAP_OPERATION")));
+    ret.setCltReplicationOperation(strToRepOp(rs.getString("CLT_IBMSNAP_OPERATION")));
     ret.setCltReplicationDate(rs.getDate("CLT_IBMSNAP_LOGMARKER"));
     ret.setCltLastUpdatedId(rs.getString("CLT_LST_UPD_ID"));
     ret.setCltLastUpdatedTime(rs.getDate("CLT_LST_UPD_TS"));
-    ret.setClaReplicationOperation(
-        CmsReplicationOperation.valueOf(rs.getString("CLA_IBMSNAP_OPERATION")));
+    ret.setClaReplicationOperation(strToRepOp(rs.getString("CLA_IBMSNAP_OPERATION")));
     ret.setClaReplicationDate(rs.getDate("CLA_IBMSNAP_LOGMARKER"));
     ret.setClaLastUpdatedId(rs.getString("CLA_LST_UPD_ID"));
     ret.setClaLastUpdatedTime(rs.getDate("CLA_LST_UPD_TS"));
@@ -524,8 +528,7 @@ public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedCl
     ret.setClaEffectiveEndDate(rs.getDate("CLA_EFF_END_DT"));
     ret.setClaEffectiveStartDate(rs.getDate("CLA_EFF_STRTDT"));
     ret.setAdrId(rs.getString("ADR_IDENTIFIER"));
-    ret.setAdrReplicationOperation(
-        CmsReplicationOperation.valueOf(rs.getString("ADR_IBMSNAP_OPERATION")));
+    ret.setAdrReplicationOperation(strToRepOp(rs.getString("ADR_IBMSNAP_OPERATION")));
     ret.setAdrReplicationDate(rs.getDate("ADR_IBMSNAP_LOGMARKER"));
     ret.setAdrCity(rs.getString("ADR_CITY_NM"));
     ret.setAdrEmergencyNumber(rs.getBigDecimal("ADR_EMRG_TELNO"));
@@ -1550,9 +1553,30 @@ public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedCl
     this.adrReplicationDate = adrReplicationDate;
   }
 
+  // TODO: set correct primary key.
   @Override
   public Serializable getPrimaryKey() {
     return null;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public final int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public final boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }
