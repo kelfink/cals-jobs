@@ -472,8 +472,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     try {
       LOGGER.info("FETCH DYNAMIC BUCKET LIST FOR TABLE {}", table);
       txn = session.beginTransaction();
-      final long totalBuckets =
-          opts.getTotalBuckets() != 0L ? opts.getTotalBuckets() : getJobTotalBuckets();
+      final long totalBuckets = opts.getTotalBuckets() < getJobTotalBuckets() ? getJobTotalBuckets()
+          : opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
               .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
@@ -764,9 +764,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         LOGGER.warn("AUTO MODE!");
         getOpts().setStartBucket(1);
         getOpts().setEndBucket(DEFAULT_BUCKETS);
-        getOpts().setTotalBuckets(DEFAULT_THREADS);
+        getOpts().setTotalBuckets(DEFAULT_BUCKETS);
 
-        if (!this.getPartitionRanges().isEmpty()) {
+        if (this.getDenormalizedClass() != null || !this.getPartitionRanges().isEmpty()) {
           processBucketPartitions();
         } else {
           getOpts().setMaxId(null);
