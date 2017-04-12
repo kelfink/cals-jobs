@@ -153,9 +153,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected AtomicInteger recsProcessed = new AtomicInteger(0);
 
   protected LinkedBlockingDeque<EsClientAddress> denormalizedQueue =
-      new LinkedBlockingDeque<>(100000);
+      new LinkedBlockingDeque<>(50000);
 
-  protected LinkedBlockingDeque<T> normalizedQueue = new LinkedBlockingDeque<>(100000);
+  protected LinkedBlockingDeque<T> normalizedQueue = new LinkedBlockingDeque<>(50000);
 
   protected boolean isReaderDone = false;
   protected boolean isNormalizerDone = false;
@@ -630,7 +630,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected void initLoadStage1ReadMaterializedRecords() {
     Thread.currentThread().setName("reader");
     LOGGER.warn("BEGIN: Stage #1: MQT Reader");
-    // "SELECT x.* FROM ES_CLIENT_ADDRESS x ORDER BY x.clt_identifier FOR READ ONLY";
 
     try {
       Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
@@ -641,7 +640,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       // Detect platform!
       StringBuilder buf = new StringBuilder();
       buf.append("SELECT x.* FROM ").append(System.getProperty("DB_CMS_SCHEMA"))
-          .append(".ES_CLIENT_ADDRESS x FOR READ ONLY");
+          .append(".ES_CLIENT_ADDRESS x ")
+          // .append("ORDER BY x.clt_identifier ")
+          .append("FOR READ ONLY");
       final String query = buf.toString();
 
       try (Statement stmt = con.createStatement()) {
@@ -683,7 +684,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     LOGGER.warn("BEGIN: Stage #2: Normalizer");
     List<EsClientAddress> groupRecs = new ArrayList<>();
     int cntr = 0;
-    while (!isNormalizerDone) {
+    while (!(isReaderDone && denormalizedQueue.isEmpty())) {
       try {
         while ((eca = denormalizedQueue.pollFirst(1, TimeUnit.SECONDS)) != null) {
           if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
