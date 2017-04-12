@@ -300,7 +300,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     try (final T job = newJob(klass, args)) { // Close resources automatically.
       job.run();
     } catch (IOException e) {
-      LOGGER.error("Unable to close resource: {}", e.getMessage(), e);
+      LOGGER.error("UNABLE TO CLOSE RESOURCE: {}", e.getMessage(), e);
       throw new JobsException("Unable to close resource: " + e.getMessage(), e);
     } catch (JobsException e) {
       LOGGER.error("Unable to complete job: {}", e.getMessage(), e);
@@ -635,18 +635,23 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
           .getService(ConnectionProvider.class).getConnection();
       con.setSchema(System.getProperty("DB_CMS_SCHEMA"));
+      con.setAutoCommit(false);
+      con.setReadOnly(true);
 
       // TODO: Linux MQT lacks ORDER BY clause. Must sort manually.
       // Detect platform!
+      // .append("ORDER BY x.clt_identifier ")
+
       StringBuilder buf = new StringBuilder();
       buf.append("SELECT x.* FROM ").append(System.getProperty("DB_CMS_SCHEMA"))
-          .append(".ES_CLIENT_ADDRESS x ")
-          // .append("ORDER BY x.clt_identifier ")
-          .append("FOR READ ONLY");
+          .append(".ES_CLIENT_ADDRESS x ").append("FOR READ ONLY");
       final String query = buf.toString();
 
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(2000);
+        stmt.setMaxRows(0);
+        stmt.setQueryTimeout(100000);
+
         ResultSet rs = stmt.executeQuery(query); // NOSONAR
 
         int cntr = 0;
@@ -877,17 +882,20 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    */
   protected void runInitialLoad() {
     Thread.currentThread().setName("main");
-    new Thread(this::initLoadStage1ReadMaterializedRecords).start();
-    new Thread(this::initLoadStage2Normalize).start();
-    new Thread(this::initLoadStep3PushToElasticsearch).start();
-
     try {
+      new Thread(this::initLoadStage1ReadMaterializedRecords).start();
+      new Thread(this::initLoadStage2Normalize).start();
+      new Thread(this::initLoadStep3PushToElasticsearch).start();
+
       while (!isPublisherDone) {
         LOGGER.warn("runInitialLoad: sleep");
-        Thread.sleep(2000);
+        Thread.sleep(6000);
       }
     } catch (InterruptedException ie) {
       LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
+    } catch (Exception e) {
+      LOGGER.error("GENERAL EXCEPTION: {}", e.getMessage(), e);
+      throw new JobsException(e);
     }
 
     LOGGER.warn("DONE: runInitialLoad");
@@ -986,6 +994,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   @Override
   public void close() throws IOException {
+    LOGGER.warn("CLOSING CONNECTIONS!!");
+
     if (this.esDao != null) {
       this.esDao.close();
     }

@@ -12,9 +12,13 @@
 		<property name="hibernate.connection.password">${DB_CMS_PASSWORD}</property>
 		<property name="hibernate.connection.url">${DB_CMS_JDBC_URL}</property>
 		<property name="hibernate.default_schema">${DB_CMS_SCHEMA}</property>
+		
+		<!-- <property name="hibernate.connection.">com.ibm.db2.jcc.DB2Driver</property> -->
 	
-		<property name="connection_pool_size">8</property>
+		<property name="connection_pool_size">2</property>
 		<property name="show_sql">true</property>
+
+		<!-- <property name="hibernate.c3p0.timeout">5000</property> -->
 
 
 	<!-- Load classes in JobsGuiceInjector, as needed. 
