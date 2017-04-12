@@ -101,7 +101,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
-  private static final int DEFAULT_BATCH_WAIT = 15;
+  private static final int DEFAULT_BATCH_WAIT = 10;
   private static final int DEFAULT_BUCKETS = 1;
   private static final int DEFAULT_THREADS = 1;
 
@@ -157,9 +157,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   protected LinkedBlockingDeque<T> normalizedQueue = new LinkedBlockingDeque<>(100000);
 
-  protected boolean isReadDone = false;
-  protected boolean isNormalizeDone = false;
-  protected boolean isLoadDone = false;
+  protected boolean isReaderDone = false;
+  protected boolean isNormalizerDone = false;
+  protected boolean isPublisherDone = false;
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -629,7 +629,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * 
    * @param jobDao replicated entity DAO
    */
-  protected void initLoadStep1ReadMaterializedRecords() {
+  protected void initLoadStage1ReadMaterializedRecords() {
     Thread.currentThread().setName("reader");
     final String query =
         "SELECT x.* FROM CWSRS1.ES_CLIENT_ADDRESS x ORDER BY x.clt_identifier FOR READ ONLY";
@@ -647,8 +647,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
           if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
             LOGGER.info("Pulled {} MQT records", cntr);
           }
-          EsClientAddress eca = EsClientAddress.produceFromResultSet(rs);
-          denormalizedQueue.putLast(eca);
+          denormalizedQueue.putLast(EsClientAddress.produceFromResultSet(rs));
         }
 
         con.commit();
@@ -660,42 +659,41 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       LOGGER.error("BATCH ERROR! {}", e.getMessage(), e);
       throw new JobsException(e.getMessage(), e);
     } finally {
-      isReadDone = true;
+      isReaderDone = true;
     }
-
   }
 
   /**
    * Single thread consumer, second stage of initial load. Convert denormalized MQT records to
    * normalized ones and hand off to the next queue.
    */
-  protected void initLoadStep2Normalize() {
+  protected void initLoadStage2Normalize() {
     Thread.currentThread().setName("normalizer");
     String lastId = "";
     EsClientAddress eca;
 
     List<EsClientAddress> groupRecs = new ArrayList<>();
     int cntr = 0;
-    while (!isNormalizeDone) {
-      LOGGER.info("normalize");
+    while (!isNormalizerDone) {
       try {
         while ((eca = denormalizedQueue.pollFirst(1, TimeUnit.SECONDS)) != null) {
           if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
             LOGGER.info("normalize {} recs", cntr);
           }
 
-          groupRecs.add(eca);
-          if (!lastId.equals(eca.getCltId()) && !StringUtils.isBlank(lastId)) {
-            lastId = eca.getCltId();
+          if (!lastId.equals(eca.getCltId()) && !groupRecs.isEmpty()) {
             normalizedQueue.putLast(reduceSingle(groupRecs));
             groupRecs.clear();
           }
+
+          groupRecs.add(eca);
+          lastId = eca.getCltId();
         }
       } catch (InterruptedException e) {
         // Can safely ignore.
         LOGGER.warn("Normalizer interrupted!");
       } finally {
-        isNormalizeDone = true;
+        isNormalizerDone = true;
       }
     }
   }
@@ -706,10 +704,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected void initLoadStep3PushToElasticsearch() {
     Thread.currentThread().setName("publisher");
     final BulkProcessor bp = buildBulkProcessor();
+    int cntr = 0;
     T t;
+
     try {
-      while (!isLoadDone) {
-        while ((t = normalizedQueue.pollFirst(1, TimeUnit.SECONDS)) != null) {
+      while (!isPublisherDone || (isNormalizerDone && normalizedQueue.isEmpty())) {
+        while ((t = normalizedQueue.pollFirst(2, TimeUnit.SECONDS)) != null) {
+          if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
+            LOGGER.info("published {} recs", cntr);
+          }
           publish(bp, t);
           recsProcessed.getAndIncrement();
         }
@@ -722,7 +725,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     } catch (JsonProcessingException e) {
       throw new JobsException("JSON error", e);
     } finally {
-      isLoadDone = true;
+      isPublisherDone = true;
     }
   }
 
@@ -846,17 +849,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   }
 
   /**
-   * Process all partitions by buckets using default parallelism.
+   * ENTRY POINT FOR INITIAL LOAD.
    */
   protected void runInitialLoad() {
-
-    // ENTRY POINT.
-    new Thread(this::initLoadStep1ReadMaterializedRecords).start();
-    new Thread(this::initLoadStep2Normalize).start();
+    new Thread(this::initLoadStage1ReadMaterializedRecords).start();
+    new Thread(this::initLoadStage2Normalize).start();
     new Thread(this::initLoadStep3PushToElasticsearch).start();
 
     try {
-      while (!this.isLoadDone) {
+      while (!isPublisherDone) {
         Thread.sleep(2000);
       }
     } catch (InterruptedException ie) {
