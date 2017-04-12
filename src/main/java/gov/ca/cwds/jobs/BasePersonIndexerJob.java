@@ -631,6 +631,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    */
   protected void initLoadStage1ReadMaterializedRecords() {
     Thread.currentThread().setName("reader");
+    LOGGER.warn("BEGIN: Stage #1: MQT Reader");
     final String query =
         "SELECT x.* FROM CWSRS1.ES_CLIENT_ADDRESS x ORDER BY x.clt_identifier FOR READ ONLY";
 
@@ -661,6 +662,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     } finally {
       isReaderDone = true;
     }
+
+    LOGGER.warn("DONE: Stage #1: MQT Reader");
   }
 
   /**
@@ -672,6 +675,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     String lastId = "";
     EsClientAddress eca;
 
+    LOGGER.warn("BEGIN: Stage #2: Normalizer");
     List<EsClientAddress> groupRecs = new ArrayList<>();
     int cntr = 0;
     while (!isNormalizerDone) {
@@ -696,6 +700,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         isNormalizerDone = true;
       }
     }
+
+    LOGGER.warn("DONE: Stage #2: Normalizer");
   }
 
   /**
@@ -707,8 +713,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     int cntr = 0;
     T t;
 
+    LOGGER.warn("BEGIN: Stage #3: ES Publisher");
     try {
-      while (!isPublisherDone || (isNormalizerDone && normalizedQueue.isEmpty())) {
+      while (!(isNormalizerDone && normalizedQueue.isEmpty())) {
         while ((t = normalizedQueue.pollFirst(2, TimeUnit.SECONDS)) != null) {
           if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
             LOGGER.info("published {} recs", cntr);
@@ -718,15 +725,19 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         }
       }
 
+      LOGGER.warn("Waiting to close ES bulk processor");
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
+
     } catch (InterruptedException e) {
-      LOGGER.warn("Normalizer interrupted!");
+      LOGGER.warn("Publisher interrupted!");
       Thread.interrupted();
     } catch (JsonProcessingException e) {
       throw new JobsException("JSON error", e);
     } finally {
       isPublisherDone = true;
     }
+
+    LOGGER.warn("DONE: Stage #3: ES Publisher");
   }
 
   protected void publish(BulkProcessor bp, T t) throws JsonProcessingException {
@@ -852,17 +863,21 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * ENTRY POINT FOR INITIAL LOAD.
    */
   protected void runInitialLoad() {
+    Thread.currentThread().setName("main");
     new Thread(this::initLoadStage1ReadMaterializedRecords).start();
     new Thread(this::initLoadStage2Normalize).start();
     new Thread(this::initLoadStep3PushToElasticsearch).start();
 
     try {
       while (!isPublisherDone) {
+        LOGGER.warn("runInitialLoad: sleep");
         Thread.sleep(2000);
       }
     } catch (InterruptedException ie) {
       LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
     }
+
+    LOGGER.warn("DONE: runInitialLoad");
 
     // LOGGER.warn("PROCESS EACH PARTITION");
     // for (Pair<String, String> pair : this.getPartitionRanges()) {
