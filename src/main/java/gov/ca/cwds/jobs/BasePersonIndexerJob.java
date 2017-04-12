@@ -630,12 +630,19 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected void initLoadStage1ReadMaterializedRecords() {
     Thread.currentThread().setName("reader");
     LOGGER.warn("BEGIN: Stage #1: MQT Reader");
-    final String query =
-        "SELECT x.* FROM CWSRS1.ES_CLIENT_ADDRESS x ORDER BY x.clt_identifier FOR READ ONLY";
+    // "SELECT x.* FROM ES_CLIENT_ADDRESS x ORDER BY x.clt_identifier FOR READ ONLY";
 
     try {
       Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
           .getService(ConnectionProvider.class).getConnection();
+      con.setSchema(System.getProperty("DB_CMS_SCHEMA"));
+
+      // TODO: Linux MQT lacks ORDER BY clause. Must sort manually.
+      // Detect platform!
+      StringBuilder buf = new StringBuilder();
+      buf.append("SELECT x.* FROM ").append(System.getProperty("DB_CMS_SCHEMA"))
+          .append(".ES_CLIENT_ADDRESS x FOR READ ONLY");
+      final String query = buf.toString();
 
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(1000);
