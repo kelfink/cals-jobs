@@ -105,7 +105,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final int DEFAULT_BUCKETS = 1;
   private static final int DEFAULT_THREADS = 1;
 
-  private static final int LOG_EVERY = 1000;
+  private static final int LOG_EVERY = 5000;
   private static final int ES_BULK_SIZE = 1500;
 
   private static final String QUERY_BUCKET_LIST =
@@ -646,7 +646,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       final String query = buf.toString();
 
       try (Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(1000);
+        stmt.setFetchSize(2000);
         ResultSet rs = stmt.executeQuery(query); // NOSONAR
 
         int cntr = 0;
