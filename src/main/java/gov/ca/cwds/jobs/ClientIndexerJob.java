@@ -62,6 +62,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
   }
 
   @Override
+  protected ReplicatedClient reduceSingle(List<? extends PersistentObject> recs) {
+    return reduce(recs).get(0);
+  }
+
+  @Override
   protected List<ReplicatedClient> reduce(List<? extends PersistentObject> recs) {
     final int len = (int) (recs.size() * 1.25);
     Map<Object, ReplicatedClient> map = new LinkedHashMap<>(len);

@@ -9,11 +9,8 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -69,7 +66,6 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
-import gov.ca.cwds.rest.api.ApiException;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.es.AutoCompletePerson;
 import gov.ca.cwds.rest.api.domain.es.Person;
@@ -105,9 +101,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
-  private static final int DEFAULT_BATCH_WAIT = 45;
+  private static final int DEFAULT_BATCH_WAIT = 15;
   private static final int DEFAULT_BUCKETS = 1;
   private static final int DEFAULT_THREADS = 1;
+
+  private static final int LOG_EVERY = 1000;
+  private static final int ES_BULK_SIZE = 1500;
 
   private static final String QUERY_BUCKET_LIST =
       "SELECT z.bucket, MIN(z.identifier) AS minId, MAX(z.identifier) AS maxId, COUNT(*) AS bucketCount "
@@ -237,7 +236,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
         LOGGER.error("Error executing bulk", failure);
       }
-    }).setBulkActions(1500).build();
+    }).setBulkActions(ES_BULK_SIZE).build();
   }
 
   /**
@@ -603,6 +602,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     return (List<T>) recs;
   }
 
+  protected T reduceSingle(List<? extends PersistentObject> recs) {
+    return null;
+  }
+
   /**
    * Override to customize the default number of buckets by job.
    * 
@@ -626,7 +629,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * 
    * @param jobDao replicated entity DAO
    */
-  protected void threadFuncReadMaterializedRecords() {
+  protected void initLoadStep1ReadMaterializedRecords() {
+    Thread.currentThread().setName("reader");
     final String query =
         "SELECT x.* FROM CWSRS1.ES_CLIENT_ADDRESS x ORDER BY x.clt_identifier FOR READ ONLY";
 
@@ -640,23 +644,21 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
         int cntr = 0;
         while (rs.next()) {
-          ++cntr;
-          EsClientAddress eca = EsClientAddress.produceFromResultSet(rs);
-          denormalizedQueue.add(eca);
-
-          if (cntr > 0 && (cntr % 1000) == 0) {
+          if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
             LOGGER.info("Pulled {} MQT records", cntr);
           }
+          EsClientAddress eca = EsClientAddress.produceFromResultSet(rs);
+          denormalizedQueue.putLast(eca);
         }
 
         con.commit();
       } finally {
-        // close the statement automatically.
+        // The statement closes automatically.
       }
 
     } catch (Exception e) {
       LOGGER.error("BATCH ERROR! {}", e.getMessage(), e);
-      throw new ApiException(e.getMessage(), e);
+      throw new JobsException(e.getMessage(), e);
     } finally {
       isReadDone = true;
     }
@@ -667,32 +669,27 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * Single thread consumer, second stage of initial load. Convert denormalized MQT records to
    * normalized ones and hand off to the next queue.
    */
-  protected void threadFuncNormalize() {
+  protected void initLoadStep2Normalize() {
+    Thread.currentThread().setName("normalizer");
     String lastId = "";
     EsClientAddress eca;
 
-    Map<Object, ReplicatedClient> map = new LinkedHashMap<>();
+    List<EsClientAddress> groupRecs = new ArrayList<>();
     int cntr = 0;
-    while (!this.isReadDone) {
+    while (!isNormalizeDone) {
+      LOGGER.info("normalize");
       try {
-        while (denormalizedQueue.poll(10, TimeUnit.SECONDS) != null) {
-          ++cntr;
-          if (cntr > 0 && (cntr % 1000) == 0) {
-            LOGGER.info("Pulled {} MQT records", cntr);
+        while ((eca = denormalizedQueue.pollFirst(1, TimeUnit.SECONDS)) != null) {
+          if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
+            LOGGER.info("normalize {} recs", cntr);
           }
 
-          eca = denormalizedQueue.take();
+          groupRecs.add(eca);
           if (!lastId.equals(eca.getCltId()) && !StringUtils.isBlank(lastId)) {
-
-            if (!map.isEmpty()) {
-              this.normalizedQueue.addAll((Collection<T>) map.values());
-            }
-
             lastId = eca.getCltId();
-            map = new LinkedHashMap<>();
+            normalizedQueue.putLast(reduceSingle(groupRecs));
+            groupRecs.clear();
           }
-
-          eca.reduce(map);
         }
       } catch (InterruptedException e) {
         // Can safely ignore.
@@ -706,56 +703,32 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   /**
    * Read from normalized record queue and push to ES.
    */
-  protected void threadFuncPushToElasticsearch() {
-    int cntr = 0;
+  protected void initLoadStep3PushToElasticsearch() {
+    Thread.currentThread().setName("publisher");
+    final BulkProcessor bp = buildBulkProcessor();
+    T t;
     try {
-      while (!isNormalizeDone) {
-        while (normalizedQueue.poll(10, TimeUnit.SECONDS) != null) {
-          final List<T> results = new ArrayList<>();
-          final int drainCnt = normalizedQueue.drainTo(results);
-
-          cntr += drainCnt;
-          if (cntr > 0 && (cntr % 1000) == 0) {
-            LOGGER.info("Pulled {} MQT records", cntr);
-          }
-
-          LOGGER.info("Push {} records to ES", drainCnt);
-
-          // One bulk processor per bucket/thread.
-          final BulkProcessor bp = buildBulkProcessor();
-
-          // One thread per bucket up to max cores.
-          // Each bucket runs on one thread only. No parallel streams here.
-          results.stream().forEach(p -> {
-            try {
-              final ElasticSearchPerson esp = buildESPerson(p);
-
-              // Bulk indexing! MUCH faster than indexing one doc at a time.
-              bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
-            } catch (JsonProcessingException e) {
-              throw new JobsException("JSON error", e);
-            }
-          });
-
-          // Track counts.
-          recsProcessed.addAndGet(drainCnt);
-
-          try {
-            bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
-          } catch (Exception e2) {
-            throw new JobsException("ES bulk processor interrupted!", e2);
-          }
-
+      while (!isLoadDone) {
+        while ((t = normalizedQueue.pollFirst(1, TimeUnit.SECONDS)) != null) {
+          publish(bp, t);
+          recsProcessed.getAndIncrement();
         }
       }
 
+      bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
-      // Can safely ignore.
       LOGGER.warn("Normalizer interrupted!");
+      Thread.interrupted();
+    } catch (JsonProcessingException e) {
+      throw new JobsException("JSON error", e);
     } finally {
       isLoadDone = true;
     }
+  }
 
+  protected void publish(BulkProcessor bp, T t) throws JsonProcessingException {
+    final ElasticSearchPerson esp = buildESPerson(t);
+    bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
   }
 
   /**
@@ -878,9 +851,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected void runInitialLoad() {
 
     // ENTRY POINT.
-    new Thread(this::threadFuncReadMaterializedRecords).start();
-    new Thread(this::threadFuncNormalize).start();
-    new Thread(this::threadFuncPushToElasticsearch).start();
+    new Thread(this::initLoadStep1ReadMaterializedRecords).start();
+    new Thread(this::initLoadStep2Normalize).start();
+    new Thread(this::initLoadStep3PushToElasticsearch).start();
 
     try {
       while (!this.isLoadDone) {
