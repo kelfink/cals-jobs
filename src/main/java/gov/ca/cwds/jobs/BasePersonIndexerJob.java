@@ -158,7 +158,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   protected LinkedBlockingDeque<T> normalizedQueue = new LinkedBlockingDeque<>(100000);
 
-  protected boolean isJobDone = false;
+  protected boolean isReadDone = false;
+  protected boolean isNormalizeDone = false;
+  protected boolean isLoadDone = false;
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -624,7 +626,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * 
    * @param jobDao replicated entity DAO
    */
-  protected void readMaterializedRecords() {
+  protected void threadFuncReadMaterializedRecords() {
     final String query =
         "SELECT x.* FROM CWSRS1.ES_CLIENT_ADDRESS x ORDER BY x.clt_identifier FOR READ ONLY";
 
@@ -633,93 +635,127 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
           .getService(ConnectionProvider.class).getConnection();
 
       try (Statement stmt = con.createStatement()) {
+        stmt.setFetchSize(1000);
         ResultSet rs = stmt.executeQuery(query); // NOSONAR
-        rs.setFetchSize(1000);
 
+        int cntr = 0;
         while (rs.next()) {
+          ++cntr;
           EsClientAddress eca = EsClientAddress.produceFromResultSet(rs);
           denormalizedQueue.add(eca);
+
+          if (cntr > 0 && (cntr % 1000) == 0) {
+            LOGGER.info("Pulled {} MQT records", cntr);
+          }
         }
+
+        con.commit();
       } finally {
-        // TODO: handle finally clause
+        // close the statement automatically.
       }
 
-      con.commit();
-
     } catch (Exception e) {
-      // con.rollback();
       LOGGER.error("BATCH ERROR! {}", e.getMessage(), e);
       throw new ApiException(e.getMessage(), e);
+    } finally {
+      isReadDone = true;
     }
 
-    isJobDone = true;
   }
 
-  protected void normalize() {
+  /**
+   * Single thread consumer, second stage of initial load. Convert denormalized MQT records to
+   * normalized ones and hand off to the next queue.
+   */
+  protected void threadFuncNormalize() {
     String lastId = "";
     EsClientAddress eca;
 
     Map<Object, ReplicatedClient> map = new LinkedHashMap<>();
-    try {
-      while (denormalizedQueue.poll(2, TimeUnit.SECONDS) != null) {
-        eca = denormalizedQueue.take();
-        if (!lastId.equals(eca.getCltId()) && !StringUtils.isBlank(lastId)) {
-
-          if (!map.isEmpty()) {
-            this.normalizedQueue.addAll((Collection<T>) map.values());
+    int cntr = 0;
+    while (!this.isReadDone) {
+      try {
+        while (denormalizedQueue.poll(10, TimeUnit.SECONDS) != null) {
+          ++cntr;
+          if (cntr > 0 && (cntr % 1000) == 0) {
+            LOGGER.info("Pulled {} MQT records", cntr);
           }
 
-          lastId = eca.getCltId();
-          map = new LinkedHashMap<>();
-        }
+          eca = denormalizedQueue.take();
+          if (!lastId.equals(eca.getCltId()) && !StringUtils.isBlank(lastId)) {
 
-        eca.reduce(map);
+            if (!map.isEmpty()) {
+              this.normalizedQueue.addAll((Collection<T>) map.values());
+            }
+
+            lastId = eca.getCltId();
+            map = new LinkedHashMap<>();
+          }
+
+          eca.reduce(map);
+        }
+      } catch (InterruptedException e) {
+        // Can safely ignore.
+        LOGGER.warn("Normalizer interrupted!");
+      } finally {
+        isNormalizeDone = true;
       }
-    } catch (InterruptedException e) {
-      // Can safely ignore.
-      LOGGER.warn("Normalizer interrupted!");
     }
   }
 
-  protected int pushToElasticsearch() {
+  /**
+   * Read from normalized record queue and push to ES.
+   */
+  protected void threadFuncPushToElasticsearch() {
+    int cntr = 0;
     try {
-      while (normalizedQueue.poll(2, TimeUnit.SECONDS) != null) {
-        final List<T> results = new ArrayList<>();
-        final int drainCnt = normalizedQueue.drainTo(results);
+      while (!isNormalizeDone) {
+        while (normalizedQueue.poll(10, TimeUnit.SECONDS) != null) {
+          final List<T> results = new ArrayList<>();
+          final int drainCnt = normalizedQueue.drainTo(results);
 
-        // One bulk processor per bucket/thread.
-        final BulkProcessor bp = buildBulkProcessor();
-
-        // One thread per bucket up to max cores.
-        // Each bucket runs on one thread only. No parallel streams here.
-        results.stream().forEach(p -> {
-          try {
-            final ElasticSearchPerson esp = buildESPerson(p);
-
-            // Bulk indexing! MUCH faster than indexing one doc at a time.
-            bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
-          } catch (JsonProcessingException e) {
-            throw new JobsException("JSON error", e);
+          cntr += drainCnt;
+          if (cntr > 0 && (cntr % 1000) == 0) {
+            LOGGER.info("Pulled {} MQT records", cntr);
           }
-        });
 
-        // Track counts.
-        recsProcessed.addAndGet(drainCnt);
+          LOGGER.info("Push {} records to ES", drainCnt);
 
-        try {
-          bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
-        } catch (Exception e2) {
-          throw new JobsException("ES bulk processor interrupted!", e2);
+          // One bulk processor per bucket/thread.
+          final BulkProcessor bp = buildBulkProcessor();
+
+          // One thread per bucket up to max cores.
+          // Each bucket runs on one thread only. No parallel streams here.
+          results.stream().forEach(p -> {
+            try {
+              final ElasticSearchPerson esp = buildESPerson(p);
+
+              // Bulk indexing! MUCH faster than indexing one doc at a time.
+              bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
+            } catch (JsonProcessingException e) {
+              throw new JobsException("JSON error", e);
+            }
+          });
+
+          // Track counts.
+          recsProcessed.addAndGet(drainCnt);
+
+          try {
+            bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
+          } catch (Exception e2) {
+            throw new JobsException("ES bulk processor interrupted!", e2);
+          }
+
         }
-
       }
 
     } catch (InterruptedException e) {
       // Can safely ignore.
       LOGGER.warn("Normalizer interrupted!");
+    } finally {
+      isLoadDone = true;
     }
 
-    return recsProcessed.get();
   }
 
   /**
@@ -839,12 +875,20 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   /**
    * Process all partitions by buckets using default parallelism.
    */
-  protected void processBucketPartitions() {
+  protected void runInitialLoad() {
 
     // ENTRY POINT.
-    new Thread(this::readMaterializedRecords).start();
-    new Thread(this::normalize).start();
-    new Thread(this::pushToElasticsearch).start();
+    new Thread(this::threadFuncReadMaterializedRecords).start();
+    new Thread(this::threadFuncNormalize).start();
+    new Thread(this::threadFuncPushToElasticsearch).start();
+
+    try {
+      while (!this.isLoadDone) {
+        Thread.sleep(2000);
+      }
+    } catch (InterruptedException ie) {
+      LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
+    }
 
     // LOGGER.warn("PROCESS EACH PARTITION");
     // for (Pair<String, String> pair : this.getPartitionRanges()) {
@@ -893,7 +937,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         getOpts().setTotalBuckets(getJobTotalBuckets());
 
         if (this.getDenormalizedClass() != null || !this.getPartitionRanges().isEmpty()) {
-          processBucketPartitions();
+          runInitialLoad();
         } else {
           getOpts().setMaxId(null);
           getOpts().setMinId(null);
