@@ -626,8 +626,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   /**
    * Single producer, staged consumers.
-   * 
-   * @param jobDao replicated entity DAO
    */
   protected void initLoadStage1ReadMaterializedRecords() {
     Thread.currentThread().setName("reader");
@@ -720,7 +718,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
           if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
             LOGGER.info("published {} recs", cntr);
           }
-          publish(bp, t);
+          publishPerson(bp, t);
           recsProcessed.getAndIncrement();
         }
       }
@@ -740,7 +738,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     LOGGER.warn("DONE: Stage #3: ES Publisher");
   }
 
-  protected void publish(BulkProcessor bp, T t) throws JsonProcessingException {
+  /**
+   * Publish a Person record to Elasticsearch with a bulk processor.
+   * 
+   * @param bp {@link #buildBulkProcessor()} for this thread
+   * @param t Person record to write
+   * @throws JsonProcessingException
+   */
+  protected void publishPerson(BulkProcessor bp, T t) throws JsonProcessingException {
     final ElasticSearchPerson esp = buildESPerson(t);
     bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
   }
