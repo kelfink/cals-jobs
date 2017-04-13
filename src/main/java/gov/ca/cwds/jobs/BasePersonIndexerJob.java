@@ -152,8 +152,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    */
   protected AtomicInteger recsProcessed = new AtomicInteger(0);
 
+  protected final Date startTime = new Date();
+
   protected LinkedBlockingDeque<EsClientAddress> denormalizedQueue =
-      new LinkedBlockingDeque<>(50000);
+      new LinkedBlockingDeque<>(150000);
 
   protected LinkedBlockingDeque<T> normalizedQueue = new LinkedBlockingDeque<>(50000);
 
@@ -648,7 +650,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       final String query = buf.toString();
 
       try (Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(2000);
+        // stmt.setFetchSize(2000); // works great
+        stmt.setFetchSize(10000); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(100000);
 
@@ -890,6 +893,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       while (!isPublisherDone) {
         LOGGER.warn("runInitialLoad: sleep");
         Thread.sleep(6000);
+        try {
+          this.jobDao.find("abc123"); // dummy call, keep pool alive.
+        } catch (Exception e) {
+          // Ignore.
+        }
       }
     } catch (InterruptedException ie) {
       LOGGER.warn("interrupted: {}", ie.getMessage(), ie);

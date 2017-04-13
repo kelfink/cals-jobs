@@ -13,33 +13,15 @@
 		<property name="hibernate.connection.url">${DB_CMS_JDBC_URL}</property>
 		<property name="hibernate.default_schema">${DB_CMS_SCHEMA}</property>
 		
-		<!-- <property name="hibernate.connection.">com.ibm.db2.jcc.DB2Driver</property> -->
+		<property name="hibernate.connection.connectionTimeout">1000000</property>
+		<property name="hibernate.connection.loginTimeout">1000000</property>
+		<property name="hibernate.connection.keepAliveTimeOut">8</property>
 	
 		<property name="connection_pool_size">2</property>
 		<property name="show_sql">true</property>
 
-		<!-- <property name="hibernate.c3p0.timeout">5000</property> -->
+		<!-- <property name="hibernate.c3p0.timeout">1000000</property> -->
 
-
-	<!-- Load classes in JobsGuiceInjector, as needed. 
-	Some classes may be missing child tables in replication schemas.
-	-->
-	
-<!-- 		
-		<mapping class="gov.ca.cwds.data.persistence.cms.Client" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.Reporter" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.OtherClientName" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.Attorney" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.ServiceProvider" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.SubstituteCareProvider" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.OtherAdultInPlacemtHome" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.CollateralIndividual" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.ClientCollateral" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.EducationProviderContact" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.OtherChildInPlacemtHome" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.EducationProviderContact" />
- -->
- 		
 	</session-factory>
 	
 </hibernate-configuration>
