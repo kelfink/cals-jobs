@@ -61,13 +61,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  protected int getJobTotalBuckets() {
-    return 128;
-  }
-
-  @Override
-  protected boolean isReducer() {
-    return true;
+  public String getMqtName() {
+    return "ES_CLIENT_ADDRESS";
   }
 
   @Override
@@ -85,6 +80,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     }
 
     return map.values().stream().collect(Collectors.toList());
+  }
+
+  @Override
+  protected int getJobTotalBuckets() {
+    return 128;
   }
 
   /**

@@ -1,5 +1,8 @@
 package gov.ca.cwds.jobs;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -52,6 +55,11 @@ public class AttorneyIndexerJob
       LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
       throw e;
     }
+  }
+
+  @Override
+  public ReplicatedAttorney pullFromResultSet(ResultSet rs) throws SQLException {
+    return null;
   }
 
 }

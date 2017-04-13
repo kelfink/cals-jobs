@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.LongStream;
 
 import javax.persistence.Table;
 
@@ -152,14 +151,28 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected AtomicInteger recsProcessed = new AtomicInteger(0);
 
+  /**
+   * Official start time.
+   */
   protected final long startTime = System.currentTimeMillis();
 
   protected LinkedBlockingDeque<M> denormalizedQueue = new LinkedBlockingDeque<>(150000);
 
   protected LinkedBlockingDeque<T> normalizedQueue = new LinkedBlockingDeque<>(50000);
 
+  /**
+   * Completion flag for method {@link #initLoadStage1ReadMaterializedRecords()}.
+   */
   protected boolean isReaderDone = false;
+
+  /**
+   * Completion flag for method {@link #initLoadStage2Normalize()}.
+   */
   protected boolean isNormalizerDone = false;
+
+  /**
+   * Completion flag for method {@link #initLoadStep3PushToElasticsearch()}.
+   */
   protected boolean isPublisherDone = false;
 
   /**
@@ -189,42 +202,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   public String getMqtName() {
     return null;
-  }
-
-  /**
-   * Get the table or view used to allocate bucket ranges. Called on full load only.
-   * 
-   * @return the table or view used to allocate bucket ranges
-   * @deprecated see {@link #initLoadStage1ReadMaterializedRecords()}
-   */
-  @Deprecated
-  protected String getBucketDriverTable() {
-    String ret = null;
-    final Table tbl = this.jobDao.getEntityClass().getDeclaredAnnotation(Table.class);
-    if (tbl != null) {
-      ret = tbl.name();
-    }
-
-    return ret;
-  }
-
-  /**
-   * Return a list of partition keys to optimize batch SELECT statements. See ReplicatedClient
-   * native named query, "findPartitionedBuckets".
-   * 
-   * @return list of partition key pairs
-   * @see ReplicatedClient
-   */
-  protected List<Pair<String, String>> getPartitionRanges() {
-    List<Pair<String, String>> ret = new ArrayList<>();
-    List<BatchBucket> buckets = buildBucketList(getBucketDriverTable());
-
-    for (BatchBucket b : buckets) {
-      LOGGER.warn("BUCKET RANGE: {} to {}", b.getMinId(), b.getMaxId());
-      ret.add(Pair.of(b.getMinId(), b.getMaxId()));
-    }
-
-    return ret;
   }
 
   /**
@@ -388,7 +365,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         pa.getSsn(), // SSN
         pa.getClass().getName(), // type
         this.mapper.writeValueAsString(p), // source
-        null, // highlights
+        null, // omit highlights
         addresses, // address
         phones, languages);
   }
@@ -441,7 +418,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
+   * ENTRY POINT FOR LAST RUN.
+   *
+   * <p>
    * Fetch all records for the next batch run, either by bucket or last successful run date.
+   * </p>
    * 
    * @param lastSuccessfulRunTime last time the batch ran successfully.
    * @return List of results to process
@@ -449,8 +430,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected Date doLastRun(Date lastSuccessfulRunTime) {
     try {
-      final Date startTime = new Date();
-
       // One bulk processor "last run" operations. BulkProcessor is thread-safe.
       final BulkProcessor bp = buildBulkProcessor();
       final List<T> results = pullLastRunResults(jobDao, lastSuccessfulRunTime);
@@ -479,7 +458,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.warn("Waiting on ElasticSearch to finish last batch");
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
 
-      return startTime;
+      return new Date(this.startTime);
     } catch (JobsException e) {
       LOGGER.error("JobsException: {}", e.getMessage(), e);
       throw e;
@@ -573,8 +552,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @return true if class overrides {@link #reduce(List)}
    */
-  protected boolean isReducer() {
-    return false;
+  protected final boolean isMQTNormalizer() {
+    return getDenormalizedClass() != null;
   }
 
   /**
@@ -596,8 +575,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // .append("ORDER BY x.clt_identifier ")
 
       StringBuilder buf = new StringBuilder();
-      buf.append("SELECT x.* FROM ").append(System.getProperty("DB_CMS_SCHEMA"))
-          .append(".ES_CLIENT_ADDRESS x ").append("FOR READ ONLY");
+      buf.append("SELECT x.* FROM ").append(System.getProperty("DB_CMS_SCHEMA")).append(".")
+          .append(getMqtName()).append(" x FOR READ ONLY");
       final String query = buf.toString();
 
       try (Statement stmt = con.createStatement()) {
@@ -682,7 +661,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       while (!(isReaderDone && isNormalizerDone && normalizedQueue.isEmpty())) {
         while ((t = normalizedQueue.pollFirst(5, TimeUnit.SECONDS)) != null) {
           if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
-            LOGGER.info("published {} recs", cntr);
+            LOGGER.info("Published {} recs to ES", cntr);
           }
           publishPerson(bp, t);
         }
@@ -723,7 +702,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * ENTRY POINT FOR INITIAL LOAD.
    */
-  protected void runInitialLoad() {
+  protected void doInitialLoadViaJdbc() {
     Thread.currentThread().setName("main");
     try {
       new Thread(this::initLoadStage1ReadMaterializedRecords).start();
@@ -780,10 +759,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
-    Date ret;
     try {
-      final Date startTime = new Date();
-
       // If the people index is missing, create it.
       LOGGER.debug("Create people index if missing");
       esDao.createIndexIfNeeded(ElasticsearchDao.DEFAULT_PERSON_IDX_NM);
@@ -800,28 +776,26 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         getOpts().setEndBucket(1);
         getOpts().setTotalBuckets(getJobTotalBuckets());
 
-        if (this.getDenormalizedClass() != null || !this.getPartitionRanges().isEmpty()) {
-          runInitialLoad();
+        if (this.getDenormalizedClass() != null) {
+          LOGGER.warn("LOAD FROM MQT VIA JDBC!");
+          doInitialLoadViaJdbc();
         } else {
-          getOpts().setMaxId(null);
-          getOpts().setMinId(null);
-          processBuckets();
+          LOGGER.warn("LOAD REPLICATED TABLE QUERY VIA HIBERNATE!");
+          doInitialLoadViaHibernate();
         }
 
-        ret = startTime;
       } else if (this.opts == null || this.opts.lastRunMode) {
         LOGGER.warn("LAST RUN MODE!");
-        ret = doLastRun(lastSuccessfulRunTime);
+        doLastRun(lastSuccessfulRunTime);
       } else {
         LOGGER.warn("DIRECT BUCKET MODE!");
-        processBuckets();
-        ret = startTime;
+        doInitialLoadViaHibernate();
       }
 
       // Result stats:
       LOGGER.info("Indexed {} people", recsProcessed);
       LOGGER.info("Updating last successful run time to {}", jobDateFormat.format(startTime));
-      return ret;
+      return new Date(this.startTime);
     } catch (JobsException e) {
       LOGGER.error("JobsException: {}", e.getMessage(), e);
       throw e;
@@ -887,20 +861,44 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     systemCodes = sysCodeCache;
   }
 
+  /**
+   * Get the table or view used to allocate bucket ranges. Called on full load only.
+   * 
+   * @return the table or view used to allocate bucket ranges
+   */
+  protected String getBucketDriverTable() {
+    String ret = null;
+    final Table tbl = this.jobDao.getEntityClass().getDeclaredAnnotation(Table.class);
+    if (tbl != null) {
+      ret = tbl.name();
+    }
+
+    return ret;
+  }
+
+  /**
+   * Return a list of partition keys to optimize batch SELECT statements. See ReplicatedClient
+   * native named query, "findPartitionedBuckets".
+   * 
+   * @return list of partition key pairs
+   * @see ReplicatedClient
+   */
+  protected List<Pair<String, String>> getPartitionRanges() {
+    LOGGER.warn("DETERMINE BUCKET RANGES ...");
+    List<Pair<String, String>> ret = new ArrayList<>();
+    List<BatchBucket> buckets = buildBucketList(getBucketDriverTable());
+
+    for (BatchBucket b : buckets) {
+      LOGGER.warn("BUCKET RANGE: {} to {}", b.getMinId(), b.getMaxId());
+      ret.add(Pair.of(b.getMinId(), b.getMaxId()));
+    }
+
+    return ret;
+  }
+
   // ===========================
   // DEPRECATED:
   // ===========================
-
-  /**
-   * Process all buckets using default parallelism without partitions.
-   * 
-   * @deprecated use {@link #initLoadStage1ReadMaterializedRecords()} instead
-   */
-  @Deprecated
-  protected void processBuckets() {
-    LongStream.rangeClosed(this.opts.getStartBucket(), this.opts.getEndBucket()).sorted().parallel()
-        .forEach(this::processBucket);
-  }
 
   /**
    * Divide work into buckets: pull a unique range of identifiers so that no bucket results overlap.
@@ -909,10 +907,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param minId start of identifier range
    * @param maxId end of identifier range
    * @return collection of entity results
-   * @deprecated call {@link #initLoadStage1ReadMaterializedRecords()} instead
    */
-  @Deprecated
-  protected List<T> processBucketRange(BaseDaoImpl<T> jobDao, String minId, String maxId) {
+  protected List<T> pullBucketRange(String minId, String maxId) {
+    LOGGER.info("PULL BUCKET RANGE {} to {}", minId, maxId);
     final Class<?> entityClass =
         getDenormalizedClass() != null ? getDenormalizedClass() : jobDao.getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findBucketRange";
@@ -924,15 +921,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setString("min_id", minId).setString("max_id", maxId);
 
+      // No reduction/normalization.
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
-      final List<T> recs = q.list();
-
-      // Normalize if needed.
-      // if (isReducer()) {
-      // results.addAll(reduce(recs));
-      // } else {
-      // results.addAll(recs);
-      // }
+      results.addAll(q.list());
 
       session.clear();
       txn.commit();
@@ -947,66 +938,50 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Process a single bucket in a batch of buckets. This method runs on thread, and therefore, all
-   * shared resources (DAO's, mappers, etc.) must be thread-safe or else you must construct or clone
-   * instances as needed.
+   * Pull replicated records from named query "findBucketRange".
    * 
    * <p>
    * Thread safety: both BulkProcessor are ElasticsearchDao are thread-safe.
    * </p>
    * 
-   * @param bucket the bucket number to process
-   * @return number of records processed in this bucket
-   * @deprecated use {@link #initLoadStage1ReadMaterializedRecords()} instead
+   * @return number of records processed
    */
-  @Deprecated
-  protected int processBucket(long bucket) {
-    final long totalBuckets = this.opts.getTotalBuckets();
-    LOGGER.warn("pull bucket #{} of #{}", bucket, totalBuckets);
-    final String minId =
-        StringUtils.isBlank(this.getOpts().getMinId()) ? " " : this.getOpts().getMinId();
-    final String maxId = this.getOpts().getMaxId();
+  protected int doInitialLoadViaHibernate() {
+    final List<Pair<String, String>> buckets = getPartitionRanges();
 
-    // ORIGINAL:
-    // final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
-    // : jobDao.partitionedBucketList(bucket, totalBuckets, minId, maxId);
+    for (Pair<String, String> b : buckets) {
+      final String minId = b.getLeft();
+      final String maxId = b.getRight();
+      final List<T> results = pullBucketRange(minId, maxId);
+      pullBucketRange(b.getLeft(), b.getRight());
 
-    // Too complex, DB2 optimization challenges.
-    // final List<T> results = StringUtils.isBlank(maxId) ? jobDao.bucketList(bucket, totalBuckets)
-    // : partitionedBucketEntities(jobDao, jobDao.getEntityClass(), bucket, totalBuckets, minId,
-    // maxId);
+      if (results != null && !results.isEmpty()) {
 
-    // Simple and clean approach: process a unique range of identifiers.
-    final List<T> results = processBucketRange(jobDao, minId, maxId);
+        // One bulk processor per bucket/thread.
+        final BulkProcessor bp = buildBulkProcessor();
 
-    if (results != null && !results.isEmpty()) {
-      LOGGER.warn("bucket #{} found {} people to index", bucket, results.size());
+        // One thread per bucket up to max cores.
+        // Each bucket runs on one thread only. No parallel streams here.
+        results.stream().forEach(p -> {
+          try {
+            final ElasticSearchPerson esp = buildESPerson(p);
 
-      // Track counts.
-      recsProcessed.getAndAdd(results.size());
+            // Bulk indexing! MUCH faster than indexing one doc at a time.
+            bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
+          } catch (JsonProcessingException e) {
+            throw new JobsException("JSON error", e);
+          }
+        });
 
-      // One bulk processor per bucket/thread.
-      final BulkProcessor bp = buildBulkProcessor();
-
-      // One thread per bucket up to max cores.
-      // Each bucket runs on one thread only. No parallel streams here.
-      results.stream().forEach(p -> {
         try {
-          final ElasticSearchPerson esp = buildESPerson(p);
-
-          // Bulk indexing! MUCH faster than indexing one doc at a time.
-          bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
-        } catch (JsonProcessingException e) {
-          throw new JobsException("JSON error", e);
+          bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
+        } catch (Exception e2) {
+          throw new JobsException("ES bulk processor interrupted!", e2);
         }
-      });
 
-      try {
-        bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
-      } catch (Exception e2) {
-        throw new JobsException("ES bulk processor interrupted!", e2);
+        // Track counts.
+        recsProcessed.getAndAdd(results.size());
       }
-
     }
 
     return recsProcessed.get();
@@ -1025,7 +1000,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param minId start of identifier range
    * @param maxId end of identifier range
    * @return List of T entity
-   * @deprecated use method {@link #processBucketRange(BaseDaoImpl, String, String)}
+   * @deprecated use method {@link #processInitialLoadBucketRange(BaseDaoImpl, String, String)}
    */
   @Deprecated
   protected List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, Class<?> rootEntity,
