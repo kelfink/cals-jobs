@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
@@ -201,6 +202,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return MQT name, if any
    */
   public String getMqtName() {
+    return null;
+  }
+
+  @Override
+  public M pullFromResultSet(ResultSet rs) throws SQLException {
     return null;
   }
 
@@ -802,6 +808,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (Exception e) {
       LOGGER.error("General Exception: {}", e.getMessage(), e);
       throw new JobsException("General Exception: " + e.getMessage(), e);
+    } finally {
+      try {
+        isReaderDone = true;
+        isNormalizerDone = true;
+        isPublisherDone = true;
+        this.close();
+      } catch (IOException io) {
+        LOGGER.warn("IOException on close! {}", io.getMessage(), io);
+      }
     }
   }
 
@@ -956,17 +971,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       pullBucketRange(b.getLeft(), b.getRight());
 
       if (results != null && !results.isEmpty()) {
-
-        // One bulk processor per bucket/thread.
         final BulkProcessor bp = buildBulkProcessor();
-
-        // One thread per bucket up to max cores.
-        // Each bucket runs on one thread only. No parallel streams here.
         results.stream().forEach(p -> {
           try {
             final ElasticSearchPerson esp = buildESPerson(p);
-
-            // Bulk indexing! MUCH faster than indexing one doc at a time.
             bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
           } catch (JsonProcessingException e) {
             throw new JobsException("JSON error", e);
