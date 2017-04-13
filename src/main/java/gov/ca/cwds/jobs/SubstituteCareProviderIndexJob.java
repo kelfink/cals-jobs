@@ -18,8 +18,8 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * 
  * @author CWDS API Team
  */
-public class SubstituteCareProviderIndexJob
-    extends BasePersonIndexerJob<ReplicatedSubstituteCareProvider> {
+public class SubstituteCareProviderIndexJob extends
+    BasePersonIndexerJob<ReplicatedSubstituteCareProvider, ReplicatedSubstituteCareProvider> {
 
   private static final Logger LOGGER = LogManager.getLogger(SubstituteCareProviderIndexJob.class);
 

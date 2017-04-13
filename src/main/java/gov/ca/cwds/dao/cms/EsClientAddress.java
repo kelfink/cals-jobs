@@ -27,7 +27,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.ReplicatedClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
-import gov.ca.cwds.data.std.ApiReduce;
+import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
 /**
  * Entity bean for Materialized Query Table (MQT), ES_CLIENT_ADDRESS.
@@ -53,7 +53,7 @@ import gov.ca.cwds.data.std.ApiReduce;
             // + "ORDER BY x.clt_IDENTIFIER, x.cla_EFF_STRTDT "
             + "FOR READ ONLY ",
         resultClass = EsClientAddress.class, readOnly = true)})
-public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedClient> {
+public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
 
   /**
    * Default.
@@ -440,6 +440,13 @@ public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedCl
     return op != null ? CmsReplicationOperation.valueOf(op) : null;
   }
 
+  /**
+   * Build an EsClientAddress from an incoming ResultSet.
+   * 
+   * @param rs incoming tuple
+   * @return a populated EsClientAddress
+   * @throws SQLException if unable to convert types or stream breaks, etc.
+   */
   public static EsClientAddress produceFromResultSet(ResultSet rs) throws SQLException {
     EsClientAddress ret = new EsClientAddress();
 
@@ -1551,6 +1558,11 @@ public class EsClientAddress implements PersistentObject, ApiReduce<ReplicatedCl
 
   public void setAdrReplicationDate(Date adrReplicationDate) {
     this.adrReplicationDate = adrReplicationDate;
+  }
+
+  @Override
+  public Object getGroupKey() {
+    return this.cltId;
   }
 
   // TODO: set correct primary key.

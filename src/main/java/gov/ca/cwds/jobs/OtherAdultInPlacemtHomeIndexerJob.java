@@ -18,8 +18,8 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * 
  * @author CWDS API Team
  */
-public class OtherAdultInPlacemtHomeIndexerJob
-    extends BasePersonIndexerJob<ReplicatedOtherAdultInPlacemtHome> {
+public class OtherAdultInPlacemtHomeIndexerJob extends
+    BasePersonIndexerJob<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
 
   private static final Logger LOGGER =
       LogManager.getLogger(OtherAdultInPlacemtHomeIndexerJob.class);

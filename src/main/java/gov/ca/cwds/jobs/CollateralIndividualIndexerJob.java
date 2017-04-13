@@ -19,7 +19,7 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * @author CWDS API Team
  */
 public class CollateralIndividualIndexerJob
-    extends BasePersonIndexerJob<ReplicatedCollateralIndividual> {
+    extends BasePersonIndexerJob<ReplicatedCollateralIndividual, ReplicatedCollateralIndividual> {
 
   private static final Logger LOGGER = LogManager.getLogger(CollateralIndividualIndexerJob.class);
 

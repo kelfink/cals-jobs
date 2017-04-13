@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +17,10 @@ import com.google.inject.Inject;
 import gov.ca.cwds.dao.cms.EsClientAddress;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.model.cms.JobResultSetAware;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
-import gov.ca.cwds.data.std.ApiReduce;
+import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
@@ -26,7 +29,8 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * 
  * @author CWDS API Team
  */
-public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
+public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsClientAddress>
+    implements JobResultSetAware<EsClientAddress> {
 
   private static final Logger LOGGER = LogManager.getLogger(ClientIndexerJob.class);
 
@@ -47,7 +51,12 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
   }
 
   @Override
-  protected Class<? extends ApiReduce<? extends PersistentObject>> getDenormalizedClass() {
+  public EsClientAddress pullFromResultSet(ResultSet rs) throws SQLException {
+    return EsClientAddress.produceFromResultSet(rs);
+  }
+
+  @Override
+  protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
     return EsClientAddress.class;
   }
 
@@ -62,16 +71,16 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient> {
   }
 
   @Override
-  protected ReplicatedClient reduceSingle(List<? extends PersistentObject> recs) {
+  protected ReplicatedClient reduceSingle(List<EsClientAddress> recs) {
     return reduce(recs).get(0);
   }
 
   @Override
-  protected List<ReplicatedClient> reduce(List<? extends PersistentObject> recs) {
+  protected List<ReplicatedClient> reduce(List<EsClientAddress> recs) {
     final int len = (int) (recs.size() * 1.25);
     Map<Object, ReplicatedClient> map = new LinkedHashMap<>(len);
     for (PersistentObject rec : recs) {
-      ApiReduce<ReplicatedClient> reducer = (EsClientAddress) rec;
+      ApiGroupNormalizer<ReplicatedClient> reducer = (EsClientAddress) rec;
       reducer.reduce(map);
     }
 

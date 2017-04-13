@@ -22,7 +22,8 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * 
  * @author CWDS API Team
  */
-public class ReporterIndexerJob extends BasePersonIndexerJob<ReplicatedReporter> {
+public class ReporterIndexerJob
+    extends BasePersonIndexerJob<ReplicatedReporter, ReplicatedReporter> {
 
   private static final Logger LOGGER = LogManager.getLogger(ReporterIndexerJob.class);
 

@@ -43,7 +43,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
-import gov.ca.cwds.dao.cms.EsClientAddress;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.cms.ClientDao;
@@ -51,17 +50,18 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.model.cms.JobResultSetAware;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiAddressAware;
+import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiLanguageAware;
 import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
 import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
-import gov.ca.cwds.data.std.ApiReduce;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
@@ -91,11 +91,12 @@ import gov.ca.cwds.rest.api.domain.es.Person;
  * </pre>
  * 
  * @author CWDS API Team
- * @param <T> storable Person persistence type
+ * @param <T> storable, replicated Person persistence class
+ * @param <M> MQT entity class, if any, or T
  * @see JobOptions
  */
-public abstract class BasePersonIndexerJob<T extends PersistentObject>
-    extends JobBasedOnLastSuccessfulRunTime implements AutoCloseable {
+public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
+    extends JobBasedOnLastSuccessfulRunTime implements AutoCloseable, JobResultSetAware<M> {
 
   private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
 
@@ -103,7 +104,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
   private static final int DEFAULT_BATCH_WAIT = 10;
   private static final int DEFAULT_BUCKETS = 1;
-  private static final int DEFAULT_THREADS = 1;
 
   private static final int LOG_EVERY = 5000;
   private static final int ES_BULK_SIZE = 1500;
@@ -154,8 +154,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   protected final long startTime = System.currentTimeMillis();
 
-  protected LinkedBlockingDeque<EsClientAddress> denormalizedQueue =
-      new LinkedBlockingDeque<>(150000);
+  protected LinkedBlockingDeque<M> denormalizedQueue = new LinkedBlockingDeque<>(150000);
 
   protected LinkedBlockingDeque<T> normalizedQueue = new LinkedBlockingDeque<>(50000);
 
@@ -181,6 +180,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     this.esDao = elasticsearchDao;
     this.mapper = mapper;
     this.sessionFactory = sessionFactory;
+  }
+
+  /**
+   * Get the MQT name, if used. All child classes that rely on an MQT must define the name.
+   * 
+   * @return MQT name, if any
+   */
+  public String getMqtName() {
+    return null;
   }
 
   /**
@@ -274,8 +282,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @param <T> Person persistence type
    * @throws JobsException if unable to parse command line or load dependencies
    */
-  public static <T extends BasePersonIndexerJob<?>> T newJob(final Class<T> klass, String... args)
-      throws JobsException {
+  public static <T extends BasePersonIndexerJob<?, ?>> T newJob(final Class<T> klass,
+      String... args) throws JobsException {
     try {
       final JobOptions opts = JobOptions.parseCommandLine(args);
       final T ret = buildInjector(opts).getInstance(klass);
@@ -299,7 +307,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @param <T> Person persistence type
    * @throws JobsException unexpected runtime error
    */
-  public static <T extends BasePersonIndexerJob<?>> void runJob(final Class<T> klass,
+  public static <T extends BasePersonIndexerJob<?, ?>> void runJob(final Class<T> klass,
       String... args) throws JobsException {
     try (final T job = newJob(klass, args)) { // Close resources automatically.
       job.run();
@@ -412,11 +420,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
 
-      if (isReducer()) {
-        results.addAll(reduce(recs));
-      } else {
-        results.addAll(recs);
-      }
+      // TODO: convert from denormalized MQT to normalized, if needed.
+
+      // if (isReducer()) {
+      // results.addAll(reduce(recs));
+      // } else {
+      // results.addAll(recs);
+      // }
 
       session.clear();
       txn.commit();
@@ -521,7 +531,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * 
    * @return MQT entity class
    */
-  protected Class<? extends ApiReduce<? extends PersistentObject>> getDenormalizedClass() {
+  protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
     return null;
   }
 
@@ -533,11 +543,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @return unmodified entity records
    */
   @SuppressWarnings("unchecked")
-  protected List<T> reduce(List<? extends PersistentObject> recs) {
+  protected List<T> reduce(List<M> recs) {
     return (List<T>) recs;
   }
 
-  protected T reduceSingle(List<? extends PersistentObject> recs) {
+  /**
+   * Reduce/normalize MQT records for a single grouping (such as all the same client) into a
+   * normalized entity bean.
+   * 
+   * @param recs denormalized MQT beans
+   * @return normalized entity bean instance
+   */
+  protected T reduceSingle(List<M> recs) {
     final List<T> list = reduce(recs);
     return list != null && !list.isEmpty() ? list.get(0) : null;
   }
@@ -595,7 +612,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
           if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
             LOGGER.info("Pulled {} MQT records", cntr);
           }
-          denormalizedQueue.putLast(EsClientAddress.produceFromResultSet(rs));
+          denormalizedQueue.putLast(pullFromResultSet(rs));
         }
 
         con.commit();
@@ -619,26 +636,26 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    */
   protected void initLoadStage2Normalize() {
     Thread.currentThread().setName("normalizer");
-    String lastId = "";
-    EsClientAddress eca;
+    Object lastId = new Object();
+    M m;
 
     LOGGER.warn("BEGIN: Stage #2: Normalizer");
-    List<EsClientAddress> groupRecs = new ArrayList<>();
+    List<M> groupRecs = new ArrayList<>();
     int cntr = 0;
     while (!(isReaderDone && denormalizedQueue.isEmpty())) {
       try {
-        while ((eca = denormalizedQueue.pollFirst(1, TimeUnit.SECONDS)) != null) {
+        while ((m = denormalizedQueue.pollFirst(1, TimeUnit.SECONDS)) != null) {
           if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
             LOGGER.info("normalize {} recs", cntr);
           }
 
-          if (!lastId.equals(eca.getCltId()) && !groupRecs.isEmpty()) {
+          if (!lastId.equals(m.getGroupKey()) && !groupRecs.isEmpty()) {
             normalizedQueue.putLast(reduceSingle(groupRecs));
             groupRecs.clear();
           }
 
-          groupRecs.add(eca);
-          lastId = eca.getCltId();
+          groupRecs.add(m);
+          lastId = m.getGroupKey();
         }
       } catch (InterruptedException e) {
         // Can safely ignore.
@@ -910,11 +927,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
 
-      if (isReducer()) {
-        results.addAll(reduce(recs));
-      } else {
-        results.addAll(recs);
-      }
+      // Normalize if needed.
+      // if (isReducer()) {
+      // results.addAll(reduce(recs));
+      // } else {
+      // results.addAll(recs);
+      // }
 
       session.clear();
       txn.commit();
