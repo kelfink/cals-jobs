@@ -731,13 +731,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
     LOGGER.warn("BEGIN: Stage #3: ES Publisher");
     try {
-      while (!(isNormalizerDone && normalizedQueue.isEmpty())) {
-        while ((t = normalizedQueue.pollFirst(2, TimeUnit.SECONDS)) != null) {
+      while (!(isReaderDone && isNormalizerDone && normalizedQueue.isEmpty())) {
+        while ((t = normalizedQueue.pollFirst(5, TimeUnit.SECONDS)) != null) {
           if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
             LOGGER.info("published {} recs", cntr);
           }
           publishPerson(bp, t);
-          recsProcessed.getAndIncrement();
         }
       }
 
@@ -748,7 +747,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       LOGGER.warn("Publisher interrupted!");
       Thread.interrupted();
     } catch (JsonProcessingException e) {
+      LOGGER.error("JsonProcessingException! {}", e.getMessage(), e);
       throw new JobsException("JSON error", e);
+    } catch (Exception e) {
+      LOGGER.error("WHAT IS THIS??? {}", e.getMessage(), e);
+      throw new JobsException("Vat ist zis??", e);
     } finally {
       isPublisherDone = true;
     }
@@ -766,6 +769,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
   protected void publishPerson(BulkProcessor bp, T t) throws JsonProcessingException {
     final ElasticSearchPerson esp = buildESPerson(t);
     bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
+    recsProcessed.getAndIncrement();
+
   }
 
   /**
@@ -892,13 +897,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
       new Thread(this::initLoadStage2Normalize).start();
       new Thread(this::initLoadStep3PushToElasticsearch).start();
 
-      while (!isPublisherDone) {
+      while (!isReaderDone && !isNormalizerDone && !isPublisherDone) {
         LOGGER.warn("runInitialLoad: sleep");
         Thread.sleep(6000);
         try {
           this.jobDao.find("abc123"); // dummy call, keep pool alive.
         } catch (Exception e) {
-          // Ignore.
+          LOGGER.error("initial load error: {}", e.getMessage(), e);
         }
       }
     } catch (InterruptedException ie) {
@@ -1004,7 +1009,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   @Override
   public void close() throws IOException {
-    if (isPublisherDone) {
+    if (isReaderDone && isNormalizerDone && isPublisherDone) {
       LOGGER.warn("CLOSING CONNECTIONS!!");
 
       if (this.esDao != null) {
@@ -1016,6 +1021,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         LOGGER.warn("CLOSING SESSION FACTORY");
         this.sessionFactory.close();
       }
+    } else {
+      LOGGER.warn("CLOSE CALL: FALSE ALARM");
     }
   }
 
