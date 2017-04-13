@@ -435,7 +435,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
    * @return List of results to process
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
-  protected Date processLastRun(Date lastSuccessfulRunTime) {
+  protected Date doLastRun(Date lastSuccessfulRunTime) {
     try {
       final Date startTime = new Date();
 
@@ -474,6 +474,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
     } catch (Exception e) {
       LOGGER.error("General Exception: {}", e.getMessage(), e);
       throw new JobsException("General Exception: " + e.getMessage(), e);
+    } finally {
+      isPublisherDone = true;
     }
   }
 
@@ -965,7 +967,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         ret = startTime;
       } else if (this.opts == null || this.opts.lastRunMode) {
         LOGGER.warn("LAST RUN MODE!");
-        ret = processLastRun(lastSuccessfulRunTime);
+        ret = doLastRun(lastSuccessfulRunTime);
       } else {
         LOGGER.warn("DIRECT BUCKET MODE!");
         processBuckets();
@@ -1002,14 +1004,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
 
   @Override
   public void close() throws IOException {
-    LOGGER.warn("CLOSING CONNECTIONS!!");
+    if (isPublisherDone) {
+      LOGGER.warn("CLOSING CONNECTIONS!!");
 
-    if (this.esDao != null) {
-      this.esDao.close();
-    }
+      if (this.esDao != null) {
+        LOGGER.warn("CLOSING ES DAO");
+        this.esDao.close();
+      }
 
-    if (this.sessionFactory != null) {
-      this.sessionFactory.close();
+      if (this.sessionFactory != null) {
+        LOGGER.warn("CLOSING SESSION FACTORY");
+        this.sessionFactory.close();
+      }
     }
   }
 
