@@ -16,10 +16,11 @@
 		<property name="hibernate.connection.connectionTimeout">1000000</property>
 		<property name="hibernate.connection.loginTimeout">1000000</property>
 		<property name="hibernate.connection.keepAliveTimeOut">8</property>
-	
+
 		<property name="connection_pool_size">2</property>
 		<property name="show_sql">true</property>
 
+		<!-- <property name="hibernate.connection.pool_size">4</property> -->
 		<!-- <property name="hibernate.c3p0.timeout">1000000</property> -->
 
 	</session-factory>

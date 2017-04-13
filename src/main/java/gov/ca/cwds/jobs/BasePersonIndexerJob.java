@@ -718,6 +718,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject>
         Thread.sleep(6000);
         try {
           this.jobDao.find("abc123"); // dummy call, keep pool alive.
+        } catch (HibernateException he) {
+          LOGGER.warn("USING DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage(), he);
         } catch (Exception e) {
           LOGGER.error("initial load error: {}", e.getMessage(), e);
         }
