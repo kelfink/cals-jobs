@@ -33,7 +33,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
  * Entity bean for Materialized Query Table (MQT), ES_CLIENT_ADDRESS.
  * 
  * <p>
- * Implements {@link ApiReduce} and converts to {@link ReplicatedClient}.
+ * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.
  * </p>
  * 
  * @author CWDS API Team

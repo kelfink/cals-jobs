@@ -697,7 +697,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param bp {@link #buildBulkProcessor()} for this thread
    * @param t Person record to write
-   * @throws JsonProcessingException
+   * @throws JsonProcessingException if unable to serialize JSON
    */
   protected final void publishPerson(BulkProcessor bp, T t) throws JsonProcessingException {
     final ElasticSearchPerson esp = buildESPerson(t);
@@ -918,7 +918,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Divide work into buckets: pull a unique range of identifiers so that no bucket results overlap.
    * 
-   * @param jobDao DAO for entity type T
    * @param minId start of identifier range
    * @param maxId end of identifier range
    * @return collection of entity results
@@ -1008,7 +1007,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param minId start of identifier range
    * @param maxId end of identifier range
    * @return List of T entity
-   * @deprecated use method {@link #processInitialLoadBucketRange(BaseDaoImpl, String, String)}
+   * @deprecated use method {@link #doInitialLoadViaHibernate()}
    */
   @Deprecated
   protected List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, Class<?> rootEntity,

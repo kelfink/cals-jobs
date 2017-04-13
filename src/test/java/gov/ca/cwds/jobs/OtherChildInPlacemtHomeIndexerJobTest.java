@@ -86,11 +86,11 @@ public class OtherChildInPlacemtHomeIndexerJobTest {
     assertThat(query, is(notNullValue()));
   }
 
-  @Test
-  public void testFindAllByBucketNamedQueryExists() throws Exception {
-    Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.cms.OtherChildInPlacemtHome.findAllByBucket");
-    assertThat(query, is(notNullValue()));
-  }
+  // @Test
+  // public void testFindAllByBucketNamedQueryExists() throws Exception {
+  // Query query = session
+  // .getNamedQuery("gov.ca.cwds.data.persistence.cms.OtherChildInPlacemtHome.findAllByBucket");
+  // assertThat(query, is(notNullValue()));
+  // }
 
 }
