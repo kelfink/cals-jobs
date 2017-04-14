@@ -481,7 +481,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected Date doLastRun(Date lastRunDt) {
     try {
-      // One bulk processor "last run" operations. BulkProcessor is thread-safe.
+      // One bulk processor for "last run" operations. BulkProcessor is thread-safe.
       final BulkProcessor bp = buildBulkProcessor();
       final List<T> results =
           this.isMQTNormalizer() ? pullLastRunRecsMQT(lastRunDt) : pullLastRunRecsNormal(lastRunDt);
@@ -498,7 +498,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
             // Bulk indexing! MUCH faster than indexing one doc at a time.
             bp.add(this.esDao.bulkAdd(this.mapper, esp.getId(), esp));
           } catch (JsonProcessingException e) {
-            throw new JobsException("JSON error", e);
+            LOGGER.error("ERROR WRITING JSON: {}", e.getMessage(), e);
+            throw new JobsException("ERROR WRITING JSON", e);
           }
         });
 

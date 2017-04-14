@@ -47,12 +47,21 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
         + "FOR READ ONLY",
     resultClass = EsClientAddress.class, readOnly = true),
     @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findAllUpdatedAfter",
-        query = "WITH lrd AS ( SELECT CAST(:after AS TIMESTAMP) AS lst_run FROM SYSIBM.SYSDUMMY1 ) "
-            + "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x CROSS JOIN lrd "
-            + "WHERE x.CLT_IBMSNAP_LOGMARKER > lrd.lst_run OR x.CLA_IBMSNAP_LOGMARKER > lrd.lst_run OR x.ADR_IBMSNAP_LOGMARKER > lrd.lst_run "
+        query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
+            + "WHERE x.CLT_IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP) "
+            + "OR x.CLA_IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP) "
+            + "OR x.ADR_IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP) "
             // + "ORDER BY x.clt_IDENTIFIER, x.cla_EFF_STRTDT "
             + "FOR READ ONLY ",
-        resultClass = EsClientAddress.class, readOnly = true)})
+        // query = "WITH lrd AS (SELECT CAST(:after AS TIMESTAMP) AS lst_run FROM SYSIBM.SYSDUMMY1)
+        // "
+        // + "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x CROSS JOIN lrd "
+        // + "WHERE x.CLT_IBMSNAP_LOGMARKER > lrd.lst_run "
+        // + "OR x.CLA_IBMSNAP_LOGMARKER > lrd.lst_run "
+        // + "OR x.ADR_IBMSNAP_LOGMARKER > lrd.lst_run "
+        // // + "ORDER BY x.clt_IDENTIFIER, x.cla_EFF_STRTDT "
+        // + "FOR READ ONLY ",
+        resultClass = EsClientAddress.class, readOnly = true, comment = "timestamp_count=3")})
 public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
 
   /**
