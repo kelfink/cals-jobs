@@ -384,11 +384,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * regular entity.
    * </p>
    * 
-   * @param lastRunDt last successful run time
+   * @param lastRunTime last successful run time
    * @return List of normalized entities
    */
-  protected List<T> pullLastRunRecsNormal(Date lastRunDt) {
-    LOGGER.info("last successful run: {}", lastRunDt);
+  protected List<T> pullLastRunRecsNormal(Date lastRunTime) {
+    LOGGER.info("last successful run: {}", lastRunTime);
     final Class<?> entityClass = jobDao.getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
     Session session = jobDao.getSessionFactory().getCurrentSession();
@@ -397,7 +397,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       txn = session.beginTransaction();
       NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
-      q.setTimestamp("after", new Timestamp(lastRunDt.getTime()));
+      q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
@@ -418,11 +418,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * @param lastRunDt last successful run time
+   * @param lastRunTime last successful run time
    * @return List of normalized entities
    */
-  protected List<T> pullLastRunRecsMQT(Date lastSuccessfulRunTime) {
-    LOGGER.info("PULL MQT: last successful run: {}", lastSuccessfulRunTime);
+  protected List<T> pullLastRunRecsMQT(Date lastRunTime) {
+    LOGGER.info("PULL MQT: last successful run: {}", lastRunTime);
 
     final Class<?> entityClass = getDenormalizedClass();
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
@@ -434,7 +434,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       txn = session.beginTransaction();
       NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
-      q.setTimestamp("after", new Timestamp(lastSuccessfulRunTime.getTime()));
+      q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<M> recs = q.list();
