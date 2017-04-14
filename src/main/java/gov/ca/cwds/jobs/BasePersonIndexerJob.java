@@ -384,13 +384,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * regular entity.
    * </p>
    * 
-   * @param jobDao DAO
-   * @param lastSuccessfulRunTime last successful run time
+   * @param lastRunDt last successful run time
    * @return List of normalized entities
    */
-  protected List<T> pullLastRunResults(BaseDaoImpl<T> jobDao, Date lastSuccessfulRunTime) {
-    final Class<?> entityClass =
-        getDenormalizedClass() != null ? getDenormalizedClass() : jobDao.getEntityClass();
+  protected List<T> pullLastRunRecsNormal(Date lastRunDt) {
+    LOGGER.info("last successful run: {}", lastRunDt);
+    final Class<?> entityClass = jobDao.getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
@@ -398,18 +397,64 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       txn = session.beginTransaction();
       NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
-      q.setTimestamp("after", new Timestamp(lastSuccessfulRunTime.getTime()));
+      q.setTimestamp("after", new Timestamp(lastRunDt.getTime()));
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
 
-      // TODO: convert from denormalized MQT to normalized, if needed.
+      LOGGER.warn("FOUND {} RECORDS", recs.size());
+      results.addAll(recs);
 
-      // if (isReducer()) {
-      // results.addAll(reduce(recs));
-      // } else {
-      // results.addAll(recs);
-      // }
+      session.clear();
+      txn.commit();
+      return results.build();
+    } catch (HibernateException h) {
+      LOGGER.error("BATCH ERROR! {}", h.getMessage(), h);
+      if (txn != null) {
+        txn.rollback();
+      }
+      throw new DaoException(h);
+    }
+  }
+
+  /**
+   * @param lastRunDt last successful run time
+   * @return List of normalized entities
+   */
+  protected List<T> pullLastRunRecsMQT(Date lastSuccessfulRunTime) {
+    LOGGER.info("PULL MQT: last successful run: {}", lastSuccessfulRunTime);
+
+    final Class<?> entityClass = getDenormalizedClass();
+    final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
+    Session session = jobDao.getSessionFactory().getCurrentSession();
+
+    Object lastId = new Object();
+    Transaction txn = null;
+
+    try {
+      txn = session.beginTransaction();
+      NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
+      q.setTimestamp("after", new Timestamp(lastSuccessfulRunTime.getTime()));
+
+      ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
+      final List<M> recs = q.list();
+      LOGGER.warn("FOUND {} RECORDS", recs.size());
+
+      // Convert from denormalized MQT to normalized.
+      List<M> groupRecs = new ArrayList<>();
+      for (M m : recs) {
+        if (!lastId.equals(m.getGroupKey()) && !groupRecs.isEmpty()) {
+          results.add(reduceSingle(groupRecs));
+          groupRecs.clear();
+        }
+
+        groupRecs.add(m);
+        lastId = m.getGroupKey();
+      }
+
+      if (!groupRecs.isEmpty()) {
+        results.add(reduceSingle(groupRecs));
+      }
 
       session.clear();
       txn.commit();
@@ -430,15 +475,16 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Fetch all records for the next batch run, either by bucket or last successful run date.
    * </p>
    * 
-   * @param lastSuccessfulRunTime last time the batch ran successfully.
+   * @param lastRunDt last time the batch ran successfully.
    * @return List of results to process
    * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
    */
-  protected Date doLastRun(Date lastSuccessfulRunTime) {
+  protected Date doLastRun(Date lastRunDt) {
     try {
       // One bulk processor "last run" operations. BulkProcessor is thread-safe.
       final BulkProcessor bp = buildBulkProcessor();
-      final List<T> results = pullLastRunResults(jobDao, lastSuccessfulRunTime);
+      final List<T> results =
+          this.isMQTNormalizer() ? pullLastRunRecsMQT(lastRunDt) : pullLastRunRecsNormal(lastRunDt);
 
       if (results != null && !results.isEmpty()) {
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
@@ -621,12 +667,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void initLoadStage2Normalize() {
     Thread.currentThread().setName("normalizer");
+    LOGGER.warn("BEGIN: Stage #2: Normalizer");
+
+    int cntr = 0;
     Object lastId = new Object();
     M m;
-
-    LOGGER.warn("BEGIN: Stage #2: Normalizer");
     List<M> groupRecs = new ArrayList<>();
-    int cntr = 0;
+
     while (!(isReaderDone && denormalizedQueue.isEmpty())) {
       try {
         while ((m = denormalizedQueue.pollFirst(1, TimeUnit.SECONDS)) != null) {
@@ -738,15 +785,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.error("GENERAL EXCEPTION: {}", e.getMessage(), e);
       throw new JobsException(e);
     }
-
-    // LOGGER.warn("PROCESS EACH PARTITION");
-    // for (Pair<String, String> pair : this.getPartitionRanges()) {
-    // getOpts().setMinId(pair.getLeft());
-    // getOpts().setMaxId(pair.getRight());
-    // LOGGER.warn("PROCESS PARTITION RANGE \"{}\" to \"{}\"", getOpts().getMinId(),
-    // getOpts().getMaxId());
-    // processBuckets();
-    // }
   }
 
   /**
