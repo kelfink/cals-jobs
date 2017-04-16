@@ -23,10 +23,10 @@ import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.cms.ReplicatedAddress;
-import gov.ca.cwds.data.persistence.cms.ReplicatedClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
 /**
