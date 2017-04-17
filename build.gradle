@@ -20,7 +20,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 
 project.ext {
-    log4jVersion = "2.7"
+    log4jVersion = "2.8"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
 }
 
@@ -34,14 +34,25 @@ repositories {
 }
 
 dependencies {
-    compile 'org.elasticsearch:elasticsearch:2.3.5'
+    compile 'org.elasticsearch:elasticsearch:2.4.4'
 	compile group: 'javax.validation', name: 'validation-api', version: '1.1.0.Final'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
   	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
+  	
 	compile group: 'com.google.inject', name: 'guice', version: '4.1.0'
 	compile group: "org.postgresql", name: "postgresql", version: "9.4.1208.jre7"
 	compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.0.0-rc4"
-	compile group: "gov.ca.cwds.api", name: "api", version: "0.20.768"
+
+	compile group: "gov.ca.cwds.api", name: "api", version: "0.20.776"
+
+    compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
+	compile group: "javax.el", name: "javax.el-api", version: "2.2.4"
+	compile group: "org.glassfish.web", name: "javax.el", version: "2.2.4"
+	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.8.3'
+
+	compile group: 'org.slf4j', name: 'slf4j-ext', version: '1.7.22'
+	compile 'com.fasterxml.jackson.module:jackson-module-guice:2.8.2'
+    compile group: 'org.json', name: 'json', version: '20090211'
     
     compile fileTree(dir: 'lib', include: ['*.jar'])
 

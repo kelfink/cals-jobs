@@ -112,18 +112,6 @@ public class JobsGuiceInjector extends AbstractModule {
         .addAnnotatedClass(ReplicatedAddress.class).buildSessionFactory());
 
     // .addPackage("gov.ca.cwds.data.persistence.cms")
-    // .addAnnotatedClass(CmsDocReferralClient.class)
-    // .addAnnotatedClass(CmsDocument.class)
-    // .addAnnotatedClass(CmsDocumentBlobSegment.class)
-    // .addAnnotatedClass(Allegation.class)
-    // .addAnnotatedClass(CollateralIndividual.class)
-    // .addAnnotatedClass(CrossReport.class)
-    // .addAnnotatedClass(Referral.class)
-    // .addAnnotatedClass(ReferralClient.class)
-    // .addAnnotatedClass(StaffPerson.class)
-
-    // Register required DAO classes.
-    // bind(DocumentMetadataDao.class).to(DocumentMetadataDaoImpl.class);
 
     bind(ReplicatedClientDao.class);
     bind(ReplicatedReporterDao.class);
@@ -144,12 +132,25 @@ public class JobsGuiceInjector extends AbstractModule {
 
     // Register CMS system code translator.
     bind(ApiSystemCodeDao.class).to(SystemCodeDaoFileImpl.class);
+    // bind(ApiSystemCodeCache.class).annotatedWith(SystemCodeCache.class)
+    // .to(CmsSystemCodeCacheService.class).asEagerSingleton();
     bind(ApiSystemCodeCache.class).to(CmsSystemCodeCacheService.class).asEagerSingleton();
     bind(CmsSystemCodeSerializer.class).asEagerSingleton();
 
+    // ElasticSearchPerson
+    // .setSystemCodes(Guice.createInjector().getInstance(CmsSystemCodeCacheService.class));
+
     // Only one instance of ES DAO.
     bind(ElasticsearchDao.class).asEagerSingleton();
+
+    // requestStaticInjection(ElasticSearchPerson.class);
   }
+
+  // @Provides
+  // @SystemCodeCache
+  // public ApiSystemCodeCache systemCodeCache() {
+  // return Guice.createInjector().getInstance(CmsSystemCodeCacheService.class);
+  // }
 
   /**
    * Instantiate the singleton ElasticSearch client on demand.

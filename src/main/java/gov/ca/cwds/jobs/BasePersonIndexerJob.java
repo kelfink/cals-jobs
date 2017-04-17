@@ -67,7 +67,6 @@ import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.rest.api.domain.DomainChef;
-import gov.ca.cwds.rest.api.domain.es.AutoCompletePerson;
 import gov.ca.cwds.rest.api.domain.es.Person;
 
 /**
@@ -352,12 +351,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       addresses = new ArrayList<>();
       ApiMultipleAddressesAware madrx = (ApiMultipleAddressesAware) p;
       for (ApiAddressAware adrx : madrx.getAddresses()) {
-        addresses.add(new AutoCompletePerson.AutoCompletePersonAddress(adrx).toESPersonAddress());
+        // AutoCompletePerson.AutoCompletePersonAddress(adrx).toESPersonAddress());
+        addresses.add(new ElasticSearchPersonAddress(adrx));
       }
     } else if (p instanceof ApiAddressAware) {
       addresses = new ArrayList<>();
-      addresses.add(new AutoCompletePerson.AutoCompletePersonAddress((ApiAddressAware) p)
-          .toESPersonAddress());
+      // addresses.add(new AutoCompletePerson.AutoCompletePersonAddress((ApiAddressAware) p)
+      // .toESPersonAddress());
+      addresses.add(new ElasticSearchPersonAddress((ApiAddressAware) p));
     }
 
     // Write persistence object to Elasticsearch Person document.
@@ -636,7 +637,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         stmt.setFetchSize(10000); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(100000);
-
         ResultSet rs = stmt.executeQuery(query); // NOSONAR
 
         int cntr = 0;
@@ -690,7 +690,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           groupRecs.add(m);
           lastId = m.getGroupKey();
         }
-      } catch (InterruptedException e) {
+      } catch (InterruptedException e) { // NOSONAR
         // Can safely ignore.
         LOGGER.warn("Normalizer interrupted!");
       } finally {
@@ -724,7 +724,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.warn("Waiting to close ES bulk processor");
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
 
-    } catch (InterruptedException e) {
+    } catch (InterruptedException e) { // NOSONAR
       LOGGER.warn("Publisher interrupted!");
       Thread.interrupted();
     } catch (JsonProcessingException e) {
@@ -805,6 +805,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
+      // TODO: GUICE NOT INJECTING THE CRITICAL SYSCODE TRANSLATOR. WHY???
+      // ElasticSearchPerson
+      // .setSystemCodes(Guice.createInjector().getInstance(ApiSystemCodeCache.class));
+
+      ElasticSearchPerson.setSystemCodes(injector.getInstance(ApiSystemCodeCache.class));
+      ElasticSearchPerson.getSystemCodes();
+
       // If the people index is missing, create it.
       LOGGER.debug("Create people index if missing");
       esDao.createIndexIfNeeded(ElasticsearchDao.DEFAULT_PERSON_IDX_NM);
