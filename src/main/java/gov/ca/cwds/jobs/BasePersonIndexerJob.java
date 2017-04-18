@@ -147,16 +147,22 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected JobOptions opts;
 
   /**
-   * Thread-safe count across all worker threads.
+   * Thread-safe count of records (ES documents) prepared to be written to Elasticsearch.
    */
-  protected AtomicInteger recsProcessed = new AtomicInteger(0);
+  protected AtomicInteger recsPreparedToIndex = new AtomicInteger(0);
+
+  protected AtomicInteger recsBulkBefore = new AtomicInteger(0);
+
+  protected AtomicInteger recsBulkAfter = new AtomicInteger(0);
+
+  protected AtomicInteger recsBulkError = new AtomicInteger(0);
 
   /**
    * Official start time.
    */
   protected final long startTime = System.currentTimeMillis();
 
-  protected LinkedBlockingDeque<M> denormalizedQueue = new LinkedBlockingDeque<>(150000);
+  protected LinkedBlockingDeque<M> denormalizedQueue = new LinkedBlockingDeque<>(100000);
 
   protected LinkedBlockingDeque<T> normalizedQueue = new LinkedBlockingDeque<>(50000);
 
@@ -218,17 +224,20 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
+        recsBulkBefore.getAndAdd(request.numberOfActions());
         LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
       }
 
       @Override
       public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
+        recsBulkAfter.getAndAdd(request.numberOfActions());
         LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
       }
 
       @Override
       public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-        LOGGER.error("Error executing bulk", failure);
+        recsBulkError.getAndAdd(request.numberOfActions());
+        LOGGER.error("ERROR EXECUTING BULK", failure);
       }
     }).setBulkActions(ES_BULK_SIZE).setConcurrentRequests(0).setName("jobs_bp").build();
   }
@@ -353,14 +362,17 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       for (ApiAddressAware adrx : madrx.getAddresses()) {
         final boolean logMe =
             adrx.getApiAdrUnitType() != null && adrx.getApiAdrUnitType().intValue() != 0;
-        if (logMe) {
-          LOGGER.warn("multi address: unit type: {}", adrx.getApiAdrUnitType());
-        }
         ElasticSearchPersonAddress espAdr = new ElasticSearchPersonAddress(adrx);
-        if (logMe) {
-          LOGGER.warn("ESP address: unit type: {}, unit number: {}", espAdr.getUnitType(),
-              espAdr.getUnitNumber());
-        }
+
+        // DIAGNOSTICS:
+        // if (logMe) {
+        // LOGGER.warn("multi address: unit type: {}", adrx.getApiAdrUnitType());
+        // }
+        // if (logMe) {
+        // LOGGER.warn("ESP address: unit type: {}, unit number: {}", espAdr.getUnitType(),
+        // espAdr.getUnitNumber());
+        // }
+
         addresses.add(espAdr);
       }
     } else if (p instanceof ApiAddressAware) {
@@ -516,7 +528,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         });
 
         // Track counts.
-        recsProcessed.getAndAdd(results.size());
+        recsPreparedToIndex.getAndAdd(results.size());
       }
 
       // Give it time to finish the last batch.
@@ -644,10 +656,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final String query = buf.toString();
 
       try (Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(10000); // faster
+        stmt.setFetchSize(5000); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(100000);
-        ResultSet rs = stmt.executeQuery(query); // NOSONAR
+        final ResultSet rs = stmt.executeQuery(query); // NOSONAR
 
         int cntr = 0;
         while (rs.next()) {
@@ -702,7 +714,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
 
         // Last bundle.
-        normalizedQueue.putLast(reduceSingle(groupRecs));
+        if (!groupRecs.isEmpty()) {
+          normalizedQueue.putLast(reduceSingle(groupRecs));
+        }
 
       } catch (InterruptedException e) { // NOSONAR
         // Can safely ignore.
@@ -731,7 +745,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
             LOGGER.info("Published {} recs to ES", cntr);
           }
-          publishPerson(bp, t);
+          prepareDocument(bp, t);
         }
       }
 
@@ -740,7 +754,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
           LOGGER.info("Published {} recs to ES", cntr);
         }
-        publishPerson(bp, t);
+        prepareDocument(bp, t);
       }
 
       LOGGER.info("Flush ES bulk processor ...");
@@ -776,16 +790,16 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param t Person record to write
    * @throws JsonProcessingException if unable to serialize JSON
    */
-  protected final void publishPerson(BulkProcessor bp, T t) throws JsonProcessingException {
+  protected final void prepareDocument(BulkProcessor bp, T t) throws JsonProcessingException {
     final ElasticSearchPerson esp = buildESPerson(t);
 
     if ("R24JJGI0MV".equals(esp.getId())) {
       final String logMe = mapper.writeValueAsString(esp);
-      LOGGER.warn("publishPerson: found R24JJGI0MV! {}", logMe);
+      LOGGER.warn("publishPerson: found R24JJGI0MV : {}", logMe);
     }
 
     bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
-    recsProcessed.getAndIncrement();
+    recsPreparedToIndex.getAndIncrement();
   }
 
   /**
@@ -880,9 +894,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       // Result stats:
-      LOGGER.info("Indexed {} records", recsProcessed);
+      LOGGER.info("Prepared {} records to index", recsPreparedToIndex);
+      LOGGER.info("STATS: \nrecsBulkBefore: {}\nrecsBulkAfter: {}\nrecsBulkError: {}",
+          recsBulkBefore, recsBulkAfter, recsBulkError);
       LOGGER.info("Updating last successful run time to {}", jobDateFormat.format(startTime));
       return new Date(this.startTime);
+
     } catch (JobsException e) {
       LOGGER.error("JobsException: {}", e.getMessage(), e);
       throw e;
@@ -1068,11 +1085,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
 
         // Track counts.
-        recsProcessed.getAndAdd(results.size());
+        recsPreparedToIndex.getAndAdd(results.size());
       }
     }
 
-    return recsProcessed.get();
+    return recsPreparedToIndex.get();
   }
 
   /**
