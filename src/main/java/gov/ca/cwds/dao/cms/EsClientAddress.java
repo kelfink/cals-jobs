@@ -440,6 +440,12 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   @Column(name = "ADR_UNIT_NO")
   private String adrUnitNumber;
 
+  /**
+   * Convert IBM replication operation to enum.
+   * 
+   * @param op replication operation, IUD
+   * @return enumerated type
+   */
   protected static CmsReplicationOperation strToRepOp(String op) {
     return op != null ? CmsReplicationOperation.valueOf(op) : null;
   }

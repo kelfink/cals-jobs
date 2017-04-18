@@ -105,7 +105,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int DEFAULT_BUCKETS = 1;
 
   private static final int LOG_EVERY = 5000;
-  private static final int ES_BULK_SIZE = 2000;
+  private static final int ES_BULK_SIZE = 1000;
 
   private static final String QUERY_BUCKET_LIST =
       "SELECT z.bucket, MIN(z.identifier) AS minId, MAX(z.identifier) AS maxId, COUNT(*) AS bucketCount "
@@ -243,7 +243,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       @Override
       public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-        recsBulkError.getAndAdd(request.numberOfActions());
+        recsBulkError.getAndIncrement();
         LOGGER.error("ERROR EXECUTING BULK", failure);
       }
     }).setBulkActions(ES_BULK_SIZE).setConcurrentRequests(0).setName("jobs_bp").build();
@@ -367,11 +367,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       addresses = new ArrayList<>();
       ApiMultipleAddressesAware madrx = (ApiMultipleAddressesAware) p;
       for (ApiAddressAware adrx : madrx.getAddresses()) {
-        final boolean logMe =
-            adrx.getApiAdrUnitType() != null && adrx.getApiAdrUnitType().intValue() != 0;
         ElasticSearchPersonAddress espAdr = new ElasticSearchPersonAddress(adrx);
 
         // DIAGNOSTICS:
+        // final boolean logMe =
+        // adrx.getApiAdrUnitType() != null && adrx.getApiAdrUnitType().intValue() != 0;
         // if (logMe) {
         // LOGGER.warn("multi address: unit type: {}", adrx.getApiAdrUnitType());
         // }
@@ -703,6 +703,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Object lastId = new Object();
     M m;
     List<M> groupRecs = new ArrayList<>();
+    // Set<String> uniqueIds = new HashSet<>();
 
     while (!(isReaderDone && denormalizedQueue.isEmpty())) {
       try {
@@ -711,7 +712,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
             LOGGER.info("normalize {} recs", cntr);
           }
 
-          if (!lastId.equals(m.getGroupKey()) && !groupRecs.isEmpty()) {
+          if (!lastId.equals(m.getGroupKey()) && cntr > 1) {
             normalizedQueue.putLast(reduceSingle(groupRecs));
             groupRecs.clear();
           }
