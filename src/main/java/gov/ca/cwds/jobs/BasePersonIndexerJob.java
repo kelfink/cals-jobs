@@ -162,8 +162,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected final long startTime = System.currentTimeMillis();
 
+  /**
+   * Initial load only. Queue of raw, denormalized records waiting to be normalized.
+   */
   protected LinkedBlockingDeque<M> denormalizedQueue = new LinkedBlockingDeque<>(100000);
 
+  /**
+   * Initial load only. Queue of normalized records waiting to be transformed to an Elasticsearch
+   * document.
+   */
   protected LinkedBlockingDeque<T> normalizedQueue = new LinkedBlockingDeque<>(50000);
 
   /**
@@ -793,10 +800,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected final void prepareDocument(BulkProcessor bp, T t) throws JsonProcessingException {
     final ElasticSearchPerson esp = buildESPerson(t);
 
-    if ("R24JJGI0MV".equals(esp.getId())) {
-      final String logMe = mapper.writeValueAsString(esp);
-      LOGGER.warn("publishPerson: found R24JJGI0MV : {}", logMe);
-    }
+    // DIAGNOSTICS:
+    // if ("R24JJGI0MV".equals(esp.getId())) {
+    // final String logMe = mapper.writeValueAsString(esp);
+    // LOGGER.warn("publishPerson: found R24JJGI0MV : {}", logMe);
+    // }
 
     bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
     recsPreparedToIndex.getAndIncrement();
@@ -855,11 +863,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      // TODO: GUICE NOT INJECTING THE CRITICAL SYSCODE TRANSLATOR.
-      // ElasticSearchPerson
-      // .setSystemCodes(Guice.createInjector().getInstance(ApiSystemCodeCache.class));
-
-      ElasticSearchPerson.setSystemCodes(injector.getInstance(ApiSystemCodeCache.class));
+      // GUICE NOT INJECTING THE CRITICAL SYSCODE TRANSLATOR INTO STATIC MEMBERS/METHODS.
+      final ApiSystemCodeCache sysCodeCache = injector.getInstance(ApiSystemCodeCache.class);
+      setSystemCodes(sysCodeCache);
+      ElasticSearchPerson.setSystemCodes(sysCodeCache);
 
       // If the people index is missing, create it.
       LOGGER.debug("Create people index if missing");
