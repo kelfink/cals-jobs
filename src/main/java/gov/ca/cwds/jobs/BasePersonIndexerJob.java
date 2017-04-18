@@ -101,11 +101,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
   private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
-  private static final int DEFAULT_BATCH_WAIT = 10;
+  private static final int DEFAULT_BATCH_WAIT = 45;
   private static final int DEFAULT_BUCKETS = 1;
 
   private static final int LOG_EVERY = 5000;
-  private static final int ES_BULK_SIZE = 1500;
+  private static final int ES_BULK_SIZE = 2000;
 
   private static final String QUERY_BUCKET_LIST =
       "SELECT z.bucket, MIN(z.identifier) AS minId, MAX(z.identifier) AS maxId, COUNT(*) AS bucketCount "
@@ -218,19 +218,19 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
-        LOGGER.debug("Ready to execute bulk of {} actions", request.numberOfActions());
+        LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
       }
 
       @Override
       public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-        LOGGER.debug("Executed bulk of {} actions", request.numberOfActions());
+        LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
       }
 
       @Override
       public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
         LOGGER.error("Error executing bulk", failure);
       }
-    }).setBulkActions(ES_BULK_SIZE).build();
+    }).setBulkActions(ES_BULK_SIZE).setConcurrentRequests(0).setName("jobs_bp").build();
   }
 
   /**
@@ -351,14 +351,25 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       addresses = new ArrayList<>();
       ApiMultipleAddressesAware madrx = (ApiMultipleAddressesAware) p;
       for (ApiAddressAware adrx : madrx.getAddresses()) {
-        // AutoCompletePerson.AutoCompletePersonAddress(adrx).toESPersonAddress());
-        addresses.add(new ElasticSearchPersonAddress(adrx));
+        final boolean logMe =
+            adrx.getApiAdrUnitType() != null && adrx.getApiAdrUnitType().intValue() != 0;
+        if (logMe) {
+          LOGGER.warn("multi address: unit type: {}", adrx.getApiAdrUnitType());
+        }
+        ElasticSearchPersonAddress espAdr = new ElasticSearchPersonAddress(adrx);
+        if (logMe) {
+          LOGGER.warn("ESP address: unit type: {}, unit number: {}", espAdr.getUnitType(),
+              espAdr.getUnitNumber());
+        }
+        addresses.add(espAdr);
       }
     } else if (p instanceof ApiAddressAware) {
       addresses = new ArrayList<>();
-      // addresses.add(new AutoCompletePerson.AutoCompletePersonAddress((ApiAddressAware) p)
-      // .toESPersonAddress());
-      addresses.add(new ElasticSearchPersonAddress((ApiAddressAware) p));
+      final ApiAddressAware adrx = (ApiAddressAware) p;
+      if (adrx.getApiAdrUnitType() != null && adrx.getApiAdrUnitType().intValue() != 0) {
+        LOGGER.warn("single address: unit type: {}", adrx.getApiAdrUnitType());
+      }
+      addresses.add(new ElasticSearchPersonAddress(adrx));
     }
 
     // Write persistence object to Elasticsearch Person document.
@@ -509,7 +520,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       // Give it time to finish the last batch.
-      LOGGER.warn("Waiting on ElasticSearch to finish last batch");
+      LOGGER.warn("Waiting on ElasticSearch to finish last batch ...");
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
 
       return new Date(this.startTime);
@@ -624,13 +635,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       con.setAutoCommit(false);
       con.setReadOnly(true);
 
-      // TODO: Linux MQT lacks ORDER BY clause. Must sort manually.
-      // Detect platform!
-      // .append("ORDER BY x.clt_identifier ")
+      // Linux MQT lacks ORDER BY clause. Must sort manually.
+      // Detect platform or always force ORDER BY clause.
 
       StringBuilder buf = new StringBuilder();
       buf.append("SELECT x.* FROM ").append(System.getProperty("DB_CMS_SCHEMA")).append(".")
-          .append(getMqtName()).append(" x FOR READ ONLY");
+          .append(getMqtName()).append(" x ORDER BY x.clt_identifier ").append(" FOR READ ONLY");
       final String query = buf.toString();
 
       try (Statement stmt = con.createStatement()) {
@@ -690,6 +700,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           groupRecs.add(m);
           lastId = m.getGroupKey();
         }
+
+        // Last bundle.
+        normalizedQueue.putLast(reduceSingle(groupRecs));
+
       } catch (InterruptedException e) { // NOSONAR
         // Can safely ignore.
         LOGGER.warn("Normalizer interrupted!");
@@ -721,17 +735,32 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
       }
 
-      LOGGER.warn("Waiting to close ES bulk processor");
+      // Just to be sure ...
+      while ((t = normalizedQueue.pollFirst(4, TimeUnit.SECONDS)) != null) {
+        if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
+          LOGGER.info("Published {} recs to ES", cntr);
+        }
+        publishPerson(bp, t);
+      }
+
+      LOGGER.info("Flush ES bulk processor ...");
+      bp.flush();
+      Thread.sleep(3000);
+      LOGGER.info("Flush ES bulk processor again ...");
+      bp.flush();
+
+      LOGGER.info("Waiting to close ES bulk processor ...");
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
+      LOGGER.info("Closed ES bulk processor");
 
     } catch (InterruptedException e) { // NOSONAR
       LOGGER.warn("Publisher interrupted!");
       Thread.interrupted();
     } catch (JsonProcessingException e) {
-      LOGGER.error("JsonProcessingException! {}", e.getMessage(), e);
+      LOGGER.error("Publisher: JsonProcessingException! {}", e.getMessage(), e);
       throw new JobsException("JSON error", e);
     } catch (Exception e) {
-      LOGGER.error("WHAT IS THIS??? {}", e.getMessage(), e);
+      LOGGER.error("Publisher: WHAT IS THIS??? {}", e.getMessage(), e);
       throw new JobsException("Vat ist zis??", e);
     } finally {
       isPublisherDone = true;
@@ -749,6 +778,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected final void publishPerson(BulkProcessor bp, T t) throws JsonProcessingException {
     final ElasticSearchPerson esp = buildESPerson(t);
+
+    if ("R24JJGI0MV".equals(esp.getId())) {
+      final String logMe = mapper.writeValueAsString(esp);
+      LOGGER.warn("publishPerson: found R24JJGI0MV! {}", logMe);
+    }
+
     bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
     recsProcessed.getAndIncrement();
   }
@@ -765,22 +800,23 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       while (!(isReaderDone && isNormalizerDone && isPublisherDone)) {
         LOGGER.warn("runInitialLoad: sleep");
-        Thread.sleep(6000);
+        Thread.sleep(5000);
         try {
-          this.jobDao.find("abc123"); // dummy call, keep pool alive.
-        } catch (HibernateException he) {
-          LOGGER.warn("USING DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage(), he);
+          this.jobDao.find("abc123"); // dummy call, keep connection pool alive.
+        } catch (HibernateException he) { // NOSONAR
+          LOGGER.warn("USING DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage());
         } catch (Exception e) {
           LOGGER.error("initial load error: {}", e.getMessage(), e);
         }
       }
 
+      Thread.sleep(2000);
       this.close();
       final long endTime = System.currentTimeMillis();
       LOGGER.warn("TOTAL ELAPSED TIME: " + ((endTime - startTime) / 1000) + " SECONDS");
       LOGGER.warn("DONE: runInitialLoad");
 
-    } catch (InterruptedException ie) {
+    } catch (InterruptedException ie) { // NOSONAR
       LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
     } catch (Exception e) {
       LOGGER.error("GENERAL EXCEPTION: {}", e.getMessage(), e);
@@ -805,12 +841,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      // TODO: GUICE NOT INJECTING THE CRITICAL SYSCODE TRANSLATOR. WHY???
+      // TODO: GUICE NOT INJECTING THE CRITICAL SYSCODE TRANSLATOR.
       // ElasticSearchPerson
       // .setSystemCodes(Guice.createInjector().getInstance(ApiSystemCodeCache.class));
 
       ElasticSearchPerson.setSystemCodes(injector.getInstance(ApiSystemCodeCache.class));
-      ElasticSearchPerson.getSystemCodes();
 
       // If the people index is missing, create it.
       LOGGER.debug("Create people index if missing");
@@ -845,7 +880,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       // Result stats:
-      LOGGER.info("Indexed {} people", recsProcessed);
+      LOGGER.info("Indexed {} records", recsProcessed);
       LOGGER.info("Updating last successful run time to {}", jobDateFormat.format(startTime));
       return new Date(this.startTime);
     } catch (JobsException e) {
@@ -881,7 +916,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         this.sessionFactory.close();
       }
     } else {
-      LOGGER.warn("CLOSE CALL: FALSE ALARM");
+      LOGGER.warn("CLOSE: FALSE ALARM");
     }
   }
 

@@ -576,6 +576,10 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     final boolean isClientAdded = map.containsKey(this.cltId);
     ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : new ReplicatedClient();
 
+    if ("R24JJGI0MV".equals(this.cltId)) {
+      LOGGER.warn("found R24JJGI0MV! isClientAdded={}", isClientAdded);
+    }
+
     if (!isClientAdded) {
       // Populate core client attributes.
       ret.setAdjudicatedDelinquentIndicator(getCltAdjudicatedDelinquentIndicator());
@@ -692,12 +696,20 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
         adr.setZip4(getAdrZip4());
         rca.addAddress(adr);
 
+        // if (getAdrUnitDesignationCd() != null && getAdrUnitDesignationCd().intValue() != 0) {
         // LOGGER.info("address: {}",
         // ToStringBuilder.reflectionToString(adr, ToStringStyle.MULTI_LINE_STYLE));
+        // }
+
       }
     }
 
     map.put(ret.getId(), ret);
+
+    if (map.containsKey("R24JJGI0MV")) {
+      LOGGER.warn("map: found R24JJGI0MV!");
+    }
+
   }
 
   public String getCltAdjudicatedDelinquentIndicator() {
