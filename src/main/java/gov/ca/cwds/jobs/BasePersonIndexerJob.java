@@ -378,17 +378,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       for (ApiAddressAware adrx : madrx.getAddresses()) {
         ElasticSearchPersonAddress espAdr = new ElasticSearchPersonAddress(adrx);
 
-        // DIAGNOSTICS:
-        // final boolean logMe =
-        // adrx.getApiAdrUnitType() != null && adrx.getApiAdrUnitType().intValue() != 0;
-        // if (logMe) {
-        // LOGGER.warn("multi address: unit type: {}", adrx.getApiAdrUnitType());
-        // }
-        // if (logMe) {
-        // LOGGER.warn("ESP address: unit type: {}, unit number: {}", espAdr.getUnitType(),
-        // espAdr.getUnitNumber());
-        // }
-
         addresses.add(espAdr);
       }
     } else if (p instanceof ApiAddressAware) {
@@ -808,12 +797,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected final void prepareDocument(BulkProcessor bp, T t) throws JsonProcessingException {
     final ElasticSearchPerson esp = buildESPerson(t);
-
-    // DIAGNOSTICS:
-    // if ("R24JJGI0MV".equals(esp.getId())) {
-    // final String logMe = mapper.writeValueAsString(esp);
-    // LOGGER.warn("publishPerson: found R24JJGI0MV : {}", logMe);
-    // }
 
     bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
     recsPreparedToIndex.getAndIncrement();
