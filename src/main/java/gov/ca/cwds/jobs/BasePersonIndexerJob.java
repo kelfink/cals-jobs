@@ -105,7 +105,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int DEFAULT_BUCKETS = 1;
 
   private static final int LOG_EVERY = 5000;
-  private static final int ES_BULK_SIZE = 1000;
+  private static final int ES_BULK_SIZE = 2000;
 
   private static final String QUERY_BUCKET_LIST =
       "SELECT z.bucket, MIN(z.identifier) AS minId, MAX(z.identifier) AS maxId, COUNT(*) AS bucketCount "
@@ -147,14 +147,23 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected JobOptions opts;
 
   /**
-   * Thread-safe count of records (ES documents) prepared to be written to Elasticsearch.
+   * Running count of records prepared for bulk indexing.
    */
   protected AtomicInteger recsPreparedToIndex = new AtomicInteger(0);
 
+  /**
+   * Running count of records before bulk indexing.
+   */
   protected AtomicInteger recsBulkBefore = new AtomicInteger(0);
 
+  /**
+   * Running count of records after bulk indexing.
+   */
   protected AtomicInteger recsBulkAfter = new AtomicInteger(0);
 
+  /**
+   * Running count of errors during bulk indexing.
+   */
   protected AtomicInteger recsBulkError = new AtomicInteger(0);
 
   /**
@@ -288,8 +297,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
-      LOGGER.error("Unable to create dependencies: {}", e.getMessage(), e);
-      throw new JobsException("Unable to create dependencies: " + e.getMessage(), e);
+      LOGGER.error("UNABLE TO CREATE DEPENDENCIES! {}", e.getMessage(), e);
+      throw new JobsException("UNABLE TO CREATE DEPENDENCIES! " + e.getMessage(), e);
     }
   }
 
@@ -310,10 +319,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try (final T job = newJob(klass, args)) { // Close resources automatically.
       job.run();
     } catch (IOException e) {
-      LOGGER.error("UNABLE TO CLOSE RESOURCE: {}", e.getMessage(), e);
-      throw new JobsException("Unable to close resource: " + e.getMessage(), e);
+      LOGGER.error("UNABLE TO CLOSE RESOURCE! {}", e.getMessage(), e);
+      throw new JobsException("UNABLE TO CLOSE RESOURCE! " + e.getMessage(), e);
     } catch (JobsException e) {
-      LOGGER.error("Unable to complete job: {}", e.getMessage(), e);
+      LOGGER.error("UNABLE TO COMPLETE JOB: {}", e.getMessage(), e);
       throw e;
     }
   }
@@ -703,7 +712,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Object lastId = new Object();
     M m;
     List<M> groupRecs = new ArrayList<>();
-    // Set<String> uniqueIds = new HashSet<>();
 
     while (!(isReaderDone && denormalizedQueue.isEmpty())) {
       try {
@@ -903,7 +911,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       // Result stats:
       LOGGER.info("Prepared {} records to index", recsPreparedToIndex);
-      LOGGER.info("STATS: \nrecsBulkBefore: {}\nrecsBulkAfter: {}\nrecsBulkError: {}",
+      LOGGER.info("STATS: \nrecsBulkBefore:  {}\nrecsBulkAfter:  {}\nrecsBulkError: {}",
           recsBulkBefore, recsBulkAfter, recsBulkError);
       LOGGER.info("Updating last successful run time to {}", jobDateFormat.format(startTime));
       return new Date(this.startTime);
