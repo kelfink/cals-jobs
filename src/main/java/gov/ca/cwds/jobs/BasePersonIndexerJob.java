@@ -107,6 +107,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int LOG_EVERY = 5000;
   private static final int ES_BULK_SIZE = 2000;
 
+  /**
+   * Obsolete. Doesn't optimize on DB2 z/OS.
+   * 
+   * @see #doInitialLoadViaJdbc()
+   */
   private static final String QUERY_BUCKET_LIST =
       "SELECT z.bucket, MIN(z.identifier) AS minId, MAX(z.identifier) AS maxId, COUNT(*) AS bucketCount "
           + "FROM (SELECT (y.rn / (total_cnt/THE_TOTAL_BUCKETS)) + 1 AS bucket, y.rn, y.identifier FROM ( "

@@ -582,9 +582,10 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     final boolean isClientAdded = map.containsKey(this.cltId);
     ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : new ReplicatedClient();
 
-    if ("R24JJGI0MV".equals(this.cltId)) {
-      LOGGER.warn("found R24JJGI0MV! isClientAdded={}", isClientAdded);
-    }
+    // DIAGNOSTICS:
+    // if ("R24JJGI0MV".equals(this.cltId)) {
+    // LOGGER.warn("found R24JJGI0MV! isClientAdded={}", isClientAdded);
+    // }
 
     if (!isClientAdded) {
       // Populate core client attributes.
@@ -702,11 +703,11 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
         adr.setZip4(getAdrZip4());
         rca.addAddress(adr);
 
+        // DIAGNOSTICS:
         // if (getAdrUnitDesignationCd() != null && getAdrUnitDesignationCd().intValue() != 0) {
         // LOGGER.info("address: {}",
         // ToStringBuilder.reflectionToString(adr, ToStringStyle.MULTI_LINE_STYLE));
         // }
-
       }
     }
 
@@ -1589,7 +1590,15 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     return this.cltId;
   }
 
-  // TODO: set correct primary key.
+  /**
+   * This view (i.e., materialized query table) doesn't have a proper unique key, but a combination
+   * of several fields might come close.
+   * <ul>
+   * <li>"Cook": convert String parameter to strong type</li>
+   * <li>"Uncook": convert strong type parameter to String</li>
+   * </ul>
+   *
+   */
   @Override
   public Serializable getPrimaryKey() {
     return null;
