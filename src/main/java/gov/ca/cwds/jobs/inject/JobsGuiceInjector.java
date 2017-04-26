@@ -111,8 +111,6 @@ public class JobsGuiceInjector extends AbstractModule {
         .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
         .addAnnotatedClass(ReplicatedAddress.class).buildSessionFactory());
 
-    // .addPackage("gov.ca.cwds.data.persistence.cms")
-
     bind(ReplicatedClientDao.class);
     bind(ReplicatedReporterDao.class);
     bind(ReplicatedAttorneyDao.class);
@@ -146,12 +144,6 @@ public class JobsGuiceInjector extends AbstractModule {
     // requestStaticInjection(ElasticSearchPerson.class);
   }
 
-  // @Provides
-  // @SystemCodeCache
-  // public ApiSystemCodeCache systemCodeCache() {
-  // return Guice.createInjector().getInstance(CmsSystemCodeCacheService.class);
-  // }
-
   /**
    * Instantiate the singleton ElasticSearch client on demand.
    * 
@@ -163,8 +155,7 @@ public class JobsGuiceInjector extends AbstractModule {
     if (esConfig != null) {
       LOGGER.warn("Create NEW ES client");
       try {
-        final ElasticsearchConfiguration config = new ObjectMapper(new YAMLFactory())
-            .readValue(esConfig, ElasticsearchConfiguration.class);
+        final ElasticsearchConfiguration config = elasticSearchConfig();
         Settings settings = Settings.settingsBuilder()
             .put("cluster.name", config.getElasticsearchCluster()).build();
         client = TransportClient.builder().settings(settings).build().addTransportAddress(
@@ -176,6 +167,27 @@ public class JobsGuiceInjector extends AbstractModule {
       }
     }
     return client;
+  }
+
+  /**
+   * Read Elasticsearch configuration on demand.
+   * 
+   * @return ES configuration
+   */
+  @Provides
+  public ElasticsearchConfiguration elasticSearchConfig() {
+    ElasticsearchConfiguration ret = null;
+    if (esConfig != null) {
+      LOGGER.warn("Create NEW ES client");
+      try {
+        ret = new ObjectMapper(new YAMLFactory()).readValue(esConfig,
+            ElasticsearchConfiguration.class);
+      } catch (Exception e) {
+        LOGGER.error("Error reading Elasticsearch configuration: {}", e.getMessage(), e);
+        throw new ApiException("Error reading Elasticsearch configuration: " + e.getMessage(), e);
+      }
+    }
+    return ret;
   }
 
   /**

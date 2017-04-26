@@ -67,7 +67,6 @@ import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.rest.api.domain.DomainChef;
-import gov.ca.cwds.rest.api.domain.es.Person;
 
 /**
  * Base person batch job to load clients from CMS into ElasticSearch.
@@ -99,8 +98,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
 
-  private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
-  private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
+  // private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
+  // private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
   private static final int DEFAULT_BATCH_WAIT = 45;
   private static final int DEFAULT_BUCKETS = 1;
 
@@ -867,7 +866,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       // If the people index is missing, create it.
       LOGGER.debug("Create people index if missing");
-      esDao.createIndexIfNeeded(ElasticsearchDao.DEFAULT_PERSON_IDX_NM);
+      esDao.createIndexIfNeeded(esDao.getConfig() != null
+          && StringUtils.isNotBlank(esDao.getConfig().getElasticsearchAlias())
+              ? esDao.getConfig().getElasticsearchAlias() : ElasticsearchDao.DEFAULT_PERSON_IDX_NM);
       LOGGER.debug("availableProcessors={}", Runtime.getRuntime().availableProcessors());
 
       // Smart/auto mode:
@@ -1178,11 +1179,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @throws JsonProcessingException if JSON cannot be read
    * @deprecated
    */
-  @Deprecated
-  protected void indexDocument(T person) throws JsonProcessingException {
-    esDao.index(INDEX_PERSON, DOCUMENT_TYPE_PERSON, mapper.writeValueAsString(person),
-        person.getPrimaryKey().toString());
-  }
+  // @Deprecated
+  // protected void indexDocument(T person) throws JsonProcessingException {
+  // esDao.index(INDEX_PERSON, DOCUMENT_TYPE_PERSON, mapper.writeValueAsString(person),
+  // person.getPrimaryKey().toString());
+  // }
 
 }
 
