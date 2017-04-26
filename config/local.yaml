@@ -1,5 +1,5 @@
 elasticsearch.host: localhost
 elasticsearch.port: 9300
 elasticsearch.cluster: elasticsearch_CWS-NS3
-elasticsearch.alias: people_v1
+elasticsearch.alias: people_v3
 elasticsearch.doctype: person

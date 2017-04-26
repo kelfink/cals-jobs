@@ -1,3 +1,5 @@
 elasticsearch.host: elasticsearch.cocina.trn01.cwds.io
 elasticsearch.port: 9301
 elasticsearch.cluster: es-trn01
+elasticsearch.alias: people
+elasticsearch.doctype: person

@@ -50,11 +50,10 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
         resultClass = EsClientAddress.class, readOnly = true),
     @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findAllUpdatedAfter",
         query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
-            // "SELECT x.* FROM CWDSTEST.ES_CLIENT_ADDRESS x "
-            // + "WHERE x.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + "WHERE x.CLT_IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP) "
-            + "OR x.CLA_IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP) "
-            + "OR x.ADR_IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP) "
+            + "WHERE x.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            // + "WHERE x.CLT_IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP) "
+            // + "OR x.CLA_IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP) "
+            // + "OR x.ADR_IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP) "
             + "ORDER BY x.clt_IDENTIFIER FOR READ ONLY ",
         resultClass = EsClientAddress.class, readOnly = true, comment = "timestamp_count=3")})
 public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
@@ -65,6 +64,10 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
    * Default.
    */
   private static final long serialVersionUID = 1L;
+
+  @Type(type = "timestamp")
+  @Column(name = "LAST_CHG", updatable = false)
+  private Date lastChange;
 
   // ================
   // CLIENT_T:
@@ -1624,6 +1627,14 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   @Override
   public final boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
+  public Date getLastChange() {
+    return lastChange;
+  }
+
+  public void setLastChange(Date lastChange) {
+    this.lastChange = lastChange;
   }
 
 }

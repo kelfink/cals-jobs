@@ -1,5 +1,5 @@
 elasticsearch.host: 10.10.15.61
 elasticsearch.port: 9300
 elasticsearch.cluster: elasticsearch
-elasticsearch.indexName: people
-elasticsearch.indexType: reporter
+elasticsearch.alias: people
+elasticsearch.doctype: person

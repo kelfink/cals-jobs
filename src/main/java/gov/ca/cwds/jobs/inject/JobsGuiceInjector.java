@@ -135,12 +135,10 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ApiSystemCodeCache.class).to(CmsSystemCodeCacheService.class).asEagerSingleton();
     bind(CmsSystemCodeSerializer.class).asEagerSingleton();
 
-    // ElasticSearchPerson
-    // .setSystemCodes(Guice.createInjector().getInstance(CmsSystemCodeCacheService.class));
-
     // Only one instance of ES DAO.
     bind(ElasticsearchDao.class).asEagerSingleton();
 
+    // Static injection?
     // requestStaticInjection(ElasticSearchPerson.class);
   }
 
