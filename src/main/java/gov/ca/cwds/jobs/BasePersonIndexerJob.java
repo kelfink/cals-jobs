@@ -26,8 +26,6 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -94,12 +92,10 @@ import gov.ca.cwds.rest.api.domain.DomainChef;
  * @see JobOptions
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends JobBasedOnLastSuccessfulRunTime implements AutoCloseable, JobResultSetAware<M> {
+    extends LastSuccessfulRunJob implements AutoCloseable, JobResultSetAware<M> {
 
   private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
 
-  // private static final String INDEX_PERSON = ElasticsearchDao.DEFAULT_PERSON_IDX_NM;
-  // private static final String DOCUMENT_TYPE_PERSON = ElasticsearchDao.DEFAULT_PERSON_DOC_TYPE;
   private static final int DEFAULT_BATCH_WAIT = 45;
   private static final int DEFAULT_BUCKETS = 1;
 
@@ -112,10 +108,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @see #doInitialLoadViaJdbc()
    */
   private static final String QUERY_BUCKET_LIST =
-      "SELECT z.bucket, MIN(z.identifier) AS minId, MAX(z.identifier) AS maxId, COUNT(*) AS bucketCount "
-          + "FROM (SELECT (y.rn / (total_cnt/THE_TOTAL_BUCKETS)) + 1 AS bucket, y.rn, y.identifier FROM ( "
-          + "SELECT c.identifier, ROW_NUMBER() OVER (ORDER BY 1) AS rn, COUNT(*) OVER (ORDER BY 1) AS total_cnt "
-          + "FROM {h-schema}THE_TABLE c ORDER BY c.IDENTIFIER) y ORDER BY y.rn "
+      "SELECT z.bucket, MIN(z.THE_ID_COL) AS minId, MAX(z.THE_ID_COL) AS maxId, COUNT(*) AS bucketCount "
+          + "FROM (SELECT (y.rn / (total_cnt/THE_TOTAL_BUCKETS)) + 1 AS bucket, y.rn, y.THE_ID_COL FROM ( "
+          + "SELECT c.THE_ID_COL, ROW_NUMBER() OVER (ORDER BY 1) AS rn, COUNT(*) OVER (ORDER BY 1) AS total_cnt "
+          + "FROM {h-schema}THE_TABLE c ORDER BY c.THE_ID_COL) y ORDER BY y.rn "
           + ") z GROUP BY z.bucket FOR READ ONLY ";
 
   private static ApiSystemCodeCache systemCodes;
@@ -153,7 +149,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Running count of records prepared for bulk indexing.
    */
-  protected AtomicInteger recsPreparedToIndex = new AtomicInteger(0);
+  protected AtomicInteger recsPrepared = new AtomicInteger(0);
 
   /**
    * Running count of records before bulk indexing.
@@ -205,18 +201,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Construct batch job instance with all required dependencies.
    * 
    * @param jobDao Person DAO, such as {@link ClientDao}
-   * @param elasticsearchDao ElasticSearch DAO
+   * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public BasePersonIndexerJob(final BaseDaoImpl<T> jobDao, final ElasticsearchDao elasticsearchDao,
+  public BasePersonIndexerJob(final BaseDaoImpl<T> jobDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory) {
     super(lastJobRunTimeFilename);
     this.jobDao = jobDao;
-    this.esDao = elasticsearchDao;
+    this.esDao = esDao;
     this.mapper = mapper;
     this.sessionFactory = sessionFactory;
   }
@@ -245,13 +241,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
         recsBulkBefore.getAndAdd(request.numberOfActions());
-        LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
+        LOGGER.warn("Ready to execute bulk of {} actions", request.numberOfActions());
       }
 
       @Override
       public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
         recsBulkAfter.getAndAdd(request.numberOfActions());
-        LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
+        LOGGER.warn("Executed bulk of {} actions", request.numberOfActions());
       }
 
       @Override
@@ -338,7 +334,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return populated ElasticSearchPerson
    * @throws JsonProcessingException if unable to serialize JSON
    */
-  protected ElasticSearchPerson buildESPerson(T p) throws JsonProcessingException {
+  protected ElasticSearchPerson buildElasticSearchPerson(T p) throws JsonProcessingException {
     ApiPersonAware pa = (ApiPersonAware) p;
     List<String> languages = null;
     List<ElasticSearchPerson.ElasticSearchPersonPhone> phones = null;
@@ -387,9 +383,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } else if (p instanceof ApiAddressAware) {
       addresses = new ArrayList<>();
       final ApiAddressAware adrx = (ApiAddressAware) p;
-      if (adrx.getApiAdrUnitType() != null && adrx.getApiAdrUnitType().intValue() != 0) {
-        LOGGER.warn("single address: unit type: {}", adrx.getApiAdrUnitType());
-      }
       addresses.add(new ElasticSearchPersonAddress(adrx));
     }
 
@@ -420,7 +413,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param lastRunTime last successful run time
    * @return List of normalized entities
    */
-  protected List<T> pullLastRunRecsNormal(Date lastRunTime) {
+  protected List<T> pullLastRunRecsFromTable(Date lastRunTime) {
     LOGGER.info("last successful run: {}", lastRunTime);
     final Class<?> entityClass = jobDao.getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
@@ -454,7 +447,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param lastRunTime last successful run time
    * @return List of normalized entities
    */
-  protected List<T> pullLastRunRecsMQT(Date lastRunTime) {
+  protected List<T> pullLastRunRecsFromMQT(Date lastRunTime) {
     LOGGER.info("PULL MQT: last successful run: {}", lastRunTime);
 
     final Class<?> entityClass = getDenormalizedClass();
@@ -510,14 +503,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param lastRunDt last time the batch ran successfully.
    * @return List of results to process
-   * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
+   * @see gov.ca.cwds.jobs.LastSuccessfulRunJob#_run(java.util.Date)
    */
   protected Date doLastRun(Date lastRunDt) {
     try {
-      // One bulk processor for "last run" operations. BulkProcessor is thread-safe.
+      // One bulk processor for "last run" operations. BulkProcessor itself is thread-safe.
       final BulkProcessor bp = buildBulkProcessor();
-      final List<T> results =
-          this.isMQTNormalizer() ? pullLastRunRecsMQT(lastRunDt) : pullLastRunRecsNormal(lastRunDt);
+      final List<T> results = this.isMQTNormalizer() ? pullLastRunRecsFromMQT(lastRunDt)
+          : pullLastRunRecsFromTable(lastRunDt);
 
       if (results != null && !results.isEmpty()) {
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
@@ -526,7 +519,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         results.parallelStream().forEach(p -> {
           try {
             // Write persistence object to Elasticsearch Person document.
-            final ElasticSearchPerson esp = buildESPerson(p);
+            final ElasticSearchPerson esp = buildElasticSearchPerson(p);
 
             // Bulk indexing! MUCH faster than indexing one doc at a time.
             bp.add(this.esDao.bulkAdd(this.mapper, esp.getId(), esp));
@@ -537,7 +530,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         });
 
         // Track counts.
-        recsPreparedToIndex.getAndAdd(results.size());
+        recsPrepared.getAndAdd(results.size());
       }
 
       // Give it time to finish the last batch.
@@ -575,7 +568,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           : opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
+              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
+                  String.valueOf(totalBuckets)),
+              BatchBucket.class);
 
       ret = q.getResultList();
       session.clear();
@@ -589,6 +584,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
 
     return ret;
+  }
+
+  /**
+   * Identifier column for this table. Defaults to "IDENTIFIER".
+   * 
+   * @return Identifier column
+   */
+  protected String getIdColumn() {
+    return "IDENTIFIER";
   }
 
   /**
@@ -800,10 +804,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @throws JsonProcessingException if unable to serialize JSON
    */
   protected final void prepareDocument(BulkProcessor bp, T t) throws JsonProcessingException {
-    final ElasticSearchPerson esp = buildESPerson(t);
+    final ElasticSearchPerson esp = buildElasticSearchPerson(t);
 
     bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
-    recsPreparedToIndex.getAndIncrement();
+    recsPrepared.getAndIncrement();
   }
 
   /**
@@ -854,7 +858,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * {@inheritDoc}
    * 
-   * @see gov.ca.cwds.jobs.JobBasedOnLastSuccessfulRunTime#_run(java.util.Date)
+   * @see gov.ca.cwds.jobs.LastSuccessfulRunJob#_run(java.util.Date)
    */
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
@@ -899,7 +903,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       // Result stats:
-      LOGGER.info("Prepared {} records to index", recsPreparedToIndex);
+      LOGGER.info("Prepared {} records to index", recsPrepared);
       LOGGER.info("STATS: \nrecsBulkBefore:  {}\nrecsBulkAfter:  {}\nrecsBulkError: {}",
           recsBulkBefore, recsBulkAfter, recsBulkError);
       LOGGER.info("Updating last successful run time to {}", jobDateFormat.format(startTime));
@@ -909,6 +913,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.error("JobsException: {}", e.getMessage(), e);
       throw e;
     } catch (Exception e) {
+      e.printStackTrace();
       LOGGER.error("General Exception: {}", e.getMessage(), e);
       throw new JobsException("General Exception: " + e.getMessage(), e);
     } finally {
@@ -1045,12 +1050,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       session.clear();
       txn.commit();
       return results.build();
-    } catch (HibernateException h) {
-      LOGGER.error("BATCH ERROR! {}", h.getMessage(), h);
+    } catch (HibernateException e) {
+      LOGGER.error("BATCH ERROR! {}", e.getMessage(), e);
       if (txn != null) {
         txn.rollback();
       }
-      throw new DaoException(h);
+      throw new DaoException(e);
     }
   }
 
@@ -1070,13 +1075,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final String minId = b.getLeft();
       final String maxId = b.getRight();
       final List<T> results = pullBucketRange(minId, maxId);
-      pullBucketRange(b.getLeft(), b.getRight());
 
       if (results != null && !results.isEmpty()) {
         final BulkProcessor bp = buildBulkProcessor();
         results.stream().forEach(p -> {
           try {
-            final ElasticSearchPerson esp = buildESPerson(p);
+            final ElasticSearchPerson esp = buildElasticSearchPerson(p);
             bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
           } catch (JsonProcessingException e) {
             throw new JobsException("JSON error", e);
@@ -1090,11 +1094,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
 
         // Track counts.
-        recsPreparedToIndex.getAndAdd(results.size());
+        recsPrepared.getAndAdd(results.size());
       }
     }
 
-    return recsPreparedToIndex.get();
+    return recsPrepared.get();
   }
 
   /**
@@ -1112,61 +1116,61 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return List of T entity
    * @deprecated use method {@link #doInitialLoadViaHibernate()}
    */
-  @Deprecated
-  protected List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, Class<?> rootEntity,
-      String minId, String maxId) {
-    final String namedQueryName = jobDao.getEntityClass().getName() + ".findPartitionedBuckets";
-    Session session = jobDao.getSessionFactory().getCurrentSession();
-
-    Transaction txn = null;
-    try {
-      txn = session.beginTransaction();
-      final Query q = session.getNamedQuery(namedQueryName);
-      SQLQuery query = session.createSQLQuery(q.getQueryString());
-      query.setString("min_id", minId).setString("max_id", maxId);
-
-      // NamedQuery comments describe join conditions.
-      boolean hibernateJoins =
-          StringUtils.isNotBlank(q.getComment()) && !q.getComment().equals(namedQueryName);
-
-      if (hibernateJoins) {
-        query.addEntity("a", rootEntity);
-        final String[] blocks = q.getComment().trim().split(";");
-        for (String block : blocks) {
-          final String[] terms = block.trim().split(",");
-          query.addJoin(terms[0], terms[1]);
-        }
-      } else {
-        query.addEntity("z", rootEntity);
-      }
-
-      ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
-      final List<Object[]> raw = query.list();
-      List<T> answers = new ArrayList<>(raw.size());
-
-      if (hibernateJoins) {
-        for (Object[] arr : raw) {
-          answers.add((T) arr[0]);
-        }
-      } else {
-        for (Object obj : raw) {
-          answers.add((T) obj);
-        }
-      }
-
-      results.addAll(answers);
-      session.clear();
-      txn.commit();
-      return results.build();
-
-    } catch (HibernateException h) {
-      LOGGER.error("BATCH ERROR! ", h);
-      if (txn != null) {
-        txn.rollback();
-      }
-      throw new DaoException(h);
-    }
-  }
+  // @Deprecated
+  // protected List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, Class<?> rootEntity,
+  // String minId, String maxId) {
+  // final String namedQueryName = jobDao.getEntityClass().getName() + ".findPartitionedBuckets";
+  // Session session = jobDao.getSessionFactory().getCurrentSession();
+  //
+  // Transaction txn = null;
+  // try {
+  // txn = session.beginTransaction();
+  // final Query q = session.getNamedQuery(namedQueryName);
+  // SQLQuery query = session.createSQLQuery(q.getQueryString());
+  // query.setString("min_id", minId).setString("max_id", maxId);
+  //
+  // // NamedQuery comments describe join conditions.
+  // boolean hibernateJoins =
+  // StringUtils.isNotBlank(q.getComment()) && !q.getComment().equals(namedQueryName);
+  //
+  // if (hibernateJoins) {
+  // query.addEntity("a", rootEntity);
+  // final String[] blocks = q.getComment().trim().split(";");
+  // for (String block : blocks) {
+  // final String[] terms = block.trim().split(",");
+  // query.addJoin(terms[0], terms[1]);
+  // }
+  // } else {
+  // query.addEntity("z", rootEntity);
+  // }
+  //
+  // ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
+  // final List<Object[]> raw = query.list();
+  // List<T> answers = new ArrayList<>(raw.size());
+  //
+  // if (hibernateJoins) {
+  // for (Object[] arr : raw) {
+  // answers.add((T) arr[0]);
+  // }
+  // } else {
+  // for (Object obj : raw) {
+  // answers.add((T) obj);
+  // }
+  // }
+  //
+  // results.addAll(answers);
+  // session.clear();
+  // txn.commit();
+  // return results.build();
+  //
+  // } catch (HibernateException h) {
+  // LOGGER.error("BATCH ERROR! ", h);
+  // if (txn != null) {
+  // txn.rollback();
+  // }
+  // throw new DaoException(h);
+  // }
+  // }
 
   /**
    * Indexes a <strong>SINGLE</strong> document. Prefer batch mode.

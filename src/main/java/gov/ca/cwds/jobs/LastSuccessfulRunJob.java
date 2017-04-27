@@ -20,12 +20,12 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author CWDS API Team
  */
-public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
+public abstract class LastSuccessfulRunJob implements Job {
 
-  private static final Logger LOGGER = LogManager.getLogger(JobBasedOnLastSuccessfulRunTime.class);
+  private static final Logger LOGGER = LogManager.getLogger(LastSuccessfulRunJob.class);
 
   /**
-   * Last run file date format.
+   * Last run file date format. NOT thread-safe!
    */
   protected DateFormat jobDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -36,7 +36,7 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
    * 
    * @param lastJobRunTimeFilename location of last run time file
    */
-  public JobBasedOnLastSuccessfulRunTime(String lastJobRunTimeFilename) {
+  public LastSuccessfulRunJob(String lastJobRunTimeFilename) {
     this.lastJobRunTimeFilename = lastJobRunTimeFilename;
   }
 
@@ -79,7 +79,8 @@ public abstract class JobBasedOnLastSuccessfulRunTime implements Job {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastJobRunTimeFilename))) {
         w.write(jobDateFormat.format(datetime));
       } catch (IOException e) {
-        throw new JobsException("Could not write the timestamp parameter file", e);
+        LOGGER.error("Caught IOException: {}", e.getMessage(), e);
+        throw new JobsException("Unable to write timestamp parameter file", e);
       }
     }
   }
