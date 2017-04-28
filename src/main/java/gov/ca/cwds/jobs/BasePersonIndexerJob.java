@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.persistence.Table;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,7 +59,6 @@ import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
-import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
@@ -107,6 +105,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @see #doInitialLoadViaJdbc()
    */
+  @Deprecated
   private static final String QUERY_BUCKET_LIST =
       "SELECT z.bucket, MIN(z.THE_ID_COL) AS minId, MAX(z.THE_ID_COL) AS maxId, COUNT(*) AS bucketCount "
           + "FROM (SELECT (y.rn / (total_cnt/THE_TOTAL_BUCKETS)) + 1 AS bucket, y.rn, y.THE_ID_COL FROM ( "
@@ -198,6 +197,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected boolean isPublisherDone = false;
 
   /**
+   * Flag for "upsert" mode. Turn off during initial loads and full refreshes.
+   */
+  protected boolean isUpsert = true;
+
+  /**
    * Construct batch job instance with all required dependencies.
    * 
    * @param jobDao Person DAO, such as {@link ClientDao}
@@ -209,7 +213,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Inject
   public BasePersonIndexerJob(final BaseDaoImpl<T> jobDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory) {
+      SessionFactory sessionFactory) {
     super(lastJobRunTimeFilename);
     this.jobDao = jobDao;
     this.esDao = esDao;
@@ -526,7 +530,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
             final ElasticSearchPerson esp = buildElasticSearchPerson(p);
 
             // Bulk indexing! MUCH faster than indexing one doc at a time.
-            bp.add(this.esDao.bulkAdd(this.mapper, esp.getId(), esp, true));
+            bp.add(this.esDao.bulkAdd(this.mapper, esp.getId(), esp, isUpsert));
           } catch (JsonProcessingException e) {
             LOGGER.error("ERROR WRITING JSON: {}", e.getMessage(), e);
             throw new JobsException("ERROR WRITING JSON", e);
@@ -812,7 +816,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected final void prepareDocument(BulkProcessor bp, T t) throws JsonProcessingException {
     final ElasticSearchPerson esp = buildElasticSearchPerson(t);
 
-    bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
+    bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, isUpsert));
     recsPrepared.getAndIncrement();
   }
 
@@ -821,6 +825,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void doInitialLoadViaJdbc() {
     Thread.currentThread().setName("main");
+    isUpsert = false; // Refresh, reload, overwrite. Don't update existing documents.
     try {
       new Thread(this::initLoadStage1ReadMaterializedRecords).start();
       new Thread(this::initLoadStage2Normalize).start();
@@ -876,9 +881,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       // If the people index is missing, create it.
       LOGGER.debug("Create people index if missing");
-      esDao.createIndexIfNeeded(esDao.getConfig() != null
-          && StringUtils.isNotBlank(esDao.getConfig().getElasticsearchAlias())
-              ? esDao.getConfig().getElasticsearchAlias() : ElasticsearchDao.DEFAULT_PERSON_IDX_NM);
+      esDao.createIndexIfNeeded(esDao.getConfig().getElasticsearchAlias());
       LOGGER.debug("availableProcessors={}", Runtime.getRuntime().availableProcessors());
 
       // Smart/auto mode:
@@ -1075,6 +1078,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return number of records processed
    */
   protected int doInitialLoadViaHibernate() {
+    isUpsert = false; // Refresh, reload, overwrite. Don't update existing documents.
     final List<Pair<String, String>> buckets = getPartitionRanges();
 
     for (Pair<String, String> b : buckets) {
@@ -1087,7 +1091,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         results.stream().forEach(p -> {
           try {
             final ElasticSearchPerson esp = buildElasticSearchPerson(p);
-            bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
+            bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
           } catch (JsonProcessingException e) {
             throw new JobsException("JSON error", e);
           }

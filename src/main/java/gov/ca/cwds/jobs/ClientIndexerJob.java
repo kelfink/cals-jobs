@@ -82,11 +82,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     return map.values().stream().collect(Collectors.toList());
   }
 
-  @Override
-  protected int getJobTotalBuckets() {
-    return 128;
-  }
-
   /**
    * Batch job entry point.
    * 
