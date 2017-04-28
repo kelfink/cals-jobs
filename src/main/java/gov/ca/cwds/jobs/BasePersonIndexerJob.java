@@ -444,13 +444,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
+   * Pull from MQT for last run mode.
+   * 
    * @param lastRunTime last successful run time
    * @return List of normalized entities
    */
   protected List<T> pullLastRunRecsFromMQT(Date lastRunTime) {
     LOGGER.info("PULL MQT: last successful run: {}", lastRunTime);
 
-    final Class<?> entityClass = getDenormalizedClass();
+    final Class<?> entityClass = getDenormalizedClass(); // MQT entity class
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
@@ -498,7 +500,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * ENTRY POINT FOR LAST RUN.
    *
    * <p>
-   * Fetch all records for the next batch run, either by bucket or last successful run date.
+   * Fetch all records for the next batch run, either by bucket or last successful run date. Pulls
+   * either from an MQT via {@link #pullLastRunRecsFromMQT(Date)}, if {@link #isMQTNormalizer()} is
+   * overridden, else from the base table directly via {@link #pullLastRunRecsFromTable(Date)}.
    * </p>
    * 
    * @param lastRunDt last time the batch ran successfully.
@@ -522,7 +526,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
             final ElasticSearchPerson esp = buildElasticSearchPerson(p);
 
             // Bulk indexing! MUCH faster than indexing one doc at a time.
-            bp.add(this.esDao.bulkAdd(this.mapper, esp.getId(), esp));
+            bp.add(this.esDao.bulkAdd(this.mapper, esp.getId(), esp, true));
           } catch (JsonProcessingException e) {
             LOGGER.error("ERROR WRITING JSON: {}", e.getMessage(), e);
             throw new JobsException("ERROR WRITING JSON", e);
@@ -575,12 +579,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       ret = q.getResultList();
       session.clear();
       txn.commit();
-    } catch (HibernateException h) {
-      LOGGER.error("BATCH ERROR! ", h);
+    } catch (HibernateException e) {
+      LOGGER.error("BATCH ERROR! ", e);
       if (txn != null) {
         txn.rollback();
       }
-      throw new DaoException(h);
+      throw new DaoException(e);
     }
 
     return ret;
@@ -618,7 +622,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   /**
    * Reduce/normalize MQT records for a single grouping (such as all the same client) into a
-   * normalized entity bean.
+   * normalized entity bean, consisting of a parent object and its child objects.
    * 
    * @param recs denormalized MQT beans
    * @return normalized entity bean instance
@@ -679,6 +683,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
             LOGGER.info("Pulled {} MQT records", cntr);
           }
+
+          // Hand the baton to the next runner ...
           denormalizedQueue.putLast(pullFromResultSet(rs));
         }
 
@@ -719,7 +725,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
           if (!lastId.equals(m.getGroupKey()) && cntr > 1) {
             normalizedQueue.putLast(reduceSingle(groupRecs));
-            groupRecs.clear();
+            groupRecs.clear(); // Single thread. Re-use memory.
           }
 
           groupRecs.add(m);
@@ -863,7 +869,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      // GUICE NOT INJECTING THE CRITICAL SYSCODE TRANSLATOR INTO STATIC MEMBERS/METHODS.
+      // GUICE DOES NOT INJECT THE SYSCODE TRANSLATOR INTO STATIC MEMBERS/METHODS.
       final ApiSystemCodeCache sysCodeCache = injector.getInstance(ApiSystemCodeCache.class);
       setSystemCodes(sysCodeCache);
       ElasticSearchPerson.setSystemCodes(sysCodeCache);
@@ -1100,94 +1106,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     return recsPrepared.get();
   }
-
-  /**
-   * Working approach tells Hibernate to collect results from native query into parent/child
-   * objects.
-   * 
-   * <p>
-   * Down side: complicated syntax. Must tell Hibernate how to join aliased tables.
-   * </p>
-   * 
-   * @param jobDao DAO for T
-   * @param rootEntity root parent entity class, typically type T
-   * @param minId start of identifier range
-   * @param maxId end of identifier range
-   * @return List of T entity
-   * @deprecated use method {@link #doInitialLoadViaHibernate()}
-   */
-  // @Deprecated
-  // protected List<T> partitionedBucketEntities(BaseDaoImpl<T> jobDao, Class<?> rootEntity,
-  // String minId, String maxId) {
-  // final String namedQueryName = jobDao.getEntityClass().getName() + ".findPartitionedBuckets";
-  // Session session = jobDao.getSessionFactory().getCurrentSession();
-  //
-  // Transaction txn = null;
-  // try {
-  // txn = session.beginTransaction();
-  // final Query q = session.getNamedQuery(namedQueryName);
-  // SQLQuery query = session.createSQLQuery(q.getQueryString());
-  // query.setString("min_id", minId).setString("max_id", maxId);
-  //
-  // // NamedQuery comments describe join conditions.
-  // boolean hibernateJoins =
-  // StringUtils.isNotBlank(q.getComment()) && !q.getComment().equals(namedQueryName);
-  //
-  // if (hibernateJoins) {
-  // query.addEntity("a", rootEntity);
-  // final String[] blocks = q.getComment().trim().split(";");
-  // for (String block : blocks) {
-  // final String[] terms = block.trim().split(",");
-  // query.addJoin(terms[0], terms[1]);
-  // }
-  // } else {
-  // query.addEntity("z", rootEntity);
-  // }
-  //
-  // ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
-  // final List<Object[]> raw = query.list();
-  // List<T> answers = new ArrayList<>(raw.size());
-  //
-  // if (hibernateJoins) {
-  // for (Object[] arr : raw) {
-  // answers.add((T) arr[0]);
-  // }
-  // } else {
-  // for (Object obj : raw) {
-  // answers.add((T) obj);
-  // }
-  // }
-  //
-  // results.addAll(answers);
-  // session.clear();
-  // txn.commit();
-  // return results.build();
-  //
-  // } catch (HibernateException h) {
-  // LOGGER.error("BATCH ERROR! ", h);
-  // if (txn != null) {
-  // txn.rollback();
-  // }
-  // throw new DaoException(h);
-  // }
-  // }
-
-  /**
-   * Indexes a <strong>SINGLE</strong> document. Prefer batch mode.
-   * 
-   * <p>
-   * <strong>TODO:</strong> Add document mapping after creating index.
-   * </p>
-   * 
-   * @param person {@link Person} document to index
-   * @throws JsonProcessingException if JSON cannot be read
-   * @deprecated
-   */
-  // @Deprecated
-  // protected void indexDocument(T person) throws JsonProcessingException {
-  // esDao.index(INDEX_PERSON, DOCUMENT_TYPE_PERSON, mapper.writeValueAsString(person),
-  // person.getPrimaryKey().toString());
-  // }
 
 }
 
