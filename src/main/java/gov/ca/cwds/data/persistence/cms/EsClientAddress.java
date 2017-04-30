@@ -1,4 +1,4 @@
-package gov.ca.cwds.dao.cms;
+package gov.ca.cwds.data.persistence.cms;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -51,11 +51,8 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
     @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findAllUpdatedAfter",
         query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
             + "WHERE x.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            // + "WHERE x.CLT_IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP) "
-            // + "OR x.CLA_IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP) "
-            // + "OR x.ADR_IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP) "
             + "ORDER BY x.clt_IDENTIFIER FOR READ ONLY ",
-        resultClass = EsClientAddress.class, readOnly = true, comment = "timestamp_count=3")})
+        resultClass = EsClientAddress.class, readOnly = true)})
 public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
 
   private static final Logger LOGGER = LogManager.getLogger(EsClientAddress.class);
