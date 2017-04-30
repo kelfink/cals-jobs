@@ -43,12 +43,12 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @Entity
 @Table(name = "ES_CLIENT_ADDRESS")
 @NamedNativeQueries({
-    @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findBucketRange",
+    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findBucketRange",
         query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
             + "WHERE x.CLT_IDENTIFIER BETWEEN :min_id AND :max_id "
             + "ORDER BY x.CLT_IDENTIFIER FOR READ ONLY",
         resultClass = EsClientAddress.class, readOnly = true),
-    @NamedNativeQuery(name = "gov.ca.cwds.dao.cms.EsClientAddress.findAllUpdatedAfter",
+    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfter",
         query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
             + "WHERE x.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + "ORDER BY x.clt_IDENTIFIER FOR READ ONLY ",
@@ -584,11 +584,6 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     final boolean isClientAdded = map.containsKey(this.cltId);
     ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : new ReplicatedClient();
 
-    // DIAGNOSTICS:
-    // if ("R24JJGI0MV".equals(this.cltId)) {
-    // LOGGER.warn("found R24JJGI0MV! isClientAdded={}", isClientAdded);
-    // }
-
     if (!isClientAdded) {
       // Populate core client attributes.
       ret.setAdjudicatedDelinquentIndicator(getCltAdjudicatedDelinquentIndicator());
@@ -704,21 +699,10 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
         adr.setZip(getAdrZip());
         adr.setZip4(getAdrZip4());
         rca.addAddress(adr);
-
-        // DIAGNOSTICS:
-        // if (getAdrUnitDesignationCd() != null && getAdrUnitDesignationCd().intValue() != 0) {
-        // LOGGER.info("address: {}",
-        // ToStringBuilder.reflectionToString(adr, ToStringStyle.MULTI_LINE_STYLE));
-        // }
       }
     }
 
     map.put(ret.getId(), ret);
-
-    if (map.containsKey("R24JJGI0MV")) {
-      LOGGER.warn("map: found R24JJGI0MV!");
-    }
-
   }
 
   public String getCltAdjudicatedDelinquentIndicator() {
