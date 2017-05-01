@@ -60,7 +60,7 @@ public class EsNsScreeningHistory
   private Date lastChange;
 
   // ================
-  // CLIENT_T:
+  // SCREENING:
   // ================
 
   @Column(name = "SCREENING_ID")
@@ -105,6 +105,10 @@ public class EsNsScreeningHistory
   @Column(name = "SCREENING_DECISION_DETAIL")
   private String screeningDecisionDetail;
 
+  // =============
+  // REPORTER:
+  // =============
+
   @Column(name = "RPTR_PRT_ID")
   private String rptrPartcipantId;
 
@@ -129,6 +133,10 @@ public class EsNsScreeningHistory
   @Column(name = "RPTR_ROLES")
   private String reporterRoles;
 
+  // =============
+  // ALLEGATION:
+  // =============
+
   @Column(name = "ALG_ID")
   private String allegationId;
 
@@ -146,6 +154,10 @@ public class EsNsScreeningHistory
 
   @Column(name = "VICTIM_ID")
   private String victimId;
+
+  // =============
+  // VICTIM:
+  // =============
 
   @Column(name = "VICT_PRT_ID")
   private String victimParticipantId;
@@ -170,6 +182,10 @@ public class EsNsScreeningHistory
 
   @Column(name = "VICT_ROLES")
   private String victimRoles;
+
+  // =============
+  // PERPETRATOR:
+  // =============
 
   @Column(name = "PERP_PRT_ID")
   private String perpetratorParticipantId;
