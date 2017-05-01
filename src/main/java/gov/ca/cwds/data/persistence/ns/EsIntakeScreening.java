@@ -34,6 +34,10 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @Entity
 @Table(name = "VW_SCREENING_HISTORY")
 @NamedNativeQueries({
+    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsNsScreeningHistory.findAll",
+        query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
+            + "WHERE vw.started_at is not null ORDER BY vw.SCREENING_ID FOR READ ONLY",
+        resultClass = EsIntakeScreening.class, readOnly = true),
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsNsScreeningHistory.findBucketRange",
         query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
             + "WHERE vw.SCREENING_ID BETWEEN :min_id AND :max_id "
@@ -140,6 +144,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   // ALLEGATION:
   // =============
 
+  @Id
   @Column(name = "ALG_ID")
   private String allegationId;
 
@@ -152,9 +157,11 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   @Column(name = "ALG_UPDT")
   private String allegationUpdt;
 
+  @Id
   @Column(name = "PERPETRATOR_ID")
   private String perpetratorId;
 
+  @Id
   @Column(name = "VICTIM_ID")
   private String victimId;
 
@@ -278,7 +285,6 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
    * <li>"Cook": convert String parameter to strong type</li>
    * <li>"Uncook": convert strong type parameter to String</li>
    * </ul>
-   *
    */
   @Override
   public Serializable getPrimaryKey() {
@@ -305,10 +311,22 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
+  /**
+   * Getter for composite "last change", the latest time that any associated record was created or
+   * updated.
+   * 
+   * @return last change date
+   */
   public Date getLastChange() {
     return lastChange;
   }
 
+  /**
+   * Setter for composite "last change", the latest time that any associated record was created or
+   * updated.
+   * 
+   * @param lastChange last change date
+   */
   public void setLastChange(Date lastChange) {
     this.lastChange = lastChange;
   }
