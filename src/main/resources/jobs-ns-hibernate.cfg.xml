@@ -10,10 +10,13 @@
 		<property name="hibernate.connection.username">${DB_NS_USER}</property>
 		<property name="hibernate.connection.password">${DB_NS_PASSWORD}</property>
 		<property name="hibernate.connection.url">${DB_NS_JDBC_URL}</property>
-		<property name="connection_pool_size">10</property>
+		<property name="connection_pool_size">4</property>
 		<property name="show_sql">true</property>
 
+<!-- 
 		<mapping class="gov.ca.cwds.data.persistence.ns.Person" />
 		<mapping class="gov.ca.cwds.data.persistence.ns.Address" />
+ -->
+		
 	</session-factory>
 </hibernate-configuration>

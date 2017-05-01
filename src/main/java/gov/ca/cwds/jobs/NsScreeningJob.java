@@ -88,7 +88,7 @@ public class NsScreeningJob extends BasePersonIndexerJob<IntakeScreening, EsInta
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Run Client indexer job");
+    LOGGER.info("Run Intake Screening job");
     try {
       runJob(NsScreeningJob.class, args);
     } catch (JobsException e) {

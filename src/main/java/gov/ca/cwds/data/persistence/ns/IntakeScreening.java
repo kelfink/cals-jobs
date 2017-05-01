@@ -18,9 +18,9 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 public class IntakeScreening implements PersistentObject {
 
   @Id
-  // @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_hotline_contact_id")
-  // @SequenceGenerator(name = "seq_hotline_contact_id", sequenceName = "seq_hotline_contact_id",
-  // allocationSize = 50)
+  // @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "screenings_id_seq")
+  // @SequenceGenerator(name = "screenings_id_seq", sequenceName = "screenings_id_seq",
+  // allocationSize = 10)
   @Column(name = "SCREENING_ID")
   private String id;
 
