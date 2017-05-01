@@ -32,7 +32,7 @@ public class EsIntakeScreeningDaoIT
   private static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   /**
-   * 
+   * Expect to not throw exceptions.
    */
   @Rule
   public ExpectedException thrown = ExpectedException.none();
@@ -44,7 +44,8 @@ public class EsIntakeScreeningDaoIT
   @SuppressWarnings("javadoc")
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = new Configuration().configure("ns-hibernate.cfg.xml").buildSessionFactory();
+    sessionFactory =
+        new Configuration().configure("test-ns-hibernate.cfg.xml").buildSessionFactory();
     dao = new EsIntakeScreeningDao(sessionFactory);
   }
 
@@ -75,13 +76,6 @@ public class EsIntakeScreeningDaoIT
     assertThat(query, is(notNullValue()));
   }
 
-  // @Override
-  @Test
-  public void testFindAllReturnsCorrectList() {
-    // Query query = session.getNamedQuery("gov.ca.cwds.rest.api.persistence.ns.Person.findAll");
-    // assertThat(query.list().size(), is(2));
-  }
-
   @SuppressWarnings("javadoc")
   @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
@@ -93,26 +87,10 @@ public class EsIntakeScreeningDaoIT
   @SuppressWarnings("javadoc")
   @Test
   public void testfindAllUpdatedAfterReturnsCorrectList() throws Exception {
-    // Query query =
-    // session.getNamedQuery("gov.ca.cwds.rest.api.persistence.ns.Person.findAllUpdatedAfter")
-    // .setDate("after", TIMESTAMP_FORMAT.parse("2016-11-02 00:00:00"));
-    // assertThat(query.list().size(), is(1));
-  }
-
-  // @Override
-  @Test
-  public void testFind() {
-    // long id = 1;
-    // Person found = dao.find(id);
-    // assertThat(found.getId(), is(id));
-  }
-
-  // @Override
-  @Test
-  public void testFindEntityNotFoundException() throws Exception {
-    // long id = 99;
-    // Person found = dao.find(id);
-    // assertThat(found, is(nullValue()));
+    Query query = session
+        .getNamedQuery("gov.ca.cwds.data.persistence.ns.EsNsScreeningHistory.findAllUpdatedAfter")
+        .setDate("after", TIMESTAMP_FORMAT.parse("2016-11-02 00:00:00"));
+    assertThat(query.list().size(), is(2));
   }
 
 }
