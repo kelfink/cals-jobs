@@ -1,8 +1,6 @@
 package gov.ca.cwds.data.persistence.ns;
 
 import java.io.Serializable;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
 
@@ -221,25 +219,6 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   @Column(name = "PERP_ROLES")
   private String perpetratorRoles;
 
-  /**
-   * Build an EsIntakeScreening from an incoming ResultSet.
-   * 
-   * @param rs incoming tuple
-   * @return a populated EsIntakeScreening
-   * @throws SQLException if unable to convert types or stream breaks, etc.
-   */
-  public static EsIntakeScreening produceFromResultSet(ResultSet rs) throws SQLException {
-    EsIntakeScreening ret = new EsIntakeScreening();
-
-    // ret.setCltAdjudicatedDelinquentIndicator(rs.getString("CLT_ADJDEL_IND"));
-
-    // ret.setCltReplicationOperation(strToRepOp(rs.getString("CLT_IBMSNAP_OPERATION")));
-    // ret.setAdrEmergencyNumber(rs.getBigDecimal("ADR_EMRG_TELNO"));
-    // ret.setAdrEmergencyExtension(rs.getInt("ADR_EMRG_EXTNO"));
-
-    return ret;
-  }
-
   @Override
   public Class<IntakeScreening> getReductionClass() {
     return IntakeScreening.class;
@@ -247,12 +226,32 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
 
   @Override
   public void reduce(Map<Object, IntakeScreening> map) {
-    final boolean isClientAdded = map.containsKey(this.screeningId);
-    IntakeScreening ret = isClientAdded ? map.get(this.screeningId) : new IntakeScreening();
+    final boolean isScreeningAdded = map.containsKey(this.screeningId);
+    IntakeScreening ret = isScreeningAdded ? map.get(this.screeningId) : new IntakeScreening();
 
-    if (!isClientAdded) {
+    if (!isScreeningAdded) {
       // Populate core client attributes.
-      // ret.setAdjudicatedDelinquentIndicator(getCltAdjudicatedDelinquentIndicator());
+
+      ret.setAdditionalInformation(additionalInformation);
+      ret.setAssignee(assignee);
+      // ret.setBirthDate(reporterBirthDt);
+      ret.setCommunicationMethod(communicationMethod);
+      ret.setEndedAt(endedAt);
+      ret.setFirstName(reporterFirstName);
+      ret.setGender(reporterGender);
+      ret.setId(screeningId);
+      ret.setIncidentCounty(incidentCounty);
+      ret.setIncidentDate(incidentDate);
+      ret.setLastName(reporterLastName);
+      ret.setLocationType(locationType);
+      ret.setReference(reference);
+      ret.setReportNarrative(reportNarrative);
+      ret.setScreeningDecision(screeningDecision);
+      ret.setScreeningDecisionDetail(screeningDecisionDetail);
+      ret.setScreeningName(screeningName);
+      ret.setSsn(reporterSsn);
+
+      ret.setReporterParticipantId(rptrPartcipantId);
     }
 
     // Client Address:
