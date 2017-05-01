@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +12,7 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
+import gov.ca.cwds.dao.ns.EsIntakeScreeningDao;
 import gov.ca.cwds.dao.ns.IntakeScreeningDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.model.cms.JobResultSetAware;
@@ -34,25 +33,40 @@ public class NsScreeningJob extends BasePersonIndexerJob<IntakeScreening, EsInta
 
   private static final Logger LOGGER = LogManager.getLogger(NsScreeningJob.class);
 
+  private EsIntakeScreeningDao viewDao;
+
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param clientDao Client DAO
+   * @param normalizedDao Intake Screening DAO
+   * @param denormalizedDao view Dao
    * @param elasticsearchDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public NsScreeningJob(final IntakeScreeningDao clientDao, final ElasticsearchDao elasticsearchDao,
+  public NsScreeningJob(final IntakeScreeningDao normalizedDao,
+      final EsIntakeScreeningDao denormalizedDao, final ElasticsearchDao elasticsearchDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @NsSessionFactory SessionFactory sessionFactory) {
-    super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    super(normalizedDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    this.viewDao = denormalizedDao;
   }
 
   @Override
-  public EsIntakeScreening pullFromResultSet(ResultSet rs) throws SQLException {
-    return EsIntakeScreening.produceFromResultSet(rs);
+  protected void initLoadStage1ReadMaterializedRecords() {
+    Thread.currentThread().setName("reader");
+    LOGGER.warn("BEGIN: Stage #1: NS View Reader");
+
+    try {
+      final List<EsIntakeScreening> results = this.viewDao.findAll();
+    } catch (Exception e) {
+      LOGGER.error("ERROR READING PG VIEW", e);
+      throw new JobsException("ERROR READING PG VIEW", e);
+    }
+
+    LOGGER.warn("DONE: Stage #1: NS View Reader");
   }
 
   @Override

@@ -72,7 +72,7 @@ public class EsIntakeScreeningDaoIT
   @Test
   public void testFindAllNamedQueryExist() throws Exception {
     Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.ns.EsNsScreeningHistory.findAllUpdatedAfter");
+        .getNamedQuery("gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
 
@@ -80,7 +80,7 @@ public class EsIntakeScreeningDaoIT
   @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
     Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.ns.EsNsScreeningHistory.findAllUpdatedAfter");
+        .getNamedQuery("gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
 
@@ -88,7 +88,7 @@ public class EsIntakeScreeningDaoIT
   @Test
   public void testfindAllUpdatedAfterReturnsCorrectList() throws Exception {
     Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.ns.EsNsScreeningHistory.findAllUpdatedAfter")
+        .getNamedQuery("gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter")
         .setDate("after", TIMESTAMP_FORMAT.parse("2016-11-02 00:00:00"));
     assertThat(query.list().size(), is(2));
   }
@@ -97,7 +97,7 @@ public class EsIntakeScreeningDaoIT
   @Test
   public void testfindAll() throws Exception {
     Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.ns.EsNsScreeningHistory.findAll");
+        session.getNamedQuery("gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAll");
     assertThat(query.list().size(), is(2));
   }
 

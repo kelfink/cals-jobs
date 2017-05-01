@@ -29,6 +29,8 @@ import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
+import gov.ca.cwds.dao.ns.EsIntakeScreeningDao;
+import gov.ca.cwds.dao.ns.IntakeScreeningDao;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
@@ -48,6 +50,8 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedReporter;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedServiceProvider;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider;
+import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
+import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
@@ -111,6 +115,11 @@ public class JobsGuiceInjector extends AbstractModule {
         .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
         .addAnnotatedClass(ReplicatedAddress.class).buildSessionFactory());
 
+    bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)
+        .toInstance(new Configuration().configure("jobs-ns-hibernate.cfg.xml")
+            .addAnnotatedClass(EsIntakeScreening.class).addAnnotatedClass(IntakeScreening.class)
+            .buildSessionFactory());
+
     bind(ReplicatedClientDao.class);
     bind(ReplicatedReporterDao.class);
     bind(ReplicatedAttorneyDao.class);
@@ -122,6 +131,9 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ReplicatedSubstituteCareProviderDao.class);
     bind(ReplicatedEducationProviderContactDao.class);
 
+    bind(IntakeScreeningDao.class);
+    bind(EsIntakeScreeningDao.class);
+
     // Instantiate as a singleton, else Guice creates a new instance each time.
     bind(ObjectMapper.class).asEagerSingleton();
 
@@ -130,8 +142,6 @@ public class JobsGuiceInjector extends AbstractModule {
 
     // Register CMS system code translator.
     bind(ApiSystemCodeDao.class).to(SystemCodeDaoFileImpl.class);
-    // bind(ApiSystemCodeCache.class).annotatedWith(SystemCodeCache.class)
-    // .to(CmsSystemCodeCacheService.class).asEagerSingleton();
     bind(ApiSystemCodeCache.class).to(CmsSystemCodeCacheService.class).asEagerSingleton();
     bind(CmsSystemCodeSerializer.class).asEagerSingleton();
 
@@ -186,18 +196,6 @@ public class JobsGuiceInjector extends AbstractModule {
       }
     }
     return ret;
-  }
-
-  /**
-   * Provides Hibernate session factory for PostgreSQL.
-   * 
-   * @return PostgreSQL Hibernate session factory
-   */
-  @Provides
-  @NsSessionFactory
-  SessionFactory nsSessionFactory() {
-    // NOTE: Configuration.configure() only looks for the named file, not resources in jar files.
-    return new Configuration().configure("ns-hibernate.cfg.xml").buildSessionFactory();
   }
 
 }

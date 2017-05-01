@@ -666,7 +666,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           .getService(ConnectionProvider.class).getConnection();
       con.setSchema(System.getProperty("DB_CMS_SCHEMA"));
       con.setAutoCommit(false);
-      con.setReadOnly(true);
+      con.setReadOnly(true); // Doesn't work with Postgres.
 
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Detect platform or always force ORDER BY clause.

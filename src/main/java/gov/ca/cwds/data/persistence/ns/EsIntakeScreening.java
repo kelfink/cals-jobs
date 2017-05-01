@@ -34,17 +34,17 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @Entity
 @Table(name = "VW_SCREENING_HISTORY")
 @NamedNativeQueries({
-    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsNsScreeningHistory.findAll",
+    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAll",
         query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
             + "WHERE vw.started_at is not null ORDER BY vw.SCREENING_ID FOR READ ONLY",
         resultClass = EsIntakeScreening.class, readOnly = true),
-    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsNsScreeningHistory.findBucketRange",
+    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findBucketRange",
         query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
             + "WHERE vw.SCREENING_ID BETWEEN :min_id AND :max_id "
             + "ORDER BY vw.SCREENING_ID FOR READ ONLY",
         resultClass = EsIntakeScreening.class, readOnly = true),
     @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.ns.EsNsScreeningHistory.findAllUpdatedAfter",
+        name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter",
         query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
             + "WHERE vw.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + "ORDER BY vw.SCREENING_ID FOR READ ONLY ",
@@ -222,10 +222,10 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   private String perpetratorRoles;
 
   /**
-   * Build an EsNsScreeningHistory from an incoming ResultSet.
+   * Build an EsIntakeScreening from an incoming ResultSet.
    * 
    * @param rs incoming tuple
-   * @return a populated EsNsScreeningHistory
+   * @return a populated EsIntakeScreening
    * @throws SQLException if unable to convert types or stream breaks, etc.
    */
   public static EsIntakeScreening produceFromResultSet(ResultSet rs) throws SQLException {
