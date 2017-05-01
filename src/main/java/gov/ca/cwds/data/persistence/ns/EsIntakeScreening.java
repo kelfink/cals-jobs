@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -19,14 +20,13 @@ import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
 /**
  * Entity bean for PostgreSQL view, VW_SCREENING_HISTORY.
  * 
  * <p>
- * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.
+ * Implements {@link ApiGroupNormalizer} and converts to {@link IntakeScreening}.
  * </p>
  * 
  * @author CWDS API Team
@@ -38,17 +38,16 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
         query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
             + "WHERE vw.SCREENING_ID BETWEEN :min_id AND :max_id "
             + "ORDER BY vw.SCREENING_ID FOR READ ONLY",
-        resultClass = EsNsScreeningHistory.class, readOnly = true),
+        resultClass = EsIntakeScreening.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.ns.EsNsScreeningHistory.findAllUpdatedAfter",
         query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
             + "WHERE vw.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + "ORDER BY vw.SCREENING_ID FOR READ ONLY ",
-        resultClass = EsNsScreeningHistory.class, readOnly = true)})
-public class EsNsScreeningHistory
-    implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
+        resultClass = EsIntakeScreening.class, readOnly = true)})
+public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<IntakeScreening> {
 
-  private static final Logger LOGGER = LogManager.getLogger(EsNsScreeningHistory.class);
+  private static final Logger LOGGER = LogManager.getLogger(EsIntakeScreening.class);
 
   /**
    * Default.
@@ -63,15 +62,19 @@ public class EsNsScreeningHistory
   // SCREENING:
   // ================
 
+  @Id
   @Column(name = "SCREENING_ID")
   private String screeningId;
 
+  @Id
   @Column(name = "REFERENCE")
   private String reference;
 
+  @Id
   @Column(name = "STARTED_AT")
   private String startedAt;
 
+  @Id
   @Column(name = "ENDED_AT")
   private String endedAt;
 
@@ -218,8 +221,8 @@ public class EsNsScreeningHistory
    * @return a populated EsNsScreeningHistory
    * @throws SQLException if unable to convert types or stream breaks, etc.
    */
-  public static EsNsScreeningHistory produceFromResultSet(ResultSet rs) throws SQLException {
-    EsNsScreeningHistory ret = new EsNsScreeningHistory();
+  public static EsIntakeScreening produceFromResultSet(ResultSet rs) throws SQLException {
+    EsIntakeScreening ret = new EsIntakeScreening();
 
     // ret.setCltAdjudicatedDelinquentIndicator(rs.getString("CLT_ADJDEL_IND"));
 
@@ -231,14 +234,14 @@ public class EsNsScreeningHistory
   }
 
   @Override
-  public Class<ReplicatedClient> getReductionClass() {
-    return ReplicatedClient.class;
+  public Class<IntakeScreening> getReductionClass() {
+    return IntakeScreening.class;
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedClient> map) {
+  public void reduce(Map<Object, IntakeScreening> map) {
     final boolean isClientAdded = map.containsKey(this.screeningId);
-    ReplicatedClient ret = isClientAdded ? map.get(this.screeningId) : new ReplicatedClient();
+    IntakeScreening ret = isClientAdded ? map.get(this.screeningId) : new IntakeScreening();
 
     if (!isClientAdded) {
       // Populate core client attributes.

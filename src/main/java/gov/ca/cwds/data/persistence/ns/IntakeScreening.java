@@ -1,42 +1,28 @@
 package gov.ca.cwds.data.persistence.ns;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import gov.ca.cwds.data.ns.NsPersistentObject;
+import gov.ca.cwds.data.persistence.PersistentObject;
 
 /**
- * {@link NsPersistentObject} representing a Person.
+ * JSON object for Intake Screenings.
  * 
  * @author CWDS API Team
  */
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "screenings")
-public class IntakeScreening extends NsPersistentObject {
+public class IntakeScreening implements PersistentObject {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_hotline_contact_id")
-  @SequenceGenerator(name = "seq_hotline_contact_id", sequenceName = "seq_hotline_contact_id",
-      allocationSize = 50)
-  @Column(name = "hotline_contact_id")
-  private Long id;
-
+  // @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_hotline_contact_id")
+  // @SequenceGenerator(name = "seq_hotline_contact_id", sequenceName = "seq_hotline_contact_id",
+  // allocationSize = 50)
   @Column(name = "SCREENING_ID")
-  private String screeningId;
+  private String id;
 
   @Column(name = "REFERENCE")
   private String reference;
@@ -77,12 +63,12 @@ public class IntakeScreening extends NsPersistentObject {
   @Column(name = "SCREENING_DECISION_DETAIL")
   private String screeningDecisionDetail;
 
-  @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "contact_address_id")
-  private Address contactAddress;
+  // @OneToOne(cascade = CascadeType.ALL)
+  // @JoinColumn(name = "contact_address_id")
+  // private Address contactAddress;
 
-  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "screening")
-  private Set<Participant> participants = new HashSet<>(0);
+  // @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "screening")
+  // private Set<Participant> participants = new HashSet<>(0);
 
   /**
    * Default constructor
@@ -150,14 +136,14 @@ public class IntakeScreening extends NsPersistentObject {
    * @see gov.ca.cwds.data.persistence.PersistentObject#getPrimaryKey()
    */
   @Override
-  public Long getPrimaryKey() {
+  public String getPrimaryKey() {
     return getId();
   }
 
   /**
    * @return the id
    */
-  public Long getId() {
+  public String getId() {
     return id;
   }
 
