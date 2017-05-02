@@ -13,13 +13,13 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
  * Entity bean for PostgreSQL view, VW_SCREENING_HISTORY.
@@ -141,13 +141,16 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   private String roles;
 
   @Column(name = "IS_REPORTER")
-  private String flgReporter;
+  @ColumnTransformer(read = "IS_REPORTER IS NOT NULL")
+  private boolean flgReporter;
 
   @Column(name = "IS_PERPETRATOR")
-  private String flgPerpetrator;
+  @ColumnTransformer(read = "IS_PERPETRATOR IS NOT NULL")
+  private boolean flgPerpetrator;
 
   @Column(name = "IS_VICTIM")
-  private String flgVictim;
+  @ColumnTransformer(read = "IS_VICTIM IS NOT NULL")
+  private boolean flgVictim;
 
   // =============
   // ALLEGATION:
@@ -213,24 +216,27 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       // Core screening attributes.
       ret.setAdditionalInformation(additionalInformation);
       ret.setAssignee(assignee);
-      ret.setBirthDate(DomainChef.uncookDateString(birthDt));
       ret.setCommunicationMethod(communicationMethod);
       ret.setEndedAt(endedAt);
-      ret.setFirstName(firstName);
-      ret.setGender(gender);
       ret.setId(screeningId);
       ret.setIncidentCounty(incidentCounty);
       ret.setIncidentDate(incidentDate);
-      ret.setLastName(lastName);
       ret.setLocationType(locationType);
       ret.setReference(reference);
       ret.setReportNarrative(reportNarrative);
       ret.setScreeningDecision(screeningDecision);
       ret.setScreeningDecisionDetail(screeningDecisionDetail);
       ret.setScreeningName(screeningName);
-      ret.setSsn(ssn);
 
-      ret.setReporterParticipantId(participantId);
+      // ret.setBirthDate(DomainChef.uncookDateString(birthDt));
+      // ret.setFirstName(firstName);
+      // ret.setGender(gender);
+      // ret.setSsn(ssn);
+      // ret.setLastName(lastName);
+
+      if (flgReporter) {
+        // ret.setReporterParticipantId(participantId);
+      }
     }
 
     // Client Address:

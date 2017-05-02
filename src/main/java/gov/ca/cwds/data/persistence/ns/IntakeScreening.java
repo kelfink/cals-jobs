@@ -1,24 +1,24 @@
 package gov.ca.cwds.data.persistence.ns;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
+import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiPersonAware;
 
 /**
- * JSON object for Intake Screenings.
+ * NS Persistence class for Intake Screenings.
  * 
  * @author CWDS API Team
  */
 @SuppressWarnings("serial")
-@Entity
-@Table(name = "screenings")
-public class IntakeScreening implements PersistentObject, ApiPersonAware {
+// @Entity
+// @Table(name = "screenings")
+public class IntakeScreening implements PersistentObject, ApiMultiplePersonAware {
 
   @Id
   // @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "screenings_id_seq")
@@ -66,7 +66,7 @@ public class IntakeScreening implements PersistentObject, ApiPersonAware {
   @Column(name = "SCREENING_DECISION_DETAIL")
   private String screeningDecisionDetail;
 
-  private IntakeParticipant reporter = new IntakeParticipant();
+  private List<IntakeParticipant> reporter = new ArrayList<>();
 
   private IntakeParticipant assignedSocialWorker = new IntakeParticipant();
 
@@ -95,48 +95,6 @@ public class IntakeScreening implements PersistentObject, ApiPersonAware {
     this.reference = reference;
   }
 
-  // /**
-  // * Constructor
-  // *
-  // * @param reference The reference
-  // * @param endedAt The endedAt date
-  // * @param incidentCounty The incident county
-  // * @param incidentDate The incident date
-  // * @param locationType The location type
-  // * @param communicationMethod The communication method
-  // * @param name The name of the screening
-  // * @param responseTime The response time
-  // * @param screeningDecision The screening decision
-  // * @param startedAt The started at date
-  // * @param narrative The narrative
-  // * @param contactAddress The contact address
-  // * @param participants The list of participants
-  // */
-  // public IntakeScreening(String reference, Date endedAt, String incidentCounty, Date
-  // incidentDate,
-  // String locationType, String communicationMethod, String name, String responseTime,
-  // String screeningDecision, Date startedAt, String narrative, Address contactAddress,
-  // Set<Participant> participants) {
-  // super();
-  //
-  // this.reference = reference;
-  // this.endedAt = endedAt;
-  // this.incidentCounty = incidentCounty;
-  // this.incidentDate = incidentDate;
-  // this.locationType = locationType;
-  // this.communicationMethod = communicationMethod;
-  // this.name = name;
-  // this.responseTime = responseTime;
-  // this.screeningDecision = screeningDecision;
-  // this.startedAt = startedAt;
-  // this.narrative = narrative;
-  // this.contactAddress = contactAddress;
-  //
-  // if (participants != null && !participants.isEmpty()) {
-  // this.participants.addAll(participants);
-  // }
-  // }
-
   /**
    * {@inheritDoc}
    * 
@@ -154,67 +112,8 @@ public class IntakeScreening implements PersistentObject, ApiPersonAware {
     return id;
   }
 
-  @Override
-  public Date getBirthDate() {
-    return reporter.getBirthDate();
-  }
-
-  @Override
-  public String getFirstName() {
-    return reporter.getFirstName();
-  }
-
-  @Override
-  public String getGender() {
-    return reporter.getGender();
-  }
-
-  @Override
-  public String getLastName() {
-    return reporter.getLastName();
-  }
-
-  @Override
-  public String getMiddleName() {
-    return null;
-  }
-
-  @Override
-  public String getNameSuffix() {
-    return null;
-  }
-
-  @Override
-  public String getSsn() {
-    return reporter.getSsn();
-  }
-
   public void setId(String id) {
     this.id = id;
-  }
-
-  public void setReporterParticipantId(String id) {
-    reporter.setId(id);
-  }
-
-  public void setFirstName(String firstName) {
-    reporter.setFirstName(firstName);
-  }
-
-  public void setLastName(String lastName) {
-    reporter.setLastName(lastName);
-  }
-
-  public void setBirthDate(Date birthDate) {
-    reporter.setBirthDate(birthDate);
-  }
-
-  public void setGender(String gender) {
-    reporter.setGender(gender);
-  }
-
-  public void setSsn(String ssn) {
-    reporter.setSsn(ssn);
   }
 
   public String getReference() {
@@ -321,20 +220,30 @@ public class IntakeScreening implements PersistentObject, ApiPersonAware {
     this.screeningDecisionDetail = screeningDecisionDetail;
   }
 
-  public IntakeParticipant getReporter() {
-    return reporter;
-  }
-
-  public void setReporter(IntakeParticipant reporter) {
-    this.reporter = reporter;
-  }
-
   public IntakeParticipant getAssignedSocialWorker() {
     return assignedSocialWorker;
   }
 
   public void setAssignedSocialWorker(IntakeParticipant assignedSocialWorker) {
     this.assignedSocialWorker = assignedSocialWorker;
+  }
+
+  @Override
+  public ApiPersonAware[] getPersons() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public List<IntakeParticipant> getReporter() {
+    return reporter;
+  }
+
+  public void setReporter(List<IntakeParticipant> reporter) {
+    this.reporter = reporter;
+  }
+
+  public void addReporter(IntakeParticipant reporter) {
+    this.reporter.add(reporter);
   }
 
 }

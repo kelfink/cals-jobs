@@ -30,7 +30,6 @@ import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
 import gov.ca.cwds.dao.ns.EsIntakeScreeningDao;
-import gov.ca.cwds.dao.ns.IntakeScreeningDao;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
@@ -131,7 +130,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ReplicatedSubstituteCareProviderDao.class);
     bind(ReplicatedEducationProviderContactDao.class);
 
-    bind(IntakeScreeningDao.class);
+    // bind(IntakeScreeningDao.class);
     bind(EsIntakeScreeningDao.class);
 
     // Instantiate as a singleton, else Guice creates a new instance each time.

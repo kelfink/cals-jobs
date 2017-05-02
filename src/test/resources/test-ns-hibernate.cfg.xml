@@ -27,9 +27,9 @@
  -->
  
 		<mapping class="gov.ca.cwds.data.persistence.ns.EsIntakeScreening" />
-		<mapping class="gov.ca.cwds.data.persistence.ns.IntakeScreening" />
 		
 <!-- 		
+		<mapping class="gov.ca.cwds.data.persistence.ns.IntakeScreening" />
 		<mapping class="gov.ca.cwds.data.persistence.ns.Person" />
 		<mapping class="gov.ca.cwds.data.persistence.ns.Address" />
  -->
