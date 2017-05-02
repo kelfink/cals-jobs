@@ -257,8 +257,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   }
 
   /**
-   * This view (i.e., materialized query table) doesn't have a proper unique key, but a combination
-   * of several fields might come close.
+   * This view lacks a proper unique key, but a combination of several fields comes close.
    * <ul>
    * <li>"Cook": convert String parameter to strong type</li>
    * <li>"Uncook": convert strong type parameter to String</li>
