@@ -90,7 +90,7 @@ public class EsIntakeScreeningDaoIT
     Query query = session
         .getNamedQuery("gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter")
         .setDate("after", TIMESTAMP_FORMAT.parse("2016-11-02 00:00:00"));
-    assertThat(query.list().size(), is(2));
+    assertThat(query.list().size(), is(10));
   }
 
   @SuppressWarnings("javadoc")
@@ -98,7 +98,7 @@ public class EsIntakeScreeningDaoIT
   public void testfindAll() throws Exception {
     Query query =
         session.getNamedQuery("gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAll");
-    assertThat(query.list().size(), is(2));
+    assertThat(query.list().size(), is(10));
   }
 
 }

@@ -19,6 +19,7 @@ import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
  * Entity bean for PostgreSQL view, VW_SCREENING_HISTORY.
@@ -110,114 +111,93 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   @Column(name = "SCREENING_DECISION_DETAIL")
   private String screeningDecisionDetail;
 
-  // =============
-  // REPORTER:
-  // =============
+  // ==============
+  // PARTICIPANT:
+  // ==============
 
-  @Column(name = "RPTR_PRT_ID")
-  private String rptrPartcipantId;
+  @Id
+  @Column(name = "PARTICIPANT_ID")
+  private String participantId;
 
-  @Column(name = "RPTR_BIRTH_DT")
-  private String reporterBirthDt;
+  @Column(name = "BIRTH_DT")
+  private String birthDt;
 
-  @Column(name = "RPTR_FIRST_NAME")
-  private String reporterFirstName;
+  @Column(name = "FIRST_NAME")
+  private String firstName;
 
-  @Column(name = "RPTR_LAST_NAME")
-  private String reporterLastName;
+  @Column(name = "LAST_NAME")
+  private String lastName;
 
-  @Column(name = "RPTR_GENDER")
-  private String reporterGender;
+  @Column(name = "GENDER")
+  private String gender;
 
-  @Column(name = "RPTR_SSN")
-  private String reporterSsn;
+  @Column(name = "SSN")
+  private String ssn;
 
-  @Column(name = "RPTR_PERSON_ID")
-  private String reporterPersonId;
+  @Column(name = "LEGACY_ID")
+  private String legacyId;
 
-  @Column(name = "RPTR_ROLES")
-  private String reporterRoles;
+  @Column(name = "ROLES")
+  private String roles;
+
+  @Column(name = "IS_REPORTER")
+  private String flgReporter;
+
+  @Column(name = "IS_PERPETRATOR")
+  private String flgPerpetrator;
+
+  @Column(name = "IS_VICTIM")
+  private String flgVictim;
 
   // =============
   // ALLEGATION:
   // =============
 
   @Id
-  @Column(name = "ALG_ID")
+  @Column(name = "ALLEGATION_ID")
   private String allegationId;
 
   @Column(name = "ALLEGATION_TYPES")
   private String allegationTypes;
 
-  @Column(name = "ALG_CRDT")
-  private String allegationCrdt;
-
-  @Column(name = "ALG_UPDT")
-  private String allegationUpdt;
-
-  @Id
-  @Column(name = "PERPETRATOR_ID")
-  private String perpetratorId;
-
-  @Id
-  @Column(name = "VICTIM_ID")
-  private String victimId;
-
   // =============
-  // VICTIM:
+  // ADDRESS:
   // =============
 
-  @Column(name = "VICT_PRT_ID")
-  private String victimParticipantId;
+  @Column(name = "ADDRESS_ID")
+  private String addressId;
 
-  @Column(name = "VICT_BIRTH_DT")
-  private String victimBirthDt;
+  @Column(name = "ADDRESS_TYPE")
+  private String addressType;
 
-  @Column(name = "VICT_FIRST_NAME")
-  private String victimFirstName;
+  @Column(name = "STREET_ADDRESS")
+  private String streetAddress;
 
-  @Column(name = "VICT_LAST_NAME")
-  private String victimLastName;
+  @Column(name = "CITY")
+  private String city;
 
-  @Column(name = "VICT_GENDER")
-  private String victimGender;
+  @Column(name = "STATE")
+  private String state;
 
-  @Column(name = "VICT_SSN")
-  private String victimSsn;
-
-  @Column(name = "VICT_PERSON_ID")
-  private String victimPersonId;
-
-  @Column(name = "VICT_ROLES")
-  private String victimRoles;
+  @Column(name = "ZIP")
+  private String zip;
 
   // =============
-  // PERPETRATOR:
+  // PHONE:
   // =============
 
-  @Column(name = "PERP_PRT_ID")
-  private String perpetratorParticipantId;
+  @Column(name = "PHONE_NUMBER_ID")
+  private String phoneNumberId;
 
-  @Column(name = "PERP_BIRTH_DT")
-  private String perpetratorBirthDt;
+  @Column(name = "PHONE_NUMBER")
+  private String phoneNumber;
 
-  @Column(name = "PERP_FIRST_NAME")
-  private String perpetratorFirstName;
+  @Column(name = "PHONE_TYPE")
+  private String phoneType;
 
-  @Column(name = "PERP_LAST_NAME")
-  private String perpetratorLastName;
-
-  @Column(name = "PERP_GENDER")
-  private String perpetratorGender;
-
-  @Column(name = "PERP_SSN")
-  private String perpetratorSsn;
-
-  @Column(name = "PERP_PERSON_ID")
-  private String perpetratorPersonId;
-
-  @Column(name = "PERP_ROLES")
-  private String perpetratorRoles;
+  // =============
+  // REDUCE:
+  // =============
 
   @Override
   public Class<IntakeScreening> getReductionClass() {
@@ -230,28 +210,27 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     IntakeScreening ret = isScreeningAdded ? map.get(this.screeningId) : new IntakeScreening();
 
     if (!isScreeningAdded) {
-      // Populate core client attributes.
-
+      // Core screening attributes.
       ret.setAdditionalInformation(additionalInformation);
       ret.setAssignee(assignee);
-      // ret.setBirthDate(reporterBirthDt);
+      ret.setBirthDate(DomainChef.uncookDateString(birthDt));
       ret.setCommunicationMethod(communicationMethod);
       ret.setEndedAt(endedAt);
-      ret.setFirstName(reporterFirstName);
-      ret.setGender(reporterGender);
+      ret.setFirstName(firstName);
+      ret.setGender(gender);
       ret.setId(screeningId);
       ret.setIncidentCounty(incidentCounty);
       ret.setIncidentDate(incidentDate);
-      ret.setLastName(reporterLastName);
+      ret.setLastName(lastName);
       ret.setLocationType(locationType);
       ret.setReference(reference);
       ret.setReportNarrative(reportNarrative);
       ret.setScreeningDecision(screeningDecision);
       ret.setScreeningDecisionDetail(screeningDecisionDetail);
       ret.setScreeningName(screeningName);
-      ret.setSsn(reporterSsn);
+      ret.setSsn(ssn);
 
-      ret.setReporterParticipantId(rptrPartcipantId);
+      ret.setReporterParticipantId(participantId);
     }
 
     // Client Address:

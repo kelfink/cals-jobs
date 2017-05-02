@@ -16,10 +16,9 @@
 		<property name="show_sql">true</property>
 
 <!-- Taborda -->
-<!-- --> 
+<!-- -->  
 		<property name="hibernate.connection.password">brIWLuo04rkt</property>
 		<property name="hibernate.connection.url">jdbc:postgresql://ns.db.jenkins.cwds.tabordasolutions.net:5432/cwdsns</property>
- 
  
 <!-- Local -->
 <!-- 
