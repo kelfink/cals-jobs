@@ -26,14 +26,14 @@ Prerequisites are job dependent but typically you can expect the following to be
 % ./gradlew build
 
 
-### Facility Indexer Job Architecture Overview
+### Facility Indexer Job
 
 Main Class: gov.ca.cwds.jobs.FacilityIndexerJob
 run job using following command: 
 ```bash
 $java -cp jobs.jar gov.ca.cwds.jobs.FacilityIndexerJob path/to/config/file.yaml
 ```
-#### Architecture
+#### Code overview
 In order to create new job you have to implement 2 interfaces: _JobReader_, _JobWriter_ and optional _JobProcessor_
 _JobReader_ has a single method _I read()_ which is responsible for reading items from input source. It must return null when everything is read.
 _JobWriter_ has a single method _write(List\<I\> items)_ which is responsible for writing chunk of data to output target.
