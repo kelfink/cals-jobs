@@ -12,12 +12,12 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobComponent {
     private int chunkSize = 100;
-    private ItemReader reader;
+    private JobReader reader;
     private List chunk = new LinkedList<>();
-    private ItemProcessor processor;
-    private ItemWriter writer;
+    private JobProcessor processor;
+    private JobWriter writer;
 
-    public <I, O> AsyncReadWriteJob(ItemReader<I> reader, ItemProcessor<I, O> processor, ItemWriter<O> writer) {
+    public <I, O> AsyncReadWriteJob(JobReader<I> reader, JobProcessor<I, O> processor, JobWriter<O> writer) {
         this.reader = reader;
         this.processor = processor;
         this.writer = writer;
@@ -26,7 +26,7 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
     /**
      * Input type = Output Type, no mapping required
      */
-    public <I> AsyncReadWriteJob(ItemReader<I> reader, ItemWriter<I> writer) {
+    public <I> AsyncReadWriteJob(JobReader<I> reader, JobWriter<I> writer) {
         this.reader = reader;
         this.processor = item -> item;
         this.writer = writer;

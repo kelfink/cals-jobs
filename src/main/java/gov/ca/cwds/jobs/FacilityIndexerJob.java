@@ -9,10 +9,10 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.model.facility.es.ESFacility;
 import gov.ca.cwds.jobs.facility.FacilityRowMapper;
 import gov.ca.cwds.jobs.util.AsyncReadWriteJob;
-import gov.ca.cwds.jobs.util.ItemReader;
-import gov.ca.cwds.jobs.util.ItemWriter;
-import gov.ca.cwds.jobs.util.elastic.ElasticItemWriter;
-import gov.ca.cwds.jobs.util.jdbc.JdbcItemReader;
+import gov.ca.cwds.jobs.util.JobReader;
+import gov.ca.cwds.jobs.util.JobWriter;
+import gov.ca.cwds.jobs.util.elastic.ElasticJobWriter;
+import gov.ca.cwds.jobs.util.jdbc.JdbcJobReader;
 import gov.ca.cwds.jobs.util.jdbc.RowMapper;
 import gov.ca.cwds.rest.api.ApiException;
 import org.apache.logging.log4j.LogManager;
@@ -108,24 +108,24 @@ public class FacilityIndexerJob extends AbstractModule {
     @Provides
     @Named("facility-reader")
     @Inject
-    public ItemReader lisItemReader(JobConfiguration jobConfiguration,
-                                    FacilityRowMapper facilityRowMapper,
-                                    @Named("lis-session-factory") SessionFactory sessionFactory) {
-        return new JdbcItemReader<>(sessionFactory, facilityRowMapper, jobConfiguration.getJobLisReaderQuery());
+    public JobReader lisItemReader(JobConfiguration jobConfiguration,
+                                   FacilityRowMapper facilityRowMapper,
+                                   @Named("lis-session-factory") SessionFactory sessionFactory) {
+        return new JdbcJobReader<>(sessionFactory, facilityRowMapper, jobConfiguration.getJobLisReaderQuery());
     }
 
     @Provides
     @Named("facility-writer")
     @Inject
-    public ItemWriter lisItemWriter(ElasticsearchDao elasticsearchDao, ObjectMapper objectMapper) {
-        return new ElasticItemWriter<ESFacility>( elasticsearchDao, objectMapper);
+    public JobWriter lisItemWriter(ElasticsearchDao elasticsearchDao, ObjectMapper objectMapper) {
+        return new ElasticJobWriter<ESFacility>( elasticsearchDao, objectMapper);
     }
 
     @Provides
     @Named("facility-job")
     @Inject
-    public Job lisItemWriter(@Named("facility-reader") ItemReader itemReader,
-                             @Named("facility-writer") ItemWriter itemWriter) {
-        return new AsyncReadWriteJob(itemReader, itemWriter);
+    public Job lisItemWriter(@Named("facility-reader") JobReader jobReader,
+                             @Named("facility-writer") JobWriter jobWriter) {
+        return new AsyncReadWriteJob(jobReader, jobWriter);
     }
 }

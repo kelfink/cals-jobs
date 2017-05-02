@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.jobs.util.ItemWriter;
+import gov.ca.cwds.jobs.util.JobWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -17,13 +17,13 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by dmitry.rudenko on 4/28/2017.
  */
-public class ElasticItemWriter<T extends PersistentObject> implements ItemWriter<T> {
-    private static final Logger LOGGER = LogManager.getLogger(ElasticItemWriter.class);
+public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T> {
+    private static final Logger LOGGER = LogManager.getLogger(ElasticJobWriter.class);
     private ElasticsearchDao elasticsearchDao;
     private BulkProcessor bulkProcessor;
     private ObjectMapper objectMapper;
 
-    public ElasticItemWriter(ElasticsearchDao elasticsearchDao, ObjectMapper objectMapper) {
+    public ElasticJobWriter(ElasticsearchDao elasticsearchDao, ObjectMapper objectMapper) {
         this.elasticsearchDao = elasticsearchDao;
         this.objectMapper = objectMapper;
         bulkProcessor = BulkProcessor.builder(elasticsearchDao.getClient(), new BulkProcessor.Listener() {

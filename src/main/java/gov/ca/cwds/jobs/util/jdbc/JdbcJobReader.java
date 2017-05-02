@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.util.jdbc;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.jobs.util.ItemReader;
+import gov.ca.cwds.jobs.util.JobReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -14,15 +14,15 @@ import java.sql.Statement;
 /**
  * Created by dmitry.rudenko on 4/28/2017.
  */
-public class JdbcItemReader<T extends PersistentObject> implements ItemReader<T> {
-    private static final Logger LOGGER = LogManager.getLogger(JdbcItemReader.class);
+public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
+    private static final Logger LOGGER = LogManager.getLogger(JdbcJobReader.class);
     private SessionFactory sessionFactory;
     private ResultSet resultSet;
     private RowMapper<T> rowMapper;
     private Statement statement;
     private String query;
 
-    public JdbcItemReader(SessionFactory sessionFactory, RowMapper<T> rowMapper, String query) {
+    public JdbcJobReader(SessionFactory sessionFactory, RowMapper<T> rowMapper, String query) {
         this.sessionFactory = sessionFactory;
         this.rowMapper = rowMapper;
         this.query = query;
