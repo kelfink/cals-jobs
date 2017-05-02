@@ -68,6 +68,8 @@ public class IntakeScreening implements PersistentObject, ApiPersonAware {
 
   private IntakeParticipant reporter = new IntakeParticipant();
 
+  private IntakeParticipant assignedSocialWorker = new IntakeParticipant();
+
   // @OneToOne(cascade = CascadeType.ALL)
   // @JoinColumn(name = "contact_address_id")
   // private Address contactAddress;
@@ -325,6 +327,14 @@ public class IntakeScreening implements PersistentObject, ApiPersonAware {
 
   public void setReporter(IntakeParticipant reporter) {
     this.reporter = reporter;
+  }
+
+  public IntakeParticipant getAssignedSocialWorker() {
+    return assignedSocialWorker;
+  }
+
+  public void setAssignedSocialWorker(IntakeParticipant assignedSocialWorker) {
+    this.assignedSocialWorker = assignedSocialWorker;
   }
 
 }
