@@ -20,6 +20,7 @@ import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
  * Entity bean for PostgreSQL view, VW_SCREENING_HISTORY.
@@ -227,16 +228,22 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       ret.setScreeningDecision(screeningDecision);
       ret.setScreeningDecisionDetail(screeningDecisionDetail);
       ret.setScreeningName(screeningName);
+    }
 
-      // ret.setBirthDate(DomainChef.uncookDateString(birthDt));
-      // ret.setFirstName(firstName);
-      // ret.setGender(gender);
-      // ret.setSsn(ssn);
-      // ret.setLastName(lastName);
+    IntakeParticipant partc = ret.getParticipants().containsKey(this.participantId)
+        ? ret.getParticipants().get(this.participantId) : new IntakeParticipant();
+    partc.setBirthDate(DomainChef.uncookDateString(birthDt));
+    partc.setFirstName(firstName);
+    partc.setGender(gender);
+    partc.setSsn(ssn);
+    partc.setLastName(lastName);
+    partc.setLegacyId(legacyId);
 
-      if (flgReporter) {
-        // ret.setReporterParticipantId(participantId);
-      }
+    // partc.setr
+    ret.addParticipant(partc);
+
+    if (flgReporter) {
+      // ret.setReporterParticipantId(participantId);
     }
 
     // Client Address:

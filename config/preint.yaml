@@ -1,5 +1,5 @@
 elasticsearch.host: elasticsearch.preint.cwds.io
 elasticsearch.port: 9300
-elasticsearch.cluster: es-trn01
+elasticsearch.cluster: es-preint
 elasticsearch.alias: people
 elasticsearch.doctype: person

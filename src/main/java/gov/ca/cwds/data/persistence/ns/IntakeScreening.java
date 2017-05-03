@@ -1,7 +1,7 @@
 package gov.ca.cwds.data.persistence.ns;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -66,7 +66,9 @@ public class IntakeScreening implements PersistentObject, ApiMultiplePersonAware
   @Column(name = "SCREENING_DECISION_DETAIL")
   private String screeningDecisionDetail;
 
-  private List<IntakeParticipant> reporter = new ArrayList<>();
+  private Map<String, IntakeParticipant> participants = new LinkedHashMap<>();
+
+  private Map<String, IntakeAllegation> allegations = new LinkedHashMap<>();
 
   private IntakeParticipant assignedSocialWorker = new IntakeParticipant();
 
@@ -230,20 +232,23 @@ public class IntakeScreening implements PersistentObject, ApiMultiplePersonAware
 
   @Override
   public ApiPersonAware[] getPersons() {
-    // TODO Auto-generated method stub
     return null;
   }
 
-  public List<IntakeParticipant> getReporter() {
-    return reporter;
+  public void addParticipant(IntakeParticipant prt) {
+    this.participants.put(prt.getId(), prt);
   }
 
-  public void setReporter(List<IntakeParticipant> reporter) {
-    this.reporter = reporter;
+  public void addAllegation(IntakeAllegation alg) {
+    this.allegations.put(alg.getId(), alg);
   }
 
-  public void addReporter(IntakeParticipant reporter) {
-    this.reporter.add(reporter);
+  public Map<String, IntakeParticipant> getParticipants() {
+    return participants;
+  }
+
+  public Map<String, IntakeAllegation> getAllegations() {
+    return allegations;
   }
 
 }

@@ -1,17 +1,26 @@
 package gov.ca.cwds.data.persistence.ns;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.std.ApiAddressAware;
+import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
+import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.data.std.ApiPhoneAware;
 
 /**
  * Represents an Intake Participant or Person.
  * 
  * @author CWDS API Team
  */
-public class IntakeParticipant implements PersistentObject, ApiPersonAware {
+public class IntakeParticipant
+    implements PersistentObject, ApiPersonAware, ApiMultipleAddressesAware, ApiMultiplePhonesAware {
 
   /**
    * Default serialization.
@@ -19,6 +28,8 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware {
   private static final long serialVersionUID = 1L;
 
   private String id;
+
+  private String legacyId;
 
   private String firstName;
 
@@ -29,6 +40,10 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware {
   private String gender;
 
   private String ssn;
+
+  private transient List<ElasticSearchPersonAddress> addresses = new ArrayList<>();
+
+  private transient List<ElasticSearchPersonPhone> phones = new ArrayList<>();
 
   @Override
   public Serializable getPrimaryKey() {
@@ -96,6 +111,24 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware {
 
   public void setSsn(String ssn) {
     this.ssn = ssn;
+  }
+
+  public String getLegacyId() {
+    return legacyId;
+  }
+
+  public void setLegacyId(String legacyId) {
+    this.legacyId = legacyId;
+  }
+
+  @Override
+  public ApiPhoneAware[] getPhones() {
+    return phones.toArray(new ApiPhoneAware[0]);
+  }
+
+  @Override
+  public ApiAddressAware[] getAddresses() {
+    return addresses.toArray(new ApiAddressAware[0]);
   }
 
 }
