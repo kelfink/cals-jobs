@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -47,7 +49,7 @@ public class IntakeParticipant
 
   @Override
   public Serializable getPrimaryKey() {
-    return this.id;
+    return StringUtils.isNotBlank(legacyId) ? legacyId : id;
   }
 
   @Override

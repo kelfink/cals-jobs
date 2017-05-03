@@ -39,6 +39,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
@@ -331,6 +332,21 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
   }
 
+  protected ElasticSearchPerson[] buildElasticSearchPersons(T p) throws JsonProcessingException {
+    ElasticSearchPerson[] ret = null;
+    if (p instanceof ApiMultiplePersonAware) {
+      final ApiPersonAware[] persons = ((ApiMultiplePersonAware) p).getPersons();
+      ret = new ElasticSearchPerson[persons.length];
+      int i = 0;
+      for (ApiPersonAware px : persons) {
+        ret[i++] = buildElasticSearchPersonDoc(px);
+      }
+    } else {
+      ret = new ElasticSearchPerson[] {buildElasticSearchPerson(p)};
+    }
+    return ret;
+  }
+
   /**
    * Produce an ElasticSearchPerson suitable as an Elasticsearch person document.
    * 
@@ -339,7 +355,19 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @throws JsonProcessingException if unable to serialize JSON
    */
   protected ElasticSearchPerson buildElasticSearchPerson(T p) throws JsonProcessingException {
-    ApiPersonAware pa = (ApiPersonAware) p;
+    return buildElasticSearchPersonDoc((ApiPersonAware) p);
+  }
+
+  /**
+   * Produce an ElasticSearchPerson suitable as an Elasticsearch person document.
+   * 
+   * @param p ApiPersonAware persistence object
+   * @return populated ElasticSearchPerson
+   * @throws JsonProcessingException if unable to serialize JSON
+   */
+  protected ElasticSearchPerson buildElasticSearchPersonDoc(ApiPersonAware p)
+      throws JsonProcessingException {
+    ApiPersonAware pa = p;
     List<String> languages = null;
     List<ElasticSearchPerson.ElasticSearchPersonPhone> phones = null;
     List<ElasticSearchPersonAddress> addresses = null;
@@ -752,6 +780,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     LOGGER.warn("DONE: Stage #2: Normalizer");
   }
 
+  protected void logEvery(int cntr, String action, String... args) {
+    if (cntr > 0 && (cntr % LOG_EVERY) == 0) {
+      LOGGER.info("{} {} {}", action, cntr, args);
+    }
+  }
+
   /**
    * Read from normalized record queue and push to ES.
    */
@@ -765,9 +799,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       while (!(isReaderDone && isNormalizerDone && normalizedQueue.isEmpty())) {
         while ((t = normalizedQueue.pollFirst(5, TimeUnit.SECONDS)) != null) {
-          if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
-            LOGGER.info("Published {} recs to ES", cntr);
-          }
+          logEvery(++cntr, "Published", "recs to ES");
           prepareDocument(bp, t);
         }
       }
@@ -814,10 +846,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @throws JsonProcessingException if unable to serialize JSON
    */
   protected final void prepareDocument(BulkProcessor bp, T t) throws JsonProcessingException {
-    final ElasticSearchPerson esp = buildElasticSearchPerson(t);
+    final ElasticSearchPerson[] docs = buildElasticSearchPersons(t);
+    for (ElasticSearchPerson esp : docs) {
+      bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
+      recsPrepared.getAndIncrement();
+    }
 
-    bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, isUpsert));
-    recsPrepared.getAndIncrement();
+    // final ElasticSearchPerson esp = buildElasticSearchPerson(t);
+    // bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, isUpsert));
+    // recsPrepared.getAndIncrement();
   }
 
   /**
@@ -1090,8 +1127,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         final BulkProcessor bp = buildBulkProcessor();
         results.stream().forEach(p -> {
           try {
-            final ElasticSearchPerson esp = buildElasticSearchPerson(p);
-            bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
+            final ElasticSearchPerson[] docs = buildElasticSearchPersons(p);
+            for (ElasticSearchPerson esp : docs) {
+              bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
+            }
+
+            // final ElasticSearchPerson esp = buildElasticSearchPerson(p);
+            // bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
           } catch (JsonProcessingException e) {
             throw new JobsException("JSON error", e);
           }

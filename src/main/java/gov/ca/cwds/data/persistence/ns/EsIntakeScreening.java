@@ -20,8 +20,10 @@ import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
@@ -218,6 +220,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     ret.setSsn(ssn);
     ret.setLastName(lastName);
     ret.setLegacyId(legacyId);
+    ret.setId(participantId);
     return ret;
   }
 
@@ -293,9 +296,16 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       p.addAddress(addr);
     }
 
-    if (StringUtils.isNotBlank(addressId)) {
+    if (StringUtils.isNotBlank(phoneNumberId)) {
+      final ElasticSearchPersonPhone ph = new ElasticSearchPersonPhone();
+      ph.setId(phoneNumberId);
+      ph.setPhoneNumber(phoneNumber);
 
+      if (StringUtils.isNotBlank(phoneType)) {
+        ph.setPhoneType(PhoneType.valueOf(phoneType));
+      }
     }
+
   }
 
   @Override

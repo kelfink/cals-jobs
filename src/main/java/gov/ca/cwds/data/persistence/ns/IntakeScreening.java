@@ -225,11 +225,6 @@ public class IntakeScreening implements PersistentObject, ApiMultiplePersonAware
     this.assignedSocialWorker = assignedSocialWorker;
   }
 
-  @Override
-  public ApiPersonAware[] getPersons() {
-    return null;
-  }
-
   public void addParticipant(IntakeParticipant prt) {
     this.participants.put(prt.getId(), prt);
   }
@@ -252,6 +247,11 @@ public class IntakeScreening implements PersistentObject, ApiMultiplePersonAware
 
   public void setReporter(IntakeParticipant reporter) {
     this.reporter = reporter;
+  }
+
+  @Override
+  public ApiPersonAware[] getPersons() {
+    return getParticipants().values().toArray(new ApiPersonAware[0]);
   }
 
 }
