@@ -20,6 +20,8 @@ public class ESFacilityAddress {
     private String streetAddress;
     @JsonProperty("city")
     private String city;
+    @JsonProperty("county")
+    private String county;
 
    /* public String getStreetNumber() {
         return streetNumber;
@@ -75,5 +77,13 @@ public class ESFacilityAddress {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getCounty() {
+        return county;
+    }
+
+    public void setCounty(String county) {
+        this.county = county;
     }
 }
