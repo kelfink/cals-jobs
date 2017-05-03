@@ -304,6 +304,8 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       if (StringUtils.isNotBlank(phoneType)) {
         ph.setPhoneType(PhoneType.valueOf(phoneType));
       }
+
+      p.addPhone(ph);
     }
 
   }
