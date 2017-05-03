@@ -72,12 +72,7 @@ public class IntakeScreening implements PersistentObject, ApiMultiplePersonAware
 
   private IntakeParticipant assignedSocialWorker = new IntakeParticipant();
 
-  // @OneToOne(cascade = CascadeType.ALL)
-  // @JoinColumn(name = "contact_address_id")
-  // private Address contactAddress;
-
-  // @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "screening")
-  // private Set<Participant> participants = new HashSet<>(0);
+  private IntakeParticipant reporter = new IntakeParticipant();
 
   /**
    * Default constructor
@@ -249,6 +244,14 @@ public class IntakeScreening implements PersistentObject, ApiMultiplePersonAware
 
   public Map<String, IntakeAllegation> getAllegations() {
     return allegations;
+  }
+
+  public IntakeParticipant getReporter() {
+    return reporter;
+  }
+
+  public void setReporter(IntakeParticipant reporter) {
+    this.reporter = reporter;
   }
 
 }

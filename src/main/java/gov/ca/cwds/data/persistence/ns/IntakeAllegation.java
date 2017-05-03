@@ -6,19 +6,29 @@ import java.util.List;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 
+/**
+ * Represents a screening allegation.
+ * 
+ * @author CWDS API Team
+ */
 public class IntakeAllegation implements PersistentObject {
+
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
 
   private String id;
 
   private List<String> allegationTypes = new ArrayList<>();
 
   /**
-   * Not yet available in Intake PG.
+   * Not yet available from Intake PG.
    */
   private String allegationDescription;
 
   /**
-   * Not yet available in Intake PG.
+   * Not yet available from Intake PG.
    */
   private String dispositionDescription;
 
@@ -28,7 +38,7 @@ public class IntakeAllegation implements PersistentObject {
 
   @Override
   public Serializable getPrimaryKey() {
-    return id;
+    return getId();
   }
 
   public String getId() {

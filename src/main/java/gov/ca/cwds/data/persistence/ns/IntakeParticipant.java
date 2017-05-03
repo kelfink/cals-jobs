@@ -1,9 +1,9 @@
 package gov.ca.cwds.data.persistence.ns;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
@@ -41,9 +41,9 @@ public class IntakeParticipant
 
   private String ssn;
 
-  private transient List<ElasticSearchPersonAddress> addresses = new ArrayList<>();
+  private Map<String, ElasticSearchPersonAddress> addresses = new LinkedHashMap<>();
 
-  private transient List<ElasticSearchPersonPhone> phones = new ArrayList<>();
+  private Map<String, ElasticSearchPersonPhone> phones = new LinkedHashMap<>();
 
   @Override
   public Serializable getPrimaryKey() {
@@ -123,12 +123,24 @@ public class IntakeParticipant
 
   @Override
   public ApiPhoneAware[] getPhones() {
-    return phones.toArray(new ApiPhoneAware[0]);
+    return phones.values().toArray(new ApiPhoneAware[0]);
   }
 
   @Override
   public ApiAddressAware[] getAddresses() {
-    return addresses.toArray(new ApiAddressAware[0]);
+    return addresses.values().toArray(new ApiAddressAware[0]);
+  }
+
+  public void addPhone(ElasticSearchPersonPhone ph) {
+    if (!phones.containsKey(ph.getPhoneId())) {
+      phones.put(ph.getPhoneId(), ph);
+    }
+  }
+
+  public void addAddress(ElasticSearchPersonAddress addr) {
+    if (!addresses.containsKey(addr.getAddressId())) {
+      addresses.put(addr.getAddressId(), addr);
+    }
   }
 
 }

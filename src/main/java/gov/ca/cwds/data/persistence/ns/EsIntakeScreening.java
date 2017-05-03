@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +19,7 @@ import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
@@ -208,60 +210,92 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     return IntakeScreening.class;
   }
 
+  protected IntakeParticipant fillParticipant(IntakeParticipant p) {
+    IntakeParticipant ret = p == null ? new IntakeParticipant() : p;
+    ret.setBirthDate(DomainChef.uncookDateString(birthDt));
+    ret.setFirstName(firstName);
+    ret.setGender(gender);
+    ret.setSsn(ssn);
+    ret.setLastName(lastName);
+    ret.setLegacyId(legacyId);
+    return ret;
+  }
+
+  protected IntakeParticipant fillParticipant() {
+    return fillParticipant(null);
+  }
+
   @Override
   public void reduce(Map<Object, IntakeScreening> map) {
-    final boolean isScreeningAdded = map.containsKey(this.screeningId);
-    IntakeScreening ret = isScreeningAdded ? map.get(this.screeningId) : new IntakeScreening();
+    IntakeScreening s;
 
-    if (!isScreeningAdded) {
-      // Core screening attributes.
-      ret.setAdditionalInformation(additionalInformation);
-      ret.setAssignee(assignee);
-      ret.setCommunicationMethod(communicationMethod);
-      ret.setEndedAt(endedAt);
-      ret.setId(screeningId);
-      ret.setIncidentCounty(incidentCounty);
-      ret.setIncidentDate(incidentDate);
-      ret.setLocationType(locationType);
-      ret.setReference(reference);
-      ret.setReportNarrative(reportNarrative);
-      ret.setScreeningDecision(screeningDecision);
-      ret.setScreeningDecisionDetail(screeningDecisionDetail);
-      ret.setScreeningName(screeningName);
+    if (!map.containsKey(screeningId)) {
+      s = new IntakeScreening();
+      s.setAdditionalInformation(additionalInformation);
+      s.setAssignee(assignee);
+      s.setCommunicationMethod(communicationMethod);
+      s.setEndedAt(endedAt);
+      s.setId(screeningId);
+      s.setIncidentCounty(incidentCounty);
+      s.setIncidentDate(incidentDate);
+      s.setLocationType(locationType);
+      s.setReference(reference);
+      s.setReportNarrative(reportNarrative);
+      s.setScreeningDecision(screeningDecision);
+      s.setScreeningDecisionDetail(screeningDecisionDetail);
+      s.setScreeningName(screeningName);
+      map.put(s.getId(), s);
+
+      final IntakeParticipant worker = s.getAssignedSocialWorker();
+      worker.setLastName(assignee);
+    } else {
+      s = map.get(screeningId);
     }
 
-    IntakeParticipant partc = ret.getParticipants().containsKey(this.participantId)
-        ? ret.getParticipants().get(this.participantId) : new IntakeParticipant();
-    partc.setBirthDate(DomainChef.uncookDateString(birthDt));
-    partc.setFirstName(firstName);
-    partc.setGender(gender);
-    partc.setSsn(ssn);
-    partc.setLastName(lastName);
-    partc.setLegacyId(legacyId);
+    IntakeParticipant p;
+    if (s.getParticipants().containsKey(participantId)) {
+      p = s.getParticipants().get(participantId);
+    } else {
+      p = fillParticipant();
+      s.addParticipant(p);
+    }
 
-    // partc.setr
-    ret.addParticipant(partc);
+    IntakeAllegation alg;
+    if (s.getAllegations().containsKey(allegationId)) {
+      alg = s.getAllegations().get(allegationId);
+    } else {
+      alg = new IntakeAllegation();
+      alg.setId(allegationId);
+      s.addAllegation(alg);
+    }
+
+    if (flgPerpetrator) {
+      alg.setPerpetrator(p);
+    }
+
+    if (flgVictim) {
+      alg.setVictim(p);
+    }
 
     if (flgReporter) {
-      // ret.setReporterParticipantId(participantId);
+      fillParticipant(s.getReporter());
     }
 
-    // Client Address:
-    // if (StringUtils.isNotBlank(getClaId())) {
-    // ReplicatedClientAddress rca = new ReplicatedClientAddress();
-    // rca.setAddressType(getClaAddressType());
-    // ret.addClientAddress(rca);
-    //
-    // // Address proper:
-    // // if (StringUtils.isNotBlank(getAdrId())) {
-    // // ReplicatedAddress adr = new ReplicatedAddress();
-    // // adr.setAddressDescription(getAdrAddressDescription());
-    // // adr.setId(getAdrId());
-    // // rca.addAddress(adr);
-    // // }
-    // }
+    if (StringUtils.isNotBlank(addressId)) {
+      final ElasticSearchPersonAddress addr = new ElasticSearchPersonAddress();
+      addr.setId(addressId);
+      addr.setCity(city);
+      addr.setState(state);
+      // addr.setStateName(stateName);
+      addr.setStreetAddress(streetAddress);
+      addr.setType(addressType);
+      addr.setZip(zip);
+      p.addAddress(addr);
+    }
 
-    map.put(ret.getId(), ret);
+    if (StringUtils.isNotBlank(addressId)) {
+
+    }
   }
 
   @Override
