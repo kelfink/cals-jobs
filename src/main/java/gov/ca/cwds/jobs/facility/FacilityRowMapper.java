@@ -40,7 +40,7 @@ public class FacilityRowMapper implements RowMapper<ESFacility> {
             }
             String value = resultSet.getString(jsonName);
 
-            descriptor.getWriteMethod().invoke(object, value);
+            descriptor.getWriteMethod().invoke(object, value == null ? "" : value.trim());
         }
         else {
             Object child = field.getType().newInstance();
