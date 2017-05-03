@@ -6,18 +6,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Created by dmitry.rudenko on 5/2/2017.
  */
 public class ESFacilityAddress {
-    @JsonProperty("street_number")
+/*    @JsonProperty("street_number")
     private String streetNumber;
     @JsonProperty("street_name")
-    private String streetName;
+    private String streetName;*/
     @JsonProperty("state_code_type")
     private String stateCodeType;
     @JsonProperty("zip_code")
     private String zipCode;
     @JsonProperty("zip_suffix_code")
     private String zipSuffixCode;
+    @JsonProperty("street_address")
+    private String streetAddress;
+    @JsonProperty("city")
+    private String city;
 
-    public String getStreetNumber() {
+   /* public String getStreetNumber() {
         return streetNumber;
     }
 
@@ -31,7 +35,7 @@ public class ESFacilityAddress {
 
     public void setStreetName(String streetName) {
         this.streetName = streetName;
-    }
+    }*/
 
     public String getStateCodeType() {
         return stateCodeType;
@@ -55,5 +59,21 @@ public class ESFacilityAddress {
 
     public void setZipSuffixCode(String zipSuffixCode) {
         this.zipSuffixCode = zipSuffixCode;
+    }
+
+    public String getStreetAddress() {
+        return streetAddress;
+    }
+
+    public void setStreetAddress(String streetAddress) {
+        this.streetAddress = streetAddress;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 }

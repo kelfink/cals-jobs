@@ -13,8 +13,8 @@ job.lis.reader.query: select
                             dc.do_name as "district_office",
                             f.fac_nbr as "license_number",
 
-                            f.fac_mail_street_addr as "mail_street_address",
-                            f.fac_mail_city as "mail_city",
+                            f.fac_mail_street_addr as "street_address",
+                            f.fac_mail_city as "city",
                             f.fac_mail_state as "state_code_type",
                             f.fac_mail_zip_code as "zip_code",
                             '' as street_number,
