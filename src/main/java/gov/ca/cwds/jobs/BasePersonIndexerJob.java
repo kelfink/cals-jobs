@@ -737,11 +737,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
         int cntr = 0;
         while (rs.next()) {
-          if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
-            LOGGER.info("Pulled {} MQT records", cntr);
-          }
-
           // Hand the baton to the next runner ...
+          logEvery(++cntr, "Retrieved", "recs");
           queueTransform.putLast(pullFromResultSet(rs));
         }
 
