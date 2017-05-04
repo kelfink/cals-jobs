@@ -55,7 +55,7 @@ public class NsScreeningJob extends BasePersonIndexerJob<IntakeScreening, EsInta
   }
 
   @Override
-  protected void initLoadStage1ReadMaterializedRecords() {
+  protected void threadExtractJdbc() {
     Thread.currentThread().setName("reader");
     LOGGER.warn("BEGIN: Stage #1: NS View Reader");
 
@@ -64,7 +64,7 @@ public class NsScreeningJob extends BasePersonIndexerJob<IntakeScreening, EsInta
 
       for (EsIntakeScreening es : results) {
         // Hand the baton to the next runner ...
-        denormalizedQueue.putLast(es);
+        queueTransform.putLast(es);
       }
 
     } catch (Exception e) {
