@@ -1,14 +1,19 @@
 package gov.ca.cwds.data.persistence.ns;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
 
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
+import gov.ca.cwds.dao.ApiScreeningAware;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
  * NS Persistence class for Intake Screenings.
@@ -18,7 +23,8 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 @SuppressWarnings("serial")
 // @Entity
 // @Table(name = "screenings")
-public class IntakeScreening implements PersistentObject, ApiMultiplePersonAware {
+public class IntakeScreening
+    implements PersistentObject, ApiMultiplePersonAware, ApiScreeningAware {
 
   @Id
   // @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "screenings_id_seq")
@@ -249,9 +255,43 @@ public class IntakeScreening implements PersistentObject, ApiMultiplePersonAware
     this.reporter = reporter;
   }
 
+  protected ElasticSearchPersonScreening toEsScreening() {
+    ElasticSearchPersonScreening ret = new ElasticSearchPersonScreening();
+
+    ret.countyName = this.incidentCounty;
+    ret.decision = this.screeningDecision;
+    ret.endDate = DomainChef.uncookDateString(this.endedAt);
+    ret.startDate = DomainChef.uncookDateString(this.startedAt);
+    ret.id = this.id;
+    // ret.responseTime = this.
+
+    ret.reporter.firstName = getReporter().getFirstName();
+    ret.reporter.lastName = getReporter().getLastName();
+    ret.reporter.id = getReporter().getId();
+    ret.reporter.legacyClientId = getReporter().getLegacyId();
+
+    ret.assignedSocialWorker.firstName = getAssignedSocialWorker().getFirstName();
+    ret.assignedSocialWorker.id = getAssignedSocialWorker().getId();
+    ret.assignedSocialWorker.lastName = getAssignedSocialWorker().getLastName();
+    ret.assignedSocialWorker.legacyClientId = getAssignedSocialWorker().getLegacyId();
+
+    for (IntakeAllegation alg : this.allegations.values()) {
+      ret.allegations.add(alg.toEsAllegation());
+    }
+
+    return ret;
+  }
+
   @Override
   public ApiPersonAware[] getPersons() {
     return getParticipants().values().toArray(new ApiPersonAware[0]);
+  }
+
+  @Override
+  public ElasticSearchPersonScreening[] getScreenings() {
+    List<ElasticSearchPersonScreening> esScreenings = new ArrayList<>();
+    esScreenings.add(toEsScreening());
+    return esScreenings.toArray(new ElasticSearchPersonScreening[0]);
   }
 
 }

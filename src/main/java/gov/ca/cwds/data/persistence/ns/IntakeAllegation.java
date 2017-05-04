@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.persistence.PersistentObject;
 
 /**
@@ -35,6 +36,26 @@ public class IntakeAllegation implements PersistentObject {
   private IntakeParticipant victim = new IntakeParticipant();
 
   private IntakeParticipant perpetrator = new IntakeParticipant();
+
+  public ElasticSearchPersonAllegation toEsAllegation() {
+    ElasticSearchPersonAllegation ret = new ElasticSearchPersonAllegation();
+
+    ret.allegationDescription = this.allegationDescription;
+    ret.dispositionDescription = this.dispositionDescription;
+    ret.id = this.id;
+
+    ret.perpetratorFirstName = this.perpetrator.getFirstName();
+    ret.perpetratorId = this.perpetrator.getId();
+    ret.perpetratorLastName = this.perpetrator.getLastName();
+    ret.perpetratorLegacyClientId = this.perpetrator.getLegacyId();
+
+    ret.victimFirstName = this.victim.getFirstName();
+    ret.victimId = this.victim.getId();
+    ret.victimLastName = this.victim.getLastName();
+    ret.victimLegacyClientId = this.victim.getLegacyId();
+
+    return ret;
+  }
 
   @Override
   public Serializable getPrimaryKey() {

@@ -332,8 +332,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
   }
 
+  /**
+   * Handle both {@link ApiMultiplePersonAware} and {@link ApiPersonAware} implementations of type
+   * T.
+   * 
+   * @param p instance of type T
+   * @return array of person documents
+   * @throws JsonProcessingException on parse error
+   * @see #buildElasticSearchPersonDoc(ApiPersonAware)
+   * @see #buildElasticSearchPerson(PersistentObject)
+   */
   protected ElasticSearchPerson[] buildElasticSearchPersons(T p) throws JsonProcessingException {
-    ElasticSearchPerson[] ret = null;
+    ElasticSearchPerson[] ret;
     if (p instanceof ApiMultiplePersonAware) {
       final ApiPersonAware[] persons = ((ApiMultiplePersonAware) p).getPersons();
       ret = new ElasticSearchPerson[persons.length];
@@ -359,7 +369,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Produce an ElasticSearchPerson suitable as an Elasticsearch person document.
+   * Produce an ElasticSearchPerson objects suitable for an Elasticsearch person document.
    * 
    * @param p ApiPersonAware persistence object
    * @return populated ElasticSearchPerson
@@ -408,14 +418,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       addresses = new ArrayList<>();
       ApiMultipleAddressesAware madrx = (ApiMultipleAddressesAware) p;
       for (ApiAddressAware adrx : madrx.getAddresses()) {
-        ElasticSearchPersonAddress espAdr = new ElasticSearchPersonAddress(adrx);
-
-        addresses.add(espAdr);
+        addresses.add(new ElasticSearchPersonAddress(adrx));
       }
     } else if (p instanceof ApiAddressAware) {
       addresses = new ArrayList<>();
-      final ApiAddressAware adrx = (ApiAddressAware) p;
-      addresses.add(new ElasticSearchPersonAddress(adrx));
+      addresses.add(new ElasticSearchPersonAddress((ApiAddressAware) p));
     }
 
     // Write persistence object to Elasticsearch Person document.
@@ -431,7 +438,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         this.mapper.writeValueAsString(p), // source
         null, // omit highlights
         addresses, // address
-        phones, languages);
+        phones, languages, null);
   }
 
   /**
@@ -552,7 +559,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
 
         // Spawn a reasonable number of threads to process all results.
-        results.parallelStream().forEach(p -> {
+        results.stream().forEach(p -> {
           try {
             // Write persistence object to Elasticsearch Person document.
             final ElasticSearchPerson esp = buildElasticSearchPerson(p);
@@ -806,9 +813,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       // Just to be sure ...
       while ((t = normalizedQueue.pollFirst(4, TimeUnit.SECONDS)) != null) {
-        if (++cntr > 0 && (cntr % LOG_EVERY) == 0) {
-          LOGGER.info("Published {} recs to ES", cntr);
-        }
+        logEvery(++cntr, "Published", "recs to ES");
         prepareDocument(bp, t);
       }
 
@@ -851,26 +856,22 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
       recsPrepared.getAndIncrement();
     }
-
-    // final ElasticSearchPerson esp = buildElasticSearchPerson(t);
-    // bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, isUpsert));
-    // recsPrepared.getAndIncrement();
   }
 
   /**
    * ENTRY POINT FOR INITIAL LOAD.
    */
-  protected void doInitialLoadViaJdbc() {
+  protected void doInitialLoadViaJdbc() throws IOException {
     Thread.currentThread().setName("main");
     isUpsert = false; // Refresh, reload, overwrite. Don't update existing documents.
     try {
-      new Thread(this::initLoadStage1ReadMaterializedRecords).start();
-      new Thread(this::initLoadStage2Normalize).start();
-      new Thread(this::initLoadStep3PushToElasticsearch).start();
+      new Thread(this::initLoadStage1ReadMaterializedRecords).start(); // Extract
+      new Thread(this::initLoadStage2Normalize).start(); // Transform
+      new Thread(this::initLoadStep3PushToElasticsearch).start(); // Load
 
       while (!(isReaderDone && isNormalizerDone && isPublisherDone)) {
-        LOGGER.warn("runInitialLoad: sleep");
-        Thread.sleep(5000);
+        LOGGER.debug("runInitialLoad: sleep");
+        Thread.sleep(2000);
         try {
           this.jobDao.find("abc123"); // dummy call, keep connection pool alive.
         } catch (HibernateException he) { // NOSONAR
@@ -891,6 +892,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (Exception e) {
       LOGGER.error("GENERAL EXCEPTION: {}", e.getMessage(), e);
       throw new JobsException(e);
+    } finally {
+      this.close();
     }
   }
 
