@@ -255,7 +255,7 @@ public class IntakeScreening
     this.reporter = reporter;
   }
 
-  protected ElasticSearchPersonScreening toEsScreening() {
+  public ElasticSearchPersonScreening toEsScreening() {
     ElasticSearchPersonScreening ret = new ElasticSearchPersonScreening();
 
     ret.countyName = this.incidentCounty;
@@ -263,7 +263,6 @@ public class IntakeScreening
     ret.endDate = DomainChef.uncookDateString(this.endedAt);
     ret.startDate = DomainChef.uncookDateString(this.startedAt);
     ret.id = this.id;
-    // ret.responseTime = this.
 
     ret.reporter.firstName = getReporter().getFirstName();
     ret.reporter.lastName = getReporter().getLastName();
@@ -288,7 +287,7 @@ public class IntakeScreening
   }
 
   @Override
-  public ElasticSearchPersonScreening[] getScreenings() {
+  public ElasticSearchPersonScreening[] getEsScreenings() {
     List<ElasticSearchPersonScreening> esScreenings = new ArrayList<>();
     esScreenings.add(toEsScreening());
     return esScreenings.toArray(new ElasticSearchPersonScreening[0]);

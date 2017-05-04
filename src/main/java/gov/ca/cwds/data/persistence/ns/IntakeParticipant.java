@@ -1,14 +1,18 @@
 package gov.ca.cwds.data.persistence.ns;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
@@ -21,8 +25,8 @@ import gov.ca.cwds.data.std.ApiPhoneAware;
  * 
  * @author CWDS API Team
  */
-public class IntakeParticipant
-    implements PersistentObject, ApiPersonAware, ApiMultipleAddressesAware, ApiMultiplePhonesAware {
+public class IntakeParticipant implements PersistentObject, ApiPersonAware,
+    ApiMultipleAddressesAware, ApiMultiplePhonesAware, ApiScreeningAware {
 
   /**
    * Default serialization.
@@ -46,6 +50,8 @@ public class IntakeParticipant
   private Map<String, ElasticSearchPersonAddress> addresses = new LinkedHashMap<>();
 
   private Map<String, ElasticSearchPersonPhone> phones = new LinkedHashMap<>();
+
+  private Map<String, IntakeScreening> screenings = new LinkedHashMap<>();
 
   @Override
   public Serializable getPrimaryKey() {
@@ -133,6 +139,17 @@ public class IntakeParticipant
     return addresses.values().toArray(new ApiAddressAware[0]);
   }
 
+  @Override
+  public ElasticSearchPersonScreening[] getEsScreenings() {
+    List<ElasticSearchPersonScreening> ret = new ArrayList<>();
+
+    for (IntakeScreening ess : screenings.values()) {
+      ret.add(ess.toEsScreening());
+    }
+
+    return ret.toArray(new ElasticSearchPersonScreening[0]);
+  }
+
   public void addPhone(ElasticSearchPersonPhone ph) {
     if (!phones.containsKey(ph.getPhoneId())) {
       phones.put(ph.getPhoneId(), ph);
@@ -142,6 +159,12 @@ public class IntakeParticipant
   public void addAddress(ElasticSearchPersonAddress addr) {
     if (!addresses.containsKey(addr.getAddressId())) {
       addresses.put(addr.getAddressId(), addr);
+    }
+  }
+
+  public void addScreening(IntakeScreening screening) {
+    if (!screenings.containsKey(screening.getId())) {
+      screenings.put(screening.getId(), screening);
     }
   }
 

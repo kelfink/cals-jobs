@@ -261,6 +261,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     } else {
       p = fillParticipant();
       s.addParticipant(p);
+      p.addScreening(s);
     }
 
     IntakeAllegation alg;

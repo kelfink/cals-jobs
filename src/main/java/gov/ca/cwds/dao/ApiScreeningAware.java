@@ -15,6 +15,6 @@ public interface ApiScreeningAware extends Serializable {
   /**
    * @return array of screening objects
    */
-  ElasticSearchPersonScreening[] getScreenings();
+  ElasticSearchPersonScreening[] getEsScreenings();
 
 }

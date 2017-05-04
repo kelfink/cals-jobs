@@ -40,6 +40,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
+import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
@@ -47,6 +48,7 @@ import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.model.cms.JobResultSetAware;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -381,6 +383,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     List<String> languages = null;
     List<ElasticSearchPerson.ElasticSearchPersonPhone> phones = null;
     List<ElasticSearchPersonAddress> addresses = null;
+    List<ElasticSearchPersonScreening> screenings = null;
 
     if (p instanceof ApiMultipleLanguagesAware) {
       ApiMultipleLanguagesAware mlx = (ApiMultipleLanguagesAware) p;
@@ -425,6 +428,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       addresses.add(new ElasticSearchPersonAddress((ApiAddressAware) p));
     }
 
+    if (p instanceof ApiScreeningAware) {
+      screenings = new ArrayList<>();
+      for (ElasticSearchPersonScreening scr : ((ApiScreeningAware) p).getEsScreenings()) {
+        screenings.add(scr);
+      }
+    }
+
     // Write persistence object to Elasticsearch Person document.
     return new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
         pa.getFirstName(), // first name
@@ -437,8 +447,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         pa.getClass().getName(), // type
         this.mapper.writeValueAsString(p), // source
         null, // omit highlights
-        addresses, // address
-        phones, languages, null);
+        addresses, phones, languages, screenings);
   }
 
   /**
