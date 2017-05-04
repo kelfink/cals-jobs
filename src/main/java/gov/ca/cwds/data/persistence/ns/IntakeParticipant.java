@@ -51,6 +51,9 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
 
   private Map<String, ElasticSearchPersonPhone> phones = new LinkedHashMap<>();
 
+  /**
+   * Can't convert to ES screening until all data for screening are loaded.
+   */
   private Map<String, IntakeScreening> screenings = new LinkedHashMap<>();
 
   @Override
