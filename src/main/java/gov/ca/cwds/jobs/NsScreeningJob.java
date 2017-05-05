@@ -71,7 +71,7 @@ public class NsScreeningJob extends BasePersonIndexerJob<IntakeScreening, EsInta
       LOGGER.error("ERROR READING PG VIEW", e);
       throw new JobsException("ERROR READING PG VIEW", e);
     } finally {
-      isReaderDone = true;
+      doneExtract = true;
     }
 
     LOGGER.warn("DONE: Stage #1: NS View Reader");

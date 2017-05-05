@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
@@ -26,7 +27,7 @@ import gov.ca.cwds.data.std.ApiPhoneAware;
  * @author CWDS API Team
  */
 public class IntakeParticipant implements PersistentObject, ApiPersonAware,
-    ApiMultipleAddressesAware, ApiMultiplePhonesAware, ApiScreeningAware {
+    ApiMultipleAddressesAware, ApiMultiplePhonesAware, ApiScreeningAware, ApiLegacyAware {
 
   /**
    * Default serialization.
@@ -55,6 +56,10 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
    * Can't convert to ES screening until all data for screening are loaded.
    */
   private Map<String, IntakeScreening> screenings = new LinkedHashMap<>();
+
+  public String makeUpdateJson() {
+    return "";
+  }
 
   @Override
   public Serializable getPrimaryKey() {
@@ -96,6 +101,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     return this.ssn;
   }
 
+  @Override
   public String getId() {
     return id;
   }
@@ -124,6 +130,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     this.ssn = ssn;
   }
 
+  @Override
   public String getLegacyId() {
     return legacyId;
   }
