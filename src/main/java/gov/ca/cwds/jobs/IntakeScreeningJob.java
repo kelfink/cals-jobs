@@ -7,13 +7,16 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.action.bulk.BulkProcessor;
 import org.hibernate.SessionFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.ns.EsIntakeScreeningDao;
 import gov.ca.cwds.dao.ns.IntakeScreeningDao;
+import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.model.cms.JobResultSetAware;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -24,14 +27,14 @@ import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
 /**
- * Job to load Clients from CMS into ElasticSearch.
+ * Job to load Intake Screening from PostgreSQL into ElasticSearch.
  * 
  * @author CWDS API Team
  */
-public class NsScreeningJob extends BasePersonIndexerJob<IntakeScreening, EsIntakeScreening>
+public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, EsIntakeScreening>
     implements JobResultSetAware<EsIntakeScreening> {
 
-  private static final Logger LOGGER = LogManager.getLogger(NsScreeningJob.class);
+  private static final Logger LOGGER = LogManager.getLogger(IntakeScreeningJob.class);
 
   private EsIntakeScreeningDao viewDao;
 
@@ -46,7 +49,7 @@ public class NsScreeningJob extends BasePersonIndexerJob<IntakeScreening, EsInta
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public NsScreeningJob(final IntakeScreeningDao normalizedDao,
+  public IntakeScreeningJob(final IntakeScreeningDao normalizedDao,
       final EsIntakeScreeningDao denormalizedDao, final ElasticsearchDao elasticsearchDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @NsSessionFactory SessionFactory sessionFactory) {
@@ -75,6 +78,32 @@ public class NsScreeningJob extends BasePersonIndexerJob<IntakeScreening, EsInta
     }
 
     LOGGER.warn("DONE: Stage #1: NS View Reader");
+  }
+
+  @Override
+  protected final void prepareDocument(BulkProcessor bp, IntakeScreening t)
+      throws JsonProcessingException {
+    final ElasticSearchPerson[] docs = buildElasticSearchPersons(t);
+    for (ElasticSearchPerson esp : docs) {
+      // This job always upserts. Other jobs load core information from legacy, whereas this job
+      // fills in screenings, unless the participant is not known to legacy.
+
+      // Upsert.
+      // public ActionRequest bulkUpsert(final String id, final String
+      // alias, final String docType, final String insertJson, final String updateJson)
+
+      if (esp.isUpsert()) {
+        // final String insertJson = mapper.writeValueAsString(esp);
+
+        // final String updateJson =
+        // bp.add(esDao.bulkUpsert(esp.getId(), esDao.getDefaultAlias(), esDao.getDefaultDocType(),
+        // insertJson, updateJson));
+      } else {
+        bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
+      }
+
+      recsPrepared.getAndIncrement();
+    }
   }
 
   @Override
@@ -112,7 +141,7 @@ public class NsScreeningJob extends BasePersonIndexerJob<IntakeScreening, EsInta
   public static void main(String... args) {
     LOGGER.info("Run Intake Screening job");
     try {
-      runJob(NsScreeningJob.class, args);
+      runJob(IntakeScreeningJob.class, args);
     } catch (JobsException e) {
       LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
       throw e;

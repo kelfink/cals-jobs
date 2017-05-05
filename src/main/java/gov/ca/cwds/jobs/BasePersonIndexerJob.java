@@ -448,12 +448,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     if (p instanceof ApiLegacyAware) {
       ApiLegacyAware l = (ApiLegacyAware) p;
 
-      // If bean has both a new id and a legacy and they don't match.
+      // If bean has BOTH new and legacy id's AND they don't match.
       upsert = StringUtils.isNotBlank(l.getId()) && StringUtils.isNotBlank(l.getLegacyId())
           && !l.getId().equals(l.getLegacyId());
       legacyId = l.getLegacyId();
     }
-
 
     // Write persistence object to Elasticsearch Person document.
     ElasticSearchPerson ret;
@@ -912,29 +911,19 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Publish a Person record to Elasticsearch with a bulk processor.
    * 
+   * <p>
+   * Child implementations may customize this method and generate different JSON for create/insert
+   * and update to prevent overwriting data from other jobs.
+   * </p>
+   * 
    * @param bp {@link #buildBulkProcessor()} for this thread
    * @param t Person record to write
    * @throws JsonProcessingException if unable to serialize JSON
    */
-  protected final void prepareDocument(BulkProcessor bp, T t) throws JsonProcessingException {
+  protected void prepareDocument(BulkProcessor bp, T t) throws JsonProcessingException {
     final ElasticSearchPerson[] docs = buildElasticSearchPersons(t);
     for (ElasticSearchPerson esp : docs) {
-
-      // TODO: upsert.
-      // public ActionRequest bulkUpsert(final String id, final String
-      // alias, final String docType, final String insertJson, final String updateJson)
-
-      if (esp.isUpsert()) {
-        // final String insertJson = mapper.writeValueAsString(esp);
-
-        // TODO: update JSON.
-        // final String updateJson =
-        // bp.add(esDao.bulkUpsert(esp.getId(), esDao.getDefaultAlias(), esDao.getDefaultDocType(),
-        // insertJson, updateJson));
-      } else {
-        bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
-      }
-
+      bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
       recsPrepared.getAndIncrement();
     }
   }
