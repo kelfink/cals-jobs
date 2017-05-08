@@ -39,7 +39,6 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
    * @param writer writer
    * 
    * @param <I> output reader type
-   * @param <O> output writer type
    */
   public <I> AsyncReadWriteJob(JobReader<I> reader, JobWriter<I> writer) {
     this.reader = reader;
