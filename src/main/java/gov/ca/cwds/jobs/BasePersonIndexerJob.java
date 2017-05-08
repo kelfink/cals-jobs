@@ -952,7 +952,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param esp ES document, already prepared by
    *        {@link #buildElasticSearchPersonDoc(ApiPersonAware)}
    * @param t target ApiPersonAware instance
-   * @return left = insert JSON, right = update JSON
+   * @return left = insert JSON, right = update JSON throws JsonProcessingException on JSON parse
+   *         error
+   * @throws JsonProcessingException on JSON parse error
+   * @throws IOException on Elasticsearch disconnect
    */
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T t)
       throws JsonProcessingException, IOException {
@@ -971,6 +974,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   /**
    * ENTRY POINT FOR INITIAL LOAD.
+   * 
+   * @throws IOException on database or Elasticsearch disconnect
    */
   protected void doInitialLoadJdbc() throws IOException {
     Thread.currentThread().setName("main");
@@ -992,7 +997,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
       }
 
-      Thread.sleep(2000);
+      Thread.sleep(1000);
       this.close();
       final long endTime = System.currentTimeMillis();
       LOGGER.warn("TOTAL ELAPSED TIME: " + ((endTime - startTime) / 1000) + " SECONDS");
