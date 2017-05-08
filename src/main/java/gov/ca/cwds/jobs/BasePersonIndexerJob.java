@@ -69,6 +69,10 @@ import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
+
+// import static org.elasticsearch.common.xcontent.XContentFactory.*;
+
+
 /**
  * Base person batch job to load clients from CMS into ElasticSearch.
  * 
@@ -90,7 +94,7 @@ import gov.ca.cwds.rest.api.domain.DomainChef;
  * </pre>
  * 
  * @author CWDS API Team
- * @param <T> storable, replicated Person persistence class
+ * @param <T> ES storable, replicated Person persistence class
  * @param <M> MQT entity class, if any, or T
  * @see JobOptions
  */
@@ -231,12 +235,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Get the MQT name, if used. All child classes that rely on a denormalized view must define the
-   * name.
+   * Get the view or materialized query table name, if used. All child classes that rely on a
+   * denormalized view must define the name.
    * 
-   * @return MQT name, if any
+   * @return name of view or materialized query table or null if none
    */
-  public String getMqtName() {
+  public String getViewName() {
     return null;
   }
 
@@ -456,34 +460,36 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     // Write persistence object to Elasticsearch Person document.
     ElasticSearchPerson ret;
-    if (upsert) {
-      // On update, only populate key and fields to be updated.
-      ret = new ElasticSearchPerson(legacyId, // id
-          null, // first name
-          null, // last name
-          null, // middle name
-          null, // name suffix
-          null, // gender
-          null, // birth date
-          null, // SSN
-          null, // type
-          null, // source
-          null, // omit highlights
-          addresses, phones, languages, screenings);
-    } else {
-      ret = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
-          pa.getFirstName(), // first name
-          pa.getLastName(), // last name
-          pa.getMiddleName(), // middle name
-          pa.getNameSuffix(), // name suffix
-          pa.getGender(), // gender
-          DomainChef.cookDate(pa.getBirthDate()), // birth date
-          pa.getSsn(), // SSN
-          pa.getClass().getName(), // type
-          this.mapper.writeValueAsString(p), // source
-          null, // omit highlights
-          addresses, phones, languages, screenings);
-    }
+    // if (upsert) {
+    // // On update, only populate key and fields to be updated.
+    // // TODO: store PG id too?
+    //
+    // ret = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
+    // null, // first name
+    // null, // last name
+    // null, // middle name
+    // null, // name suffix
+    // null, // gender
+    // null, // birth date
+    // null, // SSN
+    // null, // type
+    // null, // source
+    // null, // omit highlights
+    // addresses, phones, languages, screenings);
+    // } else {
+    ret = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
+        pa.getFirstName(), // first name
+        pa.getLastName(), // last name
+        pa.getMiddleName(), // middle name
+        pa.getNameSuffix(), // name suffix
+        pa.getGender(), // gender
+        DomainChef.cookDate(pa.getBirthDate()), // birth date
+        pa.getSsn(), // SSN
+        pa.getClass().getName(), // type
+        this.mapper.writeValueAsString(p), // source
+        null, // omit highlights
+        addresses, phones, languages, screenings);
+    // }
 
     return ret;
   }
@@ -589,7 +595,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    *
    * <p>
    * Fetch all records for the next batch run, either by bucket or last successful run date. Pulls
-   * either from an MQT via {@link #pullLastRunRecsFromMQT(Date)}, if {@link #isMQTNormalizer()} is
+   * either from an MQT via {@link #pullLastRunRecsFromMQT(Date)}, if {@link #isViewNormalizer()} is
    * overridden, else from the base table directly via {@link #pullLastRunRecsFromTable(Date)}.
    * </p>
    * 
@@ -601,7 +607,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       // One bulk processor for "last run" operations. BulkProcessor itself is thread-safe.
       final BulkProcessor bp = buildBulkProcessor();
-      final List<T> results = this.isMQTNormalizer() ? pullLastRunRecsFromMQT(lastRunDt)
+      final List<T> results = this.isViewNormalizer() ? pullLastRunRecsFromMQT(lastRunDt)
           : pullLastRunRecsFromTable(lastRunDt);
 
       if (results != null && !results.isEmpty()) {
@@ -610,6 +616,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         // Spawn a reasonable number of threads to process all results.
         results.stream().forEach(p -> {
           try {
+            // TODO: upsert.
             // Write persistence object to Elasticsearch Person document.
             final ElasticSearchPerson esp = buildElasticSearchPerson(p);
 
@@ -739,7 +746,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @return true if class overrides {@link #reduce(List)}
    */
-  protected final boolean isMQTNormalizer() {
+  protected final boolean isViewNormalizer() {
     return getDenormalizedClass() != null;
   }
 
@@ -762,7 +769,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       StringBuilder buf = new StringBuilder();
       buf.append("SELECT x.* FROM ").append(System.getProperty("DB_CMS_SCHEMA")).append(".")
-          .append(getMqtName()).append(" x ORDER BY x.clt_identifier ").append(" FOR READ ONLY");
+          .append(getViewName()).append(" x ORDER BY x.clt_identifier ").append(" FOR READ ONLY");
       final String query = buf.toString();
 
       try (Statement stmt = con.createStatement()) {
@@ -920,12 +927,51 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param t Person record to write
    * @throws JsonProcessingException if unable to serialize JSON
    */
-  protected void prepareDocument(BulkProcessor bp, T t) throws JsonProcessingException {
+  protected void prepareDocument(BulkProcessor bp, T t)
+      throws JsonProcessingException, IOException {
     final ElasticSearchPerson[] docs = buildElasticSearchPersons(t);
     for (ElasticSearchPerson esp : docs) {
-      bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
+      final Pair<String, String> pair = prepareJson(esp, t);
+      String id = esp.getId();
+
+      if (t instanceof ApiLegacyAware) {
+        ApiLegacyAware l = (ApiLegacyAware) t;
+        id = StringUtils.isNotBlank(l.getLegacyId()) ? l.getLegacyId() : l.getId();
+      }
+
+      bp.add(esDao.bulkUpsert(id, esDao.getDefaultAlias(), esDao.getDefaultDocType(),
+          pair.getLeft(), pair.getRight()));
       recsPrepared.getAndIncrement();
     }
+  }
+
+  /**
+   * Prepare sections of a document for update. Elasticsearch will automatically update the provided
+   * sections. Some jobs should only write sub-documents, such as screenings or allegations, from a
+   * new data source, like Intake PostgreSQL, but shouldn't overwrite document details from legacy.
+   * 
+   * <p>
+   * Default handler just serializes the whole ElasticSearchPerson instance to JSON and returns the
+   * same JSON for both insert and update. Child classes should override this method and null out
+   * any fields that should not be updated.
+   * </p>
+   * 
+   * @param esp ES document, already prepared by
+   *        {@link #buildElasticSearchPersonDoc(ApiPersonAware)}
+   * @param t target ApiPersonAware instance
+   * @return left = insert JSON, right = update JSON
+   */
+  protected Pair<String, String> prepareJson(ElasticSearchPerson esp, T t)
+      throws JsonProcessingException, IOException {
+
+    // Default implementation overwrites existing document.
+    // IndexRequest indexRequest = new IndexRequest("index", "type", "1").source(
+    // jsonBuilder().startObject().field("name", "Joe Smith").field("gender", "male").endObject());
+    // UpdateRequest updateRequest = new UpdateRequest("index", "type", "1")
+    // .doc(jsonBuilder().startObject().field("gender", "male").endObject()).upsert(indexRequest);
+
+    final String json = mapper.writeValueAsString(esp);
+    return Pair.<String, String>of(json, json);
   }
 
   /**
@@ -1221,7 +1267,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
         } catch (Exception e2) {
           fatalError = true;
-          throw new JobsException("ES bulk processor interrupted!", e2);
+          throw new JobsException("ERROR EXTRACTING VIA HIBERNATE!", e2);
         } finally {
           doneExtract = true;
         }

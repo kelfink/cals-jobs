@@ -1,13 +1,14 @@
 package gov.ca.cwds.jobs;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.action.bulk.BulkProcessor;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -64,7 +65,6 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
 
     try {
       final List<EsIntakeScreening> results = this.viewDao.findAll();
-
       for (EsIntakeScreening es : results) {
         // Hand the baton to the next runner ...
         queueTransform.putLast(es);
@@ -81,29 +81,11 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
   }
 
   @Override
-  protected final void prepareDocument(BulkProcessor bp, IntakeScreening t)
-      throws JsonProcessingException {
-    final ElasticSearchPerson[] docs = buildElasticSearchPersons(t);
-    for (ElasticSearchPerson esp : docs) {
-      // This job always upserts. Other jobs load core information from legacy, whereas this job
-      // fills in screenings, unless the participant is not known to legacy.
-
-      // Upsert.
-      // public ActionRequest bulkUpsert(final String id, final String
-      // alias, final String docType, final String insertJson, final String updateJson)
-
-      if (esp.isUpsert()) {
-        // final String insertJson = mapper.writeValueAsString(esp);
-
-        // final String updateJson =
-        // bp.add(esDao.bulkUpsert(esp.getId(), esDao.getDefaultAlias(), esDao.getDefaultDocType(),
-        // insertJson, updateJson));
-      } else {
-        bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
-      }
-
-      recsPrepared.getAndIncrement();
-    }
+  protected Pair<String, String> prepareJson(ElasticSearchPerson esp, IntakeScreening s)
+      throws JsonProcessingException, IOException {
+    final String insertJson = mapper.writeValueAsString(esp);
+    final String updateJson = mapper.writeValueAsString(s);
+    return Pair.<String, String>of(insertJson, updateJson);
   }
 
   @Override
@@ -112,7 +94,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
   }
 
   @Override
-  public String getMqtName() {
+  public String getViewName() {
     return "VW_SCREENING_HISTORY";
   }
 

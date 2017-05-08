@@ -57,7 +57,12 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
    */
   private Map<String, IntakeScreening> screenings = new LinkedHashMap<>();
 
-  public String makeUpdateJson() {
+  /**
+   * Update section JSON is the participant's screenings.
+   * 
+   * @return JSON to update document only
+   */
+  public String buildUpdateJson() {
     return "";
   }
 

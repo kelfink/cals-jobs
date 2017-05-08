@@ -61,7 +61,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  public String getMqtName() {
+  public String getViewName() {
     return "ES_CLIENT_ADDRESS";
   }
 
