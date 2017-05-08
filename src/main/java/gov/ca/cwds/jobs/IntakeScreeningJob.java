@@ -1,16 +1,15 @@
 package gov.ca.cwds.jobs;
 
-import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
-
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,6 +27,9 @@ import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+
+// import static org.elasticsearch.common.xcontent.XContentFactory.*;
+
 
 /**
  * Job to load Intake Screening from PostgreSQL into ElasticSearch.
@@ -83,20 +85,34 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
   }
 
   @Override
-  protected Pair<String, String> prepareJson(ElasticSearchPerson esp, IntakeScreening s)
+  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, IntakeScreening s)
       throws JsonProcessingException, IOException {
     final String insertJson = mapper.writeValueAsString(esp);
 
-    String updateJson = insertJson;
-    try {
-      updateJson = jsonBuilder().startObject().startObject("screenings")
-          .array("screenings", mapper.writeValueAsString(s.toEsScreening())).endObject().string();
-    } catch (Exception e) {
-      LOGGER.error("ERROR BUILDING SCREENING UPDATE: {}", e.getMessage(), e);
-      throw new JobsException("ERROR BUILDING SCREENING UPDATE", e);
-    }
+    // String id = esp.getId();
+    // if (s instanceof ApiLegacyAware) {
+    // ApiLegacyAware l = (ApiLegacyAware) s;
+    // id = StringUtils.isNotBlank(l.getLegacyId()) ? l.getLegacyId() : esp.getId();
+    // }
 
-    return Pair.<String, String>of(insertJson, updateJson);
+    // .doc(jsonBuilder().startObject().startObject("screenings").startArray().startObject()
+    // .value(mapper.writeValueAsString(s.toEsScreening())).endObject().endArray().endObject())
+    // .startObject().value(mapper.writeValueAsBytes(s.toEsScreening())).endObject().endArray()
+
+    final String strScreening = mapper.writeValueAsString(s.toEsScreening());
+    StringBuilder buf = new StringBuilder();
+    buf.append("{ \"screenings\":[").append(strScreening).append("]}");
+
+    final String vatIstZis = buf.toString();
+    LOGGER.warn("vatIstZis = {}", vatIstZis);
+
+    return new UpdateRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), esp.getId())
+        .doc(vatIstZis)
+        // .doc(jsonBuilder().startObject().field("hello", "dude").array("screenings",
+        // strScreenings)
+        // .endObject())
+        .upsert(new IndexRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), esp.getId())
+            .source(insertJson));
   }
 
   @Override

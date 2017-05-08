@@ -25,6 +25,8 @@ import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -931,16 +933,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       throws JsonProcessingException, IOException {
     final ElasticSearchPerson[] docs = buildElasticSearchPersons(t);
     for (ElasticSearchPerson esp : docs) {
-      final Pair<String, String> pair = prepareJson(esp, t);
-      String id = esp.getId();
-
-      if (t instanceof ApiLegacyAware) {
-        ApiLegacyAware l = (ApiLegacyAware) t;
-        id = StringUtils.isNotBlank(l.getLegacyId()) ? l.getLegacyId() : l.getId();
-      }
-
-      bp.add(esDao.bulkUpsert(id, esDao.getDefaultAlias(), esDao.getDefaultDocType(),
-          pair.getLeft(), pair.getRight()));
+      bp.add(prepareUpsertRequest(esp, t));
       recsPrepared.getAndIncrement();
     }
   }
@@ -961,17 +954,19 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param t target ApiPersonAware instance
    * @return left = insert JSON, right = update JSON
    */
-  protected Pair<String, String> prepareJson(ElasticSearchPerson esp, T t)
+  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T t)
       throws JsonProcessingException, IOException {
 
-    // Default implementation overwrites existing document.
-    // IndexRequest indexRequest = new IndexRequest("index", "type", "1").source(
-    // jsonBuilder().startObject().field("name", "Joe Smith").field("gender", "male").endObject());
-    // UpdateRequest updateRequest = new UpdateRequest("index", "type", "1")
-    // .doc(jsonBuilder().startObject().field("gender", "male").endObject()).upsert(indexRequest);
+    String id = esp.getId();
+    if (t instanceof ApiLegacyAware) {
+      ApiLegacyAware l = (ApiLegacyAware) t;
+      id = StringUtils.isNotBlank(l.getLegacyId()) ? l.getLegacyId() : esp.getId();
+    }
 
     final String json = mapper.writeValueAsString(esp);
-    return Pair.<String, String>of(json, json);
+    return new UpdateRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), id).doc(json)
+        .upsert(
+            new IndexRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), id).source(json));
   }
 
   /**
