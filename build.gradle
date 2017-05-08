@@ -44,7 +44,7 @@ dependencies {
 	compile group: "org.postgresql", name: "postgresql", version: "9.4.1208.jre7"
 	compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.0.0-rc4"
 
-	compile group: "gov.ca.cwds.api", name: "api", version: "0.21.857"
+	compile group: "gov.ca.cwds.api", name: "api", version: "0.21.860"
 
     compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
 	compile group: "javax.el", name: "javax.el-api", version: "2.2.4"
@@ -59,7 +59,6 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.+'
     testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
-
     testCompile group: 'com.h2database', name: 'h2', version: '1.4.195'
 }
 

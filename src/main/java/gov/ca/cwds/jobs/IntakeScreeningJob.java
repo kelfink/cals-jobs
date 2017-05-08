@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs;
 
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
+
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -84,7 +86,16 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
   protected Pair<String, String> prepareJson(ElasticSearchPerson esp, IntakeScreening s)
       throws JsonProcessingException, IOException {
     final String insertJson = mapper.writeValueAsString(esp);
-    final String updateJson = mapper.writeValueAsString(s);
+
+    String updateJson = insertJson;
+    try {
+      updateJson = jsonBuilder().startObject().startObject("screenings")
+          .array("screenings", mapper.writeValueAsString(s.toEsScreening())).endObject().string();
+    } catch (Exception e) {
+      LOGGER.error("ERROR BUILDING SCREENING UPDATE: {}", e.getMessage(), e);
+      throw new JobsException("ERROR BUILDING SCREENING UPDATE", e);
+    }
+
     return Pair.<String, String>of(insertJson, updateJson);
   }
 

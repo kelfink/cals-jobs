@@ -109,6 +109,47 @@ public class IntakeScreening
   }
 
   /**
+   * @return ES screening document object
+   */
+  public ElasticSearchPersonScreening toEsScreening() {
+    ElasticSearchPersonScreening ret = new ElasticSearchPersonScreening();
+
+    ret.countyName = this.incidentCounty;
+    ret.decision = this.screeningDecision;
+    ret.endDate = DomainChef.uncookDateString(this.endedAt);
+    ret.startDate = DomainChef.uncookDateString(this.startedAt);
+    ret.id = this.id;
+
+    ret.reporter.firstName = getReporter().getFirstName();
+    ret.reporter.lastName = getReporter().getLastName();
+    ret.reporter.id = getReporter().getId();
+    ret.reporter.legacyClientId = getReporter().getLegacyId();
+
+    ret.assignedSocialWorker.firstName = getAssignedSocialWorker().getFirstName();
+    ret.assignedSocialWorker.id = getAssignedSocialWorker().getId();
+    ret.assignedSocialWorker.lastName = getAssignedSocialWorker().getLastName();
+    ret.assignedSocialWorker.legacyClientId = getAssignedSocialWorker().getLegacyId();
+
+    for (IntakeAllegation alg : this.allegations.values()) {
+      ret.allegations.add(alg.toEsAllegation());
+    }
+
+    return ret;
+  }
+
+  @Override
+  public ApiPersonAware[] getPersons() {
+    return getParticipants().values().toArray(new ApiPersonAware[0]);
+  }
+
+  @Override
+  public ElasticSearchPersonScreening[] getEsScreenings() {
+    List<ElasticSearchPersonScreening> esScreenings = new ArrayList<>();
+    esScreenings.add(toEsScreening());
+    return esScreenings.toArray(new ElasticSearchPersonScreening[0]);
+  }
+
+  /**
    * @return the id
    */
   public String getId() {
@@ -253,44 +294,6 @@ public class IntakeScreening
 
   public void setReporter(IntakeParticipant reporter) {
     this.reporter = reporter;
-  }
-
-  public ElasticSearchPersonScreening toEsScreening() {
-    ElasticSearchPersonScreening ret = new ElasticSearchPersonScreening();
-
-    ret.countyName = this.incidentCounty;
-    ret.decision = this.screeningDecision;
-    ret.endDate = DomainChef.uncookDateString(this.endedAt);
-    ret.startDate = DomainChef.uncookDateString(this.startedAt);
-    ret.id = this.id;
-
-    ret.reporter.firstName = getReporter().getFirstName();
-    ret.reporter.lastName = getReporter().getLastName();
-    ret.reporter.id = getReporter().getId();
-    ret.reporter.legacyClientId = getReporter().getLegacyId();
-
-    ret.assignedSocialWorker.firstName = getAssignedSocialWorker().getFirstName();
-    ret.assignedSocialWorker.id = getAssignedSocialWorker().getId();
-    ret.assignedSocialWorker.lastName = getAssignedSocialWorker().getLastName();
-    ret.assignedSocialWorker.legacyClientId = getAssignedSocialWorker().getLegacyId();
-
-    for (IntakeAllegation alg : this.allegations.values()) {
-      ret.allegations.add(alg.toEsAllegation());
-    }
-
-    return ret;
-  }
-
-  @Override
-  public ApiPersonAware[] getPersons() {
-    return getParticipants().values().toArray(new ApiPersonAware[0]);
-  }
-
-  @Override
-  public ElasticSearchPersonScreening[] getEsScreenings() {
-    List<ElasticSearchPersonScreening> esScreenings = new ArrayList<>();
-    esScreenings.add(toEsScreening());
-    return esScreenings.toArray(new ElasticSearchPersonScreening[0]);
   }
 
 }
