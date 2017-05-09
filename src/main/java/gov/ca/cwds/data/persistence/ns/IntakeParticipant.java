@@ -34,7 +34,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
    */
   private static final long serialVersionUID = 1L;
 
-  private String id;
+  private String intakeId;
 
   private String legacyId;
 
@@ -68,7 +68,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
 
   @Override
   public Serializable getPrimaryKey() {
-    return StringUtils.isNotBlank(legacyId) ? legacyId : id;
+    return StringUtils.isNotBlank(legacyId) ? legacyId : intakeId;
   }
 
   @Override
@@ -108,11 +108,11 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
 
   @Override
   public String getId() {
-    return id;
+    return intakeId;
   }
 
   public void setId(String id) {
-    this.id = id;
+    this.intakeId = id;
   }
 
   public void setFirstName(String firstName) {
@@ -181,6 +181,30 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     if (!screenings.containsKey(screening.getId())) {
       screenings.put(screening.getId(), screening);
     }
+  }
+
+  public String getIntakeId() {
+    return intakeId;
+  }
+
+  public void setIntakeId(String intakeId) {
+    this.intakeId = intakeId;
+  }
+
+  public Map<String, IntakeScreening> getScreenings() {
+    return screenings;
+  }
+
+  public void setScreenings(Map<String, IntakeScreening> screenings) {
+    this.screenings = screenings;
+  }
+
+  public void setAddresses(Map<String, ElasticSearchPersonAddress> addresses) {
+    this.addresses = addresses;
+  }
+
+  public void setPhones(Map<String, ElasticSearchPersonPhone> phones) {
+    this.phones = phones;
   }
 
 }
