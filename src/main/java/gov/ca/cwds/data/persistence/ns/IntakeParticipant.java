@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
@@ -40,6 +42,11 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
    */
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Types for {@link ElasticSearchPersonNestedPerson} child classes.
+   * 
+   * @author CWDS API Team
+   */
   public enum EsPersonType {
     Reporter, SocialWorker, Staff, All;
   }
@@ -58,13 +65,16 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
 
   private String ssn;
 
+  @JsonIgnore
   private Map<String, ElasticSearchPersonAddress> addresses = new LinkedHashMap<>();
 
+  @JsonIgnore
   private Map<String, ElasticSearchPersonPhone> phones = new LinkedHashMap<>();
 
   /**
    * Can't convert to ES screening unless all of screening's data area available.
    */
+  @JsonIgnore
   private Map<String, IntakeScreening> screenings = new LinkedHashMap<>();
 
   /**

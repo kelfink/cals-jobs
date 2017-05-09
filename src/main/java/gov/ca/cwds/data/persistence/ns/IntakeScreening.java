@@ -10,6 +10,8 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAny;
@@ -78,14 +80,19 @@ public class IntakeScreening
   @Column(name = "SCREENING_DECISION_DETAIL")
   private String screeningDecisionDetail;
 
+  @JsonIgnore
   private Map<String, IntakeParticipant> participants = new LinkedHashMap<>();
 
+  @JsonIgnore
   private Map<String, Set<String>> participantRoles = new LinkedHashMap<>();
 
+  @JsonIgnore
   private Map<String, IntakeAllegation> allegations = new LinkedHashMap<>();
 
+  @JsonIgnore
   private IntakeParticipant socialWorker = new IntakeParticipant();
 
+  @JsonIgnore
   private IntakeParticipant reporter = new IntakeParticipant();
 
   /**
