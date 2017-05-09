@@ -189,7 +189,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
    * Convert this participant to an appropriate Elasticsearch nested person element.
    * 
    * @param esType type of Elasticsearch nested person element
-   * @param screening optional screening, required for {@link #EsPersonType.All}.
+   * @param screening optional screening, required for "all_people".
    * @return Elasticsearch nested person object
    */
   public ElasticSearchPersonNestedPerson toEsPerson(EsPersonType esType,

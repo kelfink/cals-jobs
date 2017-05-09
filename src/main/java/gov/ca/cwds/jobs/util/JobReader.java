@@ -10,7 +10,7 @@ public interface JobReader<T> extends JobComponent {
   /**
    *
    * @return extracted object, MUST return null when done
-   * @throws Exception
+   * @throws Exception if unable to read from source
    */
   T read() throws Exception;
 

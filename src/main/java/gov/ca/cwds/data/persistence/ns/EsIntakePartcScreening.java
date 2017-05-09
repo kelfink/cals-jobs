@@ -217,10 +217,10 @@ public class EsIntakePartcScreening
   }
 
   /**
-   * Populate a participant object or create a new one.
+   * Populate a screening object or create a new one.
    * 
-   * @param p participant object to populate or null to create a new one
-   * @return populated participant object
+   * @param s screening object to populate or null to create a new one
+   * @return populated screening object
    */
   protected IntakeScreening fillScreening(IntakeScreening s) {
     IntakeScreening ret = s == null ? new IntakeScreening() : s;
