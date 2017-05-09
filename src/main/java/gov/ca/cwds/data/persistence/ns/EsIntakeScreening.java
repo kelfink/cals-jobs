@@ -24,7 +24,6 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
-import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
  * Entity bean for PostgreSQL view, VW_SCREENING_HISTORY.
@@ -80,11 +79,13 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
 
   @Id
   @Column(name = "STARTED_AT")
-  private String startedAt;
+  // @Type(type = "timestamp")
+  private Date startedAt;
 
   @Id
   @Column(name = "ENDED_AT")
-  private String endedAt;
+  // @Type(type = "timestamp")
+  private Date endedAt;
 
   @Column(name = "INCIDENT_DATE")
   private String incidentDate;
@@ -125,7 +126,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   private String participantId;
 
   @Column(name = "BIRTH_DT")
-  private String birthDt;
+  private Date birthDt;
 
   @Column(name = "FIRST_NAME")
   private String firstName;
@@ -221,7 +222,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
    */
   protected IntakeParticipant fillParticipant(IntakeParticipant p) {
     IntakeParticipant ret = p == null ? new IntakeParticipant() : p;
-    ret.setBirthDate(DomainChef.uncookDateString(birthDt));
+    ret.setBirthDate(birthDt);
     ret.setFirstName(firstName);
     ret.setGender(gender);
     ret.setSsn(ssn);

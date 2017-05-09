@@ -81,11 +81,11 @@ public class EsIntakePartcScreening
 
   @Id
   @Column(name = "STARTED_AT")
-  private String startedAt;
+  private Date startedAt;
 
   @Id
   @Column(name = "ENDED_AT")
-  private String endedAt;
+  private Date endedAt;
 
   @Column(name = "INCIDENT_DATE")
   private String incidentDate;

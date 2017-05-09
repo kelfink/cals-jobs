@@ -1,6 +1,7 @@
 package gov.ca.cwds.data.persistence.ns;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,6 +13,7 @@ import javax.persistence.Id;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -22,7 +24,6 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.ns.IntakeParticipant.EsPersonType;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
  * NS Persistence class for Intake Screenings.
@@ -50,10 +51,12 @@ public class IntakeScreening
   private String reference;
 
   @Column(name = "STARTED_AT")
-  private String startedAt;
+  @Type(type = "timestamp")
+  private Date startedAt;
 
   @Column(name = "ENDED_AT")
-  private String endedAt;
+  @Type(type = "timestamp")
+  private Date endedAt;
 
   @Column(name = "INCIDENT_DATE")
   private String incidentDate;
@@ -137,8 +140,8 @@ public class IntakeScreening
     ret.id = this.id;
     ret.countyName = this.incidentCounty;
     ret.decision = this.screeningDecision;
-    ret.endDate = DomainChef.uncookDateString(this.endedAt);
-    ret.startDate = DomainChef.uncookDateString(this.startedAt);
+    ret.endDate = this.endedAt;
+    ret.startDate = this.startedAt;
     ret.responseTime = this.screeningDecisionDetail;
 
     ret.reporter.firstName = getReporter().getFirstName();
@@ -198,19 +201,19 @@ public class IntakeScreening
     this.reference = reference;
   }
 
-  public String getStartedAt() {
+  public Date getStartedAt() {
     return startedAt;
   }
 
-  public void setStartedAt(String startedAt) {
+  public void setStartedAt(Date startedAt) {
     this.startedAt = startedAt;
   }
 
-  public String getEndedAt() {
+  public Date getEndedAt() {
     return endedAt;
   }
 
-  public void setEndedAt(String endedAt) {
+  public void setEndedAt(Date endedAt) {
     this.endedAt = endedAt;
   }
 
