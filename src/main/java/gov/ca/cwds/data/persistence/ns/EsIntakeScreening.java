@@ -143,7 +143,8 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   private String personLegacyId;
 
   @Column(name = "ROLES")
-  private String roles;
+  @Type(type = "gov.ca.cwds.data.persistence.ns.StringArrayType")
+  private String[] roles;
 
   @Column(name = "IS_REPORTER")
   @ColumnTransformer(read = "IS_REPORTER IS NOT NULL")
@@ -230,6 +231,11 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     return ret;
   }
 
+  /**
+   * Create a new participant and populate it from this object.
+   * 
+   * @return a new participant, populated from this object
+   */
   protected IntakeParticipant fillParticipant() {
     return fillParticipant(null);
   }
@@ -255,7 +261,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       s.setScreeningName(screeningName);
       map.put(s.getId(), s);
 
-      final IntakeParticipant worker = s.getAssignedSocialWorker();
+      final IntakeParticipant worker = s.getSocialWorker();
       worker.setLastName(assignee);
     } else {
       s = map.get(screeningId);
@@ -268,6 +274,10 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       p = fillParticipant();
       s.addParticipant(p);
       p.addScreening(s);
+
+      for (String role : roles) {
+        s.addParticipantRole(p.getIntakeId(), role);
+      }
     }
 
     IntakeAllegation alg;
@@ -296,7 +306,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       addr.setId(addressId);
       addr.setCity(city);
       addr.setState(state);
-      // addr.setStateName(stateName);
+      // addr.setStateName(stateName); // Not found in legacy.
       addr.setStreetAddress(streetAddress);
       addr.setType(addressType);
       addr.setZip(zip);

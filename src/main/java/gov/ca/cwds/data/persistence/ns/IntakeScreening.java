@@ -2,16 +2,20 @@ package gov.ca.cwds.data.persistence.ns;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
 
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAny;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.ns.IntakeParticipant.EsPersonType;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
@@ -25,6 +29,8 @@ import gov.ca.cwds.rest.api.domain.DomainChef;
 // @Table(name = "screenings")
 public class IntakeScreening
     implements PersistentObject, ApiMultiplePersonAware, ApiScreeningAware {
+
+  private static final Set<String> EMPTY_SET_STRING = new LinkedHashSet<>();
 
   @Id
   // @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "screenings_id_seq")
@@ -74,16 +80,16 @@ public class IntakeScreening
 
   private Map<String, IntakeParticipant> participants = new LinkedHashMap<>();
 
+  private Map<String, Set<String>> participantRoles = new LinkedHashMap<>();
+
   private Map<String, IntakeAllegation> allegations = new LinkedHashMap<>();
 
-  private IntakeParticipant assignedSocialWorker = new IntakeParticipant();
+  private IntakeParticipant socialWorker = new IntakeParticipant();
 
   private IntakeParticipant reporter = new IntakeParticipant();
 
   /**
-   * Default constructor
-   * 
-   * Required for Hibernate
+   * Default constructor, required for Hibernate.
    */
   public IntakeScreening() {
     super();
@@ -109,29 +115,36 @@ public class IntakeScreening
   }
 
   /**
+   * Convert this Intake screening object to an Elasticsearch screening element.
+   * 
    * @return ES screening document object
    */
   public ElasticSearchPersonScreening toEsScreening() {
     ElasticSearchPersonScreening ret = new ElasticSearchPersonScreening();
 
+    ret.id = this.id;
     ret.countyName = this.incidentCounty;
     ret.decision = this.screeningDecision;
     ret.endDate = DomainChef.uncookDateString(this.endedAt);
     ret.startDate = DomainChef.uncookDateString(this.startedAt);
-    ret.id = this.id;
+    ret.responseTime = this.screeningDecisionDetail;
 
     ret.reporter.firstName = getReporter().getFirstName();
     ret.reporter.lastName = getReporter().getLastName();
     ret.reporter.id = getReporter().getId();
     ret.reporter.legacyClientId = getReporter().getLegacyId();
 
-    ret.assignedSocialWorker.firstName = getAssignedSocialWorker().getFirstName();
-    ret.assignedSocialWorker.id = getAssignedSocialWorker().getId();
-    ret.assignedSocialWorker.lastName = getAssignedSocialWorker().getLastName();
-    ret.assignedSocialWorker.legacyClientId = getAssignedSocialWorker().getLegacyId();
+    ret.assignedSocialWorker.firstName = getSocialWorker().getFirstName();
+    ret.assignedSocialWorker.id = getSocialWorker().getId();
+    ret.assignedSocialWorker.lastName = getSocialWorker().getLastName();
+    ret.assignedSocialWorker.legacyClientId = getSocialWorker().getLegacyId();
 
     for (IntakeAllegation alg : this.allegations.values()) {
       ret.allegations.add(alg.toEsAllegation());
+    }
+
+    for (IntakeParticipant p : this.participants.values()) {
+      ret.allPeople.add((ElasticSearchPersonAny) p.toEsPerson(EsPersonType.All, this));
     }
 
     return ret;
@@ -264,12 +277,12 @@ public class IntakeScreening
     this.screeningDecisionDetail = screeningDecisionDetail;
   }
 
-  public IntakeParticipant getAssignedSocialWorker() {
-    return assignedSocialWorker;
+  public IntakeParticipant getSocialWorker() {
+    return socialWorker;
   }
 
-  public void setAssignedSocialWorker(IntakeParticipant assignedSocialWorker) {
-    this.assignedSocialWorker = assignedSocialWorker;
+  public void setSocialWorker(IntakeParticipant assignedSocialWorker) {
+    this.socialWorker = assignedSocialWorker;
   }
 
   public void addParticipant(IntakeParticipant prt) {
@@ -278,6 +291,23 @@ public class IntakeScreening
 
   public void addAllegation(IntakeAllegation alg) {
     this.allegations.put(alg.getId(), alg);
+  }
+
+  public void addParticipantRole(String partcId, String role) {
+    Set<String> roles;
+    if (this.participantRoles.containsKey(partcId)) {
+      roles = this.participantRoles.get(partcId);
+    } else {
+      roles = new LinkedHashSet<>();
+      this.participantRoles.put(partcId, roles);
+    }
+
+    roles.add(role);
+  }
+
+  public Set<String> findParticipantRoles(String partcId) {
+    return this.participantRoles.containsKey(partcId) ? this.participantRoles.get(partcId)
+        : EMPTY_SET_STRING;
   }
 
   public Map<String, IntakeParticipant> getParticipants() {
@@ -294,6 +324,10 @@ public class IntakeScreening
 
   public void setReporter(IntakeParticipant reporter) {
     this.reporter = reporter;
+  }
+
+  public Map<String, Set<String>> getParticipantRoles() {
+    return participantRoles;
   }
 
 }

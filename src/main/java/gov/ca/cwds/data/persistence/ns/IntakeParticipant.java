@@ -6,14 +6,20 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAny;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonNestedPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonStaff;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
@@ -34,6 +40,10 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
    */
   private static final long serialVersionUID = 1L;
 
+  public enum EsPersonType {
+    Reporter, SocialWorker, Staff, All;
+  }
+
   private String intakeId;
 
   private String legacyId;
@@ -53,7 +63,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
   private Map<String, ElasticSearchPersonPhone> phones = new LinkedHashMap<>();
 
   /**
-   * Can't convert to ES screening until all data for screening are loaded.
+   * Can't convert to ES screening unless all of screening's data area available.
    */
   private Map<String, IntakeScreening> screenings = new LinkedHashMap<>();
 
@@ -163,6 +173,42 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     }
 
     return ret.toArray(new ElasticSearchPersonScreening[0]);
+  }
+
+  /**
+   * Convert this participant to an appropriate Elasticsearch nested person element.
+   * 
+   * @param esType type of Elasticsearch nested person element
+   * @param screening optional screening, required for {@link #EsPersonType.All}.
+   * @return Elasticsearch nested person object
+   */
+  public ElasticSearchPersonNestedPerson toEsPerson(EsPersonType esType,
+      IntakeScreening screening) {
+    ElasticSearchPersonNestedPerson ret;
+
+    switch (esType) {
+      case Staff:
+        ret = new ElasticSearchPersonStaff();
+        break;
+
+      case Reporter:
+        ret = new ElasticSearchPersonReporter();
+        break;
+
+      case SocialWorker:
+        ret = new ElasticSearchPersonSocialWorker();
+        break;
+
+      case All:
+      default:
+        ElasticSearchPersonAny any = new ElasticSearchPersonAny();
+        any.getRoles()
+            .addAll(screening.findParticipantRoles(intakeId).stream().collect(Collectors.toList()));
+        ret = any;
+        break;
+    }
+
+    return ret;
   }
 
   public void addPhone(ElasticSearchPersonPhone ph) {
