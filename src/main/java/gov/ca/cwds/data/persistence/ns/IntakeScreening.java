@@ -10,6 +10,9 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Id;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
@@ -31,6 +34,8 @@ import gov.ca.cwds.rest.api.domain.DomainChef;
 // @Table(name = "screenings")
 public class IntakeScreening
     implements PersistentObject, ApiMultiplePersonAware, ApiScreeningAware {
+
+  private static final Logger LOGGER = LogManager.getLogger(IntakeScreening.class);
 
   private static final Set<String> EMPTY_SET_STRING = new LinkedHashSet<>();
 
@@ -150,6 +155,7 @@ public class IntakeScreening
       ret.allegations.add(alg.toEsAllegation());
     }
 
+    LOGGER.info("screening: # participants: {}", this.participants.size());
     for (IntakeParticipant p : this.participants.values()) {
       ret.allPeople.add((ElasticSearchPersonAny) p.toEsPerson(EsPersonType.All, this));
     }
@@ -165,6 +171,10 @@ public class IntakeScreening
   @Override
   public ElasticSearchPersonScreening[] getEsScreenings() {
     List<ElasticSearchPersonScreening> esScreenings = new ArrayList<>();
+
+    // TODO: #144948751: Screening History.
+    // Participants may connect to many screenings by person legacy id.
+
     esScreenings.add(toEsScreening());
     return esScreenings.toArray(new ElasticSearchPersonScreening[0]);
   }

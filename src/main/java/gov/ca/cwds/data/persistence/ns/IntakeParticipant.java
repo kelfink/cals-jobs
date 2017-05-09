@@ -218,6 +218,11 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
         break;
     }
 
+    ret.firstName = this.firstName;
+    ret.lastName = this.lastName;
+    ret.legacyClientId = this.legacyId;
+    ret.id = this.intakeId;
+
     return ret;
   }
 

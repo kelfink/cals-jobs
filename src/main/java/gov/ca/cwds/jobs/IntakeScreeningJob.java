@@ -94,7 +94,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
 
     final String insertJson = mapper.writeValueAsString(esp);
     final String updateJson = buf.toString();
-    LOGGER.debug("updateJson: {}", updateJson);
+    LOGGER.info("updateJson: {}", updateJson);
 
     return new UpdateRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), esp.getId())
         .doc(updateJson)
