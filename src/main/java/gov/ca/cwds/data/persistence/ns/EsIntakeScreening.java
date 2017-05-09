@@ -139,8 +139,8 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   @Column(name = "SSN")
   private String ssn;
 
-  @Column(name = "LEGACY_ID")
-  private String legacyId;
+  @Column(name = "PERSON_LEGACY_ID")
+  private String personLegacyId;
 
   @Column(name = "ROLES")
   private String roles;
@@ -212,6 +212,12 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     return IntakeScreening.class;
   }
 
+  /**
+   * Populate a participant object or create a new one.
+   * 
+   * @param p participant object to populate or null to create a new one
+   * @return populated participant object
+   */
   protected IntakeParticipant fillParticipant(IntakeParticipant p) {
     IntakeParticipant ret = p == null ? new IntakeParticipant() : p;
     ret.setBirthDate(DomainChef.uncookDateString(birthDt));
@@ -219,7 +225,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     ret.setGender(gender);
     ret.setSsn(ssn);
     ret.setLastName(lastName);
-    ret.setLegacyId(legacyId);
+    ret.setLegacyId(personLegacyId);
     ret.setId(participantId);
     return ret;
   }

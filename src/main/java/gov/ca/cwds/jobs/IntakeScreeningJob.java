@@ -87,30 +87,17 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, IntakeScreening s)
       throws JsonProcessingException, IOException {
-    final String insertJson = mapper.writeValueAsString(esp);
 
-    // String id = esp.getId();
-    // if (s instanceof ApiLegacyAware) {
-    // ApiLegacyAware l = (ApiLegacyAware) s;
-    // id = StringUtils.isNotBlank(l.getLegacyId()) ? l.getLegacyId() : esp.getId();
-    // }
-
-    // .doc(jsonBuilder().startObject().startObject("screenings").startArray().startObject()
-    // .value(mapper.writeValueAsString(s.toEsScreening())).endObject().endArray().endObject())
-    // .startObject().value(mapper.writeValueAsBytes(s.toEsScreening())).endObject().endArray()
-
-    final String strScreening = mapper.writeValueAsString(s.toEsScreening());
     StringBuilder buf = new StringBuilder();
-    buf.append("{ \"screenings\":[").append(strScreening).append("]}");
+    buf.append("{ \"screenings\":[").append(mapper.writeValueAsString(s.toEsScreening()))
+        .append("]}");
 
-    final String vatIstZis = buf.toString();
-    LOGGER.warn("vatIstZis = {}", vatIstZis);
+    final String insertJson = mapper.writeValueAsString(esp);
+    final String updateJson = buf.toString();
+    LOGGER.debug("updateJson: {}", updateJson);
 
     return new UpdateRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), esp.getId())
-        .doc(vatIstZis)
-        // .doc(jsonBuilder().startObject().field("hello", "dude").array("screenings",
-        // strScreenings)
-        // .endObject())
+        .doc(updateJson)
         .upsert(new IndexRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), esp.getId())
             .source(insertJson));
   }
