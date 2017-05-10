@@ -680,9 +680,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Getter for the job's MQT entity class, if any, or null if none.
+   * Getter for the entity class of this job's view or materialized query table, if any, or null if
+   * none.
    * 
-   * @return MQT entity class
+   * @return entity class of view or materialized query table
    */
   protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
     return null;
@@ -1055,15 +1056,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.warn("Updating last successful run time to {}", jobDateFormat.format(startTime));
       return new Date(this.startTime);
 
-    } catch (JobsException e) {
-      fatalError = true;
-      LOGGER.error("JobsException: {}", e.getMessage(), e);
-      throw e;
     } catch (Exception e) {
       fatalError = true;
       LOGGER.error("General Exception: {}", e.getMessage(), e);
       throw new JobsException("General Exception: " + e.getMessage(), e);
     } finally {
+
+      // Set ETL completion flags to done.
       doneExtract = true;
       doneTransform = true;
       doneLoad = true;
@@ -1077,7 +1076,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   @Override
-  public void close() throws IOException {
+  public synchronized void close() throws IOException {
     if (fatalError || (doneExtract && doneTransform && doneLoad)) {
       LOGGER.warn("CLOSING CONNECTIONS!!");
 
@@ -1100,18 +1099,19 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Finish job and close resources. Default implementation exits the JVM.
    */
   @Override
-  protected void finish() {
+  protected synchronized void finish() {
 
     LOGGER.warn("FINISH JOB AND SHUTDOWN!");
     try {
       close();
-      Thread.sleep(SLEEP_MILLIS);
-      LogManager.shutdown();
+      LogManager.shutdown(); // Flush appenders.
+
+      Thread.sleep(SLEEP_MILLIS); // NOSONAR
       Runtime.getRuntime().exit(0); // NOSONAR
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     } catch (IOException ioe) {
-      LOGGER.error("ERROR CLOSING RESOURCES: {}", ioe.getMessage(), ioe);
+      LOGGER.fatal("ERROR CLOSING RESOURCES OR FINISHING JOB: {}", ioe.getMessage(), ioe);
     }
 
   }

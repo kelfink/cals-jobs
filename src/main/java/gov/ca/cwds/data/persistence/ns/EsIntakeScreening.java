@@ -79,12 +79,12 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
 
   @Id
   @Column(name = "STARTED_AT")
-  // @Type(type = "timestamp")
+  @Type(type = "date")
   private Date startedAt;
 
   @Id
   @Column(name = "ENDED_AT")
-  // @Type(type = "timestamp")
+  @Type(type = "date")
   private Date endedAt;
 
   @Column(name = "INCIDENT_DATE")
@@ -247,11 +247,14 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
 
     if (!map.containsKey(screeningId)) {
       s = new IntakeScreening();
+      s.setId(screeningId);
+
+      s.setEndedAt(new Date(endedAt.getTime()));
+      s.setStartedAt(new Date(startedAt.getTime()));
+
       s.setAdditionalInformation(additionalInformation);
       s.setAssignee(assignee);
       s.setCommunicationMethod(communicationMethod);
-      s.setEndedAt(endedAt);
-      s.setId(screeningId);
       s.setIncidentCounty(incidentCounty);
       s.setIncidentDate(incidentDate);
       s.setLocationType(locationType);
@@ -307,7 +310,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       addr.setId(addressId);
       addr.setCity(city);
       addr.setState(state);
-      // addr.setStateName(stateName); // Not found in legacy.
+      // addr.setStateName(stateName); // Synthetic, not found in legacy.
       addr.setStreetAddress(streetAddress);
       addr.setType(addressType);
       addr.setZip(zip);

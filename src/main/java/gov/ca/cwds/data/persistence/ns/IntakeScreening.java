@@ -13,7 +13,6 @@ import javax.persistence.Id;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -51,11 +50,11 @@ public class IntakeScreening
   private String reference;
 
   @Column(name = "STARTED_AT")
-  @Type(type = "timestamp")
+  // @Type(type = "timestamp")
   private Date startedAt;
 
   @Column(name = "ENDED_AT")
-  @Type(type = "timestamp")
+  // @Type(type = "timestamp")
   private Date endedAt;
 
   @Column(name = "INCIDENT_DATE")

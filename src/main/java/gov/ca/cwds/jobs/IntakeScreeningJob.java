@@ -138,8 +138,8 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
     LOGGER.info("Run Intake Screening job");
     try {
       runJob(IntakeScreeningJob.class, args);
-    } catch (JobsException e) {
-      LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
+    } catch (Exception e) {
+      LOGGER.fatal("FATAL ERROR! STOPPING BATCH: " + e.getMessage(), e);
       throw e;
     }
   }
