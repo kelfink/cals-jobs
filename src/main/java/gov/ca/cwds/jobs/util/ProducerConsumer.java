@@ -4,54 +4,57 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import gov.ca.cwds.jobs.JobsException;
+
 public abstract class ProducerConsumer<T> {
-    private boolean producerDone;
-    private Thread producer = new Thread(this::producer);
-    private Thread consumer = new Thread(this::consumer);
-    private BlockingQueue<T> queue = new LinkedBlockingQueue<>(5000);
 
-    protected abstract T produce();
+  private boolean producerDone;
+  private Thread producer = new Thread(this::producer);
+  private Thread consumer = new Thread(this::consumer);
+  private BlockingQueue<T> queue = new LinkedBlockingQueue<>(5000);
 
-    protected abstract void consume(T var1);
+  protected abstract T produce();
 
-    public void run() throws InterruptedException {
-        this.producer.start();
-        this.consumer.start();
-        this.consumer.join();
-    }
+  protected abstract void consume(T var1);
 
-    private void consumer() {
-        try {
-            while (!producerDone) {
-                T item = queue.poll(2L, TimeUnit.SECONDS);
-                if(item != null) {
-                    consume(item);
-                }
-            }
-            while (!queue.isEmpty()) {
-                consume(queue.take());
-            }
+  public void run() throws InterruptedException {
+    this.producer.start();
+    this.consumer.start();
+    this.consumer.join();
+  }
 
-        }catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            producer.interrupt();
+  private void consumer() {
+    try {
+      while (!producerDone) {
+        T item = queue.poll(2L, TimeUnit.SECONDS);
+        if (item != null) {
+          consume(item);
         }
+      }
+      while (!queue.isEmpty()) {
+        consume(queue.take());
+      }
 
+    } catch (Exception e) {
+      throw new JobsException(e);
+    } finally {
+      producer.interrupt();
     }
 
-    private void producer() {
-        try {
-            T o;
-            try {
-                while((o = produce()) != null) {
-                    queue.put(o);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        } finally {
-            producerDone = true;
+  }
+
+  private void producer() {
+    try {
+      T o;
+      try {
+        while ((o = produce()) != null) {
+          queue.put(o);
         }
+      } catch (Exception e) {
+        throw new JobsException(e);
+      }
+    } finally {
+      producerDone = true;
     }
+  }
 }

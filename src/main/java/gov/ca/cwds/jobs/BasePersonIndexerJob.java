@@ -571,8 +571,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    *
    * <p>
    * Fetch all records for the next batch run, either by bucket or last successful run date. Pulls
-   * either from an MQT via {@link #extractLastRunRecsFromView(Date)}, if {@link #isViewNormalizer()}
-   * is overridden, else from the base table directly via {@link #extractLastRunRecsFromTable(Date)}.
+   * either from an MQT via {@link #extractLastRunRecsFromView(Date)}, if
+   * {@link #isViewNormalizer()} is overridden, else from the base table directly via
+   * {@link #extractLastRunRecsFromTable(Date)}.
    * </p>
    * 
    * @param lastRunDt last time the batch ran successfully.
@@ -1086,6 +1087,20 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         LOGGER.warn("CLOSING SESSION FACTORY");
         this.sessionFactory.close();
       }
+
+      // try () {
+      //
+      // } catch (Exception e) {
+      // // TODO: handle exception
+      // }
+      // final SessionFactory session = (SessionFactory)
+      // injector.getInstance(NsSessionFactory.class);
+
+      // Runtime.getRuntime().
+
+      LOGGER.warn("SHUTDOWN!");
+      Runtime.getRuntime().exit(0); // NOSONAR
+
     } else {
       LOGGER.warn("CLOSE: FALSE ALARM");
     }

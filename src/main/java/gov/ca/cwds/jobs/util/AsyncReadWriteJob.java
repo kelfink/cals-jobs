@@ -12,11 +12,12 @@ import gov.ca.cwds.jobs.JobsException;
 @SuppressWarnings("unchecked")
 public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobComponent {
 
-  private int chunkSize = 100;
   private JobReader reader;
-  private List chunk = new LinkedList<>();
   private JobProcessor processor;
   private JobWriter writer;
+
+  private int chunkSize = 100;
+  private List chunk = new LinkedList<>();
 
   /**
    * @param reader reader
