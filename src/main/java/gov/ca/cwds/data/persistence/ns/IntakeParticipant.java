@@ -48,7 +48,26 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
    * @author CWDS API Team
    */
   public enum EsPersonType {
-    Reporter, SocialWorker, Staff, All;
+
+    /**
+     * For {@link ElasticSearchPersonReporter}.
+     */
+    REPORTER,
+
+    /**
+     * For {@link ElasticSearchPersonSocialWorker}.
+     */
+    SOCIAL_WORKER,
+
+    /**
+     * For {@link ElasticSearchPersonStaff}.
+     */
+    STAFF,
+
+    /**
+     * For {@link ElasticSearchPersonAny}.
+     */
+    ALL;
   }
 
   private String intakeId;
@@ -197,19 +216,19 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     ElasticSearchPersonNestedPerson ret;
 
     switch (esType) {
-      case Staff:
+      case STAFF:
         ret = new ElasticSearchPersonStaff();
         break;
 
-      case Reporter:
+      case REPORTER:
         ret = new ElasticSearchPersonReporter();
         break;
 
-      case SocialWorker:
+      case SOCIAL_WORKER:
         ret = new ElasticSearchPersonSocialWorker();
         break;
 
-      case All:
+      case ALL:
       default:
         ElasticSearchPersonAny any = new ElasticSearchPersonAny();
         any.getRoles()

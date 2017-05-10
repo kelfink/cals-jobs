@@ -160,7 +160,7 @@ public class IntakeScreening
 
     LOGGER.info("screening: # participants: {}", this.participants.size());
     for (IntakeParticipant p : this.participants.values()) {
-      ret.getAllPeople().add((ElasticSearchPersonAny) p.toEsPerson(EsPersonType.All, this));
+      ret.getAllPeople().add((ElasticSearchPersonAny) p.toEsPerson(EsPersonType.ALL, this));
     }
 
     return ret;
