@@ -49,7 +49,7 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter",
         query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
-            + "WHERE vw.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + "WHERE vw.started_at is not null AND vw.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + "ORDER BY vw.SCREENING_ID FOR READ ONLY ",
         resultClass = EsIntakeScreening.class, readOnly = true)})
 public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<IntakeScreening> {

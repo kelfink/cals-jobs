@@ -516,13 +516,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Pull from MQT for last run mode.
+   * Pull from view for last run mode.
    * 
    * @param lastRunTime last successful run time
    * @return List of normalized entities
    */
   protected List<T> extractLastRunRecsFromView(Date lastRunTime) {
-    LOGGER.info("PULL MQT: last successful run: {}", lastRunTime);
+    LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
 
     final Class<?> entityClass = getDenormalizedClass(); // MQT entity class
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
@@ -596,17 +596,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         // Spawn a reasonable number of threads to process all results.
         results.stream().forEach(p -> {
           try {
-            // TODO: upsert.
             // Write persistence object to Elasticsearch Person document.
-            final ElasticSearchPerson esp = buildElasticSearchPerson(p);
-
-            // Bulk indexing! MUCH faster than indexing one doc at a time.
-            bp.add(this.esDao.bulkAdd(this.mapper, esp.getId(), esp, modeUpsert));
+            prepareDocument(bp, p);
           } catch (JsonProcessingException e) {
             fatalError = true;
             doneLoad = true;
             LOGGER.error("ERROR WRITING JSON: {}", e.getMessage(), e);
             throw new JobsException("ERROR WRITING JSON", e);
+          } catch (IOException e) {
+            fatalError = true;
+            doneLoad = true;
+            LOGGER.error("IO EXCEPTION: {}", e.getMessage(), e);
+            throw new JobsException("IO EXCEPTION", e);
           }
         });
 
@@ -732,7 +733,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Single producer, staged consumers.
+   * The "extract" part of ETL. Single producer, staged consumers.
    */
   protected void threadExtractJdbc() {
     Thread.currentThread().setName("extract");
@@ -783,8 +784,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Single thread consumer, second stage of initial load. Convert denormalized MQT records to
-   * normalized ones and hand off to the next queue.
+   * The "transform" part of ETL. Single thread consumer, second stage of initial load. Convert
+   * denormalized view records to normalized ones and pass to the load queue.
    */
   protected void threadTransform() {
     Thread.currentThread().setName("transformer");
@@ -800,10 +801,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         while ((m = queueTransform.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
           logEvery(++cntr, "Transformed", "recs");
 
-          // Assumes that records are sorted by group key.
+          // NOTE: Assumes that records are sorted by group key.
           if (!lastId.equals(m.getGroupKey()) && cntr > 1) {
             queueLoad.putLast(reduceSingle(groupRecs));
-            groupRecs.clear(); // Single thread. Re-use memory.
+            groupRecs.clear(); // Single thread, re-use memory.
           }
 
           groupRecs.add(m);
@@ -844,7 +845,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Read from normalized record queue and push to ES.
+   * The "load" part of ETL. Read from normalized record queue and push to ES.
    */
   protected void threadLoad() {
     Thread.currentThread().setName("loader");
@@ -882,12 +883,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       fatalError = true;
       Thread.currentThread().interrupt();
     } catch (JsonProcessingException e) {
-      LOGGER.error("Publisher: JsonProcessingException! {}", e.getMessage(), e);
       fatalError = true;
+      LOGGER.error("Publisher: JsonProcessingException! {}", e.getMessage(), e);
       throw new JobsException("JSON error", e);
     } catch (Exception e) {
-      LOGGER.fatal("Publisher: fatal error {}", e.getMessage(), e);
       fatalError = true;
+      LOGGER.fatal("Publisher: fatal error {}", e.getMessage(), e);
       throw new JobsException("Publisher: fatal error", e);
     } finally {
       doneLoad = true;
@@ -907,6 +908,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param bp {@link #buildBulkProcessor()} for this thread
    * @param t Person record to write
    * @throws JsonProcessingException if unable to serialize JSON
+   * @see #prepareUpsertRequest(ElasticSearchPerson, PersistentObject)
    */
   protected void prepareDocument(BulkProcessor bp, T t)
       throws JsonProcessingException, IOException {
@@ -1034,7 +1036,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         getOpts().setTotalBuckets(getJobTotalBuckets());
 
         if (this.getDenormalizedClass() != null) {
-          LOGGER.warn("LOAD FROM MQT VIA JDBC!");
+          LOGGER.warn("LOAD FROM VIEW VIA JDBC!");
           doInitialLoadJdbc();
         } else {
           LOGGER.warn("LOAD REPLICATED TABLE QUERY VIA HIBERNATE!");
@@ -1202,7 +1204,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @see #pullBucketRange(String, String)
    */
   protected int extractHibernate() {
-    // isUpsert = true; // Refresh, reload, overwrite. Don't update existing documents.
     final List<Pair<String, String>> buckets = getPartitionRanges();
 
     for (Pair<String, String> b : buckets) {
@@ -1214,14 +1215,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         final BulkProcessor bp = buildBulkProcessor();
         results.stream().forEach(p -> {
           try {
-            final ElasticSearchPerson[] docs = buildElasticSearchPersons(p);
-            for (ElasticSearchPerson esp : docs) {
-              // TODO: upsert.
-              bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
-            }
-
+            prepareDocument(bp, p);
           } catch (JsonProcessingException e) {
             throw new JobsException("JSON error", e);
+          } catch (IOException e) {
+            throw new JobsException("IO error", e);
           }
         });
 
