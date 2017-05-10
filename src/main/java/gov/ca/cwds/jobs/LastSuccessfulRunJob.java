@@ -45,6 +45,7 @@ public abstract class LastSuccessfulRunJob implements Job {
     final Date lastRunTime = determineLastSuccessfulRunTime();
     final Date curentTimeRunTime = _run(lastRunTime);
     writeLastSuccessfulRunTime(curentTimeRunTime);
+    finish(); // Close resources, notify listeners, or even close JVM.
   }
 
   /**
@@ -92,6 +93,11 @@ public abstract class LastSuccessfulRunJob implements Job {
    * @return The time of the latest run if successful.
    */
   public abstract Date _run(Date lastSuccessfulRunTime);
+
+  /**
+   * Marks the job as completed. Close resources, notify listeners, or even close JVM.
+   */
+  protected abstract void finish();
 
   /**
    * Getter for last job run time.

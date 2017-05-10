@@ -105,11 +105,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
 
-  private static final int DEFAULT_BATCH_WAIT = 45;
+  private static final int DEFAULT_BATCH_WAIT = 25;
   private static final int DEFAULT_BUCKETS = 1;
 
   private static final int LOG_EVERY = 5000;
   private static final int ES_BULK_SIZE = 2000;
+
+  private static final int SLEEP_MILLIS = 2000;
+  private static final int POLL_MILLIS = 2000;
 
   /**
    * Obsolete. Doesn't optimize on DB2 z/OS.
@@ -197,17 +200,17 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected boolean fatalError = false;
 
   /**
-   * Completion flag for method {@link #threadExtractJdbc()}.
+   * Completion flag for <strong>Extract</strong> method {@link #threadExtractJdbc()}.
    */
   protected boolean doneExtract = false;
 
   /**
-   * Completion flag for method {@link #threadTransform()}.
+   * Completion flag for <strong>Transform</strong> method {@link #threadTransform()}.
    */
   protected boolean doneTransform = false;
 
   /**
-   * Completion flag for method {@link #threadLoad()}.
+   * Completion flag for <strong>Load</strong> method {@link #threadLoad()}.
    */
   protected boolean doneLoad = false;
 
@@ -793,7 +796,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     while (!(fatalError || (doneExtract && queueTransform.isEmpty()))) {
       try {
-        while ((m = queueTransform.pollFirst(1, TimeUnit.SECONDS)) != null) {
+        while ((m = queueTransform.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
           logEvery(++cntr, "Transformed", "recs");
 
           // Assumes that records are sorted by group key.
@@ -813,7 +816,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       } catch (InterruptedException e) { // NOSONAR
         LOGGER.warn("Transformer interrupted!");
-        Thread.interrupted();
+        Thread.currentThread().interrupt();
       } catch (Exception e) {
         LOGGER.fatal("Transformer: fatal error {}", e.getMessage(), e);
         fatalError = true;
@@ -851,21 +854,21 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     LOGGER.warn("BEGIN: Stage #3: Loader");
     try {
       while (!(fatalError || (doneExtract && doneTransform && queueLoad.isEmpty()))) {
-        while ((t = queueLoad.pollFirst(2, TimeUnit.SECONDS)) != null) {
+        while ((t = queueLoad.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
           logEvery(++cntr, "Published", "recs to ES");
           prepareDocument(bp, t);
         }
       }
 
       // Just to be sure ...
-      while ((t = queueLoad.pollFirst(3, TimeUnit.SECONDS)) != null) {
+      while ((t = queueLoad.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
         logEvery(++cntr, "Published", "recs to ES");
         prepareDocument(bp, t);
       }
 
       LOGGER.info("Flush ES bulk processor ...");
       bp.flush();
-      Thread.sleep(3000);
+      Thread.sleep(SLEEP_MILLIS);
       LOGGER.info("Flush ES bulk processor again ...");
       bp.flush();
 
@@ -876,7 +879,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (InterruptedException e) { // NOSONAR
       LOGGER.warn("Publisher interrupted!");
       fatalError = true;
-      Thread.interrupted();
+      Thread.currentThread().interrupt();
     } catch (JsonProcessingException e) {
       LOGGER.error("Publisher: JsonProcessingException! {}", e.getMessage(), e);
       fatalError = true;
@@ -962,7 +965,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       while (!(fatalError || (doneExtract && doneTransform && doneLoad))) {
         LOGGER.debug("runInitialLoad: sleep");
-        Thread.sleep(2000);
+        Thread.sleep(SLEEP_MILLIS);
         try {
           this.jobDao.find("abc123"); // dummy call, keep connection pool alive.
         } catch (HibernateException he) { // NOSONAR
@@ -972,7 +975,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
       }
 
-      Thread.sleep(1000);
+      Thread.sleep(SLEEP_MILLIS);
       this.close();
       final long endTime = System.currentTimeMillis();
       LOGGER.warn("TOTAL ELAPSED TIME: " + ((endTime - startTime) / 1000) + " SECONDS");
@@ -988,7 +991,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       throw new JobsException(e);
     } finally {
       doneExtract = true;
-      this.close();
     }
   }
 
@@ -1050,7 +1052,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.info("Prepared {} records to index", recsPrepared);
       LOGGER.info("STATS: \nrecsBulkBefore:  {}\nrecsBulkAfter:  {}\nrecsBulkError: {}",
           recsBulkBefore, recsBulkAfter, recsBulkError);
-      LOGGER.info("Updating last successful run time to {}", jobDateFormat.format(startTime));
+      LOGGER.warn("Updating last successful run time to {}", jobDateFormat.format(startTime));
       return new Date(this.startTime);
 
     } catch (JobsException e) {
@@ -1065,6 +1067,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       doneExtract = true;
       doneTransform = true;
       doneLoad = true;
+
       try {
         this.close();
       } catch (IOException io) {
@@ -1088,59 +1091,29 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         this.sessionFactory.close();
       }
 
-      // try () {
-      //
-      // } catch (Exception e) {
-      // // TODO: handle exception
-      // }
-      // final SessionFactory session = (SessionFactory)
-      // injector.getInstance(NsSessionFactory.class);
-
-      // Runtime.getRuntime().
-
-      LOGGER.warn("SHUTDOWN!");
-      Runtime.getRuntime().exit(0); // NOSONAR
-
     } else {
       LOGGER.warn("CLOSE: FALSE ALARM");
     }
   }
 
   /**
-   * Getter for this job's options.
-   * 
-   * @return this job's options
+   * Finish job and close resources. Default implementation exits the JVM.
    */
-  public JobOptions getOpts() {
-    return opts;
-  }
+  @Override
+  protected void finish() {
 
-  /**
-   * Setter for this job's options.
-   * 
-   * @param opts this job's options
-   */
-  public void setOpts(JobOptions opts) {
-    this.opts = opts;
-  }
+    LOGGER.warn("FINISH JOB AND SHUTDOWN!");
+    try {
+      close();
+      Thread.sleep(SLEEP_MILLIS);
+      LogManager.shutdown();
+      Runtime.getRuntime().exit(0); // NOSONAR
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    } catch (IOException ioe) {
+      LOGGER.error("ERROR CLOSING RESOURCES: {}", ioe.getMessage(), ioe);
+    }
 
-  /**
-   * Getter for CMS system code cache.
-   * 
-   * @return reference to CMS system code cache
-   */
-  public static ApiSystemCodeCache getSystemCodes() {
-    return systemCodes;
-  }
-
-  /**
-   * Store a reference to the singleton CMS system code cache for quick convenient access.
-   * 
-   * @param sysCodeCache CMS system code cache
-   */
-  @Inject
-  public static void setSystemCodes(@SystemCodeCache ApiSystemCodeCache sysCodeCache) {
-    systemCodes = sysCodeCache;
   }
 
   /**
@@ -1267,6 +1240,43 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
 
     return recsPrepared.get();
+  }
+
+  /**
+   * Getter for this job's options.
+   * 
+   * @return this job's options
+   */
+  public JobOptions getOpts() {
+    return opts;
+  }
+
+  /**
+   * Setter for this job's options.
+   * 
+   * @param opts this job's options
+   */
+  public void setOpts(JobOptions opts) {
+    this.opts = opts;
+  }
+
+  /**
+   * Getter for CMS system code cache.
+   * 
+   * @return reference to CMS system code cache
+   */
+  public static ApiSystemCodeCache getSystemCodes() {
+    return systemCodes;
+  }
+
+  /**
+   * Store a reference to the singleton CMS system code cache for quick convenient access.
+   * 
+   * @param sysCodeCache CMS system code cache
+   */
+  @Inject
+  public static void setSystemCodes(@SystemCodeCache ApiSystemCodeCache sysCodeCache) {
+    systemCodes = sysCodeCache;
   }
 
 }
