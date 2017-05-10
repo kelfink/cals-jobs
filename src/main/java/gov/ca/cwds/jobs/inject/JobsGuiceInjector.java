@@ -119,6 +119,7 @@ public class JobsGuiceInjector extends AbstractModule {
             .addAnnotatedClass(EsIntakeScreening.class).addAnnotatedClass(IntakeScreening.class)
             .buildSessionFactory());
 
+    // DB2 replicated tables:
     bind(ReplicatedClientDao.class);
     bind(ReplicatedReporterDao.class);
     bind(ReplicatedAttorneyDao.class);
@@ -130,7 +131,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ReplicatedSubstituteCareProviderDao.class);
     bind(ReplicatedEducationProviderContactDao.class);
 
-    // bind(IntakeScreeningDao.class);
+    // Postgres:
     bind(EsIntakeScreeningDao.class);
 
     // Instantiate as a singleton, else Guice creates a new instance each time.

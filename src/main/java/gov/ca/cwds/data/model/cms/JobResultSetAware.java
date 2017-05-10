@@ -20,6 +20,6 @@ public interface JobResultSetAware<M extends ApiGroupNormalizer<?>> {
    * @return populated MQT entity bean
    * @throws SQLException on disconnect or type conversion error
    */
-  M pullFromResultSet(ResultSet rs) throws SQLException;
+  M extractFromResultSet(ResultSet rs) throws SQLException;
 
 }

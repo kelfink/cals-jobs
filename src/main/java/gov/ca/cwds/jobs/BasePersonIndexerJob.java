@@ -247,7 +247,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   @Override
-  public M pullFromResultSet(ResultSet rs) throws SQLException {
+  public M extractFromResultSet(ResultSet rs) throws SQLException {
     return null;
   }
 
@@ -277,6 +277,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }).setBulkActions(ES_BULK_SIZE).setConcurrentRequests(0).setName("jobs_bp").build();
   }
+
+  // ======================
+  // INJECTION:
+  // ======================
 
   /**
    * Build the Guice Injector once, which is used for all Job instances during the life of this
@@ -448,37 +452,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }
 
-    boolean upsert = false;
-    String legacyId = null;
-
-    if (p instanceof ApiLegacyAware) {
-      ApiLegacyAware l = (ApiLegacyAware) p;
-
-      // If bean has BOTH new and legacy id's AND they don't match.
-      upsert = StringUtils.isNotBlank(l.getId()) && StringUtils.isNotBlank(l.getLegacyId())
-          && !l.getId().equals(l.getLegacyId());
-      legacyId = l.getLegacyId();
-    }
-
     // Write persistence object to Elasticsearch Person document.
     ElasticSearchPerson ret;
-    // if (upsert) {
-    // // On update, only populate key and fields to be updated.
-    // // TODO: store PG id too?
-    //
-    // ret = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
-    // null, // first name
-    // null, // last name
-    // null, // middle name
-    // null, // name suffix
-    // null, // gender
-    // null, // birth date
-    // null, // SSN
-    // null, // type
-    // null, // source
-    // null, // omit highlights
-    // addresses, phones, languages, screenings);
-    // } else {
     ret = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
         pa.getFirstName(), // first name
         pa.getLastName(), // last name
@@ -491,7 +466,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         this.mapper.writeValueAsString(p), // source
         null, // omit highlights
         addresses, phones, languages, screenings);
-    // }
 
     return ret;
   }
@@ -507,7 +481,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param lastRunTime last successful run time
    * @return List of normalized entities
    */
-  protected List<T> pullLastRunRecsFromTable(Date lastRunTime) {
+  protected List<T> extractLastRunRecsFromTable(Date lastRunTime) {
     LOGGER.info("last successful run: {}", lastRunTime);
     final Class<?> entityClass = jobDao.getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
@@ -544,7 +518,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param lastRunTime last successful run time
    * @return List of normalized entities
    */
-  protected List<T> pullLastRunRecsFromMQT(Date lastRunTime) {
+  protected List<T> extractLastRunRecsFromView(Date lastRunTime) {
     LOGGER.info("PULL MQT: last successful run: {}", lastRunTime);
 
     final Class<?> entityClass = getDenormalizedClass(); // MQT entity class
@@ -597,8 +571,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    *
    * <p>
    * Fetch all records for the next batch run, either by bucket or last successful run date. Pulls
-   * either from an MQT via {@link #pullLastRunRecsFromMQT(Date)}, if {@link #isViewNormalizer()} is
-   * overridden, else from the base table directly via {@link #pullLastRunRecsFromTable(Date)}.
+   * either from an MQT via {@link #extractLastRunRecsFromView(Date)}, if {@link #isViewNormalizer()}
+   * is overridden, else from the base table directly via {@link #extractLastRunRecsFromTable(Date)}.
    * </p>
    * 
    * @param lastRunDt last time the batch ran successfully.
@@ -609,8 +583,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       // One bulk processor for "last run" operations. BulkProcessor itself is thread-safe.
       final BulkProcessor bp = buildBulkProcessor();
-      final List<T> results = this.isViewNormalizer() ? pullLastRunRecsFromMQT(lastRunDt)
-          : pullLastRunRecsFromTable(lastRunDt);
+      final List<T> results = this.isViewNormalizer() ? extractLastRunRecsFromView(lastRunDt)
+          : extractLastRunRecsFromTable(lastRunDt);
 
       if (results != null && !results.isEmpty()) {
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
@@ -784,7 +758,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         while (rs.next()) {
           // Hand the baton to the next runner ...
           logEvery(++cntr, "Retrieved", "recs");
-          queueTransform.putLast(pullFromResultSet(rs));
+          queueTransform.putLast(extractFromResultSet(rs));
         }
 
         con.commit();

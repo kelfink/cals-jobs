@@ -137,30 +137,30 @@ public class IntakeScreening
   public ElasticSearchPersonScreening toEsScreening() {
     ElasticSearchPersonScreening ret = new ElasticSearchPersonScreening();
 
-    ret.id = this.id;
-    ret.countyName = this.incidentCounty;
-    ret.decision = this.screeningDecision;
-    ret.endDate = this.endedAt;
-    ret.startDate = this.startedAt;
-    ret.responseTime = this.screeningDecisionDetail;
+    ret.setId(id);
+    ret.setCountyName(incidentCounty);
+    ret.setDecision(screeningDecision);
+    ret.setEndDate(endedAt);
+    ret.setStartDate(startedAt);
+    ret.setResponseTime(screeningDecisionDetail); // Intake field name should change.
 
-    ret.reporter.firstName = getReporter().getFirstName();
-    ret.reporter.lastName = getReporter().getLastName();
-    ret.reporter.id = getReporter().getId();
-    ret.reporter.legacyClientId = getReporter().getLegacyId();
+    ret.getReporter().setFirstName(getReporter().getFirstName());
+    ret.getReporter().setLastName(getReporter().getLastName());
+    ret.getReporter().setId(getReporter().getId());
+    ret.getReporter().setLegacyClientId(getReporter().getLegacyId());
 
-    ret.assignedSocialWorker.firstName = getSocialWorker().getFirstName();
-    ret.assignedSocialWorker.id = getSocialWorker().getId();
-    ret.assignedSocialWorker.lastName = getSocialWorker().getLastName();
-    ret.assignedSocialWorker.legacyClientId = getSocialWorker().getLegacyId();
+    ret.getAssignedSocialWorker().setFirstName(getSocialWorker().getFirstName());
+    ret.getAssignedSocialWorker().setId(getSocialWorker().getId());
+    ret.getAssignedSocialWorker().setLastName(getSocialWorker().getLastName());
+    ret.getAssignedSocialWorker().setLegacyClientId(getSocialWorker().getLegacyId());
 
     for (IntakeAllegation alg : this.allegations.values()) {
-      ret.allegations.add(alg.toEsAllegation());
+      ret.getAllegations().add(alg.toEsAllegation());
     }
 
     LOGGER.info("screening: # participants: {}", this.participants.size());
     for (IntakeParticipant p : this.participants.values()) {
-      ret.allPeople.add((ElasticSearchPersonAny) p.toEsPerson(EsPersonType.All, this));
+      ret.getAllPeople().add((ElasticSearchPersonAny) p.toEsPerson(EsPersonType.All, this));
     }
 
     return ret;
