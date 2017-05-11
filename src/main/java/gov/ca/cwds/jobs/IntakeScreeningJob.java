@@ -30,7 +30,6 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
 
 // import static org.elasticsearch.common.xcontent.XContentFactory.*;
 
-
 /**
  * Job to load Intake Screening from PostgreSQL into ElasticSearch.
  * 

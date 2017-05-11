@@ -48,8 +48,9 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
         resultClass = EsIntakeScreening.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter",
-        query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
-            + "WHERE vw.started_at is not null AND vw.LAST_CHG > CAST(:after AS TIMESTAMP) "
+        query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw " + "WHERE "
+        // + "vw.started_at is not null AND "
+            + "vw.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + "ORDER BY vw.SCREENING_ID FOR READ ONLY ",
         resultClass = EsIntakeScreening.class, readOnly = true)})
 public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<IntakeScreening> {
@@ -245,12 +246,19 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   public void reduce(Map<Object, IntakeScreening> map) {
     IntakeScreening s;
 
+    LOGGER.debug("reduce screening id {}", screeningId);
+
     if (!map.containsKey(screeningId)) {
       s = new IntakeScreening();
       s.setId(screeningId);
 
-      s.setEndedAt(new Date(endedAt.getTime()));
-      s.setStartedAt(new Date(startedAt.getTime()));
+      if (endedAt != null) {
+        s.setEndedAt(new Date(endedAt.getTime()));
+      }
+
+      if (startedAt != null) {
+        s.setStartedAt(new Date(startedAt.getTime()));
+      }
 
       s.setAdditionalInformation(additionalInformation);
       s.setAssignee(assignee);
@@ -271,16 +279,21 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       s = map.get(screeningId);
     }
 
-    IntakeParticipant p;
-    if (s.getParticipants().containsKey(participantId)) {
-      p = s.getParticipants().get(participantId);
-    } else {
-      p = fillParticipant();
-      s.addParticipant(p);
-      p.addScreening(s);
+    IntakeParticipant p = null;
+    final boolean goodPartc = StringUtils.isNotBlank(participantId);
+    if (goodPartc) {
+      if (s.getParticipants().containsKey(participantId)) {
+        p = s.getParticipants().get(participantId);
+      } else {
+        p = fillParticipant();
+        s.addParticipant(p);
+        p.addScreening(s);
 
-      for (String role : roles) {
-        s.addParticipantRole(p.getIntakeId(), role);
+        if (roles != null && roles.length > 0) {
+          for (String role : roles) {
+            s.addParticipantRole(p.getIntakeId(), role);
+          }
+        }
       }
     }
 
@@ -293,40 +306,46 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       s.addAllegation(alg);
     }
 
-    if (flgPerpetrator) {
-      alg.setPerpetrator(p);
-    }
-
-    if (flgVictim) {
-      alg.setVictim(p);
-    }
-
-    if (flgReporter) {
-      fillParticipant(s.getReporter());
-    }
-
-    if (StringUtils.isNotBlank(addressId)) {
-      final ElasticSearchPersonAddress addr = new ElasticSearchPersonAddress();
-      addr.setId(addressId);
-      addr.setCity(city);
-      addr.setState(state);
-      // addr.setStateName(stateName); // Synthetic, not found in legacy.
-      addr.setStreetAddress(streetAddress);
-      addr.setType(addressType);
-      addr.setZip(zip);
-      p.addAddress(addr);
-    }
-
-    if (StringUtils.isNotBlank(phoneNumberId)) {
-      final ElasticSearchPersonPhone ph = new ElasticSearchPersonPhone();
-      ph.setId(phoneNumberId);
-      ph.setPhoneNumber(phoneNumber);
-
-      if (StringUtils.isNotBlank(phoneType)) {
-        ph.setPhoneType(PhoneType.valueOf(phoneType));
+    if (goodPartc) {
+      if (flgPerpetrator) {
+        alg.setPerpetrator(p);
       }
 
-      p.addPhone(ph);
+      if (flgVictim) {
+        alg.setVictim(p);
+      }
+
+      if (flgReporter) {
+        fillParticipant(s.getReporter());
+      }
+
+      if (StringUtils.isNotBlank(addressId)) {
+        final ElasticSearchPersonAddress addr = new ElasticSearchPersonAddress();
+        addr.setId(addressId);
+        addr.setCity(city);
+        addr.setState(state);
+
+        // Synthetic field, not found in legacy. Translate state code.
+        // addr.setStateName(stateName);
+
+        addr.setStreetAddress(streetAddress);
+        addr.setType(addressType);
+        addr.setZip(zip);
+        p.addAddress(addr);
+      }
+
+      if (StringUtils.isNotBlank(phoneNumberId)) {
+        final ElasticSearchPersonPhone ph = new ElasticSearchPersonPhone();
+        ph.setId(phoneNumberId);
+        ph.setPhoneNumber(phoneNumber);
+
+        if (StringUtils.isNotBlank(phoneType)) {
+          ph.setPhoneType(PhoneType.valueOf(phoneType));
+        }
+
+        p.addPhone(ph);
+      }
+
     }
 
   }

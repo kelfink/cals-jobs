@@ -71,9 +71,8 @@ import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
-
+// Elasticsearch jsonBuilder().
 // import static org.elasticsearch.common.xcontent.XContentFactory.*;
-
 
 /**
  * Base person batch job to load clients from CMS into ElasticSearch.
@@ -240,7 +239,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Get the view or materialized query table name, if used. All child classes that rely on a
+   * Get the view or materialized query table name, if used. Any child classes relying on a
    * denormalized view must define the name.
    * 
    * @return name of view or materialized query table or null if none
@@ -252,6 +251,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public M extractFromResultSet(ResultSet rs) throws SQLException {
     return null;
+  }
+
+  /**
+   * prepare an ES person to prepare for JSON serialization by nulling out collections.
+   * 
+   * @param esp ES person to prepare for JSON serialization
+   */
+  protected void prepEspForUpsert(ElasticSearchPerson esp) {
+
   }
 
   /**
@@ -344,13 +352,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   public static <T extends BasePersonIndexerJob<?, ?>> void runJob(final Class<T> klass,
       String... args) throws JobsException {
     try (final T job = newJob(klass, args)) { // Close resources automatically.
-      job.run();
-    } catch (IOException e) {
-      LOGGER.error("UNABLE TO CLOSE RESOURCE! {}", e.getMessage(), e);
-      throw new JobsException("UNABLE TO CLOSE RESOURCE! " + e.getMessage(), e);
-    } catch (JobsException e) {
-      LOGGER.error("UNABLE TO COMPLETE JOB: {}", e.getMessage(), e);
-      throw e;
+      try {
+        job.run();
+      } finally {
+        job.finish();
+      }
+    } catch (Exception e) {
+      LOGGER.error("JOB FAILED: {}", e.getMessage(), e);
+      throw new JobsException("JOB FAILED! " + e.getMessage(), e);
     }
   }
 
@@ -457,6 +466,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     // Write persistence object to Elasticsearch Person document.
     ElasticSearchPerson ret;
+
+    LOGGER.debug("p.getPrimaryKey()={}", p.getPrimaryKey());
+    if (p.getPrimaryKey() == null) {
+      LOGGER.warn("STOP");
+    }
+
     ret = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
         pa.getFirstName(), // first name
         pa.getLastName(), // last name
@@ -477,8 +492,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Pull records changed since the last successful run.
    * 
    * <p>
-   * If this job defines a denormalized (MQT) entity, then pull from that. Otherwise, pull from the
-   * regular entity.
+   * If this job defines a denormalized view entity, then pull from that. Otherwise, pull from the
+   * table entity.
    * </p>
    * 
    * @param lastRunTime last successful run time
@@ -540,7 +555,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final List<M> recs = q.list();
       LOGGER.warn("FOUND {} RECORDS", recs.size());
 
-      // Convert from denormalized MQT to normalized.
+      // Convert denormalized view rows to normalized persistence objects.
       List<M> groupRecs = new ArrayList<>();
       for (M m : recs) {
         if (!lastId.equals(m.getGroupKey()) && !groupRecs.isEmpty()) {
@@ -565,7 +580,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       if (txn != null) {
         txn.rollback();
       }
-      throw new DaoException(h);
+      throw new JobsException(h);
     }
   }
 
@@ -691,8 +706,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Default reduce method just returns the input. Child classes may customize this method to reduce
-   * denormalized result sets to normalized entities.
+   * Default reduce method just returns the input. Child classes may customize this method to
+   * convert (reduce) denormalized result sets to normalized entities.
    * 
    * @param recs entity records
    * @return unmodified entity records
@@ -703,10 +718,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Reduce/normalize MQT records for a single grouping (such as all the same client) into a
+   * Reduce/normalize view records for a single grouping (such as all the same client) into a
    * normalized entity bean, consisting of a parent object and its child objects.
    * 
-   * @param recs denormalized MQT beans
+   * @param recs denormalized view beans
    * @return normalized entity bean instance
    */
   protected T reduceSingle(List<M> recs) {
@@ -1105,6 +1120,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     LOGGER.warn("FINISH JOB AND SHUTDOWN!");
     try {
+      this.doneExtract = true;
+      this.doneLoad = true;
+      this.doneTransform = true;
+
       close();
       LogManager.shutdown(); // Flush appenders.
 
@@ -1114,6 +1133,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       Thread.currentThread().interrupt();
     } catch (IOException ioe) {
       LOGGER.fatal("ERROR CLOSING RESOURCES OR FINISHING JOB: {}", ioe.getMessage(), ioe);
+      throw new JobsException(ioe);
     }
 
   }
@@ -1278,4 +1298,3 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
 }
-
