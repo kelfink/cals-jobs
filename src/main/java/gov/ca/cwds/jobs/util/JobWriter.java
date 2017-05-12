@@ -7,6 +7,5 @@ import java.util.List;
  */
 public interface JobWriter<T> extends JobComponent {
 
-    void write(List<T> items) throws Exception;
-
+  void write(List<T> items) throws Exception;
 }

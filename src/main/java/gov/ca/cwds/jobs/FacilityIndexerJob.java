@@ -74,7 +74,6 @@ public class FacilityIndexerJob extends AbstractModule {
   }
 
   @Provides
-  @Singleton
   @Inject
   public Client elasticsearchClient(JobConfiguration config) {
     TransportClient client = null;

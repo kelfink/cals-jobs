@@ -8,10 +8,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JobConfiguration extends ElasticsearchConfiguration {
-    @JsonProperty("job.lis.reader.query")
-    private String jobLisReaderQuery;
 
-    public String getJobLisReaderQuery() {
-        return jobLisReaderQuery;
-    }
+  @JsonProperty("job.lis.reader.query")
+  private String jobLisReaderQuery;
+
+  public String getJobLisReaderQuery() {
+    return jobLisReaderQuery;
+  }
 }
