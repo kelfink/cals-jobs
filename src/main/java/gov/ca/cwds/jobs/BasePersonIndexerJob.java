@@ -327,8 +327,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
-      LOGGER.error("UNABLE TO CREATE DEPENDENCIES! {}", e.getMessage(), e);
-      throw new JobsException("UNABLE TO CREATE DEPENDENCIES! " + e.getMessage(), e);
+      final String msg = MessageFormat.format("UNABLE TO CREATE DEPENDENCIES! {}", e.getMessage());
+      LOGGER.error(msg, e);
+      throw new JobsException(msg, e);
     }
   }
 
@@ -347,11 +348,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   public static <T extends BasePersonIndexerJob<?, ?>> void runJob(final Class<T> klass,
       String... args) throws JobsException {
     try (final T job = newJob(klass, args)) { // Close resources automatically.
-      try {
-        job.run();
-      } finally {
-        job.finish();
-      }
+      job.run();
     } catch (Exception e) {
       LOGGER.error("JOB FAILED: {}", e.getMessage(), e);
       throw new JobsException("JOB FAILED! " + e.getMessage(), e);
@@ -1130,10 +1127,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       this.doneTransform = true;
 
       close();
-      LogManager.shutdown(); // Flush appenders.
+      // LogManager.shutdown(); // Flush appenders.
 
       Thread.sleep(SLEEP_MILLIS); // NOSONAR
+
+      // Shutdown all remaining resources, even those not attached to this job.
       Runtime.getRuntime().exit(0); // NOSONAR
+
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     } catch (IOException ioe) {

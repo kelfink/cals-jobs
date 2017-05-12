@@ -57,9 +57,9 @@ public abstract class LastSuccessfulRunJob implements Job {
     Date ret = null;
 
     if (!StringUtils.isBlank(this.lastJobRunTimeFilename)) {
-      try (BufferedReader bufferedReader =
+      try (BufferedReader br =
           new BufferedReader(new FileReader(lastJobRunTimeFilename))) {
-        ret = jobDateFormat.parse(bufferedReader.readLine().trim());
+        ret = jobDateFormat.parse(br.readLine().trim());
       } catch (FileNotFoundException e) {
         LOGGER.error("Caught FileNotFoundException: {}", e.getMessage(), e);
         throw new JobsException(e);
