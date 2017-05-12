@@ -214,11 +214,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected boolean doneLoad = false;
 
   /**
-   * Flag for "upsert" mode (update or insert). Turn off during initial loads and full refreshes.
-   */
-  protected boolean modeUpsert = true;
-
-  /**
    * Construct batch job instance with all required dependencies.
    * 
    * @param jobDao Person DAO, such as {@link ClientDao}
@@ -962,10 +957,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       id = StringUtils.isNotBlank(l.getLegacyId()) ? l.getLegacyId() : esp.getId();
     }
 
-    final String json = mapper.writeValueAsString(esp);
-    return new UpdateRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), id).doc(json)
-        .upsert(
-            new IndexRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), id).source(json));
+    final String insertJson = mapper.writeValueAsString(esp);
+
+    // Null out non-standard collections for updates.
+    esp.setScreenings(null);
+
+    final String updateJson = mapper.writeValueAsString(esp);
+
+    final String alias = esDao.getDefaultAlias();
+    final String docType = esDao.getDefaultDocType();
+
+    return new UpdateRequest(alias, docType, id).doc(updateJson)
+        .upsert(new IndexRequest(alias, docType, id).source(insertJson));
   }
 
   /**
@@ -975,7 +978,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void doInitialLoadJdbc() throws IOException {
     Thread.currentThread().setName("main");
-    modeUpsert = false; // Refresh, reload, overwrite. Don't update existing documents.
     try {
       new Thread(this::threadExtractJdbc).start(); // Extract
       new Thread(this::threadTransform).start(); // Transform
@@ -1000,9 +1002,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.warn("DONE: doInitialLoadViaJdbc");
 
     } catch (InterruptedException ie) { // NOSONAR
-      LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
+      LOGGER.error("interrupted: {}", ie.getMessage(), ie);
       fatalError = true;
-      Thread.interrupted();
+      Thread.currentThread().interrupt();;
     } catch (Exception e) {
       LOGGER.error("GENERAL EXCEPTION: {}", e.getMessage(), e);
       fatalError = true;
