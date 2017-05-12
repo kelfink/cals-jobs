@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.util;
 
 /**
- * Created by dmitry.rudenko on 5/1/2017.
+ * @author CWDS Elasticsearch Team
  */
 public interface JobComponent {
 

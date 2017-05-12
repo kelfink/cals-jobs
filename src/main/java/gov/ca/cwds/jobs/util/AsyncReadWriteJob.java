@@ -7,7 +7,7 @@ import gov.ca.cwds.jobs.Job;
 import gov.ca.cwds.jobs.JobsException;
 
 /**
- * Created by dmitry.rudenko on 4/28/2017.
+ * @author CWDS Elasticsearch Team
  */
 @SuppressWarnings("unchecked")
 public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobComponent {

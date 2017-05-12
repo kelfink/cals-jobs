@@ -39,16 +39,6 @@ public class ElasticsearchDao implements Closeable {
 
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ElasticsearchDao.class);
 
-  /**
-   * Standard "people" index name.
-   */
-  private static final String DEFAULT_PERSON_IDX_NM = "people";
-
-  /**
-   * Standard "person" document name.
-   */
-  private static final String DEFAULT_PERSON_DOC_TYPE = "person";
-
   private static int NUMBER_OF_SHARDS = 5;
 
   private static int NUMBER_OF_REPLICAS = 1;
@@ -109,7 +99,7 @@ public class ElasticsearchDao implements Closeable {
             .getResourceAsStream("/elasticsearch/mapping/map_person_5x_snake.json"), out);
     out.flush();
     final String mapping = out.toString();
-    getClient().admin().indices().preparePutMapping(index).setType(DEFAULT_PERSON_DOC_TYPE)
+    getClient().admin().indices().preparePutMapping(index).setType(getConfig().getElasticsearchDocType())
         .setSource(mapping, XContentType.JSON).get();
   }
 
@@ -152,8 +142,8 @@ public class ElasticsearchDao implements Closeable {
    */
   public IndexRequest bulkAdd(final ObjectMapper mapper, final String id, final Object obj)
       throws JsonProcessingException {
-    return new IndexRequest(DEFAULT_PERSON_IDX_NM,
-        DEFAULT_PERSON_DOC_TYPE, id).source(mapper.writeValueAsString(obj), XContentType.JSON);
+    return new IndexRequest(getConfig().getElasticsearchAlias(),
+        getConfig().getElasticsearchDocType(), id).source(mapper.writeValueAsString(obj), XContentType.JSON);
   }
 
   /**

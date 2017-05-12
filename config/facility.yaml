@@ -1,6 +1,6 @@
 elasticsearch.host: localhost
-elasticsearch.port: 9200
-elasticsearch.cluster: sr_es
+elasticsearch.port: 9300
+elasticsearch.cluster: elasticsearch
 elasticsearch.alias: facilities
 elasticsearch.doctype: facility
 
@@ -8,37 +8,37 @@ job.lis.reader.query: select
                             f.fac_nbr as "id",
                             ft.tbl_fac_type_desc as "type",
                             f.fac_name as "name",
-                            f.fac_licensee_name as "licensee_name",
-                            f.fac_do_eval_code as "assigned_worker",
-                            dc.do_name as "district_office",
-                            f.fac_nbr as "license_number",
+                            f.fac_licensee_name as "licenseeName",
+                            f.fac_do_eval_code as "assignedWorker",
+                            dc.do_name as "districtOffice",
+                            f.fac_nbr as "licenseNumber",
 
-                            f.fac_mail_street_addr as "street_address",
+                            f.fac_mail_street_addr as "streetAddress",
                             f.fac_mail_city as "city",
-                            f.fac_mail_state as "state_code_type",
-                            f.fac_mail_zip_code as "zip_code",
-                            '' as street_number,
-                            '' as zip_suffix_code,
+                            f.fac_mail_state as "stateCodeType",
+                            f.fac_mail_zip_code as "zipCode",
+                            '' as streetNumber,
+                            '' as zipSuffixCode,
 
-                            f.fac_res_street_addr as "residential_street_address",
-                            f.fac_res_city as "residential_city",
-                            f.fac_res_state as "residential_state",
-                            f.fac_res_zip_code as "residential_zip",
+                            f.fac_res_street_addr as "residentialStreetAddress",
+                            f.fac_res_city as "residentialCity",
+                            f.fac_res_state as "residentialState",
+                            f.fac_res_zip_code as "residentialZip",
 
                             co.tbl_co_desc as "county",
-                            f.fac_phone_nbr as "primary_phone_number",
-                            '' as "alt_phone_number",
+                            f.fac_phone_nbr as "primaryPhoneNumber",
+                            '' as "altPhoneNumber",
                             fs.tbl_fac_status_desc as "status",
-                            '' as "license_status",
-                            '' as "street_name",
+                            '' as "licenseStatus",
+                            '' as "streetName",
 
-                            f.fac_licensee_type as "licensee_type",
-                            f.fac_lic_eff_date as "license_effective_date",
-                            f.fac_last_visit_date as "last_visit_date",
-                            f.fac_last_visit_reason as "last_visit_reason",
-                            f.fac_email_address as "email_address",
+                            f.fac_licensee_type as "licenseeType",
+                            f.fac_lic_eff_date as "licenseEffectiveDate",
+                            f.fac_last_visit_date as "lastVisitDate",
+                            f.fac_last_visit_reason as "lastVisitReason",
+                            f.fac_email_address as "emailAddress",
                             f.fac_capacity as "capacity",
-                            f.fac_orig_appl_rec_date as "original_application_received_date"
+                            f.fac_orig_appl_rec_date as "originalApplicationReceivedDate"
                           from
                             lis_fac_file f,
                             lis_do_file dc,

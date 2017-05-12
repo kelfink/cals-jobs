@@ -18,7 +18,7 @@ import gov.ca.cwds.jobs.JobsException;
 import gov.ca.cwds.jobs.util.JobWriter;
 
 /**
- * Created by dmitry.rudenko on 4/28/2017.
+ * @author CWDS Elasticsearch Team
  * 
  * @param <T> persistence class type
  */

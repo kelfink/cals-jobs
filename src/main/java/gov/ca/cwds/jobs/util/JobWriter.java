@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.util;
 import java.util.List;
 
 /**
- * Created by dmitry.rudenko on 4/28/2017.
+ * @author CWDS Elasticsearch Team
  */
 public interface JobWriter<T> extends JobComponent {
 

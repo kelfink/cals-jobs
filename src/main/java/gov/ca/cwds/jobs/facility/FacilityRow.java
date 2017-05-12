@@ -1,52 +1,36 @@
-package gov.ca.cwds.data.model.facility.es;
+package gov.ca.cwds.jobs.facility;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.ca.cwds.data.persistence.PersistentObject;
 
-import gov.ca.cwds.rest.api.domain.DomainChef;
 import java.io.Serializable;
 import java.util.Date;
 
 /**
  * @author CWDS Elasticsearch Team
  */
+public class FacilityRow implements PersistentObject{
 
-public class ESFacility implements PersistentObject {
-
-  @JsonProperty("id")
   private String id;
-  @JsonProperty("type")
   private String type;
-  @JsonProperty("name")
   private String name;
-  @JsonProperty("licensee_name")
   private String licenseeName;
-  @JsonProperty("assigned_worker")
   private String assignedWorker;
-  @JsonProperty("district_office")
   private String districtOffice;
-  @JsonProperty("license_number")
   private String licenseNumber;
-  @JsonProperty("license_status")
   private String licenseStatus;
-  @JsonProperty("capacity")
   private String capacity;
-  @JsonProperty("license_effective_date")
-  private String licenseEffectiveDate;
-  @JsonProperty("original_application_received_date")
-  private String originalApplicationReceivedDate;
-  @JsonProperty("last_visit_date")
-  private String lastVisitDate;
-  @JsonProperty("last_visit_reason")
+  private Date licenseEffectiveDate;
+  private Date originalApplicationReceivedDate;
+  private Date lastVisitDate;
   private String lastVisitReason;
-  @JsonProperty("county")
-  private String county;
-  @JsonProperty("primary_phone_number")
   private String primaryPhoneNumber;
-  @JsonProperty("alt_phone_number")
   private String altPhoneNumber;
-  @JsonProperty("address")
-  private ESFacilityAddress address;
+  private String stateCodeType;
+  private String zipCode;
+  private String zipSuffixCode;
+  private String streetAddress;
+  private String city;
+  private String county;
 
   public String getId() {
     return id;
@@ -121,27 +105,27 @@ public class ESFacility implements PersistentObject {
   }
 
   public Date getLicenseEffectiveDate() {
-    return DomainChef.uncookDateString(licenseEffectiveDate);
+    return licenseEffectiveDate;
   }
 
   public void setLicenseEffectiveDate(Date licenseEffectiveDate) {
-    this.licenseEffectiveDate = DomainChef.cookDate(licenseEffectiveDate);
+    this.licenseEffectiveDate = licenseEffectiveDate;
   }
 
   public Date getOriginalApplicationReceivedDate() {
-    return DomainChef.uncookDateString(originalApplicationReceivedDate);
+    return originalApplicationReceivedDate;
   }
 
   public void setOriginalApplicationReceivedDate(Date originalApplicationReceivedDate) {
-    this.originalApplicationReceivedDate = DomainChef.cookDate(originalApplicationReceivedDate);
+    this.originalApplicationReceivedDate = originalApplicationReceivedDate;
   }
 
   public Date getLastVisitDate() {
-    return DomainChef.uncookDateString(lastVisitDate);
+    return lastVisitDate;
   }
 
   public void setLastVisitDate(Date lastVisitDate) {
-    this.lastVisitDate = DomainChef.cookDate(lastVisitDate);
+    this.lastVisitDate = lastVisitDate;
   }
 
   public String getLastVisitReason() {
@@ -150,14 +134,6 @@ public class ESFacility implements PersistentObject {
 
   public void setLastVisitReason(String lastVisitReason) {
     this.lastVisitReason = lastVisitReason;
-  }
-
-  public String getCounty() {
-    return county;
-  }
-
-  public void setCounty(String county) {
-    this.county = county;
   }
 
   public String getPrimaryPhoneNumber() {
@@ -176,12 +152,52 @@ public class ESFacility implements PersistentObject {
     this.altPhoneNumber = altPhoneNumber;
   }
 
-  public ESFacilityAddress getAddress() {
-    return address;
+  public String getStateCodeType() {
+    return stateCodeType;
   }
 
-  public void setAddress(ESFacilityAddress address) {
-    this.address = address;
+  public void setStateCodeType(String stateCodeType) {
+    this.stateCodeType = stateCodeType;
+  }
+
+  public String getZipCode() {
+    return zipCode;
+  }
+
+  public void setZipCode(String zipCode) {
+    this.zipCode = zipCode;
+  }
+
+  public String getZipSuffixCode() {
+    return zipSuffixCode;
+  }
+
+  public void setZipSuffixCode(String zipSuffixCode) {
+    this.zipSuffixCode = zipSuffixCode;
+  }
+
+  public String getStreetAddress() {
+    return streetAddress;
+  }
+
+  public void setStreetAddress(String streetAddress) {
+    this.streetAddress = streetAddress;
+  }
+
+  public String getCity() {
+    return city;
+  }
+
+  public void setCity(String city) {
+    this.city = city;
+  }
+
+  public String getCounty() {
+    return county;
+  }
+
+  public void setCounty(String county) {
+    this.county = county;
   }
 
   @Override

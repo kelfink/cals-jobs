@@ -12,57 +12,58 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 /**
- * Created by dmitry.rudenko on 4/28/2017.
+ * @author CWDS Elasticsearch Team
  */
 public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
-    private static final Logger LOGGER = LogManager.getLogger(JdbcJobReader.class);
-    private SessionFactory sessionFactory;
-    private ResultSet resultSet;
-    private RowMapper<T> rowMapper;
-    private Statement statement;
-    private String query;
 
-    public JdbcJobReader(SessionFactory sessionFactory, RowMapper<T> rowMapper, String query) {
-        this.sessionFactory = sessionFactory;
-        this.rowMapper = rowMapper;
-        this.query = query;
-    }
+  private static final Logger LOGGER = LogManager.getLogger(JdbcJobReader.class);
+  private SessionFactory sessionFactory;
+  private ResultSet resultSet;
+  private RowMapper<T> rowMapper;
+  private Statement statement;
+  private String query;
 
-    public void init() throws Exception {
-        Connection connection = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
-                .getService(ConnectionProvider.class).getConnection();
-        connection.setAutoCommit(false);
-        connection.setReadOnly(true);
-        try {
-            statement = connection.createStatement();
-            statement.setFetchSize(5000);
-            statement.setMaxRows(0);
-            statement.setQueryTimeout(100000);
-            resultSet = statement.executeQuery(query);
-        } catch (Exception e) {
-            destroy();
-            throw e;
-        }
-    }
+  public JdbcJobReader(SessionFactory sessionFactory, RowMapper<T> rowMapper, String query) {
+    this.sessionFactory = sessionFactory;
+    this.rowMapper = rowMapper;
+    this.query = query;
+  }
 
-    @Override
-    public T read() throws Exception {
-        if (resultSet.next()) {
-            return rowMapper.mapRow(resultSet);
-        } else {
-            return null;
-        }
+  public void init() throws Exception {
+    Connection connection = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
+        .getService(ConnectionProvider.class).getConnection();
+    connection.setAutoCommit(false);
+    connection.setReadOnly(true);
+    try {
+      statement = connection.createStatement();
+      statement.setFetchSize(5000);
+      statement.setMaxRows(0);
+      statement.setQueryTimeout(100000);
+      resultSet = statement.executeQuery(query);
+    } catch (Exception e) {
+      destroy();
+      throw e;
     }
+  }
 
-    @SuppressWarnings("ThrowFromFinallyBlock")
-    public void destroy() throws Exception {
-        try {
-            if (statement != null) {
-                statement.close();
-                statement = null;
-            }
-        } finally {
-            sessionFactory.close();
-        }
+  @Override
+  public T read() throws Exception {
+    if (resultSet.next()) {
+      return rowMapper.mapRow(resultSet);
+    } else {
+      return null;
     }
+  }
+
+  @SuppressWarnings("ThrowFromFinallyBlock")
+  public void destroy() throws Exception {
+    try {
+      if (statement != null) {
+        statement.close();
+        statement = null;
+      }
+    } finally {
+      sessionFactory.close();
+    }
+  }
 }

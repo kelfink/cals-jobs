@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by dmitry.rudenko on 4/28/2017.
+ * @author CWDS Elasticsearch Team
  */
 
 public class AsyncReadWriteJobTest {

@@ -1019,8 +1019,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       setSystemCodes(sysCodeCache);
       ElasticSearchPerson.setSystemCodes(sysCodeCache);
 
-      // If the people index is missing, create it.
-      LOGGER.debug("Create people index if missing");
+      // If the index is missing, create it.
+      LOGGER.debug("Create index if missing");
       esDao.createIndexIfNeeded(esDao.getConfig().getElasticsearchAlias());
       LOGGER.debug("availableProcessors={}", Runtime.getRuntime().availableProcessors());
 

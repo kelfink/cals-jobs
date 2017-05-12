@@ -3,7 +3,7 @@ package gov.ca.cwds.data.model.facility.es;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Created by dmitry.rudenko on 5/2/2017.
+ * @author CWDS Elasticsearch Team
  */
 public class ESFacilityAddress {
 /*    @JsonProperty("street_number")
