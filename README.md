@@ -9,7 +9,7 @@ Prerequisites are job dependent but typically you can expect the following to be
 
 1.  DB2 10.x
 2.  Postgres 9.x
-3.  Elasticsearch 2.3.x
+3.  Elasticsearch 5.3.2 or newer (newer would require testing)
 
 ## Development Environment
 

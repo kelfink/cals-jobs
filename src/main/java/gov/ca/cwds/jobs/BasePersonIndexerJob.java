@@ -27,6 +27,7 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -601,7 +602,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
             final ElasticSearchPerson esp = buildElasticSearchPerson(p);
 
             // Bulk indexing! MUCH faster than indexing one doc at a time.
-            bp.add(this.esDao.bulkAdd(this.mapper, esp.getId(), esp, modeUpsert));
+            bp.add(this.esDao.bulkAdd(this.mapper, esp.getId(), esp));
           } catch (JsonProcessingException e) {
             fatalError = true;
             doneLoad = true;
@@ -907,9 +908,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param bp {@link #buildBulkProcessor()} for this thread
    * @param t Person record to write
    * @throws JsonProcessingException if unable to serialize JSON
+   * @throws IOException if unable to prepare request
    */
-  protected void prepareDocument(BulkProcessor bp, T t)
-      throws JsonProcessingException, IOException {
+  protected void prepareDocument(BulkProcessor bp, T t) throws IOException {
     final ElasticSearchPerson[] docs = buildElasticSearchPersons(t);
     for (ElasticSearchPerson esp : docs) {
       bp.add(prepareUpsertRequest(esp, t));
@@ -936,8 +937,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @throws JsonProcessingException on JSON parse error
    * @throws IOException on Elasticsearch disconnect
    */
-  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T t)
-      throws JsonProcessingException, IOException {
+  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T t) throws IOException {
 
     String id = esp.getId();
     if (t instanceof ApiLegacyAware) {
@@ -946,9 +946,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
 
     final String json = mapper.writeValueAsString(esp);
-    return new UpdateRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), id).doc(json)
-        .upsert(
-            new IndexRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), id).source(json));
+    final String alias = esDao.getConfig().getElasticsearchAlias();
+    final String docType = esDao.getConfig().getElasticsearchDocType();
+
+    return new UpdateRequest(alias, docType, id).doc(json, XContentType.JSON)
+        .upsert(new IndexRequest(alias, docType, id).source(json, XContentType.JSON));
   }
 
   /**
@@ -1216,8 +1218,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           try {
             final ElasticSearchPerson[] docs = buildElasticSearchPersons(p);
             for (ElasticSearchPerson esp : docs) {
-              // TODO: upsert.
-              bp.add(esDao.bulkAdd(mapper, esp.getId(), esp, true));
+              bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
             }
 
           } catch (JsonProcessingException e) {

@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.inject;
 import java.io.File;
 import java.net.InetAddress;
 
+import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,6 +11,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -53,7 +55,7 @@ import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
 import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
-import gov.ca.cwds.rest.ElasticsearchConfiguration;
+import gov.ca.cwds.jobs.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 
 /**
@@ -158,15 +160,17 @@ public class JobsGuiceInjector extends AbstractModule {
    * @return initialized singleton ElasticSearch client
    */
   @Provides
+  @Inject
   public Client elasticsearchClient() {
-    Client client = null;
+    TransportClient client = null;
     if (esConfig != null) {
       LOGGER.warn("Create NEW ES client");
       try {
         final ElasticsearchConfiguration config = elasticSearchConfig();
-        Settings settings = Settings.settingsBuilder()
-            .put("cluster.name", config.getElasticsearchCluster()).build();
-        client = TransportClient.builder().settings(settings).build().addTransportAddress(
+        Settings settings = Settings.builder()
+          .put("cluster.name", config.getElasticsearchCluster()).build();
+        client = new PreBuiltTransportClient(settings);
+        client.addTransportAddress(
             new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
                 Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {

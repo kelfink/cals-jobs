@@ -10,9 +10,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.hibernate.SessionFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
@@ -27,9 +27,6 @@ import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
-
-// import static org.elasticsearch.common.xcontent.XContentFactory.*;
-
 
 /**
  * Job to load Intake Screening from PostgreSQL into ElasticSearch.
@@ -86,7 +83,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
 
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, IntakeScreening s)
-      throws JsonProcessingException, IOException {
+      throws IOException {
 
     StringBuilder buf = new StringBuilder();
     buf.append("{ \"screenings\":[").append(mapper.writeValueAsString(s.toEsScreening()))
@@ -96,10 +93,11 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
     final String updateJson = buf.toString();
     LOGGER.info("updateJson: {}", updateJson);
 
-    return new UpdateRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), esp.getId())
-        .doc(updateJson)
-        .upsert(new IndexRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), esp.getId())
-            .source(insertJson));
+    final String alias = esDao.getConfig().getElasticsearchAlias();
+    final String docType = esDao.getConfig().getElasticsearchDocType();
+
+    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON)
+        .upsert(new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
   }
 
   @Override

@@ -60,8 +60,7 @@ public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T
   public void write(List<T> items) throws Exception {
     items.stream().map(item -> {
       try {
-        return elasticsearchDao.bulkAdd(objectMapper, String.valueOf(item.getPrimaryKey()), item,
-            false);
+        return elasticsearchDao.bulkAdd(objectMapper, String.valueOf(item.getPrimaryKey()), item);
       } catch (JsonProcessingException e) {
         throw new JobsException(e);
       }

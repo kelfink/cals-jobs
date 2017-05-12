@@ -9,6 +9,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -48,15 +49,29 @@ public class FacilityIndexerJob extends AbstractModule {
     this.config = config;
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     if (args.length == 0) {
       System.out.println(
           "usage: java -cp jobs.jar gov.ca.cwds.jobs.FacilityIndexerJob path/to/config/file.yaml");
     }
-    File configFile = new File(args[0]);
-    Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile));
-    Job job = injector.getInstance(Key.get(Job.class, Names.named("facility-job")));
-    job.run();
+    try {
+      /* todo rm
+      final JobOptions opts = JobOptions.parseCommandLine(args);
+      final T ret = BasePersonIndexerJob.buildInjector(JobOptions.parseCommandLine(args)).getInstance(klass);
+
+      new JobsGuiceInjector(new File(opts.esConfigLoc), opts.lastRunLoc)
+       */
+
+      File configFile = new File(args[0]);
+      //JobsGuiceInjector jobsGuiceInjector = new JobsGuiceInjector(configFile, "");
+      //Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile), jobsGuiceInjector);
+      Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile));
+      Job job = injector.getInstance(Key.get(Job.class, Names.named("facility-job")));
+      job.run();
+    } catch (Exception e) {
+      e.printStackTrace(); // todo
+      LOGGER.error("ERROR: ", e.getMessage(), e);
+    }
   }
 
   @Override
@@ -66,6 +81,33 @@ public class FacilityIndexerJob extends AbstractModule {
     bind(RowMapper.class).to(FacilityRowMapper.class);
   }
 
+  /* todo rm ?   it is in JobsGuiceInjector !
+  @Provides
+  @Inject
+  public Client elasticsearchClient(JobConfiguration configuration) {
+    TransportClient client = null;
+    if (config != null) {
+      LOGGER.warn("Create NEW ES client");
+      try {
+        Settings settings = Settings.builder()
+            .put("cluster.name", configuration.getElasticsearchCluster()).build();
+        client = new PreBuiltTransportClient(settings)
+                .addTransportAddress(new InetSocketTransportAddress(
+                InetAddress.getByName(configuration.getElasticsearchHost()),
+                Integer.parseInt(configuration.getElasticsearchPort())));
+      } catch (Exception e) {
+        LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
+        throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
+      }
+    }
+    return client;
+  } */
+  /**
+   * Instantiate the singleton ElasticSearch client on demand.
+   *
+   * @return initialized singleton ElasticSearch client
+   */
+  /*
   @Provides
   @Inject
   public Client elasticsearchClient(JobConfiguration configuration) {
@@ -86,11 +128,52 @@ public class FacilityIndexerJob extends AbstractModule {
     }
     return client;
   }
+   */
 
   @Provides
   @Singleton
   @Inject
-  public ElasticsearchDao elasticsearchDao(JobConfiguration configuration, Client client) {
+  public Client elasticsearchClient(JobConfiguration config) {  // todo pass JobConfiguration config ?
+    TransportClient client = null;
+    if (config != null) {
+      LOGGER.warn("Create NEW ES client");
+      try {
+        Settings settings = Settings.builder()
+                .put("client.transport.sniff", false)
+
+                //.put("threadpool.indexing.type", "fixed")
+                .put("thread_pool.index.size", 1) // todo try 2
+                .put("thread_pool.index.queue_size", 100) // todo increase
+
+                //.put("threadpool.bulk.type", "fixed")
+                .put("thread_pool.bulk.size", 1) // todo try 2
+                .put("thread_pool.bulk.queue_size", 100) // todo increase
+
+                .put("cluster.name", config.getElasticsearchCluster()).build();
+
+        // TODO try other SERVER and client VERSIONS
+
+        client = new PreBuiltTransportClient(settings);
+        client.addTransportAddress(
+                new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
+                        Integer.parseInt(config.getElasticsearchPort())));
+        // todo
+        // .put("client.transport.sniff", true)
+        // client.node=false ?
+
+      } catch (Exception e) {
+        LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
+        throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
+      }
+    }
+    return client;
+  }
+
+  @Provides
+  @Singleton
+  @Inject
+  // todo was elasticsearchDao(JobConfiguration configuration, Client client)
+  public ElasticsearchDao elasticsearchDao(Client client, JobConfiguration configuration) {
     return new ElasticsearchDao(client, configuration);
   }
 
