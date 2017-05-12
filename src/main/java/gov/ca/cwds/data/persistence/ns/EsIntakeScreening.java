@@ -39,7 +39,8 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 @NamedNativeQueries({
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAll",
         query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
-            + "WHERE vw.started_at is not null ORDER BY vw.SCREENING_ID FOR READ ONLY",
+            // + "WHERE vw.started_at is not null "
+            + "ORDER BY vw.SCREENING_ID FOR READ ONLY",
         resultClass = EsIntakeScreening.class, readOnly = true),
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findBucketRange",
         query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "

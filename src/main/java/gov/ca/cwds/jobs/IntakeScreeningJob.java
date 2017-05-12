@@ -28,6 +28,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
+// For Elasticsearch jsonBuilder():
 // import static org.elasticsearch.common.xcontent.XContentFactory.*;
 
 /**
@@ -74,6 +75,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
       }
 
     } catch (Exception e) {
+      fatalError = true;
       LOGGER.error("ERROR READING PG VIEW", e);
       throw new JobsException("ERROR READING PG VIEW", e);
     } finally {
@@ -87,6 +89,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, IntakeScreening s)
       throws JsonProcessingException, IOException {
 
+    // If at first you don't succeed, cheat. :-)
     StringBuilder buf = new StringBuilder();
     buf.append("{ \"screenings\":[").append(mapper.writeValueAsString(s.toEsScreening()))
         .append("]}");
@@ -95,10 +98,11 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
     final String updateJson = buf.toString();
     LOGGER.info("updateJson: {}", updateJson);
 
-    return new UpdateRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), esp.getId())
-        .doc(updateJson)
-        .upsert(new IndexRequest(esDao.getDefaultAlias(), esDao.getDefaultDocType(), esp.getId())
-            .source(insertJson));
+    final String alias = esDao.getDefaultAlias();
+    final String docType = esDao.getDefaultDocType();
+
+    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson)
+        .upsert(new IndexRequest(alias, docType, esp.getId()).source(insertJson));
   }
 
   @Override
@@ -118,6 +122,8 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeScreening, Es
 
   @Override
   protected List<IntakeScreening> reduce(List<EsIntakeScreening> recs) {
+    // The "transform" step would typically run in the same thread.
+    // Therefore, you *could* safely reuse the same map object.
     final int len = (int) (recs.size() * 1.25);
     Map<Object, IntakeScreening> map = new LinkedHashMap<>(len);
     for (PersistentObject rec : recs) {

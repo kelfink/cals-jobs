@@ -517,11 +517,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       return results.build();
     } catch (HibernateException h) {
       fatalError = true;
-      LOGGER.error("BATCH ERROR! {}", h.getMessage(), h);
+      LOGGER.error("EXTRACT ERROR! {}", h.getMessage(), h);
       if (txn != null) {
         txn.rollback();
       }
       throw new DaoException(h);
+    } finally {
+      doneExtract = true;
     }
   }
 
@@ -534,7 +536,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected List<T> extractLastRunRecsFromView(Date lastRunTime) {
     LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
 
-    final Class<?> entityClass = getDenormalizedClass(); // MQT entity class
+    final Class<?> entityClass = getDenormalizedClass(); // view entity class
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
@@ -570,12 +572,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       txn.commit();
       return results.build();
     } catch (HibernateException h) {
-      LOGGER.error("BATCH ERROR! {}", h.getMessage(), h);
+      LOGGER.error("EXTRACT ERROR! {}", h.getMessage(), h);
       fatalError = true;
       if (txn != null) {
         txn.rollback();
       }
       throw new JobsException(h);
+    } finally {
+      doneExtract = true;
     }
   }
 
@@ -610,14 +614,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
             prepareDocument(bp, p);
           } catch (JsonProcessingException e) {
             fatalError = true;
-            doneLoad = true;
             LOGGER.error("ERROR WRITING JSON: {}", e.getMessage(), e);
             throw new JobsException("ERROR WRITING JSON", e);
           } catch (IOException e) {
             fatalError = true;
-            doneLoad = true;
             LOGGER.error("IO EXCEPTION: {}", e.getMessage(), e);
             throw new JobsException("IO EXCEPTION", e);
+          } finally {
+            doneLoad = true;
           }
         });
 
@@ -630,10 +634,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
       return new Date(this.startTime);
 
-    } catch (JobsException e) {
-      fatalError = true;
-      LOGGER.error("JobsException: {}", e.getMessage(), e);
-      throw e;
     } catch (Exception e) {
       fatalError = true;
       LOGGER.error("General Exception: {}", e.getMessage(), e);
@@ -653,10 +653,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected List<BatchBucket> buildBucketList(String table) {
     List<BatchBucket> ret = new ArrayList<>();
 
-    Session session = jobDao.getSessionFactory().getCurrentSession();
     Transaction txn = null;
     try {
       LOGGER.info("FETCH DYNAMIC BUCKET LIST FOR TABLE {}", table);
+      final Session session = jobDao.getSessionFactory().getCurrentSession();
       txn = session.beginTransaction();
       final long totalBuckets = opts.getTotalBuckets() < getJobTotalBuckets() ? getJobTotalBuckets()
           : opts.getTotalBuckets();
@@ -676,6 +676,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         txn.rollback();
       }
       throw new DaoException(e);
+    } finally {
+      doneLoad = true;
     }
 
     return ret;
@@ -828,6 +830,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       } catch (InterruptedException e) { // NOSONAR
         LOGGER.warn("Transformer interrupted!");
+        fatalError = true;
         Thread.currentThread().interrupt();
       } catch (Exception e) {
         LOGGER.fatal("Transformer: fatal error {}", e.getMessage(), e);
@@ -1004,7 +1007,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (InterruptedException ie) { // NOSONAR
       LOGGER.error("interrupted: {}", ie.getMessage(), ie);
       fatalError = true;
-      Thread.currentThread().interrupt();;
+      Thread.currentThread().interrupt();
     } catch (Exception e) {
       LOGGER.error("GENERAL EXCEPTION: {}", e.getMessage(), e);
       fatalError = true;
