@@ -1,5 +1,7 @@
 package gov.ca.cwds.data.persistence.ns;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -9,7 +11,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +30,7 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
  * Entity bean for PostgreSQL view, VW_SCREENING_HISTORY.
  * 
  * <p>
- * Implements {@link ApiGroupNormalizer} and converts to {@link IntakeScreening}.
+ * Implements {@link ApiGroupNormalizer} and converts to {@link IntakeParticipant}.
  * </p>
  * 
  * @author CWDS API Team
@@ -38,23 +39,24 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 @Table(name = "VW_SCREENING_HISTORY")
 @NamedNativeQueries({
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAll",
-        query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
-            // + "WHERE vw.started_at is not null "
-            + "ORDER BY vw.SCREENING_ID FOR READ ONLY",
+        query = "SELECT p.\"id\" as ns_partc_id, p.person_id as cms_legacy_id, vw.* "
+            + "FROM {h-schema}VW_SCREENING_HISTORY vw "
+            + "JOIN participants p ON p.screening_id = vw.screening_id "
+            + "ORDER BY ns_partc_id, cms_legacy_id, screening_id, person_legacy_id "
+            + "FOR READ ONLY",
         resultClass = EsIntakeScreening.class, readOnly = true),
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findBucketRange",
-        query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
+        query = "SELECT vw.* FROM {h-schema}VW_PARTC_SCREENING vw "
             + "WHERE vw.SCREENING_ID BETWEEN :min_id AND :max_id "
             + "ORDER BY vw.SCREENING_ID FOR READ ONLY",
         resultClass = EsIntakeScreening.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter",
-        query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw " + "WHERE "
-        // + "vw.started_at is not null AND "
-            + "vw.LAST_CHG > CAST(:after AS TIMESTAMP) "
+        query = "SELECT vw.* FROM {h-schema}VW_PARTC_SCREENING vw "
+            + "WHERE vw.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + "ORDER BY vw.SCREENING_ID FOR READ ONLY ",
         resultClass = EsIntakeScreening.class, readOnly = true)})
-public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<IntakeScreening> {
+public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<IntakeParticipant> {
 
   private static final Logger LOGGER = LogManager.getLogger(EsIntakeScreening.class);
 
@@ -66,6 +68,18 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)
   private Date lastChange;
+
+  // ================
+  // KEYS:
+  // ================
+
+  @Id
+  @Column(name = "NS_PARTC_ID")
+  private String nsParticipantId;
+
+  @Id
+  @Column(name = "CMS_LEGACY_ID")
+  private String cmsLegacyId;
 
   // ================
   // SCREENING:
@@ -212,8 +226,8 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   // =============
 
   @Override
-  public Class<IntakeScreening> getReductionClass() {
-    return IntakeScreening.class;
+  public Class<IntakeParticipant> getReductionClass() {
+    return IntakeParticipant.class;
   }
 
   /**
@@ -243,117 +257,155 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     return fillParticipant(null);
   }
 
+  /**
+   * Populate a screening object or create a new one.
+   * 
+   * @param s screening object to populate or null to create a new one
+   * @return populated screening object
+   */
+  protected IntakeScreening fillScreening(IntakeScreening s) {
+    IntakeScreening ret = s == null ? new IntakeScreening() : s;
+    ret.setAdditionalInformation(additionalInformation);
+    ret.setAssignee(assignee);
+    ret.setCommunicationMethod(communicationMethod);
+    ret.setEndedAt(endedAt);
+    ret.setId(screeningId);
+    ret.setIncidentCounty(incidentCounty);
+    ret.setIncidentDate(incidentDate);
+    ret.setLocationType(locationType);
+    ret.setReference(reference);
+    ret.setReportNarrative(reportNarrative);
+    ret.setScreeningDecision(screeningDecision);
+    ret.setScreeningDecisionDetail(screeningDecisionDetail);
+    ret.setScreeningName(screeningName);
+    return ret;
+  }
+
+  /**
+   * @return a new Screening object
+   */
+  protected IntakeScreening fillScreening() {
+    return fillScreening(null);
+  }
+
   @Override
-  public void reduce(Map<Object, IntakeScreening> map) {
-    IntakeScreening s;
+  public void reduce(Map<Object, IntakeParticipant> map) {
+    final String partcId = (String) getGroupKey();
+    final boolean goodPartc = isNotBlank(partcId);
 
-    LOGGER.debug("reduce screening id {}", screeningId);
+    // TODO: separate "this" participant from other participant.
 
-    if (!map.containsKey(screeningId)) {
-      s = new IntakeScreening();
-      s.setId(screeningId);
-
-      if (endedAt != null) {
-        s.setEndedAt(new Date(endedAt.getTime()));
-      }
-
-      if (startedAt != null) {
-        s.setStartedAt(new Date(startedAt.getTime()));
-      }
-
-      s.setAdditionalInformation(additionalInformation);
-      s.setAssignee(assignee);
-      s.setCommunicationMethod(communicationMethod);
-      s.setIncidentCounty(incidentCounty);
-      s.setIncidentDate(incidentDate);
-      s.setLocationType(locationType);
-      s.setReference(reference);
-      s.setReportNarrative(reportNarrative);
-      s.setScreeningDecision(screeningDecision);
-      s.setScreeningDecisionDetail(screeningDecisionDetail);
-      s.setScreeningName(screeningName);
-      map.put(s.getId(), s);
-
-      final IntakeParticipant worker = s.getSocialWorker();
-      worker.setLastName(assignee);
-    } else {
-      s = map.get(screeningId);
-    }
-
-    IntakeParticipant p = null;
-    final boolean goodPartc = StringUtils.isNotBlank(participantId);
     if (goodPartc) {
-      if (s.getParticipants().containsKey(participantId)) {
-        p = s.getParticipants().get(participantId);
-      } else {
-        p = fillParticipant();
-        s.addParticipant(p);
-        p.addScreening(s);
+      IntakeParticipant p = map.containsKey(partcId) ? map.get(partcId) : fillParticipant();
+      LOGGER.debug("reduce: partc id: {}, screening id: {}", partcId, screeningId);
 
-        if (roles != null && roles.length > 0) {
-          for (String role : roles) {
-            s.addParticipantRole(p.getIntakeId(), role);
+      IntakeScreening s;
+      Map<String, IntakeScreening> mapScreenings = p.getScreenings();
+
+      if (!map.containsKey(screeningId)) {
+        s = new IntakeScreening();
+        s.setId(screeningId);
+
+        if (endedAt != null) {
+          s.setEndedAt(new Date(endedAt.getTime()));
+        }
+
+        if (startedAt != null) {
+          s.setStartedAt(new Date(startedAt.getTime()));
+        }
+
+        s.setAdditionalInformation(additionalInformation);
+        s.setAssignee(assignee);
+        s.setCommunicationMethod(communicationMethod);
+        s.setIncidentCounty(incidentCounty);
+        s.setIncidentDate(incidentDate);
+        s.setLocationType(locationType);
+        s.setReference(reference);
+        s.setReportNarrative(reportNarrative);
+        s.setScreeningDecision(screeningDecision);
+        s.setScreeningDecisionDetail(screeningDecisionDetail);
+        s.setScreeningName(screeningName);
+        mapScreenings.put(s.getId(), s);
+
+        final IntakeParticipant worker = s.getSocialWorker();
+        worker.setLastName(assignee);
+      } else {
+        s = mapScreenings.get(screeningId);
+      }
+
+      if (goodPartc) {
+        if (s.getParticipants().containsKey(participantId)) {
+          p = s.getParticipants().get(participantId);
+        } else {
+          p = fillParticipant();
+          s.addParticipant(p);
+          p.addScreening(s);
+
+          if (roles != null && roles.length > 0) {
+            for (String role : roles) {
+              s.addParticipantRole(p.getIntakeId(), role);
+            }
           }
         }
       }
-    }
 
-    IntakeAllegation alg;
-    if (s.getAllegations().containsKey(allegationId)) {
-      alg = s.getAllegations().get(allegationId);
-    } else {
-      alg = new IntakeAllegation();
-      alg.setId(allegationId);
-      s.addAllegation(alg);
-    }
-
-    if (goodPartc) {
-      if (flgPerpetrator) {
-        alg.setPerpetrator(p);
+      IntakeAllegation alg;
+      if (s.getAllegations().containsKey(allegationId)) {
+        alg = s.getAllegations().get(allegationId);
+      } else {
+        alg = new IntakeAllegation();
+        alg.setId(allegationId);
+        s.addAllegation(alg);
       }
 
-      if (flgVictim) {
-        alg.setVictim(p);
-      }
-
-      if (flgReporter) {
-        fillParticipant(s.getReporter());
-      }
-
-      if (StringUtils.isNotBlank(addressId)) {
-        final ElasticSearchPersonAddress addr = new ElasticSearchPersonAddress();
-        addr.setId(addressId);
-        addr.setCity(city);
-        addr.setState(state);
-
-        // Synthetic field, not found in legacy. Translate state code.
-        // addr.setStateName(stateName);
-
-        addr.setStreetAddress(streetAddress);
-        addr.setType(addressType);
-        addr.setZip(zip);
-        p.addAddress(addr);
-      }
-
-      if (StringUtils.isNotBlank(phoneNumberId)) {
-        final ElasticSearchPersonPhone ph = new ElasticSearchPersonPhone();
-        ph.setId(phoneNumberId);
-        ph.setPhoneNumber(phoneNumber);
-
-        if (StringUtils.isNotBlank(phoneType)) {
-          ph.setPhoneType(PhoneType.valueOf(phoneType));
+      if (goodPartc) {
+        if (flgPerpetrator) {
+          alg.setPerpetrator(p);
         }
 
-        p.addPhone(ph);
-      }
+        if (flgVictim) {
+          alg.setVictim(p);
+        }
 
+        if (flgReporter) {
+          fillParticipant(s.getReporter());
+        }
+
+        if (isNotBlank(addressId)) {
+          final ElasticSearchPersonAddress addr = new ElasticSearchPersonAddress();
+          addr.setId(addressId);
+          addr.setCity(city);
+          addr.setState(state);
+
+          // Synthetic field, not found in legacy. Translate state code.
+          // addr.setStateName(stateName);
+
+          addr.setStreetAddress(streetAddress);
+          addr.setType(addressType);
+          addr.setZip(zip);
+          p.addAddress(addr);
+        }
+
+        if (isNotBlank(phoneNumberId)) {
+          final ElasticSearchPersonPhone ph = new ElasticSearchPersonPhone();
+          ph.setId(phoneNumberId);
+          ph.setPhoneNumber(phoneNumber);
+
+          if (isNotBlank(phoneType)) {
+            ph.setPhoneType(PhoneType.valueOf(phoneType));
+          }
+
+          p.addPhone(ph);
+        }
+
+      }
     }
 
   }
 
   @Override
   public Object getGroupKey() {
-    return this.screeningId;
+    return isNotBlank(cmsLegacyId) ? cmsLegacyId : nsParticipantId;
   }
 
   /**

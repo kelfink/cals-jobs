@@ -812,8 +812,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
           // NOTE: Assumes that records are sorted by group key.
           if (!lastId.equals(m.getGroupKey()) && cntr > 1) {
-            queueLoad.putLast(reduceSingle(groupRecs));
-            groupRecs.clear(); // Single thread, re-use memory.
+            final T t = reduceSingle(groupRecs);
+            if (t != null) {
+              queueLoad.putLast(t);
+              groupRecs.clear(); // Single thread, re-use memory.
+            }
           }
 
           groupRecs.add(m);
@@ -822,7 +825,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
         // Last bundle.
         if (!groupRecs.isEmpty()) {
-          queueLoad.putLast(reduceSingle(groupRecs));
+          final T t = reduceSingle(groupRecs);
+          if (t != null) {
+            queueLoad.putLast(t);
+            groupRecs.clear(); // Single thread, re-use memory.
+          }
         }
 
       } catch (InterruptedException e) { // NOSONAR

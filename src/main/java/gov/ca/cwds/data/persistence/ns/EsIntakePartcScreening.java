@@ -39,8 +39,11 @@ import gov.ca.cwds.rest.api.domain.DomainChef;
 @Table(name = "VW_PARTC_SCREENING")
 @NamedNativeQueries({
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakePartcScreening.findAll",
-        query = "SELECT vw.* FROM {h-schema}VW_PARTC_SCREENING vw "
-            + "WHERE vw.started_at is not null ORDER BY vw.SCREENING_ID FOR READ ONLY",
+        query = "SELECT p.\"id\" as ns_partc_id, p.person_id as cms_legacy_id, vw.* "
+            + "FROM {h-schema}VW_SCREENING_HISTORY vw "
+            + "JOIN participants p ON p.screening_id = vw.screening_id "
+            + "ORDER BY ns_partc_id, cms_legacy_id, screening_id, person_legacy_id "
+            + "FOR READ ONLY",
         resultClass = EsIntakePartcScreening.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.ns.EsIntakePartcScreening.findBucketRange",
