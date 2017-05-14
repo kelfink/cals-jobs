@@ -238,6 +238,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
    * Populate a participant object or create a new one.
    * 
    * @param p participant object to populate or null to create a new one
+   * @param isOther is this another participant? (i.e., not "this" participant)
    * @return populated participant object
    */
   protected IntakeParticipant fillParticipant(IntakeParticipant p, boolean isOther) {
@@ -262,6 +263,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   /**
    * Create a new participant and populate it from this object.
    * 
+   * @param isOther is this another participant? (i.e., not "this" participant)
    * @return a new participant, populated from this object
    */
   protected IntakeParticipant fillParticipant(boolean isOther) {
@@ -310,7 +312,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
 
   @Override
   public void reduce(Map<Object, IntakeParticipant> map) {
-    // final String thisParticipantId = (String) getGroupKey();
+    final String thisPartcId = (String) getGroupKey();
 
     // Iterate screenings from the perspective of "this" participant.
     // Separate "this" participant from "other" participant.
@@ -318,42 +320,43 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
 
     IntakeParticipant thisPartc;
 
-    if (map.containsKey(thisParticipantId)) {
-      thisPartc = map.get(thisParticipantId);
+    if (map.containsKey(thisPartcId)) {
+      thisPartc = map.get(thisPartcId);
     } else {
       thisPartc = fillParticipant(false);
-      map.put(thisParticipantId, thisPartc);
+      map.put(thisPartcId, thisPartc);
     }
 
-    LOGGER.debug("reduce: this partc id: {}, screening id: {}", thisParticipantId, screeningId);
+    LOGGER.debug("reduce: this partc id: {}, screening id: {}", thisPartcId, screeningId);
 
     try {
       IntakeScreening s;
       final Map<String, IntakeScreening> mapScreenings = thisPartc.getScreenings();
 
       if (!mapScreenings.containsKey(screeningId)) {
-        s = new IntakeScreening();
-        s.setId(screeningId);
-
-        if (endedAt != null) {
-          s.setEndedAt(new Date(endedAt.getTime()));
-        }
-
-        if (startedAt != null) {
-          s.setStartedAt(new Date(startedAt.getTime()));
-        }
-
-        s.setAdditionalInformation(additionalInformation);
-        s.setAssignee(assignee);
-        s.setCommunicationMethod(communicationMethod);
-        s.setIncidentCounty(incidentCounty);
-        s.setIncidentDate(incidentDate);
-        s.setLocationType(locationType);
-        s.setReference(reference);
-        s.setReportNarrative(reportNarrative);
-        s.setScreeningDecision(screeningDecision);
-        s.setScreeningDecisionDetail(screeningDecisionDetail);
-        s.setScreeningName(screeningName);
+        s = fillScreening();
+        // s = new IntakeScreening();
+        // s.setId(screeningId);
+        //
+        // if (endedAt != null) {
+        // s.setEndedAt(new Date(endedAt.getTime()));
+        // }
+        //
+        // if (startedAt != null) {
+        // s.setStartedAt(new Date(startedAt.getTime()));
+        // }
+        //
+        // s.setAdditionalInformation(additionalInformation);
+        // s.setAssignee(assignee);
+        // s.setCommunicationMethod(communicationMethod);
+        // s.setIncidentCounty(incidentCounty);
+        // s.setIncidentDate(incidentDate);
+        // s.setLocationType(locationType);
+        // s.setReference(reference);
+        // s.setReportNarrative(reportNarrative);
+        // s.setScreeningDecision(screeningDecision);
+        // s.setScreeningDecisionDetail(screeningDecisionDetail);
+        // s.setScreeningName(screeningName);
         mapScreenings.put(s.getId(), s); // iterating screenings for *this* participant.
 
         final IntakeParticipant worker = s.getSocialWorker();
@@ -400,7 +403,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
         }
 
         if (flgReporter) {
-          fillParticipant(s.getReporter(), otherPartc.getId().equals(thisParticipantId));
+          fillParticipant(s.getReporter(), otherPartc.getId().equals(thisPartcId));
         }
 
         if (isNotBlank(addressId)) {

@@ -932,9 +932,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Prepare sections of a document for update. Elasticsearch will automatically update the provided
+   * Prepare sections of a document for update. Elasticsearch automatically updates the provided
    * sections. Some jobs should only write sub-documents, such as screenings or allegations, from a
-   * new data source, like Intake PostgreSQL, but shouldn't overwrite document details from legacy.
+   * new data source, like Intake PostgreSQL, but should NOT overwrite document details from legacy.
    * 
    * <p>
    * Default handler just serializes the whole ElasticSearchPerson instance to JSON and returns the
@@ -965,7 +965,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     esp.setScreenings(null);
 
     final String updateJson = mapper.writeValueAsString(esp);
-
     final String alias = esDao.getDefaultAlias();
     final String docType = esDao.getDefaultDocType();
 
