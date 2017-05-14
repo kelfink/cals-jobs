@@ -47,15 +47,18 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
             + "FOR READ ONLY",
         resultClass = EsIntakeScreening.class, readOnly = true),
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findBucketRange",
-        query = "SELECT vw.* FROM {h-schema}VW_PARTC_SCREENING vw "
+        query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
             + "WHERE vw.SCREENING_ID BETWEEN :min_id AND :max_id "
             + "ORDER BY vw.SCREENING_ID FOR READ ONLY",
         resultClass = EsIntakeScreening.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter",
-        query = "SELECT vw.* FROM {h-schema}VW_PARTC_SCREENING vw "
+        query = "SELECT p.\"id\" as ns_partc_id, p.person_id as cms_legacy_id, vw.* "
+            + "FROM {h-schema}VW_SCREENING_HISTORY vw "
+            + "JOIN participants p ON p.screening_id = vw.screening_id "
             + "WHERE vw.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + "ORDER BY vw.SCREENING_ID FOR READ ONLY ",
+            + "ORDER BY ns_partc_id, cms_legacy_id, screening_id, person_legacy_id, participant_id "
+            + "FOR READ ONLY",
         resultClass = EsIntakeScreening.class, readOnly = true)})
 public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<IntakeParticipant> {
 
@@ -273,11 +276,11 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
    */
   protected IntakeScreening fillScreening(IntakeScreening s) {
     IntakeScreening ret = s == null ? new IntakeScreening() : s;
+
+    ret.setId(screeningId);
     ret.setAdditionalInformation(additionalInformation);
     ret.setAssignee(assignee);
     ret.setCommunicationMethod(communicationMethod);
-    ret.setEndedAt(endedAt);
-    ret.setId(screeningId);
     ret.setIncidentCounty(incidentCounty);
     ret.setIncidentDate(incidentDate);
     ret.setLocationType(locationType);
@@ -286,6 +289,15 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     ret.setScreeningDecision(screeningDecision);
     ret.setScreeningDecisionDetail(screeningDecisionDetail);
     ret.setScreeningName(screeningName);
+
+    if (endedAt != null) {
+      ret.setEndedAt(new Date(endedAt.getTime()));
+    }
+
+    if (startedAt != null) {
+      ret.setStartedAt(new Date(startedAt.getTime()));
+    }
+
     return ret;
   }
 
@@ -418,9 +430,9 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
 
           otherPartc.addPhone(ph);
         }
-
       }
     } catch (RuntimeException e) {
+      // Log the offending record.
       LOGGER.error("OOPS! {}", this);
       throw e;
     }
