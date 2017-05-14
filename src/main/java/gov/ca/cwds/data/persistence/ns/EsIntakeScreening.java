@@ -354,7 +354,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
         s.setScreeningDecision(screeningDecision);
         s.setScreeningDecisionDetail(screeningDecisionDetail);
         s.setScreeningName(screeningName);
-        mapScreenings.put(s.getId(), s);
+        mapScreenings.put(s.getId(), s); // iterating screenings for *this* participant.
 
         final IntakeParticipant worker = s.getSocialWorker();
         worker.setLastName(assignee);
@@ -372,7 +372,6 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
         } else {
           otherPartc = fillParticipant(true);
           s.addParticipant(otherPartc);
-          thisPartc.addScreening(s); // iterating screenings for *this* participant.
 
           if (roles != null && roles.length > 0) {
             for (String role : roles) {
