@@ -194,11 +194,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected LinkedBlockingDeque<T> queueLoad = new LinkedBlockingDeque<>(50000);
 
   /**
-   * Completion flag for fatal errors.
-   */
-  protected boolean fatalError = false;
-
-  /**
    * Completion flag for <strong>Extract</strong> method {@link #threadExtractJdbc()}.
    */
   protected boolean doneExtract = false;
