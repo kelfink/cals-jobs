@@ -102,7 +102,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
 
     // If at first you don't succeed, cheat. :-)
     StringBuilder buf = new StringBuilder();
-    buf.append("{ \"screenings\":[").append("]}");
+    buf.append("{\"screenings\":[");
 
     if (!p.getScreenings().isEmpty()) {
       try {
