@@ -1121,7 +1121,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   @Override
   protected synchronized void finish() {
-
     LOGGER.warn("FINISH JOB AND SHUTDOWN!");
     try {
       this.doneExtract = true;
@@ -1137,12 +1136,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       Runtime.getRuntime().exit(0); // NOSONAR
 
     } catch (InterruptedException e) {
+      fatalError = true;
       Thread.currentThread().interrupt();
     } catch (IOException ioe) {
-      LOGGER.fatal("ERROR CLOSING RESOURCES OR FINISHING JOB: {}", ioe.getMessage(), ioe);
+      fatalError = true;
+      LOGGER.fatal("ERROR FINISHING JOB: {}", ioe.getMessage(), ioe);
       throw new JobsException(ioe);
     }
-
   }
 
   /**
@@ -1212,6 +1212,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       txn.commit();
       return results.build();
     } catch (HibernateException e) {
+      fatalError = true;
       LOGGER.error("BATCH ERROR! {}", e.getMessage(), e);
       if (txn != null) {
         txn.rollback();
@@ -1244,8 +1245,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           try {
             prepareDocument(bp, p);
           } catch (JsonProcessingException e) {
+            // TODO: log the offending record.
             throw new JobsException("JSON error", e);
           } catch (IOException e) {
+            // TODO: log the offending record.
             throw new JobsException("IO error", e);
           }
         });

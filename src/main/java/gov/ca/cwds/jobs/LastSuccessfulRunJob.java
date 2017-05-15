@@ -69,12 +69,15 @@ public abstract class LastSuccessfulRunJob implements Job {
       try (BufferedReader br = new BufferedReader(new FileReader(lastJobRunTimeFilename))) {
         ret = jobDateFormat.parse(br.readLine().trim());
       } catch (FileNotFoundException e) {
+        fatalError = true;
         LOGGER.error("Caught FileNotFoundException: {}", e.getMessage(), e);
         throw new JobsException(e);
       } catch (IOException e) {
+        fatalError = true;
         LOGGER.error("Caught IOException: {}", e.getMessage(), e);
         throw new JobsException(e);
       } catch (ParseException e) {
+        fatalError = true;
         LOGGER.error("Caught ParseException: {}", e.getMessage(), e);
         throw new JobsException(e);
       }
@@ -88,6 +91,7 @@ public abstract class LastSuccessfulRunJob implements Job {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastJobRunTimeFilename))) {
         w.write(jobDateFormat.format(datetime));
       } catch (IOException e) {
+        fatalError = true;
         LOGGER.error("Caught IOException: {}", e.getMessage(), e);
         throw new JobsException("Unable to write timestamp parameter file", e);
       }
