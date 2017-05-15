@@ -962,7 +962,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final String insertJson = mapper.writeValueAsString(esp);
 
     // Null out non-standard collections for updates.
-    esp.setScreenings(null);
+    esp.clearOptionalCollections();
 
     final String updateJson = mapper.writeValueAsString(esp);
     final String alias = esDao.getDefaultAlias();

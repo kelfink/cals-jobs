@@ -317,7 +317,6 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     // Iterate screenings from the perspective of "this" participant.
     // Separate "this" participant from "other" participant.
     // This job stores person documents, not independent screening documents.
-
     IntakeParticipant thisPartc;
 
     if (map.containsKey(thisPartcId)) {
@@ -335,28 +334,6 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
 
       if (!mapScreenings.containsKey(screeningId)) {
         s = fillScreening();
-        // s = new IntakeScreening();
-        // s.setId(screeningId);
-        //
-        // if (endedAt != null) {
-        // s.setEndedAt(new Date(endedAt.getTime()));
-        // }
-        //
-        // if (startedAt != null) {
-        // s.setStartedAt(new Date(startedAt.getTime()));
-        // }
-        //
-        // s.setAdditionalInformation(additionalInformation);
-        // s.setAssignee(assignee);
-        // s.setCommunicationMethod(communicationMethod);
-        // s.setIncidentCounty(incidentCounty);
-        // s.setIncidentDate(incidentDate);
-        // s.setLocationType(locationType);
-        // s.setReference(reference);
-        // s.setReportNarrative(reportNarrative);
-        // s.setScreeningDecision(screeningDecision);
-        // s.setScreeningDecisionDetail(screeningDecisionDetail);
-        // s.setScreeningName(screeningName);
         mapScreenings.put(s.getId(), s); // iterating screenings for *this* participant.
 
         final IntakeParticipant worker = s.getSocialWorker();
