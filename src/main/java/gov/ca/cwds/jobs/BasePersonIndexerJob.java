@@ -987,6 +987,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       while (!(fatalError || (doneExtract && doneTransform && doneLoad))) {
         LOGGER.debug("runInitialLoad: sleep");
         Thread.sleep(SLEEP_MILLIS);
+
         try {
           this.jobDao.find("abc123"); // dummy call, keep connection pool alive.
         } catch (HibernateException he) { // NOSONAR
