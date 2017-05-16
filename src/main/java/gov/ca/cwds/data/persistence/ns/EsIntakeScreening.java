@@ -40,23 +40,21 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 @Table(name = "VW_SCREENING_HISTORY")
 @NamedNativeQueries({
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAll",
-        query = "SELECT p.\"id\" as ns_partc_id, p.person_id as cms_legacy_id, vw.* "
+        query = "SELECT p.\"id\" AS ns_partc_id, p.person_id AS cms_legacy_id, vw.* "
             + "FROM {h-schema}VW_SCREENING_HISTORY vw "
             + "JOIN participants p ON p.screening_id = vw.screening_id "
+            + "WHERE p.person_id IS NOT NULL "
             + "ORDER BY ns_partc_id, cms_legacy_id, screening_id, person_legacy_id, participant_id "
             + "FOR READ ONLY",
         resultClass = EsIntakeScreening.class, readOnly = true),
-    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findBucketRange",
-        query = "SELECT vw.* FROM {h-schema}VW_SCREENING_HISTORY vw "
-            + "WHERE vw.SCREENING_ID BETWEEN :min_id AND :max_id "
-            + "ORDER BY vw.SCREENING_ID FOR READ ONLY",
-        resultClass = EsIntakeScreening.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter",
-        query = "SELECT p.\"id\" as ns_partc_id, p.person_id as cms_legacy_id, vw.* "
-            + "FROM {h-schema}VW_SCREENING_HISTORY vw "
-            + "JOIN participants p ON p.screening_id = vw.screening_id "
-            + "WHERE vw.LAST_CHG > CAST(:after AS TIMESTAMP) "
+        query = "SELECT p.\"id\" AS ns_partc_id, p.person_id AS cms_legacy_id, vw.* "
+            + "FROM VW_SCREENING_HISTORY vw "
+            + "JOIN PARTICIPANTS p ON p.screening_id = vw.screening_id "
+            + "WHERE vw.participant_id IN ( SELECT DISTINCT vw1.participant_id "
+            + " FROM VW_SCREENING_HISTORY vw1 WHERE vw1.last_chg > CAST(:after AS TIMESTAMP) "
+            + ") AND p.person_id IS NOT NULL "
             + "ORDER BY ns_partc_id, cms_legacy_id, screening_id, person_legacy_id, participant_id "
             + "FOR READ ONLY",
         resultClass = EsIntakeScreening.class, readOnly = true)})

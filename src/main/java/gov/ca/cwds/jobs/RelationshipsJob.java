@@ -14,12 +14,12 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.dao.cms.ReplicatedClientDao;
+import gov.ca.cwds.dao.cms.ReplicatedRelationshipDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.model.cms.JobResultSetAware;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
-import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
+import gov.ca.cwds.data.persistence.cms.ReplicatedRelationship;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
@@ -29,7 +29,7 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * 
  * @author CWDS API Team
  */
-public class RelationshipsJob extends BasePersonIndexerJob<ReplicatedClient, EsRelationship>
+public class RelationshipsJob extends BasePersonIndexerJob<ReplicatedRelationship, EsRelationship>
     implements JobResultSetAware<EsRelationship> {
 
   private static final Logger LOGGER = LogManager.getLogger(RelationshipsJob.class);
@@ -44,7 +44,7 @@ public class RelationshipsJob extends BasePersonIndexerJob<ReplicatedClient, EsR
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public RelationshipsJob(final ReplicatedClientDao clientDao,
+  public RelationshipsJob(final ReplicatedRelationshipDao clientDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
     super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
@@ -66,16 +66,16 @@ public class RelationshipsJob extends BasePersonIndexerJob<ReplicatedClient, EsR
   }
 
   @Override
-  protected ReplicatedClient reduceSingle(List<EsRelationship> recs) {
+  protected ReplicatedRelationship reduceSingle(List<EsRelationship> recs) {
     return reduce(recs).get(0);
   }
 
   @Override
-  protected List<ReplicatedClient> reduce(List<EsRelationship> recs) {
+  protected List<ReplicatedRelationship> reduce(List<EsRelationship> recs) {
     final int len = (int) (recs.size() * 1.25);
-    Map<Object, ReplicatedClient> map = new LinkedHashMap<>(len);
+    Map<Object, ReplicatedRelationship> map = new LinkedHashMap<>(len);
     for (PersistentObject rec : recs) {
-      ApiGroupNormalizer<ReplicatedClient> reducer = (EsRelationship) rec;
+      ApiGroupNormalizer<ReplicatedRelationship> reducer = (EsRelationship) rec;
       reducer.reduce(map);
     }
 
@@ -88,7 +88,7 @@ public class RelationshipsJob extends BasePersonIndexerJob<ReplicatedClient, EsR
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Run Client indexer job");
+    LOGGER.info("Run Relationships indexer job");
     try {
       runJob(RelationshipsJob.class, args);
     } catch (JobsException e) {
