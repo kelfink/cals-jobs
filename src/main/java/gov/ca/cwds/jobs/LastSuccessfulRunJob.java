@@ -29,6 +29,11 @@ public abstract class LastSuccessfulRunJob implements Job {
    */
   protected DateFormat jobDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+  /**
+   * Completion flag for fatal errors.
+   */
+  protected boolean fatalError = false;
+
   private String lastJobRunTimeFilename;
 
   /**
@@ -44,7 +49,11 @@ public abstract class LastSuccessfulRunJob implements Job {
   public final void run() {
     final Date lastRunTime = determineLastSuccessfulRunTime();
     final Date curentTimeRunTime = _run(lastRunTime);
-    writeLastSuccessfulRunTime(curentTimeRunTime);
+
+    if (!fatalError) {
+      writeLastSuccessfulRunTime(curentTimeRunTime);
+    }
+
     finish(); // Close resources, notify listeners, or even close JVM.
   }
 
@@ -57,16 +66,18 @@ public abstract class LastSuccessfulRunJob implements Job {
     Date ret = null;
 
     if (!StringUtils.isBlank(this.lastJobRunTimeFilename)) {
-      try (BufferedReader bufferedReader =
-          new BufferedReader(new FileReader(lastJobRunTimeFilename))) {
-        ret = jobDateFormat.parse(bufferedReader.readLine().trim());
+      try (BufferedReader br = new BufferedReader(new FileReader(lastJobRunTimeFilename))) {
+        ret = jobDateFormat.parse(br.readLine().trim());
       } catch (FileNotFoundException e) {
+        fatalError = true;
         LOGGER.error("Caught FileNotFoundException: {}", e.getMessage(), e);
         throw new JobsException(e);
       } catch (IOException e) {
+        fatalError = true;
         LOGGER.error("Caught IOException: {}", e.getMessage(), e);
         throw new JobsException(e);
       } catch (ParseException e) {
+        fatalError = true;
         LOGGER.error("Caught ParseException: {}", e.getMessage(), e);
         throw new JobsException(e);
       }
@@ -80,6 +91,7 @@ public abstract class LastSuccessfulRunJob implements Job {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastJobRunTimeFilename))) {
         w.write(jobDateFormat.format(datetime));
       } catch (IOException e) {
+        fatalError = true;
         LOGGER.error("Caught IOException: {}", e.getMessage(), e);
         throw new JobsException("Unable to write timestamp parameter file", e);
       }

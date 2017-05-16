@@ -83,15 +83,15 @@ public class JobsGuiceInjector extends AbstractModule {
    * @param esConfigFileLoc location of Elasticsearch configuration file
    * @param lastJobRunTimeFilename location of last run file
    */
-  public JobsGuiceInjector(File esConfigFileLoc, String lastJobRunTimeFilename) {
+  public JobsGuiceInjector(final File esConfigFileLoc, String lastJobRunTimeFilename) {
     this.esConfig = esConfigFileLoc;
     this.lastJobRunTimeFilename =
         !StringUtils.isBlank(lastJobRunTimeFilename) ? lastJobRunTimeFilename : "";
   }
 
   /**
-   * Register all known CMS entity classes with Hibernate. Note that method addPackage() is not
-   * working as hoped.
+   * Register all DB2 replication entity classes and PostgreSQL view classes with Hibernate. Note
+   * that method addPackage() is not working as hoped.
    * 
    * <p>
    * Parent class:
@@ -133,7 +133,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ReplicatedSubstituteCareProviderDao.class);
     bind(ReplicatedEducationProviderContactDao.class);
 
-    // Postgres:
+    // PostgreSQL:
     bind(EsIntakeScreeningDao.class);
 
     // Instantiate as a singleton, else Guice creates a new instance each time.

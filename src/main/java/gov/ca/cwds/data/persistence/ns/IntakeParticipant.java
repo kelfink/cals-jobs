@@ -70,7 +70,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     ALL;
   }
 
-  private String intakeId;
+  private String id;
 
   private String legacyId;
 
@@ -107,7 +107,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
 
   @Override
   public Serializable getPrimaryKey() {
-    return StringUtils.isNotBlank(legacyId) ? legacyId : intakeId;
+    return StringUtils.isNotBlank(legacyId) ? legacyId : id;
   }
 
   @Override
@@ -147,11 +147,11 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
 
   @Override
   public String getId() {
-    return intakeId;
+    return id;
   }
 
   public void setId(String id) {
-    this.intakeId = id;
+    this.id = id;
   }
 
   public void setFirstName(String firstName) {
@@ -232,7 +232,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
       default:
         ElasticSearchPersonAny any = new ElasticSearchPersonAny();
         any.getRoles()
-            .addAll(screening.findParticipantRoles(intakeId).stream().collect(Collectors.toList()));
+            .addAll(screening.findParticipantRoles(id).stream().collect(Collectors.toList()));
         ret = any;
         break;
     }
@@ -240,7 +240,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     ret.setFirstName(firstName);
     ret.setLastName(lastName);
     ret.setLegacyClientId(legacyId);
-    ret.setId(intakeId);
+    ret.setId(id);
 
     return ret;
   }
@@ -261,14 +261,6 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     if (!screenings.containsKey(screening.getId())) {
       screenings.put(screening.getId(), screening);
     }
-  }
-
-  public String getIntakeId() {
-    return intakeId;
-  }
-
-  public void setIntakeId(String intakeId) {
-    this.intakeId = intakeId;
   }
 
   public Map<String, IntakeScreening> getScreenings() {

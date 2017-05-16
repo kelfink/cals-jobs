@@ -45,7 +45,7 @@ dependencies {
 	compile group: "org.postgresql", name: "postgresql", version: "9.4.1212"
 	compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.0.0-rc4"
 
-	compile group: "gov.ca.cwds.api", name: "api", version: "0.21.871"
+	compile group: "gov.ca.cwds.api", name: "api", version: "0.21.894"
 
     compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
 	compile group: "javax.el", name: "javax.el-api", version: "2.2.4"
@@ -94,7 +94,7 @@ publishing {
 cobertura {
 	coverageFormats = ['xml', 'html']
 	coverageIgnoreTrivial = true
-	coverageExcludes  = ['org.slf4j.Logger.*', '.*gov\\.ca\\.cwds\\.jobs\\..*BasePersonIndexer.*', '.*gov\\.ca\\.cwds\\.jobs\\.util\\..*']
+	coverageExcludes  = ['org.slf4j.Logger.*', '.*gov\\.ca\\.cwds\\.jobs\\..*BasePersonIndexer.*', '.*gov\\.ca\\.cwds\\.jobs\\..*IntakeScreeningJob.*', '.*gov\\.ca\\.cwds\\.jobs\\.util\\..*']
 	coverageIgnores = ['org.slf4j.Logger.*']
 	coverageReportDir = new File("$buildDir/reports/cobertura")
 }

@@ -176,6 +176,7 @@ public class IntakeScreening
 
     // TODO: #144948751: Screening History.
     // Participants may connect to many screenings by person legacy id.
+    // View should return all screenings by participant, not the other way around.
 
     esScreenings.add(toEsScreening());
     return esScreenings.toArray(new ElasticSearchPersonScreening[0]);

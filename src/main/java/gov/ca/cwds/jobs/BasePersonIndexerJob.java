@@ -196,11 +196,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected LinkedBlockingDeque<T> queueLoad = new LinkedBlockingDeque<>(50000);
 
   /**
-   * Completion flag for fatal errors.
-   */
-  protected boolean fatalError = false;
-
-  /**
    * Completion flag for <strong>Extract</strong> method {@link #threadExtractJdbc()}.
    */
   protected boolean doneExtract = false;
@@ -214,11 +209,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Completion flag for <strong>Load</strong> method {@link #threadLoad()}.
    */
   protected boolean doneLoad = false;
-
-  /**
-   * Flag for "upsert" mode (update or insert). Turn off during initial loads and full refreshes.
-   */
-  protected boolean modeUpsert = true;
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -241,7 +231,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Get the view or materialized query table name, if used. All child classes that rely on a
+   * Get the view or materialized query table name, if used. Any child classes relying on a
    * denormalized view must define the name.
    * 
    * @return name of view or materialized query table or null if none
@@ -253,6 +243,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public M extractFromResultSet(ResultSet rs) throws SQLException {
     return null;
+  }
+
+  /**
+   * prepare an ES person to prepare for JSON serialization by nulling out collections.
+   *
+   * @param esp ES person to prepare for JSON serialization
+   */
+  protected void prepEspForUpsert(ElasticSearchPerson esp) {
+
   }
 
   /**
@@ -325,8 +324,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
-      LOGGER.error("UNABLE TO CREATE DEPENDENCIES! {}", e.getMessage(), e);
-      throw new JobsException("UNABLE TO CREATE DEPENDENCIES! " + e.getMessage(), e);
+      final String msg = MessageFormat.format("UNABLE TO CREATE DEPENDENCIES! {}", e.getMessage());
+      LOGGER.error(msg, e);
+      throw new JobsException(msg, e);
     }
   }
 
@@ -346,12 +346,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       String... args) throws JobsException {
     try (final T job = newJob(klass, args)) { // Close resources automatically.
       job.run();
-    } catch (IOException e) {
-      LOGGER.error("UNABLE TO CLOSE RESOURCE! {}", e.getMessage(), e);
-      throw new JobsException("UNABLE TO CLOSE RESOURCE! " + e.getMessage(), e);
-    } catch (JobsException e) {
-      LOGGER.error("UNABLE TO COMPLETE JOB: {}", e.getMessage(), e);
-      throw e;
+    } catch (Exception e) {
+      LOGGER.error("JOB FAILED: {}", e.getMessage(), e);
+      throw new JobsException("JOB FAILED! " + e.getMessage(), e);
     }
   }
 
@@ -458,6 +455,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     // Write persistence object to Elasticsearch Person document.
     ElasticSearchPerson ret;
+
+    LOGGER.debug("p.getPrimaryKey()={}", p.getPrimaryKey());
+    if (p.getPrimaryKey() == null) {
+      LOGGER.warn("STOP");
+    }
+
     ret = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
         pa.getFirstName(), // first name
         pa.getLastName(), // last name
@@ -478,8 +481,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Pull records changed since the last successful run.
    * 
    * <p>
-   * If this job defines a denormalized (MQT) entity, then pull from that. Otherwise, pull from the
-   * regular entity.
+   * If this job defines a denormalized view entity, then pull from that. Otherwise, pull from the
+   * table entity.
    * </p>
    * 
    * @param lastRunTime last successful run time
@@ -508,24 +511,26 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       return results.build();
     } catch (HibernateException h) {
       fatalError = true;
-      LOGGER.error("BATCH ERROR! {}", h.getMessage(), h);
+      LOGGER.error("EXTRACT ERROR! {}", h.getMessage(), h);
       if (txn != null) {
         txn.rollback();
       }
       throw new DaoException(h);
+    } finally {
+      doneExtract = true;
     }
   }
 
   /**
-   * Pull from MQT for last run mode.
+   * Pull from view for last run mode.
    * 
    * @param lastRunTime last successful run time
    * @return List of normalized entities
    */
   protected List<T> extractLastRunRecsFromView(Date lastRunTime) {
-    LOGGER.info("PULL MQT: last successful run: {}", lastRunTime);
+    LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
 
-    final Class<?> entityClass = getDenormalizedClass(); // MQT entity class
+    final Class<?> entityClass = getDenormalizedClass(); // view entity class
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
@@ -541,7 +546,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final List<M> recs = q.list();
       LOGGER.warn("FOUND {} RECORDS", recs.size());
 
-      // Convert from denormalized MQT to normalized.
+      // Convert denormalized view rows to normalized persistence objects.
       List<M> groupRecs = new ArrayList<>();
       for (M m : recs) {
         if (!lastId.equals(m.getGroupKey()) && !groupRecs.isEmpty()) {
@@ -561,12 +566,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       txn.commit();
       return results.build();
     } catch (HibernateException h) {
-      LOGGER.error("BATCH ERROR! {}", h.getMessage(), h);
+      LOGGER.error("EXTRACT ERROR! {}", h.getMessage(), h);
       fatalError = true;
       if (txn != null) {
         txn.rollback();
       }
-      throw new DaoException(h);
+      throw new JobsException(h);
+    } finally {
+      doneExtract = true;
     }
   }
 
@@ -597,17 +604,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         // Spawn a reasonable number of threads to process all results.
         results.stream().forEach(p -> {
           try {
-            // TODO: upsert.
             // Write persistence object to Elasticsearch Person document.
-            final ElasticSearchPerson esp = buildElasticSearchPerson(p);
-
-            // Bulk indexing! MUCH faster than indexing one doc at a time.
-            bp.add(this.esDao.bulkAdd(this.mapper, esp.getId(), esp));
+            prepareDocument(bp, p);
           } catch (JsonProcessingException e) {
             fatalError = true;
-            doneLoad = true;
             LOGGER.error("ERROR WRITING JSON: {}", e.getMessage(), e);
             throw new JobsException("ERROR WRITING JSON", e);
+          } catch (IOException e) {
+            fatalError = true;
+            LOGGER.error("IO EXCEPTION: {}", e.getMessage(), e);
+            throw new JobsException("IO EXCEPTION", e);
+          } finally {
+            doneLoad = true;
           }
         });
 
@@ -620,10 +628,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
       return new Date(this.startTime);
 
-    } catch (JobsException e) {
-      fatalError = true;
-      LOGGER.error("JobsException: {}", e.getMessage(), e);
-      throw e;
     } catch (Exception e) {
       fatalError = true;
       LOGGER.error("General Exception: {}", e.getMessage(), e);
@@ -643,10 +647,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected List<BatchBucket> buildBucketList(String table) {
     List<BatchBucket> ret = new ArrayList<>();
 
-    Session session = jobDao.getSessionFactory().getCurrentSession();
     Transaction txn = null;
     try {
       LOGGER.info("FETCH DYNAMIC BUCKET LIST FOR TABLE {}", table);
+      final Session session = jobDao.getSessionFactory().getCurrentSession();
       txn = session.beginTransaction();
       final long totalBuckets = opts.getTotalBuckets() < getJobTotalBuckets() ? getJobTotalBuckets()
           : opts.getTotalBuckets();
@@ -666,6 +670,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         txn.rollback();
       }
       throw new DaoException(e);
+    } finally {
+      doneLoad = true;
     }
 
     return ret;
@@ -691,8 +697,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Default reduce method just returns the input. Child classes may customize this method to reduce
-   * denormalized result sets to normalized entities.
+   * Default reduce method just returns the input. Child classes may customize this method to
+   * convert (reduce) denormalized result sets to normalized entities.
    * 
    * @param recs entity records
    * @return unmodified entity records
@@ -703,10 +709,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Reduce/normalize MQT records for a single grouping (such as all the same client) into a
+   * Reduce/normalize view records for a single grouping (such as all the same client) into a
    * normalized entity bean, consisting of a parent object and its child objects.
    * 
-   * @param recs denormalized MQT beans
+   * @param recs denormalized view beans
    * @return normalized entity bean instance
    */
   protected T reduceSingle(List<M> recs) {
@@ -733,7 +739,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Single producer, staged consumers.
+   * The "extract" part of ETL. Single producer, staged consumers.
    */
   protected void threadExtractJdbc() {
     Thread.currentThread().setName("extract");
@@ -784,8 +790,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Single thread consumer, second stage of initial load. Convert denormalized MQT records to
-   * normalized ones and hand off to the next queue.
+   * The "transform" part of ETL. Single thread consumer, second stage of initial load. Convert
+   * denormalized view records to normalized ones and pass to the load queue.
    */
   protected void threadTransform() {
     Thread.currentThread().setName("transformer");
@@ -801,10 +807,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         while ((m = queueTransform.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
           logEvery(++cntr, "Transformed", "recs");
 
-          // Assumes that records are sorted by group key.
+          // NOTE: Assumes that records are sorted by group key.
           if (!lastId.equals(m.getGroupKey()) && cntr > 1) {
-            queueLoad.putLast(reduceSingle(groupRecs));
-            groupRecs.clear(); // Single thread. Re-use memory.
+            final T t = reduceSingle(groupRecs);
+            if (t != null) {
+              queueLoad.putLast(t);
+              groupRecs.clear(); // Single thread, re-use memory.
+            }
           }
 
           groupRecs.add(m);
@@ -813,11 +822,16 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
         // Last bundle.
         if (!groupRecs.isEmpty()) {
-          queueLoad.putLast(reduceSingle(groupRecs));
+          final T t = reduceSingle(groupRecs);
+          if (t != null) {
+            queueLoad.putLast(t);
+            groupRecs.clear(); // Single thread, re-use memory.
+          }
         }
 
       } catch (InterruptedException e) { // NOSONAR
         LOGGER.warn("Transformer interrupted!");
+        fatalError = true;
         Thread.currentThread().interrupt();
       } catch (Exception e) {
         LOGGER.fatal("Transformer: fatal error {}", e.getMessage(), e);
@@ -845,7 +859,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Read from normalized record queue and push to ES.
+   * The "load" part of ETL. Read from normalized record queue and push to ES.
    */
   protected void threadLoad() {
     Thread.currentThread().setName("loader");
@@ -883,12 +897,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       fatalError = true;
       Thread.currentThread().interrupt();
     } catch (JsonProcessingException e) {
-      LOGGER.error("Publisher: JsonProcessingException! {}", e.getMessage(), e);
       fatalError = true;
+      LOGGER.error("Publisher: JsonProcessingException! {}", e.getMessage(), e);
       throw new JobsException("JSON error", e);
     } catch (Exception e) {
-      LOGGER.fatal("Publisher: fatal error {}", e.getMessage(), e);
       fatalError = true;
+      LOGGER.fatal("Publisher: fatal error {}", e.getMessage(), e);
       throw new JobsException("Publisher: fatal error", e);
     } finally {
       doneLoad = true;
@@ -909,6 +923,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param t Person record to write
    * @throws JsonProcessingException if unable to serialize JSON
    * @throws IOException if unable to prepare request
+   * @see #prepareUpsertRequest(ElasticSearchPerson, PersistentObject)
    */
   protected void prepareDocument(BulkProcessor bp, T t) throws IOException {
     final ElasticSearchPerson[] docs = buildElasticSearchPersons(t);
@@ -919,9 +934,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Prepare sections of a document for update. Elasticsearch will automatically update the provided
+   * Prepare sections of a document for update. Elasticsearch automatically updates the provided
    * sections. Some jobs should only write sub-documents, such as screenings or allegations, from a
-   * new data source, like Intake PostgreSQL, but shouldn't overwrite document details from legacy.
+   * new data source, like Intake PostgreSQL, but should NOT overwrite document details from legacy.
    * 
    * <p>
    * Default handler just serializes the whole ElasticSearchPerson instance to JSON and returns the
@@ -945,12 +960,17 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       id = StringUtils.isNotBlank(l.getLegacyId()) ? l.getLegacyId() : esp.getId();
     }
 
-    final String json = mapper.writeValueAsString(esp);
+    final String insertJson = mapper.writeValueAsString(esp);
+
+    // Null out non-standard collections for updates.
+    esp.clearOptionalCollections();
+
+    final String updateJson = mapper.writeValueAsString(esp);
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
 
-    return new UpdateRequest(alias, docType, id).doc(json, XContentType.JSON)
-        .upsert(new IndexRequest(alias, docType, id).source(json, XContentType.JSON));
+    return new UpdateRequest(alias, docType, id).doc(updateJson, XContentType.JSON)
+        .upsert(new IndexRequest(alias, docType, id).source(insertJson, XContentType.JSON));
   }
 
   /**
@@ -960,7 +980,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void doInitialLoadJdbc() throws IOException {
     Thread.currentThread().setName("main");
-    modeUpsert = false; // Refresh, reload, overwrite. Don't update existing documents.
     try {
       new Thread(this::threadExtractJdbc).start(); // Extract
       new Thread(this::threadTransform).start(); // Transform
@@ -969,6 +988,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       while (!(fatalError || (doneExtract && doneTransform && doneLoad))) {
         LOGGER.debug("runInitialLoad: sleep");
         Thread.sleep(SLEEP_MILLIS);
+
         try {
           this.jobDao.find("abc123"); // dummy call, keep connection pool alive.
         } catch (HibernateException he) { // NOSONAR
@@ -985,9 +1005,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.warn("DONE: doInitialLoadViaJdbc");
 
     } catch (InterruptedException ie) { // NOSONAR
-      LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
+      LOGGER.error("interrupted: {}", ie.getMessage(), ie);
       fatalError = true;
-      Thread.interrupted();
+      Thread.currentThread().interrupt();
     } catch (Exception e) {
       LOGGER.error("GENERAL EXCEPTION: {}", e.getMessage(), e);
       fatalError = true;
@@ -1036,7 +1056,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         getOpts().setTotalBuckets(getJobTotalBuckets());
 
         if (this.getDenormalizedClass() != null) {
-          LOGGER.warn("LOAD FROM MQT VIA JDBC!");
+          LOGGER.warn("LOAD FROM VIEW VIA JDBC!");
           doInitialLoadJdbc();
         } else {
           LOGGER.warn("LOAD REPLICATED TABLE QUERY VIA HIBERNATE!");
@@ -1102,20 +1122,28 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   @Override
   protected synchronized void finish() {
-
     LOGGER.warn("FINISH JOB AND SHUTDOWN!");
     try {
+      this.doneExtract = true;
+      this.doneLoad = true;
+      this.doneTransform = true;
+
       close();
-      LogManager.shutdown(); // Flush appenders.
+      // LogManager.shutdown(); // Flush appenders.
 
       Thread.sleep(SLEEP_MILLIS); // NOSONAR
+
+      // Shutdown all remaining resources, even those not attached to this job.
       Runtime.getRuntime().exit(0); // NOSONAR
+
     } catch (InterruptedException e) {
+      fatalError = true;
       Thread.currentThread().interrupt();
     } catch (IOException ioe) {
-      LOGGER.fatal("ERROR CLOSING RESOURCES OR FINISHING JOB: {}", ioe.getMessage(), ioe);
+      fatalError = true;
+      LOGGER.fatal("ERROR FINISHING JOB: {}", ioe.getMessage(), ioe);
+      throw new JobsException(ioe);
     }
-
   }
 
   /**
@@ -1185,6 +1213,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       txn.commit();
       return results.build();
     } catch (HibernateException e) {
+      fatalError = true;
       LOGGER.error("BATCH ERROR! {}", e.getMessage(), e);
       if (txn != null) {
         txn.rollback();
@@ -1204,7 +1233,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @see #pullBucketRange(String, String)
    */
   protected int extractHibernate() {
-    // isUpsert = true; // Refresh, reload, overwrite. Don't update existing documents.
     final List<Pair<String, String>> buckets = getPartitionRanges();
 
     for (Pair<String, String> b : buckets) {
@@ -1216,13 +1244,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         final BulkProcessor bp = buildBulkProcessor();
         results.stream().forEach(p -> {
           try {
-            final ElasticSearchPerson[] docs = buildElasticSearchPersons(p);
-            for (ElasticSearchPerson esp : docs) {
-              bp.add(esDao.bulkAdd(mapper, esp.getId(), esp));
-            }
-
+            prepareDocument(bp, p);
           } catch (JsonProcessingException e) {
+            // TODO: log the offending record.
             throw new JobsException("JSON error", e);
+          } catch (IOException e) {
+            // TODO: log the offending record.
+            throw new JobsException("IO error", e);
           }
         });
 
