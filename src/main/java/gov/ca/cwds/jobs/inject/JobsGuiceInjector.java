@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.inject;
 
 import java.io.File;
+import java.net.InetAddress;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -8,13 +9,13 @@ import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.Provides;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
@@ -52,7 +53,7 @@ import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
 import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
-import gov.ca.cwds.jobs.ElasticsearchConfiguration;
+import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 
 /**
@@ -152,26 +153,51 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   /**
+   * Elasticsearch 5x. Instantiate the singleton ElasticSearch client on demand.
+   * 
+   * @return initialized singleton ElasticSearch client
+   */
+  // @Provides
+  // @Inject
+  // public Client elasticsearchClient() {
+  // TransportClient client = null;
+  // if (esConfig != null) {
+  // LOGGER.warn("Create NEW ES client");
+  // try {
+  // final ElasticsearchConfiguration config = elasticSearchConfig();
+  // Settings settings =
+  // Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build();
+  //
+  // // DRS: Incompatible with ES 2.3.5. Cannot connect.
+  // // client = new PreBuiltTransportClient(settings);
+  // // client.addTransportAddress(
+  // // new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
+  // // Integer.parseInt(config.getElasticsearchPort())));
+  // } catch (Exception e) {
+  // LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
+  // throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
+  // }
+  // }
+  // return client;
+  // }
+
+  /**
    * Instantiate the singleton ElasticSearch client on demand.
    * 
    * @return initialized singleton ElasticSearch client
    */
   @Provides
-  @Inject
   public Client elasticsearchClient() {
-    TransportClient client = null;
+    Client client = null;
     if (esConfig != null) {
       LOGGER.warn("Create NEW ES client");
       try {
         final ElasticsearchConfiguration config = elasticSearchConfig();
-        Settings settings =
-            Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build();
-
-        // DRS: Incompatible with ES 2.3.5. Cannot connect.
-        // client = new PreBuiltTransportClient(settings);
-        // client.addTransportAddress(
-        // new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
-        // Integer.parseInt(config.getElasticsearchPort())));
+        Settings settings = Settings.settingsBuilder()
+            .put("cluster.name", config.getElasticsearchCluster()).build();
+        client = TransportClient.builder().settings(settings).build().addTransportAddress(
+            new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
+                Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {
         LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
         throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);

@@ -123,8 +123,8 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
 
-    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON)
-        .upsert(new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
+    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON).upsert(
+        new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
   }
 
   @Override

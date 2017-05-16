@@ -1,16 +1,16 @@
 package gov.ca.cwds.jobs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.Elasticsearch5xDao;
 
 import javax.validation.constraints.NotNull;
 
 /**
- * Represents the configuration settings for {@link ElasticsearchDao}.
+ * Represents the configuration settings for {@link Elasticsearch5xDao}.
  *
  * @author CWDS API Team
  */
-public class ElasticsearchConfiguration {
+public class ElasticsearchConfiguration5x {
 
   @NotNull
   @JsonProperty("elasticsearch.host")

@@ -12,7 +12,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.jobs.JobsException;
 import gov.ca.cwds.jobs.util.JobWriter;
@@ -24,7 +24,7 @@ import gov.ca.cwds.jobs.util.JobWriter;
  */
 public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T> {
   private static final Logger LOGGER = LogManager.getLogger(ElasticJobWriter.class);
-  private ElasticsearchDao elasticsearchDao;
+  private Elasticsearch5xDao elasticsearchDao;
   private BulkProcessor bulkProcessor;
   private ObjectMapper objectMapper;
 
@@ -34,7 +34,7 @@ public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T
    * @param elasticsearchDao ES DAO
    * @param objectMapper Jackson object mapper
    */
-  public ElasticJobWriter(ElasticsearchDao elasticsearchDao, ObjectMapper objectMapper) {
+  public ElasticJobWriter(Elasticsearch5xDao elasticsearchDao, ObjectMapper objectMapper) {
     this.elasticsearchDao = elasticsearchDao;
     this.objectMapper = objectMapper;
     bulkProcessor =

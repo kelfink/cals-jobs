@@ -22,7 +22,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.model.facility.es.ESFacility;
 import gov.ca.cwds.jobs.facility.FacilityProcessor;
 import gov.ca.cwds.jobs.facility.FacilityRowMapper;
@@ -97,8 +97,8 @@ public class FacilityIndexerJob extends AbstractModule {
   @Provides
   @Singleton
   @Inject
-  public ElasticsearchDao elasticsearchDao(Client client, JobConfiguration configuration) {
-    return new ElasticsearchDao(client, configuration);
+  public Elasticsearch5xDao elasticsearchDao(Client client, JobConfiguration configuration) {
+    return new Elasticsearch5xDao(client, configuration);
   }
 
   @Provides
@@ -136,7 +136,7 @@ public class FacilityIndexerJob extends AbstractModule {
   @Provides
   @Named("facility-writer")
   @Inject
-  public JobWriter lisItemWriter(ElasticsearchDao elasticsearchDao, ObjectMapper objectMapper) {
+  public JobWriter lisItemWriter(Elasticsearch5xDao elasticsearchDao, ObjectMapper objectMapper) {
     return new ElasticJobWriter<ESFacility>(elasticsearchDao, objectMapper);
   }
 

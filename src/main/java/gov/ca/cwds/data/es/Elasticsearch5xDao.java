@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 
-import gov.ca.cwds.jobs.ElasticsearchConfiguration;
 import org.apache.commons.compress.utils.IOUtils;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.index.IndexRequest;
@@ -19,8 +18,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
+import gov.ca.cwds.jobs.ElasticsearchConfiguration5x;
+
 /**
  * A DAO for Elasticsearch.
+ *
+ * <p>
+ * Let Guice manage inject object instances. Don't manage instances in this class.
+ * </p>
  *
  * <p>
  * OPTION: In order to avoid minimize connections to Elasticsearch, this DAO class should either be
@@ -35,9 +40,9 @@ import com.google.inject.Inject;
  *
  * @author CWDS API Team
  */
-public class ElasticsearchDao implements Closeable {
+public class Elasticsearch5xDao implements Closeable {
 
-  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ElasticsearchDao.class);
+  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Elasticsearch5xDao.class);
 
   private static int NUMBER_OF_SHARDS = 5;
 
@@ -51,7 +56,7 @@ public class ElasticsearchDao implements Closeable {
   /**
    * Elasticsearch configuration
    */
-  private ElasticsearchConfiguration config;
+  private ElasticsearchConfiguration5x config;
 
   /**
    * Constructor.
@@ -60,7 +65,7 @@ public class ElasticsearchDao implements Closeable {
    * @param config The ElasticSearch configuration which is read from .yaml file
    */
   @Inject
-  public ElasticsearchDao(Client client, ElasticsearchConfiguration config) {
+  public Elasticsearch5xDao(Client client, ElasticsearchConfiguration5x config) {
     this.client = client;
     this.config = config;
   }
@@ -72,9 +77,8 @@ public class ElasticsearchDao implements Closeable {
    * @return whether the index exists
    */
   private boolean doesIndexExist(final String index) {
-    final IndexMetaData indexMetaData =
-        client.admin().cluster().state(Requests.clusterStateRequest()).actionGet().getState()
-            .getMetaData().index(index);
+    final IndexMetaData indexMetaData = client.admin().cluster()
+        .state(Requests.clusterStateRequest()).actionGet().getState().getMetaData().index(index);
     return indexMetaData != null;
   }
 
@@ -88,20 +92,19 @@ public class ElasticsearchDao implements Closeable {
    */
   private void createIndex(final String index, int numShards, int numReplicas) throws IOException {
     LOGGER.warn("CREATE ES INDEX {} with {} shards and {} replicas", index, numShards, numReplicas);
-    final Settings indexSettings =
-        Settings.builder().put("number_of_shards", numShards)
-            .put("number_of_replicas", numReplicas).build();
+    final Settings indexSettings = Settings.builder().put("number_of_shards", numShards)
+        .put("number_of_replicas", numReplicas).build();
     CreateIndexRequest indexRequest = new CreateIndexRequest(index, indexSettings);
     getClient().admin().indices().create(indexRequest).actionGet();
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    IOUtils
-        .copy(this.getClass()
-            .getResourceAsStream("/elasticsearch/mapping/map_person_5x_snake.json"), out);
+    IOUtils.copy(
+        this.getClass().getResourceAsStream("/elasticsearch/mapping/map_person_5x_snake.json"),
+        out);
     out.flush();
     final String mapping = out.toString();
-    getClient().admin().indices().preparePutMapping(index).setType(getConfig().getElasticsearchDocType())
-        .setSource(mapping, XContentType.JSON).get();
+    getClient().admin().indices().preparePutMapping(index)
+        .setType(getConfig().getElasticsearchDocType()).setSource(mapping, XContentType.JSON).get();
   }
 
   /**
@@ -120,8 +123,8 @@ public class ElasticsearchDao implements Closeable {
    * @throws InterruptedException if thread is interrupted
    * @throws IOException on disconnect, hang, etc.
    */
-  public synchronized void createIndexIfNeeded(final String index) throws InterruptedException,
-      IOException {
+  public synchronized void createIndexIfNeeded(final String index)
+      throws InterruptedException, IOException {
     if (!doesIndexExist(index)) {
       LOGGER.warn("ES INDEX {} DOES NOT EXIST!!", index);
       createIndex(index, NUMBER_OF_SHARDS, NUMBER_OF_REPLICAS);
@@ -144,7 +147,8 @@ public class ElasticsearchDao implements Closeable {
   public IndexRequest bulkAdd(final ObjectMapper mapper, final String id, final Object obj)
       throws JsonProcessingException {
     return new IndexRequest(getConfig().getElasticsearchAlias(),
-        getConfig().getElasticsearchDocType(), id).source(mapper.writeValueAsString(obj), XContentType.JSON);
+        getConfig().getElasticsearchDocType(), id).source(mapper.writeValueAsString(obj),
+            XContentType.JSON);
   }
 
   /**
@@ -177,7 +181,7 @@ public class ElasticsearchDao implements Closeable {
   /**
    * @return the Elasticsearch configuration
    */
-  public ElasticsearchConfiguration getConfig() {
+  public ElasticsearchConfiguration5x getConfig() {
     return config;
   }
 }

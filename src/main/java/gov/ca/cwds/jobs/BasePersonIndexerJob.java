@@ -54,6 +54,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
+import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.model.cms.JobResultSetAware;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -81,7 +82,7 @@ import gov.ca.cwds.rest.api.domain.DomainChef;
  * 
  * <p>
  * This class implements {@link AutoCloseable} and automatically closes common resources, such as
- * {@link ElasticsearchDao} and Hibernate {@link SessionFactory}.
+ * {@link Elasticsearch5xDao} and Hibernate {@link SessionFactory}.
  * </p>
  * 
  * <p>

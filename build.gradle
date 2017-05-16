@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        jcenter()
+         jcenter()
     }
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
@@ -23,6 +23,7 @@ project.ext {
     log4jVersion = "2.8"
     // elasticsearchVersion = "5.3.2"
     elasticsearchVersion = "2.4.4"
+    // elasticsearchVersion = "2.3.5"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
 }
 
@@ -37,7 +38,7 @@ repositories {
 
 dependencies {
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
-    compile group: 'org.elasticsearch.client', name: 'transport', version: elasticsearchVersion
+    // compile group: 'org.elasticsearch.client', name: 'transport', version: elasticsearchVersion
 
 	compile group: 'javax.validation', name: 'validation-api', version: '1.1.0.Final'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
@@ -47,7 +48,7 @@ dependencies {
 	compile group: "org.postgresql", name: "postgresql", version: "9.4.1212"
 	compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.0.0-rc4"
 
-	compile group: "gov.ca.cwds.api", name: "api", version: "0.21.894"
+	compile group: "gov.ca.cwds.api", name: "api", version: "0.21.895"
 
     compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
 	compile group: "javax.el", name: "javax.el-api", version: "2.2.4"
