@@ -21,7 +21,8 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 project.ext {
     log4jVersion = "2.8"
-    elasticsearchVersion = "5.3.2"
+    // elasticsearchVersion = "5.3.2"
+    elasticsearchVersion = "2.4.4"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
 }
 

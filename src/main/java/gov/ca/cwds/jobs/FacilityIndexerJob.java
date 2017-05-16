@@ -1,17 +1,12 @@
 package gov.ca.cwds.jobs;
 
-import gov.ca.cwds.jobs.facility.FacilityProcessor;
-import gov.ca.cwds.jobs.util.JobProcessor;
 import java.io.File;
-import java.net.InetAddress;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -29,8 +24,10 @@ import com.google.inject.name.Names;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.model.facility.es.ESFacility;
+import gov.ca.cwds.jobs.facility.FacilityProcessor;
 import gov.ca.cwds.jobs.facility.FacilityRowMapper;
 import gov.ca.cwds.jobs.util.AsyncReadWriteJob;
+import gov.ca.cwds.jobs.util.JobProcessor;
 import gov.ca.cwds.jobs.util.JobReader;
 import gov.ca.cwds.jobs.util.JobWriter;
 import gov.ca.cwds.jobs.util.elastic.ElasticJobWriter;
@@ -41,7 +38,8 @@ import gov.ca.cwds.rest.api.ApiException;
 /**
  * @author CWDS Elasticsearch Team
  *
- * run script: $java -cp jobs.jar gov.ca.cwds.jobs.FacilityIndexerJob path/to/config/file.yaml
+ *         run script: $java -cp jobs.jar gov.ca.cwds.jobs.FacilityIndexerJob
+ *         path/to/config/file.yaml
  */
 public class FacilityIndexerJob extends AbstractModule {
   private static final Logger LOGGER = LogManager.getLogger(FacilityIndexerJob.class);
@@ -80,12 +78,14 @@ public class FacilityIndexerJob extends AbstractModule {
     if (config != null) {
       LOGGER.warn("Create NEW ES client");
       try {
-        Settings settings = Settings.builder()
-                .put("cluster.name", config.getElasticsearchCluster()).build();
-        client = new PreBuiltTransportClient(settings);
-        client.addTransportAddress(
-                new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
-                        Integer.parseInt(config.getElasticsearchPort())));
+        Settings settings =
+            Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build();
+
+        // DRS: Incompatible with ES 2.3.5. Won't connect.
+        // client = new PreBuiltTransportClient(settings);
+        // client.addTransportAddress(
+        // new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
+        // Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {
         LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
         throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
@@ -144,7 +144,7 @@ public class FacilityIndexerJob extends AbstractModule {
   @Named("facility-job")
   @Inject
   public Job lisItemWriter(@Named("facility-reader") JobReader jobReader,
-      @Named("facility-processor")  JobProcessor jobProcessor,
+      @Named("facility-processor") JobProcessor jobProcessor,
       @Named("facility-writer") JobWriter jobWriter) {
     return new AsyncReadWriteJob(jobReader, jobProcessor, jobWriter);
   }
