@@ -57,7 +57,7 @@ public class ElasticsearchDao implements Closeable {
    * Constructor.
    *
    * @param client The ElasticSearch client
-   * @param config The ElasticSearch configuration whish iread from .yml file
+   * @param config The ElasticSearch configuration which is read from .yaml file
    */
   @Inject
   public ElasticsearchDao(Client client, ElasticsearchConfiguration config) {
