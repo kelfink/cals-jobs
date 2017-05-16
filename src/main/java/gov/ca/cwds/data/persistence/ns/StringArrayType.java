@@ -19,7 +19,7 @@ import org.hibernate.usertype.UserType;
  */
 public class StringArrayType implements UserType {
 
-  private final int[] arrayTypes = new int[] {Types.ARRAY};
+  private static final int[] arrayTypes = new int[] {Types.ARRAY};
 
   @Override
   public int[] sqlTypes() {
@@ -44,18 +44,18 @@ public class StringArrayType implements UserType {
   @Override
   public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session,
       Object owner) throws HibernateException, SQLException {
-    // get the first column names
+    String[] results = null;
+    // Get the first column names.
     if (names != null && names.length > 0 && rs != null && rs.getArray(names[0]) != null) {
-      String[] results = (String[]) rs.getArray(names[0]).getArray();
-      return results;
+      results = (String[]) rs.getArray(names[0]).getArray();
     }
-    return null;
+    return results;
   }
 
   @Override
   public void nullSafeSet(PreparedStatement st, Object value, int index,
       SharedSessionContractImplementor session) throws HibernateException, SQLException {
-    // setting the column with string array
+    // Set the column with string array,
     if (value != null && st != null) {
       String[] castObject = (String[]) value;
       Array array = session.connection().createArrayOf("text", castObject);
