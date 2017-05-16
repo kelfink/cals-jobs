@@ -49,7 +49,6 @@ public class ReplicatedRelationship implements PersistentObject, ApiLegacyAware 
     return StringUtils.isNotBlank(legacyId) ? legacyId : id;
   }
 
-
   @Override
   public String getId() {
     return id;
