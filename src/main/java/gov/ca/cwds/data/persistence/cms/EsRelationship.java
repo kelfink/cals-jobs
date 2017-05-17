@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -138,10 +139,10 @@ public class EsRelationship
 
     ElasticSearchPersonRelationship rel = new ElasticSearchPersonRelationship();
     ret.addRelation(rel);
-    rel.setRelatedPersonFirstName(this.relatedFirstName);
-    rel.setRelatedPersonLastName(this.relatedLastName);
+    rel.setRelatedPersonFirstName(this.relatedFirstName.trim());
+    rel.setRelatedPersonLastName(this.relatedLastName.trim());
     rel.setRelatedPersonLegacyId(this.relatedLegacyId);
-    rel.setRelatedPersonLegacySourceTable(this.thisLegacyTable);
+    rel.setRelatedPersonLegacySourceTable(this.thisLegacyTable.trim());
 
     if (this.relCode != null && this.relCode.intValue() != 0) {
       final CmsSystemCode code = ElasticSearchPerson.getSystemCodes().lookup(this.relCode);
@@ -164,7 +165,8 @@ public class EsRelationship
               break;
 
             case 3:
-              relContext = s;
+              relContext =
+                  StringUtils.isNotBlank(s) ? s.replaceAll("\\(", "").replaceAll("\\)", "") : "";
               break;
 
             default:
