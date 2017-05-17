@@ -175,11 +175,11 @@ public class EsRelationship
         rel.setIndexedPersonRelationship(primaryRel);
         rel.setRelatedPersonRelationship(secondaryRel);
         rel.setRelationshipContext(relContext);
+        LOGGER.debug("primaryRel={}, secondaryRel={}, ", primaryRel);
 
       } else {
         LOGGER.warn("NO MATCH!! rel={}", wholeRel);
       }
-
     }
 
     map.put(ret.getId(), ret);
@@ -289,6 +289,15 @@ public class EsRelationship
 
   public void setRelatedLastName(String relatedLastName) {
     this.relatedLastName = relatedLastName;
+  }
+
+  @Override
+  public String toString() {
+    return "EsRelationship [thisLegacyTable=" + thisLegacyTable + ", relatedLegacyTable="
+        + relatedLegacyTable + ", thisLegacyId=" + thisLegacyId + ", thisFirstName=" + thisFirstName
+        + ", thisLastName=" + thisLastName + ", relCode=" + relCode + ", relatedLegacyId="
+        + relatedLegacyId + ", relatedFirstName=" + relatedFirstName + ", relatedLastName="
+        + relatedLastName + "]";
   }
 
 }

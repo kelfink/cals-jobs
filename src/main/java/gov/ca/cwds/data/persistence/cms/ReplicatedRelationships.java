@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiPersonAware;
@@ -28,7 +26,7 @@ public class ReplicatedRelationships implements PersistentObject, ApiPersonAware
    */
   private String id;
 
-  @JsonIgnore
+  // @JsonIgnore
   private List<ElasticSearchPersonRelationship> relations = new ArrayList<>();
 
   /**
