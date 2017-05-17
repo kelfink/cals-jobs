@@ -241,6 +241,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return null;
   }
 
+  /**
+   * Optional method to customize JDBC ORDER BY clause on initial load.
+   * 
+   * @return custom ORDER BY clause for JDBC
+   */
+  public String getJdbcOrderBy() {
+    return " x ORDER BY x.clt_identifier ";
+  }
+
   @Override
   public M extractFromResultSet(ResultSet rs) throws SQLException {
     return null;
@@ -758,7 +767,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       StringBuilder buf = new StringBuilder();
       buf.append("SELECT x.* FROM ").append(System.getProperty("DB_CMS_SCHEMA")).append(".")
-          .append(getViewName()).append(" x ORDER BY x.clt_identifier ").append(" FOR READ ONLY");
+          .append(getViewName()).append(getJdbcOrderBy()).append(" FOR READ ONLY");
       final String query = buf.toString();
 
       try (Statement stmt = con.createStatement()) {
@@ -977,7 +986,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * ENTRY POINT FOR INITIAL LOAD.
    * 
-   * @throws IOException on database or Elasticsearch disconnect
+   * @throws IOException on JDBC error or Elasticsearch disconnect
    */
   protected void doInitialLoadJdbc() throws IOException {
     Thread.currentThread().setName("main");
@@ -995,7 +1004,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         } catch (HibernateException he) { // NOSONAR
           LOGGER.debug("USING DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage());
         } catch (Exception e) {
-          LOGGER.warn("initial load error: {}", e.getMessage(), e);
+          LOGGER.warn("Hibernate keep-alive error: {}", e.getMessage(), e);
         }
       }
 

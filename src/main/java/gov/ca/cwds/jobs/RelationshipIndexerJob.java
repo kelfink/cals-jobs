@@ -25,26 +25,27 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
 /**
- * Job to load Clients from CMS into ElasticSearch.
+ * Job to load various relationships from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */
-public class RelationshipsJob extends BasePersonIndexerJob<ReplicatedRelationship, EsRelationship>
+public class RelationshipIndexerJob
+    extends BasePersonIndexerJob<ReplicatedRelationship, EsRelationship>
     implements JobResultSetAware<EsRelationship> {
 
-  private static final Logger LOGGER = LogManager.getLogger(RelationshipsJob.class);
+  private static final Logger LOGGER = LogManager.getLogger(RelationshipIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param clientDao Client DAO
+   * @param clientDao Relationship View DAO
    * @param elasticsearchDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public RelationshipsJob(final ReplicatedRelationshipDao clientDao,
+  public RelationshipIndexerJob(final ReplicatedRelationshipDao clientDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
     super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
@@ -63,6 +64,11 @@ public class RelationshipsJob extends BasePersonIndexerJob<ReplicatedRelationshi
   @Override
   public String getViewName() {
     return "ES_RELATIONSHIP";
+  }
+
+  @Override
+  public String getJdbcOrderBy() {
+    return " x ORDER BY x.clt_identifier ";
   }
 
   @Override
@@ -90,7 +96,7 @@ public class RelationshipsJob extends BasePersonIndexerJob<ReplicatedRelationshi
   public static void main(String... args) {
     LOGGER.info("Run Relationships indexer job");
     try {
-      runJob(RelationshipsJob.class, args);
+      runJob(RelationshipIndexerJob.class, args);
     } catch (JobsException e) {
       LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
       throw e;

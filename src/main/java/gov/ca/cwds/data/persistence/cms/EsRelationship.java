@@ -3,13 +3,11 @@ package gov.ca.cwds.data.persistence.cms;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -19,11 +17,10 @@ import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
 /**
- * Entity bean for Materialized Query Table (MQT), ES_RELATIONSHIP.
+ * Entity bean for Materialized Query Table (MQT), VW_RELATIONSHIP.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedRelationship}.
@@ -32,14 +29,16 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
  * @author CWDS API Team
  */
 @Entity
-@Table(name = "ES_RELATIONSHIP")
+@Table(name = "VW_RELATIONSHIP")
 @NamedNativeQueries({
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfter",
-        query = "SELECT x.* FROM {h-schema}ES_RELATIONSHIP x "
-            + "WHERE x.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + "ORDER BY x.clt_IDENTIFIER FOR READ ONLY ",
+        query = "SELECT vw.* FROM {h-schema}VW_RELATIONSHIP vw "
+            + "WHERE vw.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID, THIS_LEGACY_TABLE, RELATED_LEGACY_TABLE "
+            + "FOR READ ONLY ",
         resultClass = EsRelationship.class, readOnly = true)})
-public class EsRelationship implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationship> {
+public class EsRelationship
+    implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationship> {
 
   // private static final Logger LOGGER = LogManager.getLogger(EsRelationship.class);
 
@@ -48,42 +47,49 @@ public class EsRelationship implements PersistentObject, ApiGroupNormalizer<Repl
    */
   private static final long serialVersionUID = 1L;
 
-  @Column(name = "CLT_ADPTN_STCD")
-  private String cltAdoptionStatusCode;
+  // TODO: may need additional id column for uniqueness, like THIRD_ID.
 
+  @Id
+  @Column(name = "THIS_LEGACY_TABLE")
+  private String thisLegacyTable;
+
+  @Id
+  @Column(name = "RELATED_LEGACY_TABLE")
+  private String relatedLegacyTable;
+
+  @Id
+  @Column(name = "THIS_LEGACY_ID")
+  private String thisLegacyId;
+
+  @Column(name = "THIS_FIRST_NAME")
+  private String thisFirstName;
+
+  @Column(name = "THIS_LAST_NAME")
+  private String thisLastName;
+
+  @Id
   @Type(type = "short")
-  @Column(name = "CLT_B_CNTRY_C")
-  private Short cltBirthCountryCodeType;
+  @Column(name = "REL_CODE")
+  private Short relCode;
 
-  @Type(type = "date")
-  @Column(name = "CLT_BIRTH_DT")
-  private Date cltBirthDate;
+  @Id
+  @Column(name = "RELATED_LEGACY_ID")
+  private String relatedLegacyId;
 
+  @Column(name = "RELATED_FIRST_NAME")
+  private String relatedFirstName;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "CLT_IBMSNAP_OPERATION", updatable = false)
-  private CmsReplicationOperation cltReplicationOperation;
+  @Column(name = "RELATED_LAST_NAME")
+  private String relatedLastName;
 
-  @Type(type = "timestamp")
-  @Column(name = "CLT_IBMSNAP_LOGMARKER", updatable = false)
-  private Date cltReplicationDate;
+  // TODO: add replication columns when available.
+  // @Enumerated(EnumType.STRING)
+  // @Column(name = "CLT_IBMSNAP_OPERATION", updatable = false)
+  // private CmsReplicationOperation cltReplicationOperation;
 
-  @Column(name = "CLT_LST_UPD_ID")
-  private String cltLastUpdatedId;
-
-  @Type(type = "timestamp")
-  @Column(name = "CLT_LST_UPD_TS")
-  private Date cltLastUpdatedTime;
-
-  /**
-   * Convert IBM replication operation to enum.
-   * 
-   * @param op replication operation, IUD
-   * @return enumerated type
-   */
-  protected static CmsReplicationOperation strToRepOp(String op) {
-    return op != null ? CmsReplicationOperation.valueOf(op) : null;
-  }
+  // @Type(type = "timestamp")
+  // @Column(name = "CLT_IBMSNAP_LOGMARKER", updatable = false)
+  // private Date cltReplicationDate;
 
   /**
    * Build an EsRelationship from an incoming ResultSet.
@@ -95,9 +101,17 @@ public class EsRelationship implements PersistentObject, ApiGroupNormalizer<Repl
   public static EsRelationship produceFromResultSet(ResultSet rs) throws SQLException {
     EsRelationship ret = new EsRelationship();
 
-    // ret.setCltAdoptionStatusCode(rs.getString("CLT_ADPTN_STCD"));
+    ret.setThisLegacyTable(rs.getString("THIS_LEGACY_TABLE"));
+    ret.setRelatedLegacyTable(rs.getString("RELATED_LEGACY_TABLE"));
+    ret.setThisLegacyId(rs.getString("THIS_LEGACY_ID"));
+    ret.setThisFirstName(rs.getString("THIS_FIRST_NAME"));
+    ret.setThisLastName(rs.getString("THIS_LAST_NAME"));
+    ret.setRelCode(rs.getShort("REL_CODE"));
+    ret.setRelatedLegacyId(rs.getString("RELATED_LEGACY_ID"));
+    ret.setRelatedFirstName(rs.getString("RELATED_FIRST_NAME"));
+    ret.setRelatedLastName(rs.getString("RELATED_LAST_NAME"));
+
     // ret.setCltBirthCountryCodeType(rs.getShort("CLT_B_CNTRY_C"));
-    // ret.setCltBirthDate(rs.getDate("CLT_BIRTH_DT"));
 
     return ret;
   }
@@ -153,6 +167,78 @@ public class EsRelationship implements PersistentObject, ApiGroupNormalizer<Repl
   @Override
   public final boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
+  public String getThisLegacyTable() {
+    return thisLegacyTable;
+  }
+
+  public void setThisLegacyTable(String thisLegacyTable) {
+    this.thisLegacyTable = thisLegacyTable;
+  }
+
+  public String getRelatedLegacyTable() {
+    return relatedLegacyTable;
+  }
+
+  public void setRelatedLegacyTable(String relatedLegacyTable) {
+    this.relatedLegacyTable = relatedLegacyTable;
+  }
+
+  public String getThisLegacyId() {
+    return thisLegacyId;
+  }
+
+  public void setThisLegacyId(String thisLegacyId) {
+    this.thisLegacyId = thisLegacyId;
+  }
+
+  public String getThisFirstName() {
+    return thisFirstName;
+  }
+
+  public void setThisFirstName(String thisFirstName) {
+    this.thisFirstName = thisFirstName;
+  }
+
+  public String getThisLastName() {
+    return thisLastName;
+  }
+
+  public void setThisLastName(String thisLastName) {
+    this.thisLastName = thisLastName;
+  }
+
+  public Short getRelCode() {
+    return relCode;
+  }
+
+  public void setRelCode(Short relCode) {
+    this.relCode = relCode;
+  }
+
+  public String getRelatedLegacyId() {
+    return relatedLegacyId;
+  }
+
+  public void setRelatedLegacyId(String relatedLegacyId) {
+    this.relatedLegacyId = relatedLegacyId;
+  }
+
+  public String getRelatedFirstName() {
+    return relatedFirstName;
+  }
+
+  public void setRelatedFirstName(String relatedFirstName) {
+    this.relatedFirstName = relatedFirstName;
+  }
+
+  public String getRelatedLastName() {
+    return relatedLastName;
+  }
+
+  public void setRelatedLastName(String relatedLastName) {
+    this.relatedLastName = relatedLastName;
   }
 
 }
