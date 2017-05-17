@@ -1,7 +1,6 @@
 package gov.ca.cwds.data.persistence.cms;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -22,11 +21,9 @@ public class ReplicatedRelationship implements PersistentObject {
 
   private String legacyId;
 
-  private String firstName;
+  private String thisFirstName;
 
-  private String lastName;
-
-  private Date birthDate;
+  private String thisLastName;
 
   private String gender;
 
