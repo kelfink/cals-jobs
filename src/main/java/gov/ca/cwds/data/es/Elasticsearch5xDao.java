@@ -98,6 +98,7 @@ public class Elasticsearch5xDao implements Closeable {
     getClient().admin().indices().create(indexRequest).actionGet();
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
+    // todo path to the mapping file has to be a part of configuration
     IOUtils.copy(
         this.getClass().getResourceAsStream("/elasticsearch/mapping/map_person_5x_snake.json"),
         out);
