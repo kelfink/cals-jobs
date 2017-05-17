@@ -57,8 +57,6 @@ public class EsRelationship
   private static final Pattern RGX_RELATIONSHIP =
       Pattern.compile("([A-Za-z0-9 _-]+)[/]?([A-Za-z0-9 _-]+)?\\s*(\\([A-Za-z0-9 _-]+\\))?");
 
-  // TODO: may required an additional id column for uniqueness, like THIRD_ID.
-
   @Id
   @Column(name = "THIS_LEGACY_TABLE")
   private String thisLegacyTable;

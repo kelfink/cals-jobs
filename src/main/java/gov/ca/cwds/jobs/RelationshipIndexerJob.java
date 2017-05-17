@@ -76,9 +76,9 @@ public class RelationshipIndexerJob
   }
 
   /**
-   * Serialize screening to JSON.
+   * Serialize object to JSON.
    * 
-   * @param s screening to serialize
+   * @param obj object to serialize
    * @return JSON for this screening
    */
   protected String jsonify(Object obj) {
