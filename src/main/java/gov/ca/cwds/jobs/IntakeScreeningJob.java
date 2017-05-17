@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -86,6 +85,12 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
     LOGGER.warn("DONE: Stage #1: NS View Reader");
   }
 
+  /**
+   * Serialize screening to JSON.
+   * 
+   * @param s screening to serialize
+   * @return JSON for this screening
+   */
   protected String serializeScreening(IntakeScreening s) {
     String ret = "";
     try {
@@ -123,8 +128,13 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
 
-    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON).upsert(
-        new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
+    // NO!! This adds escapes!
+    // return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson,
+    // XContentType.JSON).upsert(
+    // new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
+
+    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson)
+        .upsert(new IndexRequest(alias, docType, esp.getId()).source(insertJson));
   }
 
   @Override

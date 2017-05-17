@@ -27,7 +27,6 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -113,8 +112,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int LOG_EVERY = 5000;
   private static final int ES_BULK_SIZE = 2000;
 
-  private static final int SLEEP_MILLIS = 2000;
-  private static final int POLL_MILLIS = 2000;
+  private static final int SLEEP_MILLIS = 2500;
+  private static final int POLL_MILLIS = 3000;
 
   /**
    * Obsolete. Doesn't optimize on DB2 z/OS.
@@ -954,7 +953,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @throws IOException on Elasticsearch disconnect
    */
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T t) throws IOException {
-
     String id = esp.getId();
     if (t instanceof ApiLegacyAware) {
       ApiLegacyAware l = (ApiLegacyAware) t;
@@ -970,8 +968,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
 
-    return new UpdateRequest(alias, docType, id).doc(updateJson, XContentType.JSON)
-        .upsert(new IndexRequest(alias, docType, id).source(insertJson, XContentType.JSON));
+    // NO! This adds escapes!
+    // return new UpdateRequest(alias, docType, id).doc(updateJson, XContentType.JSON)
+    // .upsert(new IndexRequest(alias, docType, id).source(insertJson, XContentType.JSON));
+
+    return new UpdateRequest(alias, docType, id).doc(updateJson)
+        .upsert(new IndexRequest(alias, docType, id).source(insertJson));
   }
 
   /**
