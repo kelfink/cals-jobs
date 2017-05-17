@@ -27,7 +27,6 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -113,8 +112,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int LOG_EVERY = 5000;
   private static final int ES_BULK_SIZE = 2000;
 
-  private static final int SLEEP_MILLIS = 2000;
-  private static final int POLL_MILLIS = 2000;
+  private static final int SLEEP_MILLIS = 2500;
+  private static final int POLL_MILLIS = 3000;
 
   /**
    * Obsolete. Doesn't optimize on DB2 z/OS.
@@ -241,18 +240,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return null;
   }
 
+  /**
+   * Optional method to customize JDBC ORDER BY clause on initial load.
+   * 
+   * @return custom ORDER BY clause for JDBC
+   */
+  public String getJdbcOrderBy() {
+    return " ORDER BY x.clt_identifier ";
+  }
+
   @Override
   public M extractFromResultSet(ResultSet rs) throws SQLException {
     return null;
-  }
-
-  /**
-   * prepare an ES person to prepare for JSON serialization by nulling out collections.
-   *
-   * @param esp ES person to prepare for JSON serialization
-   */
-  protected void prepEspForUpsert(ElasticSearchPerson esp) {
-
   }
 
   /**
@@ -758,7 +757,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       StringBuilder buf = new StringBuilder();
       buf.append("SELECT x.* FROM ").append(System.getProperty("DB_CMS_SCHEMA")).append(".")
-          .append(getViewName()).append(" x ORDER BY x.clt_identifier ").append(" FOR READ ONLY");
+          .append(getViewName()).append(" x ").append(getJdbcOrderBy()).append(" FOR READ ONLY");
       final String query = buf.toString();
 
       try (Statement stmt = con.createStatement()) {
@@ -954,7 +953,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @throws IOException on Elasticsearch disconnect
    */
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T t) throws IOException {
-
     String id = esp.getId();
     if (t instanceof ApiLegacyAware) {
       ApiLegacyAware l = (ApiLegacyAware) t;
@@ -970,14 +968,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
 
-    return new UpdateRequest(alias, docType, id).doc(updateJson, XContentType.JSON)
-        .upsert(new IndexRequest(alias, docType, id).source(insertJson, XContentType.JSON));
+    // NO! This adds escapes!
+    // return new UpdateRequest(alias, docType, id).doc(updateJson, XContentType.JSON)
+    // .upsert(new IndexRequest(alias, docType, id).source(insertJson, XContentType.JSON));
+
+    return new UpdateRequest(alias, docType, id).doc(updateJson)
+        .upsert(new IndexRequest(alias, docType, id).source(insertJson));
   }
 
   /**
    * ENTRY POINT FOR INITIAL LOAD.
    * 
-   * @throws IOException on database or Elasticsearch disconnect
+   * @throws IOException on JDBC error or Elasticsearch disconnect
    */
   protected void doInitialLoadJdbc() throws IOException {
     Thread.currentThread().setName("main");
@@ -995,7 +997,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         } catch (HibernateException he) { // NOSONAR
           LOGGER.debug("USING DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage());
         } catch (Exception e) {
-          LOGGER.warn("initial load error: {}", e.getMessage(), e);
+          LOGGER.warn("Hibernate keep-alive error: {}", e.getMessage(), e);
         }
       }
 
