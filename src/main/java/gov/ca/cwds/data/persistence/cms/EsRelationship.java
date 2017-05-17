@@ -23,7 +23,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
  * Entity bean for Materialized Query Table (MQT), VW_RELATIONSHIP.
  * 
  * <p>
- * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedRelationship}.
+ * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedRelationships}.
  * </p>
  * 
  * @author CWDS API Team
@@ -32,22 +32,20 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @Table(name = "VW_RELATIONSHIP")
 @NamedNativeQueries({
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfter",
-        query = "SELECT vw.* FROM {h-schema}VW_RELATIONSHIP vw "
-            + "WHERE vw.LAST_CHG > CAST(:after AS TIMESTAMP) "
+        query = "SELECT v.* FROM {h-schema}VW_RELATIONSHIP v "
+            + "WHERE v.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID, THIS_LEGACY_TABLE, RELATED_LEGACY_TABLE "
             + "FOR READ ONLY ",
         resultClass = EsRelationship.class, readOnly = true)})
 public class EsRelationship
-    implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationship> {
-
-  // private static final Logger LOGGER = LogManager.getLogger(EsRelationship.class);
+    implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationships> {
 
   /**
    * Default.
    */
   private static final long serialVersionUID = 1L;
 
-  // TODO: may need additional id column for uniqueness, like THIRD_ID.
+  // TODO: may required an additional id column for uniqueness, like THIRD_ID.
 
   @Id
   @Column(name = "THIS_LEGACY_TABLE")
@@ -83,6 +81,8 @@ public class EsRelationship
   private String relatedLastName;
 
   // TODO: add replication columns when available.
+  // Needed to delete ES documents.
+
   // @Enumerated(EnumType.STRING)
   // @Column(name = "CLT_IBMSNAP_OPERATION", updatable = false)
   // private CmsReplicationOperation cltReplicationOperation;
@@ -111,38 +111,33 @@ public class EsRelationship
     ret.setRelatedFirstName(rs.getString("RELATED_FIRST_NAME"));
     ret.setRelatedLastName(rs.getString("RELATED_LAST_NAME"));
 
-    // ret.setCltBirthCountryCodeType(rs.getShort("CLT_B_CNTRY_C"));
-
     return ret;
   }
 
   @Override
-  public Class<ReplicatedRelationship> getReductionClass() {
-    return ReplicatedRelationship.class;
+  public Class<ReplicatedRelationships> getReductionClass() {
+    return ReplicatedRelationships.class;
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedRelationship> map) {
-    // final boolean isClientAdded = map.containsKey(this.cltId);
-    // Relationship ret = isClientAdded ? map.get(this.cltId) : new Relationship();
-    //
-    // map.put(ret.getId(), ret);
+  public void reduce(Map<Object, ReplicatedRelationships> map) {
+    final boolean isClientAdded = map.containsKey(this.thisLegacyId);
+    final ReplicatedRelationships ret =
+        isClientAdded ? map.get(this.thisLegacyId) : new ReplicatedRelationships(this.thisLegacyId);
+
+
+
+    map.put(ret.getId(), ret);
   }
 
   @Override
   public Object getGroupKey() {
-    // return this.cltId;
-    return null;
+    return this.thisLegacyId;
   }
 
   /**
    * This view (i.e., materialized query table) doesn't have a proper unique key, but a combination
    * of several fields might come close.
-   * <ul>
-   * <li>"Cook": convert String parameter to strong type</li>
-   * <li>"Uncook": convert strong type parameter to String</li>
-   * </ul>
-   *
    */
   @Override
   public Serializable getPrimaryKey() {

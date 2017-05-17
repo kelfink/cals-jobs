@@ -247,21 +247,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return custom ORDER BY clause for JDBC
    */
   public String getJdbcOrderBy() {
-    return " x ORDER BY x.clt_identifier ";
+    return " ORDER BY x.clt_identifier ";
   }
 
   @Override
   public M extractFromResultSet(ResultSet rs) throws SQLException {
     return null;
-  }
-
-  /**
-   * prepare an ES person to prepare for JSON serialization by nulling out collections.
-   *
-   * @param esp ES person to prepare for JSON serialization
-   */
-  protected void prepEspForUpsert(ElasticSearchPerson esp) {
-
   }
 
   /**
@@ -767,7 +758,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       StringBuilder buf = new StringBuilder();
       buf.append("SELECT x.* FROM ").append(System.getProperty("DB_CMS_SCHEMA")).append(".")
-          .append(getViewName()).append(getJdbcOrderBy()).append(" FOR READ ONLY");
+          .append(getViewName()).append(" x ").append(getJdbcOrderBy()).append(" FOR READ ONLY");
       final String query = buf.toString();
 
       try (Statement stmt = con.createStatement()) {

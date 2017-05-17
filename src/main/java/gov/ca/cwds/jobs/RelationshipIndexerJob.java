@@ -14,12 +14,12 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.dao.cms.ReplicatedRelationshipDao;
+import gov.ca.cwds.dao.cms.ReplicatedRelationshipsDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.model.cms.JobResultSetAware;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
-import gov.ca.cwds.data.persistence.cms.ReplicatedRelationship;
+import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
@@ -30,7 +30,7 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * @author CWDS API Team
  */
 public class RelationshipIndexerJob
-    extends BasePersonIndexerJob<ReplicatedRelationship, EsRelationship>
+    extends BasePersonIndexerJob<ReplicatedRelationships, EsRelationship>
     implements JobResultSetAware<EsRelationship> {
 
   private static final Logger LOGGER = LogManager.getLogger(RelationshipIndexerJob.class);
@@ -45,7 +45,7 @@ public class RelationshipIndexerJob
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public RelationshipIndexerJob(final ReplicatedRelationshipDao clientDao,
+  public RelationshipIndexerJob(final ReplicatedRelationshipsDao clientDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
     super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
@@ -63,25 +63,25 @@ public class RelationshipIndexerJob
 
   @Override
   public String getViewName() {
-    return "ES_RELATIONSHIP";
+    return "VW_RELATIONSHIP";
   }
 
   @Override
   public String getJdbcOrderBy() {
-    return " x ORDER BY x.clt_identifier ";
+    return " ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID, THIS_LEGACY_TABLE, RELATED_LEGACY_TABLE ";
   }
 
   @Override
-  protected ReplicatedRelationship reduceSingle(List<EsRelationship> recs) {
+  protected ReplicatedRelationships reduceSingle(List<EsRelationship> recs) {
     return reduce(recs).get(0);
   }
 
   @Override
-  protected List<ReplicatedRelationship> reduce(List<EsRelationship> recs) {
+  protected List<ReplicatedRelationships> reduce(List<EsRelationship> recs) {
     final int len = (int) (recs.size() * 1.25);
-    Map<Object, ReplicatedRelationship> map = new LinkedHashMap<>(len);
+    Map<Object, ReplicatedRelationships> map = new LinkedHashMap<>(len);
     for (PersistentObject rec : recs) {
-      ApiGroupNormalizer<ReplicatedRelationship> reducer = (EsRelationship) rec;
+      ApiGroupNormalizer<ReplicatedRelationships> reducer = (EsRelationship) rec;
       reducer.reduce(map);
     }
 

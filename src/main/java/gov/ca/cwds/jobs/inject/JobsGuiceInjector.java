@@ -26,6 +26,7 @@ import gov.ca.cwds.dao.cms.ReplicatedEducationProviderContactDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherChildInPlacemtHomeDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
+import gov.ca.cwds.dao.cms.ReplicatedRelationshipsDao;
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
@@ -36,6 +37,7 @@ import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.ApiSystemCodeDao;
 import gov.ca.cwds.data.persistence.cms.CmsSystemCodeCacheService;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.EsRelationship;
 import gov.ca.cwds.data.persistence.cms.SystemCodeDaoFileImpl;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
@@ -100,19 +102,21 @@ public class JobsGuiceInjector extends AbstractModule {
    */
   @Override
   protected void configure() {
-    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class).toInstance(new Configuration()
-        .configure("jobs-cms-hibernate.cfg.xml").addAnnotatedClass(BatchBucket.class)
-        .addAnnotatedClass(EsClientAddress.class).addAnnotatedClass(ReplicatedAttorney.class)
-        .addAnnotatedClass(ReplicatedCollateralIndividual.class)
-        .addAnnotatedClass(ReplicatedEducationProviderContact.class)
-        .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
-        .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
-        .addAnnotatedClass(ReplicatedOtherClientName.class)
-        .addAnnotatedClass(ReplicatedReporter.class)
-        .addAnnotatedClass(ReplicatedServiceProvider.class)
-        .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
-        .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
-        .addAnnotatedClass(ReplicatedAddress.class).buildSessionFactory());
+    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
+        .toInstance(new Configuration().configure("jobs-cms-hibernate.cfg.xml")
+            .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsClientAddress.class)
+            .addAnnotatedClass(EsRelationship.class).addAnnotatedClass(ReplicatedAttorney.class)
+            .addAnnotatedClass(ReplicatedCollateralIndividual.class)
+            .addAnnotatedClass(ReplicatedEducationProviderContact.class)
+            .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
+            .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
+            .addAnnotatedClass(ReplicatedOtherClientName.class)
+            .addAnnotatedClass(ReplicatedReporter.class)
+            .addAnnotatedClass(ReplicatedServiceProvider.class)
+            .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
+            .addAnnotatedClass(ReplicatedClient.class)
+            .addAnnotatedClass(ReplicatedClientAddress.class)
+            .addAnnotatedClass(ReplicatedAddress.class).buildSessionFactory());
 
     bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)
         .toInstance(new Configuration().configure("jobs-ns-hibernate.cfg.xml")
@@ -120,6 +124,7 @@ public class JobsGuiceInjector extends AbstractModule {
             .buildSessionFactory());
 
     // DB2 replicated tables:
+    bind(ReplicatedRelationshipsDao.class);
     bind(ReplicatedClientDao.class);
     bind(ReplicatedReporterDao.class);
     bind(ReplicatedAttorneyDao.class);
