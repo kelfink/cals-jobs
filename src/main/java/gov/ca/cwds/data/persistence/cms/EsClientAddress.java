@@ -43,15 +43,11 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @Entity
 @Table(name = "ES_CLIENT_ADDRESS")
 @NamedNativeQueries({
-    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findBucketRange",
-        query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
-            + "WHERE x.CLT_IDENTIFIER BETWEEN :min_id AND :max_id "
-            + "ORDER BY x.CLT_IDENTIFIER FOR READ ONLY",
-        resultClass = EsClientAddress.class, readOnly = true),
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfter",
-        query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x "
-            + "WHERE x.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + "ORDER BY x.clt_IDENTIFIER FOR READ ONLY ",
+        query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
+            + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}ES_CLIENT_ADDRESS x1 "
+            + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + ") ORDER BY CLT_IDENTIFIER FOR READ ONLY ",
         resultClass = EsClientAddress.class, readOnly = true)})
 public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
 

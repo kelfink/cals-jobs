@@ -39,9 +39,10 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @Table(name = "VW_RELATIONSHIP")
 @NamedNativeQueries({
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfter",
-        query = "SELECT v.* FROM {h-schema}VW_RELATIONSHIP v "
-            + "WHERE v.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID, THIS_LEGACY_TABLE, RELATED_LEGACY_TABLE "
+        query = "SELECT v.* FROM {h-schema}VW_RELATIONSHIP v WHERE v.THIS_LEGACY_ID IN ("
+            + " SELECT v1.THIS_LEGACY_ID FROM {h-schema}VW_RELATIONSHIP v1 "
+            + "WHERE v1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + ") ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID, THIS_LEGACY_TABLE, RELATED_LEGACY_TABLE "
             + "FOR READ ONLY ",
         resultClass = EsRelationship.class, readOnly = true)})
 public class EsRelationship
