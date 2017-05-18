@@ -4,18 +4,25 @@ import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
@@ -45,7 +52,10 @@ public class EsRelationship
    */
   private static final long serialVersionUID = 1L;
 
-  // TODO: may required an additional id column for uniqueness, like THIRD_ID.
+  private static final Logger LOGGER = LogManager.getLogger(EsRelationship.class);
+
+  private static final Pattern RGX_RELATIONSHIP =
+      Pattern.compile("([A-Za-z0-9 _-]+)[/]?([A-Za-z0-9 _-]+)?\\s*(\\([A-Za-z0-9 _-]+\\))?");
 
   @Id
   @Column(name = "THIS_LEGACY_TABLE")
@@ -125,7 +135,52 @@ public class EsRelationship
     final ReplicatedRelationships ret =
         isClientAdded ? map.get(this.thisLegacyId) : new ReplicatedRelationships(this.thisLegacyId);
 
+    ElasticSearchPersonRelationship rel = new ElasticSearchPersonRelationship();
+    ret.addRelation(rel);
+    rel.setRelatedPersonFirstName(this.relatedFirstName.trim());
+    rel.setRelatedPersonLastName(this.relatedLastName.trim());
+    rel.setRelatedPersonLegacyId(this.relatedLegacyId);
+    rel.setRelatedPersonLegacySourceTable(this.thisLegacyTable.trim());
 
+    if (this.relCode != null && this.relCode.intValue() != 0) {
+      final CmsSystemCode code = ElasticSearchPerson.getSystemCodes().lookup(this.relCode);
+      final String wholeRel = code.getShortDsc();
+      String primaryRel = "";
+      String secondaryRel = "";
+      String relContext = "";
+
+      final Matcher m = RGX_RELATIONSHIP.matcher(wholeRel);
+      if (m.matches()) {
+        for (int i = 0; i <= m.groupCount(); i++) {
+          final String s = m.group(i);
+          switch (i) {
+            case 1:
+              primaryRel = s;
+              break;
+
+            case 2:
+              secondaryRel = s;
+              break;
+
+            case 3:
+              relContext =
+                  StringUtils.isNotBlank(s) ? s.replaceAll("\\(", "").replaceAll("\\)", "") : "";
+              break;
+
+            default:
+              break;
+          }
+        }
+
+        rel.setIndexedPersonRelationship(primaryRel);
+        rel.setRelatedPersonRelationship(secondaryRel);
+        rel.setRelationshipContext(relContext);
+        LOGGER.debug("primaryRel={}, secondaryRel={}, ", primaryRel);
+
+      } else {
+        LOGGER.warn("NO MATCH!! rel={}", wholeRel);
+      }
+    }
 
     map.put(ret.getId(), ret);
   }
@@ -234,6 +289,15 @@ public class EsRelationship
 
   public void setRelatedLastName(String relatedLastName) {
     this.relatedLastName = relatedLastName;
+  }
+
+  @Override
+  public String toString() {
+    return "EsRelationship [thisLegacyTable=" + thisLegacyTable + ", relatedLegacyTable="
+        + relatedLegacyTable + ", thisLegacyId=" + thisLegacyId + ", thisFirstName=" + thisFirstName
+        + ", thisLastName=" + thisLastName + ", relCode=" + relCode + ", relatedLegacyId="
+        + relatedLegacyId + ", relatedFirstName=" + relatedFirstName + ", relatedLastName="
+        + relatedLastName + "]";
   }
 
 }
