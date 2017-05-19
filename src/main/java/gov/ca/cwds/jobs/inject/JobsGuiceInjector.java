@@ -26,7 +26,7 @@ import gov.ca.cwds.dao.cms.ReplicatedEducationProviderContactDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherChildInPlacemtHomeDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
-import gov.ca.cwds.dao.cms.ReplicatedPersonReferralDao;
+import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
 import gov.ca.cwds.dao.cms.ReplicatedRelationshipsDao;
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
@@ -142,7 +142,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ReplicatedServiceProviderDao.class);
     bind(ReplicatedSubstituteCareProviderDao.class);
     bind(ReplicatedEducationProviderContactDao.class);
-    bind(ReplicatedPersonReferralDao.class);
+    bind(ReplicatedPersonReferralsDao.class);
     
     // PostgreSQL:
     bind(EsIntakeScreeningDao.class);

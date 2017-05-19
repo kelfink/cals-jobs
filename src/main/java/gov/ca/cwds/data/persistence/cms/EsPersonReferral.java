@@ -19,6 +19,11 @@ import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReporter;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
@@ -26,7 +31,8 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
  * Entity bean for Materialized Query Table (MQT), ES_REFERRAL_HIST.
  * 
  * <p>
- * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedPersonReferral}.
+ * Implements {@link ApiGroupNormalizer} and converts to
+ * {@link ReplicatedPersonReferrals}.
  * </p>
  * 
  * @author CWDS API Team
@@ -34,13 +40,10 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @Entity
 @Table(name = "ES_REFERRAL_HIST")
 @NamedNativeQueries({
-    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
-        query = "SELECT r.* FROM {h-schema}ES_REFERRAL_HIST r "
-            + "WHERE r.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + "ORDER BY CLIENT_ID "
-            + "FOR READ ONLY ",
-        resultClass = EsPersonReferral.class, readOnly = true)})
-public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferral> {
+		@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter", query = "SELECT r.* FROM {h-schema}ES_REFERRAL_HIST r "
+				+ "WHERE r.LAST_CHG > CAST(:after AS TIMESTAMP) " + "ORDER BY CLIENT_ID "
+				+ "FOR READ ONLY ", resultClass = EsPersonReferral.class, readOnly = true) })
+public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals> {
 
 	private static final long serialVersionUID = -2265057057202257108L;
 
@@ -57,7 +60,7 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 	@Id
 	@Column(name = "CLIENT_ID")
 	private String clientId;
-	
+
 	@Id
 	@Column(name = "REFERRAL_ID")
 	private String referralId;
@@ -74,12 +77,13 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 	@Type(type = "date")
 	private Date endDate;
 
-	@Column(name = "RESPONSE_TIME")
-	@Type(type = "date")
-	private Date responseTime;
+	@Column(name = "REFERRAL_RESPONSE_TYPE")
+	@Type(type = "short")
+	private Short referralResponseType;
 
 	@Column(name = "REFERRAL_COUNTY")
-	private String county;
+	@Type(type = "short")
+	private Short county;
 
 	// ==============
 	// REPORTER:
@@ -113,12 +117,14 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 
 	@Column(name = "ALLEGATION_ID")
 	private String allegationId;
-	
+
 	@Column(name = "ALLEGATION_DISPOSITION")
-	private String allegationDisposition;
+	@Type(type = "short")
+	private Short allegationDisposition;
 
 	@Column(name = "ALLEGATION_TYPE")
-	private String allegationType;
+	@Type(type = "short")
+	private Short allegationType;
 
 	// =============
 	// VICTIM:
@@ -151,15 +157,68 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 	// =============
 
 	@Override
-	public Class<ReplicatedPersonReferral> getReductionClass() {
-		return ReplicatedPersonReferral.class;
+	public Class<ReplicatedPersonReferrals> getReductionClass() {
+		return ReplicatedPersonReferrals.class;
 	}
-	
+
 	@Override
-	public void reduce(Map<Object, ReplicatedPersonReferral> arg0) {
-		// TODO Auto-generated method stub
+	public void reduce(Map<Object, ReplicatedPersonReferrals> map) {
+		ReplicatedPersonReferrals referrals = map.get(this.clientId);
+		if (referrals == null) {
+			referrals = new ReplicatedPersonReferrals(this.clientId);	
+			map.put(this.clientId, referrals);
+		}
+		
+		ElasticSearchPersonReferral referral = new ElasticSearchPersonReferral();
+		referrals.addElasticSearchPersonReferral(referral);
+		
+		referral.setId(getReferralId());
+		referral.setStartDate(this.startDate);
+		referral.setEndDate(endDate);
+		referral.setCountyName(getCodeDescription(this.county));
+		referral.setResponseTime(getCodeDescription(this.referralResponseType));
+		
+		//
+		// Reporter
+		//
+		ElasticSearchPersonReporter reporter = new ElasticSearchPersonReporter();
+		reporter.setId(this.referralId);
+		reporter.setLegacyClientId(this.clientId);
+		reporter.setFirstName(this.reporterFirstName);
+		reporter.setLastName(this.reporterLastName);
+		referral.setReporter(reporter);
+		
+		//
+		// Assigned Worker
+		//
+		ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
+		assignedWorker.setId(this.getWorkerId());
+		assignedWorker.setLegacyClientId(this.clientId);
+		assignedWorker.setFirstName(this.workerFirstName);
+		assignedWorker.setLastName(this.workerLastName);
+		referral.setAssignedSocialWorker(assignedWorker);
+		
+		//
+		// Allegations
+		//
+		ElasticSearchPersonAllegation allegation = new ElasticSearchPersonAllegation();
+		allegation.setId(this.allegationId);		
+		allegation.setAllegationDescription(getCodeDescription(this.allegationType));
+		allegation.setDispositionDescription(getCodeDescription(this.allegationDisposition));
+		
+		allegation.setPerpetratorId(this.perpetratorId);
+		allegation.setPerpetratorLegacyClientId(this.clientId);
+		allegation.setPerpetratorFirstName(this.perpetratorFirstName);
+		allegation.setPerpetratorLastName(this.perpetratorLastName);
+		
+		allegation.setVictimId(this.victimId);
+		allegation.setVictimLegacyClientId(this.clientId);
+		allegation.setVictimFirstName(this.victimFirstName);
+		allegation.setVictimLastName(this.victimLastName);
+			
+		referral.getAllegations().add(allegation);
 	}
-	
+
 	@Override
 	public Object getGroupKey() {
 		return this.clientId;
@@ -190,7 +249,7 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 	public void setLastChange(Date lastChange) {
 		this.lastChange = lastChange;
 	}
-	
+
 	public String getClientId() {
 		return clientId;
 	}
@@ -223,19 +282,19 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 		this.endDate = endDate;
 	}
 
-	public Date getResponseTime() {
-		return responseTime;
+	public Short getReferralResponseType() {
+		return referralResponseType;
 	}
 
-	public void setResponseTime(Date responseTime) {
-		this.responseTime = responseTime;
+	public void setReferralResponseType(Short referralResponseType) {
+		this.referralResponseType = referralResponseType;
 	}
 
-	public String getCounty() {
+	public Short getCounty() {
 		return county;
 	}
 
-	public void setCounty(String county) {
+	public void setCounty(Short county) {
 		this.county = county;
 	}
 
@@ -295,19 +354,19 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 		this.allegationId = allegationId;
 	}
 
-	public String getAllegationDisposition() {
+	public Short getAllegationDisposition() {
 		return allegationDisposition;
 	}
 
-	public void setAllegationDisposition(String allegationDisposition) {
+	public void setAllegationDisposition(Short allegationDisposition) {
 		this.allegationDisposition = allegationDisposition;
 	}
 
-	public String getAllegationType() {
+	public Short getAllegationType() {
 		return allegationType;
 	}
 
-	public void setAllegationType(String allegationType) {
+	public void setAllegationType(Short allegationType) {
 		this.allegationType = allegationType;
 	}
 
@@ -358,7 +417,7 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 	public void setPerpetratorLastName(String perpetratorLastName) {
 		this.perpetratorLastName = perpetratorLastName;
 	}
-	  
+
 	/**
 	 * {@inheritDoc}
 	 * 
@@ -382,5 +441,16 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+	}
+	
+	private String getCodeDescription(Short code) {
+		String codeDesc = null;
+		if (code != null && code.intValue() != 0) {
+		      final CmsSystemCode sysCode = ElasticSearchPerson.getSystemCodes().lookup(code);
+		      if (sysCode != null) {
+		    	  codeDesc = sysCode.getShortDsc();
+		      }
+		}
+		return codeDesc;
 	}
 }
