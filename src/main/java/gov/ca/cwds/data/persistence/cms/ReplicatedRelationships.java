@@ -77,22 +77,22 @@ public class ReplicatedRelationships implements PersistentObject, ApiPersonAware
 
   @Override
   public String getFirstName() {
-    return "";
+    return null;
   }
 
   @Override
   public String getGender() {
-    return "";
+    return null;
   }
 
   @Override
   public String getLastName() {
-    return "";
+    return null;
   }
 
   @Override
   public String getMiddleName() {
-    return "";
+    return null;
   }
 
   @Override

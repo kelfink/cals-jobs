@@ -113,7 +113,7 @@ public class RelationshipIndexerJob
 
     final String insertJson = mapper.writeValueAsString(esp);
     final String updateJson = buf.toString();
-    LOGGER.debug("updateJson: {}", updateJson);
+    LOGGER.info("updateJson: {}", updateJson);
 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
