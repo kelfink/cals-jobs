@@ -172,9 +172,9 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 		ElasticSearchPersonReferral referral = new ElasticSearchPersonReferral();
 		referrals.addElasticSearchPersonReferral(referral);
 		
-		referral.setId(getReferralId());
+		referral.setId(this.referralId);
 		referral.setStartDate(this.startDate);
-		referral.setEndDate(endDate);
+		referral.setEndDate(this.endDate);
 		referral.setCountyName(getCodeDescription(this.county));
 		referral.setResponseTime(getCodeDescription(this.referralResponseType));
 		
@@ -182,7 +182,7 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 		// Reporter
 		//
 		ElasticSearchPersonReporter reporter = new ElasticSearchPersonReporter();
-		reporter.setId(this.referralId);
+		reporter.setId(this.reporterId);
 		reporter.setLegacyClientId(this.clientId);
 		reporter.setFirstName(this.reporterFirstName);
 		reporter.setLastName(this.reporterLastName);
@@ -192,7 +192,7 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 		// Assigned Worker
 		//
 		ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
-		assignedWorker.setId(this.getWorkerId());
+		assignedWorker.setId(this.workerId);
 		assignedWorker.setLegacyClientId(this.clientId);
 		assignedWorker.setFirstName(this.workerFirstName);
 		assignedWorker.setLastName(this.workerLastName);
@@ -215,7 +215,7 @@ public class EsPersonReferral implements PersistentObject, ApiGroupNormalizer<Re
 		allegation.setVictimLegacyClientId(this.clientId);
 		allegation.setVictimFirstName(this.victimFirstName);
 		allegation.setVictimLastName(this.victimLastName);
-			
+		
 		referral.getAllegations().add(allegation);
 	}
 
