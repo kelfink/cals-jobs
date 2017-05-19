@@ -249,6 +249,22 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return " ORDER BY x.clt_identifier ";
   }
 
+  /**
+   * Serialize object to JSON.
+   * 
+   * @param obj object to serialize
+   * @return JSON for this screening
+   */
+  protected String jsonify(Object obj) {
+    String ret = "";
+    try {
+      ret = mapper.writeValueAsString(obj);
+    } catch (Exception e) { // NOSONAR
+      LOGGER.warn("ERROR SERIALIZING OBJECT {} TO JSON", obj);
+    }
+    return ret;
+  }
+
   @Override
   public M extractFromResultSet(ResultSet rs) throws SQLException {
     return null;
