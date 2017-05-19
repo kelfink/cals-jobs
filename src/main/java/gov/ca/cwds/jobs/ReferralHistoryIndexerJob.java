@@ -63,7 +63,7 @@ public class ReferralHistoryIndexerJob
 
   @Override
   public String getViewName() {
-    return "VW_REFERRAL_HIST";
+    return "ES_REFERRAL_HIST";
   }
 
   @Override
@@ -101,7 +101,7 @@ public class ReferralHistoryIndexerJob
         buf.append(esPersonReferrals.stream().map(this::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
-        LOGGER.error("ERROR SERIALIZING REFERRAL", e);
+        LOGGER.error("ERROR SERIALIZING RELATIONSHIPS", e);
         throw new JobsException(e);
       }
     }
@@ -110,7 +110,6 @@ public class ReferralHistoryIndexerJob
 
     final String insertJson = mapper.writeValueAsString(esp);
     final String updateJson = buf.toString();
-    LOGGER.info("insertJson: {}", insertJson);
     LOGGER.info("updateJson: {}", updateJson);
 
     final String alias = esDao.getConfig().getElasticsearchAlias();
