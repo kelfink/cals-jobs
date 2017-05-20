@@ -72,6 +72,11 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
+  protected String getLegacySourceTable() {
+    return "REFERL_T";
+  }
+
+  @Override
   protected ReplicatedPersonReferrals reduceSingle(List<EsPersonReferral> recs) {
     return reduce(recs).get(0);
   }
@@ -108,6 +113,7 @@ public class ReferralHistoryIndexerJob
 
     buf.append("]}");
 
+    // esp.clearOptionalCollections();
     final String insertJson = mapper.writeValueAsString(esp);
     final String updateJson = buf.toString();
     LOGGER.info("updateJson: {}", updateJson);

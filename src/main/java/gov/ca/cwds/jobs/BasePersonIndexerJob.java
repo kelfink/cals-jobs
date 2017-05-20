@@ -350,7 +350,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Batch job entry point.
    * 
    * <p>
-   * This method closes Hibernate session factory and ElasticSearch DAO automatically.
+   * This method automatically closes the Hibernate session factory and ElasticSearch DAO.
    * </p>
    * 
    * @param klass batch job class
@@ -360,11 +360,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   public static <T extends BasePersonIndexerJob<?, ?>> void runJob(final Class<T> klass,
       String... args) throws JobsException {
+    int exitCode = 0;
     try (final T job = newJob(klass, args)) { // Close resources automatically.
       job.run();
     } catch (Exception e) {
+      exitCode = 1;
       LOGGER.error("JOB FAILED: {}", e.getMessage(), e);
       throw new JobsException("JOB FAILED! " + e.getMessage(), e);
+    } finally {
+      Runtime.getRuntime().exit(exitCode); // NOSONAR
     }
   }
 

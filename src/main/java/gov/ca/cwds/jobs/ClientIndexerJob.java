@@ -94,15 +94,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    */
   public static void main(String... args) {
     LOGGER.info("Run Client indexer job");
-    int exitCode = 0;
     try {
       runJob(ClientIndexerJob.class, args);
     } catch (JobsException e) {
-      exitCode = 1;
       LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
       throw e;
-    } finally {
-      Runtime.getRuntime().exit(exitCode);
     }
   }
 
