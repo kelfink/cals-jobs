@@ -455,7 +455,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
    * @return a populated EsClientAddress
    * @throws SQLException if unable to convert types or stream breaks, etc.
    */
-  public static EsClientAddress produceFromResultSet(ResultSet rs) throws SQLException {
+  public static EsClientAddress extractFromResultSet(ResultSet rs) throws SQLException {
     EsClientAddress ret = new EsClientAddress();
 
     ret.setCltAdjudicatedDelinquentIndicator(rs.getString("CLT_ADJDEL_IND"));

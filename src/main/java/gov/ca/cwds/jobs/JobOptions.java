@@ -233,6 +233,7 @@ public final class JobOptions implements Serializable {
    */
   protected static Options buildCmdLineOptions() {
     Options ret = new Options();
+
     ret.addOption(JobCmdLineOption.ES_CONFIG.getOpt());
     ret.addOption(JobCmdLineOption.THREADS.getOpt());
     ret.addOption(JobCmdLineOption.BUCKET_RANGE.getOpt());
@@ -260,7 +261,9 @@ public final class JobOptions implements Serializable {
           buildCmdLineOptions(), 4, 8, StringUtils.leftPad("", 90, '='), true);
       LOGGER.error(sw.toString());
     } catch (IOException e) {
-      throw new JobsException("ERROR PRINTING HELP! How ironic. :-)", e);
+      final String msg = "ERROR PRINTING HELP! How ironic. :-)";
+      LOGGER.fatal(msg, e);
+      throw new JobsException(msg, e);
     }
   }
 

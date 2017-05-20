@@ -45,6 +45,11 @@ public class EducationProviderContactIndexerJob extends
     return 12;
   }
 
+  @Override
+  protected String getLegacySourceTable() {
+    return "EDPRVCNT";
+  }
+
   /**
    * Batch job entry point.
    * 

@@ -40,6 +40,11 @@ public class OtherAdultInPlacemtHomeIndexerJob extends
     super(jobDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
+  @Override
+  protected String getLegacySourceTable() {
+    return "OTH_ADLT";
+  }
+
   /**
    * Batch job entry point.
    * 

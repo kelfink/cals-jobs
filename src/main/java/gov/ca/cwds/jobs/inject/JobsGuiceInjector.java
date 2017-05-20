@@ -92,8 +92,8 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   /**
-   * Register all DB2 replication entity classes and PostgreSQL view classes with Hibernate. Note
-   * that method addPackage() is not working as hoped.
+   * Register all DB2 replication entity classes and PostgreSQL view entity classes with Hibernate.
+   * Note that method addPackage() is not working as hoped.
    * 
    * <p>
    * Parent class:
@@ -104,30 +104,26 @@ public class JobsGuiceInjector extends AbstractModule {
    */
   @Override
   protected void configure() {
-    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
-        .toInstance(new Configuration().configure("jobs-cms-hibernate.cfg.xml")
-            .addAnnotatedClass(BatchBucket.class)
-            .addAnnotatedClass(EsClientAddress.class)
-            .addAnnotatedClass(EsRelationship.class)
-            .addAnnotatedClass(EsPersonReferral.class)
-            .addAnnotatedClass(ReplicatedAttorney.class)
-            .addAnnotatedClass(ReplicatedCollateralIndividual.class)
-            .addAnnotatedClass(ReplicatedEducationProviderContact.class)
-            .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
-            .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
-            .addAnnotatedClass(ReplicatedOtherClientName.class)
-            .addAnnotatedClass(ReplicatedReporter.class)
-            .addAnnotatedClass(ReplicatedServiceProvider.class)
-            .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
-            .addAnnotatedClass(ReplicatedClient.class)
-            .addAnnotatedClass(ReplicatedClientAddress.class)
-            .addAnnotatedClass(ReplicatedAddress.class)
-            .buildSessionFactory());
+    // DB2 session factory:
+    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class).toInstance(new Configuration()
+        .configure("jobs-cms-hibernate.cfg.xml").addAnnotatedClass(BatchBucket.class)
+        .addAnnotatedClass(EsClientAddress.class).addAnnotatedClass(EsRelationship.class)
+        .addAnnotatedClass(EsPersonReferral.class).addAnnotatedClass(ReplicatedAttorney.class)
+        .addAnnotatedClass(ReplicatedCollateralIndividual.class)
+        .addAnnotatedClass(ReplicatedEducationProviderContact.class)
+        .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
+        .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
+        .addAnnotatedClass(ReplicatedOtherClientName.class)
+        .addAnnotatedClass(ReplicatedReporter.class)
+        .addAnnotatedClass(ReplicatedServiceProvider.class)
+        .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
+        .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
+        .addAnnotatedClass(ReplicatedAddress.class).buildSessionFactory());
 
+    // PostgreSQL session factory:
     bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)
         .toInstance(new Configuration().configure("jobs-ns-hibernate.cfg.xml")
-            .addAnnotatedClass(EsIntakeScreening.class)
-            .addAnnotatedClass(IntakeScreening.class)
+            .addAnnotatedClass(EsIntakeScreening.class).addAnnotatedClass(IntakeScreening.class)
             .buildSessionFactory());
 
     // DB2 replicated tables:
@@ -143,7 +139,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ReplicatedSubstituteCareProviderDao.class);
     bind(ReplicatedEducationProviderContactDao.class);
     bind(ReplicatedPersonReferralsDao.class);
-    
+
     // PostgreSQL:
     bind(EsIntakeScreeningDao.class);
 
@@ -203,7 +199,7 @@ public class JobsGuiceInjector extends AbstractModule {
   public Client elasticsearchClient() {
     Client client = null;
     if (esConfig != null) {
-      LOGGER.warn("Create NEW ES client");
+      LOGGER.info("Create NEW ES client");
       try {
         final ElasticsearchConfiguration config = elasticSearchConfig();
         Settings settings = Settings.settingsBuilder()
@@ -228,7 +224,7 @@ public class JobsGuiceInjector extends AbstractModule {
   public ElasticsearchConfiguration elasticSearchConfig() {
     ElasticsearchConfiguration ret = null;
     if (esConfig != null) {
-      LOGGER.warn("Create NEW ES client");
+      LOGGER.info("Create NEW ES configuration");
       try {
         ret = new ObjectMapper(new YAMLFactory()).readValue(esConfig,
             ElasticsearchConfiguration.class);

@@ -369,6 +369,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
+   * Get the legacy source table for this job, if any.
+   * 
+   * @return legacy source table
+   */
+  protected String getLegacySourceTable() {
+    return null;
+  }
+
+  /**
    * Handle both {@link ApiMultiplePersonAware} and {@link ApiPersonAware} implementations of type
    * T.
    * 
@@ -414,6 +423,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected ElasticSearchPerson buildElasticSearchPersonDoc(ApiPersonAware p)
       throws JsonProcessingException {
     ApiPersonAware pa = p;
+
     List<String> languages = null;
     List<ElasticSearchPerson.ElasticSearchPersonPhone> phones = null;
     List<ElasticSearchPersonAddress> addresses = null;
@@ -971,9 +981,22 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     String id = esp.getId();
     if (t instanceof ApiLegacyAware) {
       ApiLegacyAware l = (ApiLegacyAware) t;
-      id = StringUtils.isNotBlank(l.getLegacyId()) ? l.getLegacyId() : esp.getId();
+      final boolean hasLegacyId = StringUtils.isNotBlank(l.getLegacyId());
+
+      if (hasLegacyId) {
+        id = l.getLegacyId();
+        esp.setLegacyId(id);
+      } else {
+        id = esp.getId();
+      }
     }
 
+    // Set the legacy source table, if appropriate for this job.
+    if (StringUtils.isNotBlank(getLegacySourceTable())) {
+      esp.setLegacySourceTable(getLegacySourceTable());
+    }
+
+    // Serialize ES person object for Insert JSON.
     final String insertJson = mapper.writeValueAsString(esp);
 
     // Null out non-standard collections for updates.
@@ -983,10 +1006,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
 
-    // NO! This adds escapes!
-    // return new UpdateRequest(alias, docType, id).doc(updateJson, XContentType.JSON)
-    // .upsert(new IndexRequest(alias, docType, id).source(insertJson, XContentType.JSON));
-
+    // Update if doc exists, insert if it does not.
     return new UpdateRequest(alias, docType, id).doc(updateJson)
         .upsert(new IndexRequest(alias, docType, id).source(insertJson));
   }

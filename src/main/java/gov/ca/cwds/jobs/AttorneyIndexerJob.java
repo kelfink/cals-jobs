@@ -39,6 +39,11 @@ public class AttorneyIndexerJob
     super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
+  @Override
+  protected String getLegacySourceTable() {
+    return "ATTRNY_T";
+  }
+
   /**
    * Batch job entry point.
    * 

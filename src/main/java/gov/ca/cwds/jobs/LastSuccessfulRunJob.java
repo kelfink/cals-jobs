@@ -34,7 +34,7 @@ public abstract class LastSuccessfulRunJob implements Job {
    */
   protected boolean fatalError = false;
 
-  private String lastJobRunTimeFilename;
+  private String lastRunTimeFilename;
 
   /**
    * Default constructor.
@@ -42,7 +42,7 @@ public abstract class LastSuccessfulRunJob implements Job {
    * @param lastJobRunTimeFilename location of last run time file
    */
   public LastSuccessfulRunJob(String lastJobRunTimeFilename) {
-    this.lastJobRunTimeFilename = lastJobRunTimeFilename;
+    this.lastRunTimeFilename = lastJobRunTimeFilename;
   }
 
   @Override
@@ -65,8 +65,8 @@ public abstract class LastSuccessfulRunJob implements Job {
   protected Date determineLastSuccessfulRunTime() {
     Date ret = null;
 
-    if (!StringUtils.isBlank(this.lastJobRunTimeFilename)) {
-      try (BufferedReader br = new BufferedReader(new FileReader(lastJobRunTimeFilename))) {
+    if (!StringUtils.isBlank(this.lastRunTimeFilename)) {
+      try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) {
         ret = jobDateFormat.parse(br.readLine().trim());
       } catch (FileNotFoundException e) {
         fatalError = true;
@@ -87,8 +87,8 @@ public abstract class LastSuccessfulRunJob implements Job {
   }
 
   private void writeLastSuccessfulRunTime(Date datetime) {
-    if (datetime != null && !StringUtils.isBlank(this.lastJobRunTimeFilename)) {
-      try (BufferedWriter w = new BufferedWriter(new FileWriter(lastJobRunTimeFilename))) {
+    if (datetime != null && !StringUtils.isBlank(this.lastRunTimeFilename)) {
+      try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) {
         w.write(jobDateFormat.format(datetime));
       } catch (IOException e) {
         fatalError = true;
@@ -117,7 +117,7 @@ public abstract class LastSuccessfulRunJob implements Job {
    * @return last time the job ran successfully, in format {@link #jobDateFormat}
    */
   public String getLastJobRunTimeFilename() {
-    return lastJobRunTimeFilename;
+    return lastRunTimeFilename;
   }
 
 }

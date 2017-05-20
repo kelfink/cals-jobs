@@ -18,8 +18,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.jobs.ElasticsearchConfiguration5x;
-
 /**
  * A DAO for Elasticsearch.
  *

@@ -40,6 +40,11 @@ public class OtherChildInPlacemtHomeIndexerJob extends
     super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
+  @Override
+  protected String getLegacySourceTable() {
+    return "OTH_KIDT";
+  }
+
   /**
    * Batch job entry point.
    * 

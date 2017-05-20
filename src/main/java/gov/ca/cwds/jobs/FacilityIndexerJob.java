@@ -6,7 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -36,22 +35,33 @@ import gov.ca.cwds.jobs.util.jdbc.RowMapper;
 import gov.ca.cwds.rest.api.ApiException;
 
 /**
+ * 
+ * <pre>
+ * {@code run script: $java -cp jobs.jar gov.ca.cwds.jobs.FacilityIndexerJob path/to/config/file.yaml}
+ * </pre>
+ * 
  * @author CWDS Elasticsearch Team
- *
- *         run script: $java -cp jobs.jar gov.ca.cwds.jobs.FacilityIndexerJob
- *         path/to/config/file.yaml
  */
 public class FacilityIndexerJob extends AbstractModule {
+
   private static final Logger LOGGER = LogManager.getLogger(FacilityIndexerJob.class);
+
+  private static final String LIS_SESSION_FACTORY_NM = "lis-session-factory";
+
   private File config;
 
+  /**
+   * Default constructor.
+   * 
+   * @param config configuration file
+   */
   public FacilityIndexerJob(File config) {
     this.config = config;
   }
 
   public static void main(String[] args) {
     if (args.length == 0) {
-      System.out.println(
+      LOGGER.warn(
           "usage: java -cp jobs.jar gov.ca.cwds.jobs.FacilityIndexerJob path/to/config/file.yaml");
     }
     try {
@@ -66,7 +76,7 @@ public class FacilityIndexerJob extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(SessionFactory.class).annotatedWith(Names.named("lis-session-factory"))
+    bind(SessionFactory.class).annotatedWith(Names.named(LIS_SESSION_FACTORY_NM))
         .toInstance(new Configuration().configure("lis-hibernate.cfg.xml").buildSessionFactory());
     bind(RowMapper.class).to(FacilityRowMapper.class);
   }
@@ -78,8 +88,8 @@ public class FacilityIndexerJob extends AbstractModule {
     if (config != null) {
       LOGGER.warn("Create NEW ES client");
       try {
-        Settings settings =
-            Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build();
+        // Settings settings =
+        // Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build();
 
         // DRS: Incompatible with ES 2.3.5. Won't connect.
         // client = new PreBuiltTransportClient(settings);
@@ -121,7 +131,7 @@ public class FacilityIndexerJob extends AbstractModule {
   @Inject
   public JobReader lisItemReader(JobConfiguration jobConfiguration,
       FacilityRowMapper facilityRowMapper,
-      @Named("lis-session-factory") SessionFactory sessionFactory) {
+      @Named(LIS_SESSION_FACTORY_NM) SessionFactory sessionFactory) {
     return new JdbcJobReader<>(sessionFactory, facilityRowMapper,
         jobConfiguration.getJobLisReaderQuery());
   }

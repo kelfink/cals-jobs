@@ -44,6 +44,11 @@ public class CollateralIndividualIndexerJob
     return 12;
   }
 
+  @Override
+  protected String getLegacySourceTable() {
+    return "COLTRL_T";
+  }
+
   /**
    * Batch job entry point.
    * 

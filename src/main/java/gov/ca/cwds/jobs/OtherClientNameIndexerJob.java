@@ -65,6 +65,11 @@ public class OtherClientNameIndexerJob
     return ret;
   }
 
+  @Override
+  protected String getLegacySourceTable() {
+    return "OCL_NM_T";
+  }
+
   /**
    * Batch job entry point.
    * 

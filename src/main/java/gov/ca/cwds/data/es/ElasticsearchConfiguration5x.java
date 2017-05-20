@@ -1,7 +1,6 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.data.es;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gov.ca.cwds.data.es.Elasticsearch5xDao;
 
 import javax.validation.constraints.NotNull;
 
