@@ -38,6 +38,8 @@ repositories {
 
 dependencies {
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
+    
+    // ES 5.x only:
     // compile group: 'org.elasticsearch.client', name: 'transport', version: elasticsearchVersion
 
 	compile group: 'javax.validation', name: 'validation-api', version: '1.1.0.Final'
@@ -97,7 +99,18 @@ publishing {
 cobertura {
 	coverageFormats = ['xml', 'html']
 	coverageIgnoreTrivial = true
-	coverageExcludes  = ['org.slf4j.Logger.*', '.*gov\\.ca\\.cwds\\.jobs\\..*BasePersonIndexer.*', '.*gov\\.ca\\.cwds\\.jobs\\..*IntakeScreeningJob.*', '.*gov\\.ca\\.cwds\\.jobs\\..*RelationshipIndexerJob.*', '.*gov\\.ca\\.cwds\\.jobs\\.util\\..*']
+	coverageExcludes  = ['org.slf4j.Logger.*', '.*gov\\.ca\\.cwds\\.jobs\\..*BasePersonIndexer.*', '.*gov\\.ca\\.cwds\\.jobs\\..*IntakeScreeningJob.*', '.*gov\\.ca\\.cwds\\.jobs\\..*Re.*', '.*gov\\.ca\\.cwds\\.jobs\\.util\\..*']
 	coverageIgnores = ['org.slf4j.Logger.*']
 	coverageReportDir = new File("$buildDir/reports/cobertura")
 }
+
+
+
+
+
+
+
+
+
+
+

@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -11,6 +12,11 @@ import org.junit.Test;
  */
 @SuppressWarnings("javadoc")
 public class ClientIndexerJobTest {
+
+  @BeforeClass
+  public static void setupClass() {
+    BasePersonIndexerJob.setTestMode(true);
+  }
 
   @Test
   public void type() throws Exception {

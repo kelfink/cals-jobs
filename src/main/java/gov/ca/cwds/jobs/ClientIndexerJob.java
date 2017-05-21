@@ -96,7 +96,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     LOGGER.info("Run Client indexer job");
     try {
       runJob(ClientIndexerJob.class, args);
-    } catch (JobsException e) {
+    } catch (Exception e) {
       LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
       throw e;
     }

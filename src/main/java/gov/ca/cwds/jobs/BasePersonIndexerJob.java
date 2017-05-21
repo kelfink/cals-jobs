@@ -136,6 +136,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected static Injector injector;
 
   /**
+   * Needed for unit tests where resources may not close properly.
+   */
+  private static boolean testMode = false;
+
+  /**
    * Jackson ObjectMapper.
    */
   protected final ObjectMapper mapper;
@@ -368,7 +373,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.error("JOB FAILED: {}", e.getMessage(), e);
       throw new JobsException("JOB FAILED! " + e.getMessage(), e);
     } finally {
-      Runtime.getRuntime().exit(exitCode); // NOSONAR
+      // WARNING: kills the JVM in testing but may be needed to shutdown resources.
+      if (!isTestMode()) {
+        Runtime.getRuntime().exit(exitCode); // NOSONAR
+      }
     }
   }
 
@@ -686,8 +694,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           : opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_ID_COL", getIdColumn())
-              .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
+              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
+                  String.valueOf(totalBuckets)),
+              BatchBucket.class);
 
       ret = q.getResultList();
       session.clear();
@@ -1350,20 +1359,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     systemCodes = sysCodeCache;
   }
 
-  /**
-   * Serialize object to JSON.
-   * 
-   * @param obj object to serialize
-   * @return JSON for this screening
-   */
-  protected String jsonify(Object obj) {
-    String ret = "";
-    try {
-      ret = mapper.writeValueAsString(obj);
-    } catch (Exception e) { // NOSONAR
-      LOGGER.warn("ERROR SERIALIZING OBJ {} TO JSON", obj);
-    }
-    return ret;
+  public static boolean isTestMode() {
+    return testMode;
+  }
+
+  public static void setTestMode(boolean testMode) {
+    BasePersonIndexerJob.testMode = testMode;
   }
 
 }
