@@ -34,155 +34,140 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  * 
  * @author CWDS API Team
  */
-public class ReferralHistoryIndexerJob extends BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral>
-		implements JobResultSetAware<EsPersonReferral> {
+public class ReferralHistoryIndexerJob
+    extends BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral>
+    implements JobResultSetAware<EsPersonReferral> {
 
-	private static final Logger LOGGER = LogManager.getLogger(ReferralHistoryIndexerJob.class);
+  private static final Logger LOGGER = LogManager.getLogger(ReferralHistoryIndexerJob.class);
 
-	/**
-	 * Construct batch job instance with all required dependencies.
-	 * 
-	 * @param clientDao
-	 * @param esDao
-	 * @param lastJobRunTimeFilename
-	 * @param mapper
-	 * @param sessionFactory
-	 */
-	@Inject
-	public ReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao, ElasticsearchDao esDao,
-			@LastRunFile String lastJobRunTimeFilename, ObjectMapper mapper,
-			@CmsSessionFactory SessionFactory sessionFactory) {
-		super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
-	}
+  /**
+   * Construct batch job instance with all required dependencies.
+   * 
+   * @param clientDao
+   * @param esDao
+   * @param lastJobRunTimeFilename
+   * @param mapper
+   * @param sessionFactory
+   */
+  @Inject
+  public ReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao, ElasticsearchDao esDao,
+      @LastRunFile String lastJobRunTimeFilename, ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory) {
+    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  }
 
-	@Override
-	protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
-		return EsPersonReferral.class;
-	}
+  @Override
+  protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
+    return EsPersonReferral.class;
+  }
 
-	@Override
-	public String getViewName() {
-		return "ES_REFERRAL_HIST";
-	}
+  @Override
+  public String getViewName() {
+    return "VW_REFERRAL_HIST";
+  }
 
-	@Override
-	public String getJdbcOrderBy() {
-		return " ORDER BY CLIENT_ID ";
-	}
+  @Override
+  public String getJdbcOrderBy() {
+    return " ORDER BY CLIENT_ID ";
+  }
 
-	@Override
-	protected ReplicatedPersonReferrals reduceSingle(List<EsPersonReferral> recs) {
-		return reduce(recs).get(0);
-	}
+  @Override
+  protected ReplicatedPersonReferrals reduceSingle(List<EsPersonReferral> recs) {
+    return reduce(recs).get(0);
+  }
 
-	@Override
-	protected List<ReplicatedPersonReferrals> reduce(List<EsPersonReferral> recs) {
-		final int len = (int) (recs.size() * 1.25);
-		Map<Object, ReplicatedPersonReferrals> map = new LinkedHashMap<>(len);
-		for (EsPersonReferral rec : recs) {
-			rec.reduce(map);
-		}
+  @Override
+  protected List<ReplicatedPersonReferrals> reduce(List<EsPersonReferral> recs) {
+    final int len = (int) (recs.size() * 1.25);
+    Map<Object, ReplicatedPersonReferrals> map = new LinkedHashMap<>(len);
+    for (EsPersonReferral rec : recs) {
+      rec.reduce(map);
+    }
 
-		return map.values().stream().collect(Collectors.toList());
-	}
+    return map.values().stream().collect(Collectors.toList());
+  }
 
-	@Override
-	protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonReferrals referrals)
-			throws IOException {
-		StringBuilder buf = new StringBuilder();
-		buf.append("{\"referrals\":[");
+  @Override
+  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp,
+      ReplicatedPersonReferrals referrals) throws IOException {
+    StringBuilder buf = new StringBuilder();
+    buf.append("{\"referrals\":[");
 
-		List<ElasticSearchPersonReferral> esPersonReferrals = referrals.geElasticSearchPersonReferrals();
+    List<ElasticSearchPersonReferral> esPersonReferrals =
+        referrals.geElasticSearchPersonReferrals();
 
-		if (esPersonReferrals != null && !esPersonReferrals.isEmpty()) {
-			try {
-				buf.append(esPersonReferrals.stream().map(this::jsonify).sorted(String::compareTo)
-						.collect(Collectors.joining(",")));
-			} catch (Exception e) {
-				LOGGER.error("ERROR SERIALIZING RELATIONSHIPS", e);
-				throw new JobsException(e);
-			}
-		}
+    if (esPersonReferrals != null && !esPersonReferrals.isEmpty()) {
+      try {
+        buf.append(esPersonReferrals.stream().map(this::jsonify).sorted(String::compareTo)
+            .collect(Collectors.joining(",")));
+      } catch (Exception e) {
+        LOGGER.error("ERROR SERIALIZING REFERRAL", e);
+        throw new JobsException(e);
+      }
+    }
 
-		buf.append("]}");
+    buf.append("]}");
 
-		final String insertJson = mapper.writeValueAsString(esp);
-		final String updateJson = buf.toString();
-		LOGGER.info("updateJson: {}", updateJson);
+    final String insertJson = mapper.writeValueAsString(esp);
+    final String updateJson = buf.toString();
+    LOGGER.info("insertJson: {}", insertJson);
+    LOGGER.info("updateJson: {}", updateJson);
 
-		final String alias = esDao.getConfig().getElasticsearchAlias();
-		final String docType = esDao.getConfig().getElasticsearchDocType();
+    final String alias = esDao.getConfig().getElasticsearchAlias();
+    final String docType = esDao.getConfig().getElasticsearchDocType();
 
-		return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson)
-				.upsert(new IndexRequest(alias, docType, esp.getId()).source(insertJson));
-	}
+    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson)
+        .upsert(new IndexRequest(alias, docType, esp.getId()).source(insertJson));
+  }
 
-	@Override
-	public EsPersonReferral extractFromResultSet(ResultSet rs) throws SQLException {
-		EsPersonReferral referral = new EsPersonReferral();
+  @Override
+  public EsPersonReferral extractFromResultSet(ResultSet rs) throws SQLException {
+    EsPersonReferral referral = new EsPersonReferral();
 
-		referral.setReferralId(rs.getString("REFERRAL_ID"));
-		referral.setClientId(rs.getString("CLIENT_ID"));
+    referral.setReferralId(rs.getString("REFERRAL_ID"));
+    referral.setClientId(rs.getString("CLIENT_ID"));
 
-		referral.setStartDate(rs.getDate("START_DATE"));
-		referral.setEndDate(rs.getDate("END_DATE"));
-		referral.setLastChange(rs.getDate("LAST_CHG"));
-		referral.setCounty(rs.getShort("REFERRAL_COUNTY"));
-		referral.setReferralResponseType(rs.getShort("REFERRAL_RESPONSE_TYPE"));
+    referral.setStartDate(rs.getDate("START_DATE"));
+    referral.setEndDate(rs.getDate("END_DATE"));
+    referral.setLastChange(rs.getDate("LAST_CHG"));
+    referral.setCounty(rs.getShort("REFERRAL_COUNTY"));
+    referral.setReferralResponseType(rs.getShort("REFERRAL_RESPONSE_TYPE"));
 
-		referral.setAllegationId(rs.getString("ALLEGATION_ID"));		
-		referral.setAllegationType(rs.getShort("ALLEGATION_TYPE"));
-		referral.setAllegationDisposition(rs.getShort("ALLEGATION_DISPOSITION"));
+    referral.setAllegationId(rs.getString("ALLEGATION_ID"));
+    referral.setAllegationType(rs.getShort("ALLEGATION_TYPE"));
+    referral.setAllegationDisposition(rs.getShort("ALLEGATION_DISPOSITION"));
 
-		referral.setPerpetratorId(rs.getString("PERPETRATOR_ID"));
-		referral.setPerpetratorFirstName(rs.getString("PERPETRATOR_FIRST_NM"));
-		referral.setPerpetratorLastName(rs.getString("PERPETRATOR_LAST_NM"));
+    referral.setPerpetratorId(rs.getString("PERPETRATOR_ID"));
+    referral.setPerpetratorFirstName(rs.getString("PERPETRATOR_FIRST_NM"));
+    referral.setPerpetratorLastName(rs.getString("PERPETRATOR_LAST_NM"));
 
-		referral.setReporterId(rs.getString("REPORTER_ID"));
-		referral.setReporterFirstName(rs.getString("REPORTER_FIRST_NM"));
-		referral.setReporterLastName(rs.getString("REPORTER_LAST_NM"));
+    referral.setReporterId(rs.getString("REPORTER_ID"));
+    referral.setReporterFirstName(rs.getString("REPORTER_FIRST_NM"));
+    referral.setReporterLastName(rs.getString("REPORTER_LAST_NM"));
 
-		referral.setVictimId(rs.getString("VICTIM_ID"));
-		referral.setVictimFirstName(rs.getString("VICTIM_FIRST_NM"));
-		referral.setVictimLastName(rs.getString("VICTIM_LAST_NM"));
+    referral.setVictimId(rs.getString("VICTIM_ID"));
+    referral.setVictimFirstName(rs.getString("VICTIM_FIRST_NM"));
+    referral.setVictimLastName(rs.getString("VICTIM_LAST_NM"));
 
-		referral.setWorkerId(rs.getString("WORKER_ID"));
-		referral.setWorkerFirstName(rs.getString("WORKER_FIRST_NM"));
-		referral.setWorkerLastName(rs.getString("WORKER_LAST_NM"));
+    referral.setWorkerId(rs.getString("WORKER_ID"));
+    referral.setWorkerFirstName(rs.getString("WORKER_FIRST_NM"));
+    referral.setWorkerLastName(rs.getString("WORKER_LAST_NM"));
 
-		return referral;
-	}
+    return referral;
+  }
 
-	/**
-	 * Batch job entry point.
-	 * 
-	 * @param args
-	 *            command line arguments
-	 */
-	public static void main(String... args) {
-		LOGGER.info("Run ReferralHistoryIndexerJob");
-		try {
-			runJob(ReferralHistoryIndexerJob.class, args);
-		} catch (JobsException e) {
-			LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
-			throw e;
-		}
-	}
-
-	/**
-	 * Serialize object to JSON.
-	 * 
-	 * @param obj
-	 *            object to serialize
-	 * @return JSON for this screening
-	 */
-	private String jsonify(Object obj) {
-		String ret = "";
-		try {
-			ret = mapper.writeValueAsString(obj);
-		} catch (Exception e) { // NOSONAR
-			LOGGER.warn("ERROR SERIALIZING REFERRALS {} TO JSON", obj);
-		}
-		return ret;
-	}
+  /**
+   * Batch job entry point.
+   * 
+   * @param args command line arguments
+   */
+  public static void main(String... args) {
+    LOGGER.info("Run ReferralHistoryIndexerJob");
+    try {
+      runJob(ReferralHistoryIndexerJob.class, args);
+    } catch (JobsException e) {
+      LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
+      throw e;
+    }
+  }
 }

@@ -656,9 +656,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           : opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
-                  String.valueOf(totalBuckets)),
-              BatchBucket.class);
+              .replaceAll("THE_ID_COL", getIdColumn())
+              .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
 
       ret = q.getResultList();
       session.clear();
@@ -1309,6 +1308,22 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Inject
   public static void setSystemCodes(@SystemCodeCache ApiSystemCodeCache sysCodeCache) {
     systemCodes = sysCodeCache;
+  }
+
+  /**
+   * Serialize object to JSON.
+   * 
+   * @param obj object to serialize
+   * @return JSON for this screening
+   */
+  protected String jsonify(Object obj) {
+    String ret = "";
+    try {
+      ret = mapper.writeValueAsString(obj);
+    } catch (Exception e) { // NOSONAR
+      LOGGER.warn("ERROR SERIALIZING OBJ {} TO JSON", obj);
+    }
+    return ret;
   }
 
 }

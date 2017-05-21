@@ -75,22 +75,6 @@ public class RelationshipIndexerJob
     return " ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID, THIS_LEGACY_TABLE, RELATED_LEGACY_TABLE ";
   }
 
-  /**
-   * Serialize object to JSON.
-   * 
-   * @param obj object to serialize
-   * @return JSON for this screening
-   */
-  protected String jsonify(Object obj) {
-    String ret = "";
-    try {
-      ret = mapper.writeValueAsString(obj);
-    } catch (Exception e) { // NOSONAR
-      LOGGER.warn("ERROR SERIALIZING SCREENING ID {} TO JSON", obj);
-    }
-    return ret;
-  }
-
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedRelationships p)
       throws IOException {
