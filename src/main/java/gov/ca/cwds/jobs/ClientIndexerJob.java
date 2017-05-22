@@ -70,12 +70,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     return "CLIENT_T";
   }
 
-  // @Override
-  // protected ReplicatedClient reduceSingle(List<EsClientAddress> recs) {
-  // final List<ReplicatedClient> list = reduce(recs);
-  // return !list.isEmpty() ? list.get(0) : null;
-  // }
-
   @Override
   protected List<ReplicatedClient> reduce(List<EsClientAddress> recs) {
     final int len = (int) (recs.size() * 1.25);
