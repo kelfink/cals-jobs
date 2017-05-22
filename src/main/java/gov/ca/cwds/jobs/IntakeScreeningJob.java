@@ -148,6 +148,13 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
     return "screenings";
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  protected void setInsertCollections(ElasticSearchPerson esp, IntakeParticipant t,
+      List<? extends ApiTypedIdentifier<String>> list) {
+    esp.setScreenings((List<ElasticSearchPerson.ElasticSearchPersonScreening>) list);
+  }
+
   /**
    * Return the optional collection used to build the update JSON, if any. Child classes that
    * populate optional collections should override this method.

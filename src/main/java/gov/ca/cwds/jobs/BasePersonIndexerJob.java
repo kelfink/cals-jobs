@@ -643,7 +643,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Set optional ES person collections to null so that they are not overwritten by accident.
+   * Set optional ES person collections to null so that they are not overwritten by accident. Child
+   * classes do not normally override this method.
    * 
    * @param esp ES document, already prepared by
    *        {@link #buildElasticSearchPersonDoc(ApiPersonAware)}
@@ -665,7 +666,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Prepare upsert JSON (update and insert).
+   * Prepare upsert JSON (update and insert). Child classes do not normally override this method.
    * 
    * @param esp ES document, already prepared by
    *        {@link #buildElasticSearchPersonDoc(ApiPersonAware)}
