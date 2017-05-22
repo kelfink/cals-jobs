@@ -1,9 +1,6 @@
 package gov.ca.cwds.jobs;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -139,23 +136,18 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
   }
 
   @Override
-  protected IntakeParticipant reduceSingle(List<EsIntakeScreening> recs) {
-    final List<IntakeParticipant> results = reduce(recs);
-    return !results.isEmpty() ? reduce(recs).get(0) : null;
-  }
-
-  @Override
   protected List<IntakeParticipant> reduce(List<EsIntakeScreening> recs) {
-    // The "transform" step would typically run in the same thread.
-    // Therefore, you *could* safely reuse the same map object.
-    final int len = (int) (recs.size() * 1.25);
-    Map<Object, IntakeParticipant> map = new LinkedHashMap<>(len);
-    for (PersistentObject rec : recs) {
-      ApiGroupNormalizer<IntakeParticipant> reducer = (EsIntakeScreening) rec;
-      reducer.reduce(map);
-    }
-
-    return map.values().stream().collect(Collectors.toList());
+    // // The "transform" step would typically run in the same thread.
+    // // Therefore, you *could* safely reuse the same map object.
+    // final int len = (int) (recs.size() * 1.25);
+    // Map<Object, IntakeParticipant> map = new LinkedHashMap<>(len);
+    // for (PersistentObject rec : recs) {
+    // ApiGroupNormalizer<IntakeParticipant> reducer = (EsIntakeScreening) rec;
+    // reducer.reduce(map);
+    // }
+    //
+    // return map.values().stream().collect(Collectors.toList());
+    return EntityNormalizer.reduceList(recs);
   }
 
   /**

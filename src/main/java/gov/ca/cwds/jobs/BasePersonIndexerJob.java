@@ -558,9 +558,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param recs entity records
    * @return unmodified entity records
+   * @see EntityNormalizer
    */
   @SuppressWarnings("unchecked")
   protected List<T> reduce(List<M> recs) {
+    if (fatalError) {
+
+    }
     return (List<T>) recs;
   }
 
