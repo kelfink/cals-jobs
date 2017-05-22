@@ -58,6 +58,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.model.cms.JobResultSetAware;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
+import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -1002,6 +1003,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       } else {
         id = esp.getId();
       }
+    } else if (t instanceof CmsReplicatedEntity) {
+      esp.setLegacyId(t.getPrimaryKey().toString());
     }
 
     // Set the legacy source table, if appropriate for this job.
