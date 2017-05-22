@@ -137,17 +137,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
 
   @Override
   protected List<IntakeParticipant> reduce(List<EsIntakeScreening> recs) {
-    // // The "transform" step would typically run in the same thread.
-    // // Therefore, you *could* safely reuse the same map object.
-    // final int len = (int) (recs.size() * 1.25);
-    // Map<Object, IntakeParticipant> map = new LinkedHashMap<>(len);
-    // for (PersistentObject rec : recs) {
-    // ApiGroupNormalizer<IntakeParticipant> reducer = (EsIntakeScreening) rec;
-    // reducer.reduce(map);
-    // }
-    //
-    // return map.values().stream().collect(Collectors.toList());
-    return EntityNormalizer.reduceList(recs);
+    return EntityNormalizer.<IntakeParticipant, EsIntakeScreening>reduceList(recs);
   }
 
   /**
