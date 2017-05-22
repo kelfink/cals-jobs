@@ -86,37 +86,6 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
     LOGGER.warn("DONE: Stage #1: NS View Reader");
   }
 
-  // @Override
-  // protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, IntakeParticipant p)
-  // throws IOException {
-  //
-  // StringBuilder buf = new StringBuilder();
-  // buf.append("{\"screenings\":[");
-  //
-  // if (!p.getScreenings().isEmpty()) {
-  // try {
-  // buf.append(p.getScreenings().values().stream().map(this::jsonify).sorted(String::compareTo)
-  // .collect(Collectors.joining(",")));
-  // } catch (Exception e) {
-  // LOGGER.error("ERROR SERIALIZING SCREENING", e);
-  // throw new JobsException(e);
-  // }
-  // }
-  //
-  // buf.append("]}");
-  //
-  // final String insertJson = mapper.writeValueAsString(esp);
-  // final String updateJson = buf.toString();
-  // LOGGER.info("updateJson: {}", updateJson);
-  //
-  // final String alias = esDao.getConfig().getElasticsearchAlias();
-  // final String docType = esDao.getConfig().getElasticsearchDocType();
-  //
-  // // WARNING: XContentType.JSON option adds escapes in 2.x.
-  // return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson)
-  // .upsert(new IndexRequest(alias, docType, esp.getId()).source(insertJson));
-  // }
-
   @Override
   protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
     return EsIntakeScreening.class;
