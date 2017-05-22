@@ -681,25 +681,23 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
       throws JsonProcessingException {
 
-    String updateJson = "";
-    if (StringUtils.isNotBlank(elementName) && list != null && !list.isEmpty()) {
+    // Child classes: Set optional collections before serializing the insert JSON.
+    prepareInsertCollections(esp, t, elementName, list, keep);
+    final String insertJson = mapper.writeValueAsString(esp);
+
+    String updateJson;
+    if (StringUtils.isNotBlank(elementName)) {
       StringBuilder buf = new StringBuilder();
       buf.append("{\"").append(elementName).append("\":[");
 
-      if (!list.isEmpty()) {
+      if (list != null && !list.isEmpty()) {
         buf.append(list.stream().map(this::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       }
 
       buf.append("]}");
       updateJson = buf.toString();
-    }
-
-    // Child classes: Set optional collections before serializing the insert JSON.
-    prepareInsertCollections(esp, t, elementName, list, keep);
-
-    final String insertJson = mapper.writeValueAsString(esp);
-    if (StringUtils.isNotBlank(updateJson)) {
+    } else {
       updateJson = insertJson;
     }
 
@@ -731,7 +729,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     // Set id and legacy id.
     if (t instanceof ApiLegacyAware) {
       ApiLegacyAware l = (ApiLegacyAware) t;
-      final boolean hasLegacyId = StringUtils.isNotBlank(l.getLegacyId());
+      final boolean hasLegacyId =
+          StringUtils.isNotBlank(l.getLegacyId()) && l.getLegacyId().trim().length() == 10;
 
       if (hasLegacyId) {
         id = l.getLegacyId();
