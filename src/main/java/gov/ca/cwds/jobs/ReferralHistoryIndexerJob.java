@@ -100,6 +100,7 @@ public class ReferralHistoryIndexerJob
 
     List<ElasticSearchPersonReferral> esPersonReferrals =
         referrals.geElasticSearchPersonReferrals();
+    esp.setReferrals(esPersonReferrals);
 
     if (esPersonReferrals != null && !esPersonReferrals.isEmpty()) {
       try {
