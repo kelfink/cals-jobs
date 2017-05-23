@@ -210,12 +210,12 @@ public class EsPersonReferral
     allegation.setDispositionDescription(getCodeDescription(this.allegationDisposition));
 
     allegation.setPerpetratorId(this.perpetratorId);
-    allegation.setPerpetratorLegacyClientId(this.clientId);
+    allegation.setPerpetratorLegacyClientId(this.perpetratorId);
     allegation.setPerpetratorFirstName(this.perpetratorFirstName);
     allegation.setPerpetratorLastName(this.perpetratorLastName);
 
     allegation.setVictimId(this.victimId);
-    allegation.setVictimLegacyClientId(this.clientId);
+    allegation.setVictimLegacyClientId(this.victimId);
     allegation.setVictimFirstName(this.victimFirstName);
     allegation.setVictimLastName(this.victimLastName);
 
