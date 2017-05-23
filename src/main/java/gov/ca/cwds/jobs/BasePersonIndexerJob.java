@@ -50,7 +50,6 @@ import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
-import gov.ca.cwds.data.cms.ClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
@@ -564,9 +563,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   @SuppressWarnings("unchecked")
   protected List<T> reduce(List<M> recs) {
-    if (fatalError) {
-
-    }
     return (List<T>) recs;
   }
 
