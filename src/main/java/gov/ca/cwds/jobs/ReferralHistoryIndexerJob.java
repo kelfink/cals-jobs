@@ -63,7 +63,7 @@ public class ReferralHistoryIndexerJob
 
   @Override
   public String getViewName() {
-    return "VW_REFERRAL_HIST";
+    return "ES_REFERRAL_HIST";
   }
 
   @Override

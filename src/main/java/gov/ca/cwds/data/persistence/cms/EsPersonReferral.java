@@ -28,7 +28,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
 /**
- * Entity bean for Materialized Query Table (MQT), VW_REFERRAL_HIST.
+ * Entity bean for Materialized Query Table (MQT), ES_REFERRAL_HIST.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedPersonReferrals}.
@@ -37,10 +37,10 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
  * @author CWDS API Team
  */
 @Entity
-@Table(name = "VW_REFERRAL_HIST")
+@Table(name = "ES_REFERRAL_HIST")
 @NamedNativeQueries({@NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
-    query = "SELECT r.* FROM {h-schema}VW_REFERRAL_HIST r "
+    query = "SELECT r.* FROM {h-schema}ES_REFERRAL_HIST r "
         + "WHERE r.LAST_CHG > CAST(:after AS TIMESTAMP) " + "ORDER BY CLIENT_ID "
         + "FOR READ ONLY ",
     resultClass = EsPersonReferral.class, readOnly = true)})
