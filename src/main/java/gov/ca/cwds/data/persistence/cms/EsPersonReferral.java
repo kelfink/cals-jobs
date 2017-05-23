@@ -175,6 +175,7 @@ public class EsPersonReferral
     referrals.addElasticSearchPersonReferral(referral);
 
     referral.setId(this.referralId);
+    referral.setLegacyId(this.referralId);
     referral.setStartDate(this.startDate);
     referral.setEndDate(this.endDate);
     referral.setCountyName(getCodeDescription(this.county));
@@ -185,7 +186,7 @@ public class EsPersonReferral
     //
     ElasticSearchPersonReporter reporter = new ElasticSearchPersonReporter();
     reporter.setId(this.reporterId);
-    reporter.setLegacyClientId(this.clientId);
+    reporter.setLegacyClientId(this.reporterId);
     reporter.setFirstName(this.reporterFirstName);
     reporter.setLastName(this.reporterLastName);
     referral.setReporter(reporter);
@@ -195,7 +196,7 @@ public class EsPersonReferral
     //
     ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
     assignedWorker.setId(this.workerId);
-    assignedWorker.setLegacyClientId(this.clientId);
+    assignedWorker.setLegacyClientId(this.workerId);
     assignedWorker.setFirstName(this.workerFirstName);
     assignedWorker.setLastName(this.workerLastName);
     referral.setAssignedSocialWorker(assignedWorker);
