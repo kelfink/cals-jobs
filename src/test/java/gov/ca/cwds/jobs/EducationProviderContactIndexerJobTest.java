@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedEducationProviderContactDao;
-import gov.ca.cwds.data.cms.EducationProviderContactDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 
@@ -28,7 +27,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 @SuppressWarnings("javadoc")
 public class EducationProviderContactIndexerJobTest {
   @SuppressWarnings("unused")
-  private static EducationProviderContactDao educationProviderContactDao;
+  private static ReplicatedEducationProviderContactDao educationProviderContactDao;
   private static SessionFactory sessionFactory;
   private Session session;
 
@@ -36,7 +35,7 @@ public class EducationProviderContactIndexerJobTest {
   public static void beforeClass() {
     sessionFactory =
         new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-    educationProviderContactDao = new EducationProviderContactDao(sessionFactory);
+    educationProviderContactDao = new ReplicatedEducationProviderContactDao(sessionFactory);
   }
 
   @AfterClass
@@ -75,15 +74,15 @@ public class EducationProviderContactIndexerJobTest {
 
   @Test
   public void testfindAllNamedQueryExists() throws Exception {
-    Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.EducationProviderContact.findAll");
+    Query query = session.getNamedQuery(
+        "gov.ca.cwds.data.persistence.cms.ReplicatedEducationProviderContact.findAll");
     assertThat(query, is(notNullValue()));
   }
 
   @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
     Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.EducationProviderContact.findAllUpdatedAfter");
+        "gov.ca.cwds.data.persistence.cms.ReplicatedEducationProviderContact.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
 

@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
-import gov.ca.cwds.data.cms.SubstituteCareProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
@@ -27,7 +26,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 @SuppressWarnings("javadoc")
 public class SubstituteCareProviderIndexerJobTest {
   @SuppressWarnings("unused")
-  private static SubstituteCareProviderDao substituteCareProviderDao;
+  private static ReplicatedSubstituteCareProviderDao dao;
   private static SessionFactory sessionFactory;
   private Session session;
 
@@ -35,7 +34,7 @@ public class SubstituteCareProviderIndexerJobTest {
   public static void beforeClass() {
     sessionFactory =
         new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-    substituteCareProviderDao = new SubstituteCareProviderDao(sessionFactory);
+    dao = new ReplicatedSubstituteCareProviderDao(sessionFactory);
   }
 
   @AfterClass

@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
-import gov.ca.cwds.data.cms.CollateralIndividualDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
@@ -27,7 +26,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 @SuppressWarnings("javadoc")
 public class CollateralIndividualIndexerJobTest {
   @SuppressWarnings("unused")
-  private static CollateralIndividualDao collateralIndividualDao;
+  private static ReplicatedCollateralIndividualDao collateralIndividualDao;
   private static SessionFactory sessionFactory;
   private Session session;
 
@@ -35,7 +34,7 @@ public class CollateralIndividualIndexerJobTest {
   public static void beforeClass() {
     sessionFactory =
         new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-    collateralIndividualDao = new CollateralIndividualDao(sessionFactory);
+    collateralIndividualDao = new ReplicatedCollateralIndividualDao(sessionFactory);
   }
 
   @AfterClass
@@ -74,14 +73,14 @@ public class CollateralIndividualIndexerJobTest {
   @Test
   public void testfindAllNamedQueryExists() throws Exception {
     Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.CollateralIndividual.findPartitionedBuckets");
+        "gov.ca.cwds.data.persistence.cms.ReplicatedCollateralIndividual.findPartitionedBuckets");
     assertThat(query, is(notNullValue()));
   }
 
   @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-    Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.cms.CollateralIndividual.findAllUpdatedAfter");
+    Query query = session.getNamedQuery(
+        "gov.ca.cwds.data.persistence.cms.ReplicatedCollateralIndividual.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
 

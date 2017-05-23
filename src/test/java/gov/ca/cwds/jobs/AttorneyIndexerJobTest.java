@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
-import gov.ca.cwds.data.cms.AttorneyDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
@@ -28,7 +27,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 public class AttorneyIndexerJobTest {
 
   @SuppressWarnings("unused")
-  private static AttorneyDao attorneyDao;
+  private static ReplicatedAttorneyDao attorneyDao;
   private static SessionFactory sessionFactory;
   private Session session;
 
@@ -36,7 +35,7 @@ public class AttorneyIndexerJobTest {
   public static void beforeClass() {
     sessionFactory =
         new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-    attorneyDao = new AttorneyDao(sessionFactory);
+    attorneyDao = new ReplicatedAttorneyDao(sessionFactory);
   }
 
   @AfterClass

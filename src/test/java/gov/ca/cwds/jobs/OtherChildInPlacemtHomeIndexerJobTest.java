@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherChildInPlacemtHomeDao;
-import gov.ca.cwds.data.cms.OtherChildInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
@@ -27,7 +26,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 @SuppressWarnings("javadoc")
 public class OtherChildInPlacemtHomeIndexerJobTest {
   @SuppressWarnings("unused")
-  private static OtherChildInPlacemtHomeDao otherChildInPlacemtHomtDao;
+  private static ReplicatedOtherChildInPlacemtHomeDao dao;
   private static SessionFactory sessionFactory;
   private Session session;
 
@@ -35,7 +34,7 @@ public class OtherChildInPlacemtHomeIndexerJobTest {
   public static void beforeClass() {
     sessionFactory =
         new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-    otherChildInPlacemtHomtDao = new OtherChildInPlacemtHomeDao(sessionFactory);
+    dao = new ReplicatedOtherChildInPlacemtHomeDao(sessionFactory);
   }
 
   @AfterClass

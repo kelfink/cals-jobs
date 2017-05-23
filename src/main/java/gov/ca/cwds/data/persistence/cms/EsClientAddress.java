@@ -17,8 +17,6 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
@@ -43,6 +41,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @Entity
 @Table(name = "ES_CLIENT_ADDRESS")
 @NamedNativeQueries({
+    // #145240149: find ALL client/address recs affected by changes.
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfter",
         query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
             + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}ES_CLIENT_ADDRESS x1 "
@@ -51,7 +50,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
         resultClass = EsClientAddress.class, readOnly = true)})
 public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
 
-  private static final Logger LOGGER = LogManager.getLogger(EsClientAddress.class);
+  // private static final Logger LOGGER = LogManager.getLogger(EsClientAddress.class);
 
   /**
    * Default.

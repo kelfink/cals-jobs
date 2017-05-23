@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
-import gov.ca.cwds.data.cms.OtherClientNameDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
@@ -27,7 +26,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 @SuppressWarnings("javadoc")
 public class OtherClientNameIndexerJobTest {
   @SuppressWarnings("unused")
-  private static OtherClientNameDao otherClientNameDao;
+  private static ReplicatedOtherClientNameDao dao;
   private static SessionFactory sessionFactory;
   private Session session;
 
@@ -35,7 +34,7 @@ public class OtherClientNameIndexerJobTest {
   public static void beforeClass() {
     sessionFactory =
         new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-    otherClientNameDao = new OtherClientNameDao(sessionFactory);
+    dao = new ReplicatedOtherClientNameDao(sessionFactory);
   }
 
   @AfterClass
@@ -73,14 +72,15 @@ public class OtherClientNameIndexerJobTest {
 
   @Test
   public void testfindAllNamedQueryExists() throws Exception {
-    Query query = session.getNamedQuery("gov.ca.cwds.data.persistence.cms.OtherClientName.findAll");
+    Query query =
+        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ReplicatedOtherClientName.findAll");
     assertThat(query, is(notNullValue()));
   }
 
   @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-    Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.cms.OtherClientName.findAllUpdatedAfter");
+    Query query = session.getNamedQuery(
+        "gov.ca.cwds.data.persistence.cms.ReplicatedOtherClientName.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
 

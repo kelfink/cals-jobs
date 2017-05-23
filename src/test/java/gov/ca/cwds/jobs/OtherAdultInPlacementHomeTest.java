@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
-import gov.ca.cwds.data.cms.OtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
@@ -28,7 +27,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 public class OtherAdultInPlacementHomeTest {
 
   @SuppressWarnings("unused")
-  private static OtherAdultInPlacemtHomeDao otherAdultInPlacementHomeDao;
+  private static ReplicatedOtherAdultInPlacemtHomeDao dao;
   private static SessionFactory sessionFactory;
   private Session session;
 
@@ -36,7 +35,7 @@ public class OtherAdultInPlacementHomeTest {
   public static void beforeClass() {
     sessionFactory =
         new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-    otherAdultInPlacementHomeDao = new OtherAdultInPlacemtHomeDao(sessionFactory);
+    dao = new ReplicatedOtherAdultInPlacemtHomeDao(sessionFactory);
   }
 
   @AfterClass
@@ -75,15 +74,15 @@ public class OtherAdultInPlacementHomeTest {
 
   @Test
   public void testfindAllNamedQueryExists() throws Exception {
-    Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.OtherAdultInPlacemtHome.findAll");
+    Query query = session.getNamedQuery(
+        "gov.ca.cwds.data.persistence.cms.ReplicatedOtherAdultInPlacemtHome.findAll");
     assertThat(query, is(notNullValue()));
   }
 
   @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
     Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.OtherAdultInPlacemtHome.findAllUpdatedAfter");
+        "gov.ca.cwds.data.persistence.cms.ReplicatedOtherAdultInPlacemtHome.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
 

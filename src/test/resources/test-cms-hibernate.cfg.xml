@@ -27,28 +27,34 @@
 		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress" />
 		
-		<mapping class="gov.ca.cwds.data.persistence.cms.Address" />
+<!-- 
 		<mapping class="gov.ca.cwds.data.persistence.cms.Allegation" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.Client" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.CountyOwnership" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.ClientAddress" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.StaffPerson" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.ReferralClient" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.Referral" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.Reporter" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.OtherClientName" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.ServiceProvider" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.OtherAdultInPlacemtHome" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.SubstituteCareProvider" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.OtherChildInPlacemtHome" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.CollateralIndividual" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.ClientCollateral" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.EducationProviderContact" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.CountyOwnership" />
+		
 		<mapping class="gov.ca.cwds.data.persistence.cms.CrossReport" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.CmsDocument" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.CmsDocReferralClient" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.CmsDocumentBlobSegment"/>
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedReferralClient" />
+
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedPersonReferrals" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientCollateral" />
+ -->
+ 		
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress" />
+		
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedReporter" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedServiceProvider" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherChildInPlacemtHome" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedEducationProviderContact" />
  		
 	</session-factory>
 </hibernate-configuration>
