@@ -72,24 +72,10 @@ public class OtherChildInPlacemtHomeIndexerJobTest {
   }
 
   @Test
-  public void testfindAllNamedQueryExists() throws Exception {
-    Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.OtherChildInPlacemtHome.findAll");
-    assertThat(query, is(notNullValue()));
-  }
-
-  @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
     Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.OtherChildInPlacemtHome.findAllUpdatedAfter");
+        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherChildInPlacemtHome.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
-
-  // @Test
-  // public void testFindAllByBucketNamedQueryExists() throws Exception {
-  // Query query = session
-  // .getNamedQuery("gov.ca.cwds.data.persistence.cms.OtherChildInPlacemtHome.findAllByBucket");
-  // assertThat(query, is(notNullValue()));
-  // }
 
 }

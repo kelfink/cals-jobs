@@ -73,23 +73,10 @@ public class ServiceProviderIndexerJobTest {
 
   @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-    Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.cms.ServiceProvider.findAllUpdatedAfter");
+    Query query = session.getNamedQuery(
+        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedServiceProvider.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
-
-  @Test
-  public void testFindAllNamedQueryExist() throws Exception {
-    Query query = session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ServiceProvider.findAll");
-    assertThat(query, is(notNullValue()));
-  }
-
-  // @Test
-  // public void testFindAllByBucketNamedQueryExist() throws Exception {
-  // Query query =
-  // session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ServiceProvider.findAllByBucket");
-  // assertThat(query, is(notNullValue()));
-  // }
 
 }
 

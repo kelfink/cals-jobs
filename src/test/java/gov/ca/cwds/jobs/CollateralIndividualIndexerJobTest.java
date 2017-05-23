@@ -73,22 +73,15 @@ public class CollateralIndividualIndexerJobTest {
   @Test
   public void testfindAllNamedQueryExists() throws Exception {
     Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.ReplicatedCollateralIndividual.findPartitionedBuckets");
+        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findPartitionedBuckets");
     assertThat(query, is(notNullValue()));
   }
 
   @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
     Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.ReplicatedCollateralIndividual.findAllUpdatedAfter");
+        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
-
-  // @Test
-  // public void testFindAllByBucketNamedQueryExists() throws Exception {
-  // Query query = session
-  // .getNamedQuery("gov.ca.cwds.data.persistence.cms.CollateralIndividual.findAllByBucket");
-  // assertThat(query, is(notNullValue()));
-  // }
 
 }

@@ -71,24 +71,10 @@ public class OtherClientNameIndexerJobTest {
   }
 
   @Test
-  public void testfindAllNamedQueryExists() throws Exception {
-    Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ReplicatedOtherClientName.findAll");
-    assertThat(query, is(notNullValue()));
-  }
-
-  @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
     Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.ReplicatedOtherClientName.findAllUpdatedAfter");
+        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
-
-  // @Test
-  // public void testFindAllByBucketExists() throws Exception {
-  // Query query =
-  // session.getNamedQuery("gov.ca.cwds.data.persistence.cms.OtherClientName.findAllByBucket");
-  // assertThat(query, is(notNullValue()));
-  // }
 
 }

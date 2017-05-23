@@ -94,12 +94,4 @@ public class EsIntakeScreeningDaoIT
     assertThat(query.list().size(), greaterThan(5));
   }
 
-  @SuppressWarnings("javadoc")
-  @Test
-  public void testfindAll() throws Exception {
-    Query query =
-        session.getNamedQuery("gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAll");
-    assertThat(query.list().size(), greaterThan(5));
-  }
-
 }

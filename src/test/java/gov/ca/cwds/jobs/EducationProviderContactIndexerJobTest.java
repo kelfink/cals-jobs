@@ -73,24 +73,10 @@ public class EducationProviderContactIndexerJobTest {
   }
 
   @Test
-  public void testfindAllNamedQueryExists() throws Exception {
-    Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.ReplicatedEducationProviderContact.findAll");
-    assertThat(query, is(notNullValue()));
-  }
-
-  @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
     Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.ReplicatedEducationProviderContact.findAllUpdatedAfter");
+        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedEducationProviderContact.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
 
-  // @Test
-  // public void testFindAllByBucketNamedQueryExists() throws Exception {
-  // Query query = session
-  // .getNamedQuery("gov.ca.cwds.data.persistence.cms.EducationProviderContact.findAllByBucket");
-  // assertThat(query, is(notNullValue()));
-  // }
-  //
 }

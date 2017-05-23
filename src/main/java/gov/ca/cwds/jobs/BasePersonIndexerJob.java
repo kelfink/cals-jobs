@@ -47,6 +47,7 @@ import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.dao.cms.BatchBucket;
+import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
@@ -227,7 +228,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param jobDao Person DAO, such as {@link ClientDao}
+   * @param jobDao Person DAO, such as {@link ReplicatedClientDao}
    * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
