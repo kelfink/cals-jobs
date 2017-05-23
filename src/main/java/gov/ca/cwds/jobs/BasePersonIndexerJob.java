@@ -391,7 +391,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     int exitCode = 0;
     try (final T job = newJob(klass, args)) { // Close resources automatically.
       job.run();
-    } catch (Exception e) {
+    } catch (Throwable e) { // NOSONAR
+      // Intentionally catch a Throwable, not an Exception.
+      // Close resources forcibly, if necessary, by system exit.
       exitCode = 1;
       LOGGER.error("JOB FAILED: {}", e.getMessage(), e);
       throw new JobsException("JOB FAILED! " + e.getMessage(), e);
