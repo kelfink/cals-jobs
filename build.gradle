@@ -37,9 +37,8 @@ repositories {
 }
 
 dependencies {
+    // ES 5.x:
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
-    
-    // ES 5.x only:
     compile group: 'org.elasticsearch.client', name: 'transport', version: elasticsearchVersion
 
 	compile group: 'javax.validation', name: 'validation-api', version: '1.1.0.Final'
@@ -54,7 +53,7 @@ dependencies {
 	// compile group: "gov.ca.cwds.api", name: "api", version: "0.22.928"
 
 	// Exclude transitive dependencies.
-	compile ('gov.ca.cwds.api:api-core:0.22.243') {
+	compile ('gov.ca.cwds.api:api-core:0.22.244') {
 	    exclude group: 'org.glassfish.jersey.core'
 	}
 	
