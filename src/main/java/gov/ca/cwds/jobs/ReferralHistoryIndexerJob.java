@@ -107,16 +107,15 @@ public class ReferralHistoryIndexerJob
         buf.append(esPersonReferrals.stream().map(this::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
-        LOGGER.error("ERROR SERIALIZING REFERRALS", e);
+        LOGGER.fatal("ERROR SERIALIZING REFERRALS", e);
         throw new JobsException(e);
       }
     }
 
     buf.append("]}");
 
-    // esp.clearOptionalCollections();
-    final String insertJson = mapper.writeValueAsString(esp);
     final String updateJson = buf.toString();
+    final String insertJson = mapper.writeValueAsString(esp);
     LOGGER.info("insertJson: {}", insertJson);
     LOGGER.info("updateJson: {}", updateJson);
 
@@ -172,8 +171,8 @@ public class ReferralHistoryIndexerJob
     LOGGER.info("Run ReferralHistoryIndexerJob");
     try {
       runJob(ReferralHistoryIndexerJob.class, args);
-    } catch (JobsException e) {
-      LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
+    } catch (Exception e) {
+      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
       throw e;
     }
   }

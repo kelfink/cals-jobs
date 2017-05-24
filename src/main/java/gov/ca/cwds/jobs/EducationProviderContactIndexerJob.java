@@ -59,8 +59,8 @@ public class EducationProviderContactIndexerJob extends
     LOGGER.info("Run Education Provider Contact indexer job");
     try {
       runJob(EducationProviderContactIndexerJob.class, args);
-    } catch (JobsException e) {
-      LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
+    } catch (Exception e) {
+      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
       throw e;
     }
   }

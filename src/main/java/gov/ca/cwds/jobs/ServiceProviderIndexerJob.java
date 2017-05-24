@@ -114,8 +114,8 @@ public class ServiceProviderIndexerJob
     LOGGER.info("Run Service Provider indexer job");
     try {
       runJob(ServiceProviderIndexerJob.class, args);
-    } catch (JobsException e) {
-      LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
+    } catch (Exception e) {
+      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
       throw e;
     }
   }

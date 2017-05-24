@@ -38,17 +38,26 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
  */
 @Entity
 @Table(name = "VW_SCREENING_HISTORY")
-@NamedNativeQueries({@NamedNativeQuery(
-    name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter",
-    query = "SELECT p.\"id\" AS ns_partc_id, p.legacy_id AS cms_legacy_id, vw.* "
-        + "FROM VW_SCREENING_HISTORY vw "
-        + "JOIN PARTICIPANTS p ON p.screening_id = vw.screening_id "
-        + "WHERE vw.participant_id IN ( SELECT DISTINCT vw1.participant_id "
-        + " FROM VW_SCREENING_HISTORY vw1 WHERE vw1.last_chg > CAST(:after AS TIMESTAMP) "
-        + ") AND p.legacy_id IS NOT NULL "
-        + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
-        + "FOR READ ONLY",
-    resultClass = EsIntakeScreening.class, readOnly = true)})
+@NamedNativeQueries({
+    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAll",
+        query = "SELECT p.\"id\" AS ns_partc_id, p.legacy_id AS cms_legacy_id, vw.* "
+            + "FROM {h-schema}VW_SCREENING_HISTORY vw "
+            + "JOIN participants p ON p.screening_id = vw.screening_id "
+            + "WHERE p.legacy_id IS NOT NULL "
+            + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
+            + "FOR READ ONLY",
+        resultClass = EsIntakeScreening.class, readOnly = true),
+    @NamedNativeQuery(
+        name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter",
+        query = "SELECT p.\"id\" AS ns_partc_id, p.legacy_id AS cms_legacy_id, vw.* "
+            + "FROM VW_SCREENING_HISTORY vw "
+            + "JOIN PARTICIPANTS p ON p.screening_id = vw.screening_id "
+            + "WHERE vw.participant_id IN ( SELECT DISTINCT vw1.participant_id "
+            + " FROM VW_SCREENING_HISTORY vw1 WHERE vw1.last_chg > CAST(:after AS TIMESTAMP) "
+            + ") AND p.legacy_id IS NOT NULL "
+            + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
+            + "FOR READ ONLY",
+        resultClass = EsIntakeScreening.class, readOnly = true)})
 public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<IntakeParticipant> {
 
   private static final Logger LOGGER = LogManager.getLogger(EsIntakeScreening.class);
@@ -315,7 +324,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       map.put(thisPartcId, thisPartc);
     }
 
-    LOGGER.debug("reduce: this partc id: {}, screening id: {}", thisPartcId, screeningId);
+    // LOGGER.debug("reduce: this partc id: {}, screening id: {}", thisPartcId, screeningId);
 
     try {
       IntakeScreening s;

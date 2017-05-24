@@ -32,9 +32,12 @@ import gov.ca.cwds.jobs.util.JobWriter;
 import gov.ca.cwds.jobs.util.elastic.ElasticJobWriter;
 import gov.ca.cwds.jobs.util.jdbc.JdbcJobReader;
 import gov.ca.cwds.jobs.util.jdbc.RowMapper;
-import gov.ca.cwds.rest.api.ApiException;
 
 /**
+ * 
+ * <p>
+ * Command line arguments:
+ * </p>
  * 
  * <pre>
  * {@code run script: $java -cp jobs.jar gov.ca.cwds.jobs.FacilityIndexerJob path/to/config/file.yaml}
@@ -70,7 +73,7 @@ public class FacilityIndexerJob extends AbstractModule {
       Job job = injector.getInstance(Key.get(Job.class, Names.named("facility-job")));
       job.run();
     } catch (Exception e) {
-      LOGGER.error("ERROR: ", e.getMessage(), e);
+      LOGGER.fatal("ERROR: ", e.getMessage(), e);
     }
   }
 
@@ -98,7 +101,7 @@ public class FacilityIndexerJob extends AbstractModule {
         // Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {
         LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
-        throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
+        throw new JobsException("Error initializing Elasticsearch client: " + e.getMessage(), e);
       }
     }
     return client;
@@ -120,7 +123,7 @@ public class FacilityIndexerJob extends AbstractModule {
             new ObjectMapper(new YAMLFactory()).readValue(config, JobConfiguration.class);
       } catch (Exception e) {
         LOGGER.error("Error reading job configuration: {}", e.getMessage(), e);
-        throw new ApiException("Error reading job configuration: " + e.getMessage(), e);
+        throw new JobsException("Error reading job configuration: " + e.getMessage(), e);
       }
     }
     return configuration;

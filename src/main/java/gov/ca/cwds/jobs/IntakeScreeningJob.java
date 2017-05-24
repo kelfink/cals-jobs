@@ -22,6 +22,7 @@ import gov.ca.cwds.data.persistence.ns.IntakeParticipant;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+import gov.ca.cwds.jobs.transform.EntityNormalizer;
 
 // For Elasticsearch jsonBuilder():
 // import static org.elasticsearch.common.xcontent.XContentFactory.*;
@@ -45,19 +46,19 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    * Construct batch job instance with all required dependencies.
    * 
    * @param normalizedDao Intake Screening DAO
-   * @param denormalizedDao view Dao
-   * @param elasticsearchDao ElasticSearch DAO
+   * @param viewDao view Dao
+   * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
   public IntakeScreeningJob(final IntakeParticipantDao normalizedDao,
-      final EsIntakeScreeningDao denormalizedDao, final ElasticsearchDao elasticsearchDao,
+      final EsIntakeScreeningDao viewDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @NsSessionFactory SessionFactory sessionFactory) {
-    super(normalizedDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    this.viewDao = denormalizedDao;
+    super(normalizedDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    this.viewDao = viewDao;
   }
 
   @Override

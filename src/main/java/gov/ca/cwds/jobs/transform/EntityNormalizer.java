@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.transform;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,6 +9,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
 /**
+ * Transform a List of denormalized objects from a view and transform them into a normalized object.
  * Normalize ("reduce") denormalized type M to normalized type T.
  * 
  * @author CWDS API Team
@@ -20,7 +21,14 @@ public class EntityNormalizer {
   }
 
   /**
-   * Take a List of denormalized objects from a view and transform them into a normalized object.
+   * Transform a List of denormalized objects from a view and transform them into a normalized
+   * object. Normalize ("reduce") denormalized type M to normalized type T.
+   * 
+   * <p>
+   * The "transform" step usually runs in a single thread. Therefore, most of the time, one can
+   * safely reuse the same map object. Alternatively, a concurrent map implementation would likewise
+   * alleviate concerns of thread safety.
+   * </p>
    * 
    * @param denormalized denormalized records
    * @return List of normalized objects
@@ -29,10 +37,12 @@ public class EntityNormalizer {
    */
   public static <T extends PersistentObject, M extends ApiGroupNormalizer<T>> List<T> reduceList(
       List<M> denormalized) {
-    // The "transform" step usually runs in the same thread.
-    // Therefore, you *could* safely reuse the same map object.
     final int len = (int) (denormalized.size() * 1.25);
-    Map<Object, T> map = new LinkedHashMap<>(len);
+    final Map<Object, T> map = new LinkedHashMap<>(len);
+
+    // In order to stream to map(), method reduce() must return the normalized object.
+    // denormalized.stream().map(r -> r.reduce(map));
+
     for (ApiGroupNormalizer<T> reducer : denormalized) {
       reducer.reduce(map);
     }

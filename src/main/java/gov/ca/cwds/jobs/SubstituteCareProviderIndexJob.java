@@ -27,7 +27,7 @@ public class SubstituteCareProviderIndexJob extends
    * Construct batch job instance with all required dependencies.
    * 
    * @param substituteCareProviderDao Client DAO
-   * @param elasticsearchDao ElasticSearch DAO
+   * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
@@ -35,10 +35,9 @@ public class SubstituteCareProviderIndexJob extends
   @Inject
   public SubstituteCareProviderIndexJob(
       final ReplicatedSubstituteCareProviderDao substituteCareProviderDao,
-      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
+      final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(substituteCareProviderDao, elasticsearchDao, lastJobRunTimeFilename, mapper,
-        sessionFactory);
+    super(substituteCareProviderDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   /**
@@ -50,8 +49,8 @@ public class SubstituteCareProviderIndexJob extends
     LOGGER.info("Run Substitute Care Provider indexer job");
     try {
       runJob(SubstituteCareProviderIndexJob.class, args);
-    } catch (JobsException e) {
-      LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
+    } catch (Exception e) {
+      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
       throw e;
     }
   }

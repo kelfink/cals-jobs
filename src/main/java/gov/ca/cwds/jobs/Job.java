@@ -12,4 +12,5 @@ public interface Job {
    * Run the job.
    */
   public void run();
+
 }

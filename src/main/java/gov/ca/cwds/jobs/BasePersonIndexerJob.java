@@ -74,6 +74,7 @@ import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+import gov.ca.cwds.jobs.transform.EntityNormalizer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 
@@ -126,7 +127,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int POLL_MILLIS = 3000;
 
   /**
-   * Obsolete. Doesn't optimize on DB2 z/OS.
+   * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it
+   * runs just fine.
    * 
    * @see #doInitialLoadJdbc()
    */
@@ -224,6 +226,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Completion flag for <strong>Load</strong> method {@link #threadLoad()}.
    */
   protected boolean doneLoad = false;
+
+  // ======================
+  // CONSTRUCTOR:
+  // ======================
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -343,8 +349,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         injector = Guice
             .createInjector(new JobsGuiceInjector(new File(opts.esConfigLoc), opts.lastRunLoc));
       } catch (CreationException e) {
-        LOGGER.error("Unable to create dependencies: {}", e.getMessage(), e);
-        throw new JobsException("Unable to create dependencies: " + e.getMessage(), e);
+        final String msg = MessageFormat.format("Unable to create dependencies {}", e.getMessage());
+        LOGGER.fatal(msg, e);
+        throw new JobsException(msg, e);
       }
     }
 
@@ -378,7 +385,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Batch job entry point.
    * 
    * <p>
-   * This method automatically closes the Hibernate session factory and ElasticSearch DAO.
+   * This method automatically closes the Hibernate session factory and ElasticSearch DAO and EXITs
+   * the JVM.
    * </p>
    * 
    * @param klass batch job class

@@ -109,7 +109,7 @@ public class EsRelationship
    * @return a populated EsRelationship
    * @throws SQLException if unable to convert types or stream breaks, etc.
    */
-  public static EsRelationship produceFromResultSet(ResultSet rs) throws SQLException {
+  public static EsRelationship mapRow(ResultSet rs) throws SQLException {
     EsRelationship ret = new EsRelationship();
 
     ret.setThisLegacyTable(rs.getString("THIS_LEGACY_TABLE"));
@@ -176,7 +176,7 @@ public class EsRelationship
         rel.setIndexedPersonRelationship(primaryRel);
         rel.setRelatedPersonRelationship(secondaryRel);
         rel.setRelationshipContext(relContext);
-        LOGGER.debug("primaryRel={}, secondaryRel={}, ", primaryRel);
+        // LOGGER.debug("primaryRel={}, secondaryRel={}, ", primaryRel);
 
       } else {
         LOGGER.warn("NO MATCH!! rel={}", wholeRel);

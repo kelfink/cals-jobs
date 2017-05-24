@@ -96,7 +96,7 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
       try {
         destroy();
       } catch (Exception e) {
-        throw new JobsException(e);
+        throw new JobsException(e); // NOSONAR
       }
     }
   }

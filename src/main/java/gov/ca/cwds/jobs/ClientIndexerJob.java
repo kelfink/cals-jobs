@@ -92,7 +92,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     try {
       runJob(ClientIndexerJob.class, args);
     } catch (Exception e) {
-      LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
+      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
       throw e;
     }
   }

@@ -3,9 +3,7 @@ package gov.ca.cwds.jobs;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +25,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+import gov.ca.cwds.jobs.transform.EntityNormalizer;
 
 /**
  * Job to load various relationships from CMS into ElasticSearch.
@@ -57,7 +56,7 @@ public class RelationshipIndexerJob
 
   @Override
   public EsRelationship extractFromResultSet(ResultSet rs) throws SQLException {
-    return EsRelationship.produceFromResultSet(rs);
+    return EsRelationship.mapRow(rs);
   }
 
   @Override
@@ -97,7 +96,7 @@ public class RelationshipIndexerJob
 
     final String insertJson = mapper.writeValueAsString(esp);
     final String updateJson = buf.toString();
-    LOGGER.info("updateJson: {}", updateJson);
+    LOGGER.debug("updateJson: {}", updateJson);
 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
@@ -113,14 +112,7 @@ public class RelationshipIndexerJob
 
   @Override
   protected List<ReplicatedRelationships> reduce(List<EsRelationship> recs) {
-    final int len = (int) (recs.size() * 1.25);
-    Map<Object, ReplicatedRelationships> map = new LinkedHashMap<>(len);
-    for (PersistentObject rec : recs) {
-      ApiGroupNormalizer<ReplicatedRelationships> reducer = (EsRelationship) rec;
-      reducer.reduce(map);
-    }
-
-    return map.values().stream().collect(Collectors.toList());
+    return EntityNormalizer.<ReplicatedRelationships, EsRelationship>reduceList(recs);
   }
 
   /**
@@ -132,8 +124,8 @@ public class RelationshipIndexerJob
     LOGGER.info("Run Relationships indexer job");
     try {
       runJob(RelationshipIndexerJob.class, args);
-    } catch (JobsException e) {
-      LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
+    } catch (Exception e) {
+      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
       throw e;
     }
   }

@@ -23,6 +23,7 @@ import gov.ca.cwds.jobs.util.JobWriter;
  * @param <T> persistence class type
  */
 public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T> {
+
   private static final Logger LOGGER = LogManager.getLogger(ElasticJobWriter.class);
   private Elasticsearch5xDao elasticsearchDao;
   private BulkProcessor bulkProcessor;
