@@ -56,8 +56,8 @@ public final class JobLogUtils {
    * @param args error message, excluding throwable message
    * @throws JobsException runtime exception
    */
-  public static void throwFatalError(final Logger log, Throwable e, String pattern, Object... args)
-      throws JobsException {
+  public static void throwFatalError(final Logger log, Throwable e, String pattern,
+      Object... args) {
     final String msg = MessageFormat.format(pattern, args);
     log.fatal(msg, e);
     throw new JobsException(msg, e);
@@ -71,8 +71,7 @@ public final class JobLogUtils {
    * @param message error message, excluding throwable message
    * @throws JobsException runtime exception
    */
-  public static void throwFatalError(final Logger log, Throwable e, String message)
-      throws JobsException {
+  public static void throwFatalError(final Logger log, Throwable e, String message) {
     final String msg = MessageFormat.format("ERROR: {}: MSG: {}", message, e.getMessage()); // NOSONAR
     log.fatal(msg, e);
     throw new JobsException(msg, e);

@@ -11,6 +11,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -623,11 +624,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @see #prepareUpsertRequest(ElasticSearchPerson, PersistentObject)
    */
   protected void prepareDocument(BulkProcessor bp, T t) throws IOException {
-    final ElasticSearchPerson[] docs = buildElasticSearchPersons(t);
-    for (ElasticSearchPerson esp : docs) {
-      bp.add(prepareUpsertRequest(esp, t));
+    Arrays.stream(buildElasticSearchPersons(t)).map(esp -> {
       recsPrepared.getAndIncrement();
-    }
+      return prepareUpsertRequestNoChecked(esp, t);
+    }).forEach(bp::add);
   }
 
   /**
@@ -712,6 +712,24 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
 
     return Pair.of(updateJson, insertJson);
+  }
+
+  /**
+   * Prepare an upsert request without a checked exception. Throws runtime {@link JobsException} on
+   * error. Easier to use in lambda and stream calls.
+   * 
+   * @param esp person document object
+   * @param t normalized entity
+   * @return prepared upsert request
+   */
+  protected UpdateRequest prepareUpsertRequestNoChecked(ElasticSearchPerson esp, T t) {
+    try {
+      return prepareUpsertRequest(esp, t);
+    } catch (Exception e) {
+      JobLogUtils.throwFatalError(LOGGER, e, "ERROR BUILDING UPSERT: PK: {}", t.getPrimaryKey());
+    }
+
+    return null;
   }
 
   /**
