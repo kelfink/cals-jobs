@@ -10,6 +10,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -166,45 +167,16 @@ public class JobsGuiceInjector extends AbstractModule {
    * 
    * @return initialized singleton ElasticSearch client
    */
-  // @Provides
-  // @Inject
-  // public Client elasticsearchClient() {
-  // TransportClient client = null;
-  // if (esConfig != null) {
-  // LOGGER.warn("Create NEW ES client");
-  // try {
-  // final ElasticsearchConfiguration config = elasticSearchConfig();
-  // Settings settings =
-  // Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build();
-  //
-  // // DRS: Incompatible with ES 2.3.5. Cannot connect.
-  // // client = new PreBuiltTransportClient(settings);
-  // // client.addTransportAddress(
-  // // new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
-  // // Integer.parseInt(config.getElasticsearchPort())));
-  // } catch (Exception e) {
-  // LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
-  // throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
-  // }
-  // }
-  // return client;
-  // }
-
-  /**
-   * Instantiate the singleton ElasticSearch client on demand.
-   * 
-   * @return initialized singleton ElasticSearch client
-   */
   @Provides
   public Client elasticsearchClient() {
-    Client client = null;
+    TransportClient client = null;
     if (esConfig != null) {
-      LOGGER.info("Create NEW ES client");
+      LOGGER.warn("Create NEW ES client");
       try {
         final ElasticsearchConfiguration config = elasticSearchConfig();
-        Settings settings = Settings.settingsBuilder()
-            .put("cluster.name", config.getElasticsearchCluster()).build();
-        client = TransportClient.builder().settings(settings).build().addTransportAddress(
+        client = new PreBuiltTransportClient(
+            Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build());
+        client.addTransportAddress(
             new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
                 Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {
@@ -214,6 +186,32 @@ public class JobsGuiceInjector extends AbstractModule {
     }
     return client;
   }
+
+  /**
+   * Instantiate the singleton ElasticSearch 2.x client on demand.
+   * 
+   * @return initialized singleton ElasticSearch client
+   */
+  // @Singleton
+  // @Provides
+  // public Client elasticsearchClient() {
+  // Client client = null;
+  // if (esConfig != null) {
+  // LOGGER.info("Create NEW ES client");
+  // try {
+  // final ElasticsearchConfiguration config = elasticSearchConfig();
+  // Settings settings = Settings.settingsBuilder()
+  // .put("cluster.name", config.getElasticsearchCluster()).build();
+  // client = TransportClient.builder().settings(settings).build().addTransportAddress(
+  // new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
+  // Integer.parseInt(config.getElasticsearchPort())));
+  // } catch (Exception e) {
+  // LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
+  // throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
+  // }
+  // }
+  // return client;
+  // }
 
   /**
    * Read Elasticsearch configuration on demand.

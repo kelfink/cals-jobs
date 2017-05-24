@@ -30,17 +30,22 @@ public class ServiceProviderIndexerJob
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param mainDao ServiceProvider DAO
-   * @param elasticsearchDao ElasticSearch DAO
+   * @param dao ServiceProvider DAO
+   * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public ServiceProviderIndexerJob(final ReplicatedServiceProviderDao mainDao,
-      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
+  public ServiceProviderIndexerJob(final ReplicatedServiceProviderDao dao,
+      final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  }
+
+  @Override
+  protected String getLegacySourceTable() {
+    return "SVC_PVRT";
   }
 
   @Override

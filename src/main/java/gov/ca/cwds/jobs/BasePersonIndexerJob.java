@@ -408,6 +408,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } finally {
       // WARNING: kills the JVM in testing but may be needed to shutdown resources.
       if (!isTestMode()) {
+        // Shutdown all remaining resources, even those not attached to this job.
         Runtime.getRuntime().exit(exitCode); // NOSONAR
       }
     }
@@ -1004,7 +1005,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       LOGGER.info("Flush ES bulk processor ...");
       bp.flush();
+
       Thread.sleep(SLEEP_MILLIS);
+
       LOGGER.info("Flush ES bulk processor again ...");
       bp.flush();
 
@@ -1036,7 +1039,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   // =================
 
   /**
-   * ENTRY POINT FOR LAST RUN.
+   * <strong>ENTRY POINT FOR LAST RUN.</strong>
    *
    * <p>
    * Fetch all records for the next batch run, either by bucket or last successful run date. Pulls
@@ -1398,7 +1401,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       Thread.sleep(SLEEP_MILLIS); // NOSONAR
 
       // Shutdown all remaining resources, even those not attached to this job.
-      Runtime.getRuntime().exit(0); // NOSONAR
+      // Runtime.getRuntime().exit(0); // NOSONAR
 
     } catch (InterruptedException e) {
       fatalError = true;

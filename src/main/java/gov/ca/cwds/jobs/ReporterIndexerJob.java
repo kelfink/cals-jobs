@@ -26,22 +26,27 @@ public class ReporterIndexerJob
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param reporterDao Client DAO
-   * @param elasticsearchDao ElasticSearch DAO
+   * @param dao Client DAO
+   * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public ReporterIndexerJob(final ReplicatedReporterDao reporterDao,
-      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
+  public ReporterIndexerJob(final ReplicatedReporterDao dao,
+      final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(reporterDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   @Override
   protected String getIdColumn() {
     return "FKREFERL_T";
+  }
+
+  @Override
+  protected String getLegacySourceTable() {
+    return "REPTR_T";
   }
 
   // @Override
