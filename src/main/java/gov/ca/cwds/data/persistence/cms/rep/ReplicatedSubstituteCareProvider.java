@@ -124,4 +124,13 @@ public class ReplicatedSubstituteCareProvider extends BaseSubstituteCareProvider
     return this.getId();
   }
 
+  // =======================
+  // ApiLegacyAware:
+  // =======================
+
+  @Override
+  public String getLegacyId() {
+    return getId();
+  }
+
 }

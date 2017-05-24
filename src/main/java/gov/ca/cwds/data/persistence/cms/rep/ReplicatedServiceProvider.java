@@ -118,4 +118,13 @@ public class ReplicatedServiceProvider extends BaseServiceProvider
     return this.getId();
   }
 
+  // =======================
+  // ApiLegacyAware:
+  // =======================
+
+  @Override
+  public String getLegacyId() {
+    return getId();
+  }
+
 }

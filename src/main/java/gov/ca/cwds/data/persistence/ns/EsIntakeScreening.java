@@ -63,7 +63,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   private static final Logger LOGGER = LogManager.getLogger(EsIntakeScreening.class);
 
   /**
-   * Default.
+   * Default serialization.
    */
   private static final long serialVersionUID = 1L;
 

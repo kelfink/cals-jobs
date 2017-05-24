@@ -49,7 +49,7 @@ public class EsRelationship
     implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationships> {
 
   /**
-   * Default.
+   * Default serialization.
    */
   private static final long serialVersionUID = 1L;
 

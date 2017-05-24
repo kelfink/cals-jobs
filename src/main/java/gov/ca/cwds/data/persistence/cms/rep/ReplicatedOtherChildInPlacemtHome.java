@@ -114,4 +114,13 @@ public class ReplicatedOtherChildInPlacemtHome extends BaseOtherChildInPlacemtHo
     return this.getId();
   }
 
+  // =======================
+  // ApiLegacyAware:
+  // =======================
+
+  @Override
+  public String getLegacyId() {
+    return getId();
+  }
+
 }

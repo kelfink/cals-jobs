@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs;
 
+import static gov.ca.cwds.data.persistence.cms.CmsPersistentObject.CMS_ID_LEN;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -75,11 +77,10 @@ import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.transform.EntityNormalizer;
+import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
-
 // import static org.elasticsearch.common.xcontent.XContentFactory.*;
-
 
 /**
  * Base person batch job to load clients from CMS into ElasticSearch.
@@ -120,7 +121,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int DEFAULT_BATCH_WAIT = 25;
   private static final int DEFAULT_BUCKETS = 1;
 
-  private static final int LOG_EVERY = 5000;
   private static final int ES_BULK_SIZE = 2000;
 
   private static final int SLEEP_MILLIS = 2500;
@@ -292,16 +292,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Log every {@link #LOG_EVERY} records.
+   * Log every N records.
    * 
    * @param cntr record count
    * @param action action message (extract, transform, load, etc)
    * @param args variable message arguments
+   * @see JobLogUtils
    */
   protected void logEvery(int cntr, String action, String... args) {
-    if (cntr > 0 && (cntr % LOG_EVERY) == 0) {
-      LOGGER.info("{} {} {}", action, cntr, args);
-    }
+    JobLogUtils.logEvery(LOGGER, cntr, action, args);
   }
 
   /**
@@ -741,7 +740,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     if (t instanceof ApiLegacyAware) {
       ApiLegacyAware l = (ApiLegacyAware) t;
       final boolean hasLegacyId =
-          StringUtils.isNotBlank(l.getLegacyId()) && l.getLegacyId().trim().length() == 10;
+          StringUtils.isNotBlank(l.getLegacyId()) && l.getLegacyId().trim().length() == CMS_ID_LEN;
 
       if (hasLegacyId) {
         id = l.getLegacyId();
