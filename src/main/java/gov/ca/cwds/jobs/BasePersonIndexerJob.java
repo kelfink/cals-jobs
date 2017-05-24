@@ -292,11 +292,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Log every {@link #LOG_EVERY} records.
+   * Log every N records.
    * 
    * @param cntr record count
    * @param action action message (extract, transform, load, etc)
    * @param args variable message arguments
+   * @see JobLogUtils
    */
   protected void logEvery(int cntr, String action, String... args) {
     JobLogUtils.logEvery(LOGGER, cntr, action, args);
