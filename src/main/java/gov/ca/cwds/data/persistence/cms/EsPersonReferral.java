@@ -40,9 +40,9 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @Table(name = "ES_REFERRAL_HIST")
 @NamedNativeQueries({@NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
-    query = "SELECT r.* FROM {h-schema}ES_REFERRAL_HIST r "
-        + "WHERE r.LAST_CHG > CAST(:after AS TIMESTAMP) " + "ORDER BY CLIENT_ID "
-        + "FOR READ ONLY ",
+    query = "SELECT r.* FROM {h-schema}ES_REFERRAL_HIST r WHERE r.CLIENT_ID IN ( "
+        + "SELECT r1.CLIENT_ID FROM {h-schema}ES_REFERRAL_HIST r1 "
+        + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) " + ") ORDER BY CLIENT_ID FOR READ ONLY ",
     resultClass = EsPersonReferral.class, readOnly = true)})
 public class EsPersonReferral
     implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals> {
