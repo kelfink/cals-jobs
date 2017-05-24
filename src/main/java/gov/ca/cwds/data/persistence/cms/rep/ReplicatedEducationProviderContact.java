@@ -114,4 +114,13 @@ public class ReplicatedEducationProviderContact extends BaseEducationProviderCon
     return this.getId();
   }
 
+  // =======================
+  // ApiLegacyAware:
+  // =======================
+
+  @Override
+  public String getLegacyId() {
+    return getId();
+  }
+
 }

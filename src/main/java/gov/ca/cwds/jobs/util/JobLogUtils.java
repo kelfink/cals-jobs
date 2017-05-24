@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.util;
 
 import java.text.MessageFormat;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import gov.ca.cwds.jobs.JobsException;
@@ -11,10 +12,39 @@ import gov.ca.cwds.jobs.JobsException;
  * 
  * @author CWDS API Team
  */
-public class JobLogUtils {
+public final class JobLogUtils {
+
+  private static final Logger LOGGER = LogManager.getLogger(JobLogUtils.class);
+
+  private static final int DEFAULT_LOG_EVERY = 5000;
 
   private JobLogUtils() {
     // No class instantiation.
+  }
+
+  /**
+   * Log every {@link #DEFAULT_LOG_EVERY} records.
+   * 
+   * @param log Logger
+   * @param cntr record count
+   * @param action action message (extract, transform, load, etc)
+   * @param args variable message arguments
+   */
+  public static void logEvery(Logger log, int cntr, String action, String... args) {
+    if (cntr > 0 && (cntr % DEFAULT_LOG_EVERY) == 0) {
+      log.info("{} {} {}", action, cntr, args);
+    }
+  }
+
+  /**
+   * Log every {@link #DEFAULT_LOG_EVERY} records.
+   * 
+   * @param cntr record count
+   * @param action action message (extract, transform, load, etc)
+   * @param args variable message arguments
+   */
+  public static void logEvery(int cntr, String action, String... args) {
+    logEvery(LOGGER, cntr, action, args);
   }
 
   /**

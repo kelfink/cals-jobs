@@ -1,14 +1,15 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
-import java.io.Serializable;
 import java.util.Date;
+
+import gov.ca.cwds.dao.ApiLegacyAware;
 
 /**
  * Replicated entity interface adds common CMS replication columns to Hibernate entity classes.
  * 
  * @author CWDS API Team
  */
-public interface CmsReplicatedEntity extends Serializable {
+public interface CmsReplicatedEntity extends ApiLegacyAware {
 
   /**
    * Getter for replication operation.

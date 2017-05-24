@@ -1,6 +1,5 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -14,7 +13,7 @@ import org.hibernate.annotations.Type;
  * 
  * @author CWDS API Team
  */
-public class BaseCmsReplicated implements Serializable, CmsReplicatedEntity {
+public abstract class BaseCmsReplicated implements CmsReplicatedEntity {
 
   /**
    * Base serialization version.

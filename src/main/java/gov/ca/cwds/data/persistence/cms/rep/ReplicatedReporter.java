@@ -132,4 +132,18 @@ public class ReplicatedReporter extends BaseReporter
     return this.getPrimaryKey();
   }
 
+  // =======================
+  // ApiLegacyAware:
+  // =======================
+
+  @Override
+  public String getLegacyId() {
+    return getId();
+  }
+
+  @Override
+  public String getId() {
+    return getReferralId();
+  }
+
 }

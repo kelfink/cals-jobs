@@ -56,7 +56,7 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
     implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedOtherClientName> {
 
   /**
-   * Default.
+   * Default serialization.
    */
   private static final long serialVersionUID = 1L;
 
@@ -110,6 +110,20 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
   @Override
   public Object getGroupKey() {
     return this.getPrimaryKey();
+  }
+
+  // =======================
+  // ApiLegacyAware:
+  // =======================
+
+  @Override
+  public String getLegacyId() {
+    return getId();
+  }
+
+  @Override
+  public String getId() {
+    return getThirdId();
   }
 
 }

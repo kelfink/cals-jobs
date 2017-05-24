@@ -120,4 +120,13 @@ public class ReplicatedCollateralIndividual extends BaseCollateralIndividual
     return this.getId();
   }
 
+  // =======================
+  // ApiLegacyAware:
+  // =======================
+
+  @Override
+  public String getLegacyId() {
+    return getId();
+  }
+
 }

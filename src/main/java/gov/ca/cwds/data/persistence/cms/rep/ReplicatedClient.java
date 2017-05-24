@@ -202,8 +202,17 @@ public class ReplicatedClient extends BaseClient
     this.replicationDate = replicationDate;
   }
 
+  // =======================
+  // ApiLegacyAware:
+  // =======================
+
+  @Override
+  public String getLegacyId() {
+    return getId();
+  }
+
   // ==============
-  // SUPPORT:
+  // IDENTITY:
   // ==============
 
   @Override

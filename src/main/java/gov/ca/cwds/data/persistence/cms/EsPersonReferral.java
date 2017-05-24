@@ -41,8 +41,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @NamedNativeQueries({@NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
     query = "SELECT r.* FROM {h-schema}ES_REFERRAL_HIST r "
-        + "WHERE r.LAST_CHG > CAST(:after AS TIMESTAMP) " + "ORDER BY CLIENT_ID "
-        + "FOR READ ONLY ",
+        + "WHERE r.LAST_CHG > CAST(:after AS TIMESTAMP) ORDER BY CLIENT_ID FOR READ ONLY ",
     resultClass = EsPersonReferral.class, readOnly = true)})
 public class EsPersonReferral
     implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals> {
