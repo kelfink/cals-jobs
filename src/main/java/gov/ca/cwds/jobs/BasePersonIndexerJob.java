@@ -902,7 +902,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * denormalized view records to normalized ones and pass to the load queue.
    */
   protected void threadTransform() {
-    Thread.currentThread().setName("transformer");
+    Thread.currentThread().setName("transform");
     LOGGER.warn("BEGIN: Stage #2: Transform");
 
     int cntr = 0;
@@ -957,7 +957,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * The "load" part of ETL. Read from normalized record queue and push to ES.
    */
   protected void threadLoad() {
-    Thread.currentThread().setName("loader");
+    Thread.currentThread().setName("load");
     final BulkProcessor bp = buildBulkProcessor();
     int cntr = 0;
     T t;
