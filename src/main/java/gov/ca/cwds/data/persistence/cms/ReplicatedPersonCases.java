@@ -18,11 +18,11 @@ public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
 
   private static final long serialVersionUID = -8746969311364544478L;
 
-  private String caseId;
+  private String focusChildId;
   private List<ElasticSearchPersonCase> esPersonCases = new ArrayList<ElasticSearchPersonCase>();
 
-  public ReplicatedPersonCases(String caseId) {
-    this.caseId = caseId;
+  public ReplicatedPersonCases(String focusChildId) {
+    this.focusChildId = focusChildId;
   }
 
   public List<ElasticSearchPersonCase> geElasticSearchPersonCases() {
@@ -39,7 +39,7 @@ public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
 
   @Override
   public Serializable getPrimaryKey() {
-    return this.caseId;
+    return this.focusChildId;
   }
 
   @Override

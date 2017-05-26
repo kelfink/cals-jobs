@@ -119,10 +119,10 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
 
   @Override
   public void reduce(Map<Object, ReplicatedPersonCases> map) {
-    ReplicatedPersonCases cases = map.get(this.caseId);
+    ReplicatedPersonCases cases = map.get(this.focusChildId);
     if (cases == null) {
-      cases = new ReplicatedPersonCases(this.caseId);
-      map.put(this.caseId, cases);
+      cases = new ReplicatedPersonCases(this.focusChildId);
+      map.put(this.focusChildId, cases);
     }
 
     // TODO
@@ -130,7 +130,7 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
 
   @Override
   public Object getGroupKey() {
-    return this.caseId;
+    return this.focusChildId;
   }
 
   @Override
