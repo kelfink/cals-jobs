@@ -26,7 +26,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
  * Entity bean for Materialized Query Table (MQT), ES_CASE_HIST.
  * 
  * <p>
- * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedPersonCase}.
+ * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedPersonCases}.
  * </p>
  * 
  * @author CWDS API Team
