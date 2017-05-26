@@ -180,6 +180,7 @@ public class EsPersonReferral
     referral.setEndDate(this.endDate);
     referral.setCountyName(getCodeDescription(this.county));
     referral.setResponseTime(getCodeDescription(this.referralResponseType));
+    referral.setLegacyLastUpdated(this.lastChange);
 
     //
     // Reporter
