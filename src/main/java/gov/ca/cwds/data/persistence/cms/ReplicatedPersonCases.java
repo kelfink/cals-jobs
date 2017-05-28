@@ -25,7 +25,8 @@ public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
   private List<ElasticSearchPersonCase> personCases = new ArrayList<ElasticSearchPersonCase>();
 
   /**
-   * Key: Case ID </br>
+   * Key: Case ID <br>
+   * </br>
    * Value: ElasticSearchPersonParent objects for the keyed case id.
    */
   private Map<String, List<ElasticSearchPersonParent>> caseParents = new HashMap<>();
@@ -40,6 +41,8 @@ public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
   }
 
   /**
+   * Get cases.
+   * 
    * @return All ElasticSearchPersonCase objects.
    */
   public List<ElasticSearchPersonCase> getCases() {
@@ -49,8 +52,8 @@ public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
   /**
    * Add case and parent to given case.
    * 
-   * @param personCase
-   * @param caseParent
+   * @param personCase Case to add.
+   * @param caseParent Parent to add.
    */
   public void addCase(ElasticSearchPersonCase personCase, ElasticSearchPersonParent caseParent) {
     personCases.add(personCase);

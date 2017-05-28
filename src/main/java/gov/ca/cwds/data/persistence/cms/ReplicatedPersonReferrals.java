@@ -26,7 +26,8 @@ public class ReplicatedPersonReferrals implements PersistentObject, ApiPersonAwa
       new ArrayList<ElasticSearchPersonReferral>();
 
   /**
-   * Key: Referral ID </br>
+   * Key: Referral ID <br>
+   * </br>
    * Value: ElasticSearchPersonAllegation objects for the keyed referral id.
    */
   private Map<String, List<ElasticSearchPersonAllegation>> referralAllegations = new HashMap<>();
@@ -34,7 +35,7 @@ public class ReplicatedPersonReferrals implements PersistentObject, ApiPersonAwa
   /**
    * Construct the object
    * 
-   * @param clientId
+   * @param clientId The referral client id.
    */
   public ReplicatedPersonReferrals(String clientId) {
     this.clientId = clientId;
@@ -51,8 +52,8 @@ public class ReplicatedPersonReferrals implements PersistentObject, ApiPersonAwa
    * Adds a referral to this container with optional allegation. Note that a referral may have more
    * than one allegations.
    * 
-   * @param referral
-   * @param allegation
+   * @param referral The referral to add.
+   * @param allegation The allegation to add.
    */
   public void addReferral(ElasticSearchPersonReferral referral,
       ElasticSearchPersonAllegation allegation) {
