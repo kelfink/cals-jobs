@@ -19,8 +19,14 @@ import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonChild;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
  * Entity bean for Materialized Query Table (MQT), ES_CASE_HIST.
@@ -34,18 +40,17 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @Entity
 @Table(name = "ES_CASE_HIST")
 @NamedNativeQueries({
-    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsCaseReferral.findAllUpdatedAfter",
-        query = "------------------------TODO-----------------------",
+    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsPersonCase.findAllUpdatedAfter",
+        query = "SELECT c.* FROM {h-schema}ES_CASE_HIST c WHERE c.CASE_ID IN ("
+            + " SELECT c1.CASE_ID FROM {h-schema}ES_CASE_HIST c1 "
+            + "WHERE c1.CASE_LAST_UPDATED > CAST(:after AS TIMESTAMP) "
+            + ") ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID FOR READ ONLY ",
         resultClass = EsPersonCase.class, readOnly = true)})
 public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonCases> {
 
   private static final long serialVersionUID = -3777509530463773550L;
 
   private static final Logger LOGGER = LogManager.getLogger(EsPersonCase.class);
-
-  @Type(type = "timestamp")
-  @Column(name = "LAST_CHG", updatable = false)
-  private Date lastChange;
 
   // ================
   // CASE:
@@ -64,13 +69,19 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
   private Date endDate;
 
   @Column(name = "COUNTY")
-  private String county;
+  @Type(type = "integer")
+  private Integer county;
+
+  @Type(type = "timestamp")
+  @Column(name = "CASE_LAST_UPDATED", updatable = false)
+  private Date caseLastUpdated;
 
   // ==============
   // FOCUS CHILD:
   // ==============
 
-  @Column(name = "CHILD_ID")
+  @Id
+  @Column(name = "FOCUS_CHILD_ID")
   private String focusChildId;
 
   @Column(name = "FOCUS_CHLD_FIRST_NM")
@@ -80,7 +91,12 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
   private String focusChildLastName;
 
   @Column(name = "SERVICE_COMP")
-  private String serviceComponent;
+  @Type(type = "integer")
+  private Integer serviceComponent;
+
+  @Type(type = "timestamp")
+  @Column(name = "FOCUS_CHILD_LAST_UPDATED", updatable = false)
+  private Date focusChildLastUpdated;
 
   // ==============
   // SOCIAL WORKER:
@@ -95,10 +111,15 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
   @Column(name = "WORKER_LAST_NM")
   private String workerLastName;
 
+  @Type(type = "timestamp")
+  @Column(name = "WORKER_LAST_UPDATED", updatable = false)
+  private Date workerLastUpdated;
+
   // =============
   // PARENT:
   // =============
 
+  @Id
   @Column(name = "PARENT_ID")
   private String parentId;
 
@@ -107,6 +128,17 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
 
   @Column(name = "PARENT_LAST_NM")
   private String parentLastName;
+
+  @Column(name = "PARENT_RELATIONSHIP")
+  @Type(type = "integer")
+  private Integer parentRelationship;
+
+  @Type(type = "timestamp")
+  @Column(name = "PARENT_LAST_UPDATED", updatable = false)
+  private Date parentLastUpdated;
+
+  @Column(name = "PARENT_SOURCE_TABLE")
+  private String parentSourceTable;
 
   // =============
   // REDUCE:
@@ -125,7 +157,57 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
       map.put(this.focusChildId, cases);
     }
 
-    // TODO
+    ElasticSearchPersonCase esPersonCase = new ElasticSearchPersonCase();
+
+    //
+    // Case
+    //
+    esPersonCase.setId(this.caseId);
+    esPersonCase.setLegacyId(this.caseId);
+    esPersonCase.setStartDate(DomainChef.cookDate(this.startDate));
+    esPersonCase.setEndDate(DomainChef.cookDate(this.endDate));
+    esPersonCase.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.caseLastUpdated));
+    esPersonCase
+        .setCountyName(ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.county));
+
+    //
+    // Child
+    //
+    ElasticSearchPersonChild child = new ElasticSearchPersonChild();
+    child.setId(this.focusChildId);
+    child.setLegacyClientId(this.focusChildId);
+    child.setFirstName(this.focusChildFirstName);
+    child.setLastName(this.focusChildLastName);
+    child.setServiceComponent(
+        ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.serviceComponent));
+    child.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.focusChildLastUpdated));
+    esPersonCase.setFocusChild(child);
+
+    //
+    // Assigned Worker
+    //
+    ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
+    assignedWorker.setId(this.workerId);
+    assignedWorker.setLegacyClientId(this.workerId);
+    assignedWorker.setFirstName(this.workerFirstName);
+    assignedWorker.setLastName(this.workerLastName);
+    assignedWorker.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.workerLastUpdated));
+    esPersonCase.setAssignedSocialWorker(assignedWorker);
+
+    //
+    // A Case may have more than one parents
+    //
+    ElasticSearchPersonParent parent = new ElasticSearchPersonParent();
+    parent.setId(this.parentId);
+    parent.setLegacyClientId(this.parentId);
+    parent.setFirstName(this.parentFirstName);
+    parent.setLastName(this.parentLastName);
+    parent.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.parentLastUpdated));
+    parent.setLegacySourceTable(this.parentSourceTable);
+    parent.setRelationship(
+        ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.parentRelationship));
+
+    cases.addCase(esPersonCase, parent);
   }
 
   @Override
@@ -136,26 +218,6 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
   @Override
   public Serializable getPrimaryKey() {
     return null;
-  }
-
-  /**
-   * Getter for composite "last change", the latest time that any associated record was created or
-   * updated.
-   * 
-   * @return last change date
-   */
-  public Date getLastChange() {
-    return lastChange;
-  }
-
-  /**
-   * Setter for composite "last change", the latest time that any associated record was created or
-   * updated.
-   * 
-   * @param lastChange last change date
-   */
-  public void setLastChange(Date lastChange) {
-    this.lastChange = lastChange;
   }
 
   public String getCaseId() {
@@ -182,11 +244,11 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
     this.endDate = endDate;
   }
 
-  public String getCounty() {
+  public Integer getCounty() {
     return county;
   }
 
-  public void setCounty(String county) {
+  public void setCounty(Integer county) {
     this.county = county;
   }
 
@@ -214,11 +276,11 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
     this.focusChildLastName = focusChildLastName;
   }
 
-  public String getServiceComponent() {
+  public Integer getServiceComponent() {
     return serviceComponent;
   }
 
-  public void setServiceComponent(String serviceComponent) {
+  public void setServiceComponent(Integer serviceComponent) {
     this.serviceComponent = serviceComponent;
   }
 
@@ -268,6 +330,54 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
 
   public void setParentLastName(String parentLastName) {
     this.parentLastName = parentLastName;
+  }
+
+  public Integer getParentRelationship() {
+    return parentRelationship;
+  }
+
+  public void setParentRelationship(Integer parentRelationship) {
+    this.parentRelationship = parentRelationship;
+  }
+
+  public Date getCaseLastUpdated() {
+    return caseLastUpdated;
+  }
+
+  public void setCaseLastUpdated(Date caseLastUpdated) {
+    this.caseLastUpdated = caseLastUpdated;
+  }
+
+  public Date getFocusChildLastUpdated() {
+    return focusChildLastUpdated;
+  }
+
+  public void setFocusChildLastUpdated(Date focusChildLastUpdated) {
+    this.focusChildLastUpdated = focusChildLastUpdated;
+  }
+
+  public Date getWorkerLastUpdated() {
+    return workerLastUpdated;
+  }
+
+  public void setWorkerLastUpdated(Date workerLastUpdated) {
+    this.workerLastUpdated = workerLastUpdated;
+  }
+
+  public Date getParentLastUpdated() {
+    return parentLastUpdated;
+  }
+
+  public void setParentLastUpdated(Date parentLastUpdated) {
+    this.parentLastUpdated = parentLastUpdated;
+  }
+
+  public String getParentSourceTable() {
+    return parentSourceTable;
+  }
+
+  public void setParentSourceTable(String parentSourceTable) {
+    this.parentSourceTable = parentSourceTable;
   }
 
   /**

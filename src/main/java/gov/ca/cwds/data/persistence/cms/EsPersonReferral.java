@@ -26,6 +26,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
  * Entity bean for Materialized Query Table (MQT), ES_REFERRAL_HIST.
@@ -80,12 +81,12 @@ public class EsPersonReferral
   private Date endDate;
 
   @Column(name = "REFERRAL_RESPONSE_TYPE")
-  @Type(type = "short")
-  private Short referralResponseType;
+  @Type(type = "integer")
+  private Integer referralResponseType;
 
   @Column(name = "REFERRAL_COUNTY")
-  @Type(type = "short")
-  private Short county;
+  @Type(type = "integer")
+  private Integer county;
 
   // ==============
   // REPORTER:
@@ -121,12 +122,12 @@ public class EsPersonReferral
   private String allegationId;
 
   @Column(name = "ALLEGATION_DISPOSITION")
-  @Type(type = "short")
-  private Short allegationDisposition;
+  @Type(type = "integer")
+  private Integer allegationDisposition;
 
   @Column(name = "ALLEGATION_TYPE")
-  @Type(type = "short")
-  private Short allegationType;
+  @Type(type = "integer")
+  private Integer allegationType;
 
   // =============
   // VICTIM:
@@ -172,15 +173,16 @@ public class EsPersonReferral
     }
 
     ElasticSearchPersonReferral referral = new ElasticSearchPersonReferral();
-    referrals.addElasticSearchPersonReferral(referral);
 
     referral.setId(this.referralId);
     referral.setLegacyId(this.referralId);
-    referral.setStartDate(this.startDate);
-    referral.setEndDate(this.endDate);
-    referral.setCountyName(getCodeDescription(this.county));
-    referral.setResponseTime(getCodeDescription(this.referralResponseType));
-    referral.setLegacyLastUpdated(this.lastChange);
+    referral.setStartDate(DomainChef.cookDate(this.startDate));
+    referral.setEndDate(DomainChef.cookDate(this.endDate));
+    referral
+        .setCountyName(ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.county));
+    referral.setResponseTime(
+        ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.referralResponseType));
+    referral.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.lastChange));
 
     //
     // Reporter
@@ -203,12 +205,14 @@ public class EsPersonReferral
     referral.setAssignedSocialWorker(assignedWorker);
 
     //
-    // Allegations
+    // A referral may have more than one allegations
     //
     ElasticSearchPersonAllegation allegation = new ElasticSearchPersonAllegation();
     allegation.setId(this.allegationId);
-    allegation.setAllegationDescription(getCodeDescription(this.allegationType));
-    allegation.setDispositionDescription(getCodeDescription(this.allegationDisposition));
+    allegation.setAllegationDescription(
+        ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.allegationType));
+    allegation.setDispositionDescription(
+        ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.allegationDisposition));
 
     allegation.setPerpetratorId(this.perpetratorId);
     allegation.setPerpetratorLegacyClientId(this.perpetratorId);
@@ -220,7 +224,7 @@ public class EsPersonReferral
     allegation.setVictimFirstName(this.victimFirstName);
     allegation.setVictimLastName(this.victimLastName);
 
-    referral.getAllegations().add(allegation);
+    referrals.addReferral(referral, allegation);
   }
 
   @Override
@@ -285,19 +289,19 @@ public class EsPersonReferral
     this.endDate = endDate;
   }
 
-  public Short getReferralResponseType() {
+  public Integer getReferralResponseType() {
     return referralResponseType;
   }
 
-  public void setReferralResponseType(Short referralResponseType) {
+  public void setReferralResponseType(Integer referralResponseType) {
     this.referralResponseType = referralResponseType;
   }
 
-  public Short getCounty() {
+  public Integer getCounty() {
     return county;
   }
 
-  public void setCounty(Short county) {
+  public void setCounty(Integer county) {
     this.county = county;
   }
 
@@ -357,19 +361,19 @@ public class EsPersonReferral
     this.allegationId = allegationId;
   }
 
-  public Short getAllegationDisposition() {
+  public Integer getAllegationDisposition() {
     return allegationDisposition;
   }
 
-  public void setAllegationDisposition(Short allegationDisposition) {
+  public void setAllegationDisposition(Integer allegationDisposition) {
     this.allegationDisposition = allegationDisposition;
   }
 
-  public Short getAllegationType() {
+  public Integer getAllegationType() {
     return allegationType;
   }
 
-  public void setAllegationType(Short allegationType) {
+  public void setAllegationType(Integer allegationType) {
     this.allegationType = allegationType;
   }
 
@@ -444,16 +448,5 @@ public class EsPersonReferral
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
-  }
-
-  private String getCodeDescription(Short code) {
-    String codeDesc = null;
-    if (code != null && code.intValue() != 0) {
-      final CmsSystemCode sysCode = ElasticSearchPerson.getSystemCodes().lookup(code);
-      if (sysCode != null) {
-        codeDesc = sysCode.getShortDsc();
-      }
-    }
-    return codeDesc;
   }
 }

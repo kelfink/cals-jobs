@@ -98,8 +98,7 @@ public class ReferralHistoryIndexerJob
     StringBuilder buf = new StringBuilder();
     buf.append("{\"referrals\":[");
 
-    List<ElasticSearchPersonReferral> esPersonReferrals =
-        referrals.geElasticSearchPersonReferrals();
+    List<ElasticSearchPersonReferral> esPersonReferrals = referrals.geReferrals();
     esp.setReferrals(esPersonReferrals);
 
     if (esPersonReferrals != null && !esPersonReferrals.isEmpty()) {
@@ -136,12 +135,12 @@ public class ReferralHistoryIndexerJob
     referral.setStartDate(rs.getDate("START_DATE"));
     referral.setEndDate(rs.getDate("END_DATE"));
     referral.setLastChange(rs.getDate("LAST_CHG"));
-    referral.setCounty(rs.getShort("REFERRAL_COUNTY"));
-    referral.setReferralResponseType(rs.getShort("REFERRAL_RESPONSE_TYPE"));
+    referral.setCounty(rs.getInt("REFERRAL_COUNTY"));
+    referral.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
 
     referral.setAllegationId(rs.getString("ALLEGATION_ID"));
-    referral.setAllegationType(rs.getShort("ALLEGATION_TYPE"));
-    referral.setAllegationDisposition(rs.getShort("ALLEGATION_DISPOSITION"));
+    referral.setAllegationType(rs.getInt("ALLEGATION_TYPE"));
+    referral.setAllegationDisposition(rs.getInt("ALLEGATION_DISPOSITION"));
 
     referral.setPerpetratorId(rs.getString("PERPETRATOR_ID"));
     referral.setPerpetratorFirstName(rs.getString("PERPETRATOR_FIRST_NM"));

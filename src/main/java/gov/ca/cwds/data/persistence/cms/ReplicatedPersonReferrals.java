@@ -3,8 +3,11 @@ package gov.ca.cwds.data.persistence.cms;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiPersonAware;
@@ -16,66 +19,96 @@ import gov.ca.cwds.data.std.ApiPersonAware;
  */
 public class ReplicatedPersonReferrals implements PersistentObject, ApiPersonAware {
 
-	private static final long serialVersionUID = -8746969311364544478L;
+  private static final long serialVersionUID = -8746969311364544478L;
 
-	private String clientId;
-	private List<ElasticSearchPersonReferral> esPersonReferrals = new ArrayList<ElasticSearchPersonReferral>();
-	
-	public ReplicatedPersonReferrals(String clientId) {
-		this.clientId = clientId;
-	}
-	
-	public List<ElasticSearchPersonReferral> geElasticSearchPersonReferrals() {
-		return esPersonReferrals;
-	}
+  private String clientId;
+  private List<ElasticSearchPersonReferral> referrals =
+      new ArrayList<ElasticSearchPersonReferral>();
 
-	public void setElasticSearchPersonReferrals(List<ElasticSearchPersonReferral> esPersonReferrals) {
-		this.esPersonReferrals = esPersonReferrals;
-	}
+  /**
+   * Key: Referral ID </br>
+   * Value: ElasticSearchPersonAllegation objects for the keyed referral id.
+   */
+  private Map<String, List<ElasticSearchPersonAllegation>> referralAllegations = new HashMap<>();
 
-	public void addElasticSearchPersonReferral(ElasticSearchPersonReferral referral) {
-		esPersonReferrals.add(referral);
-	}
-	
-	@Override
-	public Serializable getPrimaryKey() {
-		return this.clientId;
-	}
+  /**
+   * Construct the object
+   * 
+   * @param clientId
+   */
+  public ReplicatedPersonReferrals(String clientId) {
+    this.clientId = clientId;
+  }
 
-	@Override
-	public Date getBirthDate() {
-		return null;
-	}
+  /**
+   * @return The referrals collected in this container.
+   */
+  public List<ElasticSearchPersonReferral> geReferrals() {
+    return referrals;
+  }
 
-	@Override
-	public String getFirstName() {
-		return null;
-	}
+  /**
+   * Adds a referral to this container with optional allegation. Note that a referral may have more
+   * than one allegations.
+   * 
+   * @param referral
+   * @param allegation
+   */
+  public void addReferral(ElasticSearchPersonReferral referral,
+      ElasticSearchPersonAllegation allegation) {
+    referrals.add(referral);
 
-	@Override
-	public String getGender() {
-		return null;
-	}
+    // Add allegation
+    if (allegation != null) {
+      List<ElasticSearchPersonAllegation> allegations = referralAllegations.get(referral.getId());
+      if (allegations == null) {
+        allegations = new ArrayList<>();
+        referralAllegations.put(referral.getId(), allegations);
+      }
+      allegations.add(allegation);
+      referral.setAllegations(allegations);
+    }
+  }
 
-	@Override
-	public String getLastName() {
-		return null;
-	}
+  @Override
+  public Serializable getPrimaryKey() {
+    return this.clientId;
+  }
 
-	@Override
-	public String getMiddleName() {
-		return null;
-	}
+  @Override
+  public Date getBirthDate() {
+    return null;
+  }
 
-	@Override
-	public String getNameSuffix() {
-		return null;
-	}
+  @Override
+  public String getFirstName() {
+    return null;
+  }
 
-	@Override
-	public String getSsn() {
-		return null;
-	}
-	
-	
+  @Override
+  public String getGender() {
+    return null;
+  }
+
+  @Override
+  public String getLastName() {
+    return null;
+  }
+
+  @Override
+  public String getMiddleName() {
+    return null;
+  }
+
+  @Override
+  public String getNameSuffix() {
+    return null;
+  }
+
+  @Override
+  public String getSsn() {
+    return null;
+  }
+
+
 }
