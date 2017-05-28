@@ -26,7 +26,6 @@ public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
 
   /**
    * Key: Case ID <br>
-   * </br>
    * Value: ElasticSearchPersonParent objects for the keyed case id.
    */
   private Map<String, List<ElasticSearchPersonParent>> caseParents = new HashMap<>();

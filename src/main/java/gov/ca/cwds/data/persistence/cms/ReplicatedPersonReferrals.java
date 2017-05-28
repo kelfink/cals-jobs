@@ -27,7 +27,6 @@ public class ReplicatedPersonReferrals implements PersistentObject, ApiPersonAwa
 
   /**
    * Key: Referral ID <br>
-   * </br>
    * Value: ElasticSearchPersonAllegation objects for the keyed referral id.
    */
   private Map<String, List<ElasticSearchPersonAllegation>> referralAllegations = new HashMap<>();
