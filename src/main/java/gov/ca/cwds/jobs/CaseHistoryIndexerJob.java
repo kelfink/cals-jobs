@@ -41,7 +41,7 @@ public class CaseHistoryIndexerJob extends BasePersonIndexerJob<ReplicatedPerson
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param clientDao Relationship View DAO
+   * @param clientDao Case history view DAO
    * @param elasticsearchDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
