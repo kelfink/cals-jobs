@@ -523,9 +523,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     // Write persistence object to Elasticsearch Person document.
     ElasticSearchPerson ret;
 
-    LOGGER.debug("p.getPrimaryKey()={}", p.getPrimaryKey());
     if (p.getPrimaryKey() == null) {
-      LOGGER.warn("STOP");
+      LOGGER.warn("NO PRIMARY KEY!");
     }
 
     ret = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
