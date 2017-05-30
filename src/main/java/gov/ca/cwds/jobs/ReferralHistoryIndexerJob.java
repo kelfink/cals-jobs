@@ -3,9 +3,7 @@ package gov.ca.cwds.jobs;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +26,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+import gov.ca.cwds.jobs.transform.EntityNormalizer;
 
 /**
  * Job to load person referrals from CMS into ElasticSearch.
@@ -83,13 +82,7 @@ public class ReferralHistoryIndexerJob
 
   @Override
   protected List<ReplicatedPersonReferrals> reduce(List<EsPersonReferral> recs) {
-    final int len = (int) (recs.size() * 1.25);
-    Map<Object, ReplicatedPersonReferrals> map = new LinkedHashMap<>(len);
-    for (EsPersonReferral rec : recs) {
-      rec.reduce(map);
-    }
-
-    return map.values().stream().collect(Collectors.toList());
+    return EntityNormalizer.<ReplicatedPersonReferrals, EsPersonReferral>reduceList(recs);
   }
 
   @Override

@@ -143,6 +143,9 @@ public class EsRelationship
     rel.setRelatedPersonLegacyId(this.relatedLegacyId);
     rel.setRelatedPersonLegacySourceTable(this.thisLegacyTable.trim());
 
+    // This field will be set by Intake from Postgres, not from DB2.
+    // rel.setRelatedPersonId(this.);
+
     if (this.relCode != null && this.relCode.intValue() != 0) {
       final CmsSystemCode code = ElasticSearchPerson.getSystemCodes().lookup(this.relCode);
       final String wholeRel = code.getShortDsc();
