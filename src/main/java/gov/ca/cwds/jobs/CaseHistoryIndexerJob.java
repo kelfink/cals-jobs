@@ -55,7 +55,7 @@ public class CaseHistoryIndexerJob extends BasePersonIndexerJob<ReplicatedPerson
   }
 
   @Override
-  public EsPersonCase extractFromResultSet(ResultSet rs) throws SQLException {
+  public EsPersonCase extract(ResultSet rs) throws SQLException {
     String focusChildId = rs.getString("FOCUS_CHILD_ID");
     String caseId = rs.getString("CASE_ID");
 

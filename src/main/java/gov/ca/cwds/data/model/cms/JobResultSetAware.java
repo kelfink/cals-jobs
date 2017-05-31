@@ -6,20 +6,21 @@ import java.sql.SQLException;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
 /**
- * Read from a JDBC ResultSet into an MQT entity bean.
+ * Reads a JDBC ResultSet from a view or materialized query table into an entity bean.
  *
  * @author CWDS API Team
- * @param <M> MQT entity class instance
+ * @param <D> de-normalized entity class instance
  */
-public interface JobResultSetAware<M extends ApiGroupNormalizer<?>> {
+@FunctionalInterface
+public interface JobResultSetAware<D extends ApiGroupNormalizer<?>> {
 
   /**
-   * Read from a JDBC ResultSet into an MQT entity bean.
+   * Read from a JDBC ResultSet into an entity bean.
    * 
-   * @param rs ResultSet
-   * @return populated MQT entity bean
+   * @param rs the ResultSet
+   * @return populated view or MQT entity bean
    * @throws SQLException on disconnect or type conversion error
    */
-  M extractFromResultSet(ResultSet rs) throws SQLException;
+  D extract(ResultSet rs) throws SQLException;
 
 }

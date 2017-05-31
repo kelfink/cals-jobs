@@ -1,5 +1,7 @@
 package gov.ca.cwds.data.persistence.cms;
 
+import static gov.ca.cwds.jobs.transform.JobTransformUtils.ifNull;
+
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -112,15 +114,15 @@ public class EsRelationship
   public static EsRelationship mapRow(ResultSet rs) throws SQLException {
     EsRelationship ret = new EsRelationship();
 
-    ret.setThisLegacyTable(rs.getString("THIS_LEGACY_TABLE"));
-    ret.setRelatedLegacyTable(rs.getString("RELATED_LEGACY_TABLE"));
-    ret.setThisLegacyId(rs.getString("THIS_LEGACY_ID"));
-    ret.setThisFirstName(rs.getString("THIS_FIRST_NAME"));
-    ret.setThisLastName(rs.getString("THIS_LAST_NAME"));
+    ret.setThisLegacyTable(ifNull(rs.getString("THIS_LEGACY_TABLE")));
+    ret.setRelatedLegacyTable(ifNull(rs.getString("RELATED_LEGACY_TABLE")));
+    ret.setThisLegacyId(ifNull(rs.getString("THIS_LEGACY_ID")));
+    ret.setThisFirstName(ifNull(rs.getString("THIS_FIRST_NAME")));
+    ret.setThisLastName(ifNull(rs.getString("THIS_LAST_NAME")));
     ret.setRelCode(rs.getShort("REL_CODE"));
-    ret.setRelatedLegacyId(rs.getString("RELATED_LEGACY_ID"));
-    ret.setRelatedFirstName(rs.getString("RELATED_FIRST_NAME"));
-    ret.setRelatedLastName(rs.getString("RELATED_LAST_NAME"));
+    ret.setRelatedLegacyId(ifNull(rs.getString("RELATED_LEGACY_ID")));
+    ret.setRelatedFirstName(ifNull(rs.getString("RELATED_FIRST_NAME")));
+    ret.setRelatedLastName(ifNull(rs.getString("RELATED_LAST_NAME")));
 
     return ret;
   }
@@ -143,8 +145,8 @@ public class EsRelationship
     rel.setRelatedPersonLegacyId(this.relatedLegacyId);
     rel.setRelatedPersonLegacySourceTable(this.thisLegacyTable.trim());
 
-    // This field will be set by Intake from Postgres, not from DB2.
-    // rel.setRelatedPersonId(this.);
+    // Intake will set field "related_person_id" from **Postgres**, NOT from DB2.
+    // rel.setRelatedPersonId(this.); // NOSONAR
 
     if (this.relCode != null && this.relCode.intValue() != 0) {
       final CmsSystemCode code = ElasticSearchPerson.getSystemCodes().lookup(this.relCode);
@@ -179,10 +181,15 @@ public class EsRelationship
         rel.setIndexedPersonRelationship(primaryRel);
         rel.setRelatedPersonRelationship(secondaryRel);
         rel.setRelationshipContext(relContext);
-        // LOGGER.debug("primaryRel={}, secondaryRel={}, ", primaryRel);
+
+        final String priRel = primaryRel;
+        final String secRel = primaryRel;
+
+        // Only log if trace is enabled.
+        LOGGER.trace("primaryRel={}, secondaryRel={}", () -> priRel, () -> secRel);
 
       } else {
-        LOGGER.warn("NO MATCH!! rel={}", wholeRel);
+        LOGGER.trace("NO MATCH!! rel={}", () -> wholeRel);
       }
     }
 

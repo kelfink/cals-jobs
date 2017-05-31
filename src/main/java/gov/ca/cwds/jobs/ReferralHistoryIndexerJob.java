@@ -119,7 +119,7 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  public EsPersonReferral extractFromResultSet(ResultSet rs) throws SQLException {
+  public EsPersonReferral extract(ResultSet rs) throws SQLException {
     EsPersonReferral referral = new EsPersonReferral();
 
     referral.setReferralId(ifNull(rs.getString("REFERRAL_ID")));

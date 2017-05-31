@@ -55,7 +55,7 @@ public class RelationshipIndexerJob
   }
 
   @Override
-  public EsRelationship extractFromResultSet(ResultSet rs) throws SQLException {
+  public EsRelationship extract(ResultSet rs) throws SQLException {
     return EsRelationship.mapRow(rs);
   }
 

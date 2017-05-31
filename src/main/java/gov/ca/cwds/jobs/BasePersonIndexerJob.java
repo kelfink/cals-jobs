@@ -78,6 +78,7 @@ import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.transform.EntityNormalizer;
+import gov.ca.cwds.jobs.transform.JobTransformUtils;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
@@ -288,7 +289,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   @Override
-  public M extractFromResultSet(ResultSet rs) throws SQLException {
+  public M extract(ResultSet rs) throws SQLException {
     return null;
   }
 
@@ -559,7 +560,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return trimmed String or null
    */
   public String ifNull(String value) {
-    return value != null ? value.trim() : null;
+    return JobTransformUtils.ifNull(value);
   }
 
   /**
@@ -786,6 +787,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
 
     // Child classes may override these methods as needed.
+    // left = update, right = insert.
     final Pair<String, String> json = prepareUpsertJson(esp, t, getOptionalElementName(),
         getOptionalCollection(esp, t), keepCollections());
 
@@ -869,7 +871,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.warn("DONE: doInitialLoadViaJdbc");
 
     } catch (InterruptedException ie) { // NOSONAR
-      LOGGER.error("interrupted: {}", ie.getMessage(), ie);
+      LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
       fatalError = true;
       Thread.currentThread().interrupt();
     } catch (Exception e) {
@@ -913,9 +915,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         while (rs.next()) {
           // Hand the baton to the next runner ...
           logEvery(++cntr, "Retrieved", "recs");
-          M m = extractFromResultSet(rs);
+          M m = extract(rs);
           if (m != null) {
-            queueTransform.putLast(extractFromResultSet(rs));
+            queueTransform.putLast(extract(rs));
           }
         }
 
@@ -1075,6 +1077,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
 
         // Spawn a reasonable number of threads to process all results.
+        // One thread seems sufficient.
         results.stream().forEach(p -> {
           try {
             // Write persistence object to Elasticsearch Person document.
@@ -1097,13 +1100,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       // Give it time to finish the last batch.
-      LOGGER.warn("Waiting on ElasticSearch to finish last batch ...");
+      LOGGER.info("Waiting on ElasticSearch to finish last batch ...");
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
       return new Date(this.startTime);
 
     } catch (Exception e) {
       fatalError = true;
-      LOGGER.error("General Exception: {}", e.getMessage(), e);
+      LOGGER.fatal("General Exception: {}", e.getMessage(), e);
       throw new JobsException("General Exception: " + e.getMessage(), e);
     } finally {
       doneLoad = true;

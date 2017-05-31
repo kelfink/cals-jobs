@@ -387,7 +387,8 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
           addr.setCity(city);
           addr.setState(state);
 
-          // Synthetic field, not found in legacy. Translate state code.
+          // Synthetic, composite field, "state_name", not found in legacy.
+          // TODO: Translate state code.
           // addr.setStateName(stateName);
 
           addr.setStreetAddress(streetAddress);
