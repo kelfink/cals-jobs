@@ -43,7 +43,7 @@ import gov.ca.cwds.rest.api.domain.DomainChef;
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsPersonCase.findAllUpdatedAfter",
         query = "SELECT c.* FROM {h-schema}ES_CASE_HIST c WHERE c.CASE_ID IN ("
             + " SELECT c1.CASE_ID FROM {h-schema}ES_CASE_HIST c1 "
-            + "WHERE c1.CASE_LAST_UPDATED > CAST(:after AS TIMESTAMP) "
+            + "WHERE c1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID FOR READ ONLY ",
         resultClass = EsPersonCase.class, readOnly = true)})
 public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonCases> {
