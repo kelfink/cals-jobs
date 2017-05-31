@@ -413,8 +413,6 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       LOGGER.error("OOPS! {}", this);
       throw e;
     }
-
-    LOGGER.debug("END");
   }
 
   @Override

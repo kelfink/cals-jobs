@@ -122,8 +122,8 @@ public class ReferralHistoryIndexerJob
   public EsPersonReferral extractFromResultSet(ResultSet rs) throws SQLException {
     EsPersonReferral referral = new EsPersonReferral();
 
-    referral.setReferralId(rs.getString("REFERRAL_ID"));
-    referral.setClientId(rs.getString("CLIENT_ID"));
+    referral.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
+    referral.setClientId(ifNull(rs.getString("CLIENT_ID")));
 
     referral.setStartDate(rs.getDate("START_DATE"));
     referral.setEndDate(rs.getDate("END_DATE"));
@@ -131,25 +131,25 @@ public class ReferralHistoryIndexerJob
     referral.setCounty(rs.getInt("REFERRAL_COUNTY"));
     referral.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
 
-    referral.setAllegationId(rs.getString("ALLEGATION_ID"));
+    referral.setAllegationId(ifNull(rs.getString("ALLEGATION_ID")));
     referral.setAllegationType(rs.getInt("ALLEGATION_TYPE"));
     referral.setAllegationDisposition(rs.getInt("ALLEGATION_DISPOSITION"));
 
-    referral.setPerpetratorId(rs.getString("PERPETRATOR_ID"));
-    referral.setPerpetratorFirstName(rs.getString("PERPETRATOR_FIRST_NM"));
-    referral.setPerpetratorLastName(rs.getString("PERPETRATOR_LAST_NM"));
+    referral.setPerpetratorId(ifNull(rs.getString("PERPETRATOR_ID")));
+    referral.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
+    referral.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
 
-    referral.setReporterId(rs.getString("REPORTER_ID"));
-    referral.setReporterFirstName(rs.getString("REPORTER_FIRST_NM"));
-    referral.setReporterLastName(rs.getString("REPORTER_LAST_NM"));
+    referral.setReporterId(ifNull(rs.getString("REPORTER_ID")));
+    referral.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
+    referral.setReporterLastName(ifNull(rs.getString("REPORTER_LAST_NM")));
 
-    referral.setVictimId(rs.getString("VICTIM_ID"));
-    referral.setVictimFirstName(rs.getString("VICTIM_FIRST_NM"));
-    referral.setVictimLastName(rs.getString("VICTIM_LAST_NM"));
+    referral.setVictimId(ifNull(rs.getString("VICTIM_ID")));
+    referral.setVictimFirstName(ifNull(rs.getString("VICTIM_FIRST_NM")));
+    referral.setVictimLastName(ifNull(rs.getString("VICTIM_LAST_NM")));
 
-    referral.setWorkerId(rs.getString("WORKER_ID"));
-    referral.setWorkerFirstName(rs.getString("WORKER_FIRST_NM"));
-    referral.setWorkerLastName(rs.getString("WORKER_LAST_NM"));
+    referral.setWorkerId(ifNull(rs.getString("WORKER_ID")));
+    referral.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
+    referral.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
 
     return referral;
   }

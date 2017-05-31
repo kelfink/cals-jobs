@@ -553,6 +553,16 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
+   * Trim a String.
+   * 
+   * @param value String to trim
+   * @return trimmed String or null
+   */
+  public String ifNull(String value) {
+    return value != null ? value.trim() : null;
+  }
+
+  /**
    * Getter for the entity class of this job's view or materialized query table, if any, or null if
    * none.
    * 
@@ -666,7 +676,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void prepareInsertCollections(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-          throws JsonProcessingException {
+      throws JsonProcessingException {
 
     // Null out optional collections for updates.
     esp.clearOptionalCollections(keep);
@@ -689,7 +699,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected Pair<String, String> prepareUpsertJson(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-          throws JsonProcessingException {
+      throws JsonProcessingException {
 
     // Child classes: Set optional collections before serializing the insert JSON.
     prepareInsertCollections(esp, t, elementName, list, keep);
@@ -1307,8 +1317,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           : opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_ID_COL", getIdColumn())
-              .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
+              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
+                  String.valueOf(totalBuckets)),
+              BatchBucket.class);
 
       ret = q.getResultList();
       session.clear();

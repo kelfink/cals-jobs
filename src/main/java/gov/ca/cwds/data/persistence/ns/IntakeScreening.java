@@ -157,7 +157,7 @@ public class IntakeScreening
       ret.getAllegations().add(alg.toEsAllegation());
     }
 
-    LOGGER.info("screening: # participants: {}", this.participants.size());
+    // LOGGER.info("screening: # participants: {}", this.participants.size());
     for (IntakeParticipant p : this.participants.values()) {
       ret.getAllPeople().add((ElasticSearchPersonAny) p.toEsPerson(EsPersonType.ALL, this));
     }
