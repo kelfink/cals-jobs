@@ -100,17 +100,18 @@ public class ReplicatedEducationProviderContact extends BaseEducationProviderCon
 
   @SuppressWarnings("unchecked")
   @Override
-  public Class<ReplicatedEducationProviderContact> getReductionClass() {
+  public Class<ReplicatedEducationProviderContact> getNormalizationClass() {
     return (Class<ReplicatedEducationProviderContact>) this.getClass();
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedEducationProviderContact> map) {
-    // No op.
+  public ReplicatedEducationProviderContact normalize(
+      Map<Object, ReplicatedEducationProviderContact> map) {
+    return null;
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return this.getId();
   }
 

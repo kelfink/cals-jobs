@@ -110,17 +110,18 @@ public class ReplicatedSubstituteCareProvider extends BaseSubstituteCareProvider
 
   @SuppressWarnings("unchecked")
   @Override
-  public Class<ReplicatedSubstituteCareProvider> getReductionClass() {
+  public Class<ReplicatedSubstituteCareProvider> getNormalizationClass() {
     return (Class<ReplicatedSubstituteCareProvider>) this.getClass();
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedSubstituteCareProvider> map) {
-    // No op.
+  public ReplicatedSubstituteCareProvider normalize(
+      Map<Object, ReplicatedSubstituteCareProvider> map) {
+    return null;
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return this.getId();
   }
 

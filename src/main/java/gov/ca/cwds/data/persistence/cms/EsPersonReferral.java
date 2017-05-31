@@ -160,12 +160,12 @@ public class EsPersonReferral
   // =============
 
   @Override
-  public Class<ReplicatedPersonReferrals> getReductionClass() {
+  public Class<ReplicatedPersonReferrals> getNormalizationClass() {
     return ReplicatedPersonReferrals.class;
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedPersonReferrals> map) {
+  public ReplicatedPersonReferrals normalize(Map<Object, ReplicatedPersonReferrals> map) {
     ReplicatedPersonReferrals referrals = map.get(this.clientId);
     if (referrals == null) {
       referrals = new ReplicatedPersonReferrals(this.clientId);
@@ -225,10 +225,11 @@ public class EsPersonReferral
     allegation.setVictimLastName(this.victimLastName);
 
     referrals.addReferral(referral, allegation);
+    return referrals;
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return this.clientId;
   }
 

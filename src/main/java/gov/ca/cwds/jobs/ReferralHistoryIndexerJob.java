@@ -76,12 +76,12 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  protected ReplicatedPersonReferrals reduceSingle(List<EsPersonReferral> recs) {
-    return reduce(recs).get(0);
+  protected ReplicatedPersonReferrals normalizeSingle(List<EsPersonReferral> recs) {
+    return normalize(recs).get(0);
   }
 
   @Override
-  protected List<ReplicatedPersonReferrals> reduce(List<EsPersonReferral> recs) {
+  protected List<ReplicatedPersonReferrals> normalize(List<EsPersonReferral> recs) {
     return EntityNormalizer.<ReplicatedPersonReferrals, EsPersonReferral>reduceList(recs);
   }
 

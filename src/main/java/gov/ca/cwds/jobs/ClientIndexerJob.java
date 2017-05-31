@@ -2,10 +2,7 @@ package gov.ca.cwds.jobs;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +20,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+import gov.ca.cwds.jobs.transform.EntityNormalizer;
 
 /**
  * Job to load Clients from CMS into ElasticSearch.
@@ -71,15 +69,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  protected List<ReplicatedClient> reduce(List<EsClientAddress> recs) {
-    final int len = (int) (recs.size() * 1.25);
-    Map<Object, ReplicatedClient> map = new LinkedHashMap<>(len);
-    for (PersistentObject rec : recs) {
-      ApiGroupNormalizer<ReplicatedClient> reducer = (EsClientAddress) rec;
-      reducer.reduce(map);
-    }
-
-    return map.values().stream().collect(Collectors.toList());
+  protected List<ReplicatedClient> normalize(List<EsClientAddress> recs) {
+    return EntityNormalizer.<ReplicatedClient, EsClientAddress>reduceList(recs);
   }
 
   /**

@@ -9,8 +9,8 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
 /**
- * Transform a List of denormalized objects from a view and transform them into a normalized object.
- * Normalize ("reduce") denormalized type M to normalized type T.
+ * Transform a List of de-normalized objects from a view and transform them into a normalized
+ * object. Normalize ("reduce") de-normalized type D to normalized type N.
  * 
  * @author CWDS API Team
  */
@@ -22,7 +22,7 @@ public class EntityNormalizer {
 
   /**
    * Transform a List of denormalized objects from a view and transform them into a normalized
-   * object. Normalize ("reduce") denormalized type M to normalized type T.
+   * object. Normalize ("reduce") denormalized type D to normalized type N.
    * 
    * <p>
    * The "transform" step usually runs in a single thread. Therefore, most of the time, one can
@@ -32,22 +32,22 @@ public class EntityNormalizer {
    * 
    * @param denormalized denormalized records
    * @return List of normalized objects
-   * @param <T> ES storable, replicated Person persistence class
-   * @param <M> MQT entity class, if any, or T
+   * @param <N> ES storable, replicated Person persistence class
+   * @param <D> MQT entity class, if any, or N
    */
-  public static <T extends PersistentObject, M extends ApiGroupNormalizer<T>> List<T> reduceList(
-      List<M> denormalized) {
+  public static <N extends PersistentObject, D extends ApiGroupNormalizer<N>> List<N> reduceList(
+      List<D> denormalized) {
     final int len = (int) (denormalized.size() * 1.25);
-    final Map<Object, T> map = new LinkedHashMap<>(len);
+    final Map<Object, N> m = new LinkedHashMap<>(len);
 
-    // In order to stream to map(), method reduce() must return the normalized object.
-    // denormalized.stream().map(r -> r.reduce(map));
+    // In order to stream to map(), method normalize() must return the normalized object.
+    // denormalized.stream().map(r -> r.normalize(map));
 
-    for (ApiGroupNormalizer<T> reducer : denormalized) {
-      reducer.reduce(map);
+    for (ApiGroupNormalizer<N> reducer : denormalized) {
+      reducer.normalize(m);
     }
 
-    return map.values().stream().collect(Collectors.toList());
+    return m.values().stream().collect(Collectors.toList());
   }
 
 }

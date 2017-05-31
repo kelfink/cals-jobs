@@ -104,17 +104,17 @@ public class ReplicatedServiceProvider extends BaseServiceProvider
 
   @SuppressWarnings("unchecked")
   @Override
-  public Class<ReplicatedServiceProvider> getReductionClass() {
+  public Class<ReplicatedServiceProvider> getNormalizationClass() {
     return (Class<ReplicatedServiceProvider>) this.getClass();
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedServiceProvider> map) {
-    // No op.
+  public ReplicatedServiceProvider normalize(Map<Object, ReplicatedServiceProvider> map) {
+    return null;
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return this.getId();
   }
 

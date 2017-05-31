@@ -570,12 +570,12 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   @Override
-  public Class<ReplicatedClient> getReductionClass() {
+  public Class<ReplicatedClient> getNormalizationClass() {
     return ReplicatedClient.class;
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedClient> map) {
+  public ReplicatedClient normalize(Map<Object, ReplicatedClient> map) {
     final boolean isClientAdded = map.containsKey(this.cltId);
     ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : new ReplicatedClient();
 
@@ -698,6 +698,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     }
 
     map.put(ret.getId(), ret);
+    return ret;
   }
 
   public String getCltAdjudicatedDelinquentIndicator() {
@@ -1567,7 +1568,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return this.cltId;
   }
 

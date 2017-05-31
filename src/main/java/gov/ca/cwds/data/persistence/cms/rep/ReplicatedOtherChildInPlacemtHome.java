@@ -100,17 +100,18 @@ public class ReplicatedOtherChildInPlacemtHome extends BaseOtherChildInPlacemtHo
 
   @SuppressWarnings("unchecked")
   @Override
-  public Class<ReplicatedOtherChildInPlacemtHome> getReductionClass() {
+  public Class<ReplicatedOtherChildInPlacemtHome> getNormalizationClass() {
     return (Class<ReplicatedOtherChildInPlacemtHome>) this.getClass();
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedOtherChildInPlacemtHome> map) {
-    // No op.
+  public ReplicatedOtherChildInPlacemtHome normalize(
+      Map<Object, ReplicatedOtherChildInPlacemtHome> map) {
+    return null;
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return this.getId();
   }
 

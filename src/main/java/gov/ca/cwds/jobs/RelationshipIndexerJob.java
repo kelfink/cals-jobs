@@ -105,12 +105,12 @@ public class RelationshipIndexerJob
   }
 
   @Override
-  protected ReplicatedRelationships reduceSingle(List<EsRelationship> recs) {
-    return reduce(recs).get(0);
+  protected ReplicatedRelationships normalizeSingle(List<EsRelationship> recs) {
+    return normalize(recs).get(0);
   }
 
   @Override
-  protected List<ReplicatedRelationships> reduce(List<EsRelationship> recs) {
+  protected List<ReplicatedRelationships> normalize(List<EsRelationship> recs) {
     return EntityNormalizer.<ReplicatedRelationships, EsRelationship>reduceList(recs);
   }
 

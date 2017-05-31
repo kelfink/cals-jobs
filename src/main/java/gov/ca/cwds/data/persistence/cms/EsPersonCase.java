@@ -145,12 +145,12 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
   // =============
 
   @Override
-  public Class<ReplicatedPersonCases> getReductionClass() {
+  public Class<ReplicatedPersonCases> getNormalizationClass() {
     return ReplicatedPersonCases.class;
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedPersonCases> map) {
+  public ReplicatedPersonCases normalize(Map<Object, ReplicatedPersonCases> map) {
     ReplicatedPersonCases cases = map.get(this.focusChildId);
     if (cases == null) {
       cases = new ReplicatedPersonCases(this.focusChildId);
@@ -208,10 +208,11 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.parentRelationship));
 
     cases.addCase(esPersonCase, parent);
+    return cases;
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return this.focusChildId;
   }
 

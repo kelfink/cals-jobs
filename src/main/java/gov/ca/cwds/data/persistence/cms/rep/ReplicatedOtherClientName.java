@@ -98,17 +98,17 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
 
   @SuppressWarnings("unchecked")
   @Override
-  public Class<ReplicatedOtherClientName> getReductionClass() {
+  public Class<ReplicatedOtherClientName> getNormalizationClass() {
     return (Class<ReplicatedOtherClientName>) this.getClass();
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedOtherClientName> map) {
-    // No op.
+  public ReplicatedOtherClientName normalize(Map<Object, ReplicatedOtherClientName> map) {
+    return null;
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return this.getPrimaryKey();
   }
 

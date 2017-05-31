@@ -106,17 +106,17 @@ public class ReplicatedCollateralIndividual extends BaseCollateralIndividual
 
   @SuppressWarnings("unchecked")
   @Override
-  public Class<ReplicatedCollateralIndividual> getReductionClass() {
+  public Class<ReplicatedCollateralIndividual> getNormalizationClass() {
     return (Class<ReplicatedCollateralIndividual>) this.getClass();
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedCollateralIndividual> map) {
-    // No op.
+  public ReplicatedCollateralIndividual normalize(Map<Object, ReplicatedCollateralIndividual> map) {
+    return null;
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return this.getId();
   }
 

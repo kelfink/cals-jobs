@@ -104,17 +104,17 @@ public class ReplicatedAttorney extends BaseAttorney
 
   @SuppressWarnings("unchecked")
   @Override
-  public Class<ReplicatedAttorney> getReductionClass() {
+  public Class<ReplicatedAttorney> getNormalizationClass() {
     return (Class<ReplicatedAttorney>) this.getClass();
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedAttorney> map) {
-    // No op.
+  public ReplicatedAttorney normalize(Map<Object, ReplicatedAttorney> map) {
+    return null;
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return this.getId();
   }
 

@@ -154,12 +154,12 @@ public class CaseHistoryIndexerJob extends BasePersonIndexerJob<ReplicatedPerson
   }
 
   @Override
-  protected ReplicatedPersonCases reduceSingle(List<EsPersonCase> recs) {
-    return reduce(recs).get(0);
+  protected ReplicatedPersonCases normalizeSingle(List<EsPersonCase> recs) {
+    return normalize(recs).get(0);
   }
 
   @Override
-  protected List<ReplicatedPersonCases> reduce(List<EsPersonCase> recs) {
+  protected List<ReplicatedPersonCases> normalize(List<EsPersonCase> recs) {
     return EntityNormalizer.<ReplicatedPersonCases, EsPersonCase>reduceList(recs);
   }
 

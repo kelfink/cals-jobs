@@ -137,7 +137,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
   }
 
   @Override
-  protected List<IntakeParticipant> reduce(List<EsIntakeScreening> recs) {
+  protected List<IntakeParticipant> normalize(List<EsIntakeScreening> recs) {
     return EntityNormalizer.<IntakeParticipant, EsIntakeScreening>reduceList(recs);
   }
 

@@ -118,17 +118,17 @@ public class ReplicatedReporter extends BaseReporter
 
   @SuppressWarnings("unchecked")
   @Override
-  public Class<ReplicatedReporter> getReductionClass() {
+  public Class<ReplicatedReporter> getNormalizationClass() {
     return (Class<ReplicatedReporter>) this.getClass();
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedReporter> map) {
-    // No op.
+  public ReplicatedReporter normalize(Map<Object, ReplicatedReporter> map) {
+    return null;
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return this.getPrimaryKey();
   }
 

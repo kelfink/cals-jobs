@@ -228,7 +228,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   // =============
 
   @Override
-  public Class<IntakeParticipant> getReductionClass() {
+  public Class<IntakeParticipant> getNormalizationClass() {
     return IntakeParticipant.class;
   }
 
@@ -309,26 +309,26 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   }
 
   @Override
-  public void reduce(Map<Object, IntakeParticipant> map) {
-    final String thisPartcId = (String) getGroupKey();
+  public IntakeParticipant normalize(Map<Object, IntakeParticipant> map) {
+    final String thisPartcId = (String) getNormalizationGroupKey();
 
     // Iterate screenings from the perspective of "this" participant.
     // Separate "this" participant from "other" participant.
     // This job stores person documents, not independent screening documents.
-    IntakeParticipant thisPartc;
+    IntakeParticipant ret;
 
     if (map.containsKey(thisPartcId)) {
-      thisPartc = map.get(thisPartcId);
+      ret = map.get(thisPartcId);
     } else {
-      thisPartc = fillParticipant(false);
-      map.put(thisPartcId, thisPartc);
+      ret = fillParticipant(false);
+      map.put(thisPartcId, ret);
     }
 
-    // LOGGER.debug("reduce: this partc id: {}, screening id: {}", thisPartcId, screeningId);
+    // LOGGER.debug("normalize: this partc id: {}, screening id: {}", thisPartcId, screeningId);
 
     try {
       IntakeScreening s;
-      final Map<String, IntakeScreening> mapScreenings = thisPartc.getScreenings();
+      final Map<String, IntakeScreening> mapScreenings = ret.getScreenings();
 
       if (!mapScreenings.containsKey(screeningId)) {
         s = fillScreening();
@@ -414,10 +414,12 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       LOGGER.error("OOPS! {}", this);
       throw e;
     }
+
+    return ret;
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return isNotBlank(thisLegacyId) ? thisLegacyId : thisParticipantId;
   }
 

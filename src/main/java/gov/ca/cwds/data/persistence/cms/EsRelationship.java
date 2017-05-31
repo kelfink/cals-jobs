@@ -128,12 +128,12 @@ public class EsRelationship
   }
 
   @Override
-  public Class<ReplicatedRelationships> getReductionClass() {
+  public Class<ReplicatedRelationships> getNormalizationClass() {
     return ReplicatedRelationships.class;
   }
 
   @Override
-  public void reduce(Map<Object, ReplicatedRelationships> map) {
+  public ReplicatedRelationships normalize(Map<Object, ReplicatedRelationships> map) {
     final boolean isClientAdded = map.containsKey(this.thisLegacyId);
     final ReplicatedRelationships ret =
         isClientAdded ? map.get(this.thisLegacyId) : new ReplicatedRelationships(this.thisLegacyId);
@@ -194,10 +194,11 @@ public class EsRelationship
     }
 
     map.put(ret.getId(), ret);
+    return ret;
   }
 
   @Override
-  public Object getGroupKey() {
+  public Object getNormalizationGroupKey() {
     return this.thisLegacyId;
   }
 

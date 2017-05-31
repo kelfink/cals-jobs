@@ -574,27 +574,28 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Default reduce method just returns the input. Child classes may customize this method to
-   * convert (reduce) denormalized result sets to normalized entities.
+   * Default normalize method just returns the input. Child classes may customize this method to
+   * normalize de-normalized result sets (view records) to normalized entities (parent/child)
+   * records.
    * 
    * @param recs entity records
    * @return unmodified entity records
    * @see EntityNormalizer
    */
   @SuppressWarnings("unchecked")
-  protected List<T> reduce(List<M> recs) {
+  protected List<T> normalize(List<M> recs) {
     return (List<T>) recs;
   }
 
   /**
-   * Reduce/normalize view records for a single grouping (such as all the same client) into a
-   * normalized entity bean, consisting of a parent object and its child objects.
+   * Normalize view records for a single grouping (such as all the same client) into a normalized
+   * entity bean, consisting of a parent object and its child objects.
    * 
    * @param recs denormalized view beans
    * @return normalized entity bean instance
    */
-  protected T reduceSingle(List<M> recs) {
-    final List<T> list = reduce(recs);
+  protected T normalizeSingle(List<M> recs) {
+    final List<T> list = normalize(recs);
     return list != null && !list.isEmpty() ? list.get(0) : null;
   }
 
@@ -610,7 +611,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * True if the Job class intends to reduce denormalized results to normalized ones.
    * 
-   * @return true if class overrides {@link #reduce(List)}
+   * @return true if class overrides {@link #normalize(List)}
    */
   protected final boolean isViewNormalizer() {
     return getDenormalizedClass() != null;
@@ -956,8 +957,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           logEvery(++cntr, "Transformed", "recs");
 
           // NOTE: Assumes that records are sorted by group key.
-          if (!lastId.equals(m.getGroupKey()) && cntr > 1) {
-            final T t = reduceSingle(groupRecs);
+          if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
+            final T t = normalizeSingle(groupRecs);
             if (t != null) {
               queueLoad.putLast(t);
               groupRecs.clear(); // Single thread, re-use memory.
@@ -965,12 +966,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           }
 
           groupRecs.add(m);
-          lastId = m.getGroupKey();
+          lastId = m.getNormalizationGroupKey();
         }
 
         // Last bundle.
         if (!groupRecs.isEmpty()) {
-          final T t = reduceSingle(groupRecs);
+          final T t = normalizeSingle(groupRecs);
           if (t != null) {
             queueLoad.putLast(t);
             groupRecs.clear(); // Single thread, re-use memory.
@@ -1273,17 +1274,17 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Convert denormalized view rows to normalized persistence objects.
       List<M> groupRecs = new ArrayList<>();
       for (M m : recs) {
-        if (!lastId.equals(m.getGroupKey()) && !groupRecs.isEmpty()) {
-          results.add(reduceSingle(groupRecs));
+        if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
+          results.add(normalizeSingle(groupRecs));
           groupRecs.clear();
         }
 
         groupRecs.add(m);
-        lastId = m.getGroupKey();
+        lastId = m.getNormalizationGroupKey();
       }
 
       if (!groupRecs.isEmpty()) {
-        results.add(reduceSingle(groupRecs));
+        results.add(normalizeSingle(groupRecs));
       }
 
       session.clear();
