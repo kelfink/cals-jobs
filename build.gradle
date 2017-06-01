@@ -23,7 +23,7 @@ project.ext {
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
 }
 
-version = 0.22
+version = 0.24
 
 repositories {
     mavenCentral()
@@ -49,7 +49,7 @@ dependencies {
 	// compile group: "gov.ca.cwds.api", name: "api", version: "0.22.928"
 
 	// Exclude transitive dependencies.
-	compile ('gov.ca.cwds.api:api-core:0.22.258') {
+	compile ('gov.ca.cwds.api:api-core:0.24.259') {
 	    exclude group: 'org.glassfish.jersey.core'
 	}
 	
@@ -91,7 +91,7 @@ publishing {
   }
   repositories {
     maven {
-      //TODO : set to http url
+      // TODO : set to http url.
       url "file:///usr/share/nginx/html/maven2"
     }
   }
