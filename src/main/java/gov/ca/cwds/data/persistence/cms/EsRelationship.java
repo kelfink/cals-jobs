@@ -29,7 +29,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
 /**
- * Entity bean for Materialized Query Table (MQT), VW_RELATIONSHIP.
+ * Entity bean for Materialized Query Table (MQT), VW_BI_DIR_RELATION.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedRelationships}.
@@ -38,14 +38,25 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
  * @author CWDS API Team
  */
 @Entity
-@Table(name = "VW_RELATIONSHIP")
+@Table(name = "VW_BI_DIR_RELATION")
 @NamedNativeQueries({
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfter",
-        query = "SELECT v.* FROM {h-schema}VW_RELATIONSHIP v WHERE v.THIS_LEGACY_ID IN ("
-            + " SELECT v1.THIS_LEGACY_ID FROM {h-schema}VW_RELATIONSHIP v1 "
-            + "WHERE v1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID, THIS_LEGACY_TABLE, RELATED_LEGACY_TABLE "
-            + "FOR READ ONLY ",
+        // query = "SELECT v.* FROM {h-schema}VW_RELATIONSHIP v WHERE v.THIS_LEGACY_ID IN ("
+        // + " SELECT v1.THIS_LEGACY_ID FROM {h-schema}VW_RELATIONSHIP v1 "
+        // + "WHERE v1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+        // + ") ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID, THIS_LEGACY_TABLE, RELATED_LEGACY_TABLE
+        // "
+        // + "FOR READ ONLY ",
+        // query = "SELECT v.* FROM {h-schema}VW_BI_DIR_RELATION v WHERE v.THIS_LEGACY_ID IN ("
+        // + " SELECT v1.THIS_LEGACY_ID FROM {h-schema}VW_BI_DIR_RELATION v1 "
+        // + "WHERE v1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+        // + ") ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY ",
+        query = "WITH driver as ( "
+            + " SELECT v1.THIS_LEGACY_ID, V1.RELATED_LEGACY_ID FROM CWSRS1.VW_BI_DIR_RELATION v1 where v1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + ") SELECT V.* FROM {h-schema}VW_BI_DIR_RELATION v "
+            + "WHERE v.THIS_LEGACY_ID IN (select d1.THIS_LEGACY_ID from driver d1) "
+            + "OR v.RELATED_LEGACY_ID IN (select d2.RELATED_LEGACY_ID from driver d2) "
+            + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY ",
         resultClass = EsRelationship.class, readOnly = true)})
 public class EsRelationship
     implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationships> {
@@ -60,13 +71,19 @@ public class EsRelationship
   private static final Pattern RGX_RELATIONSHIP =
       Pattern.compile("([A-Za-z0-9 _-]+)[/]?([A-Za-z0-9 _-]+)?\\s*(\\([A-Za-z0-9 _-]+\\))?");
 
-  @Id
-  @Column(name = "THIS_LEGACY_TABLE")
-  private String thisLegacyTable;
+  // By request of the Intake team, only read relationships from CLN_RELT, for now.
+  // @Id
+  // @Column(name = "THIS_LEGACY_TABLE")
+  // private String thisLegacyTable;
+
+  // @Id
+  // @Column(name = "RELATED_LEGACY_TABLE")
+  // private String relatedLegacyTable;
 
   @Id
-  @Column(name = "RELATED_LEGACY_TABLE")
-  private String relatedLegacyTable;
+  @Type(type = "boolean")
+  @Column(name = "REVERSE_RELATIONSHIP")
+  private Boolean reverseRelationship;
 
   @Id
   @Column(name = "THIS_LEGACY_ID")
@@ -114,8 +131,11 @@ public class EsRelationship
   public static EsRelationship mapRow(ResultSet rs) throws SQLException {
     EsRelationship ret = new EsRelationship();
 
-    ret.setThisLegacyTable(ifNull(rs.getString("THIS_LEGACY_TABLE")));
-    ret.setRelatedLegacyTable(ifNull(rs.getString("RELATED_LEGACY_TABLE")));
+    // Only reading from CLN_RELT, for the moment.
+    // ret.setThisLegacyTable(ifNull(rs.getString("THIS_LEGACY_TABLE")));
+    // ret.setRelatedLegacyTable(ifNull(rs.getString("RELATED_LEGACY_TABLE")));
+
+    ret.setReverseRelationship(rs.getBoolean("REVERSE_RELATIONSHIP"));
     ret.setThisLegacyId(ifNull(rs.getString("THIS_LEGACY_ID")));
     ret.setThisFirstName(ifNull(rs.getString("THIS_FIRST_NAME")));
     ret.setThisLastName(ifNull(rs.getString("THIS_LAST_NAME")));
@@ -132,25 +152,15 @@ public class EsRelationship
     return ReplicatedRelationships.class;
   }
 
-  @Override
-  public ReplicatedRelationships normalize(Map<Object, ReplicatedRelationships> map) {
-    final boolean isClientAdded = map.containsKey(this.thisLegacyId);
-    final ReplicatedRelationships ret =
-        isClientAdded ? map.get(this.thisLegacyId) : new ReplicatedRelationships(this.thisLegacyId);
-
-    ElasticSearchPersonRelationship rel = new ElasticSearchPersonRelationship();
-    ret.addRelation(rel);
-    rel.setRelatedPersonFirstName(this.relatedFirstName.trim());
-    rel.setRelatedPersonLastName(this.relatedLastName.trim());
-    rel.setRelatedPersonLegacyId(this.relatedLegacyId);
-    rel.setRelatedPersonLegacySourceTable(this.thisLegacyTable.trim());
-
-    // Intake will set field "related_person_id" from **Postgres**, NOT from DB2.
-    // rel.setRelatedPersonId(this.); // NOSONAR
-
+  /**
+   * Parse bi-directional relationships and add to appropriate side.
+   * 
+   * @param rel relationship to modify
+   */
+  protected void parseBiDirectionalRelationship(final ElasticSearchPersonRelationship rel) {
     if (this.relCode != null && this.relCode.intValue() != 0) {
       final CmsSystemCode code = ElasticSearchPerson.getSystemCodes().lookup(this.relCode);
-      final String wholeRel = code.getShortDsc();
+      final String wholeRel = ifNull(code.getShortDsc());
       String primaryRel = "";
       String secondaryRel = "";
       String relContext = "";
@@ -178,20 +188,51 @@ public class EsRelationship
           }
         }
 
-        rel.setIndexedPersonRelationship(primaryRel);
-        rel.setRelatedPersonRelationship(secondaryRel);
+        // Reverse relationship direction.
+        if (getReverseRelationship() == null || getReverseRelationship().booleanValue()) {
+          rel.setIndexedPersonRelationship(secondaryRel);
+          rel.setRelatedPersonRelationship(primaryRel);
+        } else {
+          rel.setIndexedPersonRelationship(primaryRel);
+          rel.setRelatedPersonRelationship(secondaryRel);
+        }
+
+        // Context remains the same.
         rel.setRelationshipContext(relContext);
 
+        // Java lambda requires variables to be "effectively" final.
+        // For example, primaryRel is assignable and therefore cannot be used in lambda.
         final String priRel = primaryRel;
-        final String secRel = primaryRel;
+        final String secRel = secondaryRel;
 
-        // Only log if trace is enabled.
+        // Log **only if** trace is enabled.
         LOGGER.trace("primaryRel={}, secondaryRel={}", () -> priRel, () -> secRel);
 
       } else {
+        // Java lambda requires variables to be "effectively" final.
+        // Variable wholeRel is not assignable and therefore can be used in lambda.
         LOGGER.trace("NO MATCH!! rel={}", () -> wholeRel);
       }
     }
+  }
+
+  @Override
+  public ReplicatedRelationships normalize(Map<Object, ReplicatedRelationships> map) {
+    final boolean isClientAdded = map.containsKey(this.thisLegacyId);
+    final ReplicatedRelationships ret =
+        isClientAdded ? map.get(this.thisLegacyId) : new ReplicatedRelationships(this.thisLegacyId);
+
+    final ElasticSearchPersonRelationship rel = new ElasticSearchPersonRelationship();
+    ret.addRelation(rel);
+    rel.setRelatedPersonFirstName(this.relatedFirstName.trim());
+    rel.setRelatedPersonLastName(this.relatedLastName.trim());
+    rel.setRelatedPersonLegacyId(this.relatedLegacyId);
+    parseBiDirectionalRelationship(rel);
+
+    // Only reading from CLN_RELT, for the moment.
+    // rel.setRelatedPersonLegacySourceTable(this.thisLegacyTable.trim());
+
+    // Intake will set field "related_person_id" from **Postgres**, NOT from DB2.
 
     map.put(ret.getId(), ret);
     return ret;
@@ -229,22 +270,6 @@ public class EsRelationship
   @Override
   public final boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
-  }
-
-  public String getThisLegacyTable() {
-    return thisLegacyTable;
-  }
-
-  public void setThisLegacyTable(String thisLegacyTable) {
-    this.thisLegacyTable = thisLegacyTable;
-  }
-
-  public String getRelatedLegacyTable() {
-    return relatedLegacyTable;
-  }
-
-  public void setRelatedLegacyTable(String relatedLegacyTable) {
-    this.relatedLegacyTable = relatedLegacyTable;
   }
 
   public String getThisLegacyId() {
@@ -303,13 +328,20 @@ public class EsRelationship
     this.relatedLastName = relatedLastName;
   }
 
+  public Boolean getReverseRelationship() {
+    return reverseRelationship;
+  }
+
+  public void setReverseRelationship(Boolean reverseRelationship) {
+    this.reverseRelationship = reverseRelationship;
+  }
+
   @Override
   public String toString() {
-    return "EsRelationship [thisLegacyTable=" + thisLegacyTable + ", relatedLegacyTable="
-        + relatedLegacyTable + ", thisLegacyId=" + thisLegacyId + ", thisFirstName=" + thisFirstName
-        + ", thisLastName=" + thisLastName + ", relCode=" + relCode + ", relatedLegacyId="
-        + relatedLegacyId + ", relatedFirstName=" + relatedFirstName + ", relatedLastName="
-        + relatedLastName + "]";
+    return "EsRelationship [reverseRelationship=" + reverseRelationship + ", thisLegacyId="
+        + thisLegacyId + ", thisFirstName=" + thisFirstName + ", thisLastName=" + thisLastName
+        + ", relCode=" + relCode + ", relatedLegacyId=" + relatedLegacyId + ", relatedFirstName="
+        + relatedFirstName + ", relatedLastName=" + relatedLastName + "]";
   }
 
 }

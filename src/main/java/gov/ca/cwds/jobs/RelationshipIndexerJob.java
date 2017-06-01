@@ -66,12 +66,12 @@ public class RelationshipIndexerJob
 
   @Override
   public String getViewName() {
-    return "VW_RELATIONSHIP";
+    return "VW_BI_DIR_RELATION";
   }
 
   @Override
   public String getJdbcOrderBy() {
-    return " ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID, THIS_LEGACY_TABLE, RELATED_LEGACY_TABLE ";
+    return " ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID ";
   }
 
   @Override
