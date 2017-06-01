@@ -17,12 +17,12 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 public class EntityNormalizer {
 
   private EntityNormalizer() {
-    // Util class. Class static methods.
+    // Util class, static methods only.
   }
 
   /**
-   * Transform a List of denormalized objects from a view and transform them into a normalized
-   * object. Normalize ("reduce") denormalized type D to normalized type N.
+   * Transform a List of de-normalized objects from a view and transform them into a normalized
+   * object. Normalize a de-normalized type D to normalized type N.
    * 
    * <p>
    * The "transform" step usually runs in a single thread. Therefore, most of the time, one can
@@ -30,24 +30,17 @@ public class EntityNormalizer {
    * alleviate concerns of thread safety.
    * </p>
    * 
-   * @param denormalized denormalized records
+   * @param denormalized de-normalized records
    * @return List of normalized objects
-   * @param <N> ES storable, replicated Person persistence class
+   * @param <N> normalized, storable in Elasticsearch, Person persistence class
    * @param <D> MQT entity class, if any, or N
    */
   public static <N extends PersistentObject, D extends ApiGroupNormalizer<N>> List<N> reduceList(
       List<D> denormalized) {
-    final int len = (int) (denormalized.size() * 1.25);
-    final Map<Object, N> m = new LinkedHashMap<>(len);
+    final Map<Object, N> m = new LinkedHashMap<>((int) (denormalized.size() * 1.25));
 
     // In order to stream to map(), method normalize() must return the normalized object.
-    // denormalized.stream().map(r -> r.normalize(map));
-
-    for (ApiGroupNormalizer<N> reducer : denormalized) {
-      reducer.normalize(m);
-    }
-
-    return m.values().stream().collect(Collectors.toList());
+    return denormalized.stream().map(d -> d.normalize(m)).collect(Collectors.toList());
   }
 
 }
