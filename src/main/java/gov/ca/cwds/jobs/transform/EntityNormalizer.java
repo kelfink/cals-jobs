@@ -35,7 +35,7 @@ public class EntityNormalizer {
    * @param <N> normalized, storable in Elasticsearch, Person persistence class
    * @param <D> MQT entity class, if any, or N
    */
-  public static <N extends PersistentObject, D extends ApiGroupNormalizer<N>> List<N> reduceList(
+  public static <N extends PersistentObject, D extends ApiGroupNormalizer<N>> List<N> normalizeList(
       List<D> denormalized) {
     final Map<Object, N> m = new LinkedHashMap<>((int) (denormalized.size() * 1.25));
 

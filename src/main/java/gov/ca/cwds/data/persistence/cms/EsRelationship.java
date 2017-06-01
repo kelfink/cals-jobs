@@ -216,6 +216,10 @@ public class EsRelationship
     }
   }
 
+  /**
+   * Implementation notes: Only reading from CLN_RELT, for the moment. Intake will set field
+   * "related_person_id" from **Postgres**, NOT from DB2.
+   */
   @Override
   public ReplicatedRelationships normalize(Map<Object, ReplicatedRelationships> map) {
     final boolean isClientAdded = map.containsKey(this.thisLegacyId);
@@ -228,11 +232,6 @@ public class EsRelationship
     rel.setRelatedPersonLastName(this.relatedLastName.trim());
     rel.setRelatedPersonLegacyId(this.relatedLegacyId);
     parseBiDirectionalRelationship(rel);
-
-    // Only reading from CLN_RELT, for the moment.
-    // rel.setRelatedPersonLegacySourceTable(this.thisLegacyTable.trim());
-
-    // Intake will set field "related_person_id" from **Postgres**, NOT from DB2.
 
     map.put(ret.getId(), ret);
     return ret;

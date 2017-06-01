@@ -111,7 +111,7 @@ public class RelationshipIndexerJob
 
   @Override
   protected List<ReplicatedRelationships> normalize(List<EsRelationship> recs) {
-    return EntityNormalizer.<ReplicatedRelationships, EsRelationship>reduceList(recs);
+    return EntityNormalizer.<ReplicatedRelationships, EsRelationship>normalizeList(recs);
   }
 
   /**

@@ -160,7 +160,7 @@ public class CaseHistoryIndexerJob extends BasePersonIndexerJob<ReplicatedPerson
 
   @Override
   protected List<ReplicatedPersonCases> normalize(List<EsPersonCase> recs) {
-    return EntityNormalizer.<ReplicatedPersonCases, EsPersonCase>reduceList(recs);
+    return EntityNormalizer.<ReplicatedPersonCases, EsPersonCase>normalizeList(recs);
   }
 
   /**

@@ -82,7 +82,7 @@ public class ReferralHistoryIndexerJob
 
   @Override
   protected List<ReplicatedPersonReferrals> normalize(List<EsPersonReferral> recs) {
-    return EntityNormalizer.<ReplicatedPersonReferrals, EsPersonReferral>reduceList(recs);
+    return EntityNormalizer.<ReplicatedPersonReferrals, EsPersonReferral>normalizeList(recs);
   }
 
   @Override
