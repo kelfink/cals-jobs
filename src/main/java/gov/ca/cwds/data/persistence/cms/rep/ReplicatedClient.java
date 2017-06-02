@@ -1,10 +1,8 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -159,16 +157,22 @@ public class ReplicatedClient extends BaseClient
   @JsonIgnore
   @Override
   public ApiAddressAware[] getAddresses() {
-    List<ApiAddressAware> ret = new ArrayList<>();
-    if (this.clientAddresses != null && !this.clientAddresses.isEmpty()) {
-      for (ReplicatedClientAddress clAddr : this.clientAddresses) {
-        for (ReplicatedAddress addr : clAddr.getAddresses()) {
-          ret.add(addr);
-        }
-      }
-    }
 
-    return ret.toArray(new ApiAddressAware[0]);
+    // OLD SCHOOL BOILERPLATE.
+    // List<ApiAddressAware> ret = new ArrayList<>();
+    // if (this.clientAddresses != null && !this.clientAddresses.isEmpty()) {
+    // for (ReplicatedClientAddress clAddr : this.clientAddresses) {
+    // for (ReplicatedAddress addr : clAddr.getAddresses()) {
+    // ret.add(addr);
+    // }
+    // }
+    // }
+    //
+    // return ret.toArray(new ApiAddressAware[0]);
+
+    // STREAMS.
+    return clientAddresses.stream().flatMap(ca -> ca.addresses.stream())
+        .collect(Collectors.toList()).toArray(new ApiAddressAware[0]);
   }
 
   // ============================
@@ -181,7 +185,6 @@ public class ReplicatedClient extends BaseClient
 
     // OLD SCHOOL BOILERPLATE.
     // final List<ApiPhoneAware> phones = new ArrayList<>();
-    //
     // if (this.clientAddresses != null && !this.clientAddresses.isEmpty()) {
     // for (ReplicatedClientAddress clAdr : this.clientAddresses) {
     // for (ReplicatedAddress adr : clAdr.getAddresses()) {
