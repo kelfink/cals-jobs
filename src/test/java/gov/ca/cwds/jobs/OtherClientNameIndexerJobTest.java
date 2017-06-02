@@ -20,8 +20,8 @@ import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
+ * 
  * @author CWDS API Team
- *
  */
 @SuppressWarnings("javadoc")
 public class OtherClientNameIndexerJobTest {

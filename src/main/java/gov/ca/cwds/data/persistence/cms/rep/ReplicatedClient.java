@@ -171,7 +171,9 @@ public class ReplicatedClient extends BaseClient
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
-    List<ApiPhoneAware> phones = new ArrayList<>();
+    final List<ApiPhoneAware> phones = new ArrayList<>();
+
+    // TODO: convert to stream.
     if (this.clientAddresses != null && !this.clientAddresses.isEmpty()) {
       for (ReplicatedClientAddress clAddr : this.clientAddresses) {
         for (ReplicatedAddress addr : clAddr.getAddresses()) {
