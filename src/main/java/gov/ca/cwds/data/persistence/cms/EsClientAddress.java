@@ -50,8 +50,6 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
         resultClass = EsClientAddress.class, readOnly = true)})
 public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
 
-  // private static final Logger LOGGER = LogManager.getLogger(EsClientAddress.class);
-
   /**
    * Default.
    */
