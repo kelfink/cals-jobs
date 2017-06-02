@@ -108,8 +108,8 @@ public class ReferralHistoryIndexerJob
 
     final String updateJson = buf.toString();
     final String insertJson = mapper.writeValueAsString(esp);
-    // LOGGER.info("insertJson: {}", insertJson);
-    // LOGGER.info("updateJson: {}", updateJson);
+    LOGGER.trace("insertJson: {}", () -> insertJson);
+    LOGGER.trace("updateJson: {}", () -> updateJson);
 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();

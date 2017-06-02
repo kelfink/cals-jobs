@@ -1,89 +1,86 @@
 package gov.ca.cwds.data.model.facility.es;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
+ * 
  * @author CWDS Elasticsearch Team
  */
-public class ESFacilityAddress {
-/*    @JsonProperty("street_number")
-    private String streetNumber;
-    @JsonProperty("street_name")
-    private String streetName;*/
-    @JsonProperty("state_code_type")
-    private String stateCodeType;
-    @JsonProperty("zip_code")
-    private String zipCode;
-    @JsonProperty("zip_suffix_code")
-    private String zipSuffixCode;
-    @JsonProperty("street_address")
-    private String streetAddress;
-    @JsonProperty("city")
-    private String city;
-    @JsonProperty("county")
-    private String county;
+public class ESFacilityAddress implements Serializable {
 
-   /* public String getStreetNumber() {
-        return streetNumber;
-    }
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
 
-    public void setStreetNumber(String streetNumber) {
-        this.streetNumber = streetNumber;
-    }
+  // @JsonProperty("street_number") private String streetNumber;
+  // @JsonProperty("street_name") private String streetName;
 
-    public String getStreetName() {
-        return streetName;
-    }
+  @JsonProperty("state_code_type")
+  private String stateCodeType;
 
-    public void setStreetName(String streetName) {
-        this.streetName = streetName;
-    }*/
+  @JsonProperty("zip_code")
+  private String zipCode;
 
-    public String getStateCodeType() {
-        return stateCodeType;
-    }
+  @JsonProperty("zip_suffix_code")
+  private String zipSuffixCode;
 
-    public void setStateCodeType(String stateCodeType) {
-        this.stateCodeType = stateCodeType;
-    }
+  @JsonProperty("street_address")
+  private String streetAddress;
 
-    public String getZipCode() {
-        return zipCode;
-    }
+  @JsonProperty("city")
+  private String city;
 
-    public void setZipCode(String zipCode) {
-        this.zipCode = zipCode;
-    }
+  @JsonProperty("county")
+  private String county;
 
-    public String getZipSuffixCode() {
-        return zipSuffixCode;
-    }
+  public String getStateCodeType() {
+    return stateCodeType;
+  }
 
-    public void setZipSuffixCode(String zipSuffixCode) {
-        this.zipSuffixCode = zipSuffixCode;
-    }
+  public void setStateCodeType(String stateCodeType) {
+    this.stateCodeType = stateCodeType;
+  }
 
-    public String getStreetAddress() {
-        return streetAddress;
-    }
+  public String getZipCode() {
+    return zipCode;
+  }
 
-    public void setStreetAddress(String streetAddress) {
-        this.streetAddress = streetAddress;
-    }
+  public void setZipCode(String zipCode) {
+    this.zipCode = zipCode;
+  }
 
-    public String getCity() {
-        return city;
-    }
+  public String getZipSuffixCode() {
+    return zipSuffixCode;
+  }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+  public void setZipSuffixCode(String zipSuffixCode) {
+    this.zipSuffixCode = zipSuffixCode;
+  }
 
-    public String getCounty() {
-        return county;
-    }
+  public String getStreetAddress() {
+    return streetAddress;
+  }
 
-    public void setCounty(String county) {
-        this.county = county;
-    }
+  public void setStreetAddress(String streetAddress) {
+    this.streetAddress = streetAddress;
+  }
+
+  public String getCity() {
+    return city;
+  }
+
+  public void setCity(String city) {
+    this.city = city;
+  }
+
+  public String getCounty() {
+    return county;
+  }
+
+  public void setCounty(String county) {
+    this.county = county;
+  }
 }

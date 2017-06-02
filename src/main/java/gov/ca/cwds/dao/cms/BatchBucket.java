@@ -5,6 +5,18 @@ import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import org.hibernate.SessionFactory;
+
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider;
+import gov.ca.cwds.inject.CmsSessionFactory;
+
+/**
+ * Hibernate DAO for DB2 {@link ReplicatedSubstituteCareProvider}.
+ * 
+ * @author CWDS API Team
+ * @see CmsSessionFactory
+ * @see SessionFactory
+ */
 @Entity
 public class BatchBucket implements Serializable {
 

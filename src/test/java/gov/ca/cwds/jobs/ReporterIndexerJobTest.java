@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
@@ -18,11 +20,13 @@ import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
- * @author Tabpcenc1
- *
+ * Test for {@link ReporterIndexerJob}.
+ * 
+ * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
 public class ReporterIndexerJobTest {
+
   @SuppressWarnings("unused")
   private static ReplicatedReporterDao reporterDao;
   private static SessionFactory sessionFactory;
@@ -87,6 +91,72 @@ public class ReporterIndexerJobTest {
   // Query query =
   // session.getNamedQuery("gov.ca.cwds.data.persistence.cms.Reporter.findAllByBucket");
   // assertThat(query, is(notNullValue()));
+  // }
+
+  @Test
+  public void type() throws Exception {
+    assertThat(ReporterIndexerJob.class, notNullValue());
+  }
+
+  @Test
+  public void instantiation() throws Exception {
+    ReplicatedReporterDao dao = null;
+    ElasticsearchDao esDao = null;
+    String lastJobRunTimeFilename = null;
+    ObjectMapper mapper = null;
+    SessionFactory sessionFactory = null;
+    ReporterIndexerJob target =
+        new ReporterIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    assertThat(target, notNullValue());
+  }
+
+  @Test
+  public void getIdColumn_Args__() throws Exception {
+    ReplicatedReporterDao dao = null;
+    ElasticsearchDao esDao = null;
+    String lastJobRunTimeFilename = null;
+    ObjectMapper mapper = null;
+    SessionFactory sessionFactory = null;
+    final ReporterIndexerJob target =
+        new ReporterIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    final String actual = target.getIdColumn();
+    // then
+    // e.g. : verify(mocked).called();
+    final String expected = "FKREFERL_T";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getLegacySourceTable_Args__() throws Exception {
+    ReplicatedReporterDao dao = null;
+    ElasticsearchDao esDao = null;
+    String lastJobRunTimeFilename = null;
+    ObjectMapper mapper = null;
+    SessionFactory sessionFactory = null;
+    ReporterIndexerJob target =
+        new ReporterIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    final String actual = target.getLegacySourceTable();
+    // then
+    // e.g. : verify(mocked).called();
+    String expected = "REPTR_T";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  // @Test
+  // public void main_Args__StringArray() throws Exception {
+  // // given
+  // String[] args = new String[] {};
+  // // e.g. : given(mocked.called()).willReturn(1);
+  // // when
+  // // ReporterIndexerJob.main(args);
+  // // then
+  // // e.g. : verify(mocked).called();
   // }
 
 }

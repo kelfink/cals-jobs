@@ -33,10 +33,11 @@ import gov.ca.cwds.jobs.transform.EntityNormalizer;
  * 
  * @author CWDS API Team
  */
-public class CaseHistoryIndexerJob extends BasePersonIndexerJob<ReplicatedPersonCases, EsPersonCase>
+public final class CaseHistoryIndexerJob
+    extends BasePersonIndexerJob<ReplicatedPersonCases, EsPersonCase>
     implements JobResultSetAware<EsPersonCase> {
 
-  private static final Logger LOGGER = LogManager.getLogger(RelationshipIndexerJob.class);
+  private static final Logger LOGGER = LogManager.getLogger(CaseHistoryIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -60,11 +61,11 @@ public class CaseHistoryIndexerJob extends BasePersonIndexerJob<ReplicatedPerson
     String caseId = rs.getString("CASE_ID");
 
     if (focusChildId == null) {
-      LOGGER.error("FOCUS_CHILD_ID is null for CASE_ID: " + caseId);
+      LOGGER.error("FOCUS_CHILD_ID is null for CASE_ID: {}", caseId);
       return null;
     }
 
-    EsPersonCase personCase = new EsPersonCase();
+    final EsPersonCase personCase = new EsPersonCase();
 
     //
     // Case
@@ -79,17 +80,17 @@ public class CaseHistoryIndexerJob extends BasePersonIndexerJob<ReplicatedPerson
     // Child (client)
     //
     personCase.setFocusChildId(focusChildId);
-    personCase.setFocusChildFirstName(rs.getString("FOCUS_CHLD_FIRST_NM"));
-    personCase.setFocusChildLastName(rs.getString("FOCUS_CHLD_LAST_NM"));
+    personCase.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
+    personCase.setFocusChildLastName(ifNull(rs.getString("FOCUS_CHLD_LAST_NM")));
     personCase.setServiceComponent(rs.getInt("SERVICE_COMP"));
     personCase.setFocusChildLastUpdated(rs.getDate("FOCUS_CHILD_LAST_UPDATED"));
 
     //
     // Parent
     //
-    personCase.setParentId(rs.getString("PARENT_ID"));
-    personCase.setParentFirstName(rs.getString("PARENT_FIRST_NM"));
-    personCase.setParentLastName(rs.getString("PARENT_LAST_NM"));
+    personCase.setParentId(ifNull(rs.getString("PARENT_ID")));
+    personCase.setParentFirstName(ifNull(rs.getString("PARENT_FIRST_NM")));
+    personCase.setParentLastName(ifNull(rs.getString("PARENT_LAST_NM")));
     personCase.setParentRelationship(rs.getInt("PARENT_RELATIONSHIP"));
     personCase.setParentLastUpdated(rs.getDate("PARENT_LAST_UPDATED"));
     personCase.setParentSourceTable(rs.getString("PARENT_SOURCE_TABLE"));
@@ -97,9 +98,9 @@ public class CaseHistoryIndexerJob extends BasePersonIndexerJob<ReplicatedPerson
     //
     // Worker (staff)
     //
-    personCase.setWorkerId(rs.getString("WORKER_ID"));
-    personCase.setWorkerFirstName(rs.getString("WORKER_FIRST_NM"));
-    personCase.setWorkerLastName(rs.getString("WORKER_LAST_NM"));
+    personCase.setWorkerId(ifNull(rs.getString("WORKER_ID")));
+    personCase.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
+    personCase.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
     personCase.setWorkerLastUpdated(rs.getDate("WORKER_LAST_UPDATED"));
 
     return personCase;
@@ -144,7 +145,7 @@ public class CaseHistoryIndexerJob extends BasePersonIndexerJob<ReplicatedPerson
 
     final String insertJson = mapper.writeValueAsString(esp);
     final String updateJson = buf.toString();
-    LOGGER.debug("updateJson: {}", updateJson);
+    LOGGER.trace("updateJson: {}", () -> updateJson);
 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
@@ -169,13 +170,7 @@ public class CaseHistoryIndexerJob extends BasePersonIndexerJob<ReplicatedPerson
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Run case history indexer job");
-    try {
-      runJob(CaseHistoryIndexerJob.class, args);
-    } catch (Exception e) {
-      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
-      throw e;
-    }
+    runMain(CaseHistoryIndexerJob.class, args);
   }
 
 }

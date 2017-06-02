@@ -1560,6 +1560,22 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
+   * Batch job entry point.
+   * 
+   * @param klass batch job class
+   * @param args command line arguments
+   */
+  public static void runMain(final Class<? extends BasePersonIndexerJob> klass, String... args) {
+    LOGGER.info("Run job {}", klass.getName());
+    try {
+      runJob(klass, args);
+    } catch (Exception e) {
+      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
+      throw e;
+    }
+  }
+
+  /**
    * Store a reference to the singleton CMS system code cache for quick convenient access.
    * 
    * @param sysCodeCache CMS system code cache
