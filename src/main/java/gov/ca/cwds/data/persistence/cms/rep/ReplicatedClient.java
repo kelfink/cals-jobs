@@ -1,10 +1,12 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +20,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
@@ -34,6 +38,7 @@ import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
+import gov.ca.cwds.jobs.BasePersonIndexerJob;
 
 /**
  * {@link PersistentObject} representing a Client as a {@link CmsReplicatedEntity} in the replicated
@@ -90,6 +95,8 @@ public class ReplicatedClient extends BaseClient
    * Default serialization version. Increment by class version.
    */
   private static final long serialVersionUID = 1L;
+
+  private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
 
   @Enumerated(EnumType.STRING)
   @Column(name = "IBMSNAP_OPERATION", updatable = false)
@@ -171,20 +178,26 @@ public class ReplicatedClient extends BaseClient
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
-    final List<ApiPhoneAware> phones = new ArrayList<>();
 
-    // TODO: convert to stream.
-    if (this.clientAddresses != null && !this.clientAddresses.isEmpty()) {
-      for (ReplicatedClientAddress clAddr : this.clientAddresses) {
-        for (ReplicatedAddress addr : clAddr.getAddresses()) {
-          for (ApiPhoneAware phone : addr.getPhones()) {
-            phones.add(phone);
-          }
-        }
-      }
-    }
+    // OLD SCHOOL BOILERPLATE.
+    // final List<ApiPhoneAware> phones = new ArrayList<>();
+    //
+    // if (this.clientAddresses != null && !this.clientAddresses.isEmpty()) {
+    // for (ReplicatedClientAddress clAdr : this.clientAddresses) {
+    // for (ReplicatedAddress adr : clAdr.getAddresses()) {
+    // for (ApiPhoneAware phone : adr.getPhones()) {
+    // phones.add(phone);
+    // }
+    // }
+    // }
+    // }
+    //
+    // return phones.toArray(new ApiPhoneAware[0]);
 
-    return phones.toArray(new ApiPhoneAware[0]);
+    // STREAMS.
+    return clientAddresses.stream().flatMap(ca -> ca.addresses.stream())
+        .flatMap(adr -> Arrays.stream(adr.getPhones())).collect(Collectors.toList())
+        .toArray(new ApiPhoneAware[0]);
   }
 
   // =======================
