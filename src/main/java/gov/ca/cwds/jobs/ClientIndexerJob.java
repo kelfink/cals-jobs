@@ -4,8 +4,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,8 +27,6 @@ import gov.ca.cwds.jobs.transform.EntityNormalizer;
  */
 public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsClientAddress>
     implements JobResultSetAware<EsClientAddress> {
-
-  private static final Logger LOGGER = LogManager.getLogger(ClientIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -79,13 +75,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Run Client indexer job");
-    try {
-      runJob(ClientIndexerJob.class, args);
-    } catch (Exception e) {
-      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
-      throw e;
-    }
+    runMain(ClientIndexerJob.class, args);
   }
 
 }

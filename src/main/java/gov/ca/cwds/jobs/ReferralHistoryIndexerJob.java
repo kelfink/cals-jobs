@@ -160,12 +160,6 @@ public class ReferralHistoryIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Run ReferralHistoryIndexerJob");
-    try {
-      runJob(ReferralHistoryIndexerJob.class, args);
-    } catch (Exception e) {
-      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
-      throw e;
-    }
+    runMain(ReferralHistoryIndexerJob.class, args);
   }
 }

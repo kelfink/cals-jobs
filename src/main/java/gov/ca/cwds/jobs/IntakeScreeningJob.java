@@ -24,9 +24,6 @@ import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.transform.EntityNormalizer;
 
-// For Elasticsearch jsonBuilder():
-// import static org.elasticsearch.common.xcontent.XContentFactory.*;
-
 /**
  * Job to load Intake Screening from PostgreSQL into ElasticSearch.
  * 
@@ -105,11 +102,6 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
     return KEEP_COLLECTIONS;
   }
 
-  /**
-   * Get the optional element name populated by this job or null if none.
-   * 
-   * @return optional element name populated by this job or null if none
-   */
   @Override
   protected String getOptionalElementName() {
     return "screenings";
@@ -147,13 +139,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Run Intake Screening job");
-    try {
-      runJob(IntakeScreeningJob.class, args);
-    } catch (Exception e) {
-      LOGGER.fatal("FATAL ERROR! STOPPING BATCH: " + e.getMessage(), e);
-      throw e;
-    }
+    runMain(IntakeScreeningJob.class, args);
   }
 
 }

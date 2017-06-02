@@ -817,7 +817,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Get the optional element name populated by this job or null if none.
    * 
-   * @return optional element name populated by this job or null if none
+   * @return optional element name
    */
   protected String getOptionalElementName() {
     return null;
