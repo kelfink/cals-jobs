@@ -1,14 +1,19 @@
 package gov.ca.cwds.jobs.facility;
 
-import gov.ca.cwds.data.persistence.PersistentObject;
-
 import java.io.Serializable;
 import java.util.Date;
+
+import gov.ca.cwds.data.persistence.PersistentObject;
 
 /**
  * @author CWDS Elasticsearch Team
  */
-public class FacilityRow implements PersistentObject{
+public class FacilityRow implements PersistentObject {
+
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
 
   private String id;
   private String type;

@@ -1,15 +1,16 @@
 package gov.ca.cwds.jobs.util.jdbc;
 
-import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.jobs.util.JobReader;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.jobs.util.JobReader;
 
 /**
  * @author CWDS Elasticsearch Team
@@ -17,6 +18,7 @@ import java.sql.Statement;
 public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
 
   private static final Logger LOGGER = LogManager.getLogger(JdbcJobReader.class);
+
   private SessionFactory sessionFactory;
   private ResultSet resultSet;
   private RowMapper<T> rowMapper;
@@ -29,6 +31,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
     this.query = query;
   }
 
+  @Override
   public void init() throws Exception {
     Connection connection = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection();
@@ -55,6 +58,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
     }
   }
 
+  @Override
   @SuppressWarnings("ThrowFromFinallyBlock")
   public void destroy() throws Exception {
     try {

@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs.facility;
 
+import java.io.Serializable;
+
 import gov.ca.cwds.data.model.facility.es.ESFacility;
 import gov.ca.cwds.data.model.facility.es.ESFacilityAddress;
 import gov.ca.cwds.jobs.util.JobProcessor;
@@ -7,36 +9,44 @@ import gov.ca.cwds.jobs.util.JobProcessor;
 /**
  * @author CWDS Elasticsearch Team
  */
-public class FacilityProcessor implements JobProcessor<FacilityRow, ESFacility>{
+public class FacilityProcessor implements JobProcessor<FacilityRow, ESFacility>, Serializable {
+
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
   @Override
   public ESFacility process(FacilityRow item) throws Exception {
-    ESFacility esFacility = new ESFacility();
-    esFacility.setId(item.getId());
-    esFacility.setType(item.getType());
-    esFacility.setName(item.getName());
-    esFacility.setLicenseeName(item.getLicenseeName());
-    esFacility.setAssignedWorker(item.getAssignedWorker());
-    esFacility.setDistrictOffice(item.getDistrictOffice());
-    esFacility.setLicenseNumber(item.getLicenseNumber());
-    esFacility.setLicenseStatus(item.getLicenseStatus());
-    esFacility.setCapacity(item.getCapacity());
-    esFacility.setLicenseEffectiveDate(item.getLicenseEffectiveDate());
-    esFacility.setOriginalApplicationReceivedDate(item.getOriginalApplicationReceivedDate());
-    esFacility.setLastVisitDate(item.getLastVisitDate());
-    esFacility.setLastVisitReason(item.getLastVisitReason());
-    esFacility.setCounty(item.getCounty());
-    esFacility.setPrimaryPhoneNumber(item.getPrimaryPhoneNumber());
-    esFacility.setAltPhoneNumber(item.getAltPhoneNumber());
+    ESFacility ret = new ESFacility();
 
-    ESFacilityAddress esFacilityAddress = new ESFacilityAddress();
-    esFacilityAddress.setStateCodeType(item.getStateCodeType());
-    esFacilityAddress.setZipCode(item.getZipCode());
-    esFacilityAddress.setZipSuffixCode(item.getZipSuffixCode());
-    esFacilityAddress.setStreetAddress(item.getStreetAddress());
-    esFacilityAddress.setCity(item.getCity());
-    esFacilityAddress.setCounty(item.getCounty());
-    esFacility.setAddress(esFacilityAddress);
+    ret.setId(item.getId());
+    ret.setType(item.getType());
+    ret.setName(item.getName());
+    ret.setLicenseeName(item.getLicenseeName());
+    ret.setAssignedWorker(item.getAssignedWorker());
+    ret.setDistrictOffice(item.getDistrictOffice());
+    ret.setLicenseNumber(item.getLicenseNumber());
+    ret.setLicenseStatus(item.getLicenseStatus());
+    ret.setCapacity(item.getCapacity());
+    ret.setLicenseEffectiveDate(item.getLicenseEffectiveDate());
+    ret.setOriginalApplicationReceivedDate(item.getOriginalApplicationReceivedDate());
+    ret.setLastVisitDate(item.getLastVisitDate());
+    ret.setLastVisitReason(item.getLastVisitReason());
+    ret.setCounty(item.getCounty());
+    ret.setPrimaryPhoneNumber(item.getPrimaryPhoneNumber());
+    ret.setAltPhoneNumber(item.getAltPhoneNumber());
 
-    return esFacility;
+    ESFacilityAddress adr = new ESFacilityAddress();
+    adr.setStateCodeType(item.getStateCodeType());
+    adr.setZipCode(item.getZipCode());
+    adr.setZipSuffixCode(item.getZipSuffixCode());
+    adr.setStreetAddress(item.getStreetAddress());
+    adr.setCity(item.getCity());
+    adr.setCounty(item.getCounty());
+    ret.setAddress(adr);
+
+    return ret;
   }
+
 }

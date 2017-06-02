@@ -51,7 +51,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
 
   /**
-   * Default.
+   * Default serialization.
    */
   private static final long serialVersionUID = 1L;
 

@@ -1,4 +1,4 @@
-package gov.ca.cwds.data.persistence.ns;
+package gov.ca.cwds.jobs.util.jdbc;
 
 import java.io.Serializable;
 import java.sql.Array;

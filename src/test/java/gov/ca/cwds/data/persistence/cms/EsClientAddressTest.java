@@ -4,15 +4,19 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
@@ -21,10 +25,38 @@ public class EsClientAddressTest {
 
   private static EsClientAddress emptyTarget;
 
+  @Mock
+  private ResultSet rs;
+
   @BeforeClass
   public static void setupClass() throws Exception {
-    final ResultSet rs = Mockito.mock(ResultSet.class);
-    emptyTarget = EsClientAddress.extract(rs);
+    emptyTarget = EsClientAddress.extract(Mockito.mock(ResultSet.class));
+  }
+
+  @Before
+  public void setUp() throws Exception {
+    MockitoAnnotations.initMocks(this);
+    when(rs.first()).thenReturn(true);
+    when(rs.getString("CLT_ADJDEL_IND")).thenReturn("Y");
+
+    final Short shortZero = Short.valueOf((short) 0);
+    when(rs.getShort("ADR_GVR_ENTC")).thenReturn(shortZero);
+    when(rs.getShort("ADR_ST_SFX_C")).thenReturn(shortZero);
+    when(rs.getShort("ADR_STATE_C")).thenReturn(shortZero);
+    when(rs.getShort("ADR_UNT_DSGC")).thenReturn(shortZero);
+    when(rs.getShort("ADR_ZIP_SFX_NO")).thenReturn(shortZero);
+    when(rs.getShort("CLA_ADDR_TPC")).thenReturn(shortZero);
+    when(rs.getShort("CLT_B_CNTRY_C")).thenReturn(shortZero);
+    when(rs.getShort("CLT_B_STATE_C")).thenReturn(shortZero);
+    when(rs.getShort("CLT_D_STATE_C")).thenReturn(shortZero);
+    when(rs.getShort("CLT_I_CNTRY_C")).thenReturn(shortZero);
+    when(rs.getShort("CLT_IMGT_STC")).thenReturn(shortZero);
+    when(rs.getShort("CLT_MRTL_STC")).thenReturn(shortZero);
+    when(rs.getShort("CLT_NAME_TPC")).thenReturn(shortZero);
+    when(rs.getShort("CLT_P_ETHNCTYC")).thenReturn(shortZero);
+    when(rs.getShort("CLT_P_LANG_TPC")).thenReturn(shortZero);
+    when(rs.getShort("CLT_RLGN_TPC")).thenReturn(shortZero);
+    when(rs.getShort("CLT_S_LANG_TC")).thenReturn(shortZero);
   }
 
   @Test
@@ -61,6 +93,19 @@ public class EsClientAddressTest {
     // then
     // e.g. : verify(mocked).called();
     final EsClientAddress expected = emptyTarget;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void extract_Args__ResultSet_read() throws Exception {
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    final EsClientAddress actual = EsClientAddress.extract(rs);
+    // then
+    // e.g. : verify(mocked).called();
+    final EsClientAddress expected = new EsClientAddress();
+    expected.setCltAdjudicatedDelinquentIndicator("Y");
     assertThat(actual, is(equalTo(expected)));
   }
 
