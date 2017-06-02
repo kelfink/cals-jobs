@@ -77,9 +77,9 @@ import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
-import gov.ca.cwds.jobs.transform.EntityNormalizer;
-import gov.ca.cwds.jobs.transform.JobTransformUtils;
 import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
+import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 // import static org.elasticsearch.common.xcontent.XContentFactory.*;

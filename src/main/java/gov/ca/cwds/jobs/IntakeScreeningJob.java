@@ -22,7 +22,7 @@ import gov.ca.cwds.data.persistence.ns.IntakeParticipant;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
-import gov.ca.cwds.jobs.transform.EntityNormalizer;
+import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
  * Job to load Intake Screening from PostgreSQL into ElasticSearch.

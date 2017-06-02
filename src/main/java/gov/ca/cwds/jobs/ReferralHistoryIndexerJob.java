@@ -26,7 +26,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
-import gov.ca.cwds.jobs.transform.EntityNormalizer;
+import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
  * Job to load person referrals from CMS into ElasticSearch.

@@ -1,6 +1,6 @@
 package gov.ca.cwds.data.persistence.cms;
 
-import static gov.ca.cwds.jobs.transform.JobTransformUtils.ifNull;
+import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
