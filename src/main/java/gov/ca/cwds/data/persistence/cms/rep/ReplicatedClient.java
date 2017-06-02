@@ -106,6 +106,13 @@ public class ReplicatedClient extends BaseClient
   protected transient Set<ReplicatedClientAddress> clientAddresses = new LinkedHashSet<>();
 
   /**
+   * Default, no-op constructor
+   */
+  public ReplicatedClient() {
+    // Default, no-op.
+  }
+
+  /**
    * Get client address linkages.
    *
    * @return client addresses

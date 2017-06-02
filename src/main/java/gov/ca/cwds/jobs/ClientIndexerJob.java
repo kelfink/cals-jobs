@@ -46,7 +46,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
   @Override
   public EsClientAddress extract(ResultSet rs) throws SQLException {
-    return EsClientAddress.extractFromResultSet(rs);
+    return EsClientAddress.extract(rs);
   }
 
   @Override
