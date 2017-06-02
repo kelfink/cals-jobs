@@ -22,14 +22,20 @@ public class ReplicatedPersonReferrals implements PersistentObject, ApiPersonAwa
   private static final long serialVersionUID = -8746969311364544478L;
 
   private String clientId;
-  private List<ElasticSearchPersonReferral> referrals =
-      new ArrayList<ElasticSearchPersonReferral>();
+  private List<ElasticSearchPersonReferral> referrals = new ArrayList<>();
 
   /**
    * Key: Referral ID <br>
    * Value: ElasticSearchPersonAllegation objects for the keyed referral id.
    */
   private Map<String, List<ElasticSearchPersonAllegation>> referralAllegations = new HashMap<>();
+
+  /**
+   * Default constructor.
+   */
+  public ReplicatedPersonReferrals() {
+    // Default, no-op
+  }
 
   /**
    * Construct the object

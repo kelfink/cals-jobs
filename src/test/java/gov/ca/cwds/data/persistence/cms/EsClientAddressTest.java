@@ -65,7 +65,7 @@ public class EsClientAddressTest {
   }
 
   // @Test
-  // public void extractFromResultSet_Args__ResultSet_T__SQLException() throws Exception {
+  // public void extract_Args__ResultSet_T__SQLException() throws Exception {
   // // given
   // final ResultSet rs = mock(ResultSet.class);
   // // e.g. : given(mocked.called()).willReturn(1);
