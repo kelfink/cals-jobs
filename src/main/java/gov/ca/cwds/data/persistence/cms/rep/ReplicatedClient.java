@@ -18,8 +18,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
@@ -36,7 +34,6 @@ import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 
 /**
  * {@link PersistentObject} representing a Client as a {@link CmsReplicatedEntity} in the replicated
@@ -93,8 +90,6 @@ public class ReplicatedClient extends BaseClient
    * Default serialization version. Increment by class version.
    */
   private static final long serialVersionUID = 1L;
-
-  private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
 
   @Enumerated(EnumType.STRING)
   @Column(name = "IBMSNAP_OPERATION", updatable = false)
