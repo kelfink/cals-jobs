@@ -1612,4 +1612,80 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     this.lastChange = lastChange;
   }
 
+  @Override
+  public String toString() {
+    return "EsClientAddress [lastChange=" + lastChange + ", cltAdjudicatedDelinquentIndicator="
+        + cltAdjudicatedDelinquentIndicator + ", cltAdoptionStatusCode=" + cltAdoptionStatusCode
+        + ", cltAlienRegistrationNumber=" + cltAlienRegistrationNumber + ", cltBirthCity="
+        + cltBirthCity + ", cltBirthCountryCodeType=" + cltBirthCountryCodeType + ", cltBirthDate="
+        + cltBirthDate + ", cltBirthFacilityName=" + cltBirthFacilityName
+        + ", cltBirthStateCodeType=" + cltBirthStateCodeType + ", cltBirthplaceVerifiedIndicator="
+        + cltBirthplaceVerifiedIndicator + ", cltChildClientIndicatorVar="
+        + cltChildClientIndicatorVar + ", cltClientIndexNumber=" + cltClientIndexNumber
+        + ", cltCommentDescription=" + cltCommentDescription + ", cltCommonFirstName="
+        + cltCommonFirstName + ", cltCommonLastName=" + cltCommonLastName + ", cltCommonMiddleName="
+        + cltCommonMiddleName + ", cltConfidentialityActionDate=" + cltConfidentialityActionDate
+        + ", cltConfidentialityInEffectIndicator=" + cltConfidentialityInEffectIndicator
+        + ", cltCreationDate=" + cltCreationDate + ", cltCurrCaChildrenServIndicator="
+        + cltCurrCaChildrenServIndicator + ", cltCurrentlyOtherDescription="
+        + cltCurrentlyOtherDescription + ", cltCurrentlyRegionalCenterIndicator="
+        + cltCurrentlyRegionalCenterIndicator + ", cltDeathDate=" + cltDeathDate
+        + ", cltDeathDateVerifiedIndicator=" + cltDeathDateVerifiedIndicator + ", cltDeathPlace="
+        + cltDeathPlace + ", cltDeathReasonText=" + cltDeathReasonText + ", cltDriverLicenseNumber="
+        + cltDriverLicenseNumber + ", cltDriverLicenseStateCodeType="
+        + cltDriverLicenseStateCodeType + ", cltEmailAddress=" + cltEmailAddress
+        + ", cltEstimatedDobCode=" + cltEstimatedDobCode + ", cltEthUnableToDetReasonCode="
+        + cltEthUnableToDetReasonCode + ", cltFatherParentalRightTermDate="
+        + cltFatherParentalRightTermDate + ", cltGenderCode=" + cltGenderCode
+        + ", cltHealthSummaryText=" + cltHealthSummaryText + ", cltHispUnableToDetReasonCode="
+        + cltHispUnableToDetReasonCode + ", cltHispanicOriginCode=" + cltHispanicOriginCode
+        + ", cltId=" + cltId + ", cltImmigrationCountryCodeType=" + cltImmigrationCountryCodeType
+        + ", cltImmigrationStatusType=" + cltImmigrationStatusType + ", cltIncapacitatedParentCode="
+        + cltIncapacitatedParentCode + ", cltIndividualHealthCarePlanIndicator="
+        + cltIndividualHealthCarePlanIndicator + ", cltLimitationOnScpHealthIndicator="
+        + cltLimitationOnScpHealthIndicator + ", cltLiterateCode=" + cltLiterateCode
+        + ", cltMaritalCohabitatnHstryIndicatorVar=" + cltMaritalCohabitatnHstryIndicatorVar
+        + ", cltMaritalStatusType=" + cltMaritalStatusType + ", cltMilitaryStatusCode="
+        + cltMilitaryStatusCode + ", cltMotherParentalRightTermDate="
+        + cltMotherParentalRightTermDate + ", cltNamePrefixDescription=" + cltNamePrefixDescription
+        + ", cltNameType=" + cltNameType + ", cltOutstandingWarrantIndicator="
+        + cltOutstandingWarrantIndicator + ", cltPrevCaChildrenServIndicator="
+        + cltPrevCaChildrenServIndicator + ", cltPrevOtherDescription=" + cltPrevOtherDescription
+        + ", cltPrevRegionalCenterIndicator=" + cltPrevRegionalCenterIndicator
+        + ", cltPrimaryEthnicityType=" + cltPrimaryEthnicityType + ", cltPrimaryLanguageType="
+        + cltPrimaryLanguageType + ", cltReligionType=" + cltReligionType
+        + ", cltSecondaryLanguageType=" + cltSecondaryLanguageType
+        + ", cltSensitiveHlthInfoOnFileIndicator=" + cltSensitiveHlthInfoOnFileIndicator
+        + ", cltSensitivityIndicator=" + cltSensitivityIndicator + ", cltSoc158PlacementCode="
+        + cltSoc158PlacementCode + ", cltSoc158SealedClientIndicator="
+        + cltSoc158SealedClientIndicator + ", cltSocialSecurityNumChangedCode="
+        + cltSocialSecurityNumChangedCode + ", cltSocialSecurityNumber=" + cltSocialSecurityNumber
+        + ", cltSuffixTitleDescription=" + cltSuffixTitleDescription
+        + ", cltTribalAncestryClientIndicatorVar=" + cltTribalAncestryClientIndicatorVar
+        + ", cltTribalMembrshpVerifctnIndicatorVar=" + cltTribalMembrshpVerifctnIndicatorVar
+        + ", cltUnemployedParentCode=" + cltUnemployedParentCode + ", cltZippyCreatedIndicator="
+        + cltZippyCreatedIndicator + ", cltReplicationOperation=" + cltReplicationOperation
+        + ", cltReplicationDate=" + cltReplicationDate + ", cltLastUpdatedId=" + cltLastUpdatedId
+        + ", cltLastUpdatedTime=" + cltLastUpdatedTime + ", claReplicationOperation="
+        + claReplicationOperation + ", claReplicationDate=" + claReplicationDate
+        + ", claLastUpdatedId=" + claLastUpdatedId + ", claLastUpdatedTime=" + claLastUpdatedTime
+        + ", claId=" + claId + ", claFkAddress=" + claFkAddress + ", claFkClient=" + claFkClient
+        + ", claFkReferral=" + claFkReferral + ", claAddressType=" + claAddressType
+        + ", claHomelessInd=" + claHomelessInd + ", claBkInmtId=" + claBkInmtId
+        + ", claEffectiveEndDate=" + claEffectiveEndDate + ", claEffectiveStartDate="
+        + claEffectiveStartDate + ", adrId=" + adrId + ", adrReplicationOperation="
+        + adrReplicationOperation + ", adrReplicationDate=" + adrReplicationDate + ", adrCity="
+        + adrCity + ", adrEmergencyNumber=" + adrEmergencyNumber + ", adrEmergencyExtension="
+        + adrEmergencyExtension + ", adrFrgAdrtB=" + adrFrgAdrtB + ", adrGovernmentEntityCd="
+        + adrGovernmentEntityCd + ", adrMessageNumber=" + adrMessageNumber
+        + ", adrMessageExtension=" + adrMessageExtension + ", adrHeaderAddress=" + adrHeaderAddress
+        + ", adrPrimaryNumber=" + adrPrimaryNumber + ", adrPrimaryExtension=" + adrPrimaryExtension
+        + ", adrState=" + adrState + ", adrStreetName=" + adrStreetName + ", adrStreetNumber="
+        + adrStreetNumber + ", adrZip=" + adrZip + ", adrAddressDescription="
+        + adrAddressDescription + ", adrZip4=" + adrZip4 + ", adrPostDirCd=" + adrPostDirCd
+        + ", adrPreDirCd=" + adrPreDirCd + ", adrStreetSuffixCd=" + adrStreetSuffixCd
+        + ", adrUnitDesignationCd=" + adrUnitDesignationCd + ", adrUnitNumber=" + adrUnitNumber
+        + "]";
+  }
+
 }

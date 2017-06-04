@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,8 +39,6 @@ public class EsClientAddressTest {
     MockitoAnnotations.initMocks(this);
     when(rs.first()).thenReturn(true);
 
-    when(rs.getString("CLT_ADJDEL_IND")).thenReturn("Y");
-
     final Short shortZero = Short.valueOf((short) 0);
     when(rs.getShort("ADR_GVR_ENTC")).thenReturn(shortZero);
     when(rs.getShort("ADR_ST_SFX_C")).thenReturn(shortZero);
@@ -58,6 +57,53 @@ public class EsClientAddressTest {
     when(rs.getShort("CLT_P_LANG_TPC")).thenReturn(shortZero);
     when(rs.getShort("CLT_RLGN_TPC")).thenReturn(shortZero);
     when(rs.getShort("CLT_S_LANG_TC")).thenReturn(shortZero);
+
+    when(rs.getBigDecimal("ADR_EMRG_TELNO")).thenReturn(BigDecimal.ZERO);
+    when(rs.getBigDecimal("ADR_MSG_TEL_NO")).thenReturn(BigDecimal.ZERO);
+    when(rs.getBigDecimal("ADR_PRM_TEL_NO")).thenReturn(BigDecimal.ZERO);
+    when(rs.getInt("ADR_EMRG_EXTNO")).thenReturn(0);
+    when(rs.getInt("ADR_MSG_EXT_NO")).thenReturn(0);
+    when(rs.getInt("ADR_PRM_EXT_NO")).thenReturn(0);
+
+    // when(rs.getDate("ADR_IBMSNAP_LOGMARKER"))
+
+    when(rs.getString("CLT_ADJDEL_IND")).thenReturn("Y");
+  }
+
+  private EsClientAddress buildEsClientAddress() {
+    final EsClientAddress ret = new EsClientAddress();
+
+    final Short sz = Short.valueOf((short) 0);
+    ret.setAdrGovernmentEntityCd(sz);
+    ret.setCltBirthCountryCodeType(sz);
+    ret.setCltBirthStateCodeType(sz);
+    ret.setCltDriverLicenseStateCodeType(sz);
+    ret.setCltImmigrationCountryCodeType(sz);
+    ret.setCltImmigrationStatusType(sz);
+    ret.setCltMaritalStatusType(sz);
+    ret.setCltNameType(sz);
+    ret.setCltPrimaryEthnicityType(sz);
+    ret.setCltPrimaryLanguageType(sz);
+    ret.setCltReligionType(sz);
+    ret.setCltSecondaryLanguageType(sz);
+    ret.setClaAddressType(sz);
+    ret.setAdrGovernmentEntityCd(sz);
+    ret.setAdrState(sz);
+    ret.setAdrZip4(sz);
+    ret.setAdrStreetSuffixCd(sz);
+    ret.setAdrUnitDesignationCd(sz);
+
+    ret.setAdrEmergencyExtension(0);
+    ret.setAdrMessageExtension(0);
+    ret.setAdrPrimaryExtension(0);
+
+    ret.setAdrEmergencyNumber(BigDecimal.ZERO);
+    ret.setAdrMessageNumber(BigDecimal.ZERO);
+    ret.setAdrPrimaryNumber(BigDecimal.ZERO);
+
+    ret.setCltAdjudicatedDelinquentIndicator("Y");
+
+    return ret;
   }
 
   @Test
@@ -105,8 +151,12 @@ public class EsClientAddressTest {
     final EsClientAddress actual = EsClientAddress.extract(rs);
     // then
     // e.g. : verify(mocked).called();
-    final EsClientAddress expected = new EsClientAddress();
-    expected.setCltAdjudicatedDelinquentIndicator("Y");
+    final EsClientAddress expected = buildEsClientAddress();
+
+    System.out.println("actual: " + actual);
+    System.out.println("expected: " + expected);
+
+    // expected.setCltAdjudicatedDelinquentIndicator("Y");
     assertThat(actual, is(equalTo(expected)));
   }
 
