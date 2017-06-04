@@ -7,6 +7,8 @@ import static org.mockito.Mockito.mock;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
+import gov.ca.cwds.jobs.JobsException;
+
 public class JobLogUtilsTest {
 
   @Test
@@ -41,11 +43,11 @@ public class JobLogUtilsTest {
     // e.g. : verify(mocked).called();
   }
 
-  @Test
+  @Test(expected = JobsException.class)
   public void throwFatalError_Args__Logger__Throwable__String__ObjectArray() throws Exception {
     // given
     Logger log = mock(Logger.class);
-    Throwable e = null;
+    Throwable e = new IllegalStateException("hello world");
     String pattern = null;
     Object[] args = new Object[] {};
     // e.g. : given(mocked.called()).willReturn(1);
@@ -55,12 +57,12 @@ public class JobLogUtilsTest {
     // e.g. : verify(mocked).called();
   }
 
-  @Test
+  @Test(expected = JobsException.class)
   public void throwFatalError_Args__Logger__Throwable__String() throws Exception {
     // given
     Logger log = mock(Logger.class);
-    Throwable e = null;
-    String message = null;
+    Throwable e = new IllegalStateException("error message");
+    String message = "hello world";
     // e.g. : given(mocked.called()).willReturn(1);
     // when
     JobLogUtils.throwFatalError(log, e, message);

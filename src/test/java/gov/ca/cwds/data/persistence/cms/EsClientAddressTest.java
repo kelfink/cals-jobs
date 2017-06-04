@@ -37,6 +37,7 @@ public class EsClientAddressTest {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
     when(rs.first()).thenReturn(true);
+
     when(rs.getString("CLT_ADJDEL_IND")).thenReturn("Y");
 
     final Short shortZero = Short.valueOf((short) 0);

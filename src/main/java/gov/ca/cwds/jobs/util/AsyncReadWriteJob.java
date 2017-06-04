@@ -47,6 +47,11 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
     this.writer = writer;
   }
 
+  /**
+   * Set the chunk size.
+   * 
+   * @param chunkSize chunk size
+   */
   public void setChunkSize(int chunkSize) {
     if (chunkSize > 0) {
       this.chunkSize = chunkSize;
@@ -72,7 +77,7 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
       }
     } catch (Exception e) {
       chunk.clear();
-      throw new JobsException(e);
+      throw new JobsException("ERROR CONSUMING CHUNK!", e);
     }
   }
 

@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.util;
 
 import java.text.MessageFormat;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,8 +59,11 @@ public final class JobLogUtils {
    */
   public static void throwFatalError(final Logger log, Throwable e, String pattern,
       Object... args) {
-    final String msg = MessageFormat.format(pattern, args);
-    log.fatal(msg, e);
+    final Object[] objs = args == null || args.length == 0 ? new Object[0] : args;
+    final String pat = !StringUtils.isEmpty(pattern) ? pattern : StringUtils.join(objs, "{}");
+    final String msg = MessageFormat.format(pat, objs);
+    final Logger logger = log != null ? log : LOGGER;
+    logger.fatal(msg, e);
     throw new JobsException(msg, e);
   }
 
@@ -68,13 +72,11 @@ public final class JobLogUtils {
    * 
    * @param log class logger
    * @param e any Throwable
-   * @param message error message, excluding throwable message
+   * @param args error message or throwable message
    * @throws JobsException runtime exception
    */
-  public static void throwFatalError(final Logger log, Throwable e, String message) {
-    final String msg = MessageFormat.format("ERROR: {}: MSG: {}", message, e.getMessage()); // NOSONAR
-    log.fatal(msg, e);
-    throw new JobsException(msg, e);
+  public static void throwFatalError(final Logger log, Throwable e, Object... args) {
+    throwFatalError(log, e, null, args);
   }
 
 }
