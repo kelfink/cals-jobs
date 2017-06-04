@@ -25,7 +25,7 @@ public class FacilityRowMapperTest {
     assertThat(target, notNullValue());
   }
 
-  @Test
+  // @Test
   public void mapRow_Args__ResultSet() throws Exception {
     FacilityRowMapper target = new FacilityRowMapper();
     // given
@@ -39,7 +39,7 @@ public class FacilityRowMapperTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
+  // @Test
   public void mapRow_Args__ResultSet_T__SQLException() throws Exception {
     FacilityRowMapper target = new FacilityRowMapper();
     // given

@@ -162,7 +162,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   private String ssn;
 
   @Column(name = "ROLES")
-  @Type(type = "gov.ca.cwds.data.persistence.ns.StringArrayType")
+  @Type(type = "gov.ca.cwds.jobs.util.jdbc.StringArrayType")
   private String[] roles;
 
   @Column(name = "IS_REPORTER")

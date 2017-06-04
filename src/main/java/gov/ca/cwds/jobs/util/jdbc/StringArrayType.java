@@ -61,7 +61,7 @@ public class StringArrayType implements UserType {
       Array array = session.connection().createArrayOf("text", castObject);
       st.setArray(index, array);
     } else {
-      st.setNull(index, arrayTypes[0]);
+      st.setNull(index, arrayTypes[0]); // NOSONAR
     }
   }
 

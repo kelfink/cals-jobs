@@ -7,12 +7,12 @@
 <hibernate-configuration>
 	<session-factory>
 		<property name="hibernate.current_session_context_class">thread</property>
-		<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQL82Dialect</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQL95Dialect</property>
 		<property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
 		<property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
 		<property name="hibernate.connection.username">postgres</property>
 
-		<property name="connection_pool_size">4</property>
+		<property name="connection_pool_size">2</property>
 		<property name="show_sql">true</property>
 
 <!-- Taborda -->
@@ -28,8 +28,9 @@
  
 		<mapping class="gov.ca.cwds.data.persistence.ns.EsIntakeScreening" />
 		
-<!-- 		
-		<mapping class="gov.ca.cwds.data.persistence.ns.IntakeScreening" />
+		
+<!-- 
+		<mapping class="gov.ca.cwds.jobs.util.jdbc.StringArrayType" />
 		<mapping class="gov.ca.cwds.data.persistence.ns.Person" />
 		<mapping class="gov.ca.cwds.data.persistence.ns.Address" />
  -->
