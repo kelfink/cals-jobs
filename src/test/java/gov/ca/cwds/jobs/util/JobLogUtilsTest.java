@@ -35,7 +35,7 @@ public class JobLogUtilsTest {
     // given
     int cntr = 0;
     String action = null;
-    String[] args = new String[] {};
+    Object[] args = new String[] {};
     // e.g. : given(mocked.called()).willReturn(1);
     // when
     JobLogUtils.logEvery(cntr, action, args);
