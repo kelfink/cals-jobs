@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import javax.persistence.Table;
@@ -264,6 +265,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     lock = new ReentrantLock();
     condition = lock.newCondition();
+
+    java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.SEVERE);
   }
 
   /**

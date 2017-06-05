@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -281,6 +282,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     IntakeScreening ret = s == null ? new IntakeScreening() : s;
 
     ret.setId(screeningId);
+    ret.setReferralId(referralId);
     ret.setAdditionalInformation(additionalInformation);
     ret.setAssignee(assignee);
     ret.setCommunicationMethod(communicationMethod);
@@ -329,8 +331,6 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
       map.put(thisPartcId, ret);
     }
 
-    // LOGGER.debug("normalize: this partc id: {}, screening id: {}", thisPartcId, screeningId);
-
     try {
       IntakeScreening s;
       final Map<String, IntakeScreening> mapScreenings = ret.getScreenings();
@@ -356,7 +356,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
           otherPartc = fillParticipant(true);
           s.addParticipant(otherPartc);
 
-          if (roles != null && roles.length > 0) {
+          if (!ArrayUtils.isEmpty(roles)) {
             for (String role : roles) {
               s.addParticipantRole(otherPartc.getId(), role);
             }
@@ -393,9 +393,6 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
           addr.setState(state);
 
           // Synthetic, composite field, "state_name", not found in legacy.
-          // TODO: Translate state code.
-          // addr.setStateName(stateName);
-
           addr.setStreetAddress(streetAddress);
           addr.setType(addressType);
           addr.setZip(zip);
@@ -414,7 +411,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
           otherPartc.addPhone(ph);
         }
       }
-    } catch (RuntimeException e) {
+    } catch (Exception e) {
       // Log the offending record.
       LOGGER.error("OOPS! {}", this);
       throw e;

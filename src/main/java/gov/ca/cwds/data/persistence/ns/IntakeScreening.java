@@ -11,9 +11,6 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Id;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
@@ -35,8 +32,6 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 public class IntakeScreening
     implements PersistentObject, ApiMultiplePersonAware, ApiScreeningAware {
 
-  private static final Logger LOGGER = LogManager.getLogger(IntakeScreening.class);
-
   private static final Set<String> EMPTY_SET_STRING = new LinkedHashSet<>();
 
   @Id
@@ -45,6 +40,9 @@ public class IntakeScreening
   // allocationSize = 10)
   @Column(name = "SCREENING_ID")
   private String id;
+
+  @Column(name = "REFERRAL_ID")
+  private String referralId;
 
   @Column(name = "REFERENCE")
   private String reference;
@@ -137,6 +135,7 @@ public class IntakeScreening
     ElasticSearchPersonScreening ret = new ElasticSearchPersonScreening();
 
     ret.setId(id);
+    ret.setReferralId(referralId);
     ret.setCountyName(incidentCounty);
     ret.setDecision(screeningDecision);
     ret.setEndDate(endedAt);
@@ -157,7 +156,6 @@ public class IntakeScreening
       ret.getAllegations().add(alg.toEsAllegation());
     }
 
-    // LOGGER.info("screening: # participants: {}", this.participants.size());
     for (IntakeParticipant p : this.participants.values()) {
       ret.getAllPeople().add((ElasticSearchPersonAny) p.toEsPerson(EsPersonType.ALL, this));
     }
@@ -173,11 +171,6 @@ public class IntakeScreening
   @Override
   public ElasticSearchPersonScreening[] getEsScreenings() {
     List<ElasticSearchPersonScreening> esScreenings = new ArrayList<>();
-
-    // TODO: #144948751: Screening History.
-    // Participants may connect to many screenings by person legacy id.
-    // View should return all screenings by participant, not the other way around.
-
     esScreenings.add(toEsScreening());
     return esScreenings.toArray(new ElasticSearchPersonScreening[0]);
   }
@@ -348,6 +341,14 @@ public class IntakeScreening
 
   public Map<String, Set<String>> getParticipantRoles() {
     return participantRoles;
+  }
+
+  public String getReferralId() {
+    return referralId;
+  }
+
+  public void setReferralId(String referralId) {
+    this.referralId = referralId;
   }
 
 }
