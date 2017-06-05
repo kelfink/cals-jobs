@@ -14,8 +14,11 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
  * 
  * @author CWDS API Team
  */
-public class EntityNormalizer {
+public final class EntityNormalizer {
 
+  /**
+   * Util class, static methods only.
+   */
   private EntityNormalizer() {
     // Util class, static methods only.
   }
@@ -37,7 +40,7 @@ public class EntityNormalizer {
    */
   public static <N extends PersistentObject, D extends ApiGroupNormalizer<N>> List<N> normalizeList(
       List<D> denormalized) {
-    final Map<Object, N> m = new LinkedHashMap<>((int) (denormalized.size() * 1.25));
+    final Map<Object, N> m = new LinkedHashMap<>();
 
     // In order to stream to map(), method normalize() must return the normalized object.
     return denormalized.stream().map(d -> d.normalize(m)).collect(Collectors.toList());

@@ -13,6 +13,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.jobs.util.JobReader;
 
 /**
+ * @param <T> persistence class
  * @author CWDS Elasticsearch Team
  */
 public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
@@ -37,6 +38,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
         .getService(ConnectionProvider.class).getConnection();
     connection.setAutoCommit(false);
     connection.setReadOnly(true);
+
     try {
       statement = connection.createStatement();
       statement.setFetchSize(5000);
@@ -47,6 +49,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
       destroy();
       throw e;
     }
+
   }
 
   @Override

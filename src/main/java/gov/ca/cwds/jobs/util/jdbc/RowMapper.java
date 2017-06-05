@@ -4,8 +4,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * @author CWDS Elasticsearch Team
+ * Simple interface to map results from a JDBC ResultSet.
+ * 
  * @param <T> persistence type to extract from ResultSet
+ * @author CWDS Elasticsearch Team
  */
 @FunctionalInterface
 public interface RowMapper<T> {

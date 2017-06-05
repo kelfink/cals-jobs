@@ -25,7 +25,7 @@ import gov.ca.cwds.jobs.util.JobWriter;
 public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T> {
 
   private static final Logger LOGGER = LogManager.getLogger(ElasticJobWriter.class);
-  private Elasticsearch5xDao elasticsearchDao;
+  private Elasticsearch5xDao esDao;
   private BulkProcessor bulkProcessor;
   private ObjectMapper objectMapper;
 
@@ -36,7 +36,7 @@ public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T
    * @param objectMapper Jackson object mapper
    */
   public ElasticJobWriter(Elasticsearch5xDao elasticsearchDao, ObjectMapper objectMapper) {
-    this.elasticsearchDao = elasticsearchDao;
+    this.esDao = elasticsearchDao;
     this.objectMapper = objectMapper;
     bulkProcessor =
         BulkProcessor.builder(elasticsearchDao.getClient(), new BulkProcessor.Listener() {
@@ -61,7 +61,7 @@ public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T
   public void write(List<T> items) throws Exception {
     items.stream().map(item -> {
       try {
-        return elasticsearchDao.bulkAdd(objectMapper, String.valueOf(item.getPrimaryKey()), item);
+        return esDao.bulkAdd(objectMapper, String.valueOf(item.getPrimaryKey()), item);
       } catch (JsonProcessingException e) {
         throw new JobsException(e);
       }
@@ -72,6 +72,6 @@ public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T
   @Override
   public void destroy() throws Exception {
     bulkProcessor.awaitClose(3000, TimeUnit.MILLISECONDS);
-    elasticsearchDao.close();
+    esDao.close();
   }
 }

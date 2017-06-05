@@ -79,6 +79,7 @@ public class FacilityIndexerJob extends AbstractModule {
 
   @Override
   protected void configure() {
+    // DRS: let Guice inject dependencies for you instead of calling Guice here.
     bind(SessionFactory.class).annotatedWith(Names.named(LIS_SESSION_FACTORY_NM))
         .toInstance(new Configuration().configure("lis-hibernate.cfg.xml").buildSessionFactory());
     bind(RowMapper.class).to(FacilityRowMapper.class);

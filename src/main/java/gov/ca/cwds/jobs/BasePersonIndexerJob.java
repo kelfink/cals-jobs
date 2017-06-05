@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import javax.persistence.Table;
@@ -216,18 +219,25 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   /**
    * Completion flag for <strong>Extract</strong> method {@link #threadExtractJdbc()}.
+   * <p>
+   * Volatile guarantees that changes to this flag become visible other threads (i.e., don't cache a
+   * copy of the flag in thread memory).
+   * </p>
    */
-  protected boolean doneExtract = false;
+  protected volatile boolean doneExtract = false;
 
   /**
    * Completion flag for <strong>Transform</strong> method {@link #threadTransform()}.
    */
-  protected boolean doneTransform = false;
+  protected volatile boolean doneTransform = false;
 
   /**
    * Completion flag for <strong>Load</strong> method {@link #threadLoad()}.
    */
-  protected boolean doneLoad = false;
+  protected volatile boolean doneLoad = false;
+
+  private final Lock lock;
+  private final Condition condition;
 
   // ======================
   // CONSTRUCTOR:
@@ -251,6 +261,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     this.esDao = esDao;
     this.mapper = mapper;
     this.sessionFactory = sessionFactory;
+
+    lock = new ReentrantLock();
+    condition = lock.newCondition();
   }
 
   /**
@@ -402,7 +415,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       job.run();
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
-      // Close resources forcibly, if necessary, by system exit.
+      // Close orphaned resources forcibly, if necessary, by system exit.
       exitCode = 1;
       LOGGER.error("JOB FAILED: {}", e.getMessage(), e);
       throw new JobsException("JOB FAILED! " + e.getMessage(), e);
@@ -727,8 +740,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Prepare an upsert request without a checked exception. Throws runtime {@link JobsException} on
-   * error. Easier to use in lambda and stream calls.
+   * Prepare an "upsert" request without a checked exception. Throws runtime {@link JobsException}
+   * on error. This method's signature is easier to use in functional lambda and stream calls than
+   * older styles.
    * 
    * @param esp person document object
    * @param t normalized entity
@@ -979,7 +993,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
 
       } catch (InterruptedException e) { // NOSONAR
-        LOGGER.warn("Transformer interrupted!");
+        LOGGER.error("Transformer interrupted!");
         fatalError = true;
         Thread.currentThread().interrupt();
       } catch (Exception e) {
@@ -1003,7 +1017,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     int cntr = 0;
     T t;
 
-    LOGGER.warn("BEGIN: Stage #3: Loader");
+    LOGGER.warn("BEGIN: Stage #3: Load");
     try {
       while (!(fatalError || (doneExtract && doneTransform && queueLoad.isEmpty()))) {
         while ((t = queueLoad.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
@@ -1347,7 +1361,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @return the table or view used to allocate bucket ranges
    */
-  protected String getBucketDriverTable() {
+  protected String getDriverTable() {
     String ret = null;
     final Table tbl = this.jobDao.getEntityClass().getDeclaredAnnotation(Table.class);
     if (tbl != null) {
@@ -1367,7 +1381,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected List<Pair<String, String>> getPartitionRanges() {
     LOGGER.warn("DETERMINE BUCKET RANGES ...");
     List<Pair<String, String>> ret = new ArrayList<>();
-    List<BatchBucket> buckets = buildBucketList(getBucketDriverTable());
+    List<BatchBucket> buckets = buildBucketList(getDriverTable());
 
     for (BatchBucket b : buckets) {
       LOGGER.warn("BUCKET RANGE: {} to {}", b.getMinId(), b.getMaxId());

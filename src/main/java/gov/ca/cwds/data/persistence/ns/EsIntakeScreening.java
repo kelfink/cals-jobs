@@ -105,6 +105,9 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   @Type(type = "date")
   private Date endedAt;
 
+  @Column(name = "REFERRAL_ID")
+  private String referralId;
+
   @Column(name = "INCIDENT_DATE")
   private String incidentDate;
 
@@ -308,13 +311,15 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     return fillScreening(null);
   }
 
+  /**
+   * Iterate screenings from the perspective of "this" participant. Separate "this" participant from
+   * "other" participant. This job stores person documents in ES, not disconnected or independent
+   * screening documents.
+   */
   @Override
   public IntakeParticipant normalize(Map<Object, IntakeParticipant> map) {
     final String thisPartcId = (String) getNormalizationGroupKey();
 
-    // Iterate screenings from the perspective of "this" participant.
-    // Separate "this" participant from "other" participant.
-    // This job stores person documents, not independent screening documents.
     IntakeParticipant ret;
 
     if (map.containsKey(thisPartcId)) {

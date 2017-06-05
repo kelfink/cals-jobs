@@ -20,7 +20,7 @@ public final class JobLogUtils {
   private static final int DEFAULT_LOG_EVERY = 5000;
 
   private JobLogUtils() {
-    // No class instantiation.
+    // Static methods only, no class instantiation.
   }
 
   /**
@@ -31,7 +31,7 @@ public final class JobLogUtils {
    * @param action action message (extract, transform, load, etc)
    * @param args variable message arguments
    */
-  public static void logEvery(Logger log, int cntr, String action, String... args) {
+  public static void logEvery(Logger log, int cntr, String action, Object... args) {
     if (cntr > 0 && (cntr % DEFAULT_LOG_EVERY) == 0) {
       log.info("{} {} {}", action, cntr, args);
     }
@@ -44,7 +44,7 @@ public final class JobLogUtils {
    * @param action action message (extract, transform, load, etc)
    * @param args variable message arguments
    */
-  public static void logEvery(int cntr, String action, String... args) {
+  public static void logEvery(int cntr, String action, Object... args) {
     logEvery(LOGGER, cntr, action, args);
   }
 

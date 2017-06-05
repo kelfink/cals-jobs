@@ -88,7 +88,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
 
   @Override
   public String getViewName() {
-    return "VW_SCREENING_HISTORY";
+    return getDriverTable();
   }
 
   /**
