@@ -104,7 +104,7 @@ public class IntakeScreeningJobTest {
         lastJobRunTimeFilename, mapper, sessionFactory);
     final ESOptionalCollection[] actual = target.keepCollections();
     final ESOptionalCollection[] expected =
-        new ESOptionalCollection[] {ESOptionalCollection.SCREENING};;
+        new ESOptionalCollection[] {ESOptionalCollection.SCREENING};
     assertThat(actual, is(equalTo(expected)));
   }
 

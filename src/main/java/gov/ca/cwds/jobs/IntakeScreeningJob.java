@@ -2,6 +2,8 @@ package gov.ca.cwds.jobs;
 
 import java.util.List;
 
+import javax.persistence.Table;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -88,7 +90,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
 
   @Override
   public String getViewName() {
-    return getDriverTable();
+    return getDenormalizedClass().getDeclaredAnnotation(Table.class).name();
   }
 
   /**
