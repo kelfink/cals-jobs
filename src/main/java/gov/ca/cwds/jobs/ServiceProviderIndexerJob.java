@@ -116,13 +116,7 @@ public class ServiceProviderIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Run Service Provider indexer job");
-    try {
-      runJob(ServiceProviderIndexerJob.class, args);
-    } catch (Exception e) {
-      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
-      throw e;
-    }
+    runMain(ServiceProviderIndexerJob.class, args);
   }
 
 }

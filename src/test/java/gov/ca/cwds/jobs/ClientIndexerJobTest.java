@@ -6,6 +6,8 @@ import static org.junit.Assert.assertThat;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import gov.ca.cwds.jobs.exception.JobsException;
+
 /**
  * 
  * @author CWDS API Team

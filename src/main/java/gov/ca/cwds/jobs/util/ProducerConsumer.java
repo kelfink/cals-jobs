@@ -4,7 +4,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import gov.ca.cwds.jobs.JobsException;
+import gov.ca.cwds.jobs.exception.JobsException;
 
 public abstract class ProducerConsumer<T> {
 

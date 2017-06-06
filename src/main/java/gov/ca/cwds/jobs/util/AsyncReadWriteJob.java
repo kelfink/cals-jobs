@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import gov.ca.cwds.jobs.Job;
-import gov.ca.cwds.jobs.JobsException;
+import gov.ca.cwds.jobs.exception.JobsException;
 
 /**
  * @author CWDS Elasticsearch Team

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.jobs.JobsException;
+import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.util.JobWriter;
 
 /**

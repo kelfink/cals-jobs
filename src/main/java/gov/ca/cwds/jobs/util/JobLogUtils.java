@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import gov.ca.cwds.jobs.JobsException;
+import gov.ca.cwds.jobs.exception.JobsException;
 
 /**
  * Logging utilities for Neutron job classes.
@@ -20,7 +20,8 @@ public final class JobLogUtils {
   private static final int DEFAULT_LOG_EVERY = 5000;
 
   private JobLogUtils() {
-    // Static methods only, no class instantiation.
+    // Static methods only, no class instantiation. Evil singleton, blah, blah, blah ... I can't
+    // hear you!
   }
 
   /**

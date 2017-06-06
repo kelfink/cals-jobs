@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.config;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,6 +16,8 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import gov.ca.cwds.jobs.exception.JobsException;
 
 /**
  * Represents batch job options from the command line.

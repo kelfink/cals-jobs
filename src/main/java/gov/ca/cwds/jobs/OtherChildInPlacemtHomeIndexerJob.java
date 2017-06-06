@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,9 +18,6 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  */
 public class OtherChildInPlacemtHomeIndexerJob extends
     BasePersonIndexerJob<ReplicatedOtherChildInPlacemtHome, ReplicatedOtherChildInPlacemtHome> {
-
-  private static final Logger LOGGER =
-      LogManager.getLogger(OtherChildInPlacemtHomeIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -51,13 +46,7 @@ public class OtherChildInPlacemtHomeIndexerJob extends
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Run Other Child In Placement Home indexer job");
-    try {
-      runJob(OtherChildInPlacemtHomeIndexerJob.class, args);
-    } catch (Exception e) {
-      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
-      throw e;
-    }
+    runMain(OtherChildInPlacemtHomeIndexerJob.class, args);
   }
 
 }

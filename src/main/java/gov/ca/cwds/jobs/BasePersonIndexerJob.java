@@ -65,7 +65,6 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.model.cms.JobResultSetAware;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
@@ -79,14 +78,15 @@ import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.inject.SystemCodeCache;
+import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
-
-// import static org.elasticsearch.common.xcontent.XContentFactory.*;
 
 /**
  * Base person batch job to load clients from CMS into ElasticSearch.
@@ -363,8 +363,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected static synchronized Injector buildInjector(final JobOptions opts) throws JobsException {
     if (injector == null) {
       try {
-        injector = Guice
-            .createInjector(new JobsGuiceInjector(new File(opts.esConfigLoc), opts.lastRunLoc));
+        injector = Guice.createInjector(
+            new JobsGuiceInjector(new File(opts.getEsConfigLoc()), opts.getLastRunLoc()));
       } catch (CreationException e) {
         final String msg = MessageFormat.format("Unable to create dependencies {}", e.getMessage());
         LOGGER.fatal(msg, e);
@@ -755,7 +755,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       return prepareUpsertRequest(esp, t);
     } catch (Exception e) {
-      JobLogUtils.throwFatalError(LOGGER, e, "ERROR BUILDING UPSERT: PK: {}", t.getPrimaryKey());
+      JobLogUtils.throwFatalError(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
     }
 
     return null;
@@ -1165,7 +1165,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Smart/auto mode:
       final Calendar cal = Calendar.getInstance();
       cal.add(Calendar.YEAR, -50);
-      final boolean autoMode = this.opts.lastRunMode && lastSuccessfulRunTime.before(cal.getTime());
+      final boolean autoMode =
+          this.opts.isLastRunMode() && lastSuccessfulRunTime.before(cal.getTime());
 
       if (autoMode) {
         LOGGER.warn("AUTO MODE!");
@@ -1181,7 +1182,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           extractHibernate();
         }
 
-      } else if (this.opts == null || this.opts.lastRunMode) {
+      } else if (this.opts == null || this.opts.isLastRunMode()) {
         LOGGER.warn("LAST RUN MODE!");
         doLastRun(lastSuccessfulRunTime);
       } else {

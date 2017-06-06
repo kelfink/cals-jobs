@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Simple interface to map results from a JDBC ResultSet.
+ * Simple interface to map results from a JDBC ResultSet to an entity bean.
  * 
  * @param <T> persistence type to extract from ResultSet
  * @author CWDS Elasticsearch Team

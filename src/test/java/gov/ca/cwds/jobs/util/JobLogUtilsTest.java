@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.JobsException;
+import gov.ca.cwds.jobs.exception.JobsException;
 
 public class JobLogUtilsTest {
 

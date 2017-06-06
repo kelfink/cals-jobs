@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,23 +19,20 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
 public class SubstituteCareProviderIndexJob extends
     BasePersonIndexerJob<ReplicatedSubstituteCareProvider, ReplicatedSubstituteCareProvider> {
 
-  private static final Logger LOGGER = LogManager.getLogger(SubstituteCareProviderIndexJob.class);
-
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param substituteCareProviderDao Client DAO
+   * @param dao main DAO
    * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public SubstituteCareProviderIndexJob(
-      final ReplicatedSubstituteCareProviderDao substituteCareProviderDao,
+  public SubstituteCareProviderIndexJob(final ReplicatedSubstituteCareProviderDao dao,
       final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(substituteCareProviderDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   /**
@@ -46,13 +41,7 @@ public class SubstituteCareProviderIndexJob extends
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Run Substitute Care Provider indexer job");
-    try {
-      runJob(SubstituteCareProviderIndexJob.class, args);
-    } catch (Exception e) {
-      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
-      throw e;
-    }
+    runMain(SubstituteCareProviderIndexJob.class, args);
   }
 
 }

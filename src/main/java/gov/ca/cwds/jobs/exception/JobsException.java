@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.exception;
 
 /**
  * Base class of batch job runtime exceptions. Specialized exceptions should extend this class.

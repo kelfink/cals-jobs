@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.config;
 
 import org.apache.commons.cli.Option;
 
