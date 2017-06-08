@@ -39,8 +39,9 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.ApiSystemCodeDao;
 import gov.ca.cwds.data.persistence.cms.CmsSystemCodeCacheService;
+import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
-import gov.ca.cwds.data.persistence.cms.EsPersonCase;
+import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
 import gov.ca.cwds.data.persistence.cms.SystemCodeDaoFileImpl;
@@ -108,22 +109,21 @@ public class JobsGuiceInjector extends AbstractModule {
   @Override
   protected void configure() {
     // DB2 session factory:
-    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
-        .toInstance(new Configuration().configure("jobs-cms-hibernate.cfg.xml")
-            .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsClientAddress.class)
-            .addAnnotatedClass(EsRelationship.class).addAnnotatedClass(EsPersonReferral.class)
-            .addAnnotatedClass(EsPersonCase.class).addAnnotatedClass(ReplicatedAttorney.class)
-            .addAnnotatedClass(ReplicatedCollateralIndividual.class)
-            .addAnnotatedClass(ReplicatedEducationProviderContact.class)
-            .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
-            .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
-            .addAnnotatedClass(ReplicatedOtherClientName.class)
-            .addAnnotatedClass(ReplicatedReporter.class)
-            .addAnnotatedClass(ReplicatedServiceProvider.class)
-            .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
-            .addAnnotatedClass(ReplicatedClient.class)
-            .addAnnotatedClass(ReplicatedClientAddress.class)
-            .addAnnotatedClass(ReplicatedAddress.class).buildSessionFactory());
+    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class).toInstance(new Configuration()
+        .configure("jobs-cms-hibernate.cfg.xml").addAnnotatedClass(BatchBucket.class)
+        .addAnnotatedClass(EsClientAddress.class).addAnnotatedClass(EsRelationship.class)
+        .addAnnotatedClass(EsPersonReferral.class).addAnnotatedClass(EsChildPersonCase.class)
+        .addAnnotatedClass(EsParentPersonCase.class).addAnnotatedClass(ReplicatedAttorney.class)
+        .addAnnotatedClass(ReplicatedCollateralIndividual.class)
+        .addAnnotatedClass(ReplicatedEducationProviderContact.class)
+        .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
+        .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
+        .addAnnotatedClass(ReplicatedOtherClientName.class)
+        .addAnnotatedClass(ReplicatedReporter.class)
+        .addAnnotatedClass(ReplicatedServiceProvider.class)
+        .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
+        .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
+        .addAnnotatedClass(ReplicatedAddress.class).buildSessionFactory());
 
     // PostgreSQL session factory:
     bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)

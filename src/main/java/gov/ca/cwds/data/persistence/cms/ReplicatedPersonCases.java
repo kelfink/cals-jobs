@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -21,8 +23,13 @@ public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
 
   private static final long serialVersionUID = -8746969311364544478L;
 
-  private String focusChildId;
-  private List<ElasticSearchPersonCase> personCases = new ArrayList<ElasticSearchPersonCase>();
+  private String groupId;
+
+  /**
+   * Key: Case ID <br>
+   * Value: ElasticSearchPersonCase objects for the keyed case id.
+   */
+  private Map<String, ElasticSearchPersonCase> personCases = new HashMap<>();
 
   /**
    * Key: Case ID <br>
@@ -33,10 +40,10 @@ public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
   /**
    * Construct the object
    * 
-   * @param focusChildId The child id (this is same as client id of the child)
+   * @param groupId The group id (usually focus child or parent id)
    */
-  public ReplicatedPersonCases(String focusChildId) {
-    this.focusChildId = focusChildId;
+  public ReplicatedPersonCases(String groupId) {
+    this.groupId = groupId;
   }
 
   /**
@@ -45,7 +52,7 @@ public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
    * @return All ElasticSearchPersonCase objects.
    */
   public List<ElasticSearchPersonCase> getCases() {
-    return personCases;
+    return Lists.newArrayList(personCases.values());
   }
 
   /**
@@ -55,7 +62,7 @@ public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
    * @param caseParent Parent to add.
    */
   public void addCase(ElasticSearchPersonCase personCase, ElasticSearchPersonParent caseParent) {
-    personCases.add(personCase);
+    personCases.put(personCase.getId(), personCase);
 
     // Add parent
     if (caseParent != null) {
@@ -71,7 +78,7 @@ public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
 
   @Override
   public Serializable getPrimaryKey() {
-    return this.focusChildId;
+    return this.groupId;
   }
 
   @Override

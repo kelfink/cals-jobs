@@ -5,9 +5,6 @@ import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -15,8 +12,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.annotations.NamedNativeQueries;
-import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson;
@@ -37,28 +32,16 @@ import gov.ca.cwds.rest.api.domain.DomainChef;
  * 
  * @author CWDS API Team
  */
-@Entity
-@Table(name = "ES_CASE_HIST")
-@NamedNativeQueries({
-    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsPersonCase.findAllUpdatedAfter",
-        query = "SELECT c.* FROM {h-schema}ES_CASE_HIST c WHERE c.CASE_ID IN ("
-            + " SELECT c1.CASE_ID FROM {h-schema}ES_CASE_HIST c1 "
-            + "WHERE c1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID FOR READ ONLY ",
-        resultClass = EsPersonCase.class, readOnly = true)})
-public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonCases> {
+public abstract class EsPersonCase
+    implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonCases> {
 
-  private static final long serialVersionUID = -3777509530463773550L;
+  private static final long serialVersionUID = 2896950873299112269L;
 
   private static final Logger LOGGER = LogManager.getLogger(EsPersonCase.class);
 
   // ================
   // CASE:
   // ================
-
-  @Id
-  @Column(name = "CASE_ID")
-  private String caseId;
 
   @Column(name = "START_DATE")
   @Type(type = "date")
@@ -72,6 +55,10 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
   @Type(type = "integer")
   private Integer county;
 
+  @Column(name = "SERVICE_COMP")
+  @Type(type = "integer")
+  private Integer serviceComponent;
+
   @Type(type = "timestamp")
   @Column(name = "CASE_LAST_UPDATED", updatable = false)
   private Date caseLastUpdated;
@@ -80,19 +67,11 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
   // FOCUS CHILD:
   // ==============
 
-  @Id
-  @Column(name = "FOCUS_CHILD_ID")
-  private String focusChildId;
-
   @Column(name = "FOCUS_CHLD_FIRST_NM")
   private String focusChildFirstName;
 
   @Column(name = "FOCUS_CHLD_LAST_NM")
   private String focusChildLastName;
-
-  @Column(name = "SERVICE_COMP")
-  @Type(type = "integer")
-  private Integer serviceComponent;
 
   @Type(type = "timestamp")
   @Column(name = "FOCUS_CHILD_LAST_UPDATED", updatable = false)
@@ -118,10 +97,6 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
   // =============
   // PARENT:
   // =============
-
-  @Id
-  @Column(name = "PARENT_ID")
-  private String parentId;
 
   @Column(name = "PARENT_FIRST_NM")
   private String parentFirstName;
@@ -151,10 +126,11 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
 
   @Override
   public ReplicatedPersonCases normalize(Map<Object, ReplicatedPersonCases> map) {
-    ReplicatedPersonCases cases = map.get(this.focusChildId);
+    String groupId = (String) getNormalizationGroupKey();
+    ReplicatedPersonCases cases = map.get(groupId);
     if (cases == null) {
-      cases = new ReplicatedPersonCases(this.focusChildId);
-      map.put(this.focusChildId, cases);
+      cases = new ReplicatedPersonCases(groupId);
+      map.put(groupId, cases);
     }
 
     ElasticSearchPersonCase esPersonCase = new ElasticSearchPersonCase();
@@ -162,24 +138,24 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
     //
     // Case
     //
-    esPersonCase.setId(this.caseId);
-    esPersonCase.setLegacyId(this.caseId);
+    esPersonCase.setId(getCaseId());
+    esPersonCase.setLegacyId(getCaseId());
     esPersonCase.setStartDate(DomainChef.cookDate(this.startDate));
     esPersonCase.setEndDate(DomainChef.cookDate(this.endDate));
     esPersonCase.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.caseLastUpdated));
     esPersonCase
         .setCountyName(ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.county));
+    esPersonCase.setServiceComponent(
+        ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.serviceComponent));
 
     //
     // Child
     //
     ElasticSearchPersonChild child = new ElasticSearchPersonChild();
-    child.setId(this.focusChildId);
-    child.setLegacyClientId(this.focusChildId);
+    child.setId(getFocusChildId());
+    child.setLegacyClientId(getFocusChildId());
     child.setFirstName(this.focusChildFirstName);
     child.setLastName(this.focusChildLastName);
-    child.setServiceComponent(
-        ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.serviceComponent));
     child.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.focusChildLastUpdated));
     esPersonCase.setFocusChild(child);
 
@@ -198,8 +174,8 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
     // A Case may have more than one parents
     //
     ElasticSearchPersonParent parent = new ElasticSearchPersonParent();
-    parent.setId(this.parentId);
-    parent.setLegacyClientId(this.parentId);
+    parent.setId(getParentId());
+    parent.setLegacyClientId(getParentId());
     parent.setFirstName(this.parentFirstName);
     parent.setLastName(this.parentLastName);
     parent.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.parentLastUpdated));
@@ -212,22 +188,21 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
-    return this.focusChildId;
-  }
-
-  @Override
   public Serializable getPrimaryKey() {
     return null;
   }
 
-  public String getCaseId() {
-    return caseId;
-  }
+  public abstract String getCaseId();
 
-  public void setCaseId(String caseId) {
-    this.caseId = caseId;
-  }
+  public abstract void setCaseId(String caseId);
+
+  public abstract String getFocusChildId();
+
+  public abstract String getParentId();
+
+  public abstract void setParentId(String parentId);
+
+  public abstract void setFocusChildId(String focusChildId);
 
   public Date getStartDate() {
     return startDate;
@@ -251,14 +226,6 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
 
   public void setCounty(Integer county) {
     this.county = county;
-  }
-
-  public String getFocusChildId() {
-    return focusChildId;
-  }
-
-  public void setFocusChildId(String focusChildId) {
-    this.focusChildId = focusChildId;
   }
 
   public String getFocusChildFirstName() {
@@ -307,14 +274,6 @@ public class EsPersonCase implements PersistentObject, ApiGroupNormalizer<Replic
 
   public void setWorkerLastName(String workerLastName) {
     this.workerLastName = workerLastName;
-  }
-
-  public String getParentId() {
-    return parentId;
-  }
-
-  public void setParentId(String parentId) {
-    this.parentId = parentId;
   }
 
   public String getParentFirstName() {
