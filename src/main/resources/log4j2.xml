@@ -12,7 +12,7 @@
 	</Appenders>
 
 	<Loggers>
-		<Root level="WARN">
+		<Root level="INFO">
 			<AppenderRef ref="ASYNC" />
 		</Root>
 		<logger name="gov.ca.cwds" level="INFO" additivity="false">

@@ -22,7 +22,7 @@ public class JobLogUtilsTest {
     Logger log = mock(Logger.class);
     int cntr = 0;
     String action = null;
-    String[] args = new String[] {};
+    Object[] args = new String[] {};
     // e.g. : given(mocked.called()).willReturn(1);
     // when
     JobLogUtils.logEvery(log, cntr, action, args);
