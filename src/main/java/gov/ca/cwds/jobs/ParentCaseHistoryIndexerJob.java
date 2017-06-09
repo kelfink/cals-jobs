@@ -45,16 +45,53 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
 
   @Override
   public EsParentPersonCase extract(ResultSet rs) throws SQLException {
-    String parentId = rs.getString("PARENT_ID");
+    String parentPersonId = rs.getString("PARENT_PERSON_ID");
     String caseId = rs.getString("CASE_ID");
 
-    if (parentId == null) {
-      LOGGER.warn("PARENT_ID is null for CASE_ID: {}", caseId);
+    if (parentPersonId == null) {
+      LOGGER.warn("PARENT_PERSON_ID is null for CASE_ID: {}", caseId);
       return null;
     }
 
     EsParentPersonCase personCase = new EsParentPersonCase();
-    super.fillEsPersonCaseFromResultSet(rs, personCase);
+    personCase.setParentPersonId(parentPersonId);
+
+    //
+    // Case
+    //
+    personCase.setCaseId(caseId);
+    personCase.setStartDate(rs.getDate("START_DATE"));
+    personCase.setEndDate(rs.getDate("END_DATE"));
+    personCase.setCaseLastUpdated(rs.getDate("CASE_LAST_UPDATED"));
+    personCase.setCounty(rs.getInt("COUNTY"));
+    personCase.setServiceComponent(rs.getInt("SERVICE_COMP"));
+
+    //
+    // Child (client)
+    //
+    personCase.setFocusChildId(rs.getString("FOCUS_CHILD_ID"));
+    personCase.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
+    personCase.setFocusChildLastName(ifNull(rs.getString("FOCUS_CHLD_LAST_NM")));
+    personCase.setFocusChildLastUpdated(rs.getDate("FOCUS_CHILD_LAST_UPDATED"));
+
+    //
+    // Parent
+    //
+    personCase.setParentId(ifNull(rs.getString("PARENT_ID")));
+    personCase.setParentFirstName(ifNull(rs.getString("PARENT_FIRST_NM")));
+    personCase.setParentLastName(ifNull(rs.getString("PARENT_LAST_NM")));
+    personCase.setParentRelationship(rs.getInt("PARENT_RELATIONSHIP"));
+    personCase.setParentLastUpdated(rs.getDate("PARENT_LAST_UPDATED"));
+    personCase.setParentSourceTable(rs.getString("PARENT_SOURCE_TABLE"));
+
+    //
+    // Worker (staff)
+    //
+    personCase.setWorkerId(ifNull(rs.getString("WORKER_ID")));
+    personCase.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
+    personCase.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
+    personCase.setWorkerLastUpdated(rs.getDate("WORKER_LAST_UPDATED"));
+
     return personCase;
   }
 
@@ -64,8 +101,13 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
   }
 
   @Override
+  public String getViewName() {
+    return "VW_PARENT_CASE_HIST";
+  }
+
+  @Override
   public String getJdbcOrderBy() {
-    return " ORDER BY PARENT_ID, CASE_ID ";
+    return " ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID ";
   }
 
   /**

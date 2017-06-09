@@ -1,8 +1,6 @@
 package gov.ca.cwds.jobs;
 
 import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,11 +53,6 @@ public abstract class CaseHistoryIndexerJob
   }
 
   @Override
-  public String getViewName() {
-    return "ES_CASE_HIST";
-  }
-
-  @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonCases cases)
       throws IOException {
 
@@ -100,53 +93,6 @@ public abstract class CaseHistoryIndexerJob
   @Override
   protected List<ReplicatedPersonCases> normalize(List<EsPersonCase> recs) {
     return EntityNormalizer.<ReplicatedPersonCases, EsPersonCase>normalizeList(recs);
-  }
-
-  /**
-   * Fills given EsPersonCase with data retrieved from given ResultSet
-   * 
-   * @param rs
-   * @param personCase
-   * @throws SQLException
-   */
-  protected void fillEsPersonCaseFromResultSet(ResultSet rs, EsPersonCase personCase)
-      throws SQLException {
-
-    //
-    // Case
-    //
-    personCase.setCaseId(rs.getString("CASE_ID"));
-    personCase.setStartDate(rs.getDate("START_DATE"));
-    personCase.setEndDate(rs.getDate("END_DATE"));
-    personCase.setCaseLastUpdated(rs.getDate("CASE_LAST_UPDATED"));
-    personCase.setCounty(rs.getInt("COUNTY"));
-    personCase.setServiceComponent(rs.getInt("SERVICE_COMP"));
-
-    //
-    // Child (client)
-    //
-    personCase.setFocusChildId(rs.getString("FOCUS_CHILD_ID"));
-    personCase.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
-    personCase.setFocusChildLastName(ifNull(rs.getString("FOCUS_CHLD_LAST_NM")));
-    personCase.setFocusChildLastUpdated(rs.getDate("FOCUS_CHILD_LAST_UPDATED"));
-
-    //
-    // Parent
-    //
-    personCase.setParentId(ifNull(rs.getString("PARENT_ID")));
-    personCase.setParentFirstName(ifNull(rs.getString("PARENT_FIRST_NM")));
-    personCase.setParentLastName(ifNull(rs.getString("PARENT_LAST_NM")));
-    personCase.setParentRelationship(rs.getInt("PARENT_RELATIONSHIP"));
-    personCase.setParentLastUpdated(rs.getDate("PARENT_LAST_UPDATED"));
-    personCase.setParentSourceTable(rs.getString("PARENT_SOURCE_TABLE"));
-
-    //
-    // Worker (staff)
-    //
-    personCase.setWorkerId(ifNull(rs.getString("WORKER_ID")));
-    personCase.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
-    personCase.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
-    personCase.setWorkerLastUpdated(rs.getDate("WORKER_LAST_UPDATED"));
   }
 }
 
