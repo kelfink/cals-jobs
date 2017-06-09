@@ -41,18 +41,9 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @Table(name = "VW_BI_DIR_RELATION")
 @NamedNativeQueries({
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfter",
-        // query = "SELECT v.* FROM {h-schema}VW_RELATIONSHIP v WHERE v.THIS_LEGACY_ID IN ("
-        // + " SELECT v1.THIS_LEGACY_ID FROM {h-schema}VW_RELATIONSHIP v1 "
-        // + "WHERE v1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-        // + ") ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID, THIS_LEGACY_TABLE, RELATED_LEGACY_TABLE
-        // "
-        // + "FOR READ ONLY ",
-        // query = "SELECT v.* FROM {h-schema}VW_BI_DIR_RELATION v WHERE v.THIS_LEGACY_ID IN ("
-        // + " SELECT v1.THIS_LEGACY_ID FROM {h-schema}VW_BI_DIR_RELATION v1 "
-        // + "WHERE v1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-        // + ") ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY ",
         query = "WITH driver as ( "
-            + " SELECT v1.THIS_LEGACY_ID, V1.RELATED_LEGACY_ID FROM CWSRS1.VW_BI_DIR_RELATION v1 where v1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + " SELECT v1.THIS_LEGACY_ID, V1.RELATED_LEGACY_ID FROM CWSRS1.VW_BI_DIR_RELATION v1 "
+            + "where v1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") SELECT V.* FROM {h-schema}VW_BI_DIR_RELATION v "
             + "WHERE v.THIS_LEGACY_ID IN (select d1.THIS_LEGACY_ID from driver d1) "
             + "OR v.RELATED_LEGACY_ID IN (select d2.RELATED_LEGACY_ID from driver d2) "
@@ -171,16 +162,16 @@ public class EsRelationship
           final String s = m.group(i);
           switch (i) {
             case 1:
-              primaryRel = s;
+              primaryRel = s.trim();
               break;
 
             case 2:
-              secondaryRel = s;
+              secondaryRel = s.trim();
               break;
 
             case 3:
-              relContext =
-                  StringUtils.isNotBlank(s) ? s.replaceAll("\\(", "").replaceAll("\\)", "") : "";
+              relContext = StringUtils.isNotBlank(s)
+                  ? s.replaceAll("\\(", "").replaceAll("\\)", "").trim() : "";
               break;
 
             default:
