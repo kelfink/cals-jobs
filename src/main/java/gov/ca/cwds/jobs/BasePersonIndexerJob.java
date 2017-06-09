@@ -317,7 +317,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param args variable message arguments
    * @see JobLogUtils
    */
-  protected void logEvery(int cntr, String action, String... args) {
+  protected void logEvery(int cntr, String action, Object... args) {
     JobLogUtils.logEvery(LOGGER, cntr, action, args);
   }
 
