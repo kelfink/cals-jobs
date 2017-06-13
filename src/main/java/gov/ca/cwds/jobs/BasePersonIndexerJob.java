@@ -877,7 +877,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         } catch (HibernateException he) { // NOSONAR
           LOGGER.debug("USING DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage());
         } catch (Exception e) {
-          LOGGER.warn("Hibernate keep-alive error: {}", e.getMessage(), e);
+          LOGGER.warn("Hibernate keep-alive error: {}", e.getMessage());
         }
       }
 
@@ -904,7 +904,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void threadExtractJdbc() {
     Thread.currentThread().setName("extract");
-    LOGGER.warn("BEGIN: Stage #1: extract");
+    LOGGER.info("BEGIN: Stage #1: extract");
 
     try {
       Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
@@ -928,7 +928,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
 
         int cntr = 0;
-        while (rs.next()) {
+        while (!fatalError && rs.next()) {
           // Hand the baton to the next runner ...
           logEvery(++cntr, "Retrieved", "recs");
           M m = extract(rs);
@@ -949,7 +949,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       doneExtract = true;
     }
 
-    LOGGER.warn("DONE: Stage #1: Extract");
+    LOGGER.info("DONE: Stage #1: Extract");
   }
 
   /**
@@ -958,7 +958,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void threadTransform() {
     Thread.currentThread().setName("transform");
-    LOGGER.warn("BEGIN: Stage #2: Transform");
+    LOGGER.info("BEGIN: Stage #2: Transform");
 
     int cntr = 0;
     Object lastId = new Object();
@@ -1004,7 +1004,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }
 
-    LOGGER.warn("DONE: Stage #2: Transform");
+    LOGGER.info("DONE: Stage #2: Transform");
   }
 
   /**
