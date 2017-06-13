@@ -1318,6 +1318,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param table the driver table
    * @return batch buckets
    */
+  @Deprecated
   @SuppressWarnings("unchecked")
   protected List<BatchBucket> buildBucketList(String table) {
     List<BatchBucket> ret = new ArrayList<>();
@@ -1450,6 +1451,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param maxId end of identifier range
    * @return collection of entity results
    */
+  @Deprecated
   protected List<T> pullBucketRange(String minId, String maxId) {
     LOGGER.info("PULL BUCKET RANGE {} to {}", minId, maxId);
     final Class<?> entityClass =
