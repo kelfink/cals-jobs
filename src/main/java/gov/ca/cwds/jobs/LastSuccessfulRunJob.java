@@ -34,7 +34,7 @@ public abstract class LastSuccessfulRunJob implements Job {
   /**
    * Completion flag for fatal errors.
    */
-  protected boolean fatalError = false;
+  protected volatile boolean fatalError = false;
 
   private String lastRunTimeFilename;
 
@@ -72,13 +72,13 @@ public abstract class LastSuccessfulRunJob implements Job {
         ret = jobDateFormat.parse(br.readLine().trim());
       } catch (FileNotFoundException e) {
         fatalError = true;
-        JobLogUtils.throwFatalError(LOGGER, e, "Caught FileNotFoundException: {}", e.getMessage());
+        JobLogUtils.raiseError(LOGGER, e, "Caught FileNotFoundException: {}", e.getMessage());
       } catch (IOException e) {
         fatalError = true;
-        JobLogUtils.throwFatalError(LOGGER, e, "Caught IOException: {}", e.getMessage());
+        JobLogUtils.raiseError(LOGGER, e, "Caught IOException: {}", e.getMessage());
       } catch (ParseException e) {
         fatalError = true;
-        JobLogUtils.throwFatalError(LOGGER, e, "Caught ParseException: {}", e.getMessage());
+        JobLogUtils.raiseError(LOGGER, e, "Caught ParseException: {}", e.getMessage());
       }
     }
 
@@ -91,8 +91,7 @@ public abstract class LastSuccessfulRunJob implements Job {
         w.write(jobDateFormat.format(datetime));
       } catch (IOException e) {
         fatalError = true;
-        JobLogUtils.throwFatalError(LOGGER, e, "Failed to write timestamp file: {}",
-            e.getMessage());
+        JobLogUtils.raiseError(LOGGER, e, "Failed to write timestamp file: {}", e.getMessage());
       }
     }
   }

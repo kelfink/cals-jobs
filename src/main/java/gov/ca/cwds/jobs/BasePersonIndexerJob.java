@@ -652,10 +652,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @see #prepareUpsertRequest(ElasticSearchPerson, PersistentObject)
    */
   protected void prepareDocument(BulkProcessor bp, T t) throws IOException {
-    Arrays.stream(buildElasticSearchPersons(t)).map(esp -> {
-      recsPrepared.getAndIncrement();
-      return prepareUpsertRequestNoChecked(esp, t);
-    }).forEach(bp::add);
+    Arrays.stream(buildElasticSearchPersons(t)).map(esp -> prepareUpsertRequestNoChecked(esp, t))
+        .forEach(bp::add);
   }
 
   /**
@@ -753,9 +751,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected UpdateRequest prepareUpsertRequestNoChecked(ElasticSearchPerson esp, T t) {
     try {
+      recsPrepared.getAndIncrement();
       return prepareUpsertRequest(esp, t);
     } catch (Exception e) {
-      JobLogUtils.throwFatalError(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
+      JobLogUtils.raiseError(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
     }
 
     return null;
@@ -893,9 +892,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       fatalError = true;
       Thread.currentThread().interrupt();
     } catch (Exception e) {
-      LOGGER.error("GENERAL EXCEPTION: {}", e.getMessage(), e);
       fatalError = true;
-      throw new JobsException(e);
+      JobLogUtils.raiseError(LOGGER, e, "GENERAL EXCEPTION: {}", e);
     } finally {
       doneExtract = true;
     }
@@ -946,8 +944,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     } catch (Exception e) {
       fatalError = true;
-      LOGGER.error("BATCH ERROR! {}", e.getMessage(), e);
-      throw new JobsException(e.getMessage(), e);
+      JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneExtract = true;
     }
@@ -1000,9 +997,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         fatalError = true;
         Thread.currentThread().interrupt();
       } catch (Exception e) {
-        LOGGER.fatal("Transformer: fatal error {}", e.getMessage(), e);
         fatalError = true;
-        throw new JobsException("Transformer: fatal error", e);
+        JobLogUtils.raiseError(LOGGER, e, "Transformer: fatal error {}", e.getMessage());
       } finally {
         doneTransform = true;
       }
@@ -1053,12 +1049,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       Thread.currentThread().interrupt();
     } catch (JsonProcessingException e) {
       fatalError = true;
-      LOGGER.error("Publisher: JsonProcessingException! {}", e.getMessage(), e);
-      throw new JobsException("JSON error", e);
+      JobLogUtils.raiseError(LOGGER, e, "Publisher: JsonProcessingException {}", e.getMessage());
     } catch (Exception e) {
       fatalError = true;
-      LOGGER.fatal("Publisher: fatal error {}", e.getMessage(), e);
-      throw new JobsException("Publisher: fatal error", e);
+      JobLogUtils.raiseError(LOGGER, e, "Publisher: fatal error {}", e.getMessage());
     } finally {
       doneLoad = true;
     }
@@ -1102,12 +1096,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
             prepareDocument(bp, p);
           } catch (JsonProcessingException e) {
             fatalError = true;
-            LOGGER.error("ERROR WRITING JSON: {}", e.getMessage(), e);
-            throw new JobsException("ERROR WRITING JSON", e);
+            JobLogUtils.raiseError(LOGGER, e, "ERROR WRITING JSON: {}", e.getMessage());
           } catch (IOException e) {
             fatalError = true;
-            LOGGER.error("IO EXCEPTION: {}", e.getMessage(), e);
-            throw new JobsException("IO EXCEPTION", e);
+            JobLogUtils.raiseError(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
           } finally {
             doneLoad = true;
           }
