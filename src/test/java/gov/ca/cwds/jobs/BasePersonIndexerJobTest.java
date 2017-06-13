@@ -301,19 +301,6 @@ public class BasePersonIndexerJobTest {
   }
 
   // @Test
-  public void logEvery_Args__int__String__ObjectArray() throws Exception {
-    // given
-    int cntr = 0;
-    String action = null;
-    Object[] args = new Object[] {};
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
-    target.logEvery(cntr, action, args);
-    // then
-    // e.g. : verify(mocked).called();
-  }
-
-  // @Test
   public void buildBulkProcessor_Args__() throws Exception {
     // given
     // e.g. : given(mocked.called()).willReturn(1);

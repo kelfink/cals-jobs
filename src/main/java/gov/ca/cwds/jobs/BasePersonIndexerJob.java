@@ -317,9 +317,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param args variable message arguments
    * @see JobLogUtils
    */
-  protected void logEvery(int cntr, String action, Object... args) {
-    JobLogUtils.logEvery(LOGGER, cntr, action, args);
-  }
+  // protected void logEvery(int cntr, String action, Object... args) {
+  // JobLogUtils.logEvery(LOGGER, cntr, action, args);
+  // }
 
   /**
    * Instantiate one Elasticsearch BulkProcessor per working thread.
@@ -930,7 +930,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         int cntr = 0;
         while (!fatalError && rs.next()) {
           // Hand the baton to the next runner ...
-          logEvery(++cntr, "Retrieved", "recs");
+          JobLogUtils.logEvery(++cntr, "Retrieved", "recs");
           M m = extract(rs);
           if (m != null) {
             queueTransform.putLast(extract(rs));
@@ -968,7 +968,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     while (!(fatalError || (doneExtract && queueTransform.isEmpty()))) {
       try {
         while ((m = queueTransform.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
-          logEvery(++cntr, "Transformed", "recs");
+          JobLogUtils.logEvery(++cntr, "Transformed", "recs");
 
           // NOTE: Assumes that records are sorted by group key.
           if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
@@ -1020,14 +1020,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       while (!(fatalError || (doneExtract && doneTransform && queueLoad.isEmpty()))) {
         while ((t = queueLoad.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
-          logEvery(++cntr, "Published", "recs to ES");
-          prepareDocument(bp, t);
+          JobLogUtils.logEvery(++cntr, "Published", "recs to ES");
         }
+        prepareDocument(bp, t);
       }
 
       // Just to be sure ...
       while ((t = queueLoad.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
-        logEvery(++cntr, "Published", "recs to ES");
+        JobLogUtils.logEvery(++cntr, "Published", "recs to ES");
         prepareDocument(bp, t);
       }
 

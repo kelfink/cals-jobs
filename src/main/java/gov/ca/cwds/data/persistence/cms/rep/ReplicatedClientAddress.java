@@ -25,7 +25,7 @@ import gov.ca.cwds.data.persistence.cms.BaseClientAddress;
 @Table(name = "CL_ADDRT")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public final class ReplicatedClientAddress extends BaseClientAddress {
+public class ReplicatedClientAddress extends BaseClientAddress {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "IDENTIFIER", referencedColumnName = "FKADDRS_T", insertable = false,
