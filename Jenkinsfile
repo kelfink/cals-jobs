@@ -13,6 +13,11 @@ node ('dora-slave'){
    }
    stage('CoverageCheck_and_Test') {
        buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport'
+	   result = buildInfo.result
+			if !(result.equals("SUCCESS")) {
+				slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Jobs ${env.JOB_NAME} build # ${env.BUILD_NUMBER} falled: ${buildInfo}"
+				
+			} 
    }
    stage('SonarQube analysis'){
 		withSonarQubeEnv('Core-SonarQube') {
