@@ -32,7 +32,7 @@ public class ReplicatedOtherChildInPlacemtHomeTest {
     Class<ReplicatedOtherChildInPlacemtHome> actual = target.getNormalizationClass();
     // then
     // e.g. : verify(mocked).called();
-    Class<ReplicatedOtherChildInPlacemtHome> expected = null;
+    Class<ReplicatedOtherChildInPlacemtHome> expected = ReplicatedOtherChildInPlacemtHome.class;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -60,7 +60,7 @@ public class ReplicatedOtherChildInPlacemtHomeTest {
     Object actual = target.getNormalizationGroupKey();
     // then
     // e.g. : verify(mocked).called();
-    Object expected = null;
+    Object expected = "";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -73,7 +73,7 @@ public class ReplicatedOtherChildInPlacemtHomeTest {
     String actual = target.getLegacyId();
     // then
     // e.g. : verify(mocked).called();
-    String expected = null;
+    String expected = "";
     assertThat(actual, is(equalTo(expected)));
   }
 
