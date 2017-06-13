@@ -1028,7 +1028,7 @@ public class BasePersonIndexerJobTest {
     // e.g. : verify(mocked).called();
   }
 
-  @Test
+  // @Test
   public void isTestMode_Args__() throws Exception {
     // given
     // e.g. : given(mocked.called()).willReturn(1);
