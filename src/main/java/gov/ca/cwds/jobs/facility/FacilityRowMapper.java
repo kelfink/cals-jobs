@@ -43,7 +43,7 @@ public class FacilityRowMapper implements RowMapper<FacilityRow> {
         descriptor.getWriteMethod().invoke(object, value);
       }
     } catch (Exception e) {
-      JobLogUtils.throwFatalError(LOGGER, e, e.getMessage());
+      JobLogUtils.raiseError(LOGGER, e, e.getMessage());
     }
   }
 

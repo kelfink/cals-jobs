@@ -58,7 +58,7 @@ public final class JobLogUtils {
    * @param args error message, excluding throwable message
    * @throws JobsException runtime exception
    */
-  public static void throwFatalError(final Logger log, Throwable e, String pattern,
+  public static void raiseError(final Logger log, Throwable e, String pattern,
       Object... args) {
     final Object[] objs = args == null || args.length == 0 ? new Object[0] : args;
     final String pat = !StringUtils.isEmpty(pattern) ? pattern : StringUtils.join(objs, "{}");
@@ -76,8 +76,8 @@ public final class JobLogUtils {
    * @param args error message or throwable message
    * @throws JobsException runtime exception
    */
-  public static void throwFatalError(final Logger log, Throwable e, Object... args) {
-    throwFatalError(log, e, null, args);
+  public static void raiseError(final Logger log, Throwable e, Object... args) {
+    raiseError(log, e, null, args);
   }
 
 }

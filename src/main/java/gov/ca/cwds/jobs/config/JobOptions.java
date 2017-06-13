@@ -24,7 +24,7 @@ import gov.ca.cwds.jobs.exception.JobsException;
  * 
  * @author CWDS API Team
  */
-public final class JobOptions implements Serializable {
+public class JobOptions implements Serializable {
 
   /**
    * Base serialization version. Increment by class change.
@@ -33,13 +33,13 @@ public final class JobOptions implements Serializable {
 
   private static final Logger LOGGER = LogManager.getLogger(JobOptions.class);
 
-  static final String CMD_LINE_ES_CONFIG = "config";
-  static final String CMD_LINE_LAST_RUN = "last-run-file";
-  static final String CMD_LINE_BUCKET_RANGE = "bucket-range";
-  static final String CMD_LINE_BUCKET_TOTAL = "total-buckets";
-  static final String CMD_LINE_THREADS = "thread-num";
-  static final String CMD_LINE_MIN_ID = "min_id";
-  static final String CMD_LINE_MAX_ID = "max_id";
+  public static final String CMD_LINE_ES_CONFIG = "config";
+  public static final String CMD_LINE_LAST_RUN = "last-run-file";
+  public static final String CMD_LINE_BUCKET_RANGE = "bucket-range";
+  public static final String CMD_LINE_BUCKET_TOTAL = "total-buckets";
+  public static final String CMD_LINE_THREADS = "thread-num";
+  public static final String CMD_LINE_MIN_ID = "min_id";
+  public static final String CMD_LINE_MAX_ID = "max_id";
 
   /**
    * Location of Elasticsearch configuration file.

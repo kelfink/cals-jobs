@@ -51,7 +51,7 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter",
         query = "SELECT p.\"id\" AS ns_partc_id, p.legacy_id AS cms_legacy_id, vw.* "
-            + "FROM VW_SCREENING_HISTORY vw "
+            + "FROM {h-schema}VW_SCREENING_HISTORY vw "
             + "JOIN PARTICIPANTS p ON p.screening_id = vw.screening_id "
             + "WHERE vw.participant_id IN ( SELECT DISTINCT vw1.participant_id "
             + " FROM VW_SCREENING_HISTORY vw1 WHERE vw1.last_chg > CAST(:after AS TIMESTAMP) "

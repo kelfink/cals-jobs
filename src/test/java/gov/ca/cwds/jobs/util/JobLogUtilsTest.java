@@ -52,7 +52,7 @@ public class JobLogUtilsTest {
     Object[] args = new Object[] {};
     // e.g. : given(mocked.called()).willReturn(1);
     // when
-    JobLogUtils.throwFatalError(log, e, pattern, args);
+    JobLogUtils.raiseError(log, e, pattern, args);
     // then
     // e.g. : verify(mocked).called();
   }
@@ -65,7 +65,7 @@ public class JobLogUtilsTest {
     String message = "hello world";
     // e.g. : given(mocked.called()).willReturn(1);
     // when
-    JobLogUtils.throwFatalError(log, e, message);
+    JobLogUtils.raiseError(log, e, message);
     // then
     // e.g. : verify(mocked).called();
   }
