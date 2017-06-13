@@ -165,21 +165,6 @@ public class ReplicatedClient extends BaseClient
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
-
-    // OLD SCHOOL BOILERPLATE.
-    // final List<ApiPhoneAware> phones = new ArrayList<>();
-    // if (this.clientAddresses != null && !this.clientAddresses.isEmpty()) {
-    // for (ReplicatedClientAddress clAdr : this.clientAddresses) {
-    // for (ReplicatedAddress adr : clAdr.getAddresses()) {
-    // for (ApiPhoneAware phone : adr.getPhones()) {
-    // phones.add(phone);
-    // }
-    // }
-    // }
-    // }
-    //
-    // return phones.toArray(new ApiPhoneAware[0]);
-
     // STREAMS.
     return clientAddresses.stream().flatMap(ca -> ca.addresses.stream())
         .flatMap(adr -> Arrays.stream(adr.getPhones())).collect(Collectors.toList())

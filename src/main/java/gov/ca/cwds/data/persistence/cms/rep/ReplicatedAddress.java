@@ -19,7 +19,7 @@ import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 @Table(name = "ADDRS_T")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public final class ReplicatedAddress extends BaseAddress {
+public class ReplicatedAddress extends BaseAddress {
 
   /**
    * Default constructor.
