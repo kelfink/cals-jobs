@@ -7,18 +7,16 @@ node ('dora-slave'){
 		  git branch: 'master', url: 'git@github.com:ca-cwds/jobs.git'
 		  rtGradle.tool = "Gradle_35"
 		  rtGradle.resolver repo:'repo', server: serverArti
+		  rtGradle.setUseWrapper(true)
    }
    stage('Build'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar'
    }
    stage('CoverageCheck_and_Test') {
-       buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport'
-	   result = buildInfo.result
-	   echo "${result}"
-			if (result.equals("FAILURE")) {
-				slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Jobs ${env.JOB_NAME} build # ${env.BUILD_NUMBER} falled: ${buildInfo}"
-				
-			} 
+     catchError {
+	   buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport'
+	   echo "${buildInfo}"
+	 } 
    }
    stage('SonarQube analysis'){
 		withSonarQubeEnv('Core-SonarQube') {
