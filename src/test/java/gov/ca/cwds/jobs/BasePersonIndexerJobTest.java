@@ -11,13 +11,11 @@ import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -28,197 +26,21 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
-import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
-import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.inject.LastRunFile;
 
 public class BasePersonIndexerJobTest {
-
-  @JsonPropertyOrder(alphabetic = true)
-  static final class TestNormalizedEntry {
-    private String id;
-
-    private String name;
-
-  }
-
-  @JsonPropertyOrder(alphabetic = true)
-  static final class TestNormalizedEntity
-      implements PersistentObject, ApiPersonAware, ApiTypedIdentifier<String> {
-
-    private String id;
-
-    private String firstName;
-
-    private String lastName;
-
-    private String title;
-
-    public TestNormalizedEntity(String id) {
-      this.id = id;
-    }
-
-    @Override
-    public Serializable getPrimaryKey() {
-      return id;
-    }
-
-    @Override
-    public String getId() {
-      return id;
-    }
-
-    @Override
-    public void setId(String id) {
-      this.id = id;
-    }
-
-    @Override
-    public Date getBirthDate() {
-      return null;
-    }
-
-    @Override
-    public String getFirstName() {
-      return firstName;
-    }
-
-    @Override
-    public String getGender() {
-      return null;
-    }
-
-    @Override
-    public String getLastName() {
-      return lastName;
-    }
-
-    @Override
-    public String getMiddleName() {
-      return null;
-    }
-
-    @Override
-    public String getNameSuffix() {
-      return null;
-    }
-
-    @Override
-    public String getSsn() {
-      return null;
-    }
-
-    public String getName() {
-      return firstName;
-    }
-
-    public void setName(String name) {
-      this.firstName = name;
-    }
-
-    public String getTitle() {
-      return title;
-    }
-
-    public void setTitle(String title) {
-      this.title = title;
-    }
-
-    public void setFirstName(String firstName) {
-      this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-      this.lastName = lastName;
-    }
-
-  }
-
-  /**
-   * Denormalized
-   */
-  static final class TestDenormalizedEntity implements ApiGroupNormalizer<TestNormalizedEntity> {
-
-    private String id;
-    private String[] names;
-
-    public TestDenormalizedEntity() {
-
-    }
-
-    public TestDenormalizedEntity(String id, String... names) {
-      this.id = id;
-      this.names = names;
-    }
-
-    @Override
-    public Class<TestNormalizedEntity> getNormalizationClass() {
-      return TestNormalizedEntity.class;
-    }
-
-    @Override
-    public Object getNormalizationGroupKey() {
-      return null;
-    }
-
-    @Override
-    public TestNormalizedEntity normalize(Map<Object, TestNormalizedEntity> arg0) {
-      return null;
-    }
-
-  }
-
-  /**
-   * DAO
-   */
-  static final class TestNormalizedEntityDao extends BaseDaoImpl<TestNormalizedEntity> {
-
-    public TestNormalizedEntityDao(SessionFactory sessionFactory) {
-      super(sessionFactory);
-    }
-
-  }
-
-  static final class TestIndexerJob
-      extends BasePersonIndexerJob<TestNormalizedEntity, TestDenormalizedEntity> {
-
-    public TestIndexerJob(final TestNormalizedEntityDao mainDao,
-        final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
-        final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-      super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    }
-
-    @Override
-    protected String getLegacySourceTable() {
-      return "NOBUENO";
-    }
-
-    @Override
-    public String getViewName() {
-      return "VW_NUTTIN";
-    }
-
-  }
-
-  // ====================
-  // TEST MEMBERS:
-  // ====================
 
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();

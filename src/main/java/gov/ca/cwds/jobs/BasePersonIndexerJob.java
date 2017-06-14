@@ -52,7 +52,6 @@ import com.google.inject.Injector;
 
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
-import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.ApiTypedIdentifier;
@@ -60,23 +59,14 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
-import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.data.std.ApiLanguageAware;
-import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
-import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
-import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
@@ -84,9 +74,9 @@ import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
-import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
  * Base person batch job to load clients from CMS into ElasticSearch.
@@ -483,92 +473,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected ElasticSearchPerson buildElasticSearchPersonDoc(ApiPersonAware p)
       throws JsonProcessingException {
-    ApiPersonAware pa = p;
-
-    List<String> languages = null;
-    List<ElasticSearchPerson.ElasticSearchPersonPhone> phones = null;
-    List<ElasticSearchPersonAddress> addresses = null;
-    List<ElasticSearchPersonScreening> screenings = null;
-
-    if (p instanceof ApiMultipleLanguagesAware) {
-      ApiMultipleLanguagesAware mlx = (ApiMultipleLanguagesAware) p;
-      languages = new ArrayList<>();
-      for (ApiLanguageAware lx : mlx.getLanguages()) {
-        final ElasticSearchPerson.ElasticSearchPersonLanguage lang =
-            ElasticSearchPerson.ElasticSearchPersonLanguage.findBySysId(lx.getLanguageSysId());
-        if (lang != null) {
-          languages.add(lang.getDescription());
-        }
-      }
-    } else if (p instanceof ApiLanguageAware) {
-      languages = new ArrayList<>();
-      ApiLanguageAware lx = (ApiLanguageAware) p;
-      final ElasticSearchPerson.ElasticSearchPersonLanguage lang =
-          ElasticSearchPerson.ElasticSearchPersonLanguage.findBySysId(lx.getLanguageSysId());
-      if (lang != null) {
-        languages.add(lang.getDescription());
-      }
-    }
-
-    if (p instanceof ApiMultiplePhonesAware) {
-      phones = new ArrayList<>();
-      ApiMultiplePhonesAware mphx = (ApiMultiplePhonesAware) p;
-      for (ApiPhoneAware phx : mphx.getPhones()) {
-        phones.add(new ElasticSearchPersonPhone(phx));
-      }
-    } else if (p instanceof ApiPhoneAware) {
-      phones = new ArrayList<>();
-      ApiPhoneAware phx = (ApiPhoneAware) p;
-      phones.add(new ElasticSearchPersonPhone(phx));
-    }
-
-    if (p instanceof ApiMultipleAddressesAware) {
-      addresses = new ArrayList<>();
-      ApiMultipleAddressesAware madrx = (ApiMultipleAddressesAware) p;
-      for (ApiAddressAware adrx : madrx.getAddresses()) {
-        addresses.add(new ElasticSearchPersonAddress(adrx));
-      }
-    } else if (p instanceof ApiAddressAware) {
-      addresses = new ArrayList<>();
-      addresses.add(new ElasticSearchPersonAddress((ApiAddressAware) p));
-    }
-
-    if (p instanceof ApiScreeningAware) {
-      screenings = new ArrayList<>();
-      for (ElasticSearchPersonScreening scr : ((ApiScreeningAware) p).getEsScreenings()) {
-        screenings.add(scr);
-      }
-    }
-
-    // Write persistence object to Elasticsearch Person document.
-    ElasticSearchPerson ret;
-
-    if (p.getPrimaryKey() == null) {
-      LOGGER.warn("NO PRIMARY KEY!");
-    }
-
-    ret = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
-        pa.getFirstName(), // first name
-        pa.getLastName(), // last name
-        pa.getMiddleName(), // middle name
-        pa.getNameSuffix(), // name suffix
-        pa.getGender(), // gender
-        DomainChef.cookDate(pa.getBirthDate()), // birth date
-        pa.getSsn(), // SSN
-        pa.getClass().getName(), // type
-        this.mapper.writeValueAsString(p), // source
-        null, // omit highlights
-        addresses, phones, languages, screenings);
-
-    // Sealed and sensitive.
-    ret.setSensitivityIndicator(pa.getSensitivityIndicator());
-    ret.SetSoc158SealedClientIndicator(pa.getSoc158SealedClientIndicator());
-
-    return ret;
+    return ElasticTransformer.buildElasticSearchPersonDoc(mapper, p);
   }
 
   /**
-   * Identifier column for this table. Defaults to "IDENTIFIER".
+   * Identifier column for this table. Defaults to "IDENTIFIER", the most common key name in legacy
+   * DB2.
    * 
    * @return Identifier column
    */
