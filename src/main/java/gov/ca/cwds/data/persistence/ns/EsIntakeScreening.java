@@ -498,4 +498,316 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
         + ", phoneType=" + phoneType + "]";
   }
 
+  public String getThisParticipantId() {
+    return thisParticipantId;
+  }
+
+  public void setThisParticipantId(String thisParticipantId) {
+    this.thisParticipantId = thisParticipantId;
+  }
+
+  public String getThisLegacyId() {
+    return thisLegacyId;
+  }
+
+  public void setThisLegacyId(String thisLegacyId) {
+    this.thisLegacyId = thisLegacyId;
+  }
+
+  public String getScreeningId() {
+    return screeningId;
+  }
+
+  public void setScreeningId(String screeningId) {
+    this.screeningId = screeningId;
+  }
+
+  public String getReference() {
+    return reference;
+  }
+
+  public void setReference(String reference) {
+    this.reference = reference;
+  }
+
+  public Date getStartedAt() {
+    return startedAt;
+  }
+
+  public void setStartedAt(Date startedAt) {
+    this.startedAt = startedAt;
+  }
+
+  public Date getEndedAt() {
+    return endedAt;
+  }
+
+  public void setEndedAt(Date endedAt) {
+    this.endedAt = endedAt;
+  }
+
+  public String getReferralId() {
+    return referralId;
+  }
+
+  public void setReferralId(String referralId) {
+    this.referralId = referralId;
+  }
+
+  public String getIncidentDate() {
+    return incidentDate;
+  }
+
+  public void setIncidentDate(String incidentDate) {
+    this.incidentDate = incidentDate;
+  }
+
+  public String getLocationType() {
+    return locationType;
+  }
+
+  public void setLocationType(String locationType) {
+    this.locationType = locationType;
+  }
+
+  public String getCommunicationMethod() {
+    return communicationMethod;
+  }
+
+  public void setCommunicationMethod(String communicationMethod) {
+    this.communicationMethod = communicationMethod;
+  }
+
+  public String getScreeningName() {
+    return screeningName;
+  }
+
+  public void setScreeningName(String screeningName) {
+    this.screeningName = screeningName;
+  }
+
+  public String getScreeningDecision() {
+    return screeningDecision;
+  }
+
+  public void setScreeningDecision(String screeningDecision) {
+    this.screeningDecision = screeningDecision;
+  }
+
+  public String getIncidentCounty() {
+    return incidentCounty;
+  }
+
+  public void setIncidentCounty(String incidentCounty) {
+    this.incidentCounty = incidentCounty;
+  }
+
+  public String getReportNarrative() {
+    return reportNarrative;
+  }
+
+  public void setReportNarrative(String reportNarrative) {
+    this.reportNarrative = reportNarrative;
+  }
+
+  public String getAssignee() {
+    return assignee;
+  }
+
+  public void setAssignee(String assignee) {
+    this.assignee = assignee;
+  }
+
+  public String getAdditionalInformation() {
+    return additionalInformation;
+  }
+
+  public void setAdditionalInformation(String additionalInformation) {
+    this.additionalInformation = additionalInformation;
+  }
+
+  public String getScreeningDecisionDetail() {
+    return screeningDecisionDetail;
+  }
+
+  public void setScreeningDecisionDetail(String screeningDecisionDetail) {
+    this.screeningDecisionDetail = screeningDecisionDetail;
+  }
+
+  public String getOtherParticipantId() {
+    return otherParticipantId;
+  }
+
+  public void setOtherParticipantId(String otherParticipantId) {
+    this.otherParticipantId = otherParticipantId;
+  }
+
+  public String getOtherLegacyId() {
+    return otherLegacyId;
+  }
+
+  public void setOtherLegacyId(String otherLegacyId) {
+    this.otherLegacyId = otherLegacyId;
+  }
+
+  public Date getBirthDt() {
+    return birthDt;
+  }
+
+  public void setBirthDt(Date birthDt) {
+    this.birthDt = birthDt;
+  }
+
+  public String getFirstName() {
+    return firstName;
+  }
+
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
+
+  public String getLastName() {
+    return lastName;
+  }
+
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+  }
+
+  public String getGender() {
+    return gender;
+  }
+
+  public void setGender(String gender) {
+    this.gender = gender;
+  }
+
+  public String getSsn() {
+    return ssn;
+  }
+
+  public void setSsn(String ssn) {
+    this.ssn = ssn;
+  }
+
+  public String[] getRoles() {
+    return roles;
+  }
+
+  public void setRoles(String[] roles) {
+    this.roles = roles;
+  }
+
+  public boolean isFlgReporter() {
+    return flgReporter;
+  }
+
+  public void setFlgReporter(boolean flgReporter) {
+    this.flgReporter = flgReporter;
+  }
+
+  public boolean isFlgPerpetrator() {
+    return flgPerpetrator;
+  }
+
+  public void setFlgPerpetrator(boolean flgPerpetrator) {
+    this.flgPerpetrator = flgPerpetrator;
+  }
+
+  public boolean isFlgVictim() {
+    return flgVictim;
+  }
+
+  public void setFlgVictim(boolean flgVictim) {
+    this.flgVictim = flgVictim;
+  }
+
+  public String getAllegationId() {
+    return allegationId;
+  }
+
+  public void setAllegationId(String allegationId) {
+    this.allegationId = allegationId;
+  }
+
+  public String getAllegationTypes() {
+    return allegationTypes;
+  }
+
+  public void setAllegationTypes(String allegationTypes) {
+    this.allegationTypes = allegationTypes;
+  }
+
+  public String getAddressId() {
+    return addressId;
+  }
+
+  public void setAddressId(String addressId) {
+    this.addressId = addressId;
+  }
+
+  public String getAddressType() {
+    return addressType;
+  }
+
+  public void setAddressType(String addressType) {
+    this.addressType = addressType;
+  }
+
+  public String getStreetAddress() {
+    return streetAddress;
+  }
+
+  public void setStreetAddress(String streetAddress) {
+    this.streetAddress = streetAddress;
+  }
+
+  public String getCity() {
+    return city;
+  }
+
+  public void setCity(String city) {
+    this.city = city;
+  }
+
+  public String getState() {
+    return state;
+  }
+
+  public void setState(String state) {
+    this.state = state;
+  }
+
+  public String getZip() {
+    return zip;
+  }
+
+  public void setZip(String zip) {
+    this.zip = zip;
+  }
+
+  public String getPhoneNumberId() {
+    return phoneNumberId;
+  }
+
+  public void setPhoneNumberId(String phoneNumberId) {
+    this.phoneNumberId = phoneNumberId;
+  }
+
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
+
+  public String getPhoneType() {
+    return phoneType;
+  }
+
+  public void setPhoneType(String phoneType) {
+    this.phoneType = phoneType;
+  }
+
 }

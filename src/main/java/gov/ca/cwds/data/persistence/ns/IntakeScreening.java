@@ -351,4 +351,145 @@ public class IntakeScreening
     this.referralId = referralId;
   }
 
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result =
+        prime * result + ((additionalInformation == null) ? 0 : additionalInformation.hashCode());
+    result = prime * result + ((allegations == null) ? 0 : allegations.hashCode());
+    result = prime * result + ((assignee == null) ? 0 : assignee.hashCode());
+    result = prime * result + ((communicationMethod == null) ? 0 : communicationMethod.hashCode());
+    result = prime * result + ((endedAt == null) ? 0 : endedAt.hashCode());
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result + ((incidentCounty == null) ? 0 : incidentCounty.hashCode());
+    result = prime * result + ((incidentDate == null) ? 0 : incidentDate.hashCode());
+    result = prime * result + ((locationType == null) ? 0 : locationType.hashCode());
+    result = prime * result + ((participantRoles == null) ? 0 : participantRoles.hashCode());
+    result = prime * result + ((participants == null) ? 0 : participants.hashCode());
+    result = prime * result + ((reference == null) ? 0 : reference.hashCode());
+    result = prime * result + ((referralId == null) ? 0 : referralId.hashCode());
+    result = prime * result + ((reportNarrative == null) ? 0 : reportNarrative.hashCode());
+    result = prime * result + ((reporter == null) ? 0 : reporter.hashCode());
+    result = prime * result + ((screeningDecision == null) ? 0 : screeningDecision.hashCode());
+    result = prime * result
+        + ((screeningDecisionDetail == null) ? 0 : screeningDecisionDetail.hashCode());
+    result = prime * result + ((screeningName == null) ? 0 : screeningName.hashCode());
+    result = prime * result + ((socialWorker == null) ? 0 : socialWorker.hashCode());
+    result = prime * result + ((startedAt == null) ? 0 : startedAt.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    IntakeScreening other = (IntakeScreening) obj;
+    if (additionalInformation == null) {
+      if (other.additionalInformation != null)
+        return false;
+    } else if (!additionalInformation.equals(other.additionalInformation))
+      return false;
+    if (allegations == null) {
+      if (other.allegations != null)
+        return false;
+    } else if (!allegations.equals(other.allegations))
+      return false;
+    if (assignee == null) {
+      if (other.assignee != null)
+        return false;
+    } else if (!assignee.equals(other.assignee))
+      return false;
+    if (communicationMethod == null) {
+      if (other.communicationMethod != null)
+        return false;
+    } else if (!communicationMethod.equals(other.communicationMethod))
+      return false;
+    if (endedAt == null) {
+      if (other.endedAt != null)
+        return false;
+    } else if (!endedAt.equals(other.endedAt))
+      return false;
+    if (id == null) {
+      if (other.id != null)
+        return false;
+    } else if (!id.equals(other.id))
+      return false;
+    if (incidentCounty == null) {
+      if (other.incidentCounty != null)
+        return false;
+    } else if (!incidentCounty.equals(other.incidentCounty))
+      return false;
+    if (incidentDate == null) {
+      if (other.incidentDate != null)
+        return false;
+    } else if (!incidentDate.equals(other.incidentDate))
+      return false;
+    if (locationType == null) {
+      if (other.locationType != null)
+        return false;
+    } else if (!locationType.equals(other.locationType))
+      return false;
+    if (participantRoles == null) {
+      if (other.participantRoles != null)
+        return false;
+    } else if (!participantRoles.equals(other.participantRoles))
+      return false;
+    if (participants == null) {
+      if (other.participants != null)
+        return false;
+    } else if (!participants.equals(other.participants))
+      return false;
+    if (reference == null) {
+      if (other.reference != null)
+        return false;
+    } else if (!reference.equals(other.reference))
+      return false;
+    if (referralId == null) {
+      if (other.referralId != null)
+        return false;
+    } else if (!referralId.equals(other.referralId))
+      return false;
+    if (reportNarrative == null) {
+      if (other.reportNarrative != null)
+        return false;
+    } else if (!reportNarrative.equals(other.reportNarrative))
+      return false;
+    if (reporter == null) {
+      if (other.reporter != null)
+        return false;
+    } else if (!reporter.equals(other.reporter))
+      return false;
+    if (screeningDecision == null) {
+      if (other.screeningDecision != null)
+        return false;
+    } else if (!screeningDecision.equals(other.screeningDecision))
+      return false;
+    if (screeningDecisionDetail == null) {
+      if (other.screeningDecisionDetail != null)
+        return false;
+    } else if (!screeningDecisionDetail.equals(other.screeningDecisionDetail))
+      return false;
+    if (screeningName == null) {
+      if (other.screeningName != null)
+        return false;
+    } else if (!screeningName.equals(other.screeningName))
+      return false;
+    if (socialWorker == null) {
+      if (other.socialWorker != null)
+        return false;
+    } else if (!socialWorker.equals(other.socialWorker))
+      return false;
+    if (startedAt == null) {
+      if (other.startedAt != null)
+        return false;
+    } else if (!startedAt.equals(other.startedAt))
+      return false;
+    return true;
+  }
+
 }
