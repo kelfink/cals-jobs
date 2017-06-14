@@ -6,6 +6,9 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,6 +18,26 @@ import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 
 public class ReplicatedClientTest {
+
+  @Test
+  public void testReplicationOperation() throws Exception {
+    ReplicatedClient target = new ReplicatedClient();
+    target.setReplicationOperation(CmsReplicationOperation.I);
+    CmsReplicationOperation actual = target.getReplicationOperation();
+    CmsReplicationOperation expected = CmsReplicationOperation.I;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void testReplicationDate() throws Exception {
+    ReplicatedClient target = new ReplicatedClient();
+    DateFormat fmt = new SimpleDateFormat("yyyy-mm-dd");
+    Date date = fmt.parse("2012-10-31");
+    target.setReplicationDate(date);
+    Date actual = target.getReplicationDate();
+    Date expected = fmt.parse("2012-10-31");
+    assertThat(actual, is(equalTo(expected)));
+  }
 
   @Test
   public void type() throws Exception {

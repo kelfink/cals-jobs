@@ -5,12 +5,35 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
 
 public class ReplicatedReporterTest {
+
+  @Test
+  public void testReplicationOperation() throws Exception {
+    ReplicatedReporter target = new ReplicatedReporter();
+    target.setReplicationOperation(CmsReplicationOperation.I);
+    CmsReplicationOperation actual = target.getReplicationOperation();
+    CmsReplicationOperation expected = CmsReplicationOperation.I;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void testReplicationDate() throws Exception {
+    ReplicatedReporter target = new ReplicatedReporter();
+    DateFormat fmt = new SimpleDateFormat("yyyy-mm-dd");
+    Date date = fmt.parse("2012-10-31");
+    target.setReplicationDate(date);
+    Date actual = target.getReplicationDate();
+    Date expected = fmt.parse("2012-10-31");
+    assertThat(actual, is(equalTo(expected)));
+  }
 
   @Test
   public void type() throws Exception {
