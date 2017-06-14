@@ -33,7 +33,7 @@ public class DocumentMetadataDaoImpl implements DocumentMetadataDao {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(DocumentMetadataDaoImpl.class);
 
-  private static final String TIMESTAMP_FORMAT = "YYYY-MM-DD HH24:MI:SS";
+  private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd HH24:mm:ss";
 
   /**
    * WARNING: NOT thread safe!
