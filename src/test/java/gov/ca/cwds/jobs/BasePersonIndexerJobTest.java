@@ -269,7 +269,7 @@ public class BasePersonIndexerJobTest {
     obj.setName("whatever");
     String actual = target.jsonify(obj);
     String expected =
-        "{\"birthDate\":null,\"firstName\":\"whatever\",\"gender\":null,\"id\":\"xyz\",\"lastName\":\"whatever\",\"middleName\":null,\"name\":\"whatever\",\"nameSuffix\":null,\"primaryKey\":\"xyz\",\"ssn\":null}";
+        "{\"birthDate\":null,\"firstName\":\"whatever\",\"gender\":null,\"id\":\"xyz\",\"lastName\":\"whatever\",\"middleName\":null,\"name\":\"whatever\",\"nameSuffix\":null,\"primaryKey\":\"xyz\",\"sensitivityIndicator\":null,\"soc158SealedClientIndicator\":null,\"ssn\":null}";
     assertThat(actual, is(equalTo(expected)));
   }
 

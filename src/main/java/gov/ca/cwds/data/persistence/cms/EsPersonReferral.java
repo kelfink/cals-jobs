@@ -20,6 +20,7 @@ import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchAccessLimitation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReporter;
@@ -142,6 +143,24 @@ public class EsPersonReferral
   @Column(name = "VICTIM_LAST_NM")
   private String victimLastName;
 
+  // ==================
+  // ACCESS LIMITATION:
+  // ==================
+
+  @Column(name = "LIMITED_ACCESS_CODE")
+  private String limitedAccessCode;
+
+  @Column(name = "LIMITED_ACCESS_DATE")
+  @Type(type = "date")
+  private Date limitedAccessDate;
+
+  @Column(name = "LIMITED_ACCESS_DESCRIPTION")
+  private String limitedAccessDescription;
+
+  @Column(name = "LIMITED_ACCESS_GOVERNMENT_ENTITY")
+  @Type(type = "integer")
+  private Integer limitedAccessGovernmentEntityId;
+
   // =============
   // PERPETRATOR:
   // =============
@@ -178,8 +197,10 @@ public class EsPersonReferral
     referral.setLegacyId(this.referralId);
     referral.setStartDate(DomainChef.cookDate(this.startDate));
     referral.setEndDate(DomainChef.cookDate(this.endDate));
+    referral.setCountyId(String.valueOf(this.county));
     referral
         .setCountyName(ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.county));
+    referral.setResponseTimeId(String.valueOf(this.referralResponseType));
     referral.setResponseTime(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.referralResponseType));
     referral.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.lastChange));
@@ -205,12 +226,26 @@ public class EsPersonReferral
     referral.setAssignedSocialWorker(assignedWorker);
 
     //
+    // Access Limitation
+    //
+    ElasticSearchAccessLimitation accessLimit = new ElasticSearchAccessLimitation();
+    accessLimit.setLimitedAccessCode(this.limitedAccessCode);
+    accessLimit.setLimitedAccessDate(DomainChef.cookDate(this.limitedAccessDate));
+    accessLimit.setLimitedAccessDescription(this.limitedAccessDescription);
+    accessLimit
+        .setLimitedAccessGovernmentEntityId(String.valueOf(this.limitedAccessGovernmentEntityId));
+    accessLimit.setLimitedAccessGovernmentEntityName(ElasticSearchPerson.getSystemCodes()
+        .getCodeShortDescription(this.limitedAccessGovernmentEntityId));
+    referral.setAccessLimitation(accessLimit);
+
+    //
     // A referral may have more than one allegations
     //
     ElasticSearchPersonAllegation allegation = new ElasticSearchPersonAllegation();
     allegation.setId(this.allegationId);
     allegation.setAllegationDescription(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.allegationType));
+    allegation.setDispositionId(String.valueOf(this.allegationDisposition));
     allegation.setDispositionDescription(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.allegationDisposition));
 
@@ -424,6 +459,38 @@ public class EsPersonReferral
 
   public void setPerpetratorLastName(String perpetratorLastName) {
     this.perpetratorLastName = perpetratorLastName;
+  }
+
+  public String getLimitedAccessCode() {
+    return limitedAccessCode;
+  }
+
+  public void setLimitedAccessCode(String limitedAccessCode) {
+    this.limitedAccessCode = limitedAccessCode;
+  }
+
+  public Date getLimitedAccessDate() {
+    return limitedAccessDate;
+  }
+
+  public void setLimitedAccessDate(Date limitedAccessDate) {
+    this.limitedAccessDate = limitedAccessDate;
+  }
+
+  public String getLimitedAccessDescription() {
+    return limitedAccessDescription;
+  }
+
+  public void setLimitedAccessDescription(String limitedAccessDescription) {
+    this.limitedAccessDescription = limitedAccessDescription;
+  }
+
+  public Integer getLimitedAccessGovernmentEntityId() {
+    return limitedAccessGovernmentEntityId;
+  }
+
+  public void setLimitedAccessGovernmentEntityId(Integer limitedAccessGovernmentEntityId) {
+    this.limitedAccessGovernmentEntityId = limitedAccessGovernmentEntityId;
   }
 
   /**

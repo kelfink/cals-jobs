@@ -152,6 +152,11 @@ public class ReferralHistoryIndexerJob
     referral.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
     referral.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
 
+    referral.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
+    referral.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
+    referral.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
+    referral.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENTITY"));
+
     return referral;
   }
 

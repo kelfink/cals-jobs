@@ -13,6 +13,7 @@ import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchAccessLimitation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
@@ -127,6 +128,24 @@ public class EsChildPersonCase extends EsPersonCase {
 
   @Column(name = "PARENT_SOURCE_TABLE")
   private String parentSourceTable;
+
+  // ==================
+  // ACCESS LIMITATION:
+  // ==================
+
+  @Column(name = "LIMITED_ACCESS_CODE")
+  private String limitedAccessCode;
+
+  @Column(name = "LIMITED_ACCESS_DATE")
+  @Type(type = "date")
+  private Date limitedAccessDate;
+
+  @Column(name = "LIMITED_ACCESS_DESCRIPTION")
+  private String limitedAccessDescription;
+
+  @Column(name = "LIMITED_ACCESS_GOVERNMENT_ENTITY")
+  @Type(type = "integer")
+  private Integer limitedAccessGovernmentEntityId;
 
   public String getCaseId() {
     return caseId;
@@ -288,6 +307,38 @@ public class EsChildPersonCase extends EsPersonCase {
     this.parentSourceTable = parentSourceTable;
   }
 
+  public String getLimitedAccessCode() {
+    return limitedAccessCode;
+  }
+
+  public void setLimitedAccessCode(String limitedAccessCode) {
+    this.limitedAccessCode = limitedAccessCode;
+  }
+
+  public Date getLimitedAccessDate() {
+    return limitedAccessDate;
+  }
+
+  public void setLimitedAccessDate(Date limitedAccessDate) {
+    this.limitedAccessDate = limitedAccessDate;
+  }
+
+  public String getLimitedAccessDescription() {
+    return limitedAccessDescription;
+  }
+
+  public void setLimitedAccessDescription(String limitedAccessDescription) {
+    this.limitedAccessDescription = limitedAccessDescription;
+  }
+
+  public Integer getLimitedAccessGovernmentEntityId() {
+    return limitedAccessGovernmentEntityId;
+  }
+
+  public void setLimitedAccessGovernmentEntityId(Integer limitedAccessGovernmentEntityId) {
+    this.limitedAccessGovernmentEntityId = limitedAccessGovernmentEntityId;
+  }
+
   @Override
   public ReplicatedPersonCases normalize(Map<Object, ReplicatedPersonCases> map) {
     String groupId = (String) getNormalizationGroupKey();
@@ -309,8 +360,10 @@ public class EsChildPersonCase extends EsPersonCase {
     esPersonCase.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.caseLastUpdated));
     esPersonCase
         .setCountyName(ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.county));
+    esPersonCase.setCountyId(String.valueOf(this.county));
     esPersonCase.setServiceComponent(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.serviceComponent));
+    esPersonCase.setServiceComponentId(String.valueOf(this.serviceComponent));
 
     //
     // Child
@@ -333,6 +386,19 @@ public class EsChildPersonCase extends EsPersonCase {
     assignedWorker.setLastName(this.workerLastName);
     assignedWorker.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.workerLastUpdated));
     esPersonCase.setAssignedSocialWorker(assignedWorker);
+
+    //
+    // Access Limitation
+    //
+    ElasticSearchAccessLimitation accessLimit = new ElasticSearchAccessLimitation();
+    accessLimit.setLimitedAccessCode(this.limitedAccessCode);
+    accessLimit.setLimitedAccessDate(DomainChef.cookDate(this.limitedAccessDate));
+    accessLimit.setLimitedAccessDescription(this.limitedAccessDescription);
+    accessLimit
+        .setLimitedAccessGovernmentEntityId(String.valueOf(this.limitedAccessGovernmentEntityId));
+    accessLimit.setLimitedAccessGovernmentEntityName(ElasticSearchPerson.getSystemCodes()
+        .getCodeShortDescription(this.limitedAccessGovernmentEntityId));
+    esPersonCase.setAccessLimitation(accessLimit);
 
     //
     // A Case may have more than one parents
