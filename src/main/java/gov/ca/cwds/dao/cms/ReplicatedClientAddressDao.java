@@ -6,12 +6,11 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
-import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.BatchBucketDao;
 import gov.ca.cwds.inject.CmsSessionFactory;
 
 /**
- * Hibernate DAO for DB2 {@link ReplicatedClient}.
+ * Hibernate DAO for DB2 {@link EsClientAddress}.
  * 
  * @author CWDS API Team
  * @see CmsSessionFactory

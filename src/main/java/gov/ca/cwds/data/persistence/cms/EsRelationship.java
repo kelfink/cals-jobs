@@ -209,7 +209,7 @@ public class EsRelationship
 
   /**
    * Implementation notes: Only reading from CLN_RELT, for the moment. Intake will set field
-   * "related_person_id" from **Postgres**, NOT from DB2.
+   * "related_person_id" from <strong>Postgres</strong>, NOT from DB2.
    */
   @Override
   public ReplicatedRelationships normalize(Map<Object, ReplicatedRelationships> map) {
@@ -219,11 +219,17 @@ public class EsRelationship
 
     final ElasticSearchPersonRelationship rel = new ElasticSearchPersonRelationship();
     ret.addRelation(rel);
-    rel.setRelatedPersonFirstName(this.relatedFirstName.trim());
-    rel.setRelatedPersonLastName(this.relatedLastName.trim());
-    rel.setRelatedPersonLegacyId(this.relatedLegacyId);
-    parseBiDirectionalRelationship(rel);
+    if (StringUtils.isNotBlank(this.relatedFirstName)) {
+      rel.setRelatedPersonFirstName(this.relatedFirstName.trim());
+    }
+    if (StringUtils.isNotBlank(this.relatedLastName)) {
+      rel.setRelatedPersonLastName(this.relatedLastName.trim());
+    }
+    if (StringUtils.isNotBlank(this.relatedLegacyId)) {
+      rel.setRelatedPersonLegacyId(this.relatedLegacyId.trim());
+    }
 
+    parseBiDirectionalRelationship(rel);
     map.put(ret.getId(), ret);
     return ret;
   }

@@ -12,7 +12,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
 /**
- * Job to load reporters from CMS into ElasticSearch
+ * Job to load reporters from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */

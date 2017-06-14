@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseClient;
+import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
 import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
@@ -40,8 +41,9 @@ import gov.ca.cwds.data.std.ApiPhoneAware;
  * schema.
  * 
  * <p>
- * Entity class EsClientAddress for Materialized Query Table ES_CLIENT_ADDRESS now holds the named
- * queries below. These are left here for tracking purposes and will be removed in the near future.
+ * Entity class {@link EsClientAddress} for Materialized Query Table ES_CLIENT_ADDRESS now holds the
+ * named queries below. These are left here for tracking purposes and will be removed in the near
+ * future.
  * </p>
  * 
  * @author CWDS API Team
@@ -151,20 +153,6 @@ public class ReplicatedClient extends BaseClient
   @JsonIgnore
   @Override
   public ApiAddressAware[] getAddresses() {
-
-    // OLD SCHOOL BOILERPLATE.
-    // List<ApiAddressAware> ret = new ArrayList<>();
-    // if (this.clientAddresses != null && !this.clientAddresses.isEmpty()) {
-    // for (ReplicatedClientAddress clAddr : this.clientAddresses) {
-    // for (ReplicatedAddress addr : clAddr.getAddresses()) {
-    // ret.add(addr);
-    // }
-    // }
-    // }
-    //
-    // return ret.toArray(new ApiAddressAware[0]);
-
-    // STREAMS.
     return clientAddresses.stream().flatMap(ca -> ca.addresses.stream())
         .collect(Collectors.toList()).toArray(new ApiAddressAware[0]);
   }
@@ -176,21 +164,6 @@ public class ReplicatedClient extends BaseClient
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
-
-    // OLD SCHOOL BOILERPLATE.
-    // final List<ApiPhoneAware> phones = new ArrayList<>();
-    // if (this.clientAddresses != null && !this.clientAddresses.isEmpty()) {
-    // for (ReplicatedClientAddress clAdr : this.clientAddresses) {
-    // for (ReplicatedAddress adr : clAdr.getAddresses()) {
-    // for (ApiPhoneAware phone : adr.getPhones()) {
-    // phones.add(phone);
-    // }
-    // }
-    // }
-    // }
-    //
-    // return phones.toArray(new ApiPhoneAware[0]);
-
     // STREAMS.
     return clientAddresses.stream().flatMap(ca -> ca.addresses.stream())
         .flatMap(adr -> Arrays.stream(adr.getPhones())).collect(Collectors.toList())

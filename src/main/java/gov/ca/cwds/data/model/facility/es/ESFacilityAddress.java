@@ -83,4 +83,59 @@ public class ESFacilityAddress implements Serializable {
   public void setCounty(String county) {
     this.county = county;
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((city == null) ? 0 : city.hashCode());
+    result = prime * result + ((county == null) ? 0 : county.hashCode());
+    result = prime * result + ((stateCodeType == null) ? 0 : stateCodeType.hashCode());
+    result = prime * result + ((streetAddress == null) ? 0 : streetAddress.hashCode());
+    result = prime * result + ((zipCode == null) ? 0 : zipCode.hashCode());
+    result = prime * result + ((zipSuffixCode == null) ? 0 : zipSuffixCode.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    ESFacilityAddress other = (ESFacilityAddress) obj;
+    if (city == null) {
+      if (other.city != null)
+        return false;
+    } else if (!city.equals(other.city))
+      return false;
+    if (county == null) {
+      if (other.county != null)
+        return false;
+    } else if (!county.equals(other.county))
+      return false;
+    if (stateCodeType == null) {
+      if (other.stateCodeType != null)
+        return false;
+    } else if (!stateCodeType.equals(other.stateCodeType))
+      return false;
+    if (streetAddress == null) {
+      if (other.streetAddress != null)
+        return false;
+    } else if (!streetAddress.equals(other.streetAddress))
+      return false;
+    if (zipCode == null) {
+      if (other.zipCode != null)
+        return false;
+    } else if (!zipCode.equals(other.zipCode))
+      return false;
+    if (zipSuffixCode == null) {
+      if (other.zipSuffixCode != null)
+        return false;
+    } else if (!zipSuffixCode.equals(other.zipSuffixCode))
+      return false;
+    return true;
+  }
 }

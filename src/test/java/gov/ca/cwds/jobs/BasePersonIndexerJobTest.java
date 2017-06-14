@@ -48,7 +48,6 @@ import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
-
 public class BasePersonIndexerJobTest {
 
   @JsonPropertyOrder(alphabetic = true)
@@ -298,19 +297,6 @@ public class BasePersonIndexerJobTest {
     } catch (SQLException e) {
       // then
     }
-  }
-
-  // @Test
-  public void logEvery_Args__int__String__ObjectArray() throws Exception {
-    // given
-    int cntr = 0;
-    String action = null;
-    Object[] args = new Object[] {};
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
-    target.logEvery(cntr, action, args);
-    // then
-    // e.g. : verify(mocked).called();
   }
 
   // @Test
