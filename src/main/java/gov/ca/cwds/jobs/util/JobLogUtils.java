@@ -15,7 +15,7 @@ import gov.ca.cwds.jobs.exception.JobsException;
  */
 public final class JobLogUtils {
 
-  private static final Logger LOGGER = LogManager.getLogger(JobLogUtils.class);
+  protected static final Logger LOGGER = LogManager.getLogger(JobLogUtils.class);
 
   private static final int DEFAULT_LOG_EVERY = 5000;
 
@@ -50,24 +50,6 @@ public final class JobLogUtils {
   }
 
   /**
-   * Format message and throw a runtime {@link JobsException}.
-   * 
-   * @param log class logger
-   * @param e any Throwable
-   * @param pattern MessageFormat pattern
-   * @param args error message, excluding throwable message
-   * @throws JobsException runtime exception
-   */
-  public static void raiseError(final Logger log, Throwable e, String pattern, Object... args) {
-    final Object[] objs = args == null || args.length == 0 ? new Object[0] : args;
-    final String pat = !StringUtils.isEmpty(pattern) ? pattern : StringUtils.join(objs, "{}");
-    final String msg = MessageFormat.format(pat, objs);
-    final Logger logger = log != null ? log : LOGGER;
-    logger.fatal(msg, e);
-    throw new JobsException(msg, e);
-  }
-
-  /**
    * Format message and return a runtime {@link JobsException}.
    * 
    * @param log class logger
@@ -78,12 +60,30 @@ public final class JobLogUtils {
    */
   public static JobsException buildException(final Logger log, Throwable e, String pattern,
       Object... args) {
-    final Object[] objs = args == null || args.length == 0 ? new Object[0] : args;
-    final String pat = !StringUtils.isEmpty(pattern) ? pattern : StringUtils.join(objs, "{}");
-    final String msg = MessageFormat.format(pat, objs);
+    final boolean hasArgs = args == null || args.length == 0;
+    final boolean hasPattern = !StringUtils.isEmpty(pattern);
     final Logger logger = log != null ? log : LOGGER;
+
+    // Build message:
+    final Object[] objs = hasArgs ? new Object[0] : args;
+    final String pat = hasPattern ? pattern : StringUtils.join(objs, "{}");
+    final String msg = hasPattern && hasArgs ? MessageFormat.format(pat, objs) : "";
+
     logger.fatal(msg, e);
     return new JobsException(msg, e);
+  }
+
+  /**
+   * Format message and throw a runtime {@link JobsException}.
+   * 
+   * @param log class logger
+   * @param e any Throwable
+   * @param pattern MessageFormat pattern
+   * @param args error message, excluding throwable message
+   * @throws JobsException runtime exception
+   */
+  public static void raiseError(final Logger log, Throwable e, String pattern, Object... args) {
+    throw buildException(log, e, pattern, args);
   }
 
   /**

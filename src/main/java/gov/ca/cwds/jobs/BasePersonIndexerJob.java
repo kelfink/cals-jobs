@@ -303,18 +303,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Log every N records.
-   * 
-   * @param cntr record count
-   * @param action action message (extract, transform, load, etc)
-   * @param args variable message arguments
-   * @see JobLogUtils
-   */
-  // protected void logEvery(int cntr, String action, Object... args) {
-  // JobLogUtils.logEvery(LOGGER, cntr, action, args);
-  // }
-
-  /**
    * Instantiate one Elasticsearch BulkProcessor per working thread.
    * 
    * @return Elasticsearch BulkProcessor
@@ -385,9 +373,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
-      final String msg = MessageFormat.format("UNABLE TO CREATE DEPENDENCIES! {}", e.getMessage());
-      LOGGER.error(msg, e);
-      throw new JobsException(msg, e);
+      throw JobLogUtils.buildException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
     }
   }
 
@@ -413,8 +399,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
       exitCode = 1;
-      LOGGER.error("JOB FAILED: {}", e.getMessage(), e);
-      throw new JobsException("JOB FAILED! " + e.getMessage(), e);
+      throw JobLogUtils.buildException(LOGGER, e, "JOB FAILED!: {}", e.getMessage());
     } finally {
       // WARNING: kills the JVM in testing but may be needed to shutdown resources.
       if (!isTestMode()) {
@@ -1216,12 +1201,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       txn.commit();
       return results.build();
     } catch (HibernateException h) {
-      LOGGER.error("EXTRACT ERROR! {}", h.getMessage(), h);
       fatalError = true;
       if (txn != null) {
         txn.rollback();
       }
-      throw new JobsException(h);
+      throw JobLogUtils.buildException(LOGGER, h, "EXTRACT ERROR!: {}", h.getMessage());
     } finally {
       doneExtract = true;
     }

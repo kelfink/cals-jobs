@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs.util;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -66,6 +68,72 @@ public class JobLogUtilsTest {
     // e.g. : given(mocked.called()).willReturn(1);
     // when
     JobLogUtils.raiseError(log, e, message);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
+  @Test(expected = JobsException.class)
+  public void logEvery_Args__Logger__int__String__ObjectArray() throws Exception {
+    Exception e = new Exception();
+    JobLogUtils.raiseError(JobLogUtils.LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+  }
+
+  @Test
+  public void logEvery_Args__int__String__ObjectArray() throws Exception {
+
+    // given
+    int cntr = 0;
+    String action = null;
+    Object[] args = new Object[] {};
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    JobLogUtils.logEvery(cntr, action, args);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
+  @Test(expected = JobsException.class)
+  public void raiseError_Args__Logger__Throwable__String__ObjectArray() throws Exception {
+
+    // given
+    Logger log = mock(Logger.class);
+    Throwable e = null;
+    String pattern = null;
+    Object[] args = new Object[] {};
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    JobLogUtils.raiseError(log, e, pattern, args);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
+  // @Test
+  public void buildException_Args__Logger__Throwable__String__ObjectArray() throws Exception {
+
+    // given
+    Logger log = mock(Logger.class);
+    Throwable e = null;
+    String pattern = null;
+    Object[] args = new Object[] {};
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    JobsException actual = JobLogUtils.buildException(log, e, pattern, args);
+    // then
+    // e.g. : verify(mocked).called();
+    JobsException expected = new JobsException("", null);
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test(expected = JobsException.class)
+  public void raiseError_Args__Logger__Throwable__ObjectArray() throws Exception {
+
+    // given
+    Logger log = mock(Logger.class);
+    Throwable e = null;
+    Object[] args = new Object[] {};
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    JobLogUtils.raiseError(log, e, args);
     // then
     // e.g. : verify(mocked).called();
   }
