@@ -27,10 +27,13 @@ public class IntakeAllegationTest {
     assertThat(target, notNullValue());
   }
 
-  // @Test
+  @Test
   public void toEsAllegation_Args__() throws Exception {
     IntakeAllegation target = new IntakeAllegation();
     target.setId("1234");
+    IntakeParticipant victim = new IntakeParticipant();
+    victim.setId("8888");
+    target.setVictim(victim);
     // given
     // e.g. : given(mocked.called()).willReturn(1);
     // when
@@ -39,6 +42,7 @@ public class IntakeAllegationTest {
     // e.g. : verify(mocked).called();
     ElasticSearchPersonAllegation expected = new ElasticSearchPersonAllegation();
     expected.setId("1234");
+    expected.setVictimId("8888");
     assertThat(actual, is(equalTo(expected)));
   }
 
