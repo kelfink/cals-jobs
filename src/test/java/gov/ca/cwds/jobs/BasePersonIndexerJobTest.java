@@ -48,7 +48,6 @@ import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
-
 public class BasePersonIndexerJobTest {
 
   @JsonPropertyOrder(alphabetic = true)
