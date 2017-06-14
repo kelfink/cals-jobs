@@ -306,6 +306,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   @Override
   public M extract(ResultSet rs) throws SQLException {
+    while (rs.next()) {
+      // TODO: Delegate to row mapper.
+    }
     return null;
   }
 
@@ -557,6 +560,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         null, // omit highlights
         addresses, phones, languages, screenings);
 
+    // Sealed and sensitive.
     ret.setSensitivityIndicator(pa.getSensitivityIndicator());
     ret.SetSoc158SealedClientIndicator(pa.getSoc158SealedClientIndicator());
 
@@ -695,7 +699,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void prepareInsertCollections(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-          throws JsonProcessingException {
+      throws JsonProcessingException {
 
     // Null out optional collections for updates.
     esp.clearOptionalCollections(keep);
@@ -718,7 +722,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected Pair<String, String> prepareUpsertJson(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-          throws JsonProcessingException {
+      throws JsonProcessingException {
 
     // Child classes: Set optional collections before serializing the insert JSON.
     prepareInsertCollections(esp, t, elementName, list, keep);
@@ -878,7 +882,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         try {
           this.jobDao.find("abc123"); // dummy call, keep connection pool alive.
         } catch (HibernateException he) { // NOSONAR
-          LOGGER.debug("USING DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage());
+          LOGGER.trace("DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage());
         } catch (Exception e) {
           LOGGER.warn("Hibernate keep-alive error: {}", e.getMessage());
         }
@@ -1024,8 +1028,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       while (!(fatalError || (doneExtract && doneTransform && queueLoad.isEmpty()))) {
         while ((t = queueLoad.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
           JobLogUtils.logEvery(++cntr, "Published", "recs to ES");
+          prepareDocument(bp, t);
         }
-        prepareDocument(bp, t);
       }
 
       // Just to be sure ...
@@ -1119,8 +1123,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     } catch (Exception e) {
       fatalError = true;
-      LOGGER.fatal("General Exception: {}", e.getMessage(), e);
-      throw new JobsException("General Exception: " + e.getMessage(), e);
+      throw JobLogUtils.buildException(LOGGER, e, "General Exception: {}", e.getMessage());
     } finally {
       doneLoad = true;
     }
@@ -1194,8 +1197,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     } catch (Exception e) {
       fatalError = true;
-      LOGGER.error("General Exception: {}", e.getMessage(), e);
-      throw new JobsException("General Exception: " + e.getMessage(), e);
+      throw JobLogUtils.buildException(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
     } finally {
 
       // Set ETL completion flags to done.
@@ -1335,8 +1337,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           : opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_ID_COL", getIdColumn())
-              .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
+              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
+                  String.valueOf(totalBuckets)),
+              BatchBucket.class);
 
       ret = q.getResultList();
       session.clear();
@@ -1437,8 +1440,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       Thread.currentThread().interrupt();
     } catch (IOException ioe) {
       fatalError = true;
-      LOGGER.fatal("ERROR FINISHING JOB: {}", ioe.getMessage(), ioe);
-      throw new JobsException(ioe);
+      throw JobLogUtils.buildException(LOGGER, ioe, "ERROR FINISHING JOB: {}", ioe.getMessage());
     }
   }
 

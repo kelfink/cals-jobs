@@ -51,12 +51,24 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
 public class BasePersonIndexerJobTest {
 
   @JsonPropertyOrder(alphabetic = true)
+  static final class TestNormalizedEntry {
+    private String id;
+
+    private String name;
+
+  }
+
+  @JsonPropertyOrder(alphabetic = true)
   static final class TestNormalizedEntity
       implements PersistentObject, ApiPersonAware, ApiTypedIdentifier<String> {
 
     private String id;
 
-    private String name;
+    private String firstName;
+
+    private String lastName;
+
+    private String title;
 
     public TestNormalizedEntity(String id) {
       this.id = id;
@@ -84,7 +96,7 @@ public class BasePersonIndexerJobTest {
 
     @Override
     public String getFirstName() {
-      return name;
+      return firstName;
     }
 
     @Override
@@ -94,7 +106,7 @@ public class BasePersonIndexerJobTest {
 
     @Override
     public String getLastName() {
-      return name;
+      return lastName;
     }
 
     @Override
@@ -113,11 +125,27 @@ public class BasePersonIndexerJobTest {
     }
 
     public String getName() {
-      return name;
+      return firstName;
     }
 
     public void setName(String name) {
-      this.name = name;
+      this.firstName = name;
+    }
+
+    public String getTitle() {
+      return title;
+    }
+
+    public void setTitle(String title) {
+      this.title = title;
+    }
+
+    public void setFirstName(String firstName) {
+      this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+      this.lastName = lastName;
     }
 
   }
@@ -266,9 +294,11 @@ public class BasePersonIndexerJobTest {
   public void jsonify_Args__Object() throws Exception {
     TestNormalizedEntity obj = new TestNormalizedEntity("xyz");
     obj.setName("whatever");
+    obj.setLastName("whatever");
+    // obj.setLastName("whatever");
     String actual = target.jsonify(obj);
     String expected =
-        "{\"birthDate\":null,\"firstName\":\"whatever\",\"gender\":null,\"id\":\"xyz\",\"lastName\":\"whatever\",\"middleName\":null,\"name\":\"whatever\",\"nameSuffix\":null,\"primaryKey\":\"xyz\",\"sensitivityIndicator\":null,\"soc158SealedClientIndicator\":null,\"ssn\":null}";
+        "{\"birthDate\":null,\"firstName\":\"whatever\",\"gender\":null,\"id\":\"xyz\",\"lastName\":\"whatever\",\"middleName\":null,\"name\":\"whatever\",\"nameSuffix\":null,\"primaryKey\":\"xyz\",\"sensitivityIndicator\":null,\"soc158SealedClientIndicator\":null,\"ssn\":null,\"title\":null}";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -285,11 +315,12 @@ public class BasePersonIndexerJobTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
   public void extract_Args__ResultSet_T__SQLException() throws Exception {
     // given
     ResultSet rs = mock(ResultSet.class);
     doThrow(new SQLException()).when(rs).getString(any());
+    doThrow(new SQLException()).when(rs).next();
     try {
       // when
       target.extract(rs);
@@ -394,7 +425,7 @@ public class BasePersonIndexerJobTest {
   // }
   // }
 
-  // @Test
+  @Test
   public void buildElasticSearchPersons_Args__Object() throws Exception {
     // given
     TestNormalizedEntity p = new TestNormalizedEntity("7ApWVDF00h");
@@ -426,26 +457,27 @@ public class BasePersonIndexerJobTest {
     }
   }
 
-  // @Test
+  @Test
   public void buildElasticSearchPerson_Args__Object() throws Exception {
     // given
-    TestNormalizedEntity p = new TestNormalizedEntity("7ApWVDF00h");
+    final String key = "7ApWVDF00h";
+    TestNormalizedEntity p = new TestNormalizedEntity(key);
     // e.g. : given(mocked.called()).willReturn(1);
     // when
     ElasticSearchPerson actual = target.buildElasticSearchPerson(p);
     // then
     // e.g. : verify(mocked).called();
-    ElasticSearchPerson expected = null;
+    ElasticSearchPerson expected = new ElasticSearchPerson();
+    expected.setId(key);
     assertThat(actual, is(equalTo(expected)));
   }
 
   // @Test
   public void buildElasticSearchPerson_Args__Object_T__JsonProcessingException() throws Exception {
-    // given
     TestNormalizedEntity p = new TestNormalizedEntity("7ApWVDF00h");
-    // e.g. : given(mocked.called()).willReturn(1);
+    // doThrow(new SQLException()).when(rs).getString(any());
+    // doThrow(new SQLException()).when(rs).next();
     try {
-      // when
       target.buildElasticSearchPerson(p);
       fail("Expected exception was not thrown!");
     } catch (JsonProcessingException e) {

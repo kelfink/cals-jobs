@@ -17,4 +17,5 @@ public class JobConfiguration extends ElasticsearchConfiguration5x {
   public String getJobLisReaderQuery() {
     return jobLisReaderQuery;
   }
+
 }

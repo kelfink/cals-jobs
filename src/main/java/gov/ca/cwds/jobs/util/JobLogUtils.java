@@ -58,14 +58,32 @@ public final class JobLogUtils {
    * @param args error message, excluding throwable message
    * @throws JobsException runtime exception
    */
-  public static void raiseError(final Logger log, Throwable e, String pattern,
-      Object... args) {
+  public static void raiseError(final Logger log, Throwable e, String pattern, Object... args) {
     final Object[] objs = args == null || args.length == 0 ? new Object[0] : args;
     final String pat = !StringUtils.isEmpty(pattern) ? pattern : StringUtils.join(objs, "{}");
     final String msg = MessageFormat.format(pat, objs);
     final Logger logger = log != null ? log : LOGGER;
     logger.fatal(msg, e);
     throw new JobsException(msg, e);
+  }
+
+  /**
+   * Format message and return a runtime {@link JobsException}.
+   * 
+   * @param log class logger
+   * @param e any Throwable
+   * @param pattern MessageFormat pattern
+   * @param args error message, excluding throwable message
+   * @return JobsException runtime exception
+   */
+  public static JobsException buildException(final Logger log, Throwable e, String pattern,
+      Object... args) {
+    final Object[] objs = args == null || args.length == 0 ? new Object[0] : args;
+    final String pat = !StringUtils.isEmpty(pattern) ? pattern : StringUtils.join(objs, "{}");
+    final String msg = MessageFormat.format(pat, objs);
+    final Logger logger = log != null ? log : LOGGER;
+    logger.fatal(msg, e);
+    return new JobsException(msg, e);
   }
 
   /**
