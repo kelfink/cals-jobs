@@ -1,6 +1,7 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
 import java.util.Date;
+import java.util.function.Supplier;
 
 import javax.persistence.Column;
 import javax.persistence.EnumType;
@@ -13,7 +14,7 @@ import org.hibernate.annotations.Type;
  * 
  * @author CWDS API Team
  */
-public abstract class BaseCmsReplicated implements CmsReplicatedEntity {
+public class BaseCmsReplicated implements CmsReplicatedEntity {
 
   /**
    * Base serialization version.
@@ -27,6 +28,19 @@ public abstract class BaseCmsReplicated implements CmsReplicatedEntity {
   @Type(type = "timestamp")
   @Column(name = "IBMSNAP_LOGMARKER", updatable = false)
   private Date replicationDate;
+
+  private Supplier<String> supplyId;
+
+  private Supplier<String> supplyLegacyId;
+
+  private BaseCmsReplicated() {
+    // Don't instantiate.
+  }
+
+  public BaseCmsReplicated(Supplier<String> supplyId, Supplier<String> supplyLegacyId) {
+    this.supplyId = supplyId;
+    this.supplyLegacyId = supplyLegacyId;
+  }
 
   /*
    * (non-Javadoc)
@@ -56,6 +70,16 @@ public abstract class BaseCmsReplicated implements CmsReplicatedEntity {
   @Override
   public void setReplicationDate(Date replicationDate) {
     this.replicationDate = replicationDate;
+  }
+
+  @Override
+  public String getId() {
+    return this.supplyId.get();
+  }
+
+  @Override
+  public String getLegacyId() {
+    return this.supplyLegacyId.get();
   }
 
 }
