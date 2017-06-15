@@ -179,7 +179,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void getBirthDate_Args__() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -193,7 +192,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void getFirstName_Args__() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -221,7 +219,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void getLastName_Args__() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -235,7 +232,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void getSsn_Args__() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -249,7 +245,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void getId_Args__() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -263,7 +258,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void setId_Args__String() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     String id = null;
@@ -276,7 +270,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void setFirstName_Args__String() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     String firstName = null;
@@ -289,7 +282,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void setLastName_Args__String() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     String lastName = null;
@@ -302,7 +294,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void setBirthDate_Args__Date() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     Date birthDate = mock(Date.class);
@@ -315,7 +306,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void setGender_Args__String() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     String gender = null;
@@ -328,7 +318,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void setSsn_Args__String() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     String ssn = null;
@@ -341,7 +330,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void getLegacyId_Args__() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -355,7 +343,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void setLegacyId_Args__String() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     String legacyId = null;
@@ -370,7 +357,7 @@ public class IntakeParticipantTest {
   public void toEsPerson_Args__Object__IntakeScreening() throws Exception {
     IntakeParticipant target = new IntakeParticipant();
     // given
-    IntakeParticipant.EsPersonType esType = IntakeParticipant.EsPersonType.REPORTER;
+    EsPersonType esType = EsPersonType.REPORTER;
     IntakeScreening screening = mock(IntakeScreening.class);
     // e.g. : given(mocked.called()).willReturn(1);
     // when
@@ -408,7 +395,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void setAddresses_Args__Map() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     Map<String, ElasticSearchPersonAddress> addresses =
@@ -422,7 +408,6 @@ public class IntakeParticipantTest {
 
   @Test
   public void setPhones_Args__Map() throws Exception {
-
     IntakeParticipant target = new IntakeParticipant();
     // given
     Map<String, ElasticSearchPersonPhone> phones = new HashMap<String, ElasticSearchPersonPhone>();

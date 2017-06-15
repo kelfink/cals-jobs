@@ -18,7 +18,6 @@ import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAny;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.ns.IntakeParticipant.EsPersonType;
 import gov.ca.cwds.data.std.ApiPersonAware;
 
 /**

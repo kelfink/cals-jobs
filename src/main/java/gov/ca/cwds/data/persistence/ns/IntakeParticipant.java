@@ -42,34 +42,6 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
    */
   private static final long serialVersionUID = 1L;
 
-  /**
-   * Types for {@link ElasticSearchPersonNestedPerson} child classes.
-   * 
-   * @author CWDS API Team
-   */
-  public enum EsPersonType {
-
-    /**
-     * For {@link ElasticSearchPersonReporter}.
-     */
-    REPORTER,
-
-    /**
-     * For {@link ElasticSearchPersonSocialWorker}.
-     */
-    SOCIAL_WORKER,
-
-    /**
-     * For {@link ElasticSearchPersonStaff}.
-     */
-    STAFF,
-
-    /**
-     * For {@link ElasticSearchPersonAny}.
-     */
-    ALL;
-  }
-
   private String id;
 
   private String legacyId;
