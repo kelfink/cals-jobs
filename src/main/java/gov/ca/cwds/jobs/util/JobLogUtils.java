@@ -15,6 +15,9 @@ import gov.ca.cwds.jobs.exception.JobsException;
  */
 public final class JobLogUtils {
 
+  /**
+   * Standard Logger.
+   */
   protected static final Logger LOGGER = LogManager.getLogger(JobLogUtils.class);
 
   private static final int DEFAULT_LOG_EVERY = 5000;

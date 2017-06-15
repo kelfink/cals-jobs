@@ -144,7 +144,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected static Injector injector;
 
   /**
-   * Needed for unit tests where resources may not close properly.
+   * For unit tests where resources either may not close properly or where expensive resources
+   * should be mocked.
    */
   private static boolean testMode = false;
 
@@ -256,7 +257,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     lock = new ReentrantLock();
     condition = lock.newCondition();
 
-    java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.SEVERE);
+    java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.INFO);
   }
 
   /**
@@ -296,9 +297,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   @Override
   public M extract(ResultSet rs) throws SQLException {
-    while (rs.next()) {
-      // TODO: Delegate to row mapper.
-    }
+    // TODO: Delegate to row mapper.
+    // while (rs.next()) {
+    // }
     return null;
   }
 
@@ -502,6 +503,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   @SuppressWarnings("unchecked")
   protected List<T> normalize(List<M> recs) {
+    // if (getDenormalizedClass() != null
+    // && getDenormalizedClass().isAssignableFrom(ApiGroupNormalizer.class)) {
+    // LOGGER.trace("denormalizer");
+    // }
     return (List<T>) recs;
   }
 
@@ -822,6 +827,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       buf.append("SELECT x.* FROM ").append(System.getProperty("DB_CMS_SCHEMA")).append(".")
           .append(getViewName()).append(" x ").append(getJdbcOrderBy()).append(" FOR READ ONLY");
       final String query = buf.toString();
+      M m;
 
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(5000); // faster
@@ -833,9 +839,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         while (!fatalError && rs.next()) {
           // Hand the baton to the next runner ...
           JobLogUtils.logEvery(++cntr, "Retrieved", "recs");
-          M m = extract(rs);
-          if (m != null) {
-            queueTransform.putLast(extract(rs));
+          if ((m = extract(rs)) != null) {
+            queueTransform.putLast(m);
           }
         }
 
@@ -865,7 +870,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     int cntr = 0;
     Object lastId = new Object();
     M m;
-    List<M> groupRecs = new ArrayList<>();
+    T t;
+    List<M> grpRecs = new ArrayList<>();
 
     while (!(fatalError || (doneExtract && queueTransform.isEmpty()))) {
       try {
@@ -874,24 +880,21 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
           // NOTE: Assumes that records are sorted by group key.
           if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
-            final T t = normalizeSingle(groupRecs);
-            if (t != null) {
+            // End of group. Normalize these group recs.
+            if ((t = normalizeSingle(grpRecs)) != null) {
               queueLoad.putLast(t);
-              groupRecs.clear(); // Single thread, re-use memory.
+              grpRecs.clear(); // Single thread, re-use memory.
             }
           }
 
-          groupRecs.add(m);
+          grpRecs.add(m);
           lastId = m.getNormalizationGroupKey();
         }
 
         // Last bundle.
-        if (!groupRecs.isEmpty()) {
-          final T t = normalizeSingle(groupRecs);
-          if (t != null) {
-            queueLoad.putLast(t);
-            groupRecs.clear(); // Single thread, re-use memory.
-          }
+        if (!grpRecs.isEmpty() && (t = normalizeSingle(grpRecs)) != null) {
+          queueLoad.putLast(t);
+          grpRecs.clear(); // Single thread, re-use memory.
         }
 
       } catch (InterruptedException e) { // NOSONAR
@@ -1404,11 +1407,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           try {
             prepareDocument(bp, p);
           } catch (JsonProcessingException e) {
-            // TODO: log the offending record.
-            throw new JobsException("JSON error", e);
+            throw JobLogUtils.buildException(LOGGER, e, "JSON ERROR: id: {}, {}", p.getPrimaryKey(),
+                e.getMessage());
           } catch (IOException e) {
-            // TODO: log the offending record.
-            throw new JobsException("IO error", e);
+            throw JobLogUtils.buildException(LOGGER, e, "IO ERROR: id: {}, {}", p.getPrimaryKey(),
+                e.getMessage());
           }
         });
 
@@ -1495,10 +1498,22 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     systemCodes = sysCodeCache;
   }
 
+  /**
+   * For unit tests where resources either may not close properly or where expensive resources
+   * should be mocked.
+   * 
+   * @return whether in test mode
+   */
   public static boolean isTestMode() {
     return testMode;
   }
 
+  /**
+   * For unit tests where resources either may not close properly or where expensive resources
+   * should be mocked.
+   * 
+   * @param testMode whether in test mode
+   */
   public static void setTestMode(boolean testMode) {
     BasePersonIndexerJob.testMode = testMode;
   }

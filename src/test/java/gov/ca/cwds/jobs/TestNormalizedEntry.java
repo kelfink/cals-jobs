@@ -1,12 +1,24 @@
 package gov.ca.cwds.jobs;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder(alphabetic = true)
-public class TestNormalizedEntry {
+public class TestNormalizedEntry implements Serializable {
+
   private String id;
 
-  private String name;
+  private String shazbat;
+
+  public TestNormalizedEntry() {
+
+  }
+
+  public TestNormalizedEntry(String id, String shazbat) {
+    this.id = id;
+    this.shazbat = shazbat;
+  }
 
   public String getId() {
     return id;
@@ -16,12 +28,12 @@ public class TestNormalizedEntry {
     this.id = id;
   }
 
-  public String getName() {
-    return name;
+  public String getShazbat() {
+    return shazbat;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setShazbat(String shazbat) {
+    this.shazbat = shazbat;
   }
 
 }

@@ -1,7 +1,9 @@
 package gov.ca.cwds.jobs;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -20,6 +22,8 @@ public class TestNormalizedEntity
   private String lastName;
 
   private String title;
+
+  private List<TestNormalizedEntry> entries = new ArrayList<>();
 
   public TestNormalizedEntity(String id) {
     this.id = id;
@@ -97,6 +101,10 @@ public class TestNormalizedEntity
 
   public void setLastName(String lastName) {
     this.lastName = lastName;
+  }
+
+  public void addEntry(TestNormalizedEntry entry) {
+    this.entries.add(entry);
   }
 
 }
