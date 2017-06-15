@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import org.junit.Test;
 
 import gov.ca.cwds.data.model.facility.es.ESFacility;
+import gov.ca.cwds.data.model.facility.es.ESFacilityAddress;
 
 public class FacilityProcessorTest {
 
@@ -24,17 +25,19 @@ public class FacilityProcessorTest {
     assertThat(target, notNullValue());
   }
 
-  // @Test
+  @Test
   public void process_Args__FacilityRow() throws Exception {
     FacilityProcessor target = new FacilityProcessor();
     // given
-    FacilityRow item = mock(FacilityRow.class);
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+    FacilityRow item = new FacilityRow();
+    item.setId("1234");
+
     ESFacility actual = target.process(item);
-    // then
-    // e.g. : verify(mocked).called();
+
     ESFacility expected = new ESFacility();
+    expected.setId("1234");
+    expected.setAddress(new ESFacilityAddress());
+
     assertThat(actual, is(equalTo(expected)));
   }
 
