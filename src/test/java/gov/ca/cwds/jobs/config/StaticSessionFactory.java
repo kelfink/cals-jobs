@@ -163,7 +163,7 @@ public class StaticSessionFactory {
 
     @Override
     public void close() {
-      sf.close();
+      // Close thread calls close().
       held = false;
       condition.signalAll();
       lock.unlock();
@@ -237,23 +237,29 @@ public class StaticSessionFactory {
     protected void runCloseThread() {
       new Thread(() -> {
         try {
-          Thread.sleep(500); // NOSONAR
-          // lock.lock();
-          while (held) {
-            try {
-              condition.await(); // Possible spurious wake-up. Must still evaluation the situation.
-              Thread.sleep(2000); // NOSONAR
-            } catch (InterruptedException ie) {
-              Thread.currentThread().interrupt();
+          Thread.sleep(1500); // NOSONAR
+          while (true) {
+            System.out.println("condition.await()");
+            condition.await(); // Possible spurious wake-up. Must still evaluation the situation.
+            Thread.sleep(1500); // NOSONAR
+
+            if (!held) {
+              try {
+                lock.lock();
+                held = false;
+                condition.signalAll();
+                System.out.println("CLOSE DOWN SESSION FACTORY!");
+              } finally {
+                lock.unlock(); // Always unlock, no matter what!
+              }
+              break;
             }
           }
-          held = false;
-          condition.signal();
+
         } catch (InterruptedException ie) {
           Thread.currentThread().interrupt();
-        } finally {
-          // lock.unlock(); // Always unlock, no matter what!
         }
+
       }).start();
     }
 
