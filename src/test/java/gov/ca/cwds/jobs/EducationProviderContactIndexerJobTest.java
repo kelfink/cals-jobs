@@ -26,6 +26,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
  */
 @SuppressWarnings("javadoc")
 public class EducationProviderContactIndexerJobTest {
+
   @SuppressWarnings("unused")
   private static ReplicatedEducationProviderContactDao educationProviderContactDao;
   private static SessionFactory sessionFactory;

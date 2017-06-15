@@ -1,17 +1,18 @@
 package gov.ca.cwds.jobs;
 
-import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.jobs.util.JobReader;
-import gov.ca.cwds.jobs.util.jdbc.JdbcJobReader;
-import gov.ca.cwds.jobs.util.jdbc.RowMapper;
+import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.Serializable;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.jobs.util.JobReader;
+import gov.ca.cwds.jobs.util.jdbc.JdbcJobReader;
+import gov.ca.cwds.jobs.util.jdbc.RowMapper;
 
 /**
  * @author CWDS Elasticsearch Team
@@ -22,8 +23,8 @@ public class JdbcJobReaderTest {
   public void testRead() throws Exception {
     SessionFactory sessionFactory =
         new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
-    JobReader<Item> jobReader = new JdbcJobReader<>(sessionFactory, new ItemMapper(),
-        "select * from test order by a");
+    JobReader<Item> jobReader =
+        new JdbcJobReader<>(sessionFactory, new ItemMapper(), "select * from test order by a");
     jobReader.init();
     int counter = 0;
     Item item;
@@ -71,5 +72,6 @@ public class JdbcJobReaderTest {
       item.setB(resultSet.getString("b"));
       return item;
     }
+
   }
 }

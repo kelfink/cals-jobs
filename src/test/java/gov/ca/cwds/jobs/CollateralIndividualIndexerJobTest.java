@@ -21,10 +21,10 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
  * @author CWDS API Team
- *
  */
 @SuppressWarnings("javadoc")
 public class CollateralIndividualIndexerJobTest {
+
   @SuppressWarnings("unused")
   private static ReplicatedCollateralIndividualDao collateralIndividualDao;
   private static SessionFactory sessionFactory;
