@@ -85,7 +85,10 @@ public abstract class LastSuccessfulRunJob implements Job {
     return ret;
   }
 
-  private void writeLastSuccessfulRunTime(Date datetime) {
+  /**
+   * @param datetime date and time to store
+   */
+  protected void writeLastSuccessfulRunTime(Date datetime) {
     if (datetime != null && !StringUtils.isBlank(this.lastRunTimeFilename)) {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) {
         w.write(jobDateFormat.format(datetime));
