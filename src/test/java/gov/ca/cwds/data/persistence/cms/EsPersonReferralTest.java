@@ -104,20 +104,15 @@ public class EsPersonReferralTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
   public void normalize_Args__Map() throws Exception {
     EsPersonReferral target = new EsPersonReferral();
     target.setClientId("xyz789");
     target.setAllegationId("abc1234");
     target.setReferralId("ddusicnz7");
 
-    // given
     Map<Object, ReplicatedPersonReferrals> map = new HashMap<Object, ReplicatedPersonReferrals>();
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     ReplicatedPersonReferrals actual = target.normalize(map);
-    // then
-    // e.g. : verify(mocked).called();
     ReplicatedPersonReferrals expected = new ReplicatedPersonReferrals("xyz789");
 
     ElasticSearchPersonAllegation allegation = new ElasticSearchPersonAllegation();
@@ -126,9 +121,14 @@ public class EsPersonReferralTest {
     ElasticSearchPersonReferral referral = new ElasticSearchPersonReferral();
     referral.setId("ddusicnz7");
     referral.setLegacyId("ddusicnz7");
-    referral.setCountyId("null"); // Is this right?
 
     expected.addReferral(referral, allegation);
+
+    // Value is a literal "null"? Is this right?
+    expected.geReferrals().get(0).getAccessLimitation().setLimitedAccessGovernmentEntityId("null");
+    referral.setCountyId("null");
+    referral.setResponseTimeId("null");
+    allegation.setDispositionId("null");
 
     assertThat(actual, is(equalTo(expected)));
   }

@@ -7,6 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -116,42 +121,23 @@ public class ReplicatedPersonReferrals implements PersistentObject, ApiPersonAwa
     return null;
   }
 
+  // ==============
+  // IDENTITY:
+  // ==============
+
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((clientId == null) ? 0 : clientId.hashCode());
-    result = prime * result + ((referralAllegations == null) ? 0 : referralAllegations.hashCode());
-    result = prime * result + ((referrals == null) ? 0 : referrals.hashCode());
-    return result;
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE, true);
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    ReplicatedPersonReferrals other = (ReplicatedPersonReferrals) obj;
-    if (clientId == null) {
-      if (other.clientId != null)
-        return false;
-    } else if (!clientId.equals(other.clientId))
-      return false;
-    if (referralAllegations == null) {
-      if (other.referralAllegations != null)
-        return false;
-    } else if (!referralAllegations.equals(other.referralAllegations))
-      return false;
-    if (referrals == null) {
-      if (other.referrals != null)
-        return false;
-    } else if (!referrals.equals(other.referrals))
-      return false;
-    return true;
+  public final int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
   }
 
+  @Override
+  public final boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
 
 }
