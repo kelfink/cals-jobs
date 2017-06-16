@@ -7,14 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 
 /**
@@ -22,7 +18,8 @@ import gov.ca.cwds.data.std.ApiPersonAware;
  * 
  * @author CWDS API Team
  */
-public class ReplicatedPersonReferrals implements PersistentObject, ApiPersonAware {
+public class ReplicatedPersonReferrals extends ApiObjectIdentity
+    implements PersistentObject, ApiPersonAware {
 
   private static final long serialVersionUID = -8746969311364544478L;
 
@@ -119,25 +116,6 @@ public class ReplicatedPersonReferrals implements PersistentObject, ApiPersonAwa
   @Override
   public String getSsn() {
     return null;
-  }
-
-  // ==============
-  // IDENTITY:
-  // ==============
-
-  @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE, true);
-  }
-
-  @Override
-  public final int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this, false);
-  }
-
-  @Override
-  public final boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }

@@ -2,7 +2,6 @@ package gov.ca.cwds.data.persistence.cms;
 
 import java.io.Serializable;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.PersistentObject;
 
 /**
@@ -102,12 +101,6 @@ public class ReplicatedRelationship implements PersistentObject {
   @Override
   public Serializable getPrimaryKey() {
     return null;
-  }
-
-  public ElasticSearchPersonRelationship getEsRelationship() {
-    ElasticSearchPersonRelationship ret = new ElasticSearchPersonRelationship();
-
-    return ret;
   }
 
 }
