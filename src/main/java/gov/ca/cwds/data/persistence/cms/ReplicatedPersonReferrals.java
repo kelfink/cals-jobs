@@ -116,5 +116,42 @@ public class ReplicatedPersonReferrals implements PersistentObject, ApiPersonAwa
     return null;
   }
 
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((clientId == null) ? 0 : clientId.hashCode());
+    result = prime * result + ((referralAllegations == null) ? 0 : referralAllegations.hashCode());
+    result = prime * result + ((referrals == null) ? 0 : referrals.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    ReplicatedPersonReferrals other = (ReplicatedPersonReferrals) obj;
+    if (clientId == null) {
+      if (other.clientId != null)
+        return false;
+    } else if (!clientId.equals(other.clientId))
+      return false;
+    if (referralAllegations == null) {
+      if (other.referralAllegations != null)
+        return false;
+    } else if (!referralAllegations.equals(other.referralAllegations))
+      return false;
+    if (referrals == null) {
+      if (other.referrals != null)
+        return false;
+    } else if (!referrals.equals(other.referrals))
+      return false;
+    return true;
+  }
+
 
 }
