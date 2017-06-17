@@ -12,6 +12,10 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
+import gov.ca.cwds.jobs.config.StaticSystemCodeCache;
+
 public class EsParentPersonCaseTest {
 
   @Test
@@ -661,16 +665,31 @@ public class EsParentPersonCaseTest {
 
   // @Test
   public void normalize_Args__Map() throws Exception {
+    StaticSystemCodeCache.deploy();
     EsParentPersonCase target = new EsParentPersonCase();
-    target.setCaseId("abc123");
-    // given
-    Map<Object, ReplicatedPersonCases> map = new HashMap<Object, ReplicatedPersonCases>();
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+    target.setCaseId("xyz789");
+    target.setParentId("parentid");
+    target.setFocusChildId("focusChildId");
+    target.setParentPersonId("parentPersonId");
+
+    Map<Object, ReplicatedPersonCases> map = new HashMap<>();
     ReplicatedPersonCases actual = target.normalize(map);
-    // then
-    // e.g. : verify(mocked).called();
-    ReplicatedPersonCases expected = new ReplicatedPersonCases("abc123");
+
+    // Expected:
+    ReplicatedPersonCases expected = new ReplicatedPersonCases("xyz789");
+
+    ElasticSearchPersonCase personCase = new ElasticSearchPersonCase();
+    personCase.setId("xyz789");
+
+    ElasticSearchPersonParent caseParent = new ElasticSearchPersonParent();
+    caseParent.setId("parentid");
+    caseParent.setLegacyClientId("parentid");
+
+    personCase.setId("focusChildId");
+    personCase.setLegacyId("focusChildId");
+
+    expected.addCase(personCase, caseParent);
+
     assertThat(actual, is(equalTo(expected)));
   }
 

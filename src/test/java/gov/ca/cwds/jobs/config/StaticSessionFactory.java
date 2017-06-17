@@ -37,14 +37,14 @@ import org.hibernate.stat.Statistics;
 
 public class StaticSessionFactory {
 
-  public static class ShareableSessionFactory implements SessionFactory {
+  public static class SharedSessionFactory implements SessionFactory {
 
     private SessionFactory sf;
     private final Lock lock;
     private final Condition condition;
     private volatile boolean held = true;
 
-    public ShareableSessionFactory(SessionFactory sf) {
+    public SharedSessionFactory(SessionFactory sf) {
       this.sf = sf;
       lock = new ReentrantLock();
       condition = lock.newCondition();
@@ -281,10 +281,10 @@ public class StaticSessionFactory {
 
   }
 
-  private static ShareableSessionFactory sessionFactory;
+  private static SharedSessionFactory sessionFactory;
 
   static {
-    sessionFactory = new ShareableSessionFactory(
+    sessionFactory = new SharedSessionFactory(
         new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory());
   }
 
