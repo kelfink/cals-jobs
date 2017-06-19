@@ -13,6 +13,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
 import gov.ca.cwds.jobs.config.StaticSystemCodeCache;
 
@@ -663,30 +664,42 @@ public class EsParentPersonCaseTest {
     // e.g. : verify(mocked).called();
   }
 
-  // @Test
+  @Test
   public void normalize_Args__Map() throws Exception {
     StaticSystemCodeCache.deploy();
+
+    final String caseId = "abc12340x5";
+    final String parentId = "def56780x5";
+    final String focusChildId = "ghi90120x5";
+    final String parentPersonId = "xxx93940x5";
+
     EsParentPersonCase target = new EsParentPersonCase();
-    target.setCaseId("xyz789");
-    target.setParentId("parentid");
-    target.setFocusChildId("focusChildId");
-    target.setParentPersonId("parentPersonId");
+    target.setCaseId(caseId);
+    target.setParentId(parentId);
+    target.setFocusChildId(focusChildId);
+    target.setParentPersonId(parentPersonId);
 
     Map<Object, ReplicatedPersonCases> map = new HashMap<>();
     ReplicatedPersonCases actual = target.normalize(map);
 
     // Expected:
-    ReplicatedPersonCases expected = new ReplicatedPersonCases("xyz789");
+    ReplicatedPersonCases expected = new ReplicatedPersonCases(parentPersonId);
 
     ElasticSearchPersonCase personCase = new ElasticSearchPersonCase();
-    personCase.setId("xyz789");
+    personCase.setId(caseId);
+    personCase.setLegacyId(caseId);
+    personCase.setCountyId("null");
+    personCase.setServiceComponentId("null");
+    personCase.getAccessLimitation().setLimitedAccessGovernmentEntityId("null");
+
+    ElasticSearchPersonChild focusChild = new ElasticSearchPersonChild();
+    focusChild.setId(focusChildId);
+    focusChild.setLegacyClientId(focusChildId);
+    personCase.setFocusChild(focusChild);
 
     ElasticSearchPersonParent caseParent = new ElasticSearchPersonParent();
-    caseParent.setId("parentid");
-    caseParent.setLegacyClientId("parentid");
-
-    personCase.setId("focusChildId");
-    personCase.setLegacyId("focusChildId");
+    caseParent.setId(parentId);
+    caseParent.setLegacyClientId(parentId);
 
     expected.addCase(personCase, caseParent);
 
