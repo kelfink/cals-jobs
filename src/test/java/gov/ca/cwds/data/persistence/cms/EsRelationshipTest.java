@@ -169,4 +169,210 @@ public class EsRelationshipTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
+  @Test
+  public void getThisLegacyId_Args__() throws Exception {
+
+    EsRelationship target = new EsRelationship();
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    String actual = target.getThisLegacyId();
+    // then
+    // e.g. : verify(mocked).called();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setThisLegacyId_Args__String() throws Exception {
+
+    EsRelationship target = new EsRelationship();
+    // given
+    String thisLegacyId = null;
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    target.setThisLegacyId(thisLegacyId);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
+  @Test
+  public void getThisFirstName_Args__() throws Exception {
+    EsRelationship target = new EsRelationship();
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    String actual = target.getThisFirstName();
+    // then
+    // e.g. : verify(mocked).called();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setThisFirstName_Args__String() throws Exception {
+    EsRelationship target = new EsRelationship();
+    // given
+    String thisFirstName = null;
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    target.setThisFirstName(thisFirstName);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
+  @Test
+  public void getThisLastName_Args__() throws Exception {
+    EsRelationship target = new EsRelationship();
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    String actual = target.getThisLastName();
+    // then
+    // e.g. : verify(mocked).called();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setThisLastName_Args__String() throws Exception {
+
+    EsRelationship target = new EsRelationship();
+    // given
+    String thisLastName = null;
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    target.setThisLastName(thisLastName);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
+  @Test
+  public void getRelCode_Args__() throws Exception {
+
+    EsRelationship target = new EsRelationship();
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    Short actual = target.getRelCode();
+    // then
+    // e.g. : verify(mocked).called();
+    Short expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setRelCode_Args__Short() throws Exception {
+    EsRelationship target = new EsRelationship();
+    // given
+    Short relCode = null;
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    target.setRelCode(relCode);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
+  @Test
+  public void getRelatedLegacyId_Args__() throws Exception {
+    EsRelationship target = new EsRelationship();
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    String actual = target.getRelatedLegacyId();
+    // then
+    // e.g. : verify(mocked).called();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setRelatedLegacyId_Args__String() throws Exception {
+
+    EsRelationship target = new EsRelationship();
+    // given
+    String relatedLegacyId = null;
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    target.setRelatedLegacyId(relatedLegacyId);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
+  @Test
+  public void getRelatedFirstName_Args__() throws Exception {
+
+    EsRelationship target = new EsRelationship();
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    String actual = target.getRelatedFirstName();
+    // then
+    // e.g. : verify(mocked).called();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setRelatedFirstName_Args__String() throws Exception {
+    EsRelationship target = new EsRelationship();
+    // given
+    String relatedFirstName = null;
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    target.setRelatedFirstName(relatedFirstName);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
+  @Test
+  public void getRelatedLastName_Args__() throws Exception {
+    EsRelationship target = new EsRelationship();
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    String actual = target.getRelatedLastName();
+    // then
+    // e.g. : verify(mocked).called();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setRelatedLastName_Args__String() throws Exception {
+    EsRelationship target = new EsRelationship();
+    // given
+    String relatedLastName = null;
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    target.setRelatedLastName(relatedLastName);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
+  @Test
+  public void getReverseRelationship_Args__() throws Exception {
+    EsRelationship target = new EsRelationship();
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    Boolean actual = target.getReverseRelationship();
+    // then
+    // e.g. : verify(mocked).called();
+    Boolean expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setReverseRelationship_Args__Boolean() throws Exception {
+    EsRelationship target = new EsRelationship();
+    // given
+    Boolean reverseRelationship = null;
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    target.setReverseRelationship(reverseRelationship);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
 }
