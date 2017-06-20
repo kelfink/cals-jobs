@@ -332,12 +332,4 @@ public class EsRelationship
     this.reverseRelationship = reverseRelationship;
   }
 
-  @Override
-  public String toString() {
-    return "EsRelationship [reverseRelationship=" + reverseRelationship + ", thisLegacyId="
-        + thisLegacyId + ", thisFirstName=" + thisFirstName + ", thisLastName=" + thisLastName
-        + ", relCode=" + relCode + ", relatedLegacyId=" + relatedLegacyId + ", relatedFirstName="
-        + relatedFirstName + ", relatedLastName=" + relatedLastName + "]";
-  }
-
 }
