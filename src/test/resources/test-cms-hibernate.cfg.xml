@@ -10,26 +10,42 @@
 		<property name="hibernate.dialect">org.hibernate.dialect.DB2Dialect</property>
 		<property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
 		<property name="hibernate.connection.driver_class">com.ibm.db2.jcc.DB2Driver</property>
-		<property name="hibernate.connection.username">db2inst1</property>
-		<property name="hibernate.connection.password">jyN3Ec3DRHmk</property>
-		<property name="hibernate.connection.url">jdbc:db2://legacy.db.jenkins.cwds.tabordasolutions.net:50000/DB0TDEV</property>
-		<property name="hibernate.default_schema">CWSINT</property>
 		<property name="connection_pool_size">2</property>
 		<property name="show_sql">true</property>
 
-<!-- 
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress" />
- -->
- 		
+		<property name="hibernate.connection.username">${DB_CMS_USER}</property>
+		<property name="hibernate.connection.password">${DB_CMS_PASSWORD}</property>
+		<property name="hibernate.connection.url">${DB_CMS_JDBC_URL}</property>
+		<property name="hibernate.default_schema">${DB_CMS_SCHEMA}</property>
+
 		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress" />
-		
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedReporter" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedServiceProvider" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherChildInPlacemtHome" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedEducationProviderContact" />
+
+<!-- Taborda Dev -->
 <!-- 
+		<property name="hibernate.connection.username">db2inst1</property>
+		<property name="hibernate.connection.password">jyN3Ec3DRHmk</property>
+		<property name="hibernate.connection.url">jdbc:db2://legacy.db.jenkins.cwds.tabordasolutions.net:50000/DB0TDEV</property>
+ -->
+ 		
+<!-- 
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress" />
+		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress" />
+
 		<mapping class="gov.ca.cwds.data.persistence.cms.Allegation" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.StaffPerson" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.CountyOwnership" />
@@ -43,18 +59,6 @@
 		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedPersonReferrals" />
 		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientCollateral" />
  -->
- 		
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress" />
-		
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedReporter" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedServiceProvider" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherChildInPlacemtHome" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual" />
-		<mapping class="gov.ca.cwds.data.persistence.cms.rep.ReplicatedEducationProviderContact" />
  		
 	</session-factory>
 </hibernate-configuration>

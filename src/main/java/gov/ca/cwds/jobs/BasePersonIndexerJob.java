@@ -331,7 +331,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   // ======================
-  // INJECTION:
+  // STATIC, INJECTION:
   // ======================
 
   /**
@@ -348,9 +348,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         injector = Guice.createInjector(
             new JobsGuiceInjector(new File(opts.getEsConfigLoc()), opts.getLastRunLoc()));
       } catch (CreationException e) {
-        final String msg = MessageFormat.format("Unable to create dependencies {}", e.getMessage());
-        LOGGER.fatal(msg, e);
-        throw new JobsException(msg, e);
+        throw JobLogUtils.buildException(LOGGER, e, "FAILED TO BUILD INJECTOR!: {}",
+            e.getMessage());
       }
     }
 
@@ -718,7 +717,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
 
-    // Update if doc exists, insert if it does not.
+    // "Upsert": update if doc exists, insert if it does not.
     return new UpdateRequest(alias, docType, id).doc(json.getLeft())
         .upsert(new IndexRequest(alias, docType, id).source(json.getRight()));
   }
@@ -783,7 +782,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           this.jobDao.find("abc123"); // dummy call, keep connection pool alive.
         } catch (HibernateException he) { // NOSONAR
           LOGGER.trace("DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage());
-        } catch (Exception e) {
+        } catch (Exception e) { // NOSONAR
           LOGGER.warn("Hibernate keep-alive error: {}", e.getMessage());
         }
       }
@@ -1482,6 +1481,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param klass batch job class
    * @param args command line arguments
    */
+  @SuppressWarnings("rawtypes")
   public static void runMain(final Class<? extends BasePersonIndexerJob> klass, String... args) {
     LOGGER.info("Run job {}", klass.getName());
     try {
@@ -1494,6 +1494,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   /**
    * Store a reference to the singleton CMS system code cache for quick convenient access.
+   * 
+   * <p/>
+   * Guice does not inject static dependencies automatically.
    * 
    * @param sysCodeCache CMS system code cache
    */

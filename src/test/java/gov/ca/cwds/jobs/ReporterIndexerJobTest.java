@@ -34,8 +34,6 @@ public class ReporterIndexerJobTest {
 
   @BeforeClass
   public static void beforeClass() {
-    // sessionFactory =
-    // new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
     sessionFactory = StaticSessionFactory.getSessionFactory();
     reporterDao = new ReplicatedReporterDao(sessionFactory);
   }

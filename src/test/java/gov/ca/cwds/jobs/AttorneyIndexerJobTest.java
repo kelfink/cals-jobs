@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
 import gov.ca.cwds.jobs.config.StaticSessionFactory;
 
 /**
@@ -72,15 +73,14 @@ public class AttorneyIndexerJobTest {
 
   @Test
   public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-    Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney.findAllUpdatedAfter");
+    Query query =
+        session.getNamedQuery(ReplicatedAttorney.class.getName() + ".findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
   }
 
   @Test
   public void testFindAllByBucketExists() throws Exception {
-    Query query = session
-        .getNamedQuery("gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney.findAllByBucket");
+    Query query = session.getNamedQuery(ReplicatedAttorney.class.getName() + ".findAllByBucket");
     assertThat(query, is(notNullValue()));
   }
 
