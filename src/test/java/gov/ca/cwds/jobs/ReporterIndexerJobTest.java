@@ -71,27 +71,6 @@ public class ReporterIndexerJobTest {
     assertThat(target, notNullValue());
   }
 
-  // @Test
-  // public void testfindAllNamedQueryExists() throws Exception {
-  // Query query =
-  // session.getNamedQuery("gov.ca.cwds.data.persistence.cms.ReplicatedReporter.findAll");
-  // assertThat(query, is(notNullValue()));
-  // }
-  //
-  // @Test
-  // public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-  // Query query = session
-  // .getNamedQuery("gov.ca.cwds.data.persistence.cms.ReplicatedReporter.findAllUpdatedAfter");
-  // assertThat(query, is(notNullValue()));
-  // }
-
-  // @Test
-  // public void testFindAllByBucketNamedQueryExists() throws Exception {
-  // Query query =
-  // session.getNamedQuery("gov.ca.cwds.data.persistence.cms.Reporter.findAllByBucket");
-  // assertThat(query, is(notNullValue()));
-  // }
-
   @Test
   public void type() throws Exception {
     assertThat(ReporterIndexerJob.class, notNullValue());
@@ -146,17 +125,6 @@ public class ReporterIndexerJobTest {
     String expected = "REPTR_T";
     assertThat(actual, is(equalTo(expected)));
   }
-
-  // @Test
-  // public void main_Args__StringArray() throws Exception {
-  // // given
-  // String[] args = new String[] {};
-  // // e.g. : given(mocked.called()).willReturn(1);
-  // // when
-  // // ReporterIndexerJob.main(args);
-  // // then
-  // // e.g. : verify(mocked).called();
-  // }
 
   // @Test
   public void main_Args__StringArray() throws Exception {

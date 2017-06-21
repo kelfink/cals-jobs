@@ -114,7 +114,6 @@ publishing {
 }
 
 task printProps << {
-    println DB_CMS_JDBC_URL
     println System.properties['DB_CMS_JDBC_URL']
 }
 
