@@ -35,6 +35,13 @@ import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.metadata.CollectionMetadata;
 import org.hibernate.stat.Statistics;
 
+/**
+ * Reduce pressure on test databases by constructing a single data source (connection pool) for all
+ * test cases. The static session factory will decide to shutdown the shared session factory on
+ * method close, if no further unit tests require it.
+ * 
+ * @author CWDS API Team
+ */
 public class StaticSessionFactory {
 
   public static class SharedSessionFactory implements SessionFactory {

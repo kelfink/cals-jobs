@@ -1215,47 +1215,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Build the bucket list at runtime.
-   * 
-   * @param table the driver table
-   * @return batch buckets
-   */
-  @Deprecated
-  @SuppressWarnings("unchecked")
-  protected List<BatchBucket> buildBucketList(String table) {
-    List<BatchBucket> ret = new ArrayList<>();
-
-    Transaction txn = null;
-    try {
-      LOGGER.info("FETCH DYNAMIC BUCKET LIST FOR TABLE {}", table);
-      final Session session = jobDao.getSessionFactory().getCurrentSession();
-      txn = session.beginTransaction();
-      final long totalBuckets = opts.getTotalBuckets() < getJobTotalBuckets() ? getJobTotalBuckets()
-          : opts.getTotalBuckets();
-      final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
-          .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
-                  String.valueOf(totalBuckets)),
-              BatchBucket.class);
-
-      ret = q.getResultList();
-      session.clear();
-      txn.commit();
-    } catch (HibernateException e) {
-      LOGGER.error("BATCH ERROR! ", e);
-      fatalError = true;
-      if (txn != null) {
-        txn.rollback();
-      }
-      throw new DaoException(e);
-    } finally {
-      doneLoad = true;
-    }
-
-    return ret;
-  }
-
-  /**
    * Get the table or view used to allocate bucket ranges. Called on full load only.
    * 
    * @return the table or view used to allocate bucket ranges
@@ -1265,26 +1224,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final Table tbl = this.jobDao.getEntityClass().getDeclaredAnnotation(Table.class);
     if (tbl != null) {
       ret = tbl.name();
-    }
-
-    return ret;
-  }
-
-  /**
-   * Return a list of partition keys to optimize batch SELECT statements. See ReplicatedClient
-   * native named query, "findPartitionedBuckets".
-   * 
-   * @return list of partition key pairs
-   * @see ReplicatedClient
-   */
-  protected List<Pair<String, String>> getPartitionRanges() {
-    LOGGER.warn("DETERMINE BUCKET RANGES ...");
-    List<Pair<String, String>> ret = new ArrayList<>();
-    List<BatchBucket> buckets = buildBucketList(getDriverTable());
-
-    for (BatchBucket b : buckets) {
-      LOGGER.warn("BUCKET RANGE: {} to {}", b.getMinId(), b.getMaxId());
-      ret.add(Pair.of(b.getMinId(), b.getMaxId()));
     }
 
     return ret;
@@ -1346,10 +1285,75 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   // ===========================
 
   /**
+   * Build the bucket list at runtime.
+   * 
+   * @param table the driver table
+   * @return batch buckets
+   * @deprecated use {@link #threadExtractJdbc()} or {@link #extractHibernate()} instead
+   */
+  @Deprecated
+  @SuppressWarnings("unchecked")
+  protected List<BatchBucket> buildBucketList(String table) {
+    List<BatchBucket> ret = new ArrayList<>();
+
+    Transaction txn = null;
+    try {
+      LOGGER.info("FETCH DYNAMIC BUCKET LIST FOR TABLE {}", table);
+      final Session session = jobDao.getSessionFactory().getCurrentSession();
+      txn = session.beginTransaction();
+      final long totalBuckets = opts.getTotalBuckets() < getJobTotalBuckets() ? getJobTotalBuckets()
+          : opts.getTotalBuckets();
+      final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
+          .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
+              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
+                  String.valueOf(totalBuckets)),
+              BatchBucket.class);
+
+      ret = q.getResultList();
+      session.clear();
+      txn.commit();
+    } catch (HibernateException e) {
+      LOGGER.error("BATCH ERROR! ", e);
+      fatalError = true;
+      if (txn != null) {
+        txn.rollback();
+      }
+      throw new DaoException(e);
+    } finally {
+      doneLoad = true;
+    }
+
+    return ret;
+  }
+
+  /**
+   * Return a list of partition keys to optimize batch SELECT statements. See ReplicatedClient
+   * native named query, "findPartitionedBuckets".
+   * 
+   * @return list of partition key pairs
+   * @see ReplicatedClient
+   * @deprecated use {@link #threadExtractJdbc()} or {@link #extractHibernate()} instead
+   */
+  @Deprecated
+  protected List<Pair<String, String>> getPartitionRanges() {
+    LOGGER.info("DETERMINE BUCKET RANGES ...");
+    List<Pair<String, String>> ret = new ArrayList<>();
+    List<BatchBucket> buckets = buildBucketList(getDriverTable());
+
+    for (BatchBucket b : buckets) {
+      LOGGER.warn("BUCKET RANGE: {} to {}", b.getMinId(), b.getMaxId());
+      ret.add(Pair.of(b.getMinId(), b.getMaxId()));
+    }
+
+    return ret;
+  }
+
+  /**
    * Divide work into buckets: pull a unique range of identifiers so that no bucket results overlap.
    * 
    * @param minId start of identifier range
    * @param maxId end of identifier range
+   * @deprecated use {@link #threadExtractJdbc()} or {@link #extractHibernate()} instead
    * @return collection of entity results
    */
   @Deprecated

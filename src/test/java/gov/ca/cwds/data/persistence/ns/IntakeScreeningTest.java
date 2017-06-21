@@ -584,7 +584,6 @@ public class IntakeScreeningTest {
 
   @Test
   public void setReporter_Args__IntakeParticipant() throws Exception {
-
     IntakeScreening target = new IntakeScreening();
     // given
     IntakeParticipant reporter = mock(IntakeParticipant.class);
@@ -597,7 +596,6 @@ public class IntakeScreeningTest {
 
   @Test
   public void getParticipantRoles_Args__() throws Exception {
-
     IntakeScreening target = new IntakeScreening();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -611,7 +609,6 @@ public class IntakeScreeningTest {
 
   @Test
   public void getReferralId_Args__() throws Exception {
-
     IntakeScreening target = new IntakeScreening();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -625,7 +622,6 @@ public class IntakeScreeningTest {
 
   @Test
   public void setReferralId_Args__String() throws Exception {
-
     IntakeScreening target = new IntakeScreening();
     // given
     String referralId = null;
@@ -634,6 +630,33 @@ public class IntakeScreeningTest {
     target.setReferralId(referralId);
     // then
     // e.g. : verify(mocked).called();
+  }
+
+  // @Test
+  public void hashCode_Args__() throws Exception {
+    IntakeScreening target = new IntakeScreening();
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    int actual = target.hashCode();
+    // then
+    // e.g. : verify(mocked).called();
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void equals_Args__Object() throws Exception {
+    IntakeScreening target = new IntakeScreening();
+    // given
+    Object obj = null;
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    boolean actual = target.equals(obj);
+    // then
+    // e.g. : verify(mocked).called();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
   }
 
 }
