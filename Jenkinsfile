@@ -7,17 +7,18 @@ node ('dora-slave'){
 		  git branch: 'master', url: 'git@github.com:ca-cwds/jobs.git'
 		  rtGradle.tool = "Gradle_35"
 		  rtGradle.resolver repo:'repo', server: serverArti
-		  rtGradle.setUseWrapper(true)   }
+   }
    stage('Build'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar'
    }
+   stage('CoverageCheck_and_Test') {
+       buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport'
+	   result = buildInfo.result
+   }
    stage('SonarQube analysis'){
-     catchError {
 		withSonarQubeEnv('Core-SonarQube') {
-			buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport sonarqube'
+			buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'sonarqube'
         }
-	 } 
-	 	 echo "${buildInfo}"
     }
     stage ('Push to artifactory'){
         rtGradle.deployer repo:'libs-snapshot', server: serverArti
