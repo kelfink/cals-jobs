@@ -1495,8 +1495,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Store a reference to the singleton CMS system code cache for quick convenient access.
    * 
-   * <p/>
+   * <p>
    * Guice does not inject static dependencies automatically.
+   * </p>
    * 
    * @param sysCodeCache CMS system code cache
    */
