@@ -3,17 +3,18 @@ package gov.ca.cwds.dao;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import gov.ca.cwds.data.ApiReferentialIntegrityInterceptor;
 
 /**
  * Hibernate interceptor traps referential integrity errors.
  * 
  * @author CWDS API Team
  */
-public class NeutronReferentialIntegrityInterceptor extends EmptyInterceptor {
+public class NeutronReferentialIntegrityInterceptor extends ApiReferentialIntegrityInterceptor {
 
   private static final long serialVersionUID = 1L;
 
