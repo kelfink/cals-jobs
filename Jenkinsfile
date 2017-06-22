@@ -32,7 +32,7 @@ node ('dora-slave'){
 		buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'dropDockerImage'
 		archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt', fingerprint: true
 		sh ('docker-compose down -v')
-		publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'coverage', reportFiles: 'index.html', reportName: 'Test reports', reportTitles: ''])
+		publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'reports', reportFiles: 'index.html', reportName: 'Test reports', reportTitles: ''])
 
 	}
  } catch (e)   {
@@ -40,7 +40,7 @@ node ('dora-slave'){
        subject: "Jobs failed with ${e.message}", to: "Leonid.Marushevskiy@osi.ca.gov, Alex.Kuznetsov@osi.ca.gov"
        slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Build Falled: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
 	   sh ('docker-compose down -v')
-	   publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'coverage', reportFiles: 'index.html', reportName: 'Test reports', reportTitles: ''])
+	   publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'reports', reportFiles: 'index.html', reportName: 'Test reports', reportTitles: ''])
 
 	   }
 }
