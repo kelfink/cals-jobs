@@ -12,7 +12,8 @@ node ('dora-slave'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar'
    }
    stage('CoverageCheck_and_Test') {
-       buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport'
+       sh ('docker-compose up -d')
+	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '-DDB_CMS_JDBC_URL=jdbc:db2://127.0.0.1:51000/DB0TDEV -DDB_CMS_PASSWORD=db2inst1 -DDB_CMS_SCHEMA=CWSCMS -DDB_CMS_USER=db2inst1 -DDB_NS_JDBC_URL=jdbc:postgresql://127.0.0.1:5432/postgres_data -DDB_NS_PASSWORD=postgres_data -DDB_NS_USER=postgres_data', tasks: 'test jacocoTestReport'
 	   result = buildInfo.result
    }
    stage('SonarQube analysis'){
@@ -29,12 +30,14 @@ node ('dora-slave'){
 	stage('Clean WorkSpace') {
 		buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'dropDockerImage'
 		archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt', fingerprint: true
+		sh ('docker-compose down -v')
 		cleanWs()
 	}
  } catch (e)   {
        emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
        subject: "Jobs failed with ${e.message}", to: "Leonid.Marushevskiy@osi.ca.gov, Alex.Kuznetsov@osi.ca.gov"
        slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Build Falled: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+	   sh ('docker-compose down -v')
        cleanWs()
 	   }
 }
