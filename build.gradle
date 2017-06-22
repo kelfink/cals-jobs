@@ -68,7 +68,7 @@ dependencies {
 	compile 'com.fasterxml.jackson.module:jackson-module-guice:2.8.2'
     compile group: 'org.json', name: 'json', version: '20090211'
 
-	compile 'com.landawn:abacus-util:0.9.67'
+	// compile 'com.landawn:abacus-util:0.9.67'
     
     compile fileTree(dir: 'lib', include: ['*.jar'])
 

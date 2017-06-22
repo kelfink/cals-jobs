@@ -86,10 +86,12 @@ public abstract class LastSuccessfulRunJob implements Job {
   }
 
   /**
+   * Write the timestamp IF the job succeeded.
+   * 
    * @param datetime date and time to store
    */
   protected void writeLastSuccessfulRunTime(Date datetime) {
-    if (datetime != null && !StringUtils.isBlank(this.lastRunTimeFilename)) {
+    if (datetime != null && !StringUtils.isBlank(this.lastRunTimeFilename) && !fatalError) {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) {
         w.write(jobDateFormat.format(datetime));
       } catch (IOException e) {

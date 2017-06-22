@@ -11,6 +11,7 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
+import gov.ca.cwds.dao.NeutronReferentialIntegrityInterceptor;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
@@ -109,21 +111,24 @@ public class JobsGuiceInjector extends AbstractModule {
   @Override
   protected void configure() {
     // DB2 session factory:
-    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class).toInstance(new Configuration()
-        .configure("jobs-cms-hibernate.cfg.xml").addAnnotatedClass(BatchBucket.class)
-        .addAnnotatedClass(EsClientAddress.class).addAnnotatedClass(EsRelationship.class)
-        .addAnnotatedClass(EsPersonReferral.class).addAnnotatedClass(EsChildPersonCase.class)
-        .addAnnotatedClass(EsParentPersonCase.class).addAnnotatedClass(ReplicatedAttorney.class)
-        .addAnnotatedClass(ReplicatedCollateralIndividual.class)
-        .addAnnotatedClass(ReplicatedEducationProviderContact.class)
-        .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
-        .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
-        .addAnnotatedClass(ReplicatedOtherClientName.class)
-        .addAnnotatedClass(ReplicatedReporter.class)
-        .addAnnotatedClass(ReplicatedServiceProvider.class)
-        .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
-        .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
-        .addAnnotatedClass(ReplicatedAddress.class).buildSessionFactory());
+    final Interceptor interceptor = new NeutronReferentialIntegrityInterceptor();
+    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
+        .toInstance(new Configuration().configure("jobs-cms-hibernate.cfg.xml")
+            .setInterceptor(interceptor).addAnnotatedClass(BatchBucket.class)
+            .addAnnotatedClass(EsClientAddress.class).addAnnotatedClass(EsRelationship.class)
+            .addAnnotatedClass(EsPersonReferral.class).addAnnotatedClass(EsChildPersonCase.class)
+            .addAnnotatedClass(EsParentPersonCase.class).addAnnotatedClass(ReplicatedAttorney.class)
+            .addAnnotatedClass(ReplicatedCollateralIndividual.class)
+            .addAnnotatedClass(ReplicatedEducationProviderContact.class)
+            .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
+            .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
+            .addAnnotatedClass(ReplicatedOtherClientName.class)
+            .addAnnotatedClass(ReplicatedReporter.class)
+            .addAnnotatedClass(ReplicatedServiceProvider.class)
+            .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
+            .addAnnotatedClass(ReplicatedClient.class)
+            .addAnnotatedClass(ReplicatedClientAddress.class)
+            .addAnnotatedClass(ReplicatedAddress.class).buildSessionFactory());
 
     // PostgreSQL session factory:
     bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)

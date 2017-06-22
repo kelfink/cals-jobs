@@ -23,17 +23,17 @@ public class NeutronReferentialIntegrityInterceptor extends EmptyInterceptor {
   @Override
   public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames,
       Type[] types) {
-    LOGGER.info("on delete");
+    LOGGER.debug("on delete");
   }
 
   // Called on entity update.
   @Override
   public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState,
       Object[] previousState, String[] propertyNames, Type[] types) {
-    LOGGER.info("on flush dirty");
+    LOGGER.debug("on flush dirty");
 
     // if (entity instanceof Client) {
-    // LOGGER.info("Client Update Operation");
+    // LOGGER.debug("Client Update Operation");
     // return true;
     // }
 
@@ -44,17 +44,17 @@ public class NeutronReferentialIntegrityInterceptor extends EmptyInterceptor {
   @Override
   public boolean onLoad(Object entity, Serializable id, Object[] state, String[] propertyNames,
       Type[] types) {
-    LOGGER.info("Load Operation");
+    LOGGER.debug("Load Operation");
     return true;
   }
 
   @Override
   public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames,
       Type[] types) {
-    LOGGER.info("on save");
+    LOGGER.debug("on save");
 
     // if (entity instanceof Client) {
-    // LOGGER.info("Client Create Operation");
+    // LOGGER.debug("Client Create Operation");
     // return true;
     // }
 
@@ -64,12 +64,12 @@ public class NeutronReferentialIntegrityInterceptor extends EmptyInterceptor {
   // Called before commit to database.
   @Override
   public void preFlush(Iterator iterator) {
-    LOGGER.info("Before commiting");
+    LOGGER.debug("Before commiting");
   }
 
   // Called after committed to database.
   @Override
   public void postFlush(Iterator iterator) {
-    LOGGER.info("After commiting");
+    LOGGER.debug("After commiting");
   }
 }

@@ -1089,6 +1089,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.info("Prepared {} records to index", recsPrepared);
       LOGGER.info("STATS: \nrecsBulkBefore:  {}\nrecsBulkAfter:  {}\nrecsBulkError: {}",
           recsBulkBefore, recsBulkAfter, recsBulkError);
+
       LOGGER.warn("Updating last successful run time to {}", jobDateFormat.format(startTime));
       return new Date(this.startTime);
 
