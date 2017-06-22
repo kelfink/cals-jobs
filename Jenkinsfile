@@ -13,7 +13,7 @@ node ('dora-slave'){
    }
    stage('CoverageCheck_and_Test') {
        sh ('docker-compose up -d')
-	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '-DDB_CMS_JDBC_URL=jdbc:db2://127.0.0.1:51000/DB0TDEV -DDB_CMS_PASSWORD=db2inst1 -DDB_CMS_SCHEMA=CWSCMS -DDB_CMS_USER=db2inst1 -DDB_NS_JDBC_URL=jdbc:postgresql://127.0.0.1:5432/postgres_data -DDB_NS_PASSWORD=postgres_data -DDB_NS_USER=postgres_data  -DDB_NS_SCHEMA=cwsns', tasks: 'test jacocoTestReport'
+	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--debug -DDB_CMS_JDBC_URL=jdbc:db2://127.0.0.1:51000/DB0TDEV -DDB_CMS_PASSWORD=db2inst1 -DDB_CMS_SCHEMA=CWSCMS -DDB_CMS_USER=db2inst1 -DDB_NS_JDBC_URL=jdbc:postgresql://127.0.0.1:5432/postgres_data -DDB_NS_PASSWORD=postgres_data -DDB_NS_USER=postgres_data  -DDB_NS_SCHEMA=cwsns', tasks: 'test jacocoTestReport'
 	   result = buildInfo.result
    }
    stage('SonarQube analysis'){
