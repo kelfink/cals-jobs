@@ -649,6 +649,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
       ret.setTribalMembrshpVerifctnIndicatorVar(getCltTribalMembrshpVerifctnIndicatorVar());
       ret.setUnemployedParentCode(getCltUnemployedParentCode());
       ret.setZippyCreatedIndicator(getCltZippyCreatedIndicator());
+      ret.setReplicationDate(getCltReplicationDate());
     }
 
     // Client Address:
@@ -691,6 +692,8 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
         adr.setUnitNumber(getAdrUnitNumber());
         adr.setZip(getAdrZip());
         adr.setZip4(getAdrZip4());
+        adr.setReplicationDate(getAdrReplicationDate());
+        adr.setReplicationOperation(getAdrReplicationOperation());
         rca.addAddress(adr);
       }
     }

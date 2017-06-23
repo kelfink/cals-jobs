@@ -64,6 +64,7 @@ public class ElasticTransformer {
     legacyTableDescriptions.put("STFPERST", "Staff");
     legacyTableDescriptions.put("REFERL_T", "Referral");
     legacyTableDescriptions.put("ALLGTN_T", "Allegation");
+    legacyTableDescriptions.put("ADDRS_T", "Address");
   }
 
   private ElasticTransformer() {
@@ -85,6 +86,7 @@ public class ElasticTransformer {
     if (!StringUtils.isBlank(legacyId)) {
       legacyDesc.setLegacyId(legacyId.trim());
       legacyDesc.setLegacyUiId(CmsKeyIdGenerator.getUIIdentifierFromKey(legacyId.trim()));
+      legacyDesc.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
       legacyDesc.setLegacyTableName(legacyTableName);
       legacyDesc.setLegacyTableDescription(legacyTableDescriptions.get(legacyTableName));
     }
@@ -142,11 +144,19 @@ public class ElasticTransformer {
       addresses = new ArrayList<>();
       ApiMultipleAddressesAware madrx = (ApiMultipleAddressesAware) p;
       for (ApiAddressAware adrx : madrx.getAddresses()) {
-        addresses.add(new ElasticSearchPersonAddress(adrx));
+        ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress(adrx);
+        if (adrx instanceof ApiLegacyAware) {
+          esAddress.setLegacyDescriptor(((ApiLegacyAware) adrx).getLegacyDescriptor());
+        }
+        addresses.add(esAddress);
       }
     } else if (p instanceof ApiAddressAware) {
       addresses = new ArrayList<>();
-      addresses.add(new ElasticSearchPersonAddress((ApiAddressAware) p));
+      ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress((ApiAddressAware) p);
+      if (p instanceof ApiLegacyAware) {
+        esAddress.setLegacyDescriptor(((ApiLegacyAware) p).getLegacyDescriptor());
+      }
+      addresses.add(esAddress);
     }
 
     return addresses;
