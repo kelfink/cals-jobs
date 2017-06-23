@@ -98,7 +98,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
     personCase.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
     personCase.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
-    personCase.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENTITY"));
+    personCase.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
 
     return personCase;
   }

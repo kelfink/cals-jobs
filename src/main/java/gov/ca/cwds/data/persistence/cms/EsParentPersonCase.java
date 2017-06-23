@@ -147,7 +147,7 @@ public class EsParentPersonCase extends EsPersonCase {
   @Column(name = "LIMITED_ACCESS_DESCRIPTION")
   private String limitedAccessDescription;
 
-  @Column(name = "LIMITED_ACCESS_GOVERNMENT_ENTITY")
+  @Column(name = "LIMITED_ACCESS_GOVERNMENT_ENT")
   @Type(type = "integer")
   private Integer limitedAccessGovernmentEntityId;
 
