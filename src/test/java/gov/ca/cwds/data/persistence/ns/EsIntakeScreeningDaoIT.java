@@ -91,7 +91,7 @@ public class EsIntakeScreeningDaoIT
     Query query = session
         .getNamedQuery("gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter")
         .setDate("after", TIMESTAMP_FORMAT.parse("2016-11-02 00:00:00"));
-    assertThat(query.list().size(), greaterThan(5));
+    assertThat(query.list().size(), greaterThan(0));
   }
 
 }

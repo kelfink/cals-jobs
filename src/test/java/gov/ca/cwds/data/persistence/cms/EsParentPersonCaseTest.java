@@ -16,6 +16,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
 import gov.ca.cwds.jobs.config.StaticSystemCodeCache;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 public class EsParentPersonCaseTest {
 
@@ -688,18 +689,21 @@ public class EsParentPersonCaseTest {
     ElasticSearchPersonCase personCase = new ElasticSearchPersonCase();
     personCase.setId(caseId);
     personCase.setLegacyId(caseId);
-    personCase.setCountyId("null");
-    personCase.setServiceComponentId("null");
-    personCase.getAccessLimitation().setLimitedAccessGovernmentEntityId("null");
+    personCase
+        .setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(caseId, null, "CASE_T"));
 
     ElasticSearchPersonChild focusChild = new ElasticSearchPersonChild();
     focusChild.setId(focusChildId);
     focusChild.setLegacyClientId(focusChildId);
+    focusChild.setLegacyDescriptor(
+        ElasticTransformer.createLegacyDescriptor(focusChildId, null, "CLIENT_T"));
     personCase.setFocusChild(focusChild);
 
     ElasticSearchPersonParent caseParent = new ElasticSearchPersonParent();
     caseParent.setId(parentId);
     caseParent.setLegacyClientId(parentId);
+    caseParent
+        .setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(parentId, null, "CLIENT_T"));
 
     expected.addCase(personCase, caseParent);
 

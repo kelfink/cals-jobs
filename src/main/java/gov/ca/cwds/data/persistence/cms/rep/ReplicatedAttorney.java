@@ -16,9 +16,11 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseAttorney;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 /**
  * {@link PersistentObject} representing an Attorney as a {@link CmsReplicatedEntity} in the
@@ -125,6 +127,11 @@ public class ReplicatedAttorney extends BaseAttorney
   @Override
   public String getLegacyId() {
     return getId();
+  }
+
+  @Override
+  public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
+    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(), "ATTRNY_T");
   }
 
 }

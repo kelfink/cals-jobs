@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseClient;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
@@ -35,6 +36,7 @@ import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 /**
  * {@link PersistentObject} representing a Client as a {@link CmsReplicatedEntity} in the replicated
@@ -201,6 +203,11 @@ public class ReplicatedClient extends BaseClient
   @Override
   public String getLegacyId() {
     return getId();
+  }
+
+  @Override
+  public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
+    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(), "CLIENT_T");
   }
 
   // ==============

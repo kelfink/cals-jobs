@@ -8,7 +8,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonNestedPerson;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 /**
  * Represents a screening allegation.
@@ -51,11 +53,29 @@ public class IntakeAllegation implements PersistentObject {
     ret.setAllegationDescription(allegationDescription);
     ret.setDispositionDescription(dispositionDescription);
     ret.setId(id);
+    ret.setLegacyId(id);
+    ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(id, null, "ALLGTN_T"));
+
+    ElasticSearchPersonNestedPerson perpet = new ElasticSearchPersonNestedPerson();
+    perpet.setId(this.perpetrator.getId());
+    perpet.setFirstName(this.perpetrator.getFirstName());
+    perpet.setLastName(this.perpetrator.getLastName());
+    perpet.setLegacyDescriptor(ElasticTransformer
+        .createLegacyDescriptor(this.perpetrator.getLegacyId(), null, "CLIENT_T"));
+    ret.setPerpetrator(perpet);
 
     ret.setPerpetratorFirstName(this.perpetrator.getFirstName());
     ret.setPerpetratorId(this.perpetrator.getId());
     ret.setPerpetratorLastName(this.perpetrator.getLastName());
     ret.setPerpetratorLegacyClientId(this.perpetrator.getLegacyId());
+
+    ElasticSearchPersonNestedPerson vict = new ElasticSearchPersonNestedPerson();
+    vict.setId(this.victim.getId());
+    vict.setFirstName(this.victim.getFirstName());
+    vict.setLastName(this.victim.getLastName());
+    vict.setLegacyDescriptor(
+        ElasticTransformer.createLegacyDescriptor(this.victim.getLegacyId(), null, "CLIENT_T"));
+    ret.setVictim(vict);
 
     ret.setVictimFirstName(this.victim.getFirstName());
     ret.setVictimId(this.victim.getId());

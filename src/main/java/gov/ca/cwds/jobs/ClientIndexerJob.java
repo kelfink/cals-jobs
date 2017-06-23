@@ -60,6 +60,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
+  @Deprecated
   protected String getLegacySourceTable() {
     return "CLIENT_T";
   }

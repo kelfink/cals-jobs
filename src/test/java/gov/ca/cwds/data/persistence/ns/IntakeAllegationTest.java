@@ -13,6 +13,7 @@ import java.util.List;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 public class IntakeAllegationTest {
 
@@ -30,9 +31,9 @@ public class IntakeAllegationTest {
   @Test
   public void toEsAllegation_Args__() throws Exception {
     IntakeAllegation target = new IntakeAllegation();
-    target.setId("1234");
+    target.setId("1234567");
     IntakeParticipant victim = new IntakeParticipant();
-    victim.setId("8888");
+    victim.setId("8888888");
     target.setVictim(victim);
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -41,8 +42,14 @@ public class IntakeAllegationTest {
     // then
     // e.g. : verify(mocked).called();
     ElasticSearchPersonAllegation expected = new ElasticSearchPersonAllegation();
-    expected.setId("1234");
-    expected.setVictimId("8888");
+    expected.setId("1234567");
+    expected.setLegacyId("1234567");
+    expected.setLegacyDescriptor(
+        ElasticTransformer.createLegacyDescriptor("1234567", null, "ALLGTN_T"));
+
+    expected.setVictimId("8888888");
+    expected.getVictim().setId("8888888");
+
     assertThat(actual, is(equalTo(expected)));
   }
 

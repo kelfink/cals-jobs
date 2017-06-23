@@ -9,6 +9,9 @@ import javax.persistence.Enumerated;
 
 import org.hibernate.annotations.Type;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+
 /**
  * Entity class adds common CMS replication columns.
  * 
@@ -82,5 +85,9 @@ public class BaseCmsReplicated implements CmsReplicatedEntity {
     return this.supplyLegacyId.get();
   }
 
+  @Override
+  public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
+    return ElasticTransformer.createLegacyDescriptor(getLegacyId(), getReplicationDate(), null);
+  }
 }
 

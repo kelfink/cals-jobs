@@ -22,11 +22,13 @@ import org.hibernate.annotations.Type;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchAccessLimitation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonNestedPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
@@ -89,6 +91,10 @@ public class EsPersonReferral
   @Type(type = "integer")
   private Integer county;
 
+  @Column(name = "RFL_IBMSNAP_LOGMARKER")
+  @Type(type = "timestamp")
+  private Date referralLastChanged;
+
   // ==============
   // REPORTER:
   // ==============
@@ -102,6 +108,10 @@ public class EsPersonReferral
   @Column(name = "REPORTER_LAST_NM")
   private String reporterLastName;
 
+  @Column(name = "RPT_IBMSNAP_LOGMARKER")
+  @Type(type = "timestamp")
+  private Date reporterLastChanged;
+
   // ==============
   // SOCIAL WORKER:
   // ==============
@@ -114,6 +124,10 @@ public class EsPersonReferral
 
   @Column(name = "WORKER_LAST_NM")
   private String workerLastName;
+
+  @Column(name = "STP_IBMSNAP_LOGMARKER")
+  @Type(type = "timestamp")
+  private Date workerLastChanged;
 
   // =============
   // ALLEGATION:
@@ -130,6 +144,10 @@ public class EsPersonReferral
   @Type(type = "integer")
   private Integer allegationType;
 
+  @Column(name = "ALG_IBMSNAP_LOGMARKER")
+  @Type(type = "timestamp")
+  private Date allegationLastChanged;
+
   // =============
   // VICTIM:
   // =============
@@ -142,6 +160,10 @@ public class EsPersonReferral
 
   @Column(name = "VICTIM_LAST_NM")
   private String victimLastName;
+
+  @Column(name = "CLV_IBMSNAP_LOGMARKER")
+  @Type(type = "timestamp")
+  private Date victimLastChanged;
 
   // ==================
   // ACCESS LIMITATION:
@@ -174,6 +196,10 @@ public class EsPersonReferral
   @Column(name = "PERPETRATOR_LAST_NM")
   private String perpetratorLastName;
 
+  @Column(name = "CLP_IBMSNAP_OPERATION")
+  @Type(type = "timestamp")
+  private Date perpetratorLastChanged;
+
   // =============
   // REDUCE:
   // =============
@@ -195,15 +221,18 @@ public class EsPersonReferral
 
     referral.setId(this.referralId);
     referral.setLegacyId(this.referralId);
+    referral.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.lastChange));
     referral.setStartDate(DomainChef.cookDate(this.startDate));
     referral.setEndDate(DomainChef.cookDate(this.endDate));
-    referral.setCountyId(String.valueOf(this.county));
+    referral.setCountyId(this.county == null ? null : this.county.toString());
     referral
         .setCountyName(ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.county));
-    referral.setResponseTimeId(String.valueOf(this.referralResponseType));
+    referral.setResponseTimeId(
+        this.referralResponseType == null ? null : this.referralResponseType.toString());
     referral.setResponseTime(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.referralResponseType));
-    referral.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.lastChange));
+    referral.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.referralId,
+        this.referralLastChanged, "REFERL_T"));
 
     //
     // Reporter
@@ -213,6 +242,8 @@ public class EsPersonReferral
     reporter.setLegacyClientId(this.reporterId);
     reporter.setFirstName(this.reporterFirstName);
     reporter.setLastName(this.reporterLastName);
+    reporter.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.reporterId,
+        this.reporterLastChanged, "REPTR_T"));
     referral.setReporter(reporter);
 
     //
@@ -223,6 +254,8 @@ public class EsPersonReferral
     assignedWorker.setLegacyClientId(this.workerId);
     assignedWorker.setFirstName(this.workerFirstName);
     assignedWorker.setLastName(this.workerLastName);
+    assignedWorker.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
+        this.workerLastChanged, "STFPERST"));
     referral.setAssignedSocialWorker(assignedWorker);
 
     //
@@ -232,8 +265,8 @@ public class EsPersonReferral
     accessLimit.setLimitedAccessCode(this.limitedAccessCode);
     accessLimit.setLimitedAccessDate(DomainChef.cookDate(this.limitedAccessDate));
     accessLimit.setLimitedAccessDescription(this.limitedAccessDescription);
-    accessLimit
-        .setLimitedAccessGovernmentEntityId(String.valueOf(this.limitedAccessGovernmentEntityId));
+    accessLimit.setLimitedAccessGovernmentEntityId(this.limitedAccessGovernmentEntityId == null
+        ? null : this.limitedAccessGovernmentEntityId.toString());
     accessLimit.setLimitedAccessGovernmentEntityName(ElasticSearchPerson.getSystemCodes()
         .getCodeShortDescription(this.limitedAccessGovernmentEntityId));
     referral.setAccessLimitation(accessLimit);
@@ -243,16 +276,36 @@ public class EsPersonReferral
     //
     ElasticSearchPersonAllegation allegation = new ElasticSearchPersonAllegation();
     allegation.setId(this.allegationId);
+    allegation.setLegacyId(this.allegationId);
     allegation.setAllegationDescription(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.allegationType));
-    allegation.setDispositionId(String.valueOf(this.allegationDisposition));
+    allegation.setDispositionId(
+        this.allegationDisposition == null ? null : this.allegationDisposition.toString());
     allegation.setDispositionDescription(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.allegationDisposition));
+    allegation.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.allegationId,
+        this.allegationLastChanged, "ALLGTN_T"));
+
+    ElasticSearchPersonNestedPerson perpetrator = new ElasticSearchPersonNestedPerson();
+    perpetrator.setId(this.perpetratorId);
+    perpetrator.setFirstName(this.perpetratorFirstName);
+    perpetrator.setLastName(this.perpetratorLastName);
+    perpetrator.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.perpetratorId,
+        this.perpetratorLastChanged, "CLIENT_T"));
+    allegation.setPerpetrator(perpetrator);
 
     allegation.setPerpetratorId(this.perpetratorId);
     allegation.setPerpetratorLegacyClientId(this.perpetratorId);
     allegation.setPerpetratorFirstName(this.perpetratorFirstName);
     allegation.setPerpetratorLastName(this.perpetratorLastName);
+
+    ElasticSearchPersonNestedPerson victim = new ElasticSearchPersonNestedPerson();
+    victim.setId(this.victimId);
+    victim.setFirstName(this.victimFirstName);
+    victim.setLastName(this.victimLastName);
+    victim.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.victimId,
+        this.victimLastChanged, "CLIENT_T"));
+    allegation.setVictim(victim);
 
     allegation.setVictimId(this.victimId);
     allegation.setVictimLegacyClientId(this.victimId);
@@ -491,6 +544,54 @@ public class EsPersonReferral
 
   public void setLimitedAccessGovernmentEntityId(Integer limitedAccessGovernmentEntityId) {
     this.limitedAccessGovernmentEntityId = limitedAccessGovernmentEntityId;
+  }
+
+  public Date getReferralLastChanged() {
+    return referralLastChanged;
+  }
+
+  public void setReferralLastChanged(Date referralLastChanged) {
+    this.referralLastChanged = referralLastChanged;
+  }
+
+  public Date getReporterLastChanged() {
+    return reporterLastChanged;
+  }
+
+  public void setReporterLastChanged(Date reporterLastChanged) {
+    this.reporterLastChanged = reporterLastChanged;
+  }
+
+  public Date getWorkerLastChanged() {
+    return workerLastChanged;
+  }
+
+  public void setWorkerLastChanged(Date workerLastChanged) {
+    this.workerLastChanged = workerLastChanged;
+  }
+
+  public Date getAllegationLastChanged() {
+    return allegationLastChanged;
+  }
+
+  public void setAllegationLastChanged(Date allegationLastChanged) {
+    this.allegationLastChanged = allegationLastChanged;
+  }
+
+  public Date getVictimLastChanged() {
+    return victimLastChanged;
+  }
+
+  public void setVictimLastChanged(Date victimLastChanged) {
+    this.victimLastChanged = victimLastChanged;
+  }
+
+  public Date getPerpetratorLastChanged() {
+    return perpetratorLastChanged;
+  }
+
+  public void setPerpetratorLastChanged(Date perpetratorLastChanged) {
+    this.perpetratorLastChanged = perpetratorLastChanged;
   }
 
   /**

@@ -41,6 +41,7 @@ public final class CollateralIndividualIndexerJob
   }
 
   @Override
+  @Deprecated
   protected String getLegacySourceTable() {
     return "COLTRL_T";
   }

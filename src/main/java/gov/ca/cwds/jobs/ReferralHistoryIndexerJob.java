@@ -131,26 +131,32 @@ public class ReferralHistoryIndexerJob
     referral.setLastChange(rs.getDate("LAST_CHG"));
     referral.setCounty(rs.getInt("REFERRAL_COUNTY"));
     referral.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
+    referral.setReferralLastChanged(rs.getDate("RFL_IBMSNAP_LOGMARKER"));
 
     referral.setAllegationId(ifNull(rs.getString("ALLEGATION_ID")));
     referral.setAllegationType(rs.getInt("ALLEGATION_TYPE"));
     referral.setAllegationDisposition(rs.getInt("ALLEGATION_DISPOSITION"));
+    referral.setAllegationLastChanged(rs.getDate("ALG_IBMSNAP_LOGMARKER"));
 
     referral.setPerpetratorId(ifNull(rs.getString("PERPETRATOR_ID")));
     referral.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
     referral.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
+    referral.setPerpetratorLastChanged(rs.getDate("CLP_IBMSNAP_OPERATION"));
 
     referral.setReporterId(ifNull(rs.getString("REPORTER_ID")));
     referral.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
     referral.setReporterLastName(ifNull(rs.getString("REPORTER_LAST_NM")));
+    referral.setReporterLastChanged(rs.getDate("RPT_IBMSNAP_LOGMARKER"));
 
     referral.setVictimId(ifNull(rs.getString("VICTIM_ID")));
     referral.setVictimFirstName(ifNull(rs.getString("VICTIM_FIRST_NM")));
     referral.setVictimLastName(ifNull(rs.getString("VICTIM_LAST_NM")));
+    referral.setVictimLastChanged(rs.getDate("CLV_IBMSNAP_LOGMARKER"));
 
     referral.setWorkerId(ifNull(rs.getString("WORKER_ID")));
     referral.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
     referral.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
+    referral.setWorkerLastChanged(rs.getDate("STP_IBMSNAP_LOGMARKER"));
 
     referral.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
     referral.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));

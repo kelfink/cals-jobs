@@ -18,6 +18,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
@@ -355,15 +356,18 @@ public class EsChildPersonCase extends EsPersonCase {
     //
     esPersonCase.setId(this.caseId);
     esPersonCase.setLegacyId(this.caseId);
+    esPersonCase.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.caseLastUpdated));
     esPersonCase.setStartDate(DomainChef.cookDate(this.startDate));
     esPersonCase.setEndDate(DomainChef.cookDate(this.endDate));
-    esPersonCase.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.caseLastUpdated));
     esPersonCase
         .setCountyName(ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.county));
-    esPersonCase.setCountyId(String.valueOf(this.county));
+    esPersonCase.setCountyId(this.county == null ? null : this.county.toString());
     esPersonCase.setServiceComponent(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.serviceComponent));
-    esPersonCase.setServiceComponentId(String.valueOf(this.serviceComponent));
+    esPersonCase.setServiceComponentId(
+        this.serviceComponent == null ? null : this.serviceComponent.toString());
+    esPersonCase.setLegacyDescriptor(
+        ElasticTransformer.createLegacyDescriptor(this.caseId, this.caseLastUpdated, "CASE_T"));
 
     //
     // Child
@@ -371,9 +375,11 @@ public class EsChildPersonCase extends EsPersonCase {
     ElasticSearchPersonChild child = new ElasticSearchPersonChild();
     child.setId(this.focusChildId);
     child.setLegacyClientId(this.focusChildId);
+    child.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.focusChildLastUpdated));
     child.setFirstName(this.focusChildFirstName);
     child.setLastName(this.focusChildLastName);
-    child.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.focusChildLastUpdated));
+    child.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.focusChildId,
+        this.focusChildLastUpdated, "CLIENT_T"));
     esPersonCase.setFocusChild(child);
 
     //
@@ -382,9 +388,11 @@ public class EsChildPersonCase extends EsPersonCase {
     ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
     assignedWorker.setId(this.workerId);
     assignedWorker.setLegacyClientId(this.workerId);
+    assignedWorker.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.workerLastUpdated));
     assignedWorker.setFirstName(this.workerFirstName);
     assignedWorker.setLastName(this.workerLastName);
-    assignedWorker.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.workerLastUpdated));
+    assignedWorker.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
+        this.workerLastUpdated, "STFPERST"));
     esPersonCase.setAssignedSocialWorker(assignedWorker);
 
     //
@@ -394,8 +402,8 @@ public class EsChildPersonCase extends EsPersonCase {
     accessLimit.setLimitedAccessCode(this.limitedAccessCode);
     accessLimit.setLimitedAccessDate(DomainChef.cookDate(this.limitedAccessDate));
     accessLimit.setLimitedAccessDescription(this.limitedAccessDescription);
-    accessLimit
-        .setLimitedAccessGovernmentEntityId(String.valueOf(this.limitedAccessGovernmentEntityId));
+    accessLimit.setLimitedAccessGovernmentEntityId(this.limitedAccessGovernmentEntityId == null
+        ? null : this.limitedAccessGovernmentEntityId.toString());
     accessLimit.setLimitedAccessGovernmentEntityName(ElasticSearchPerson.getSystemCodes()
         .getCodeShortDescription(this.limitedAccessGovernmentEntityId));
     esPersonCase.setAccessLimitation(accessLimit);
@@ -406,12 +414,14 @@ public class EsChildPersonCase extends EsPersonCase {
     ElasticSearchPersonParent parent = new ElasticSearchPersonParent();
     parent.setId(this.parentId);
     parent.setLegacyClientId(getParentId());
-    parent.setFirstName(this.parentFirstName);
-    parent.setLastName(this.parentLastName);
     parent.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.parentLastUpdated));
     parent.setLegacySourceTable(this.parentSourceTable);
+    parent.setFirstName(this.parentFirstName);
+    parent.setLastName(this.parentLastName);
     parent.setRelationship(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.parentRelationship));
+    parent.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.parentId,
+        this.parentLastUpdated, "CLIENT_T"));
 
     cases.addCase(esPersonCase, parent);
     return cases;

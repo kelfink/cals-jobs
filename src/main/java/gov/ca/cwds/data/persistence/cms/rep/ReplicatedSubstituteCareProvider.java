@@ -16,13 +16,15 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseSubstituteCareProvider;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 /**
- * {@link PersistentObject} representing a Substitute Care Provider as a
- * {@link CmsReplicatedEntity}.
+ * {@link PersistentObject} representing a Substitute Care Provider as a {@link CmsReplicatedEntity}
+ * .
  * 
  * @author CWDS API Team
  */
@@ -134,4 +136,8 @@ public class ReplicatedSubstituteCareProvider extends BaseSubstituteCareProvider
     return getId();
   }
 
+  @Override
+  public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
+    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(), "SB_PVDRT");
+  }
 }

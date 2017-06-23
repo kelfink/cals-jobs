@@ -17,6 +17,7 @@ import org.junit.Test;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 public class EsPersonReferralTest {
 
@@ -117,18 +118,23 @@ public class EsPersonReferralTest {
 
     ElasticSearchPersonAllegation allegation = new ElasticSearchPersonAllegation();
     allegation.setId("abc1234");
+    allegation.setLegacyId("abc1234");
+    allegation.setLegacyDescriptor(
+        ElasticTransformer.createLegacyDescriptor("abc1234", null, "ALLGTN_T"));
 
     ElasticSearchPersonReferral referral = new ElasticSearchPersonReferral();
     referral.setId("ddusicnz7");
     referral.setLegacyId("ddusicnz7");
+    referral.setLegacyDescriptor(
+        ElasticTransformer.createLegacyDescriptor("ddusicnz7", null, "REFERL_T"));
 
     expected.addReferral(referral, allegation);
 
     // Value is a literal "null"? Is this right?
-    expected.geReferrals().get(0).getAccessLimitation().setLimitedAccessGovernmentEntityId("null");
-    referral.setCountyId("null");
-    referral.setResponseTimeId("null");
-    allegation.setDispositionId("null");
+    // expected.geReferrals().get(0).getAccessLimitation().setLimitedAccessGovernmentEntityId("null");
+    // referral.setCountyId("null");
+    // referral.setResponseTimeId("null");
+    // allegation.setDispositionId("null");
 
     assertThat(actual, is(equalTo(expected)));
   }
@@ -842,7 +848,7 @@ public class EsPersonReferralTest {
     int actual = target.hashCode();
     // then
     // e.g. : verify(mocked).called();
-    int expected = 1456885897;
+    int expected = -1684923503;
     assertThat(actual, is(equalTo(expected)));
   }
 

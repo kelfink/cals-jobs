@@ -7,13 +7,16 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.data.ApiTypedIdentifier;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 @JsonPropertyOrder(alphabetic = true)
 public class TestNormalizedEntity
-    implements PersistentObject, ApiPersonAware, ApiTypedIdentifier<String> {
+    implements PersistentObject, ApiPersonAware, ApiTypedIdentifier<String>, ApiLegacyAware {
 
   private String id;
 
@@ -106,5 +109,16 @@ public class TestNormalizedEntity
   public void addEntry(TestNormalizedEntry entry) {
     this.entries.add(entry);
   }
+
+  @Override
+  public String getLegacyId() {
+    return getId();
+  }
+
+  @Override
+  public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
+    return ElasticTransformer.createLegacyDescriptor(null, null, null);
+  }
+
 
 }

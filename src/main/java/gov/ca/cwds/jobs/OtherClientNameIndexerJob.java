@@ -62,6 +62,7 @@ public class OtherClientNameIndexerJob
   }
 
   @Override
+  @Deprecated
   protected String getLegacySourceTable() {
     return "OCL_NM_T";
   }

@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAny;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonNestedPerson;
@@ -28,6 +29,7 @@ import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 /**
  * Represents an Intake Participant or Person.
@@ -156,6 +158,11 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
   }
 
   @Override
+  public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
+    return ElasticTransformer.createLegacyDescriptor(legacyId, null, null);
+  }
+
+  @Override
   public ApiPhoneAware[] getPhones() {
     return phones.values().toArray(new ApiPhoneAware[0]);
   }
@@ -213,6 +220,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     ret.setLastName(lastName);
     ret.setLegacyClientId(legacyId);
     ret.setId(id);
+    ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(legacyId, null, null));
 
     return ret;
   }

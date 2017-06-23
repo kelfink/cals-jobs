@@ -1,19 +1,26 @@
 package gov.ca.cwds.jobs.util.transform;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
+import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiLanguageAware;
 import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
@@ -32,8 +39,57 @@ public class ElasticTransformer {
 
   private static final Logger LOGGER = LogManager.getLogger(ElasticTransformer.class);
 
+  /**
+   * Key: Legacy table name <br>
+   * Value: Legacy table description (human readable name)
+   */
+  private static Map<String, String> legacyTableDescriptions = new HashMap<>();
+
+  /**
+   * Initialize legacyTableDescriptions
+   */
+  static {
+    legacyTableDescriptions.put("CLIENT_T", "Client");
+    legacyTableDescriptions.put("COLTRL_T", "Collateral individual");
+    legacyTableDescriptions.put("EDPRVCNT", "Education provider");
+    legacyTableDescriptions.put("ATTRNY_T", "Attorney");
+    legacyTableDescriptions.put("CLN_RELT", "Relationship");
+    legacyTableDescriptions.put("OTH_ADLT", "Adult in placement home");
+    legacyTableDescriptions.put("OTH_KIDT", "Child in placement home");
+    legacyTableDescriptions.put("OCL_NM_T", "Alias or other client name");
+    legacyTableDescriptions.put("REPTR_T", "Reporter");
+    legacyTableDescriptions.put("SVC_PVRT", "Service provider");
+    legacyTableDescriptions.put("SB_PVDRT", "Substitute care provider");
+    legacyTableDescriptions.put("CASE_T", "Case");
+    legacyTableDescriptions.put("STFPERST", "Staff");
+    legacyTableDescriptions.put("REFERL_T", "Referral");
+    legacyTableDescriptions.put("ALLGTN_T", "Allegation");
+  }
+
   private ElasticTransformer() {
     // Static methods, don't instantiate.
+  }
+
+  /**
+   * Create legacy descriptor
+   * 
+   * @param legacyId Legacy ID
+   * @param legacyLastUpdated Legacy last updated time stamp
+   * @param legacyTableName Legacy table name
+   * @return Legacy descriptor
+   */
+  public static ElasticSearchLegacyDescriptor createLegacyDescriptor(String legacyId,
+      Date legacyLastUpdated, String legacyTableName) {
+    ElasticSearchLegacyDescriptor legacyDesc = new ElasticSearchLegacyDescriptor();
+
+    if (!StringUtils.isBlank(legacyId)) {
+      legacyDesc.setLegacyId(legacyId.trim());
+      legacyDesc.setLegacyUiId(CmsKeyIdGenerator.getUIIdentifierFromKey(legacyId.trim()));
+      legacyDesc.setLegacyTableName(legacyTableName);
+      legacyDesc.setLegacyTableDescription(legacyTableDescriptions.get(legacyTableName));
+    }
+
+    return legacyDesc;
   }
 
   protected static List<String> handleLanguage(ApiPersonAware p) {
@@ -107,6 +163,14 @@ public class ElasticTransformer {
     return screenings;
   }
 
+  protected static ElasticSearchLegacyDescriptor handleLegacyDescriptor(ApiPersonAware p) {
+    ElasticSearchLegacyDescriptor legacyDescriptor = null;
+    if (p instanceof ApiLegacyAware) {
+      legacyDescriptor = ((ApiLegacyAware) p).getLegacyDescriptor();
+    }
+    return legacyDescriptor;
+  }
+
   /**
    * Produce an ElasticSearchPerson objects suitable for an Elasticsearch person document.
    * 
@@ -136,6 +200,9 @@ public class ElasticTransformer {
         mapper.writeValueAsString(p), // source
         null, // omit highlights
         handleAddress(p), handlePhone(p), handleLanguage(p), handleScreening(p));
+
+    // Legacy descriptor
+    ret.setLegacyDescriptor(handleLegacyDescriptor(p));
 
     // Sealed and sensitive.
     ret.setSensitivityIndicator(p.getSensitivityIndicator());

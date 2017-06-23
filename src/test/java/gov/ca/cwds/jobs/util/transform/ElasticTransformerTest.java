@@ -91,9 +91,10 @@ public class ElasticTransformerTest {
     ElasticSearchPerson actual = ElasticTransformer.buildElasticSearchPersonDoc(mapper, p);
     // then
     // e.g. : verify(mocked).called();
-    final String json =
-        "{\"first_name\":null,\"middle_name\":null,\"last_name\":null,\"name_suffix\":null,\"date_of_birth\":null,\"gender\":null,\"ssn\":null,\"type\":\"gov.ca.cwds.jobs.TestNormalizedEntity\",\"sensitivity_indicator\":null,\"soc158_sealed_client_indicator\":null,\"source\":null,\"legacy_source_table\":null,\"legacy_id\":null,\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"screenings\":[],\"referrals\":[],\"relationships\":[],\"cases\":[],\"id\":\"abc12340x2\"}";
-    ElasticSearchPerson expected = mapper.readValue(json, ElasticSearchPerson.class);
+    //
+    ElasticSearchPerson expected = mapper.readValue(
+        this.getClass().getResourceAsStream("/fixtures/ElasticTransformerTestFixture.json"),
+        ElasticSearchPerson.class);
     assertThat(actual, is(equalTo(expected)));
   }
 
