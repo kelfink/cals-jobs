@@ -403,8 +403,8 @@ public class EsParentPersonCase extends EsPersonCase {
     assignedWorker.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.workerLastUpdated));
     assignedWorker.setFirstName(this.workerFirstName);
     assignedWorker.setLastName(this.workerLastName);
-    assignedWorker.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
-        this.workerLastUpdated, "STFPERST"));
+    assignedWorker.setLegacyDescriptor(
+        ElasticTransformer.createStaffLegacyDescriptor(this.workerId, this.workerLastUpdated));
     esPersonCase.setAssignedSocialWorker(assignedWorker);
 
     //

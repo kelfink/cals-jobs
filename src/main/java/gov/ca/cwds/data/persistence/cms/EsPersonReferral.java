@@ -254,8 +254,8 @@ public class EsPersonReferral
     assignedWorker.setLegacyClientId(this.workerId);
     assignedWorker.setFirstName(this.workerFirstName);
     assignedWorker.setLastName(this.workerLastName);
-    assignedWorker.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
-        this.workerLastChanged, "STFPERST"));
+    assignedWorker.setLegacyDescriptor(
+        ElasticTransformer.createStaffLegacyDescriptor(this.workerId, this.workerLastChanged));
     referral.setAssignedSocialWorker(assignedWorker);
 
     //

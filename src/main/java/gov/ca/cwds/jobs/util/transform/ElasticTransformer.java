@@ -94,6 +94,29 @@ public class ElasticTransformer {
     return legacyDesc;
   }
 
+  /**
+   * Create staff person (STFPERST) legacy descriptor
+   * 
+   * @param legacyId Legacy ID
+   * @param legacyLastUpdated Legacy last updated time stamp
+   * @return Legacy descriptor
+   */
+  public static ElasticSearchLegacyDescriptor createStaffLegacyDescriptor(String legacyId,
+      Date legacyLastUpdated) {
+    ElasticSearchLegacyDescriptor legacyDesc = new ElasticSearchLegacyDescriptor();
+
+    if (!StringUtils.isBlank(legacyId)) {
+      String legacyTableName = "STFPERST";
+      legacyDesc.setLegacyId(legacyId.trim());
+      legacyDesc.setLegacyUiId(legacyId.trim());
+      legacyDesc.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
+      legacyDesc.setLegacyTableName(legacyTableName);
+      legacyDesc.setLegacyTableDescription(legacyTableDescriptions.get(legacyTableName));
+    }
+
+    return legacyDesc;
+  }
+
   protected static List<String> handleLanguage(ApiPersonAware p) {
     List<String> languages = null;
     if (p instanceof ApiMultipleLanguagesAware) {

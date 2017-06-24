@@ -141,7 +141,7 @@ public class ReferralHistoryIndexerJob
     referral.setPerpetratorId(ifNull(rs.getString("PERPETRATOR_ID")));
     referral.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
     referral.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
-    referral.setPerpetratorLastChanged(rs.getDate("CLP_IBMSNAP_OPERATION"));
+    referral.setPerpetratorLastChanged(rs.getDate("CLP_IBMSNAP_LOGMARKER"));
 
     referral.setReporterId(ifNull(rs.getString("REPORTER_ID")));
     referral.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
