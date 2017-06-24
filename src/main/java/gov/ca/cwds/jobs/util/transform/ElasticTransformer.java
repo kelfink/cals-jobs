@@ -46,7 +46,7 @@ public class ElasticTransformer {
    * 
    * @param legacyId Legacy ID
    * @param legacyLastUpdated Legacy last updated time stamp
-   * @param legacyTableName Legacy table name
+   * @param legacyTable Legacy table
    * @return Legacy descriptor
    */
   public static ElasticSearchLegacyDescriptor createLegacyDescriptor(String legacyId,
