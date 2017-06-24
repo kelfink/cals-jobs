@@ -5,6 +5,7 @@ import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,7 +44,7 @@ import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 @NamedNativeQueries({
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfter",
         query = "WITH driver as ( "
-            + " SELECT v1.THIS_LEGACY_ID, V1.RELATED_LEGACY_ID FROM CWSRS1.VW_BI_DIR_RELATION v1 "
+            + " SELECT v1.THIS_LEGACY_ID, v1.RELATED_LEGACY_ID FROM CWSRS1.VW_BI_DIR_RELATION v1 "
             + "where v1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") SELECT V.* FROM {h-schema}VW_BI_DIR_RELATION v "
             + "WHERE v.THIS_LEGACY_ID IN (select d1.THIS_LEGACY_ID from driver d1) "
@@ -102,6 +103,18 @@ public class EsRelationship
   @Column(name = "RELATED_LAST_NAME")
   private String relatedLastName;
 
+  @Column(name = "THIS_LAST_UPDATED")
+  @Type(type = "date")
+  private Date thisLastUpdated;
+
+  @Column(name = "RELATED_LAST_UPDATED")
+  @Type(type = "date")
+  private Date relatedLastUpdated;
+
+  @Column(name = "RELATIONSHIP_LAST_UPDATED")
+  @Type(type = "date")
+  private Date relationshipLastUpdated;
+
   // TODO: add replication columns when available.
   // Needed to delete ES documents.
 
@@ -135,6 +148,9 @@ public class EsRelationship
     ret.setRelatedLegacyId(ifNull(rs.getString("RELATED_LEGACY_ID")));
     ret.setRelatedFirstName(ifNull(rs.getString("RELATED_FIRST_NAME")));
     ret.setRelatedLastName(ifNull(rs.getString("RELATED_LAST_NAME")));
+    ret.setThisLastUpdated(rs.getDate("THIS_LAST_UPDATED"));
+    ret.setRelatedLastUpdated(rs.getDate("RELATED_LAST_UPDATED"));
+    ret.setRelationshipLastUpdated(rs.getDate("RELATIONSHIP_LAST_UPDATED"));
 
     return ret;
   }
@@ -220,18 +236,21 @@ public class EsRelationship
 
     final ElasticSearchPersonRelationship rel = new ElasticSearchPersonRelationship();
     ret.addRelation(rel);
+
     if (StringUtils.isNotBlank(this.relatedFirstName)) {
       rel.setRelatedPersonFirstName(this.relatedFirstName.trim());
     }
+
     if (StringUtils.isNotBlank(this.relatedLastName)) {
       rel.setRelatedPersonLastName(this.relatedLastName.trim());
     }
+
     if (StringUtils.isNotBlank(this.relatedLegacyId)) {
       rel.setRelatedPersonLegacyId(this.relatedLegacyId.trim());
     }
 
-    rel.setLegacyDescriptor(
-        ElasticTransformer.createLegacyDescriptor(this.relatedLegacyId, null, "CLN_RELT"));
+    rel.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.relatedLegacyId,
+        this.relatedLastUpdated, "CLIENT_T"));
 
     parseBiDirectionalRelationship(rel);
     map.put(ret.getId(), ret);
@@ -336,4 +355,27 @@ public class EsRelationship
     this.reverseRelationship = reverseRelationship;
   }
 
+  public Date getThisLastUpdated() {
+    return thisLastUpdated;
+  }
+
+  public void setThisLastUpdated(Date thisLastUpdated) {
+    this.thisLastUpdated = thisLastUpdated;
+  }
+
+  public Date getRelatedLastUpdated() {
+    return relatedLastUpdated;
+  }
+
+  public void setRelatedLastUpdated(Date relatedLastUpdated) {
+    this.relatedLastUpdated = relatedLastUpdated;
+  }
+
+  public Date getRelationshipLastUpdated() {
+    return relationshipLastUpdated;
+  }
+
+  public void setRelationshipLastUpdated(Date relationshipLastUpdated) {
+    this.relationshipLastUpdated = relationshipLastUpdated;
+  }
 }

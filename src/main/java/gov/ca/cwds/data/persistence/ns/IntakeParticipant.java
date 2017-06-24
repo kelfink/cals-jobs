@@ -201,10 +201,13 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
 
       case REPORTER:
         ret = new ElasticSearchPersonReporter();
+        ret.setLegacyDescriptor(
+            ElasticTransformer.createLegacyDescriptor(legacyId, null, "REPTR_T"));
         break;
 
       case SOCIAL_WORKER:
         ret = new ElasticSearchPersonSocialWorker();
+        ret.setLegacyDescriptor(ElasticTransformer.createStaffLegacyDescriptor(legacyId, null));
         break;
 
       case ALL:
@@ -212,6 +215,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
         ElasticSearchPersonAny any = new ElasticSearchPersonAny();
         any.getRoles()
             .addAll(screening.findParticipantRoles(id).stream().collect(Collectors.toList()));
+        any.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(legacyId, null, null));
         ret = any;
         break;
     }
@@ -220,7 +224,6 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     ret.setLastName(lastName);
     ret.setLegacyClientId(legacyId);
     ret.setId(id);
-    ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(legacyId, null, null));
 
     return ret;
   }
