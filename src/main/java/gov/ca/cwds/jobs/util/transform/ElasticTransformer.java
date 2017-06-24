@@ -2,9 +2,7 @@ package gov.ca.cwds.jobs.util.transform;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -39,34 +37,6 @@ public class ElasticTransformer {
 
   private static final Logger LOGGER = LogManager.getLogger(ElasticTransformer.class);
 
-  /**
-   * Key: Legacy table name <br>
-   * Value: Legacy table description (human readable name)
-   */
-  private static Map<String, String> legacyTableDescriptions = new HashMap<>();
-
-  /**
-   * Initialize legacyTableDescriptions
-   */
-  static {
-    legacyTableDescriptions.put("CLIENT_T", "Client");
-    legacyTableDescriptions.put("COLTRL_T", "Collateral individual");
-    legacyTableDescriptions.put("EDPRVCNT", "Education provider");
-    legacyTableDescriptions.put("ATTRNY_T", "Attorney");
-    legacyTableDescriptions.put("CLN_RELT", "Relationship");
-    legacyTableDescriptions.put("OTH_ADLT", "Adult in placement home");
-    legacyTableDescriptions.put("OTH_KIDT", "Child in placement home");
-    legacyTableDescriptions.put("OCL_NM_T", "Alias or other client name");
-    legacyTableDescriptions.put("REPTR_T", "Reporter");
-    legacyTableDescriptions.put("SVC_PVRT", "Service provider");
-    legacyTableDescriptions.put("SB_PVDRT", "Substitute care provider");
-    legacyTableDescriptions.put("CASE_T", "Case");
-    legacyTableDescriptions.put("STFPERST", "Staff");
-    legacyTableDescriptions.put("REFERL_T", "Referral");
-    legacyTableDescriptions.put("ALLGTN_T", "Allegation");
-    legacyTableDescriptions.put("ADDRS_T", "Address");
-  }
-
   private ElasticTransformer() {
     // Static methods, don't instantiate.
   }
@@ -80,38 +50,26 @@ public class ElasticTransformer {
    * @return Legacy descriptor
    */
   public static ElasticSearchLegacyDescriptor createLegacyDescriptor(String legacyId,
-      Date legacyLastUpdated, String legacyTableName) {
+      Date legacyLastUpdated, LegacyTable legacyTable) {
     ElasticSearchLegacyDescriptor legacyDesc = new ElasticSearchLegacyDescriptor();
 
     if (!StringUtils.isBlank(legacyId)) {
       legacyDesc.setLegacyId(legacyId.trim());
-      legacyDesc.setLegacyUiId(CmsKeyIdGenerator.getUIIdentifierFromKey(legacyId.trim()));
       legacyDesc.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
-      legacyDesc.setLegacyTableName(legacyTableName);
-      legacyDesc.setLegacyTableDescription(legacyTableDescriptions.get(legacyTableName));
-    }
 
-    return legacyDesc;
-  }
+      if (legacyTable != null && LegacyTable.STFPERST.getName().equals(legacyTable.getName())) {
+        /**
+         * For staff person, UI ID is not available, just use legacyId
+         */
+        legacyDesc.setLegacyUiId(legacyId.trim());
+      } else {
+        legacyDesc.setLegacyUiId(CmsKeyIdGenerator.getUIIdentifierFromKey(legacyId.trim()));
+      }
 
-  /**
-   * Create staff person (STFPERST) legacy descriptor
-   * 
-   * @param legacyId Legacy ID
-   * @param legacyLastUpdated Legacy last updated time stamp
-   * @return Legacy descriptor
-   */
-  public static ElasticSearchLegacyDescriptor createStaffLegacyDescriptor(String legacyId,
-      Date legacyLastUpdated) {
-    ElasticSearchLegacyDescriptor legacyDesc = new ElasticSearchLegacyDescriptor();
-
-    if (!StringUtils.isBlank(legacyId)) {
-      String legacyTableName = "STFPERST";
-      legacyDesc.setLegacyId(legacyId.trim());
-      legacyDesc.setLegacyUiId(legacyId.trim());
-      legacyDesc.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
-      legacyDesc.setLegacyTableName(legacyTableName);
-      legacyDesc.setLegacyTableDescription(legacyTableDescriptions.get(legacyTableName));
+      if (legacyTable != null) {
+        legacyDesc.setLegacyTableName(legacyTable.getName());
+        legacyDesc.setLegacyTableDescription(legacyTable.getDescription());
+      }
     }
 
     return legacyDesc;

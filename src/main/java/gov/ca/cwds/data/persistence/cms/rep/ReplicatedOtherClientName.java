@@ -21,6 +21,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseOtherClientName;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.jobs.util.transform.LegacyTable;
 
 /**
  * {@link PersistentObject} representing an Other Client Name as a {@link CmsReplicatedEntity}.
@@ -130,6 +131,7 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
 
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
-    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(), "OCL_NM_T");
+    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
+        LegacyTable.OCL_NM_T);
   }
 }

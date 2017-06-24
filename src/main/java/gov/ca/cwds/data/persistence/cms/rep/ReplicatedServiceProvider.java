@@ -21,6 +21,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseServiceProvider;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.jobs.util.transform.LegacyTable;
 
 /**
  * {@link PersistentObject} representing a Service Provider as a {@link CmsReplicatedEntity}.
@@ -131,6 +132,7 @@ public class ReplicatedServiceProvider extends BaseServiceProvider
 
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
-    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(), "SVC_PVRT");
+    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
+        LegacyTable.SVC_PVRT);
   }
 }

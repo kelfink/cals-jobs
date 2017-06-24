@@ -29,6 +29,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.jobs.util.transform.LegacyTable;
 
 /**
  * Entity bean for Materialized Query Table (MQT), VW_BI_DIR_RELATION.
@@ -250,7 +251,7 @@ public class EsRelationship
     }
 
     rel.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.relatedLegacyId,
-        this.relatedLastUpdated, "CLIENT_T"));
+        this.relatedLastUpdated, LegacyTable.CLIENT_T));
 
     parseBiDirectionalRelationship(rel);
     map.put(ret.getId(), ret);

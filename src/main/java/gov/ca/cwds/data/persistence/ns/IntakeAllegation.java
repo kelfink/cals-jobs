@@ -11,6 +11,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonNestedPerson;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.jobs.util.transform.LegacyTable;
 
 /**
  * Represents a screening allegation.
@@ -54,14 +55,15 @@ public class IntakeAllegation implements PersistentObject {
     ret.setDispositionDescription(dispositionDescription);
     ret.setId(id);
     ret.setLegacyId(id);
-    ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(id, null, "ALLGTN_T"));
+    ret.setLegacyDescriptor(
+        ElasticTransformer.createLegacyDescriptor(id, null, LegacyTable.ALLGTN_T));
 
     ElasticSearchPersonNestedPerson perpet = new ElasticSearchPersonNestedPerson();
     perpet.setId(this.perpetrator.getId());
     perpet.setFirstName(this.perpetrator.getFirstName());
     perpet.setLastName(this.perpetrator.getLastName());
     perpet.setLegacyDescriptor(ElasticTransformer
-        .createLegacyDescriptor(this.perpetrator.getLegacyId(), null, "CLIENT_T"));
+        .createLegacyDescriptor(this.perpetrator.getLegacyId(), null, LegacyTable.CLIENT_T));
     ret.setPerpetrator(perpet);
 
     ret.setPerpetratorFirstName(this.perpetrator.getFirstName());
@@ -73,8 +75,8 @@ public class IntakeAllegation implements PersistentObject {
     vict.setId(this.victim.getId());
     vict.setFirstName(this.victim.getFirstName());
     vict.setLastName(this.victim.getLastName());
-    vict.setLegacyDescriptor(
-        ElasticTransformer.createLegacyDescriptor(this.victim.getLegacyId(), null, "CLIENT_T"));
+    vict.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.victim.getLegacyId(),
+        null, LegacyTable.CLIENT_T));
     ret.setVictim(vict);
 
     ret.setVictimFirstName(this.victim.getFirstName());

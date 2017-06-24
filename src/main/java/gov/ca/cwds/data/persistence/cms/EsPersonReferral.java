@@ -29,6 +29,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.jobs.util.transform.LegacyTable;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
@@ -232,7 +233,7 @@ public class EsPersonReferral
     referral.setResponseTime(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.referralResponseType));
     referral.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.referralId,
-        this.referralLastChanged, "REFERL_T"));
+        this.referralLastChanged, LegacyTable.REFERL_T));
 
     //
     // Reporter
@@ -243,7 +244,7 @@ public class EsPersonReferral
     reporter.setFirstName(this.reporterFirstName);
     reporter.setLastName(this.reporterLastName);
     reporter.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.reporterId,
-        this.reporterLastChanged, "REPTR_T"));
+        this.reporterLastChanged, LegacyTable.REPTR_T));
     referral.setReporter(reporter);
 
     //
@@ -254,8 +255,8 @@ public class EsPersonReferral
     assignedWorker.setLegacyClientId(this.workerId);
     assignedWorker.setFirstName(this.workerFirstName);
     assignedWorker.setLastName(this.workerLastName);
-    assignedWorker.setLegacyDescriptor(
-        ElasticTransformer.createStaffLegacyDescriptor(this.workerId, this.workerLastChanged));
+    assignedWorker.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
+        this.workerLastChanged, LegacyTable.STFPERST));
     referral.setAssignedSocialWorker(assignedWorker);
 
     //
@@ -284,14 +285,14 @@ public class EsPersonReferral
     allegation.setDispositionDescription(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.allegationDisposition));
     allegation.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.allegationId,
-        this.allegationLastChanged, "ALLGTN_T"));
+        this.allegationLastChanged, LegacyTable.ALLGTN_T));
 
     ElasticSearchPersonNestedPerson perpetrator = new ElasticSearchPersonNestedPerson();
     perpetrator.setId(this.perpetratorId);
     perpetrator.setFirstName(this.perpetratorFirstName);
     perpetrator.setLastName(this.perpetratorLastName);
     perpetrator.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.perpetratorId,
-        this.perpetratorLastChanged, "CLIENT_T"));
+        this.perpetratorLastChanged, LegacyTable.CLIENT_T));
     allegation.setPerpetrator(perpetrator);
 
     allegation.setPerpetratorId(this.perpetratorId);
@@ -304,7 +305,7 @@ public class EsPersonReferral
     victim.setFirstName(this.victimFirstName);
     victim.setLastName(this.victimLastName);
     victim.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.victimId,
-        this.victimLastChanged, "CLIENT_T"));
+        this.victimLastChanged, LegacyTable.CLIENT_T));
     allegation.setVictim(victim);
 
     allegation.setVictimId(this.victimId);

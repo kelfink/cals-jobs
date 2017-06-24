@@ -30,6 +30,7 @@ import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.jobs.util.transform.LegacyTable;
 
 /**
  * Represents an Intake Participant or Person.
@@ -197,17 +198,19 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     switch (esType) {
       case STAFF:
         ret = new ElasticSearchPersonStaff();
+        ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(legacyId, null, null));
         break;
 
       case REPORTER:
         ret = new ElasticSearchPersonReporter();
         ret.setLegacyDescriptor(
-            ElasticTransformer.createLegacyDescriptor(legacyId, null, "REPTR_T"));
+            ElasticTransformer.createLegacyDescriptor(legacyId, null, LegacyTable.REPTR_T));
         break;
 
       case SOCIAL_WORKER:
         ret = new ElasticSearchPersonSocialWorker();
-        ret.setLegacyDescriptor(ElasticTransformer.createStaffLegacyDescriptor(legacyId, null));
+        ret.setLegacyDescriptor(
+            ElasticTransformer.createLegacyDescriptor(legacyId, null, LegacyTable.STFPERST));
         break;
 
       case ALL:

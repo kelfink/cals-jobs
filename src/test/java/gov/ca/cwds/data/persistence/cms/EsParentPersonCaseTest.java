@@ -17,6 +17,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
 import gov.ca.cwds.jobs.config.StaticSystemCodeCache;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.jobs.util.transform.LegacyTable;
 
 public class EsParentPersonCaseTest {
 
@@ -689,21 +690,21 @@ public class EsParentPersonCaseTest {
     ElasticSearchPersonCase personCase = new ElasticSearchPersonCase();
     personCase.setId(caseId);
     personCase.setLegacyId(caseId);
-    personCase
-        .setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(caseId, null, "CASE_T"));
+    personCase.setLegacyDescriptor(
+        ElasticTransformer.createLegacyDescriptor(caseId, null, LegacyTable.CASE_T));
 
     ElasticSearchPersonChild focusChild = new ElasticSearchPersonChild();
     focusChild.setId(focusChildId);
     focusChild.setLegacyClientId(focusChildId);
     focusChild.setLegacyDescriptor(
-        ElasticTransformer.createLegacyDescriptor(focusChildId, null, "CLIENT_T"));
+        ElasticTransformer.createLegacyDescriptor(focusChildId, null, LegacyTable.CLIENT_T));
     personCase.setFocusChild(focusChild);
 
     ElasticSearchPersonParent caseParent = new ElasticSearchPersonParent();
     caseParent.setId(parentId);
     caseParent.setLegacyClientId(parentId);
-    caseParent
-        .setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(parentId, null, "CLIENT_T"));
+    caseParent.setLegacyDescriptor(
+        ElasticTransformer.createLegacyDescriptor(parentId, null, LegacyTable.CLIENT_T));
 
     expected.addCase(personCase, caseParent);
 

@@ -21,6 +21,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseOtherChildInPlacemtHome;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.jobs.util.transform.LegacyTable;
 
 /**
  * {@link PersistentObject} representing an Other Child In Placement Home as a
@@ -128,6 +129,7 @@ public class ReplicatedOtherChildInPlacemtHome extends BaseOtherChildInPlacemtHo
 
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
-    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(), "OTH_KIDT");
+    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
+        LegacyTable.OTH_KIDT);
   }
 }
