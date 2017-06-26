@@ -104,17 +104,13 @@ public class EsRelationship
   @Column(name = "RELATED_LAST_NAME")
   private String relatedLastName;
 
-  @Column(name = "THIS_LAST_UPDATED")
+  @Column(name = "THIS_LEGACY_LAST_UPDATED")
   @Type(type = "date")
-  private Date thisLastUpdated;
+  private Date thisLegacyLastUpdated;
 
-  @Column(name = "RELATED_LAST_UPDATED")
+  @Column(name = "RELATED_LEGACY_LAST_UPDATED")
   @Type(type = "date")
-  private Date relatedLastUpdated;
-
-  @Column(name = "RELATIONSHIP_LAST_UPDATED")
-  @Type(type = "date")
-  private Date relationshipLastUpdated;
+  private Date relatedLegacyLastUpdated;
 
   // TODO: add replication columns when available.
   // Needed to delete ES documents.
@@ -149,9 +145,8 @@ public class EsRelationship
     ret.setRelatedLegacyId(ifNull(rs.getString("RELATED_LEGACY_ID")));
     ret.setRelatedFirstName(ifNull(rs.getString("RELATED_FIRST_NAME")));
     ret.setRelatedLastName(ifNull(rs.getString("RELATED_LAST_NAME")));
-    ret.setThisLastUpdated(rs.getDate("THIS_LAST_UPDATED"));
-    ret.setRelatedLastUpdated(rs.getDate("RELATED_LAST_UPDATED"));
-    ret.setRelationshipLastUpdated(rs.getDate("RELATIONSHIP_LAST_UPDATED"));
+    ret.setThisLegacyLastUpdated(rs.getDate("THIS_LEGACY_LAST_UPDATED"));
+    ret.setRelatedLegacyLastUpdated(rs.getDate("RELATED_LEGACY_LAST_UPDATED"));
 
     return ret;
   }
@@ -251,7 +246,7 @@ public class EsRelationship
     }
 
     rel.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.relatedLegacyId,
-        this.relatedLastUpdated, LegacyTable.CLIENT_T));
+        this.relatedLegacyLastUpdated, LegacyTable.CLIENT_T));
 
     parseBiDirectionalRelationship(rel);
     map.put(ret.getId(), ret);
@@ -356,27 +351,19 @@ public class EsRelationship
     this.reverseRelationship = reverseRelationship;
   }
 
-  public Date getThisLastUpdated() {
-    return thisLastUpdated;
+  public Date getThisLegacyLastUpdated() {
+    return thisLegacyLastUpdated;
   }
 
-  public void setThisLastUpdated(Date thisLastUpdated) {
-    this.thisLastUpdated = thisLastUpdated;
+  public void setThisLegacyLastUpdated(Date thisLegacyLastUpdated) {
+    this.thisLegacyLastUpdated = thisLegacyLastUpdated;
   }
 
-  public Date getRelatedLastUpdated() {
-    return relatedLastUpdated;
+  public Date getRelatedLegacyLastUpdated() {
+    return relatedLegacyLastUpdated;
   }
 
-  public void setRelatedLastUpdated(Date relatedLastUpdated) {
-    this.relatedLastUpdated = relatedLastUpdated;
-  }
-
-  public Date getRelationshipLastUpdated() {
-    return relationshipLastUpdated;
-  }
-
-  public void setRelationshipLastUpdated(Date relationshipLastUpdated) {
-    this.relationshipLastUpdated = relationshipLastUpdated;
+  public void setRelatedLegacyLastUpdated(Date relatedLegacyLastUpdated) {
+    this.relatedLegacyLastUpdated = relatedLegacyLastUpdated;
   }
 }
