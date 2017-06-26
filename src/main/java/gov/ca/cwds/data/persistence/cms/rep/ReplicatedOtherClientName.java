@@ -107,6 +107,7 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
 
   @Override
   public ReplicatedOtherClientName normalize(Map<Object, ReplicatedOtherClientName> map) {
+    // TODO: #145554407: add client names to person document.
     return null;
   }
 
