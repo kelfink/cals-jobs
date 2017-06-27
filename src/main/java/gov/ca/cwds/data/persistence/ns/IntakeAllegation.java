@@ -62,8 +62,9 @@ public class IntakeAllegation implements PersistentObject {
     perpet.setId(this.perpetrator.getId());
     perpet.setFirstName(this.perpetrator.getFirstName());
     perpet.setLastName(this.perpetrator.getLastName());
-    perpet.setLegacyDescriptor(ElasticTransformer
-        .createLegacyDescriptor(this.perpetrator.getLegacyId(), null, LegacyTable.CLIENT_T));
+    perpet.setLegacyDescriptor(
+        ElasticTransformer.createLegacyDescriptor(this.perpetrator.getLegacyId(),
+            this.perpetrator.getLegacyLastUpdated(), LegacyTable.CLIENT_T));
     ret.setPerpetrator(perpet);
 
     ret.setPerpetratorFirstName(this.perpetrator.getFirstName());
@@ -76,7 +77,7 @@ public class IntakeAllegation implements PersistentObject {
     vict.setFirstName(this.victim.getFirstName());
     vict.setLastName(this.victim.getLastName());
     vict.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.victim.getLegacyId(),
-        null, LegacyTable.CLIENT_T));
+        this.victim.getLegacyLastUpdated(), LegacyTable.CLIENT_T));
     ret.setVictim(vict);
 
     ret.setVictimFirstName(this.victim.getFirstName());

@@ -57,7 +57,7 @@ public class ElasticTransformer {
       legacyDesc.setLegacyId(legacyId.trim());
       legacyDesc.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
 
-      if (legacyTable != null && LegacyTable.STFPERST.getName().equals(legacyTable.getName())) {
+      if (legacyTable != null && LegacyTable.STFPERST.equals(legacyTable)) {
         /**
          * For staff person, UI ID is not available, just use legacyId
          */

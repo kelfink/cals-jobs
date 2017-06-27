@@ -49,6 +49,10 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
 
   private String legacyId;
 
+  private Date legacyLastUpdated;
+
+  private String legacyTable;
+
   private String firstName;
 
   private String lastName;
@@ -160,7 +164,8 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
 
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
-    return ElasticTransformer.createLegacyDescriptor(legacyId, null, null);
+    return ElasticTransformer.createLegacyDescriptor(legacyId, legacyLastUpdated,
+        LegacyTable.lookupByName(legacyTable));
   }
 
   @Override
@@ -198,19 +203,14 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     switch (esType) {
       case STAFF:
         ret = new ElasticSearchPersonStaff();
-        ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(legacyId, null, null));
         break;
 
       case REPORTER:
         ret = new ElasticSearchPersonReporter();
-        ret.setLegacyDescriptor(
-            ElasticTransformer.createLegacyDescriptor(legacyId, null, LegacyTable.REPTR_T));
         break;
 
       case SOCIAL_WORKER:
         ret = new ElasticSearchPersonSocialWorker();
-        ret.setLegacyDescriptor(
-            ElasticTransformer.createLegacyDescriptor(legacyId, null, LegacyTable.STFPERST));
         break;
 
       case ALL:
@@ -218,7 +218,6 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
         ElasticSearchPersonAny any = new ElasticSearchPersonAny();
         any.getRoles()
             .addAll(screening.findParticipantRoles(id).stream().collect(Collectors.toList()));
-        any.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(legacyId, null, null));
         ret = any;
         break;
     }
@@ -227,6 +226,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     ret.setLastName(lastName);
     ret.setLegacyClientId(legacyId);
     ret.setId(id);
+    ret.setLegacyDescriptor(getLegacyDescriptor());
 
     return ret;
   }
@@ -265,4 +265,19 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
     this.phones = phones;
   }
 
+  public Date getLegacyLastUpdated() {
+    return legacyLastUpdated;
+  }
+
+  public void setLegacyLastUpdated(Date legacyLastUpdated) {
+    this.legacyLastUpdated = legacyLastUpdated;
+  }
+
+  public String getLegacyTable() {
+    return legacyTable;
+  }
+
+  public void setLegacyTable(String legacyTable) {
+    this.legacyTable = legacyTable;
+  }
 }

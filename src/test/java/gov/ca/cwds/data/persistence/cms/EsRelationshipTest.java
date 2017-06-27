@@ -100,7 +100,7 @@ public class EsRelationshipTest {
   public void hashCode_Args__() throws Exception {
     EsRelationship target = new EsRelationship();
     int actual = target.hashCode();
-    int expected = -1130789619;
+    int expected = -2120005431;
     assertThat(actual, is(equalTo(expected)));
   }
 
