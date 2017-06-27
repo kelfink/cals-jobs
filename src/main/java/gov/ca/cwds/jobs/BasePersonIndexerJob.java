@@ -273,7 +273,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Optional method to customize JDBC ORDER BY clause on initial load.
    * 
-   * @return custom ORDER BY clause for JDBC
+   * @return custom ORDER BY clause for JDBC query
    */
   public String getJdbcOrderBy() {
     return " ORDER BY x.clt_identifier ";
@@ -598,7 +598,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void prepareInsertCollections(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-          throws JsonProcessingException {
+      throws JsonProcessingException {
 
     // Null out optional collections for updates.
     esp.clearOptionalCollections(keep);
@@ -621,7 +621,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected Pair<String, String> prepareUpsertJson(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-          throws JsonProcessingException {
+      throws JsonProcessingException {
 
     // Child classes: Set optional collections before serializing the insert JSON.
     prepareInsertCollections(esp, t, elementName, list, keep);
@@ -1305,8 +1305,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           : opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_ID_COL", getIdColumn())
-              .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
+              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
+                  String.valueOf(totalBuckets)),
+              BatchBucket.class);
 
       ret = q.getResultList();
       session.clear();
