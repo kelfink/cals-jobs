@@ -180,8 +180,7 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
       aka.setNameType(ElasticSearchPerson.getSystemCodes().lookup(this.nameType).getShortDsc());
     }
 
-    aka.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.clientId,
-        this.getLastUpdatedTime(), LegacyTable.OCL_NM_T));
+    aka.setLegacyDescriptor(getLegacyDescriptor());
 
     map.put(ret.getId(), ret);
     return ret;
