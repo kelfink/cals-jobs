@@ -222,7 +222,7 @@ public class EsRelationship
 
   /**
    * Implementation notes: Only reading from CLN_RELT, for the moment. Intake will set field
-   * "related_person_id" from <strong>Postgres</strong>, NOT from DB2.
+   * "related_person_id" from <strong>PostgreSQL</strong>, NOT from DB2.
    */
   @Override
   public ReplicatedRelationships normalize(Map<Object, ReplicatedRelationships> map) {

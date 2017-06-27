@@ -1,5 +1,9 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
+import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
 
@@ -9,6 +13,9 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
@@ -16,9 +23,12 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAka;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseOtherClientName;
+import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.LegacyTable;
@@ -56,12 +66,14 @@ import gov.ca.cwds.jobs.util.transform.LegacyTable;
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReplicatedOtherClientName extends BaseOtherClientName
-    implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedOtherClientName> {
+    implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedAkas> {
 
   /**
    * Default serialization.
    */
   private static final long serialVersionUID = 1L;
+
+  private static final Logger LOGGER = LogManager.getLogger(ReplicatedOtherClientName.class);
 
   @Enumerated(EnumType.STRING)
   @Column(name = "IBMSNAP_OPERATION", updatable = false)
@@ -78,6 +90,32 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
   @Override
   public CmsReplicationOperation getReplicationOperation() {
     return replicationOperation;
+  }
+
+  /**
+   * Build a ReplicatedOtherClientName from an incoming ResultSet.
+   * 
+   * @param rs incoming tuple
+   * @return a populated EsRelationship
+   * @throws SQLException if unable to convert types or stream breaks, etc.
+   */
+  public static ReplicatedOtherClientName mapRow(ResultSet rs) throws SQLException {
+    ReplicatedOtherClientName ret = new ReplicatedOtherClientName();
+
+    ret.setClientId(rs.getString("FKCLIENT_T"));
+    ret.setThirdId(rs.getString("THIRD_ID"));
+
+    ret.firstName = ifNull(rs.getString("FIRST_NM"));
+    ret.middleName = ifNull(rs.getString("MIDDLE_NM"));
+    ret.lastName = ifNull(rs.getString("LAST_NM"));
+    ret.nameType = rs.getShort("NAME_TPC");
+    ret.namePrefixDescription = ifNull(rs.getString("NMPRFX_DSC"));
+    ret.suffixTitleDescription = ifNull(rs.getString("SUFX_TLDSC"));
+
+    ret.setLastUpdatedId(rs.getString("LST_UPD_ID"));
+    ret.setLastUpdatedTime(rs.getDate("LST_UPD_TS"));
+
+    return ret;
   }
 
   @Override
@@ -99,21 +137,54 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
   // ApiGroupNormalizer:
   // =======================
 
-  @SuppressWarnings("unchecked")
   @Override
-  public Class<ReplicatedOtherClientName> getNormalizationClass() {
-    return (Class<ReplicatedOtherClientName>) this.getClass();
-  }
-
-  @Override
-  public ReplicatedOtherClientName normalize(Map<Object, ReplicatedOtherClientName> map) {
-    // TODO: #145554407: add client names to person document.
-    return null;
+  public Class<ReplicatedAkas> getNormalizationClass() {
+    return ReplicatedAkas.class;
   }
 
   @Override
   public Object getNormalizationGroupKey() {
     return this.getPrimaryKey();
+  }
+
+  @Override
+  public ReplicatedAkas normalize(Map<Object, ReplicatedAkas> map) {
+    final boolean isClientAdded = map.containsKey(this.clientId);
+    final ReplicatedAkas ret =
+        isClientAdded ? map.get(this.clientId) : new ReplicatedAkas(this.clientId);
+
+    final ElasticSearchPersonAka aka = new ElasticSearchPersonAka();
+    ret.addAka(aka);
+
+    if (StringUtils.isNotBlank(this.firstName)) {
+      aka.setFirstName(this.firstName.trim());
+    }
+
+    if (StringUtils.isNotBlank(this.lastName)) {
+      aka.setLastName(this.lastName.trim());
+    }
+
+    if (StringUtils.isNotBlank(this.middleName)) {
+      aka.setMiddleName(this.middleName.trim());
+    }
+
+    if (StringUtils.isNotBlank(this.namePrefixDescription)) {
+      aka.setPrefix(this.namePrefixDescription.trim());
+    }
+
+    if (StringUtils.isNotBlank(this.suffixTitleDescription)) {
+      aka.setSuffix(this.suffixTitleDescription.trim());
+    }
+
+    if (this.nameType != null && this.nameType.intValue() != 0) {
+      aka.setNameType(ElasticSearchPerson.getSystemCodes().lookup(this.nameType).getShortDsc());
+    }
+
+    aka.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.clientId,
+        this.getLastUpdatedTime(), LegacyTable.OCL_NM_T));
+
+    map.put(ret.getId(), ret);
+    return ret;
   }
 
   // =======================
@@ -135,4 +206,5 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
     return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
         LegacyTable.OCL_NM_T);
   }
+
 }
