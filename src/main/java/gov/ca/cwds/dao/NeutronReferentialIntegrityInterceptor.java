@@ -7,14 +7,14 @@ import org.hibernate.type.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.data.ApiReferentialIntegrityInterceptor;
+import gov.ca.cwds.data.ApiHibernateInterceptor;
 
 /**
  * Hibernate interceptor traps referential integrity errors.
  * 
  * @author CWDS API Team
  */
-public class NeutronReferentialIntegrityInterceptor extends ApiReferentialIntegrityInterceptor {
+public class NeutronReferentialIntegrityInterceptor extends ApiHibernateInterceptor {
 
   private static final long serialVersionUID = 1L;
 

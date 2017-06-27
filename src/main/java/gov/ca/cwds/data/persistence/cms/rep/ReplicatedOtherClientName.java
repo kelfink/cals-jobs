@@ -9,6 +9,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
@@ -63,6 +65,8 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
    */
   private static final long serialVersionUID = 1L;
 
+  private static final Logger LOGGER = LogManager.getLogger(ReplicatedOtherClientName.class);
+
   @Enumerated(EnumType.STRING)
   @Column(name = "IBMSNAP_OPERATION", updatable = false)
   private CmsReplicationOperation replicationOperation;
@@ -106,14 +110,13 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
   }
 
   @Override
-  public ReplicatedOtherClientName normalize(Map<Object, ReplicatedOtherClientName> map) {
-    // TODO: #145554407: add client names to person document.
-    return null;
+  public Object getNormalizationGroupKey() {
+    return this.getPrimaryKey();
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
-    return this.getPrimaryKey();
+  public ReplicatedOtherClientName normalize(Map<Object, ReplicatedOtherClientName> denorm) {
+    return null;
   }
 
   // =======================
@@ -135,4 +138,5 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
     return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
         LegacyTable.OCL_NM_T);
   }
+
 }
