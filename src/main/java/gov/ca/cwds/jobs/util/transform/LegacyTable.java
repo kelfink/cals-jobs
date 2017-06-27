@@ -1,59 +1,86 @@
 package gov.ca.cwds.jobs.util.transform;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Legacy system tables
  * 
  * @author CWDS API Team
  */
-public class LegacyTable {
+public enum LegacyTable {
 
-  public static final LegacyTable CLIENT_T = new LegacyTable("CLIENT_T", "Client");
+  //
+  // CHECKSTYLE:OFF
+  //
 
-  public static final LegacyTable COLTRL_T = new LegacyTable("COLTRL_T", "Collateral individual");
+  CLIENT_T("Client"),
 
-  public static final LegacyTable EDPRVCNT = new LegacyTable("EDPRVCNT", "Education provider");
+  COLTRL_T("Collateral individual"),
 
-  public static final LegacyTable ATTRNY_T = new LegacyTable("ATTRNY_T", "Attorney");
+  EDPRVCNT("Education provider"),
 
-  public static final LegacyTable CLN_RELT = new LegacyTable("CLN_RELT", "Client Relationship");
+  ATTRNY_T("Attorney"),
 
-  public static final LegacyTable OTH_ADLT = new LegacyTable("OTH_ADLT", "Adult in placement home");
+  CLN_RELT("Client Relationship"),
 
-  public static final LegacyTable OTH_KIDT = new LegacyTable("OTH_KIDT", "Child in placement home");
+  OTH_ADLT("Adult in placement home"),
 
-  public static final LegacyTable OCL_NM_T =
-      new LegacyTable("OCL_NM_T", "Alias or other client name");
+  OTH_KIDT("Child in placement home"),
 
-  public static final LegacyTable REPTR_T = new LegacyTable("REPTR_T", "Reporter");
+  OCL_NM_T("Alias or other client name"),
 
-  public static final LegacyTable SVC_PVRT = new LegacyTable("SVC_PVRT", "Service provider");
+  REPTR_T("Reporter"),
 
-  public static final LegacyTable SB_PVDRT =
-      new LegacyTable("SB_PVDRT", "Substitute care provider");
+  SVC_PVRT("Service provider"),
 
-  public static final LegacyTable CASE_T = new LegacyTable("CASE_T", "Case");
+  SB_PVDRT("Substitute care provider"),
 
-  public static final LegacyTable STFPERST = new LegacyTable("STFPERST", "Staff");
+  CASE_T("Case"),
 
-  public static final LegacyTable REFERL_T = new LegacyTable("REFERL_T", "Referral");
+  STFPERST("Staff"),
 
-  public static final LegacyTable ALLGTN_T = new LegacyTable("ALLGTN_T", "Allegation");
+  REFERL_T("Referral"),
 
-  public static final LegacyTable ADDRS_T = new LegacyTable("ADDRS_T", "Address");
+  ALLGTN_T("Allegation"),
 
-  private String name;
+  ADDRS_T("Address");
+
+  //
+  // CHECKSTYLE:ON
+  //
+
   private String description;
 
-  private LegacyTable(String name, String description) {
-    this.name = name;
+  private LegacyTable(String description) {
     this.description = description;
   }
 
   public String getName() {
-    return name;
+    return this.name();
   }
 
   public String getDescription() {
     return description;
+  }
+
+  /**
+   * Lookup a legacy table by name.
+   * 
+   * @param tableName The legacy table name
+   * @return LegacyTable for given name if found, null otherwise.
+   */
+  public static LegacyTable lookupByName(String tableName) {
+    if (StringUtils.isBlank(tableName)) {
+      return null;
+    }
+
+    LegacyTable legacyTable = null;
+    for (LegacyTable lt : LegacyTable.values()) {
+      if (lt.getName().equals(tableName.trim())) {
+        legacyTable = lt;
+        break;
+      }
+    }
+    return legacyTable;
   }
 }
