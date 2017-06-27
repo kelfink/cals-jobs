@@ -67,12 +67,12 @@ public class ReplicatedAkas extends ApiObjectIdentity implements PersistentObjec
   }
 
   @SuppressWarnings("javadoc")
-  public void setRelations(List<ElasticSearchPersonAka> akas) {
+  public void setAkas(List<ElasticSearchPersonAka> akas) {
     this.akas = akas;
   }
 
   @SuppressWarnings("javadoc")
-  public void addRelation(ElasticSearchPersonAka aka) {
+  public void addAka(ElasticSearchPersonAka aka) {
     this.akas.add(aka);
   }
 

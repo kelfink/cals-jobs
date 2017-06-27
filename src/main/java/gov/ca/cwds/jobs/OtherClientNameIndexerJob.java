@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +23,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
@@ -81,15 +83,15 @@ public class OtherClientNameIndexerJob
     StringBuilder buf = new StringBuilder();
     buf.append("{\"akas\":[");
 
-    // if (!p.getRelations().isEmpty()) {
-    // try {
-    // buf.append(p.getRelations().stream().map(this::jsonify).sorted(String::compareTo)
-    // .collect(Collectors.joining(",")));
-    // } catch (Exception e) {
-    // LOGGER.error("ERROR SERIALIZING OTHER CLIENT NAMES", e);
-    // throw new JobsException(e);
-    // }
-    // }
+    if (!p.getAkas().isEmpty()) {
+      try {
+        buf.append(p.getAkas().stream().map(this::jsonify).sorted(String::compareTo)
+            .collect(Collectors.joining(",")));
+      } catch (Exception e) {
+        LOGGER.error("ERROR SERIALIZING OTHER CLIENT NAMES", e);
+        throw new JobsException(e);
+      }
+    }
 
     buf.append("]}");
 

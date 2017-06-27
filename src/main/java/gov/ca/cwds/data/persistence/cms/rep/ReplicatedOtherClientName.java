@@ -13,6 +13,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.NamedNativeQueries;
@@ -22,7 +23,9 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAka;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseOtherClientName;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
@@ -101,12 +104,16 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
 
     ret.setClientId(rs.getString("FKCLIENT_T"));
     ret.setThirdId(rs.getString("THIRD_ID"));
+
     ret.firstName = ifNull(rs.getString("FIRST_NM"));
     ret.middleName = ifNull(rs.getString("MIDDLE_NM"));
     ret.lastName = ifNull(rs.getString("LAST_NM"));
     ret.nameType = rs.getShort("NAME_TPC");
     ret.namePrefixDescription = ifNull(rs.getString("NMPRFX_DSC"));
     ret.suffixTitleDescription = ifNull(rs.getString("SUFX_TLDSC"));
+
+    ret.setLastUpdatedId(rs.getString("LST_UPD_ID"));
+    ret.setLastUpdatedTime(rs.getDate("LST_UPD_TS"));
 
     return ret;
   }
@@ -142,7 +149,42 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
 
   @Override
   public ReplicatedAkas normalize(Map<Object, ReplicatedAkas> map) {
-    return null;
+    final boolean isClientAdded = map.containsKey(this.clientId);
+    final ReplicatedAkas ret =
+        isClientAdded ? map.get(this.clientId) : new ReplicatedAkas(this.clientId);
+
+    final ElasticSearchPersonAka aka = new ElasticSearchPersonAka();
+    ret.addAka(aka);
+
+    if (StringUtils.isNotBlank(this.firstName)) {
+      aka.setFirstName(this.firstName.trim());
+    }
+
+    if (StringUtils.isNotBlank(this.lastName)) {
+      aka.setLastName(this.lastName.trim());
+    }
+
+    if (StringUtils.isNotBlank(this.middleName)) {
+      aka.setMiddleName(this.middleName.trim());
+    }
+
+    if (StringUtils.isNotBlank(this.namePrefixDescription)) {
+      aka.setPrefix(this.namePrefixDescription.trim());
+    }
+
+    if (StringUtils.isNotBlank(this.suffixTitleDescription)) {
+      aka.setSuffix(this.suffixTitleDescription.trim());
+    }
+
+    if (this.nameType != null && this.nameType.intValue() != 0) {
+      aka.setNameType(ElasticSearchPerson.getSystemCodes().lookup(this.nameType).getShortDsc());
+    }
+
+    aka.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.clientId,
+        this.getLastUpdatedTime(), LegacyTable.OCL_NM_T));
+
+    map.put(ret.getId(), ret);
+    return ret;
   }
 
   // =======================
