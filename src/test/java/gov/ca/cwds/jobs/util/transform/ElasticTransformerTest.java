@@ -8,6 +8,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Test;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.std.ApiPersonAware;
@@ -44,14 +46,14 @@ public class ElasticTransformerTest {
   @Test
   public void handlePhone_Args__ApiPersonAware() throws Exception {
     // given
-    ApiPersonAware p = mock(ApiPersonAware.class);
+    ApiPersonAware p = new TestNormalizedEntity("abc123");
     // e.g. : given(mocked.called()).willReturn(1);
     // when
     List<ElasticSearchPerson.ElasticSearchPersonPhone> actual = ElasticTransformer.handlePhone(p);
     // then
     // e.g. : verify(mocked).called();
     List<ElasticSearchPerson.ElasticSearchPersonPhone> expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, notNullValue());
   }
 
   @Test
@@ -113,6 +115,35 @@ public class ElasticTransformerTest {
     } catch (JsonProcessingException e) {
       // then
     }
+  }
+
+  @Test
+  public void createLegacyDescriptor_Args__String__Date__LegacyTable() throws Exception {
+    // given
+    String legacyId = null;
+    Date legacyLastUpdated = mock(Date.class);
+    LegacyTable legacyTable = LegacyTable.OCL_NM_T;
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    ElasticSearchLegacyDescriptor actual =
+        ElasticTransformer.createLegacyDescriptor(legacyId, legacyLastUpdated, legacyTable);
+    // then
+    // e.g. : verify(mocked).called();
+    ElasticSearchLegacyDescriptor expected = new ElasticSearchLegacyDescriptor();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void handleLegacyDescriptor_Args__ApiPersonAware() throws Exception {
+    // given
+    ApiPersonAware p = mock(ApiPersonAware.class);
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    ElasticSearchLegacyDescriptor actual = ElasticTransformer.handleLegacyDescriptor(p);
+    // then
+    // e.g. : verify(mocked).called();
+    ElasticSearchLegacyDescriptor expected = null;
+    assertThat(actual, is(equalTo(expected)));
   }
 
 }

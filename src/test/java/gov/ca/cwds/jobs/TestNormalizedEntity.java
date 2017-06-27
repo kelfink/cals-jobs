@@ -9,14 +9,18 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.data.ApiTypedIdentifier;
+import gov.ca.cwds.data.ReadablePhone;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.data.std.ApiPhoneAware;
+import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 @JsonPropertyOrder(alphabetic = true)
-public class TestNormalizedEntity
-    implements PersistentObject, ApiPersonAware, ApiTypedIdentifier<String>, ApiLegacyAware {
+public class TestNormalizedEntity implements PersistentObject, ApiPersonAware,
+    ApiTypedIdentifier<String>, ApiLegacyAware, ApiMultiplePhonesAware {
 
   private String id;
 
@@ -120,5 +124,11 @@ public class TestNormalizedEntity
     return ElasticTransformer.createLegacyDescriptor(null, null, null);
   }
 
+  @Override
+  public ApiPhoneAware[] getPhones() {
+    ApiPhoneAware[] phones = new ApiPhoneAware[1];
+    phones[0] = new ReadablePhone("abc1234567", "408-374-2790", "", PhoneType.Home);
+    return phones;
+  }
 
 }
