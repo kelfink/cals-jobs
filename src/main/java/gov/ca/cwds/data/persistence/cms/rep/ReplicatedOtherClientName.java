@@ -1,5 +1,9 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
+import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
 
@@ -21,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseOtherClientName;
+import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.LegacyTable;
@@ -58,7 +63,7 @@ import gov.ca.cwds.jobs.util.transform.LegacyTable;
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReplicatedOtherClientName extends BaseOtherClientName
-    implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedOtherClientName> {
+    implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedAkas> {
 
   /**
    * Default serialization.
@@ -84,6 +89,28 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
     return replicationOperation;
   }
 
+  /**
+   * Build a ReplicatedOtherClientName from an incoming ResultSet.
+   * 
+   * @param rs incoming tuple
+   * @return a populated EsRelationship
+   * @throws SQLException if unable to convert types or stream breaks, etc.
+   */
+  public static ReplicatedOtherClientName mapRow(ResultSet rs) throws SQLException {
+    ReplicatedOtherClientName ret = new ReplicatedOtherClientName();
+
+    ret.setClientId(rs.getString("FKCLIENT_T"));
+    ret.setThirdId(rs.getString("THIRD_ID"));
+    ret.firstName = ifNull(rs.getString("FIRST_NM"));
+    ret.middleName = ifNull(rs.getString("MIDDLE_NM"));
+    ret.lastName = ifNull(rs.getString("LAST_NM"));
+    ret.nameType = rs.getShort("NAME_TPC");
+    ret.namePrefixDescription = ifNull(rs.getString("NMPRFX_DSC"));
+    ret.suffixTitleDescription = ifNull(rs.getString("SUFX_TLDSC"));
+
+    return ret;
+  }
+
   @Override
   public void setReplicationOperation(CmsReplicationOperation replicationOperation) {
     this.replicationOperation = replicationOperation;
@@ -103,10 +130,9 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
   // ApiGroupNormalizer:
   // =======================
 
-  @SuppressWarnings("unchecked")
   @Override
-  public Class<ReplicatedOtherClientName> getNormalizationClass() {
-    return (Class<ReplicatedOtherClientName>) this.getClass();
+  public Class<ReplicatedAkas> getNormalizationClass() {
+    return ReplicatedAkas.class;
   }
 
   @Override
@@ -115,7 +141,7 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
   }
 
   @Override
-  public ReplicatedOtherClientName normalize(Map<Object, ReplicatedOtherClientName> denorm) {
+  public ReplicatedAkas normalize(Map<Object, ReplicatedAkas> map) {
     return null;
   }
 

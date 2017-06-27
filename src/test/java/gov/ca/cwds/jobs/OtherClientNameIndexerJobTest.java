@@ -18,7 +18,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
+import gov.ca.cwds.dao.cms.ReplicatedAkaDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.config.StaticSessionFactory;
 
@@ -30,14 +30,14 @@ import gov.ca.cwds.jobs.config.StaticSessionFactory;
 public class OtherClientNameIndexerJobTest {
 
   @SuppressWarnings("unused")
-  private static ReplicatedOtherClientNameDao dao;
+  private static ReplicatedAkaDao dao;
   private static SessionFactory sessionFactory;
   private Session session;
 
   @BeforeClass
   public static void beforeClass() {
     sessionFactory = StaticSessionFactory.getSessionFactory();
-    dao = new ReplicatedOtherClientNameDao(sessionFactory);
+    dao = new ReplicatedAkaDao(sessionFactory);
   }
 
   @AfterClass
@@ -63,7 +63,7 @@ public class OtherClientNameIndexerJobTest {
 
   @Test
   public void testInstantiation() throws Exception {
-    ReplicatedOtherClientNameDao otherClientNameDao = null;
+    ReplicatedAkaDao otherClientNameDao = null;
     ElasticsearchDao elasticsearchDao = null;
     String lastJobRunTimeFilename = null;
     ObjectMapper mapper = null;
@@ -87,7 +87,7 @@ public class OtherClientNameIndexerJobTest {
 
   @Test
   public void instantiation() throws Exception {
-    ReplicatedOtherClientNameDao mainDao = null;
+    ReplicatedAkaDao mainDao = null;
     ElasticsearchDao elasticsearchDao = null;
     String lastJobRunTimeFilename = null;
     ObjectMapper mapper = null;
@@ -99,7 +99,7 @@ public class OtherClientNameIndexerJobTest {
 
   // @Test
   public void getPartitionRanges_Args__() throws Exception {
-    ReplicatedOtherClientNameDao mainDao = null;
+    ReplicatedAkaDao mainDao = null;
     ElasticsearchDao elasticsearchDao = null;
     String lastJobRunTimeFilename = null;
     ObjectMapper mapper = null;
@@ -118,7 +118,7 @@ public class OtherClientNameIndexerJobTest {
 
   @Test
   public void getLegacySourceTable_Args__() throws Exception {
-    ReplicatedOtherClientNameDao mainDao = null;
+    ReplicatedAkaDao mainDao = null;
     ElasticsearchDao elasticsearchDao = null;
     String lastJobRunTimeFilename = null;
     ObjectMapper mapper = null;

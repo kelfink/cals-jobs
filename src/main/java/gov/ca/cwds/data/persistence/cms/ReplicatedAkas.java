@@ -23,7 +23,7 @@ public class ReplicatedAkas extends ApiObjectIdentity implements PersistentObjec
   private static final long serialVersionUID = 1L;
 
   /**
-   * Legacy person id.
+   * Legacy person id, the client id.
    */
   private String id;
 
@@ -51,22 +51,27 @@ public class ReplicatedAkas extends ApiObjectIdentity implements PersistentObjec
     return id;
   }
 
+  @SuppressWarnings("javadoc")
   public String getId() {
     return id;
   }
 
+  @SuppressWarnings("javadoc")
   public void setId(String id) {
     this.id = id;
   }
 
+  @SuppressWarnings("javadoc")
   public List<ElasticSearchPersonAka> getAkas() {
     return akas;
   }
 
+  @SuppressWarnings("javadoc")
   public void setRelations(List<ElasticSearchPersonAka> akas) {
     this.akas = akas;
   }
 
+  @SuppressWarnings("javadoc")
   public void addRelation(ElasticSearchPersonAka aka) {
     this.akas.add(aka);
   }

@@ -1,6 +1,8 @@
 package gov.ca.cwds.jobs;
 
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,12 +14,16 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
+import gov.ca.cwds.dao.cms.ReplicatedAkaDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
+import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
@@ -26,39 +32,49 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
  * @author CWDS API Team
  */
 public class OtherClientNameIndexerJob
-    extends BasePersonIndexerJob<ReplicatedOtherClientName, ReplicatedOtherClientName> {
+    extends BasePersonIndexerJob<ReplicatedAkas, ReplicatedOtherClientName>
+    implements JobResultSetAware<ReplicatedOtherClientName> {
 
   private static final Logger LOGGER = LogManager.getLogger(OtherClientNameIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param dao OtherClientName DAO
-   * @param elasticsearchDao ElasticSearch DAO
+   * @param dao Relationship View DAO
+   * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public OtherClientNameIndexerJob(final ReplicatedOtherClientNameDao dao,
-      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
-      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(dao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  public OtherClientNameIndexerJob(final ReplicatedAkaDao dao, final ElasticsearchDao esDao,
+      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory) {
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   @Override
-  protected ReplicatedOtherClientName normalizeSingle(List<ReplicatedOtherClientName> recs) {
+  public ReplicatedOtherClientName extract(ResultSet rs) throws SQLException {
+    return ReplicatedOtherClientName.mapRow(rs);
+  }
+
+  @Override
+  protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
+    return ReplicatedOtherClientName.class;
+  }
+
+  @Override
+  protected ReplicatedAkas normalizeSingle(List<ReplicatedOtherClientName> recs) {
     return normalize(recs).get(0);
   }
 
   @Override
-  protected List<ReplicatedOtherClientName> normalize(List<ReplicatedOtherClientName> recs) {
-    return EntityNormalizer
-        .<ReplicatedOtherClientName, ReplicatedOtherClientName>normalizeList(recs);
+  protected List<ReplicatedAkas> normalize(List<ReplicatedOtherClientName> recs) {
+    return EntityNormalizer.<ReplicatedAkas, ReplicatedOtherClientName>normalizeList(recs);
   }
 
   @Override
-  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedOtherClientName p)
+  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedAkas p)
       throws IOException {
 
     // If at first you don't succeed, cheat. :-)
@@ -86,28 +102,6 @@ public class OtherClientNameIndexerJob
     return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson)
         .upsert(new IndexRequest(alias, docType, esp.getId()).source(insertJson));
   }
-
-  // @Override
-  // protected List<Pair<String, String>> getPartitionRanges() {
-  // List<Pair<String, String>> ret = new ArrayList<>();
-  // ret.add(Pair.of(" ", "CpE9999999"));
-  // ret.add(Pair.of("CpE9999999", "EE99999998"));
-  // ret.add(Pair.of("EE99999998", "GUE9999997"));
-  // ret.add(Pair.of("GUE9999997", "I999999996"));
-  // ret.add(Pair.of("I999999996", "LpE9999995"));
-  // ret.add(Pair.of("LpE9999995", "NE99999994"));
-  // ret.add(Pair.of("NE99999994", "PUE9999993"));
-  // ret.add(Pair.of("PUE9999993", "R999999992"));
-  // ret.add(Pair.of("R999999992", "UpE9999991"));
-  // ret.add(Pair.of("UpE9999991", "WE99999990"));
-  // ret.add(Pair.of("WE99999990", "YUE999999Z"));
-  // ret.add(Pair.of("YUE999999Z", "099999999Y"));
-  // ret.add(Pair.of("099999999Y", "3pE999999X"));
-  // ret.add(Pair.of("3pE999999X", "5E9999999W"));
-  // ret.add(Pair.of("5E9999999W", "7UE999999V"));
-  // ret.add(Pair.of("7UE999999V", "999999999U"));
-  // return ret;
-  // }
 
   @Override
   public String getViewName() {
