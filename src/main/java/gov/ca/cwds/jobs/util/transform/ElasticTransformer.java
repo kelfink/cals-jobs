@@ -57,13 +57,14 @@ public class ElasticTransformer {
       legacyDesc.setLegacyId(legacyId.trim());
       legacyDesc.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
 
-      if (legacyTable != null && LegacyTable.STFPERST.equals(legacyTable)) {
-        /**
-         * For staff person, UI ID is not available, just use legacyId
-         */
-        legacyDesc.setLegacyUiId(legacyId.trim());
-      } else {
+      /**
+       * Legacy ID should always be 10 characters long, otherwise we can not parse it to get UI ID.
+       * For LegacyTable.STFPERST it is usually 3 characters long.
+       */
+      if (legacyId.trim().length() == 10) {
         legacyDesc.setLegacyUiId(CmsKeyIdGenerator.getUIIdentifierFromKey(legacyId.trim()));
+      } else {
+        legacyDesc.setLegacyUiId(legacyId.trim());
       }
 
       if (legacyTable != null) {
