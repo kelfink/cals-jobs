@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 public class IntakeAllegationTest {
 
@@ -46,7 +46,7 @@ public class IntakeAllegationTest {
     expected.setId("1234567");
     expected.setLegacyId("1234567");
     expected.setLegacyDescriptor(
-        ElasticTransformer.createLegacyDescriptor("1234567", null, LegacyTable.ALLGTN_T));
+        ElasticTransformer.createLegacyDescriptor("1234567", null, LegacyTable.ALLEGATION));
 
     expected.setVictimId("8888888");
     expected.getVictim().setId("8888888");

@@ -12,7 +12,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.cms.BaseAddress;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
  * {@link CmsPersistentObject} representing an Address in the replicated schema.
@@ -44,7 +44,7 @@ public class ReplicatedAddress extends BaseAddress implements CmsReplicatedEntit
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
-        LegacyTable.ADDRS_T);
+        LegacyTable.ADDRESS);
   }
 
   @Override

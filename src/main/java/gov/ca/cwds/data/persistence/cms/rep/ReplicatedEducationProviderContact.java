@@ -21,7 +21,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseEducationProviderContact;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
  * {@link PersistentObject} representing an Education Provider Contact as a
@@ -130,6 +130,6 @@ public class ReplicatedEducationProviderContact extends BaseEducationProviderCon
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
-        LegacyTable.EDPRVCNT);
+        LegacyTable.EDUCATION_PROVIDER);
   }
 }

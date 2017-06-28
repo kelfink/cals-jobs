@@ -37,7 +37,7 @@ import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
  * {@link PersistentObject} representing a Client as a {@link CmsReplicatedEntity} in the replicated
@@ -209,7 +209,7 @@ public class ReplicatedClient extends BaseClient
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
-        LegacyTable.CLIENT_T);
+        LegacyTable.CLIENT);
   }
 
   // ==============

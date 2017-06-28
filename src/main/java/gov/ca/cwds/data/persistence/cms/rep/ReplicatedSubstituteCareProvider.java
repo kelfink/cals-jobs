@@ -21,7 +21,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseSubstituteCareProvider;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
  * {@link PersistentObject} representing a Substitute Care Provider as a {@link CmsReplicatedEntity}
@@ -140,6 +140,6 @@ public class ReplicatedSubstituteCareProvider extends BaseSubstituteCareProvider
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
-        LegacyTable.SB_PVDRT);
+        LegacyTable.SUBSTITUTE_CARE_PROVIDER);
   }
 }

@@ -21,7 +21,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseReporter;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
  * {@link PersistentObject} representing a Reporter as a {@link CmsReplicatedEntity}.
@@ -152,6 +152,6 @@ public class ReplicatedReporter extends BaseReporter
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
-        LegacyTable.REPTR_T);
+        LegacyTable.REPORTER);
   }
 }

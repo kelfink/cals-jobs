@@ -21,7 +21,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseCollateralIndividual;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
  * {@link PersistentObject} representing a Collateral Individual as a {@link CmsReplicatedEntity}.
@@ -135,6 +135,6 @@ public class ReplicatedCollateralIndividual extends BaseCollateralIndividual
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
-        LegacyTable.COLTRL_T);
+        LegacyTable.COLLATERAL_INDIVIDUAL);
   }
 }

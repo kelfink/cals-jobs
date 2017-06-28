@@ -19,8 +19,8 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.LegacyTable;
 import gov.ca.cwds.rest.api.domain.DomainChef;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
  * Entity bean for view VW_PARENT_CASE_HIST for parent person cases.
@@ -380,7 +380,7 @@ public class EsParentPersonCase extends EsPersonCase {
     esPersonCase.setServiceComponent(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.serviceComponent));
     esPersonCase.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.caseId,
-        this.caseLastUpdated, LegacyTable.CASE_T));
+        this.caseLastUpdated, LegacyTable.CASE));
 
     //
     // Child
@@ -392,7 +392,7 @@ public class EsParentPersonCase extends EsPersonCase {
     child.setFirstName(this.focusChildFirstName);
     child.setLastName(this.focusChildLastName);
     child.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.focusChildId,
-        this.focusChildLastUpdated, LegacyTable.CLIENT_T));
+        this.focusChildLastUpdated, LegacyTable.CLIENT));
     esPersonCase.setFocusChild(child);
 
     //
@@ -405,7 +405,7 @@ public class EsParentPersonCase extends EsPersonCase {
     assignedWorker.setFirstName(this.workerFirstName);
     assignedWorker.setLastName(this.workerLastName);
     assignedWorker.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
-        this.workerLastUpdated, LegacyTable.STFPERST));
+        this.workerLastUpdated, LegacyTable.STAFF_PERSON));
     esPersonCase.setAssignedSocialWorker(assignedWorker);
 
     //
@@ -434,7 +434,7 @@ public class EsParentPersonCase extends EsPersonCase {
     parent.setRelationship(
         ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.parentRelationship));
     parent.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.parentId,
-        this.parentLastUpdated, LegacyTable.CLIENT_T));
+        this.parentLastUpdated, LegacyTable.CLIENT));
 
     cases.addCase(esPersonCase, parent);
     return cases;

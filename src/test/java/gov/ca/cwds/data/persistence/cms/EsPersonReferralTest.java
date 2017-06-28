@@ -18,7 +18,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 public class EsPersonReferralTest {
 
@@ -121,13 +121,13 @@ public class EsPersonReferralTest {
     allegation.setId("abc1234");
     allegation.setLegacyId("abc1234");
     allegation.setLegacyDescriptor(
-        ElasticTransformer.createLegacyDescriptor("abc1234", null, LegacyTable.ALLGTN_T));
+        ElasticTransformer.createLegacyDescriptor("abc1234", null, LegacyTable.ALLEGATION));
 
     ElasticSearchPersonReferral referral = new ElasticSearchPersonReferral();
     referral.setId("ddusicnz7");
     referral.setLegacyId("ddusicnz7");
     referral.setLegacyDescriptor(
-        ElasticTransformer.createLegacyDescriptor("ddusicnz7", null, LegacyTable.REFERL_T));
+        ElasticTransformer.createLegacyDescriptor("ddusicnz7", null, LegacyTable.REFERRAL));
 
     expected.addReferral(referral, allegation);
 
