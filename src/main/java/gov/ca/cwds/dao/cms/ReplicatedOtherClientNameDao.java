@@ -15,9 +15,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
  * @see CmsSessionFactory
  * @see SessionFactory
  */
-public class ReplicatedOtherClientNameDao extends BaseDaoImpl<ReplicatedOtherClientName>
-// implements BatchBucketDao<ReplicatedOtherClientName>
-{
+public class ReplicatedOtherClientNameDao extends BaseDaoImpl<ReplicatedOtherClientName> {
 
   /**
    * Constructor
