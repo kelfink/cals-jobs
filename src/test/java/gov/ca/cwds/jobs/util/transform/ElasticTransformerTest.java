@@ -21,7 +21,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.jobs.TestNormalizedEntity;
+import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 
 public class ElasticTransformerTest {
 

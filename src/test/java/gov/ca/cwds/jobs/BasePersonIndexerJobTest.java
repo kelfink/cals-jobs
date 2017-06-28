@@ -39,6 +39,10 @@ import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
+import gov.ca.cwds.jobs.test.TestIndexerJob;
+import gov.ca.cwds.jobs.test.TestNormalizedEntity;
+import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
 public class BasePersonIndexerJobTest {
 

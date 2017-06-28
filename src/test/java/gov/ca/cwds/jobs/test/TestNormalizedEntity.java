@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.test;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -12,6 +12,8 @@ import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.ReadablePhone;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.std.ApiAddressAware;
+import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
@@ -20,7 +22,7 @@ import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 @JsonPropertyOrder(alphabetic = true)
 public class TestNormalizedEntity implements PersistentObject, ApiPersonAware,
-    ApiTypedIdentifier<String>, ApiLegacyAware, ApiMultiplePhonesAware {
+    ApiTypedIdentifier<String>, ApiLegacyAware, ApiMultiplePhonesAware, ApiMultipleAddressesAware {
 
   private String id;
 
@@ -129,6 +131,12 @@ public class TestNormalizedEntity implements PersistentObject, ApiPersonAware,
     ApiPhoneAware[] phones = new ApiPhoneAware[1];
     phones[0] = new ReadablePhone("abc1234567", "408-374-2790", "", PhoneType.Home);
     return phones;
+  }
+
+  @Override
+  public ApiAddressAware[] getAddresses() {
+    ApiAddressAware[] addresses = new ApiAddressAware[0];
+    return null;
   }
 
 }

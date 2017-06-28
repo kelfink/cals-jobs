@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
 public class LastSuccessfulRunJobTest {
 

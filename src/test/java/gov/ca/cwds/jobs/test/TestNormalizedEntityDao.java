@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.test;
 
 import org.hibernate.SessionFactory;
 
