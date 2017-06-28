@@ -23,7 +23,7 @@ import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
- * Entity bean for Materialized Query Table (MQT) ES_CASE_HIST for focus child person cases.
+ * Entity bean for Materialized Query Table (MQT), ES_CASE_HIST, for focus child person cases.
  * 
  * @author CWDS API Team
  */
