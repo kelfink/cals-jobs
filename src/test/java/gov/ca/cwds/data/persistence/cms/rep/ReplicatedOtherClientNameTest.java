@@ -13,7 +13,10 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAka;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 public class ReplicatedOtherClientNameTest {
 
@@ -65,14 +68,27 @@ public class ReplicatedOtherClientNameTest {
   public void normalize_Args__Map() throws Exception {
     ReplicatedOtherClientName target = new ReplicatedOtherClientName();
     // given
+
+    String key = "asd12340x5";
     Map<Object, ReplicatedAkas> map = new HashMap<Object, ReplicatedAkas>();
+    ReplicatedAkas akas = new ReplicatedAkas();
+    akas.setId(key);
+    ElasticSearchPersonAka aka = new ElasticSearchPersonAka();
+    aka.setFirstName("fred");
+    aka.setMiddleName("jason");
+    aka.setLastName("meyer");
+    aka.setLegacyDescriptor(new ElasticSearchLegacyDescriptor("abc123djsk", "1234567890",
+        "2017-12-31", LegacyTable.ADDRESS.getName(), "whatever"));
+    akas.addAka(aka);
+    map.put(key, akas);
+
     // e.g. : given(mocked.called()).willReturn(1);
     // when
     ReplicatedAkas actual = target.normalize(map);
     // then
     // e.g. : verify(mocked).called();
-    ReplicatedAkas expected = new ReplicatedAkas();
-    assertThat(actual, is(equalTo(expected)));
+    // ReplicatedAkas expected = new ReplicatedAkas();
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
