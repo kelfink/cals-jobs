@@ -30,7 +30,7 @@ import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
- * Translate {@link ApiPersonAware} to {@link ElasticSearchPerson}.
+ * Methods to transform {@link ApiPersonAware} into {@link ElasticSearchPerson}.
  * 
  * @author CWDS API Team
  */

@@ -34,7 +34,7 @@ public class ElasticTransformerTest {
   public void handleLanguage_Args__ApiPersonAware() throws Exception {
     // given
     ApiPersonAware p = new TestNormalizedEntity("abc123");
-    // e.g. : given(mocked.called()).willReturn(1);
+
     // when
     List<String> actual = ElasticTransformer.handleLanguage(p);
     // then
@@ -48,7 +48,7 @@ public class ElasticTransformerTest {
   public void handlePhone_Args__ApiPersonAware() throws Exception {
     // given
     ApiPersonAware p = new TestNormalizedEntity("abc123");
-    // e.g. : given(mocked.called()).willReturn(1);
+
     // when
     List<ElasticSearchPerson.ElasticSearchPersonPhone> actual = ElasticTransformer.handlePhone(p);
     // then
@@ -61,7 +61,7 @@ public class ElasticTransformerTest {
   public void handleAddress_Args__ApiPersonAware() throws Exception {
     // given
     ApiPersonAware p = mock(ApiPersonAware.class);
-    // e.g. : given(mocked.called()).willReturn(1);
+
     // when
     List<ElasticSearchPersonAddress> actual = ElasticTransformer.handleAddress(p);
     // then
@@ -74,7 +74,7 @@ public class ElasticTransformerTest {
   public void handleScreening_Args__ApiPersonAware() throws Exception {
     // given
     ApiPersonAware p = mock(ApiPersonAware.class);
-    // e.g. : given(mocked.called()).willReturn(1);
+
     // when
     List<ElasticSearchPersonScreening> actual = ElasticTransformer.handleScreening(p);
     // then
@@ -101,7 +101,7 @@ public class ElasticTransformerTest {
     ObjectMapper mapper = mock(ObjectMapper.class);
     ApiPersonAware p = mock(ApiPersonAware.class);
     doThrow(new IllegalArgumentException("whatever")).when(p).getPrimaryKey();
-    // e.g. : given(mocked.called()).willReturn(1);
+
     try {
       // when
       ElasticTransformer.buildElasticSearchPersonDoc(mapper, p);
@@ -115,7 +115,7 @@ public class ElasticTransformerTest {
   public void handleLegacyDescriptor_Args__ApiPersonAware() throws Exception {
     // given
     ApiPersonAware p = mock(ApiPersonAware.class);
-    // e.g. : given(mocked.called()).willReturn(1);
+
     // when
     ElasticSearchLegacyDescriptor actual = ElasticTransformer.handleLegacyDescriptor(p);
     // then
