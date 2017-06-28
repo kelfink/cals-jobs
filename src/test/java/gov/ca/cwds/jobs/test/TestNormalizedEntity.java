@@ -13,7 +13,9 @@ import gov.ca.cwds.data.ReadablePhone;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiAddressAware;
+import gov.ca.cwds.data.std.ApiLanguageAware;
 import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
+import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
@@ -21,8 +23,9 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 @JsonPropertyOrder(alphabetic = true)
-public class TestNormalizedEntity implements PersistentObject, ApiPersonAware,
-    ApiTypedIdentifier<String>, ApiLegacyAware, ApiMultiplePhonesAware, ApiMultipleAddressesAware {
+public class TestNormalizedEntity
+    implements PersistentObject, ApiPersonAware, ApiTypedIdentifier<String>, ApiLegacyAware,
+    ApiMultiplePhonesAware, ApiMultipleAddressesAware, ApiMultipleLanguagesAware {
 
   private String id;
 
@@ -135,8 +138,16 @@ public class TestNormalizedEntity implements PersistentObject, ApiPersonAware,
 
   @Override
   public ApiAddressAware[] getAddresses() {
-    ApiAddressAware[] addresses = new ApiAddressAware[0];
-    return null;
+    ApiAddressAware[] addresses = new ApiAddressAware[1];
+    addresses[0] = new SimpleAddress("Sacramento", "Sacramento", "CA", "1234", "95660");
+    return addresses;
+  }
+
+  @Override
+  public ApiLanguageAware[] getLanguages() {
+    ApiLanguageAware[] languages = new ApiLanguageAware[1];
+    languages[0] = new TestLanguage();
+    return languages;
   }
 
 }

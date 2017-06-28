@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -81,6 +82,72 @@ public class CollateralIndividualIndexerJobTest {
     Query query = session.getNamedQuery(
         "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findAllUpdatedAfter");
     assertThat(query, is(notNullValue()));
+  }
+
+  @Test
+  public void type() throws Exception {
+    assertThat(CollateralIndividualIndexerJob.class, notNullValue());
+  }
+
+  @Test
+  public void instantiation() throws Exception {
+    ReplicatedCollateralIndividualDao mainDao = null;
+    ElasticsearchDao elasticsearchDao = null;
+    String lastJobRunTimeFilename = null;
+    ObjectMapper mapper = null;
+    SessionFactory sessionFactory = null;
+    CollateralIndividualIndexerJob target = new CollateralIndividualIndexerJob(mainDao,
+        elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    assertThat(target, notNullValue());
+  }
+
+  @Test
+  public void getJobTotalBuckets_Args__() throws Exception {
+    ReplicatedCollateralIndividualDao mainDao = null;
+    ElasticsearchDao elasticsearchDao = null;
+    String lastJobRunTimeFilename = null;
+    ObjectMapper mapper = null;
+    SessionFactory sessionFactory = null;
+    CollateralIndividualIndexerJob target = new CollateralIndividualIndexerJob(mainDao,
+        elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    int actual = target.getJobTotalBuckets();
+    // then
+    // e.g. : verify(mocked).called();
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getLegacySourceTable_Args__() throws Exception {
+    ReplicatedCollateralIndividualDao mainDao = null;
+    ElasticsearchDao elasticsearchDao = null;
+    String lastJobRunTimeFilename = null;
+    ObjectMapper mapper = null;
+    SessionFactory sessionFactory = null;
+    CollateralIndividualIndexerJob target = new CollateralIndividualIndexerJob(mainDao,
+        elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    String actual = target.getLegacySourceTable();
+    // then
+    // e.g. : verify(mocked).called();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void main_Args__StringArray() throws Exception {
+    // given
+    String[] args = new String[] {};
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    CollateralIndividualIndexerJob.main(args);
+    // then
+    // e.g. : verify(mocked).called();
   }
 
 }
