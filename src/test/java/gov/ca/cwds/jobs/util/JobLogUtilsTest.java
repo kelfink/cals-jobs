@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs.util;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -36,7 +34,7 @@ public class JobLogUtilsTest {
   }
 
   @Test(expected = JobsException.class)
-  public void throwFatalError_Args__Logger__Throwable__String__ObjectArray() throws Exception {
+  public void throwFatalError_Args__Logger__Throwable__String__ObjectArray4() throws Exception {
     Logger log = mock(Logger.class);
     Throwable e = new IllegalStateException("hello world");
     String pattern = null;
@@ -53,7 +51,7 @@ public class JobLogUtilsTest {
   }
 
   @Test(expected = JobsException.class)
-  public void logEvery_Args__Logger__int__String__ObjectArray() throws Exception {
+  public void logEvery_Args__Logger__int__String__ObjectArray1() throws Exception {
     Exception e = new Exception();
     JobLogUtils.raiseError(JobLogUtils.LOGGER, e, "BATCH ERROR! {}", e.getMessage());
   }
@@ -67,7 +65,7 @@ public class JobLogUtilsTest {
   }
 
   @Test(expected = JobsException.class)
-  public void raiseError_Args__Logger__Throwable__String__ObjectArray() throws Exception {
+  public void raiseError_Args__Logger__Throwable__String__ObjectArray2() throws Exception {
     Logger log = mock(Logger.class);
     Throwable e = null;
     String pattern = null;
@@ -75,19 +73,8 @@ public class JobLogUtilsTest {
     JobLogUtils.raiseError(log, e, pattern, args);
   }
 
-  // @Test
-  public void buildException_Args__Logger__Throwable__String__ObjectArray() throws Exception {
-    Logger log = mock(Logger.class);
-    Throwable e = null;
-    String pattern = null;
-    Object[] args = new Object[] {};
-    JobsException actual = JobLogUtils.buildException(log, e, pattern, args);
-    JobsException expected = new JobsException("", null);
-    assertThat(actual, is(equalTo(expected)));
-  }
-
   @Test(expected = JobsException.class)
-  public void raiseError_Args__Logger__Throwable__ObjectArray() throws Exception {
+  public void raiseError_Args__Logger__Throwable__ObjectArray3() throws Exception {
     Logger log = mock(Logger.class);
     Throwable e = null;
     Object[] args = new Object[] {};
