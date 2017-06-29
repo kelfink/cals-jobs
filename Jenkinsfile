@@ -13,6 +13,7 @@ node ('dora-slave'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar'
    }
    stage('CoverageCheck_and_Test') {
+       sh ('docker-compose pull')
        sh ('docker-compose up -d')
 	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoTestReport'
 	   result = buildInfo.result
