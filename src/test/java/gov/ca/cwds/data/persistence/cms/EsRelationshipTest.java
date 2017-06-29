@@ -15,11 +15,18 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonRelationship;
+import gov.ca.cwds.jobs.test.TestSystemCodeCache;
 
 public class EsRelationshipTest {
+
+  @BeforeClass
+  public static void setupTests() {
+    TestSystemCodeCache.init();
+  }
 
   @Test
   public void type() throws Exception {
@@ -66,18 +73,30 @@ public class EsRelationshipTest {
   public void parseBiDirectionalRelationship_Args__ElasticSearchPersonRelationship()
       throws Exception {
     EsRelationship target = new EsRelationship();
-    ElasticSearchPersonRelationship rel = mock(ElasticSearchPersonRelationship.class);
+    target.setRelCode((short) 196);
+
+    ElasticSearchPersonRelationship rel = new ElasticSearchPersonRelationship();
+    rel.setIndexedPersonRelationship("daughter");
+    rel.setRelatedPersonFirstName("Britney");
+    rel.setRelatedPersonLastName("Spears");
+    rel.setRelatedPersonRelationship("mother");
+    rel.setRelationshipContext("birth");
+    rel.setRelatedPersonId("abc12347x6");
+
     target.parseBiDirectionalRelationship(rel);
   }
 
   @Test
   public void normalize_Args__Map() throws Exception {
     EsRelationship target = new EsRelationship();
+    target.setRelatedLegacyId("abc12340x7");
+    target.setRelatedFirstName("Idina");
+    target.setRelatedLastName("Menzel");
+
     Map<Object, ReplicatedRelationships> map = new HashMap<Object, ReplicatedRelationships>();
     ReplicatedRelationships actual = target.normalize(map);
-    ReplicatedRelationships expected = new ReplicatedRelationships();
-    expected.addRelation(new ElasticSearchPersonRelationship());
-    assertThat(actual, is(equalTo(expected)));
+
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
