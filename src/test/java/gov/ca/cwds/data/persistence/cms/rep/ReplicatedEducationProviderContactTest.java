@@ -13,6 +13,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
+
 public class ReplicatedEducationProviderContactTest {
 
   @Test
@@ -49,12 +51,7 @@ public class ReplicatedEducationProviderContactTest {
   @Test
   public void getNormalizationClass_Args__() throws Exception {
     ReplicatedEducationProviderContact target = new ReplicatedEducationProviderContact();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     Class<ReplicatedEducationProviderContact> actual = target.getNormalizationClass();
-    // then
-    // e.g. : verify(mocked).called();
     Class<ReplicatedEducationProviderContact> expected = ReplicatedEducationProviderContact.class;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -62,14 +59,9 @@ public class ReplicatedEducationProviderContactTest {
   @Test
   public void normalize_Args__Map() throws Exception {
     ReplicatedEducationProviderContact target = new ReplicatedEducationProviderContact();
-    // given
     Map<Object, ReplicatedEducationProviderContact> map =
         new HashMap<Object, ReplicatedEducationProviderContact>();
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     ReplicatedEducationProviderContact actual = target.normalize(map);
-    // then
-    // e.g. : verify(mocked).called();
     ReplicatedEducationProviderContact expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -77,12 +69,7 @@ public class ReplicatedEducationProviderContactTest {
   @Test
   public void getNormalizationGroupKey_Args__() throws Exception {
     ReplicatedEducationProviderContact target = new ReplicatedEducationProviderContact();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     Object actual = target.getNormalizationGroupKey();
-    // then
-    // e.g. : verify(mocked).called();
     Object expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -90,14 +77,21 @@ public class ReplicatedEducationProviderContactTest {
   @Test
   public void getLegacyId_Args__() throws Exception {
     ReplicatedEducationProviderContact target = new ReplicatedEducationProviderContact();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getLegacyId();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getLegacyDescriptor_Args__() throws Exception {
+    ReplicatedEducationProviderContact target = new ReplicatedEducationProviderContact();
+    Date lastUpdatedTime = new Date();
+    target.setReplicationOperation(CmsReplicationOperation.U);
+    target.setLastUpdatedId("0x5");
+    target.setLastUpdatedTime(lastUpdatedTime);
+    target.setReplicationDate(lastUpdatedTime);
+    ElasticSearchLegacyDescriptor actual = target.getLegacyDescriptor();
+    assertThat(actual, is(notNullValue()));
   }
 
 }

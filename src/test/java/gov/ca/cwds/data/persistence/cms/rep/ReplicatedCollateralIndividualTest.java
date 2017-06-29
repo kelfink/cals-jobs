@@ -13,6 +13,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
+
 public class ReplicatedCollateralIndividualTest {
 
   @Test
@@ -98,6 +100,18 @@ public class ReplicatedCollateralIndividualTest {
     // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getLegacyDescriptor_Args__() throws Exception {
+    Date lastUpdatedTime = new Date();
+    ReplicatedCollateralIndividual target = new ReplicatedCollateralIndividual();
+    target.setReplicationOperation(CmsReplicationOperation.U);
+    target.setLastUpdatedId("0x5");
+    target.setLastUpdatedTime(lastUpdatedTime);
+    target.setReplicationDate(lastUpdatedTime);
+    ElasticSearchLegacyDescriptor actual = target.getLegacyDescriptor();
+    assertThat(actual, is(notNullValue()));
   }
 
 }

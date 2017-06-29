@@ -13,6 +13,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
+
 public class ReplicatedServiceProviderTest {
 
   @Test
@@ -49,12 +51,7 @@ public class ReplicatedServiceProviderTest {
   @Test
   public void getNormalizationClass_Args__() throws Exception {
     ReplicatedServiceProvider target = new ReplicatedServiceProvider();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     Class<ReplicatedServiceProvider> actual = target.getNormalizationClass();
-    // then
-    // e.g. : verify(mocked).called();
     Class<ReplicatedServiceProvider> expected = ReplicatedServiceProvider.class;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -62,13 +59,8 @@ public class ReplicatedServiceProviderTest {
   @Test
   public void normalize_Args__Map() throws Exception {
     ReplicatedServiceProvider target = new ReplicatedServiceProvider();
-    // given
     Map<Object, ReplicatedServiceProvider> map = new HashMap<Object, ReplicatedServiceProvider>();
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     ReplicatedServiceProvider actual = target.normalize(map);
-    // then
-    // e.g. : verify(mocked).called();
     ReplicatedServiceProvider expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -76,12 +68,7 @@ public class ReplicatedServiceProviderTest {
   @Test
   public void getNormalizationGroupKey_Args__() throws Exception {
     ReplicatedServiceProvider target = new ReplicatedServiceProvider();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     Object actual = target.getNormalizationGroupKey();
-    // then
-    // e.g. : verify(mocked).called();
     Object expected = "";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -89,14 +76,21 @@ public class ReplicatedServiceProviderTest {
   @Test
   public void getLegacyId_Args__() throws Exception {
     ReplicatedServiceProvider target = new ReplicatedServiceProvider();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getLegacyId();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = "";
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getLegacyDescriptor_Args__() throws Exception {
+    ReplicatedServiceProvider target = new ReplicatedServiceProvider();
+    Date lastUpdatedTime = new Date();
+    target.setReplicationOperation(CmsReplicationOperation.U);
+    target.setLastUpdatedId("0x5");
+    target.setLastUpdatedTime(lastUpdatedTime);
+    target.setReplicationDate(lastUpdatedTime);
+    ElasticSearchLegacyDescriptor actual = target.getLegacyDescriptor();
+    assertThat(actual, is(notNullValue()));
   }
 
 }

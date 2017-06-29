@@ -4,15 +4,21 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
+import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAka;
@@ -22,9 +28,36 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 public class ReplicatedOtherClientNameTest {
 
+  private static ReplicatedOtherClientName emptyTarget;
+
+  @Mock
+  private ResultSet rs;
+
   @BeforeClass
-  public static void setupTests() {
+  public static void setupClass() throws Exception {
     TestSystemCodeCache.init();
+    emptyTarget = ReplicatedOtherClientName.mapRowToBean(Mockito.mock(ResultSet.class));
+  }
+
+  @Before
+  public void setUp() throws Exception {
+    MockitoAnnotations.initMocks(this);
+    when(rs.first()).thenReturn(true);
+
+    final Short shortZero = Short.valueOf((short) 0);
+
+    when(rs.getString("FKCLIENT_T")).thenReturn("abc12340x3");
+    when(rs.getString("THIRD_ID")).thenReturn("def56780x3");
+    when(rs.getString("LST_UPD_ID")).thenReturn("0x5");
+    when(rs.getString("FIRST_NM")).thenReturn("Maynard");
+    when(rs.getString("MIDDLE_NM")).thenReturn("James");
+    when(rs.getString("LAST_NM")).thenReturn("Keynamn");
+    when(rs.getString("NMPRFX_DSC")).thenReturn("Lord");
+    when(rs.getString("SUFX_TLDSC")).thenReturn("IV");
+
+    when(rs.getShort("NAME_TPC")).thenReturn(shortZero);
+
+    when(rs.getDate("LST_UPD_TS")).thenReturn(java.sql.Date.valueOf("2017-10-31"));
   }
 
   @Test
@@ -61,12 +94,7 @@ public class ReplicatedOtherClientNameTest {
   @Test
   public void getNormalizationClass_Args__() throws Exception {
     ReplicatedOtherClientName target = new ReplicatedOtherClientName();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     Class<ReplicatedAkas> actual = target.getNormalizationClass();
-    // then
-    // e.g. : verify(mocked).called();
     Class<ReplicatedAkas> expected = ReplicatedAkas.class;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -87,6 +115,7 @@ public class ReplicatedOtherClientNameTest {
     Map<Object, ReplicatedAkas> map = new HashMap<Object, ReplicatedAkas>();
     ReplicatedAkas akas = new ReplicatedAkas();
     akas.setId(key);
+
     ElasticSearchPersonAka aka = new ElasticSearchPersonAka();
     aka.setFirstName("fred");
     aka.setMiddleName("jason");
@@ -96,24 +125,21 @@ public class ReplicatedOtherClientNameTest {
     akas.addAka(aka);
     map.put(key, akas);
 
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     ReplicatedAkas actual = target.normalize(map);
-    // then
-    // e.g. : verify(mocked).called();
-    // ReplicatedAkas expected = new ReplicatedAkas();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void extract_Args__ResultSet() throws Exception {
+    ReplicatedOtherClientName target = new ReplicatedOtherClientName();
+    final ReplicatedOtherClientName actual = target.mapRow(rs);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void getNormalizationGroupKey_Args__() throws Exception {
     ReplicatedOtherClientName target = new ReplicatedOtherClientName();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     Object actual = target.getNormalizationGroupKey();
-    // then
-    // e.g. : verify(mocked).called();
     Object expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -121,12 +147,7 @@ public class ReplicatedOtherClientNameTest {
   @Test
   public void getLegacyId_Args__() throws Exception {
     ReplicatedOtherClientName target = new ReplicatedOtherClientName();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getLegacyId();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = "";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -134,14 +155,21 @@ public class ReplicatedOtherClientNameTest {
   @Test
   public void getId_Args__() throws Exception {
     ReplicatedOtherClientName target = new ReplicatedOtherClientName();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getId();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = "";
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getLegacyDescriptor_Args__() throws Exception {
+    ReplicatedOtherClientName target = new ReplicatedOtherClientName();
+    Date lastUpdatedTime = new Date();
+    target.setReplicationOperation(CmsReplicationOperation.U);
+    target.setLastUpdatedId("0x5");
+    target.setLastUpdatedTime(lastUpdatedTime);
+    target.setReplicationDate(lastUpdatedTime);
+    ElasticSearchLegacyDescriptor actual = target.getLegacyDescriptor();
+    assertThat(actual, is(notNullValue()));
   }
 
 }

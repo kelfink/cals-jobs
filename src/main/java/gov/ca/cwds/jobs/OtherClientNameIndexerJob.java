@@ -57,7 +57,7 @@ public class OtherClientNameIndexerJob
 
   @Override
   public ReplicatedOtherClientName extract(ResultSet rs) throws SQLException {
-    return ReplicatedOtherClientName.mapRow(rs);
+    return ReplicatedOtherClientName.mapRowToBean(rs);
   }
 
   @Override

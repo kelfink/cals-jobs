@@ -30,6 +30,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseOtherClientName;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.jobs.util.jdbc.RowMapper;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -65,8 +66,8 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 @Table(name = "OCL_NM_T")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ReplicatedOtherClientName extends BaseOtherClientName
-    implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedAkas> {
+public class ReplicatedOtherClientName extends BaseOtherClientName implements CmsReplicatedEntity,
+    ApiGroupNormalizer<ReplicatedAkas>, RowMapper<ReplicatedOtherClientName> {
 
   /**
    * Default serialization.
@@ -99,7 +100,7 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
    * @return a populated EsRelationship
    * @throws SQLException if unable to convert types or stream breaks, etc.
    */
-  public static ReplicatedOtherClientName mapRow(ResultSet rs) throws SQLException {
+  public static ReplicatedOtherClientName mapRowToBean(ResultSet rs) throws SQLException {
     ReplicatedOtherClientName ret = new ReplicatedOtherClientName();
 
     ret.setClientId(rs.getString("FKCLIENT_T"));
@@ -116,6 +117,11 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
     ret.setLastUpdatedTime(rs.getDate("LST_UPD_TS"));
 
     return ret;
+  }
+
+  @Override
+  public ReplicatedOtherClientName mapRow(ResultSet rs) throws SQLException {
+    return ReplicatedOtherClientName.mapRowToBean(rs);
   }
 
   @Override

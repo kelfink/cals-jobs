@@ -13,6 +13,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
+
 public class ReplicatedAttorneyTest {
 
   @Test
@@ -49,12 +51,7 @@ public class ReplicatedAttorneyTest {
   @Test
   public void getNormalizationClass_Args__() throws Exception {
     ReplicatedAttorney target = new ReplicatedAttorney();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     Class<ReplicatedAttorney> actual = target.getNormalizationClass();
-    // then
-    // e.g. : verify(mocked).called();
     Class<ReplicatedAttorney> expected = ReplicatedAttorney.class;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -62,13 +59,8 @@ public class ReplicatedAttorneyTest {
   @Test
   public void normalize_Args__Map() throws Exception {
     ReplicatedAttorney target = new ReplicatedAttorney();
-    // given
     Map<Object, ReplicatedAttorney> map = new HashMap<Object, ReplicatedAttorney>();
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     ReplicatedAttorney actual = target.normalize(map);
-    // then
-    // e.g. : verify(mocked).called();
     ReplicatedAttorney expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -76,12 +68,7 @@ public class ReplicatedAttorneyTest {
   @Test
   public void getNormalizationGroupKey_Args__() throws Exception {
     ReplicatedAttorney target = new ReplicatedAttorney();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     Object actual = target.getNormalizationGroupKey();
-    // then
-    // e.g. : verify(mocked).called();
     Object expected = "";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -89,11 +76,21 @@ public class ReplicatedAttorneyTest {
   @Test
   public void getLegacyId_Args__() throws Exception {
     ReplicatedAttorney target = new ReplicatedAttorney();
-    // target.id = "12345";
-
     String actual = target.getLegacyId();
     String expected = "";
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getLegacyDescriptor_Args__() throws Exception {
+    ReplicatedAttorney target = new ReplicatedAttorney();
+    Date lastUpdatedTime = new Date();
+    target.setReplicationOperation(CmsReplicationOperation.U);
+    target.setLastUpdatedId("0x5");
+    target.setLastUpdatedTime(lastUpdatedTime);
+    target.setReplicationDate(lastUpdatedTime);
+    ElasticSearchLegacyDescriptor actual = target.getLegacyDescriptor();
+    assertThat(actual, is(notNullValue()));
   }
 
 }
