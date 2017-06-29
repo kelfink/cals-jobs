@@ -66,10 +66,11 @@ public class ReplicatedOtherClientNameTest {
 
   // @Test
   public void normalize_Args__Map() throws Exception {
-    ReplicatedOtherClientName target = new ReplicatedOtherClientName();
-    // given
-
     String key = "asd12340x5";
+    ReplicatedOtherClientName target = new ReplicatedOtherClientName();
+    target.setClientId(key);
+    target.setThirdId("ABC12340x5");
+
     Map<Object, ReplicatedAkas> map = new HashMap<Object, ReplicatedAkas>();
     ReplicatedAkas akas = new ReplicatedAkas();
     akas.setId(key);
