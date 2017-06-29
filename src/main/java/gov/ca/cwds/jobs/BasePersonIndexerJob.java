@@ -806,7 +806,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * The "extract" part of ETL. Single producer, staged consumers.
+   * The "extract" part of ETL. Single producer, chained consumers.
    */
   protected void threadExtractJdbc() {
     Thread.currentThread().setName("extract");

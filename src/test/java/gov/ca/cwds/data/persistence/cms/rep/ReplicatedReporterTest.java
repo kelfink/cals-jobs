@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,8 +14,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
-public class ReplicatedReporterTest {
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 
+public class ReplicatedReporterTest {
   @Test
   public void testReplicationOperation() throws Exception {
     ReplicatedReporter target = new ReplicatedReporter();
@@ -110,6 +112,68 @@ public class ReplicatedReporterTest {
     // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getReplicationOperation_Args__() throws Exception {
+    ReplicatedReporter target = new ReplicatedReporter();
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    CmsReplicationOperation actual = target.getReplicationOperation();
+    // then
+    // e.g. : verify(mocked).called();
+    CmsReplicationOperation expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setReplicationOperation_Args__CmsReplicationOperation() throws Exception {
+    ReplicatedReporter target = new ReplicatedReporter();
+    // given
+    CmsReplicationOperation replicationOperation = CmsReplicationOperation.U;
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    target.setReplicationOperation(replicationOperation);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
+  @Test
+  public void getReplicationDate_Args__() throws Exception {
+    ReplicatedReporter target = new ReplicatedReporter();
+    // given
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    Date actual = target.getReplicationDate();
+    // then
+    // e.g. : verify(mocked).called();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setReplicationDate_Args__Date() throws Exception {
+    ReplicatedReporter target = new ReplicatedReporter();
+    // given
+    Date replicationDate = mock(Date.class);
+    // e.g. : given(mocked.called()).willReturn(1);
+    // when
+    target.setReplicationDate(replicationDate);
+    // then
+    // e.g. : verify(mocked).called();
+  }
+
+  @Test
+  public void getLegacyDescriptor_Args__() throws Exception {
+    Date lastUpdatedTime = new Date();
+    ReplicatedReporter target = new ReplicatedReporter();
+    target.setReplicationOperation(CmsReplicationOperation.U);
+    target.setLastUpdatedId("0x5");
+    target.setLastUpdatedTime(lastUpdatedTime);
+    target.setReplicationDate(lastUpdatedTime);
+    ElasticSearchLegacyDescriptor actual = target.getLegacyDescriptor();
+    assertThat(actual, is(notNullValue()));
   }
 
 }

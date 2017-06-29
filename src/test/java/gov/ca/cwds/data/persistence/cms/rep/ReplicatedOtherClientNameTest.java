@@ -11,14 +11,21 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAka;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
+import gov.ca.cwds.jobs.test.TestSystemCodeCache;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 public class ReplicatedOtherClientNameTest {
+
+  @BeforeClass
+  public static void setupTests() {
+    TestSystemCodeCache.init();
+  }
 
   @Test
   public void testReplicationOperation() throws Exception {
@@ -64,12 +71,18 @@ public class ReplicatedOtherClientNameTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
   public void normalize_Args__Map() throws Exception {
     String key = "asd12340x5";
+    String thirdId = "ABC12340x5";
     ReplicatedOtherClientName target = new ReplicatedOtherClientName();
     target.setClientId(key);
-    target.setThirdId("ABC12340x5");
+    target.setThirdId("thirdId");
+    target.setFirstName("fred");
+    target.setMiddleName("jason");
+    target.setLastName("meyer");
+    target.setNameType(new Short((short) 1311));
+    target.setSuffixTitleDescription("junior");
 
     Map<Object, ReplicatedAkas> map = new HashMap<Object, ReplicatedAkas>();
     ReplicatedAkas akas = new ReplicatedAkas();
@@ -78,8 +91,8 @@ public class ReplicatedOtherClientNameTest {
     aka.setFirstName("fred");
     aka.setMiddleName("jason");
     aka.setLastName("meyer");
-    aka.setLegacyDescriptor(new ElasticSearchLegacyDescriptor("abc123djsk", "1234567890",
-        "2017-12-31", LegacyTable.ADDRESS.getName(), "whatever"));
+    aka.setLegacyDescriptor(new ElasticSearchLegacyDescriptor(key, thirdId, "2017-12-31",
+        LegacyTable.ADDRESS.getName(), "whatever"));
     akas.addAka(aka);
     map.put(key, akas);
 

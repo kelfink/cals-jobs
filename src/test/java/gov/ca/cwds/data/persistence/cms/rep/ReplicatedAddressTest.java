@@ -27,7 +27,6 @@ public class ReplicatedAddressTest {
 
   @Test
   public void getLegacyId_Args__() throws Exception {
-
     ReplicatedAddress target = new ReplicatedAddress();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -41,7 +40,6 @@ public class ReplicatedAddressTest {
 
   @Test
   public void getLegacyDescriptor_Args__() throws Exception {
-
     ReplicatedAddress target = new ReplicatedAddress();
     // given
     // e.g. : given(mocked.called()).willReturn(1);

@@ -22,6 +22,7 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -43,6 +44,7 @@ import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
+import gov.ca.cwds.jobs.test.TestSystemCodeCache;
 
 public class BasePersonIndexerJobTest {
 
@@ -56,6 +58,11 @@ public class BasePersonIndexerJobTest {
   String lastJobRunTimeFilename;
   ObjectMapper mapper = ElasticSearchPerson.MAPPER;
   TestIndexerJob target;
+
+  @BeforeClass
+  public static void setupTests() {
+    TestSystemCodeCache.init();
+  }
 
   @Before
   public void setup() throws Exception {

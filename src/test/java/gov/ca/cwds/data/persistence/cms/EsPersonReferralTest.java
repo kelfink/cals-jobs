@@ -14,9 +14,9 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
+import gov.ca.cwds.jobs.test.TestSystemCodeCache;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -24,11 +24,7 @@ public class EsPersonReferralTest {
 
   @BeforeClass
   public static void setupTests() {
-    ApiSystemCodeDao sysCodeDao = new SystemCodeDaoFileImpl();
-    ApiSystemCodeCache sysCodeCache = new CmsSystemCodeCacheService(sysCodeDao);
-
-    // BasePersonIndexerJob.setSystemCodes(sysCodeCache);
-    ElasticSearchPerson.setSystemCodes(sysCodeCache);
+    TestSystemCodeCache.init();
   }
 
   @Test
@@ -142,7 +138,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getLastChange_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -156,7 +151,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setLastChange_Args__Date() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     Date lastChange = mock(Date.class);
@@ -169,7 +163,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getClientId_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -183,7 +176,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setClientId_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String clientId = null;
@@ -196,7 +188,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getReferralId_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -210,7 +201,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setReferralId_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String referralId = null;
@@ -223,7 +213,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getStartDate_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -237,7 +226,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setStartDate_Args__Date() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     Date startDate = mock(Date.class);
@@ -250,7 +238,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getEndDate_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -264,7 +251,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setEndDate_Args__Date() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     Date endDate = mock(Date.class);
@@ -277,7 +263,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getReferralResponseType_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -291,7 +276,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setReferralResponseType_Args__Integer() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     Integer referralResponseType = null;
@@ -304,7 +288,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getCounty_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -318,7 +301,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setCounty_Args__Integer() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     Integer county = null;
@@ -331,7 +313,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getReporterId_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -345,7 +326,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setReporterId_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String reporterId = null;
@@ -358,7 +338,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getReporterFirstName_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -372,7 +351,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setReporterFirstName_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String reporterFirstName = null;
@@ -385,7 +363,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getReporterLastName_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -399,7 +376,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setReporterLastName_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String reporterLastName = null;
@@ -412,7 +388,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getWorkerId_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -426,7 +401,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setWorkerId_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String workerId = null;
@@ -439,7 +413,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getWorkerFirstName_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -453,7 +426,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setWorkerFirstName_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String workerFirstName = null;
@@ -466,7 +438,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getWorkerLastName_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -480,7 +451,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setWorkerLastName_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String workerLastName = null;
@@ -493,7 +463,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getAllegationId_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -507,7 +476,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setAllegationId_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String allegationId = null;
@@ -520,7 +488,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getAllegationDisposition_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -534,7 +501,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setAllegationDisposition_Args__Integer() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     Integer allegationDisposition = null;
@@ -547,7 +513,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getAllegationType_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -561,7 +526,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setAllegationType_Args__Integer() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     Integer allegationType = null;
@@ -574,7 +538,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getVictimId_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -588,7 +551,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setVictimId_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String victimId = null;
@@ -601,7 +563,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getVictimFirstName_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -615,7 +576,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setVictimFirstName_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String victimFirstName = null;
@@ -628,7 +588,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getVictimLastName_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -642,7 +601,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setVictimLastName_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String victimLastName = null;
@@ -655,7 +613,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getPerpetratorId_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -669,7 +626,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setPerpetratorId_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String perpetratorId = null;
@@ -682,7 +638,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getPerpetratorFirstName_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -696,7 +651,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setPerpetratorFirstName_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String perpetratorFirstName = null;
@@ -709,7 +663,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getPerpetratorLastName_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -723,7 +676,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setPerpetratorLastName_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String perpetratorLastName = null;
@@ -736,7 +688,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getLimitedAccessCode_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -750,7 +701,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setLimitedAccessCode_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String limitedAccessCode = null;
@@ -763,7 +713,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getLimitedAccessDate_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -777,7 +726,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setLimitedAccessDate_Args__Date() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     Date limitedAccessDate = mock(Date.class);
@@ -790,7 +738,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void getLimitedAccessDescription_Args__() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     // e.g. : given(mocked.called()).willReturn(1);
@@ -804,7 +751,6 @@ public class EsPersonReferralTest {
 
   @Test
   public void setLimitedAccessDescription_Args__String() throws Exception {
-
     EsPersonReferral target = new EsPersonReferral();
     // given
     String limitedAccessDescription = null;

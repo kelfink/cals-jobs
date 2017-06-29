@@ -206,4 +206,32 @@ public class ReplicatedOtherClientName extends BaseOtherClientName
         LegacyTable.ALIAS_OR_OTHER_CLIENT_NAME);
   }
 
+  // =======================
+  // SETTERS:
+  // =======================
+
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
+
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+  }
+
+  public void setMiddleName(String middleName) {
+    this.middleName = middleName;
+  }
+
+  public void setNamePrefixDescription(String namePrefixDescription) {
+    this.namePrefixDescription = namePrefixDescription;
+  }
+
+  public void setNameType(Short nameType) {
+    this.nameType = nameType;
+  }
+
+  public void setSuffixTitleDescription(String suffixTitleDescription) {
+    this.suffixTitleDescription = suffixTitleDescription;
+  }
+
 }
