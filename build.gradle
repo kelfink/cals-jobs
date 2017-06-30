@@ -136,3 +136,9 @@ sonarqube {
       property "sonar.jacoco.itReportPath", "${buildDir}/jacoco/integrationTest.exec"     
   }
 }
+
+task dropDockerImage(type:Exec) {
+    commandLine 'docker',  'rmi',  "cwds/cals_db2_data"
+    commandLine 'docker',  'rmi',  "cwds/postgresql_data"
+    commandLine 'docker',  'rmi',  "cwds/elasticsearch_xpack_data"
+}
