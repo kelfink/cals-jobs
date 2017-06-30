@@ -17,7 +17,6 @@ node ('dora-slave'){
        sh ('docker-compose up -d')
        sleep (60)
 	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoTestReport'
-	   result = buildInfo.result
    }
    stage('SonarQube analysis'){
 		withSonarQubeEnv('Core-SonarQube') {
