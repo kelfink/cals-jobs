@@ -245,6 +245,15 @@ public class IntakeParticipantTest {
   }
 
   @Test
+  public void toEsPerson_Args__Object__IntakeScreening_4() throws Exception {
+    IntakeParticipant target = new IntakeParticipant();
+    EsPersonType esType = EsPersonType.ALL;
+    IntakeScreening screening = mock(IntakeScreening.class);
+    ElasticSearchPersonNestedPerson actual = target.toEsPerson(esType, screening);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
   public void getScreenings_Args__() throws Exception {
     IntakeParticipant target = new IntakeParticipant();
     Map<String, IntakeScreening> actual = target.getScreenings();
