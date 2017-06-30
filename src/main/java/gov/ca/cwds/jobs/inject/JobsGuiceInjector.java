@@ -198,32 +198,6 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   /**
-   * Instantiate the singleton ElasticSearch 2.x client on demand.
-   * 
-   * @return initialized singleton ElasticSearch client
-   */
-  // @Singleton
-  // @Provides
-  // public Client elasticsearchClient() {
-  // Client client = null;
-  // if (esConfig != null) {
-  // LOGGER.info("Create NEW ES client");
-  // try {
-  // final ElasticsearchConfiguration config = elasticSearchConfig();
-  // Settings settings = Settings.settingsBuilder()
-  // .put("cluster.name", config.getElasticsearchCluster()).build();
-  // client = TransportClient.builder().settings(settings).build().addTransportAddress(
-  // new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
-  // Integer.parseInt(config.getElasticsearchPort())));
-  // } catch (Exception e) {
-  // LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
-  // throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
-  // }
-  // }
-  // return client;
-  // }
-
-  /**
    * Read Elasticsearch configuration on demand.
    * 
    * @return ES configuration
