@@ -82,7 +82,7 @@ public class AsyncReadWriteJobTest {
   @Test
   public void init_Args___T__Exception() throws Exception {
     AsyncReadWriteJob target = new AsyncReadWriteJob(reader, processor, writer);
-    doThrow(new JobsException("боже мій!")).when(reader).init();
+    doThrow(new JobsException("bozhe miy!")).when(reader).init();
 
     try {
       target.init();
@@ -100,7 +100,7 @@ public class AsyncReadWriteJobTest {
   @Test
   public void destroy_Args___T__Exception() throws Exception {
     AsyncReadWriteJob target = new AsyncReadWriteJob(reader, processor, writer);
-    doThrow(new JobsException("ось лайно!")).when(reader).destroy();
+    doThrow(new JobsException("bozhe miy!")).when(reader).destroy();
 
     try {
       target.destroy();
