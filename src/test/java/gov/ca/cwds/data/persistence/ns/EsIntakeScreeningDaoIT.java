@@ -87,7 +87,6 @@ public class EsIntakeScreeningDaoIT
   }
 
   @SuppressWarnings("javadoc")
-  @Ignore
   @Test
   public void testfindAllUpdatedAfterReturnsCorrectList() throws Exception {
     Query query = session
