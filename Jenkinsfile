@@ -12,7 +12,7 @@ node ('dora-slave'){
    stage('Build'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar'
    }
-   stage('CoverageCheck_and_Test') {
+   stage('Tests and Coverage') {
        sh ('docker-compose pull')
        sh ('docker-compose up -d')
        sleep (60)
