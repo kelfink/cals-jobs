@@ -13,7 +13,7 @@ public class JobsExceptionTest {
   }
 
   @Test
-  public void instantiation() throws Exception {
+  public void instantiation1() throws Exception {
     String message = null;
     JobsException target = new JobsException(message);
     assertThat(target, notNullValue());

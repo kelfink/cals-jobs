@@ -88,11 +88,11 @@ public class JobsGuiceInjector extends AbstractModule {
   /**
    * Usual constructor.
    * 
-   * @param esConfigFileLoc location of Elasticsearch configuration file
+   * @param esConfigFile location of Elasticsearch configuration file
    * @param lastJobRunTimeFilename location of last run file
    */
-  public JobsGuiceInjector(final File esConfigFileLoc, String lastJobRunTimeFilename) {
-    this.esConfig = esConfigFileLoc;
+  public JobsGuiceInjector(final File esConfigFile, String lastJobRunTimeFilename) {
+    this.esConfig = esConfigFile;
     this.lastJobRunTimeFilename =
         !StringUtils.isBlank(lastJobRunTimeFilename) ? lastJobRunTimeFilename : "";
   }
