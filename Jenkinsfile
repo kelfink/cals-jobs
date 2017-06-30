@@ -30,7 +30,6 @@ node ('dora-slave'){
         rtGradle.deployer.deployArtifacts = false
 	}
 	stage('Clean WorkSpace') {
-		buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'dropDockerImage'
 		archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt', fingerprint: true
 		sh ('docker-compose down -v')
 		publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'reports', reportFiles: 'index.html', reportName: 'Test reports', reportTitles: ''])
