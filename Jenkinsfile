@@ -15,7 +15,7 @@ node ('dora-slave'){
    stage('CoverageCheck_and_Test') {
        sh ('docker-compose pull')
        sh ('docker-compose up -d')
-       sleep (1)
+       sleep (60)
 	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoTestReport'
 	   result = buildInfo.result
    }
