@@ -138,6 +138,6 @@ sonarqube {
 }
 
 task dropDockerImage(type:Exec) {
-    commandLine 'docker',  'rmi',  "cwds/cals_db2_data"
-    commandLine 'docker',  'rmi',  "cwds/postgresql_data"
+//    commandLine 'docker',  'rmi',  "cwds/cals_db2_data:latest"
+//    commandLine 'docker',  'rmi',  "cwds/postgresql_data:latest"
 }
