@@ -221,10 +221,13 @@ public class EsClientAddressTest {
   @Test
   public void normalize_Args__Map() throws Exception {
     final EsClientAddress target = new EsClientAddress();
+    target.setCltId(TEST_CLIENT_ID);
+    target.setClaId(TEST_CLIENT_ID);
+    target.setAdrId(TEST_CLIENT_ID);
+
     final Map<Object, ReplicatedClient> map = new HashMap<Object, ReplicatedClient>();
     final ReplicatedClient actual = target.normalize(map);
-    final ReplicatedClient expected = new ReplicatedClient();
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
