@@ -54,7 +54,7 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
             + "FROM {h-schema}VW_SCREENING_HISTORY vw "
             + "JOIN PARTICIPANTS p ON p.screening_id = vw.screening_id "
             + "WHERE vw.participant_id IN ( SELECT DISTINCT vw1.participant_id "
-            + " FROM VW_SCREENING_HISTORY vw1 WHERE vw1.last_chg > CAST(:after AS TIMESTAMP) "
+            + " FROM {h-schema}VW_SCREENING_HISTORY vw1 WHERE vw1.last_chg > CAST(:after AS TIMESTAMP) "
             + ") AND p.legacy_id IS NOT NULL "
             + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
             + "FOR READ ONLY",
