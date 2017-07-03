@@ -16,11 +16,11 @@ node ('dora-slave'){
        sh ('docker-compose pull')
        sh ('docker-compose up -d')
        sleep (60)
-	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test'
+	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoTestReport'
    }
    stage('SonarQube analysis'){
 		withSonarQubeEnv('Core-SonarQube') {
-			buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'sonarqube'
+			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
         }
     }
     stage ('Push to artifactory'){
@@ -42,6 +42,6 @@ node ('dora-slave'){
 	   sh ('docker-compose down -v')
 	   publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests/test', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
 
-	   }
+	}
 }
 
