@@ -24,6 +24,7 @@ project.ext {
 }
 
 version = 0.25
+group = 'gov.ca.cwds.jobs'
 
 repositories {
     mavenCentral()

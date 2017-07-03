@@ -8,6 +8,9 @@ node ('dora-slave'){
 		  git branch: '$branch', url: 'git@github.com:ca-cwds/jobs.git'
 		  rtGradle.tool = "Gradle_35"
 		  rtGradle.resolver repo:'repo', server: serverArti
+		  rtGradle.deployer.mavenCompatible = true
+		  rtGradle.deployer.deployMavenDescriptors = true
+		  rtGradle.useWrapper = true
    }
    stage('Build'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar'
@@ -26,7 +29,7 @@ node ('dora-slave'){
     stage ('Push to artifactory'){
         rtGradle.deployer repo:'libs-snapshot', server: serverArti
         rtGradle.deployer.deployArtifacts = true
-        buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'artifactoryPublish'
+        buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'artifactoryPublish'
         rtGradle.deployer.deployArtifacts = false
 	}
 	stage('Clean WorkSpace') {
