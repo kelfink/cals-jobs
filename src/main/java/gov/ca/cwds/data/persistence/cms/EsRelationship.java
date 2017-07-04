@@ -163,7 +163,8 @@ public class EsRelationship
    */
   protected void parseBiDirectionalRelationship(final ElasticSearchPersonRelationship rel) {
     if (this.relCode != null && this.relCode.intValue() != 0) {
-      final CmsSystemCode code = ElasticSearchPerson.getSystemCodes().lookup(this.relCode);
+      final CmsSystemCode code =
+          ElasticSearchPerson.getSystemCodes().lookup(this.relCode.intValue());
       final String wholeRel = ifNull(code.getShortDsc());
       String primaryRel = "";
       String secondaryRel = "";

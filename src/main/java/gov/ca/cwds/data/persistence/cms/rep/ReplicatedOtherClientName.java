@@ -183,7 +183,8 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
     }
 
     if (this.nameType != null && this.nameType.intValue() != 0) {
-      aka.setNameType(ElasticSearchPerson.getSystemCodes().lookup(this.nameType).getShortDsc());
+      aka.setNameType(
+          ElasticSearchPerson.getSystemCodes().lookup(this.nameType.intValue()).getShortDsc());
     }
 
     aka.setLegacyDescriptor(getLegacyDescriptor());
