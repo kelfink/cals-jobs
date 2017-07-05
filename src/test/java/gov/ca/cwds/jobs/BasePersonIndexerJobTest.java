@@ -36,15 +36,14 @@ import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
-import gov.ca.cwds.jobs.test.TestSystemCodeCache;
 
 public class BasePersonIndexerJobTest {
 
@@ -61,7 +60,7 @@ public class BasePersonIndexerJobTest {
 
   @BeforeClass
   public static void setupTests() {
-    TestSystemCodeCache.init();
+    SimpleTestSystemCodeCache.init();
   }
 
   @Before
@@ -577,11 +576,11 @@ public class BasePersonIndexerJobTest {
   }
 
   // @Test
-  public void getSystemCodes_Args__() throws Exception {
-    ApiSystemCodeCache actual = BasePersonIndexerJob.getSystemCodes();
-    ApiSystemCodeCache expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
+  // public void getSystemCodes_Args__() throws Exception {
+  // ApiSystemCodeCache actual = BasePersonIndexerJob.getSystemCodes();
+  // ApiSystemCodeCache expected = null;
+  // assertThat(actual, is(equalTo(expected)));
+  // }
 
   // @Test
   public void runMain_Args__Class__StringArray() throws Exception {
@@ -590,11 +589,11 @@ public class BasePersonIndexerJobTest {
     BasePersonIndexerJob.runMain(klass, args);
   }
 
-  @Test
-  public void setSystemCodes_Args__ApiSystemCodeCache() throws Exception {
-    ApiSystemCodeCache sysCodeCache = mock(ApiSystemCodeCache.class);
-    BasePersonIndexerJob.setSystemCodes(sysCodeCache);
-  }
+  // @Test
+  // public void setSystemCodes_Args__ApiSystemCodeCache() throws Exception {
+  // ApiSystemCodeCache sysCodeCache = mock(ApiSystemCodeCache.class);
+  // BasePersonIndexerJob.setSystemCodes(sysCodeCache);
+  // }
 
   // @Test
   public void isTestMode_Args__() throws Exception {

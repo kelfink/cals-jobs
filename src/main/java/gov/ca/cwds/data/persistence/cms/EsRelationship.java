@@ -24,12 +24,12 @@ import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
  * Entity bean for Materialized Query Table (MQT), VW_BI_DIR_RELATION.
@@ -163,9 +163,9 @@ public class EsRelationship
    */
   protected void parseBiDirectionalRelationship(final ElasticSearchPersonRelationship rel) {
     if (this.relCode != null && this.relCode.intValue() != 0) {
-      final CmsSystemCode code =
-          ElasticSearchPerson.getSystemCodes().lookup(this.relCode.intValue());
-      final String wholeRel = ifNull(code.getShortDsc());
+      final gov.ca.cwds.rest.api.domain.cms.SystemCode code =
+          SystemCodeCache.global().getSystemCode(this.relCode);
+      final String wholeRel = ifNull(code.getShortDescription());
       String primaryRel = "";
       String secondaryRel = "";
       String relContext = "";

@@ -19,7 +19,6 @@ import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchAccessLimitation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonNestedPerson;
@@ -31,6 +30,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
  * Entity bean for Materialized Query Table (MQT), ES_REFERRAL_HIST.
@@ -226,12 +226,11 @@ public class EsPersonReferral
     referral.setStartDate(DomainChef.cookDate(this.startDate));
     referral.setEndDate(DomainChef.cookDate(this.endDate));
     referral.setCountyId(this.county == null ? null : this.county.toString());
-    referral
-        .setCountyName(ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.county));
+    referral.setCountyName(SystemCodeCache.global().getSystemCodeShortDescription(this.county));
     referral.setResponseTimeId(
         this.referralResponseType == null ? null : this.referralResponseType.toString());
     referral.setResponseTime(
-        ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.referralResponseType));
+        SystemCodeCache.global().getSystemCodeShortDescription(this.referralResponseType));
     referral.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.referralId,
         this.referralLastChanged, LegacyTable.REFERRAL));
 
@@ -268,8 +267,8 @@ public class EsPersonReferral
     accessLimit.setLimitedAccessDescription(this.limitedAccessDescription);
     accessLimit.setLimitedAccessGovernmentEntityId(this.limitedAccessGovernmentEntityId == null
         ? null : this.limitedAccessGovernmentEntityId.toString());
-    accessLimit.setLimitedAccessGovernmentEntityName(ElasticSearchPerson.getSystemCodes()
-        .getCodeShortDescription(this.limitedAccessGovernmentEntityId));
+    accessLimit.setLimitedAccessGovernmentEntityName(SystemCodeCache.global()
+        .getSystemCodeShortDescription(this.limitedAccessGovernmentEntityId));
     referral.setAccessLimitation(accessLimit);
 
     //
@@ -279,11 +278,11 @@ public class EsPersonReferral
     allegation.setId(this.allegationId);
     allegation.setLegacyId(this.allegationId);
     allegation.setAllegationDescription(
-        ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.allegationType));
+        SystemCodeCache.global().getSystemCodeShortDescription(this.allegationType));
     allegation.setDispositionId(
         this.allegationDisposition == null ? null : this.allegationDisposition.toString());
     allegation.setDispositionDescription(
-        ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.allegationDisposition));
+        SystemCodeCache.global().getSystemCodeShortDescription(this.allegationDisposition));
     allegation.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.allegationId,
         this.allegationLastChanged, LegacyTable.ALLEGATION));
 
