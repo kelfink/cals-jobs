@@ -12,7 +12,6 @@ import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchAccessLimitation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonChild;
@@ -21,6 +20,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
  * Entity bean for Materialized Query Table (MQT), ES_CASE_HIST, for focus child person cases.
@@ -360,11 +360,10 @@ public class EsChildPersonCase extends EsPersonCase {
     esPersonCase.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.caseLastUpdated));
     esPersonCase.setStartDate(DomainChef.cookDate(this.startDate));
     esPersonCase.setEndDate(DomainChef.cookDate(this.endDate));
-    esPersonCase
-        .setCountyName(ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.county));
+    esPersonCase.setCountyName(SystemCodeCache.global().getSystemCodeShortDescription(this.county));
     esPersonCase.setCountyId(this.county == null ? null : this.county.toString());
     esPersonCase.setServiceComponent(
-        ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.serviceComponent));
+        SystemCodeCache.global().getSystemCodeShortDescription(this.serviceComponent));
     esPersonCase.setServiceComponentId(
         this.serviceComponent == null ? null : this.serviceComponent.toString());
     esPersonCase.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.caseId,
@@ -405,8 +404,8 @@ public class EsChildPersonCase extends EsPersonCase {
     accessLimit.setLimitedAccessDescription(this.limitedAccessDescription);
     accessLimit.setLimitedAccessGovernmentEntityId(this.limitedAccessGovernmentEntityId == null
         ? null : this.limitedAccessGovernmentEntityId.toString());
-    accessLimit.setLimitedAccessGovernmentEntityName(ElasticSearchPerson.getSystemCodes()
-        .getCodeShortDescription(this.limitedAccessGovernmentEntityId));
+    accessLimit.setLimitedAccessGovernmentEntityName(SystemCodeCache.global()
+        .getSystemCodeShortDescription(this.limitedAccessGovernmentEntityId));
     esPersonCase.setAccessLimitation(accessLimit);
 
     //
@@ -420,7 +419,7 @@ public class EsChildPersonCase extends EsPersonCase {
     parent.setFirstName(this.parentFirstName);
     parent.setLastName(this.parentLastName);
     parent.setRelationship(
-        ElasticSearchPerson.getSystemCodes().getCodeShortDescription(this.parentRelationship));
+        SystemCodeCache.global().getSystemCodeShortDescription(this.parentRelationship));
     parent.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.parentId,
         this.parentLastUpdated, LegacyTable.CLIENT));
 

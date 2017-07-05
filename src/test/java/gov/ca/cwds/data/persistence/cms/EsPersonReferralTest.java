@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
-import gov.ca.cwds.jobs.test.TestSystemCodeCache;
+import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -24,7 +24,7 @@ public class EsPersonReferralTest {
 
   @BeforeClass
   public static void setupTests() {
-    TestSystemCodeCache.init();
+    SimpleTestSystemCodeCache.init();
   }
 
   @Test

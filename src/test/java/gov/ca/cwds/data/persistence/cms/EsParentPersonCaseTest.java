@@ -15,7 +15,7 @@ import org.junit.Test;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
-import gov.ca.cwds.jobs.config.StaticSystemCodeCache;
+import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -668,7 +668,7 @@ public class EsParentPersonCaseTest {
 
   @Test
   public void normalize_Args__Map() throws Exception {
-    StaticSystemCodeCache.deploy();
+    SimpleTestSystemCodeCache.init();
 
     final String caseId = "abc12340x5";
     final String parentId = "def56780x5";

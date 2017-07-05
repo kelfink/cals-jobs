@@ -23,7 +23,6 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAka;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -33,6 +32,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.jdbc.RowMapper;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
  * {@link PersistentObject} representing an Other Client Name as a {@link CmsReplicatedEntity}.
@@ -183,7 +183,7 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
     }
 
     if (this.nameType != null && this.nameType.intValue() != 0) {
-      aka.setNameType(ElasticSearchPerson.getSystemCodes().lookup(this.nameType).getShortDsc());
+      aka.setNameType(SystemCodeCache.global().getSystemCodeShortDescription(this.nameType));
     }
 
     aka.setLegacyDescriptor(getLegacyDescriptor());

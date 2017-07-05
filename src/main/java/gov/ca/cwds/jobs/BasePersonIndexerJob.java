@@ -62,12 +62,10 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.inject.SystemCodeCache;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
@@ -135,8 +133,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           + "SELECT c.THE_ID_COL, ROW_NUMBER() OVER (ORDER BY 1) AS rn, COUNT(*) OVER (ORDER BY 1) AS total_cnt "
           + "FROM {h-schema}THE_TABLE c ORDER BY c.THE_ID_COL) y ORDER BY y.rn "
           + ") z GROUP BY z.bucket FOR READ ONLY ";
-
-  private static ApiSystemCodeCache systemCodes;
 
   /**
    * Guice Injector used for all Job instances during the life of this batch JVM.
@@ -347,6 +343,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       try {
         injector = Guice.createInjector(
             new JobsGuiceInjector(new File(opts.getEsConfigLoc()), opts.getLastRunLoc()));
+
+        /**
+         * Initialize system code cache
+         */
+        injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
+
       } catch (CreationException e) {
         throw JobLogUtils.buildException(LOGGER, e, "FAILED TO BUILD INJECTOR!: {}",
             e.getMessage());
@@ -598,7 +600,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void prepareInsertCollections(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-      throws JsonProcessingException {
+          throws JsonProcessingException {
 
     // Null out optional collections for updates.
     esp.clearOptionalCollections(keep);
@@ -621,7 +623,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected Pair<String, String> prepareUpsertJson(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-      throws JsonProcessingException {
+          throws JsonProcessingException {
 
     // Child classes: Set optional collections before serializing the insert JSON.
     prepareInsertCollections(esp, t, elementName, list, keep);
@@ -1047,10 +1049,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      // GUICE DOES NOT INJECT THE SYSCODE TRANSLATOR INTO STATIC MEMBERS/METHODS.
-      final ApiSystemCodeCache sysCodeCache = injector.getInstance(ApiSystemCodeCache.class);
-      setSystemCodes(sysCodeCache);
-      ElasticSearchPerson.setSystemCodes(sysCodeCache);
 
       // If the index is missing, create it.
       LOGGER.debug("Create index if missing");
@@ -1305,9 +1303,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           : opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
-                  String.valueOf(totalBuckets)),
-              BatchBucket.class);
+              .replaceAll("THE_ID_COL", getIdColumn())
+              .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
 
       ret = q.getResultList();
       session.clear();
@@ -1470,15 +1467,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Getter for CMS system code cache.
-   * 
-   * @return reference to CMS system code cache
-   */
-  public static ApiSystemCodeCache getSystemCodes() {
-    return systemCodes;
-  }
-
-  /**
    * Batch job entry point.
    * 
    * @param klass batch job class
@@ -1493,20 +1481,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
       throw e;
     }
-  }
-
-  /**
-   * Store a reference to the singleton CMS system code cache for quick convenient access.
-   * 
-   * <p>
-   * Guice does not inject static dependencies automatically.
-   * </p>
-   * 
-   * @param sysCodeCache CMS system code cache
-   */
-  @Inject
-  public static void setSystemCodes(@SystemCodeCache ApiSystemCodeCache sysCodeCache) {
-    systemCodes = sysCodeCache;
   }
 
   /**

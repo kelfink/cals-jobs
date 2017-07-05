@@ -19,13 +19,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonRelationship;
-import gov.ca.cwds.jobs.test.TestSystemCodeCache;
+import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 
 public class EsRelationshipTest {
 
   @BeforeClass
   public static void setupTests() {
-    TestSystemCodeCache.init();
+    SimpleTestSystemCodeCache.init();
   }
 
   @Test

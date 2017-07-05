@@ -23,7 +23,7 @@ import org.mockito.MockitoAnnotations;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAka;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
-import gov.ca.cwds.jobs.test.TestSystemCodeCache;
+import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 public class ReplicatedOtherClientNameTest {
@@ -35,7 +35,7 @@ public class ReplicatedOtherClientNameTest {
 
   @BeforeClass
   public static void setupClass() throws Exception {
-    TestSystemCodeCache.init();
+    SimpleTestSystemCodeCache.init();
     emptyTarget = ReplicatedOtherClientName.mapRowToBean(Mockito.mock(ResultSet.class));
   }
 

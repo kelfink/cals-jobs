@@ -13,13 +13,13 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.test.TestSystemCodeCache;
+import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 
 public class EsChildPersonCaseTest {
 
   @BeforeClass
   public static void setupTests() {
-    TestSystemCodeCache.init();
+    SimpleTestSystemCodeCache.init();
   }
 
   @Test

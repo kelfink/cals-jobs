@@ -37,16 +37,16 @@ import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
 import gov.ca.cwds.dao.ns.EsIntakeScreeningDao;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
+import gov.ca.cwds.data.cms.SystemCodeDao;
+import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.ApiSystemCodeCache;
-import gov.ca.cwds.data.persistence.cms.ApiSystemCodeDao;
-import gov.ca.cwds.data.persistence.cms.CmsSystemCodeCacheService;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
-import gov.ca.cwds.data.persistence.cms.SystemCodeDaoFileImpl;
+import gov.ca.cwds.data.persistence.cms.SystemCode;
+import gov.ca.cwds.data.persistence.cms.SystemMeta;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
@@ -65,6 +65,8 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
+import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
+import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
 
 /**
  * Guice dependency injection (DI), module which constructs and manages common class instances for
@@ -128,7 +130,8 @@ public class JobsGuiceInjector extends AbstractModule {
             .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
             .addAnnotatedClass(ReplicatedClient.class)
             .addAnnotatedClass(ReplicatedClientAddress.class)
-            .addAnnotatedClass(ReplicatedAddress.class).buildSessionFactory());
+            .addAnnotatedClass(ReplicatedAddress.class).addAnnotatedClass(SystemCode.class)
+            .addAnnotatedClass(SystemMeta.class).buildSessionFactory());
 
     // PostgreSQL session factory:
     bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)
@@ -161,15 +164,26 @@ public class JobsGuiceInjector extends AbstractModule {
     bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
 
     // Register CMS system code translator.
-    bind(ApiSystemCodeDao.class).to(SystemCodeDaoFileImpl.class);
-    bind(ApiSystemCodeCache.class).to(CmsSystemCodeCacheService.class).asEagerSingleton();
     bind(CmsSystemCodeSerializer.class).asEagerSingleton();
+
+    bind(SystemCodeDao.class);
+    bind(SystemMetaDao.class);
 
     // Only one instance of ES DAO.
     bind(ElasticsearchDao.class).asEagerSingleton();
 
     // Static injection?
     // requestStaticInjection(ElasticSearchPerson.class);
+  }
+
+  @Provides
+  public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
+      SystemMetaDao systemMetaDao) {
+    final long secondsToRefreshCache = 15 * 24 * 60 * 60; // 15 days
+    SystemCodeCache systemCodeCache =
+        new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
+    systemCodeCache.register();
+    return systemCodeCache;
   }
 
   /**
