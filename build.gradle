@@ -89,11 +89,21 @@ dependencies {
 shadowJar {
   classifier = ''
   baseName = (System.properties.getProperty('baseName') != null) ? System.properties.getProperty('baseName') : 'DocumentIndexerJob'
-  mergeServiceFiles()	
+  mergeServiceFiles()
   manifest {
     attributes 'Main-Class': (System.properties.getProperty('mainClass') != null) ? System.properties.getProperty('mainClass') : 'gov.ca.cwds.jobs.DocumentIndexerJob'
   }
   version version + ((System.properties.getProperty('build') != null ) ? '.' + System.properties.getProperty('build') : '')
+}
+
+tpt2Jar {
+    classifier = ''
+    baseName = (System.properties.getProperty('baseName') != null) ? System.properties.getProperty('baseName') : 'jobs-neutron'
+    mergeServiceFiles()
+    manifest {
+        attributes 'Main-Class': (System.properties.getProperty('mainClass') != null) ? System.properties.getProperty('mainClass') : 'gov.ca.cwds.jobs.FacilityIndexerJob'
+    }
+    version version + ((System.properties.getProperty('build') != null ) ? '.' + System.properties.getProperty('build') : '')
 }
 
 publishing {
