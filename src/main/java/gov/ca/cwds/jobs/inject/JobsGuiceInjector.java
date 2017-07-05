@@ -179,7 +179,9 @@ public class JobsGuiceInjector extends AbstractModule {
   @Provides
   public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
       SystemMetaDao systemMetaDao) {
-    SystemCodeCache systemCodeCache = new CachingSystemCodeService(systemCodeDao, systemMetaDao);
+    final long secondsToRefreshCache = 15 * 24 * 60 * 60; // 15 days
+    SystemCodeCache systemCodeCache =
+        new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
     systemCodeCache.register();
     return systemCodeCache;
   }
