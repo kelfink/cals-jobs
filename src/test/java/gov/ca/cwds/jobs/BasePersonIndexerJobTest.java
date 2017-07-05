@@ -576,24 +576,11 @@ public class BasePersonIndexerJobTest {
   }
 
   // @Test
-  // public void getSystemCodes_Args__() throws Exception {
-  // ApiSystemCodeCache actual = BasePersonIndexerJob.getSystemCodes();
-  // ApiSystemCodeCache expected = null;
-  // assertThat(actual, is(equalTo(expected)));
-  // }
-
-  // @Test
   public void runMain_Args__Class__StringArray() throws Exception {
     Class klass = null;
     String[] args = new String[] {};
     BasePersonIndexerJob.runMain(klass, args);
   }
-
-  // @Test
-  // public void setSystemCodes_Args__ApiSystemCodeCache() throws Exception {
-  // ApiSystemCodeCache sysCodeCache = mock(ApiSystemCodeCache.class);
-  // BasePersonIndexerJob.setSystemCodes(sysCodeCache);
-  // }
 
   // @Test
   public void isTestMode_Args__() throws Exception {

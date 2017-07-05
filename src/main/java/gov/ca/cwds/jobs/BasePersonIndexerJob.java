@@ -134,8 +134,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           + "FROM {h-schema}THE_TABLE c ORDER BY c.THE_ID_COL) y ORDER BY y.rn "
           + ") z GROUP BY z.bucket FOR READ ONLY ";
 
-  // private static ApiSystemCodeCache systemCodes;
-
   /**
    * Guice Injector used for all Job instances during the life of this batch JVM.
    */
@@ -1051,10 +1049,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      // GUICE DOES NOT INJECT THE SYSCODE TRANSLATOR INTO STATIC MEMBERS/METHODS.
-      // final ApiSystemCodeCache sysCodeCache = injector.getInstance(ApiSystemCodeCache.class);
-      // setSystemCodes(sysCodeCache);
-      // ElasticSearchPerson.setSystemCodes(sysCodeCache);
 
       // If the index is missing, create it.
       LOGGER.debug("Create index if missing");
@@ -1488,20 +1482,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       throw e;
     }
   }
-
-  // /**
-  // * Store a reference to the singleton CMS system code cache for quick convenient access.
-  // *
-  // * <p>
-  // * Guice does not inject static dependencies automatically.
-  // * </p>
-  // *
-  // * @param sysCodeCache CMS system code cache
-  // */
-  // @Inject
-  // public static void setSystemCodes(@SystemCodeCache ApiSystemCodeCache sysCodeCache) {
-  // systemCodes = sysCodeCache;
-  // }
 
   /**
    * For unit tests where resources either may not close properly or where expensive resources
