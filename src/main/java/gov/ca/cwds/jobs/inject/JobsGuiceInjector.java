@@ -164,7 +164,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
 
     // Register CMS system code translator.
-    bind(CmsSystemCodeSerializer.class).asEagerSingleton();
+    // bind(CmsSystemCodeSerializer.class).asEagerSingleton();
 
     bind(SystemCodeDao.class);
     bind(SystemMetaDao.class);
@@ -184,6 +184,12 @@ public class JobsGuiceInjector extends AbstractModule {
         new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
     systemCodeCache.register();
     return systemCodeCache;
+  }
+
+  @Provides
+  public CmsSystemCodeSerializer provideCmsSystemCodeSerializer(SystemCodeCache systemCodeCache) {
+    CmsSystemCodeSerializer systemCodeSerializer = new CmsSystemCodeSerializer(systemCodeCache);
+    return systemCodeSerializer;
   }
 
   /**
