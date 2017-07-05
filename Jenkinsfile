@@ -13,7 +13,7 @@ node ('dora-slave'){
 		  rtGradle.useWrapper = true
    }
    stage('Build'){
-		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar'
+		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar'
    }
    stage('Tests and Coverage') {
        sh ('docker-compose pull')
