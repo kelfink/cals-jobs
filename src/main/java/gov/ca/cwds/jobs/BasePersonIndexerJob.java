@@ -40,7 +40,10 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.jdbc.Work;
 import org.hibernate.query.NativeQuery;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -273,6 +276,36 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   public String getJdbcOrderBy() {
     return " ORDER BY x.clt_identifier ";
+  }
+
+  /**
+   * Refresh the view if needed.
+   */
+  protected void refreshView(Connection conn) throws SQLException {
+    // Default - do nothing
+  }
+
+  /**
+   * Only valid for DB2 MQTs
+   * 
+   * @param conn Connection
+   * @param viewName Name of MQT
+   * @throws SQLException
+   */
+  protected void refreshView(Connection conn, String viewName) throws SQLException {
+    LOGGER.info("Refreshing view: " + viewName + "...");
+    DateTime startTime = new DateTime();
+    StringBuilder buf = new StringBuilder();
+    buf.append("REFRESH TABLE ").append(System.getProperty("DB_CMS_SCHEMA")).append(".")
+        .append(viewName);
+    final String query = buf.toString();
+    Statement stmt = conn.createStatement();
+    stmt.execute(query);
+    DateTime endTime = new DateTime();
+    Duration duration = new Duration(startTime, endTime);
+    duration.getStandardSeconds();
+    LOGGER.info(
+        "DONE refreshing view " + viewName + " in " + duration.getStandardSeconds() + " seconds");
   }
 
   /**
@@ -821,6 +854,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       con.setAutoCommit(false);
       con.setReadOnly(true); // WARNING: fails with Postgres.
 
+      // Refresh view
+      refreshView(con);
+
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Detect platform or always force ORDER BY clause.
 
@@ -1175,6 +1211,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     try {
       txn = session.beginTransaction();
+
+      // Refresh view
+      session.doWork(new Work() {
+        @Override
+        public void execute(Connection connection) throws SQLException {
+          refreshView(connection);
+        }
+      });
+
       NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
       q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
 

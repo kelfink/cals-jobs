@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -84,6 +85,11 @@ public class ReferralHistoryIndexerJob
   @Override
   protected List<ReplicatedPersonReferrals> normalize(List<EsPersonReferral> recs) {
     return EntityNormalizer.<ReplicatedPersonReferrals, EsPersonReferral>normalizeList(recs);
+  }
+
+  @Override
+  protected void refreshView(Connection conn) throws SQLException {
+    super.refreshView(conn, getViewName());
   }
 
   @Override
