@@ -293,19 +293,26 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @throws SQLException
    */
   protected void refreshView(Connection conn, String viewName) throws SQLException {
-    LOGGER.info("Refreshing view: " + viewName + "...");
-    DateTime startTime = new DateTime();
-    StringBuilder buf = new StringBuilder();
-    buf.append("REFRESH TABLE ").append(System.getProperty("DB_CMS_SCHEMA")).append(".")
-        .append(viewName);
-    final String query = buf.toString();
-    Statement stmt = conn.createStatement();
-    stmt.execute(query);
-    DateTime endTime = new DateTime();
-    Duration duration = new Duration(startTime, endTime);
-    duration.getStandardSeconds();
-    LOGGER.info(
-        "DONE refreshing view " + viewName + " in " + duration.getStandardSeconds() + " seconds");
+    Statement stmt = null;
+    try {
+      LOGGER.info("Refreshing view: " + viewName + "...");
+      DateTime startTime = new DateTime();
+      StringBuilder buf = new StringBuilder();
+      buf.append("REFRESH TABLE ").append(System.getProperty("DB_CMS_SCHEMA")).append(".")
+          .append(viewName);
+      final String query = buf.toString();
+      stmt = conn.createStatement();
+      stmt.execute(query);
+      DateTime endTime = new DateTime();
+      Duration duration = new Duration(startTime, endTime);
+      duration.getStandardSeconds();
+      LOGGER.info(
+          "DONE refreshing view " + viewName + " in " + duration.getStandardSeconds() + " seconds");
+    } finally {
+      if (stmt != null) {
+        stmt.close();
+      }
+    }
   }
 
   /**
