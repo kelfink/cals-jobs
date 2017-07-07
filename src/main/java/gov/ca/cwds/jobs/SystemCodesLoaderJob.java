@@ -35,6 +35,7 @@ import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.rest.api.domain.cms.SystemCode;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
+import gov.ca.cwds.rest.api.domain.cms.SystemMeta;
 import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
 
 /**
@@ -60,17 +61,61 @@ public class SystemCodesLoaderJob {
    */
   public Map<Integer, NsSystemCode> load() {
     Map<Integer, NsSystemCode> loadedSystemCodes = new HashMap<>();
+
+    Set<SystemMeta> allSystemMetas = SystemCodeCache.global().getAllSystemMetas();
+    LOGGER.info("Found total " + allSystemMetas.size() + " system metas in legacy");
+
     Set<SystemCode> allSystemCodes = SystemCodeCache.global().getAllSystemCodes();
     LOGGER.info("Found total " + allSystemCodes.size() + " system codes in legacy");
+
+    Map<String, SystemMeta> systemMetaMap = new HashMap<>();
+    for (SystemMeta systemMeta : allSystemMetas) {
+      systemMetaMap.put(systemMeta.getLogicalTableDsdName(), systemMeta);
+    }
+
+    Map<Short, SystemCode> systemCodeMap = new HashMap<>();
+    for (SystemCode systemCode : allSystemCodes) {
+      systemCodeMap.put(systemCode.getSystemId(), systemCode);
+    }
 
     Transaction tx = systemCodeDao.getSessionFactory().getCurrentSession().beginTransaction();
 
     try {
       for (SystemCode systemCode : allSystemCodes) {
-        if (StringUtils.equalsIgnoreCase("N", systemCode.getInactiveIndicator().trim())) {
-          NsSystemCode sc = new NsSystemCode(systemCode);
-          systemCodeDao.createOrUpdate(sc);
-          loadedSystemCodes.put(sc.getId(), sc);
+        boolean active =
+            StringUtils.equalsIgnoreCase("N", systemCode.getInactiveIndicator().trim());
+
+        if (active) {
+          NsSystemCode nsc = new NsSystemCode();
+          nsc.setId(systemCode.getSystemId().intValue());
+          nsc.setDescription(systemCode.getShortDescription());
+          nsc.setOtherCode(systemCode.getOtherCd());
+
+          String categoryId = systemCode.getForeignKeyMetaTable();
+          nsc.setCategoryId(categoryId);
+
+          SystemMeta systemMeta = systemMetaMap.get(categoryId);
+          if (systemMeta != null) {
+            nsc.setCategoryDescription(systemMeta.getShortDescriptionName());
+          } else {
+            LOGGER.warn("Missing system meta for category " + categoryId + " for system code "
+                + systemCode.getSystemId());
+          }
+
+          Short subCategoryId = systemCode.getCategoryId();
+          if (subCategoryId != null && subCategoryId != 0) {
+            nsc.setSubCategoryId(subCategoryId.intValue());
+            SystemCode subCategoySystemCode = systemCodeMap.get(subCategoryId);
+            if (subCategoySystemCode != null) {
+              nsc.setSubCategoryDescription(subCategoySystemCode.getShortDescription());
+            } else {
+              LOGGER.warn("Missing system code for sub-category ID " + subCategoryId
+                  + " for system code " + systemCode.getSystemId());
+            }
+          }
+
+          systemCodeDao.createOrUpdate(nsc);
+          loadedSystemCodes.put(nsc.getId(), nsc);
         }
       }
     } catch (Exception e) {
@@ -131,23 +176,30 @@ public class SystemCodesLoaderJob {
     @Type(type = "int")
     private Integer id;
 
-    @Column(name = "category_id")
+    @Column(name = "CATEGORY_ID")
     private String categoryId;
 
-    @Column(name = "description")
+    @Column(name = "SUB_CATEGORY_ID")
+    @Type(type = "int")
+    private Integer subCategoryId;
+
+    @Column(name = "DESCRIPTION")
     private String description;
+
+    @Column(name = "CATEGORY_DESCRIPTION")
+    private String categoryDescription;
+
+    @Column(name = "SUB_CATEGORY_DESCRIPTION")
+    private String subCategoryDescription;
+
+    @Column(name = "OTHER_CODE")
+    private String otherCode;
 
     /**
      * Default constructor.
      */
     public NsSystemCode() {
       // Default constructor
-    }
-
-    public NsSystemCode(SystemCode systemCode) {
-      setId(systemCode.getSystemId().intValue());
-      setCategoryId(systemCode.getForeignKeyMetaTable());
-      setDescription(systemCode.getShortDescription());
     }
 
     public Integer getId() {
@@ -172,6 +224,38 @@ public class SystemCodesLoaderJob {
 
     public void setDescription(String description) {
       this.description = description;
+    }
+
+    public Integer getSubCategoryId() {
+      return subCategoryId;
+    }
+
+    public void setSubCategoryId(Integer subCategoryId) {
+      this.subCategoryId = subCategoryId;
+    }
+
+    public String getCategoryDescription() {
+      return categoryDescription;
+    }
+
+    public void setCategoryDescription(String categoryDescription) {
+      this.categoryDescription = categoryDescription;
+    }
+
+    public String getSubCategoryDescription() {
+      return subCategoryDescription;
+    }
+
+    public void setSubCategoryDescription(String subCategoryDescription) {
+      this.subCategoryDescription = subCategoryDescription;
+    }
+
+    public String getOtherCode() {
+      return otherCode;
+    }
+
+    public void setOtherCode(String otherCode) {
+      this.otherCode = otherCode;
     }
 
     @Override

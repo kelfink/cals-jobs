@@ -49,8 +49,11 @@ public class SimpleTestSystemCodeCache implements SystemCodeCache {
 
   @Override
   public Set<SystemMeta> getAllSystemMetas() {
-    // TODO Auto-generated method stub
-    return null;
+    Set<SystemMeta> systemMetas = new HashSet<>();
+    systemMetas.add(new SystemMeta("META_A", "META_A", "META_A_DESC"));
+    systemMetas.add(new SystemMeta("META_B", "META_B", "META_B_DESC"));
+    systemMetas.add(new SystemMeta("META_C", "META_C", "META_C_DESC"));
+    return systemMetas;
   }
 
   @Override
