@@ -1,6 +1,8 @@
 package gov.ca.cwds.jobs;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -9,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -50,25 +54,23 @@ public class SystemCodesLoaderJob {
   }
 
   /**
-   * Run the loader job
+   * Load system codes into new system
+   * 
+   * @return Map of newly loaded system codes.
    */
-  public void run() {
+  public Map<Integer, NsSystemCode> load() {
+    Map<Integer, NsSystemCode> loadedSystemCodes = new HashMap<>();
     Set<SystemCode> allSystemCodes = SystemCodeCache.global().getAllSystemCodes();
-    int totalCount = allSystemCodes.size();
-    int activeCount = 0;
-    LOGGER.info("Found total " + totalCount + " system codes in legacy");
+    LOGGER.info("Found total " + allSystemCodes.size() + " system codes in legacy");
 
     Transaction tx = systemCodeDao.getSessionFactory().getCurrentSession().beginTransaction();
 
     try {
       for (SystemCode systemCode : allSystemCodes) {
         if (StringUtils.equalsIgnoreCase("N", systemCode.getInactiveIndicator().trim())) {
-          activeCount = activeCount + 1;
-          NsSystemCode sc = new NsSystemCode();
-          sc.setId(systemCode.getSystemId().intValue());
-          sc.setCategoryId(systemCode.getForeignKeyMetaTable());
-          sc.setDescription(systemCode.getShortDescription().trim());
+          NsSystemCode sc = new NsSystemCode(systemCode);
           systemCodeDao.createOrUpdate(sc);
+          loadedSystemCodes.put(sc.getId(), sc);
         }
       }
     } catch (Exception e) {
@@ -78,7 +80,9 @@ public class SystemCodesLoaderJob {
     }
 
     tx.commit();
-    LOGGER.info("Loaded total " + activeCount + " active system codes from legacy into new system");
+    LOGGER.info("Loaded total " + loadedSystemCodes.size()
+        + " active system codes from legacy into new system");
+    return loadedSystemCodes;
   }
 
   /**
@@ -99,7 +103,7 @@ public class SystemCodesLoaderJob {
 
       NsSystemCodeDao systemCodeDao = injector.getInstance(NsSystemCodeDao.class);
       SystemCodesLoaderJob systemCodesJob = new SystemCodesLoaderJob(systemCodeDao);
-      systemCodesJob.run();
+      systemCodesJob.load();
       LOGGER.info("DONE loading system codes from legacy to new system.");
     } catch (Exception e) {
       LOGGER.error(e);
@@ -118,7 +122,7 @@ public class SystemCodesLoaderJob {
    */
   @Entity
   @Table(name = "system_codes")
-  private static class NsSystemCode implements PersistentObject {
+  static class NsSystemCode implements PersistentObject {
 
     private static final long serialVersionUID = 8370500764130606101L;
 
@@ -138,6 +142,12 @@ public class SystemCodesLoaderJob {
      */
     public NsSystemCode() {
       // Default constructor
+    }
+
+    public NsSystemCode(SystemCode systemCode) {
+      setId(systemCode.getSystemId().intValue());
+      setCategoryId(systemCode.getForeignKeyMetaTable());
+      setDescription(systemCode.getShortDescription());
     }
 
     public Integer getId() {
@@ -168,6 +178,16 @@ public class SystemCodesLoaderJob {
     public Serializable getPrimaryKey() {
       return getId();
     }
+
+    @Override
+    public int hashCode() {
+      return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      return EqualsBuilder.reflectionEquals(this, obj);
+    }
   }
 
   //
@@ -178,7 +198,7 @@ public class SystemCodesLoaderJob {
   /**
    * System codes DAO for new system
    */
-  private static class NsSystemCodeDao extends CrudsDaoImpl<NsSystemCode> {
+  static class NsSystemCodeDao extends CrudsDaoImpl<NsSystemCode> {
 
     /**
      * Constructor
@@ -209,7 +229,7 @@ public class SystemCodesLoaderJob {
   /**
    * System codes loader Guice module
    */
-  private static class SystemCodesLoaderModule extends AbstractModule {
+  static class SystemCodesLoaderModule extends AbstractModule {
 
     /**
      * Default constructor.

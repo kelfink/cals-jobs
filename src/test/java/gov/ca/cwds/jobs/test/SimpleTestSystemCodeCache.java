@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.test;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import gov.ca.cwds.rest.api.domain.cms.SystemCode;
@@ -23,8 +24,27 @@ public class SimpleTestSystemCodeCache implements SystemCodeCache {
 
   @Override
   public Set<SystemCode> getAllSystemCodes() {
-    // TODO Auto-generated method stub
-    return null;
+    Set<SystemCode> systemCodes = new HashSet<>();
+
+    // Add META_A_ active codes
+    for (int i = 1; i < 4; i++) {
+      systemCodes.add(new SystemCode(new Integer(i).shortValue(), null, "N", null,
+          ("DESCRIPTION_A" + i), null, null, "META_A", null));
+    }
+
+    // Add META_A_ inactive codes
+    for (int i = 4; i < 7; i++) {
+      systemCodes.add(new SystemCode(new Integer(i).shortValue(), null, "Y", null,
+          ("DESCRIPTION_A" + i), null, null, "META_A", null));
+    }
+
+    // Add META_B_ active codes
+    for (int i = 7; i < 10; i++) {
+      systemCodes.add(new SystemCode(new Integer(i).shortValue(), null, "N", null,
+          ("DESCRIPTION_B" + i), null, null, "META_B", null));
+    }
+
+    return systemCodes;
   }
 
   @Override
