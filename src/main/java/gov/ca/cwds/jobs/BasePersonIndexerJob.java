@@ -62,7 +62,6 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
-import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
@@ -84,7 +83,7 @@ import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
  * 
  * <p>
  * This class implements {@link AutoCloseable} and automatically closes common resources, such as
- * {@link Elasticsearch5xDao} and Hibernate {@link SessionFactory}.
+ * {@link ElasticsearchDao} and Hibernate {@link SessionFactory}.
  * </p>
  * 
  * <p>
