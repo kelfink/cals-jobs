@@ -1163,9 +1163,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
-    Transaction txn = null;
+    Transaction txn = session.beginTransaction();
     try {
-      txn = session.beginTransaction();
       NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
 
@@ -1181,9 +1180,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (HibernateException h) {
       fatalError = true;
       LOGGER.error("EXTRACT ERROR! {}", h.getMessage(), h);
-      if (txn != null) {
-        txn.rollback();
-      }
+      txn.rollback();
       throw new DaoException(h);
     } finally {
       doneExtract = true;
@@ -1204,11 +1201,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
     Object lastId = new Object();
-    Transaction txn = null;
+    Transaction txn = session.beginTransaction();
 
     try {
-      txn = session.beginTransaction();
-
       // Refresh view
       session.doWork(new Work() {
         @Override
@@ -1245,9 +1240,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       return results.build();
     } catch (HibernateException h) {
       fatalError = true;
-      if (txn != null) {
-        txn.rollback();
-      }
+      txn.rollback();
       throw JobLogUtils.buildException(LOGGER, h, "EXTRACT ERROR!: {}", h.getMessage());
     } finally {
       doneExtract = true;
@@ -1403,9 +1396,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final String namedQueryName = entityClass.getName() + ".findBucketRange";
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
-    Transaction txn = null;
+    Transaction txn = session.beginTransaction();
     try {
-      txn = session.beginTransaction();
       NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setString("min_id", minId).setString("max_id", maxId);
 
@@ -1419,9 +1411,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (HibernateException e) {
       fatalError = true;
       LOGGER.error("BATCH ERROR! {}", e.getMessage(), e);
-      if (txn != null) {
-        txn.rollback();
-      }
+      txn.rollback();
       throw new DaoException(e);
     }
   }

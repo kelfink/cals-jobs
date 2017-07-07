@@ -163,23 +163,17 @@ public class JobsGuiceInjector extends AbstractModule {
     // Required for annotation injection.
     bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
 
-    // Register CMS system code translator.
-    // bind(CmsSystemCodeSerializer.class).asEagerSingleton();
-
     bind(SystemCodeDao.class);
     bind(SystemMetaDao.class);
 
     // Only one instance of ES DAO.
     bind(ElasticsearchDao.class).asEagerSingleton();
-
-    // Static injection?
-    // requestStaticInjection(ElasticSearchPerson.class);
   }
 
   @Provides
   public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
       SystemMetaDao systemMetaDao) {
-    final long secondsToRefreshCache = 15 * 24 * 60 * 60; // 15 days
+    final long secondsToRefreshCache = 15 * 24 * 60 * (long) 60; // 15 days
     SystemCodeCache systemCodeCache =
         new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
     systemCodeCache.register();
