@@ -296,15 +296,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Statement stmt = null;
     try {
       LOGGER.info("Refreshing view: " + viewName + "...");
-      DateTime startTime = new DateTime();
+      DateTime refreshStartTime = new DateTime();
       StringBuilder buf = new StringBuilder();
-      buf.append("REFRESH TABLE ").append(System.getProperty("DB_CMS_SCHEMA")).append(".")
-          .append(viewName);
+      buf.append("REFRESH TABLE ").append(getDBSchemaName()).append(".").append(viewName);
       final String query = buf.toString();
       stmt = conn.createStatement();
       stmt.execute(query);
-      DateTime endTime = new DateTime();
-      Duration duration = new Duration(startTime, endTime);
+      Duration duration = new Duration(refreshStartTime, new DateTime());
       duration.getStandardSeconds();
       LOGGER.info(
           "DONE refreshing view " + viewName + " in " + duration.getStandardSeconds() + " seconds");
@@ -333,9 +331,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   @Override
   public M extract(ResultSet rs) throws SQLException {
-    // TODO: Delegate to row mapper.
-    // while (rs.next()) {
-    // }
     return null;
   }
 
@@ -544,10 +539,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   @SuppressWarnings("unchecked")
   protected List<T> normalize(List<M> recs) {
-    // if (getDenormalizedClass() != null
-    // && getDenormalizedClass().isAssignableFrom(ApiGroupNormalizer.class)) {
-    // LOGGER.trace("denormalizer");
-    // }
     return (List<T>) recs;
   }
 
@@ -857,7 +848,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
           .getService(ConnectionProvider.class).getConnection();
-      con.setSchema(System.getProperty("DB_CMS_SCHEMA"));
+      con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
       con.setReadOnly(true); // WARNING: fails with Postgres.
 
@@ -868,8 +859,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Detect platform or always force ORDER BY clause.
 
       StringBuilder buf = new StringBuilder();
-      buf.append("SELECT x.* FROM ").append(System.getProperty("DB_CMS_SCHEMA")).append(".")
-          .append(getViewName()).append(" x ").append(getJdbcOrderBy()).append(" FOR READ ONLY");
+      buf.append("SELECT x.* FROM ").append(getDBSchemaName()).append(".").append(getViewName())
+          .append(" x ").append(getJdbcOrderBy()).append(" FOR READ ONLY");
       final String query = buf.toString();
       M m;
 
@@ -1555,5 +1546,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     BasePersonIndexerJob.testMode = testMode;
   }
 
+  protected static String getDBSchemaName() {
+    return System.getProperty("DB_CMS_SCHEMA");
+  }
 }
 
