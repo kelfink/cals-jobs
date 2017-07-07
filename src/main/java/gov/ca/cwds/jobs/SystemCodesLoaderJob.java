@@ -1,6 +1,9 @@
 package gov.ca.cwds.jobs;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -15,10 +18,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.annotations.Type;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.jdbc.Work;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -78,7 +83,16 @@ public class SystemCodesLoaderJob {
       systemCodeMap.put(systemCode.getSystemId(), systemCode);
     }
 
+    Session session = systemCodeDao.getSessionFactory().getCurrentSession();
     Transaction tx = systemCodeDao.getSessionFactory().getCurrentSession().beginTransaction();
+
+    // Delete all exising system codes from new system
+    session.doWork(new Work() {
+      @Override
+      public void execute(Connection connection) throws SQLException {
+        deleteNsSystemCodes(connection);
+      }
+    });
 
     try {
       for (SystemCode systemCode : allSystemCodes) {
@@ -128,6 +142,21 @@ public class SystemCodesLoaderJob {
     LOGGER.info("Loaded total " + loadedSystemCodes.size()
         + " active system codes from legacy into new system");
     return loadedSystemCodes;
+  }
+
+  private void deleteNsSystemCodes(Connection conn) throws SQLException {
+    Statement stmt = null;
+    try {
+      LOGGER.info("Deleting system codes from new system...");
+      final String query = "DELETE FROM SYSTEM_CODES";
+      stmt = conn.createStatement();
+      stmt.execute(query);
+      LOGGER.info("Deleting system codes from new system");
+    } finally {
+      if (stmt != null) {
+        stmt.close();
+      }
+    }
   }
 
   /**
