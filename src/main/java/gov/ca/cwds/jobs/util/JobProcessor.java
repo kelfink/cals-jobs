@@ -14,7 +14,6 @@ public interface JobProcessor<I, O> {
    * 
    * @param item input
    * @return an O
-   * @throws Exception on ... whatever
    */
   O process(I item);
 
