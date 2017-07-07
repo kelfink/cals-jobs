@@ -77,7 +77,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
         statement = null;
       }
     } catch (SQLException e) {
-      // Do nothing
+      LOGGER.error(e);
     } finally {
       sessionFactory.close();
     }

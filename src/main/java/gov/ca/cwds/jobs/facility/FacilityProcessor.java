@@ -17,7 +17,7 @@ public class FacilityProcessor implements JobProcessor<FacilityRow, ESFacility>,
   private static final long serialVersionUID = 1L;
 
   @Override
-  public ESFacility process(FacilityRow item) throws Exception {
+  public ESFacility process(FacilityRow item) {
     ESFacility ret = new ESFacility();
 
     ret.setId(item.getId());

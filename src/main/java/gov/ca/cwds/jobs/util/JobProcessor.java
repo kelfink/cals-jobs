@@ -16,6 +16,6 @@ public interface JobProcessor<I, O> {
    * @return an O
    * @throws Exception on ... whatever
    */
-  O process(I item) throws Exception;
+  O process(I item);
 
 }
