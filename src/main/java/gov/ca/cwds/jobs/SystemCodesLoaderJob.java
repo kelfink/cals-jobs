@@ -84,17 +84,17 @@ public class SystemCodesLoaderJob {
     }
 
     Session session = systemCodeDao.getSessionFactory().getCurrentSession();
-    Transaction tx = systemCodeDao.getSessionFactory().getCurrentSession().beginTransaction();
-
-    // Delete all exising system codes from new system
-    session.doWork(new Work() {
-      @Override
-      public void execute(Connection connection) throws SQLException {
-        deleteNsSystemCodes(connection);
-      }
-    });
+    Transaction tx = session.beginTransaction();
 
     try {
+      // Delete all existing system codes from new system
+      session.doWork(new Work() {
+        @Override
+        public void execute(Connection connection) throws SQLException {
+          deleteNsSystemCodes(connection);
+        }
+      });
+
       for (SystemCode systemCode : allSystemCodes) {
         boolean active =
             StringUtils.equalsIgnoreCase("N", systemCode.getInactiveIndicator().trim());
