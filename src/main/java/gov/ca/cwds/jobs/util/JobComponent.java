@@ -7,16 +7,12 @@ public interface JobComponent {
 
   /**
    * Optionally initialize resources. Default is no-op.
-   * 
-   * @throws Exception on generic error
    */
-  default void init() throws Exception {}
+  default void init() {}
 
   /**
    * Close and de-allocate exclusive resources. Default is no-op.
-   * 
-   * @throws Exception on generic error
    */
-  default void destroy() throws Exception {}
+  default void destroy() {}
 
 }

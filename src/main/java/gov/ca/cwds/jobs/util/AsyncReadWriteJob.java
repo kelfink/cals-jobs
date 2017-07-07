@@ -107,13 +107,13 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
   }
 
   @Override
-  public void init() throws Exception {
+  public void init() {
     reader.init();
     writer.init();
   }
 
   @Override
-  public void destroy() throws Exception {
+  public void destroy() {
     reader.destroy();
     writer.destroy();
   }

@@ -9,6 +9,6 @@ import java.util.List;
 @FunctionalInterface
 public interface JobWriter<T> extends JobComponent {
 
-  void write(List<T> items) throws Exception;
+  void write(List<T> items);
 
 }

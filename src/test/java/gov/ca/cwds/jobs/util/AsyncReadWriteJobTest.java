@@ -73,7 +73,7 @@ public class AsyncReadWriteJobTest {
         return input.remove(0);
       }
       return null;
-    }, String::valueOf, output::addAll);
+    } , String::valueOf, output::addAll);
     job.run();
 
     Assert.assertEquals(3, output.size());
@@ -88,10 +88,14 @@ public class AsyncReadWriteJobTest {
       if (input.size() == 3) {
         return input.remove(0);
       } else {
-        Thread.sleep(1000); // NOSONAR
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
         throw new RuntimeException("failed on second!");
       }
-    }, String::valueOf, output::addAll);
+    } , String::valueOf, output::addAll);
 
     job.run();
     Assert.assertEquals(1, output.size());
