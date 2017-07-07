@@ -294,7 +294,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected void refreshView(Connection conn, String viewName) throws SQLException {
     Statement stmt = null;
     try {
-      LOGGER.info("Refreshing view: " + viewName + "...");
+      LOGGER.info("Refreshing view " + viewName + "...");
       DateTime refreshStartTime = new DateTime();
       StringBuilder buf = new StringBuilder();
       buf.append("REFRESH TABLE ").append(getDBSchemaName()).append(".").append(viewName);

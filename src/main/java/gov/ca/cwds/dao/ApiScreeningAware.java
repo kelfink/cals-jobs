@@ -10,6 +10,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
  * 
  * @author CWDS API Team
  */
+@FunctionalInterface
 public interface ApiScreeningAware extends Serializable {
 
   /**

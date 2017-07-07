@@ -10,6 +10,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
  * 
  * @author CWDS API Team
  */
+@FunctionalInterface
 public interface ApiMultiplePersonAware extends Serializable {
 
   /**

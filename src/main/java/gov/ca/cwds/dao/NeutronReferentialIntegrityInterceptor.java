@@ -32,12 +32,6 @@ public class NeutronReferentialIntegrityInterceptor extends ApiHibernateIntercep
   public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState,
       Object[] previousState, String[] propertyNames, Type[] types) {
     LOGGER.debug("on flush dirty");
-
-    // if (entity instanceof Client) {
-    // LOGGER.debug("Client Update Operation");
-    // return true;
-    // }
-
     return false;
   }
 
@@ -53,12 +47,6 @@ public class NeutronReferentialIntegrityInterceptor extends ApiHibernateIntercep
   public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames,
       Type[] types) {
     LOGGER.debug("on save");
-
-    // if (entity instanceof Client) {
-    // LOGGER.debug("Client Create Operation");
-    // return true;
-    // }
-
     return false;
   }
 

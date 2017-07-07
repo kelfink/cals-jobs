@@ -17,16 +17,15 @@ import gov.ca.cwds.inject.CmsSessionFactory;
  * @see SessionFactory
  */
 public class ReplicatedPersonReferralsDao extends BaseDaoImpl<ReplicatedPersonReferrals>
-		implements BatchBucketDao<ReplicatedPersonReferrals> {
+    implements BatchBucketDao<ReplicatedPersonReferrals> {
 
-	/**
-	 * Constructor
-	 * 
-	 * @param sessionFactory
-	 *            The sessionFactory
-	 */
-	@Inject
-	public ReplicatedPersonReferralsDao(@CmsSessionFactory SessionFactory sessionFactory) {
-		super(sessionFactory);
-	}
+  /**
+   * Constructor
+   * 
+   * @param sessionFactory The sessionFactory
+   */
+  @Inject
+  public ReplicatedPersonReferralsDao(@CmsSessionFactory SessionFactory sessionFactory) {
+    super(sessionFactory);
+  }
 }
