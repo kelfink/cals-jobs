@@ -746,7 +746,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final Pair<String, String> json = prepareUpsertJson(esp, t, getOptionalElementName(),
         getOptionalCollection(esp, t), keepCollections());
 
-    final String alias = esDao.getConfig().getElasticsearchAlias();
+    final String alias = getOpts().getIndexName();
     final String docType = esDao.getConfig().getElasticsearchDocType();
 
     // "Upsert": update if doc exists, insert if it does not.
@@ -1082,10 +1082,24 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
+      /**
+       * If index name is provided then use it, otherwise use alias from ES config.
+       */
+      String indexName = StringUtils.isBlank(opts.getIndexName())
+          ? esDao.getConfig().getElasticsearchAlias() : opts.getIndexName();
+
+      getOpts().setIndexName(indexName);
+
+      String documentType = esDao.getConfig().getElasticsearchDocType();
+      String peopleSettingsFile = "/elasticsearch/setting/people-index-settings.json";
+      String personMappingFile = "/elasticsearch/mapping/map_person_5x_snake.json";
 
       // If the index is missing, create it.
-      LOGGER.debug("Create index if missing");
-      esDao.createIndexIfNeeded(esDao.getConfig().getElasticsearchAlias());
+      LOGGER.debug("Create index if missing, indexName: " + indexName);
+      esDao.createIndexIfNeeded(indexName, documentType, peopleSettingsFile, personMappingFile);
+
+      // esDao.createIndexIfNeeded(esDao.getConfig().getElasticsearchAlias());
+
       LOGGER.debug("availableProcessors={}", Runtime.getRuntime().availableProcessors());
 
       // Smart/auto mode:

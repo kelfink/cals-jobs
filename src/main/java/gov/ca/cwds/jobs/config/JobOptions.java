@@ -34,6 +34,7 @@ public class JobOptions implements Serializable {
   private static final Logger LOGGER = LogManager.getLogger(JobOptions.class);
 
   public static final String CMD_LINE_ES_CONFIG = "config";
+  public static final String CMD_LINE_INDEX_NAME = "index-name";
   public static final String CMD_LINE_LAST_RUN = "last-run-file";
   public static final String CMD_LINE_BUCKET_RANGE = "bucket-range";
   public static final String CMD_LINE_BUCKET_TOTAL = "total-buckets";
@@ -45,6 +46,11 @@ public class JobOptions implements Serializable {
    * Location of Elasticsearch configuration file.
    */
   final String esConfigLoc;
+
+  /**
+   * Name of index to create or use. If this is not provided then alias is used from ES Config file.
+   */
+  private String indexName;
 
   /**
    * Location of last run file.
@@ -96,6 +102,7 @@ public class JobOptions implements Serializable {
    * Construct from all settings.
    * 
    * @param esConfigLoc location of Elasticsearch configuration file
+   * @param indexName Name of index to use. If not provided then alias is used from es config.
    * @param lastRunLoc location of last run file
    * @param lastRunMode is last run mode or not
    * @param startBucket starting bucket number
@@ -103,9 +110,11 @@ public class JobOptions implements Serializable {
    * @param totalBuckets total buckets
    * @param threadCount number of simultaneous threads
    */
-  JobOptions(String esConfigLoc, String lastRunLoc, boolean lastRunMode, long startBucket,
-      long endBucket, long totalBuckets, long threadCount, String minId, String maxId) {
+  JobOptions(String esConfigLoc, String indexName, String lastRunLoc, boolean lastRunMode,
+      long startBucket, long endBucket, long totalBuckets, long threadCount, String minId,
+      String maxId) {
     this.esConfigLoc = esConfigLoc;
+    this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
     this.lastRunLoc = lastRunLoc;
     this.lastRunMode = lastRunMode;
     this.startBucket = startBucket;
@@ -123,6 +132,15 @@ public class JobOptions implements Serializable {
    */
   public final String getEsConfigLoc() {
     return esConfigLoc;
+  }
+
+  /**
+   * Get name of the index to create or use.
+   * 
+   * @return Name of the index to use.
+   */
+  public String getIndexName() {
+    return indexName;
   }
 
   /**
@@ -237,6 +255,7 @@ public class JobOptions implements Serializable {
     Options ret = new Options();
 
     ret.addOption(JobCmdLineOption.ES_CONFIG.getOpt());
+    ret.addOption(JobCmdLineOption.INDEX_NAME.getOpt());
     ret.addOption(JobCmdLineOption.THREADS.getOpt());
     ret.addOption(JobCmdLineOption.BUCKET_RANGE.getOpt());
     ret.addOption(JobCmdLineOption.MIN_ID.getOpt());
@@ -278,6 +297,7 @@ public class JobOptions implements Serializable {
    */
   public static JobOptions parseCommandLine(String[] args) throws JobsException {
     String esConfigLoc = null;
+    String indexName = null;
     String lastRunLoc = null;
     boolean lastRunMode = false;
     long startBucket = 0L;
@@ -300,6 +320,11 @@ public class JobOptions implements Serializable {
           case CMD_LINE_ES_CONFIG:
             LOGGER.info("ES config file  = " + opt.getValue());
             esConfigLoc = opt.getValue().trim();
+            break;
+
+          case CMD_LINE_INDEX_NAME:
+            indexName = opt.getValue().trim();
+            LOGGER.info("index name = " + indexName);
             break;
 
           case CMD_LINE_LAST_RUN:
@@ -346,7 +371,7 @@ public class JobOptions implements Serializable {
       throw new JobsException("Error parsing command line: " + e.getMessage(), e);
     }
 
-    return new JobOptions(esConfigLoc, lastRunLoc, lastRunMode, startBucket, endBucket,
+    return new JobOptions(esConfigLoc, indexName, lastRunLoc, lastRunMode, startBucket, endBucket,
         totalBuckets, threadCount, minId, maxId);
   }
 
@@ -374,4 +399,7 @@ public class JobOptions implements Serializable {
     this.totalBuckets = totalBuckets;
   }
 
+  public void setIndexName(String indexName) {
+    this.indexName = indexName;
+  }
 }
