@@ -849,7 +849,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           .getService(ConnectionProvider.class).getConnection();
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      con.setReadOnly(true); // WARNING: fails with Postgres.
+      // con.setReadOnly(true); // WARNING: fails with Postgres.
 
       // Refresh view
       refreshView(con);
