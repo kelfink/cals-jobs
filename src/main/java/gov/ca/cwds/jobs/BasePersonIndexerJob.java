@@ -40,7 +40,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.hibernate.jdbc.Work;
 import org.hibernate.query.NativeQuery;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -849,10 +848,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           .getService(ConnectionProvider.class).getConnection();
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      // con.setReadOnly(true); // WARNING: fails with Postgres.
+      con.setReadOnly(true); // WARNING: fails with Postgres.
 
       // Refresh view
-      refreshView(con);
+      // refreshView(con);
 
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Detect platform or always force ORDER BY clause.
@@ -1219,12 +1218,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     try {
       // Refresh view
-      session.doWork(new Work() {
-        @Override
-        public void execute(Connection connection) throws SQLException {
-          refreshView(connection);
-        }
-      });
+      // session.doWork(new Work() {
+      // @Override
+      // public void execute(Connection connection) throws SQLException {
+      // refreshView(connection);
+      // }
+      // });
 
       NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
       q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
