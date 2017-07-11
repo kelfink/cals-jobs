@@ -132,7 +132,7 @@ public class Elasticsearch5xDao implements Closeable {
       createIndex(index, NUMBER_OF_SHARDS, NUMBER_OF_REPLICAS);
 
       // Give Elasticsearch a moment to catch its breath.
-      wait(2000);
+      Thread.sleep(2000); // NOSONAR
     }
   }
 
