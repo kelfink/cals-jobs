@@ -1084,18 +1084,30 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       /**
        * If index name is provided then use it, otherwise use alias from ES config.
        */
-      String indexName = StringUtils.isBlank(opts.getIndexName())
-          ? esDao.getConfig().getElasticsearchAlias() : opts.getIndexName();
+      String indexNameOverride = getOpts().getIndexName();
+      String effectiveIndexName = StringUtils.isBlank(indexNameOverride)
+          ? esDao.getConfig().getElasticsearchAlias() : indexNameOverride;
 
-      getOpts().setIndexName(indexName);
+      /**
+       * If last run time is provide in options then use it, otherwise use provided
+       * lastSuccessfulRunTime.
+       */
+      Date lastSuccessfulRunTimeOverride = getOpts().getLastRunTime();
+      Date effectiveLastSuccessfulRunTime = lastSuccessfulRunTimeOverride != null
+          ? lastSuccessfulRunTimeOverride : lastSuccessfulRunTime;
 
       String documentType = esDao.getConfig().getElasticsearchDocType();
       String peopleSettingsFile = "/elasticsearch/setting/people-index-settings.json";
       String personMappingFile = "/elasticsearch/mapping/map_person_5x_snake.json";
 
+      LOGGER.info("Effective index name: " + effectiveIndexName);
+      LOGGER.info(
+          "Effective last successsfull run time: " + effectiveLastSuccessfulRunTime.toString());
+
       // If the index is missing, create it.
-      LOGGER.debug("Create index if missing, indexName: " + indexName);
-      esDao.createIndexIfNeeded(indexName, documentType, peopleSettingsFile, personMappingFile);
+      LOGGER.debug("Create index if missing, effectiveIndexName: " + effectiveIndexName);
+      esDao.createIndexIfNeeded(effectiveIndexName, documentType, peopleSettingsFile,
+          personMappingFile);
 
       // esDao.createIndexIfNeeded(esDao.getConfig().getElasticsearchAlias());
 
@@ -1105,7 +1117,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final Calendar cal = Calendar.getInstance();
       cal.add(Calendar.YEAR, -50);
       final boolean autoMode =
-          this.opts.isLastRunMode() && lastSuccessfulRunTime.before(cal.getTime());
+          this.opts.isLastRunMode() && effectiveLastSuccessfulRunTime.before(cal.getTime());
 
       if (autoMode) {
         LOGGER.warn("AUTO MODE!");
@@ -1123,7 +1135,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       } else if (this.opts == null || this.opts.isLastRunMode()) {
         LOGGER.warn("LAST RUN MODE!");
-        doLastRun(lastSuccessfulRunTime);
+        doLastRun(effectiveLastSuccessfulRunTime);
       } else {
         LOGGER.warn("DIRECT BUCKET MODE!");
         extractHibernate();

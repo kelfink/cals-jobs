@@ -22,9 +22,15 @@ public enum JobCmdLineOption {
       false, 1, String.class, ',')),
 
   /**
+   * Last run time in format 'yyyy-MM-dd HH:mm:ss'
+   */
+  LAST_RUN_TIME(JobOptions.makeOpt("s", JobOptions.CMD_LINE_LAST_RUN_TIME,
+      "last run time (yyyy-MM-dd HH:mm:ss)", false, 1, String.class, ',')),
+
+  /**
    * Last run date file (yyyy-MM-dd HH:mm:ss)
    */
-  LAST_RUN_FILE(JobOptions.makeOpt("l", JobOptions.CMD_LINE_LAST_RUN,
+  LAST_RUN_FILE(JobOptions.makeOpt("l", JobOptions.CMD_LINE_LAST_RUN_FILE,
       "last run date file (yyyy-MM-dd HH:mm:ss)", false, 1, String.class, ',')),
 
   /**

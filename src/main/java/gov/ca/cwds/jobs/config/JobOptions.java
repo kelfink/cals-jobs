@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -18,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.rest.api.ApiException;
 
 /**
  * Represents batch job options from the command line.
@@ -35,7 +39,8 @@ public class JobOptions implements Serializable {
 
   public static final String CMD_LINE_ES_CONFIG = "config";
   public static final String CMD_LINE_INDEX_NAME = "index-name";
-  public static final String CMD_LINE_LAST_RUN = "last-run-file";
+  public static final String CMD_LINE_LAST_RUN_TIME = "last-run-time";
+  public static final String CMD_LINE_LAST_RUN_FILE = "last-run-file";
   public static final String CMD_LINE_BUCKET_RANGE = "bucket-range";
   public static final String CMD_LINE_BUCKET_TOTAL = "total-buckets";
   public static final String CMD_LINE_THREADS = "thread-num";
@@ -51,6 +56,12 @@ public class JobOptions implements Serializable {
    * Name of index to create or use. If this is not provided then alias is used from ES Config file.
    */
   private String indexName;
+
+  /**
+   * Last time job was executed in format 'yyyy-MM-dd HH.mm.ss' If this is provided then time stamp
+   * given in last run time file is ignored.
+   */
+  private Date lastRunTime;
 
   /**
    * Location of last run file.
@@ -103,6 +114,7 @@ public class JobOptions implements Serializable {
    * 
    * @param esConfigLoc location of Elasticsearch configuration file
    * @param indexName Name of index to use. If not provided then alias is used from es config.
+   * @param lastRunTime Last run time to use
    * @param lastRunLoc location of last run file
    * @param lastRunMode is last run mode or not
    * @param startBucket starting bucket number
@@ -110,11 +122,12 @@ public class JobOptions implements Serializable {
    * @param totalBuckets total buckets
    * @param threadCount number of simultaneous threads
    */
-  JobOptions(String esConfigLoc, String indexName, String lastRunLoc, boolean lastRunMode,
-      long startBucket, long endBucket, long totalBuckets, long threadCount, String minId,
-      String maxId) {
+  JobOptions(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
+      boolean lastRunMode, long startBucket, long endBucket, long totalBuckets, long threadCount,
+      String minId, String maxId) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
+    this.lastRunTime = lastRunTime;
     this.lastRunLoc = lastRunLoc;
     this.lastRunMode = lastRunMode;
     this.startBucket = startBucket;
@@ -141,6 +154,16 @@ public class JobOptions implements Serializable {
    */
   public String getIndexName() {
     return indexName;
+  }
+
+  /**
+   * Get last run time override in format 'yyyy-MM-dd HH.mm.ss'. If this is non-null then time
+   * provided in last run time file is ignored.
+   * 
+   * @return Last run time
+   */
+  public Date getLastRunTime() {
+    return lastRunTime;
   }
 
   /**
@@ -256,6 +279,7 @@ public class JobOptions implements Serializable {
 
     ret.addOption(JobCmdLineOption.ES_CONFIG.getOpt());
     ret.addOption(JobCmdLineOption.INDEX_NAME.getOpt());
+    ret.addOption(JobCmdLineOption.LAST_RUN_TIME.getOpt());
     ret.addOption(JobCmdLineOption.THREADS.getOpt());
     ret.addOption(JobCmdLineOption.BUCKET_RANGE.getOpt());
     ret.addOption(JobCmdLineOption.MIN_ID.getOpt());
@@ -298,6 +322,7 @@ public class JobOptions implements Serializable {
   public static JobOptions parseCommandLine(String[] args) throws JobsException {
     String esConfigLoc = null;
     String indexName = null;
+    Date lastRunTime = null;
     String lastRunLoc = null;
     boolean lastRunMode = false;
     long startBucket = 0L;
@@ -327,7 +352,14 @@ public class JobOptions implements Serializable {
             LOGGER.info("index name = " + indexName);
             break;
 
-          case CMD_LINE_LAST_RUN:
+          case CMD_LINE_LAST_RUN_TIME:
+            lastRunMode = true;
+            String lastRunTimeStr = opt.getValue().trim();
+            lastRunTime = createDate(lastRunTimeStr);
+            LOGGER.info("last run time = " + lastRunTimeStr);
+            break;
+
+          case CMD_LINE_LAST_RUN_FILE:
             lastRunMode = true;
             lastRunLoc = opt.getValue().trim();
             LOGGER.info("last run file = " + lastRunLoc);
@@ -371,8 +403,8 @@ public class JobOptions implements Serializable {
       throw new JobsException("Error parsing command line: " + e.getMessage(), e);
     }
 
-    return new JobOptions(esConfigLoc, indexName, lastRunLoc, lastRunMode, startBucket, endBucket,
-        totalBuckets, threadCount, minId, maxId);
+    return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode, startBucket,
+        endBucket, totalBuckets, threadCount, minId, maxId);
   }
 
   public void setStartBucket(long startBucket) {
@@ -401,5 +433,18 @@ public class JobOptions implements Serializable {
 
   public void setIndexName(String indexName) {
     this.indexName = indexName;
+  }
+
+  private static Date createDate(String timestamp) {
+    String trimTimestamp = StringUtils.trim(timestamp);
+    if (StringUtils.isNotEmpty(trimTimestamp)) {
+      try {
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return df.parse(trimTimestamp);
+      } catch (Exception e) {
+        throw new ApiException(e);
+      }
+    }
+    return null;
   }
 }
