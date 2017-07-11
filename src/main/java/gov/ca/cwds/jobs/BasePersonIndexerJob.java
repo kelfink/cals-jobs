@@ -629,7 +629,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void prepareInsertCollections(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-          throws JsonProcessingException {
+      throws JsonProcessingException {
 
     // Null out optional collections for updates.
     esp.clearOptionalCollections(keep);
@@ -652,7 +652,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected Pair<String, String> prepareUpsertJson(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-          throws JsonProcessingException {
+      throws JsonProcessingException {
 
     // Child classes: Set optional collections before serializing the insert JSON.
     prepareInsertCollections(esp, t, elementName, list, keep);
@@ -1003,6 +1003,27 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   // =================
 
   /**
+   * Prepare a document.
+   * 
+   * @param bp bulk processor
+   * @param p document object
+   */
+  protected void prepLastRunDoc(BulkProcessor bp, T p) {
+    try {
+      // Write persistence object to Elasticsearch Person document.
+      prepareDocument(bp, p);
+    } catch (JsonProcessingException e) {
+      fatalError = true;
+      JobLogUtils.raiseError(LOGGER, e, "ERROR WRITING JSON: {}", e.getMessage());
+    } catch (IOException e) {
+      fatalError = true;
+      JobLogUtils.raiseError(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
+    } finally {
+      doneLoad = true;
+    }
+  }
+
+  /**
    * <strong>ENTRY POINT FOR LAST RUN.</strong>
    *
    * <p>
@@ -1026,21 +1047,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       if (results != null && !results.isEmpty()) {
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
 
-        // Spawn a reasonable number of threads to process all results.
-        // One thread seems sufficient.
         results.stream().forEach(p -> {
-          try {
-            // Write persistence object to Elasticsearch Person document.
-            prepareDocument(bp, p);
-          } catch (JsonProcessingException e) {
-            fatalError = true;
-            JobLogUtils.raiseError(LOGGER, e, "ERROR WRITING JSON: {}", e.getMessage());
-          } catch (IOException e) {
-            fatalError = true;
-            JobLogUtils.raiseError(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
-          } finally {
-            doneLoad = true;
-          }
+          prepLastRunDoc(bp, p);
         });
 
         // Track counts.
@@ -1363,8 +1371,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           : opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_ID_COL", getIdColumn())
-              .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
+              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
+                  String.valueOf(totalBuckets)),
+              BatchBucket.class);
 
       ret = q.getResultList();
       session.clear();

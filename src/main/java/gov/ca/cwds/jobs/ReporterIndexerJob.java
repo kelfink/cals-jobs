@@ -20,7 +20,7 @@ public class ReporterIndexerJob
     extends BasePersonIndexerJob<ReplicatedReporter, ReplicatedReporter> {
 
   /**
-   * Construct batch job instance with all required dependencies.
+   * Construct job with all required dependencies.
    * 
    * @param dao Client DAO
    * @param esDao ElasticSearch DAO

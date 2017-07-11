@@ -5,8 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,8 +28,6 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
  */
 public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsClientAddress>
     implements JobResultSetAware<EsClientAddress> {
-
-  private static final Logger LOGGER = LogManager.getLogger(ClientIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
