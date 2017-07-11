@@ -37,7 +37,10 @@ import com.google.inject.Inject;
  * </p>
  *
  * @author CWDS API Team
+ * 
+ * @deprecated Use gov.ca.cwds.data.es.ElasticsearchDao instead
  */
+@Deprecated
 public class Elasticsearch5xDao implements Closeable {
 
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Elasticsearch5xDao.class);
@@ -129,8 +132,7 @@ public class Elasticsearch5xDao implements Closeable {
       createIndex(index, NUMBER_OF_SHARDS, NUMBER_OF_REPLICAS);
 
       // Give Elasticsearch a moment to catch its breath.
-      // Thread.currentThread().wait(2000L); // thread monitor error
-      Thread.sleep(2000);
+      wait(2000);
     }
   }
 
