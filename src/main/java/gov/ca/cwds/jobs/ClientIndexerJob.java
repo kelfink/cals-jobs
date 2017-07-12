@@ -33,16 +33,16 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    * Construct batch job instance with all required dependencies.
    * 
    * @param clientDao Client DAO
-   * @param elasticsearchDao ElasticSearch DAO
+   * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public ClientIndexerJob(final ReplicatedClientDao clientDao,
-      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
-      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  public ClientIndexerJob(final ReplicatedClientDao clientDao, final ElasticsearchDao esDao,
+      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory) {
+    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   @Override
@@ -58,12 +58,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   @Override
   public String getInitialLoadViewName() {
     return "ES_CLIENT_ADDRESS";
-  }
-
-  @Override
-  @Deprecated
-  protected String getLegacySourceTable() {
-    return "CLIENT_T";
   }
 
   @Override

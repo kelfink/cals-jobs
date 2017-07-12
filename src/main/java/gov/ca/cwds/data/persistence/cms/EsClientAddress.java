@@ -15,8 +15,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
@@ -28,10 +26,11 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.data.std.ApiObjectIdentity;
 
 /**
  * Entity bean for Materialized Query Table (MQT), ES_CLIENT_ADDRESS, and last-change view,
- * VW_CLIENT_ADDRESS.
+ * VW_LST_CLIENT_ADDRESS.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.
@@ -44,12 +43,13 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @NamedNativeQueries({
     // #145240149: find ALL client/address recs affected by changes.
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfter",
-        query = "SELECT x.* FROM {h-schema}VW_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
-            + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_CLIENT_ADDRESS x1 "
+        query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
+            + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
             + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") ORDER BY CLT_IDENTIFIER FOR READ ONLY ",
         resultClass = EsClientAddress.class, readOnly = true)})
-public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
+public class EsClientAddress extends ApiObjectIdentity
+    implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
 
   /**
    * Default serialization.
@@ -1586,26 +1586,6 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   @Override
   public Serializable getPrimaryKey() {
     return null;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see java.lang.Object#hashCode()
-   */
-  @Override
-  public final int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this, false);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
-  @Override
-  public final boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
   public Date getLastChange() {
