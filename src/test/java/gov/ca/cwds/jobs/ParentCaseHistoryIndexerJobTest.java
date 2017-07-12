@@ -113,7 +113,7 @@ public class ParentCaseHistoryIndexerJobTest {
     String actual = target.getInitialLoadViewName();
     // then
     // e.g. : verify(mocked).called();
-    String expected = "VW_PARENT_CASE_HIST";
+    String expected = "VW_MQT_PARENT_CASE_HIST";
     assertThat(actual, is(equalTo(expected)));
   }
 
