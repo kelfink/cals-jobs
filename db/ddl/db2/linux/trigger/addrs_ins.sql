@@ -1,0 +1,63 @@
+-- https://www.ibm.com/support/knowledgecenter/SSEPEK_10.0.0/sqlref/src/tpc/db2z_sql_createtrigger.html
+
+CREATE TRIGGER CWSINT.trg_ins_addrs
+AFTER INSERT ON CWSINT.ADDRS_T
+REFERENCING NEW AS NROW
+FOR EACH ROW MODE DB2SQL
+BEGIN ATOMIC
+INSERT INTO CWSRS1.ADDRS_T (
+    IDENTIFIER,
+	CITY_NM,
+	EMRG_TELNO,
+	EMRG_EXTNO,
+	FRG_ADRT_B,
+	GVR_ENTC,
+	MSG_TEL_NO,
+	MSG_EXT_NO,
+	HEADER_ADR,
+	PRM_TEL_NO,
+	PRM_EXT_NO,
+	STATE_C,
+	STREET_NM,
+	STREET_NO,
+	ZIP_NO,
+	LST_UPD_ID,
+	LST_UPD_TS,
+	ADDR_DSC,
+	ZIP_SFX_NO,
+	POSTDIR_CD,
+	PREDIR_CD,
+	ST_SFX_C,
+	UNT_DSGC,
+	UNIT_NO,
+	IBMSNAP_OPERATION,
+	IBMSNAP_LOGMARKER
+) VALUES (
+	nrow.IDENTIFIER,
+	nrow.CITY_NM,
+	nrow.EMRG_TELNO,
+	nrow.EMRG_EXTNO,
+	nrow.FRG_ADRT_B,
+	nrow.GVR_ENTC,
+	nrow.MSG_TEL_NO,
+	nrow.MSG_EXT_NO,
+	nrow.HEADER_ADR,
+	nrow.PRM_TEL_NO,
+	nrow.PRM_EXT_NO,
+	nrow.STATE_C,
+	nrow.STREET_NM,
+	nrow.STREET_NO,
+	nrow.ZIP_NO,
+	nrow.LST_UPD_ID,
+	nrow.LST_UPD_TS,
+	nrow.ADDR_DSC,
+	nrow.ZIP_SFX_NO,
+	nrow.POSTDIR_CD,
+	nrow.PREDIR_CD,
+	nrow.ST_SFX_C,
+	nrow.UNT_DSGC,
+	nrow.UNIT_NO,
+	'I',
+	current timestamp
+);
+END
