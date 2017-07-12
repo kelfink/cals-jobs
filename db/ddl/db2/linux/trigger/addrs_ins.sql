@@ -1,6 +1,8 @@
 -- https://www.ibm.com/support/knowledgecenter/SSEPEK_10.0.0/sqlref/src/tpc/db2z_sql_createtrigger.html
 
-CREATE TRIGGER CWSINT.trg_ins_addrs
+DROP TRIGGER CWSINT.trg_addrs_ins;
+
+CREATE TRIGGER CWSINT.trg_addrs_ins
 AFTER INSERT ON CWSINT.ADDRS_T
 REFERENCING NEW AS NROW
 FOR EACH ROW MODE DB2SQL
