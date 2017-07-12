@@ -291,7 +291,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param conn Connection
    * @param viewName Name of MQT
-   * @throws SQLException
+   * @throws SQLException no longer used
    */
   protected void refreshView(Connection conn, String viewName) throws SQLException {
     Statement stmt = null;
