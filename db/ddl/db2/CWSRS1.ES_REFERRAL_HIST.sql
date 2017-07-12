@@ -1,5 +1,5 @@
 -- DB2 View/MQT
--- ORDER BY clause is only valid on mainframe, remove it if running on other hosts.
+-- ORDER BY clause only works on mainframe. Remove it if running on other hosts.
 
 DROP TABLE CWSRS1.ES_REFERRAL_HIST;
 
