@@ -87,7 +87,7 @@ public class IntakeScreeningJobTest {
     SessionFactory sessionFactory = null;
     IntakeScreeningJob target = new IntakeScreeningJob(normalizedDao, viewDao, esDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    final String actual = target.getViewName();
+    final String actual = target.getInitialLoadViewName();
     final String expected = "VW_SCREENING_HISTORY";
     assertThat(actual, is(equalTo(expected)));
   }

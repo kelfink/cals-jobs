@@ -67,7 +67,7 @@ public class RelationshipIndexerJob
   }
 
   @Override
-  public String getViewName() {
+  public String getInitialLoadViewName() {
     return "VW_BI_DIR_RELATION";
   }
 

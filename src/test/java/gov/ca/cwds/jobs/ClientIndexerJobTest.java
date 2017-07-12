@@ -168,7 +168,7 @@ public class ClientIndexerJobTest {
     // given
 
     // when
-    String actual = target.getViewName();
+    String actual = target.getInitialLoadViewName();
     // then
     // e.g. : verify(mocked).called();
     String expected = "ES_CLIENT_ADDRESS";

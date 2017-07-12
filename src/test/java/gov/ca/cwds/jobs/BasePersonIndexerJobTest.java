@@ -100,7 +100,7 @@ public class BasePersonIndexerJobTest {
 
   @Test
   public void getViewName_Args__() throws Exception {
-    String actual = target.getViewName();
+    String actual = target.getInitialLoadViewName();
     String expected = "VW_NUTTIN";
     assertThat(actual, is(equalTo(expected)));
   }

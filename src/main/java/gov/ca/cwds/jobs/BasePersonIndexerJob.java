@@ -263,7 +263,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @return name of view or materialized query table or null if none
    */
-  public String getViewName() {
+  public String getInitialLoadViewName() {
     return null;
   }
 
@@ -339,6 +339,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected BulkProcessor buildBulkProcessor() {
     return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
+
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
         recsBulkBefore.getAndAdd(request.numberOfActions());
@@ -356,6 +357,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         recsBulkError.getAndIncrement();
         LOGGER.error("ERROR EXECUTING BULK", failure);
       }
+
     }).setBulkActions(ES_BULK_SIZE).setConcurrentRequests(0).setName("jobs_bp").build();
   }
 
@@ -857,8 +859,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Detect platform or always force ORDER BY clause.
 
       StringBuilder buf = new StringBuilder();
-      buf.append("SELECT x.* FROM ").append(getDBSchemaName()).append(".").append(getViewName())
-          .append(" x ").append(getJdbcOrderBy()).append(" FOR READ ONLY");
+      buf.append("SELECT x.* FROM ").append(getDBSchemaName()).append(".")
+          .append(getInitialLoadViewName()).append(" x ").append(getJdbcOrderBy())
+          .append(" FOR READ ONLY");
       final String query = buf.toString();
       M m;
 

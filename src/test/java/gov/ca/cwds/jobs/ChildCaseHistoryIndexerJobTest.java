@@ -110,7 +110,7 @@ public class ChildCaseHistoryIndexerJobTest {
     // given
     // e.g. : given(mocked.called()).willReturn(1);
     // when
-    String actual = target.getViewName();
+    String actual = target.getInitialLoadViewName();
     // then
     // e.g. : verify(mocked).called();
     String expected = "ES_CASE_HIST";

@@ -90,7 +90,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
   }
 
   @Override
-  public String getViewName() {
+  public String getInitialLoadViewName() {
     return getDenormalizedClass().getDeclaredAnnotation(Table.class).name();
   }
 

@@ -30,7 +30,8 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
 /**
- * Entity bean for Materialized Query Table (MQT), ES_CLIENT_ADDRESS.
+ * Entity bean for Materialized Query Table (MQT), ES_CLIENT_ADDRESS, and last-change view,
+ * VW_CLIENT_ADDRESS.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.
@@ -43,8 +44,8 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 @NamedNativeQueries({
     // #145240149: find ALL client/address recs affected by changes.
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfter",
-        query = "SELECT x.* FROM {h-schema}ES_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
-            + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}ES_CLIENT_ADDRESS x1 "
+        query = "SELECT x.* FROM {h-schema}VW_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
+            + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_CLIENT_ADDRESS x1 "
             + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") ORDER BY CLT_IDENTIFIER FOR READ ONLY ",
         resultClass = EsClientAddress.class, readOnly = true)})

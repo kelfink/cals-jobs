@@ -106,14 +106,14 @@ public class OtherClientNameIndexerJob
   }
 
   @Override
-  public String getViewName() {
+  public String getInitialLoadViewName() {
     return "OCL_NM_T";
   }
 
   @Override
   @Deprecated
   protected String getLegacySourceTable() {
-    return getViewName();
+    return getInitialLoadViewName();
   }
 
   /**

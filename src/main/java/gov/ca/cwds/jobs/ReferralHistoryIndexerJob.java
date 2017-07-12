@@ -63,7 +63,7 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  public String getViewName() {
+  public String getInitialLoadViewName() {
     return "ES_REFERRAL_HIST";
   }
 
@@ -89,7 +89,7 @@ public class ReferralHistoryIndexerJob
 
   @Override
   protected void refreshView(Connection conn) throws SQLException {
-    super.refreshView(conn, getViewName());
+    super.refreshView(conn, getInitialLoadViewName());
   }
 
   @Override

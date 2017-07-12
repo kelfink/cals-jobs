@@ -108,7 +108,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
   }
 
   @Override
-  public String getViewName() {
+  public String getInitialLoadViewName() {
     return "ES_CASE_HIST";
   }
 
@@ -119,7 +119,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
 
   @Override
   protected void refreshView(Connection conn) throws SQLException {
-    super.refreshView(conn, getViewName());
+    super.refreshView(conn, getInitialLoadViewName());
   }
 
   /**

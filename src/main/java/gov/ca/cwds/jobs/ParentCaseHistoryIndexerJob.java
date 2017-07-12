@@ -110,7 +110,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
   }
 
   @Override
-  public String getViewName() {
+  public String getInitialLoadViewName() {
     return "VW_PARENT_CASE_HIST";
   }
 

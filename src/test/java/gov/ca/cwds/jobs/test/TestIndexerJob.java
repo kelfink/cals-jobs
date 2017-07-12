@@ -24,7 +24,7 @@ public class TestIndexerJob
   }
 
   @Override
-  public String getViewName() {
+  public String getInitialLoadViewName() {
     return "VW_NUTTIN";
   }
 

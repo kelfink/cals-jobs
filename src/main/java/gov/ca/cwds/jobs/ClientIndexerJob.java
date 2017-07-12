@@ -56,7 +56,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  public String getViewName() {
+  public String getInitialLoadViewName() {
     return "ES_CLIENT_ADDRESS";
   }
 
@@ -73,7 +73,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
   @Override
   protected void refreshView(Connection conn) throws SQLException {
-    super.refreshView(conn, getViewName());
+    super.refreshView(conn, getInitialLoadViewName());
   }
 
   /**
