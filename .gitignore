@@ -8,3 +8,4 @@ bin/
 *.env
 *.sw*
 *.time
+/temp/

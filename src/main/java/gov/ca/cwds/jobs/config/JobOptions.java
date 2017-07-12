@@ -21,7 +21,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.rest.api.ApiException;
 
 /**
  * Represents batch job options from the command line.
@@ -55,13 +54,13 @@ public class JobOptions implements Serializable {
   /**
    * Name of index to create or use. If this is not provided then alias is used from ES Config file.
    */
-  private String indexName;
+  private final String indexName;
 
   /**
    * Last time job was executed in format 'yyyy-MM-dd HH.mm.ss' If this is provided then time stamp
    * given in last run time file is ignored.
    */
-  private Date lastRunTime;
+  private final Date lastRunTime;
 
   /**
    * Location of last run file.
@@ -401,6 +400,10 @@ public class JobOptions implements Serializable {
       printUsage();
       LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
       throw new JobsException("Error parsing command line: " + e.getMessage(), e);
+    } catch (java.text.ParseException e) {
+      printUsage();
+      LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
+      throw new JobsException("Error parsing command line: " + e.getMessage(), e);
     }
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode, startBucket,
@@ -431,20 +434,13 @@ public class JobOptions implements Serializable {
     this.totalBuckets = totalBuckets;
   }
 
-  public void setIndexName(String indexName) {
-    this.indexName = indexName;
-  }
-
-  private static Date createDate(String timestamp) {
+  private static Date createDate(String timestamp) throws java.text.ParseException {
+    Date date = null;
     String trimTimestamp = StringUtils.trim(timestamp);
     if (StringUtils.isNotEmpty(trimTimestamp)) {
-      try {
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return df.parse(trimTimestamp);
-      } catch (Exception e) {
-        throw new ApiException(e);
-      }
+      DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      date = df.parse(trimTimestamp);
     }
-    return null;
+    return date;
   }
 }
