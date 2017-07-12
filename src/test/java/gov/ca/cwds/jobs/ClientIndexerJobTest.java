@@ -171,26 +171,7 @@ public class ClientIndexerJobTest {
     String actual = target.getInitialLoadViewName();
     // then
     // e.g. : verify(mocked).called();
-    String expected = "ES_CLIENT_ADDRESS";
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void getLegacySourceTable_Args__() throws Exception {
-    ReplicatedClientDao clientDao = null;
-    ElasticsearchDao elasticsearchDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ClientIndexerJob target = new ClientIndexerJob(clientDao, elasticsearchDao,
-        lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-
-    // when
-    String actual = target.getLegacySourceTable();
-    // then
-    // e.g. : verify(mocked).called();
-    String expected = "CLIENT_T";
+    String expected = "VW_MQT_CLIENT_ADDRESS";
     assertThat(actual, is(equalTo(expected)));
   }
 

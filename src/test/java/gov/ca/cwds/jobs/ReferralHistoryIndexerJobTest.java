@@ -89,7 +89,7 @@ public class ReferralHistoryIndexerJobTest {
     String actual = target.getInitialLoadViewName();
     // then
     // e.g. : verify(mocked).called();
-    String expected = "ES_REFERRAL_HIST";
+    String expected = "VW_MQT_REFERRAL_HIST";
     assertThat(actual, is(equalTo(expected)));
   }
 

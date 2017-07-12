@@ -113,7 +113,7 @@ public class ChildCaseHistoryIndexerJobTest {
     String actual = target.getInitialLoadViewName();
     // then
     // e.g. : verify(mocked).called();
-    String expected = "ES_CASE_HIST";
+    String expected = "VW_MQT_CASE_HIST";
     assertThat(actual, is(equalTo(expected)));
   }
 

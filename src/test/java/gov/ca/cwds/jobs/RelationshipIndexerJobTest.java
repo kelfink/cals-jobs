@@ -119,7 +119,7 @@ public class RelationshipIndexerJobTest {
     String actual = target.getInitialLoadViewName();
     // then
     // e.g. : verify(mocked).called();
-    String expected = "VW_BI_DIR_RELATION";
+    String expected = "VW_MQT_BI_DIR_RELATION";
     assertThat(actual, is(equalTo(expected)));
   }
 
