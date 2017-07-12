@@ -278,6 +278,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   /**
    * Refresh the view if needed.
+   * 
+   * @param conn connection
+   * @throws SQLException no longer used
    */
   protected void refreshView(Connection conn) throws SQLException {
     // Default - do nothing
