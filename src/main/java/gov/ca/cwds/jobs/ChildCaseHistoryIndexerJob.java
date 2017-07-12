@@ -109,7 +109,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
 
   @Override
   public String getInitialLoadViewName() {
-    return "ES_CASE_HIST";
+    return "VW_MQT_CASE_HIST";
   }
 
   @Override

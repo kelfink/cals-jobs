@@ -41,13 +41,13 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * @author CWDS API Team
  */
 @Entity
-@Table(name = "VW_BI_DIR_RELATION")
+@Table(name = "VW_LST_BI_DIR_RELATION")
 @NamedNativeQueries({
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfter",
         query = "WITH driver as ( "
             + " SELECT v1.THIS_LEGACY_ID, v1.RELATED_LEGACY_ID FROM CWSRS1.VW_BI_DIR_RELATION v1 "
             + "where v1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") SELECT V.* FROM {h-schema}VW_BI_DIR_RELATION v "
+            + ") SELECT V.* FROM {h-schema}VW_LST_BI_DIR_RELATION v "
             + "WHERE v.THIS_LEGACY_ID IN (select d1.THIS_LEGACY_ID from driver d1) "
             + "OR v.RELATED_LEGACY_ID IN (select d2.RELATED_LEGACY_ID from driver d2) "
             + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY ",

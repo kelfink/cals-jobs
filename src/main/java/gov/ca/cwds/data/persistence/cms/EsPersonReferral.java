@@ -9,12 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
@@ -27,6 +23,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -42,19 +39,17 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * @author CWDS API Team
  */
 @Entity
-@Table(name = "ES_REFERRAL_HIST")
+@Table(name = "VW_LST_REFERRAL_HIST")
 @NamedNativeQueries({@NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
-    query = "SELECT r.* FROM {h-schema}ES_REFERRAL_HIST r WHERE r.CLIENT_ID IN ( "
-        + "SELECT r1.CLIENT_ID FROM {h-schema}ES_REFERRAL_HIST r1 "
+    query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r WHERE r.CLIENT_ID IN ( "
+        + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
         + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) " + ") ORDER BY CLIENT_ID FOR READ ONLY ",
     resultClass = EsPersonReferral.class, readOnly = true)})
-public class EsPersonReferral
+public class EsPersonReferral extends ApiObjectIdentity
     implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals> {
 
   private static final long serialVersionUID = -2265057057202257108L;
-
-  private static final Logger LOGGER = LogManager.getLogger(EsPersonReferral.class);
 
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)
@@ -592,26 +587,6 @@ public class EsPersonReferral
 
   public void setPerpetratorLastChanged(Date perpetratorLastChanged) {
     this.perpetratorLastChanged = perpetratorLastChanged;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see java.lang.Object#hashCode()
-   */
-  @Override
-  public final int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this, false);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
-  @Override
-  public final boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
   @Override

@@ -64,7 +64,7 @@ public class ReferralHistoryIndexerJob
 
   @Override
   public String getInitialLoadViewName() {
-    return "ES_REFERRAL_HIST";
+    return "VW_MQT_REFERRAL_HIST";
   }
 
   @Override

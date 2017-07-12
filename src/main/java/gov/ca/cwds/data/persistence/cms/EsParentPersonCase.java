@@ -5,8 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
 
 /**
@@ -15,10 +13,10 @@ import org.hibernate.annotations.NamedNativeQuery;
  * @author CWDS API Team
  */
 @Entity
-@Table(name = "VW_PARENT_CASE_HIST")
+@Table(name = "VW_LST_PARENT_CASE_HIST")
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsParentPersonCase.findAllUpdatedAfter",
-    query = "SELECT c.* FROM {h-schema}VW_PARENT_CASE_HIST c WHERE c.CASE_ID IN ("
-        + " SELECT c1.CASE_ID FROM {h-schema}VW_PARENT_CASE_HIST c1 "
+    query = "SELECT c.* FROM {h-schema}VW_LST_PARENT_CASE_HIST c WHERE c.CASE_ID IN ("
+        + " SELECT c1.CASE_ID FROM {h-schema}VW_LST_PARENT_CASE_HIST c1 "
         + "WHERE c1.LAST_CHG > CAST(:after AS TIMESTAMP) "
         + ") ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID FOR READ ONLY ",
     resultClass = EsParentPersonCase.class, readOnly = true)
@@ -37,10 +35,12 @@ public class EsParentPersonCase extends EsPersonCase {
     super();
   }
 
+  @SuppressWarnings("javadoc")
   public String getParentPersonId() {
     return parentPersonId;
   }
 
+  @SuppressWarnings("javadoc")
   public void setParentPersonId(String parentPersonId) {
     this.parentPersonId = parentPersonId;
   }
@@ -48,16 +48,6 @@ public class EsParentPersonCase extends EsPersonCase {
   @Override
   public Object getNormalizationGroupKey() {
     return this.parentPersonId;
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
   }
 
 }

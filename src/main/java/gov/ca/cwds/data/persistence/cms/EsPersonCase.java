@@ -441,4 +441,5 @@ public abstract class EsPersonCase extends ApiObjectIdentity
     cases.addCase(esPersonCase, parent);
     return cases;
   }
+
 }

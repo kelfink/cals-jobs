@@ -57,7 +57,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
   @Override
   public String getInitialLoadViewName() {
-    return "ES_CLIENT_ADDRESS";
+    return "VW_MQT_CLIENT_ADDRESS";
   }
 
   @Override

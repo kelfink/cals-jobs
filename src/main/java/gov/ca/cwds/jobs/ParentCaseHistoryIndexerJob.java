@@ -111,7 +111,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
 
   @Override
   public String getInitialLoadViewName() {
-    return "VW_PARENT_CASE_HIST";
+    return "VW_MQT_PARENT_CASE_HIST";
   }
 
   @Override

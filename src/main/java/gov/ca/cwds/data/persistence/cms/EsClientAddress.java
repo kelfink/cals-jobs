@@ -39,7 +39,7 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
  * @author CWDS API Team
  */
 @Entity
-@Table(name = "ES_CLIENT_ADDRESS")
+@Table(name = "VW_LST_CLIENT_ADDRESS")
 @NamedNativeQueries({
     // #145240149: find ALL client/address recs affected by changes.
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfter",
