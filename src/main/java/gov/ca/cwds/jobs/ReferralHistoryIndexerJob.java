@@ -86,7 +86,7 @@ public class ReferralHistoryIndexerJob
     buf.append(" x ");
 
     if (hideSealedAndSensitive) {
-      buf.append(" WHERE x.LIMITED_ACCESS_CODE = 'N' ");
+      buf.append(" WHERE x.LIMITED_ACCESS_CODE = 'N'  ");
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
