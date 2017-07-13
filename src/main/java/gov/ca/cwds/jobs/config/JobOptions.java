@@ -45,6 +45,7 @@ public class JobOptions implements Serializable {
   public static final String CMD_LINE_THREADS = "thread-num";
   public static final String CMD_LINE_MIN_ID = "min_id";
   public static final String CMD_LINE_MAX_ID = "max_id";
+  public static final String CMD_LINE_HIDE_SEALED_AND_SENSITIVE = "hide-sealed-sensitive";
 
   /**
    * Location of Elasticsearch configuration file.
@@ -109,6 +110,11 @@ public class JobOptions implements Serializable {
   private String maxId;
 
   /**
+   * If true then don't load sealed and sensitive data
+   */
+  private final boolean hideSealedAndSensitive;
+
+  /**
    * Construct from all settings.
    * 
    * @param esConfigLoc location of Elasticsearch configuration file
@@ -120,10 +126,11 @@ public class JobOptions implements Serializable {
    * @param endBucket ending bucket number
    * @param totalBuckets total buckets
    * @param threadCount number of simultaneous threads
+   * @param hideSealedAndSensitive If true then don't load sealed and sensitive data
    */
   JobOptions(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
       boolean lastRunMode, long startBucket, long endBucket, long totalBuckets, long threadCount,
-      String minId, String maxId) {
+      String minId, String maxId, boolean hideSealedAndSensitive) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
     this.lastRunTime = lastRunTime;
@@ -135,6 +142,7 @@ public class JobOptions implements Serializable {
     this.threadCount = threadCount;
     this.minId = minId;
     this.maxId = maxId;
+    this.hideSealedAndSensitive = hideSealedAndSensitive;
   }
 
   /**
@@ -238,6 +246,15 @@ public class JobOptions implements Serializable {
   }
 
   /**
+   * Get if sealed and sensitive data should be loaded.
+   * 
+   * @return true if sealed and sensitive data should not be loaded, false otherwise.
+   */
+  public boolean isHideSealedAndSensitive() {
+    return hideSealedAndSensitive;
+  }
+
+  /**
    * Define a command line option.
    * 
    * @param shortOpt single letter option name
@@ -283,6 +300,7 @@ public class JobOptions implements Serializable {
     ret.addOption(JobCmdLineOption.BUCKET_RANGE.getOpt());
     ret.addOption(JobCmdLineOption.MIN_ID.getOpt());
     ret.addOption(JobCmdLineOption.MAX_ID.getOpt());
+    ret.addOption(JobCmdLineOption.HIDE_SEALED_SENSITIVE.getOpt());
 
     // RUN MODE: mutually exclusive choice.
     OptionGroup group = new OptionGroup();
@@ -328,6 +346,7 @@ public class JobOptions implements Serializable {
     long endBucket = 0L;
     long totalBuckets = 0L;
     long threadCount = 0L;
+    boolean hideSealedAndSensitive = false;
 
     String minId = " ";
     String maxId = "9999999999";
@@ -388,6 +407,10 @@ public class JobOptions implements Serializable {
             maxId = opt.getValue().trim();
             break;
 
+          case CMD_LINE_HIDE_SEALED_AND_SENSITIVE:
+            hideSealedAndSensitive = Boolean.parseBoolean(opt.getValue().trim());
+            break;
+
           default:
             break;
         }
@@ -407,7 +430,7 @@ public class JobOptions implements Serializable {
     }
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode, startBucket,
-        endBucket, totalBuckets, threadCount, minId, maxId);
+        endBucket, totalBuckets, threadCount, minId, maxId, hideSealedAndSensitive);
   }
 
   public void setStartBucket(long startBucket) {

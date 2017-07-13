@@ -46,6 +46,14 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
             + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
             + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") ORDER BY CLT_IDENTIFIER FOR READ ONLY ",
+        resultClass = EsClientAddress.class, readOnly = true),
+
+    @NamedNativeQuery(
+        name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfterWithLimitedAccess",
+        query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
+            + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
+            + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + ") AND (x.CLT_SENSTV_IND = 'N' AND x.CLT_SOC158_IND = 'N') ORDER BY CLT_IDENTIFIER FOR READ ONLY ",
         resultClass = EsClientAddress.class, readOnly = true)})
 public class EsClientAddress extends ApiObjectIdentity
     implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
@@ -454,7 +462,8 @@ public class EsClientAddress extends ApiObjectIdentity
    */
   public static EsClientAddress extract(ResultSet rs) throws SQLException {
     EsClientAddress ret = new EsClientAddress();
-
+    ret.setCltSensitivityIndicator(rs.getString("CLT_SENSTV_IND"));
+    ret.setCltSoc158SealedClientIndicator(rs.getString("CLT_SOC158_IND"));
     ret.setCltAdjudicatedDelinquentIndicator(rs.getString("CLT_ADJDEL_IND"));
     ret.setCltAdoptionStatusCode(rs.getString("CLT_ADPTN_STCD"));
     ret.setCltAlienRegistrationNumber(rs.getString("CLT_ALN_REG_NO"));
@@ -512,9 +521,8 @@ public class EsClientAddress extends ApiObjectIdentity
     ret.setCltReligionType(rs.getShort("CLT_RLGN_TPC"));
     ret.setCltSecondaryLanguageType(rs.getShort("CLT_S_LANG_TC"));
     ret.setCltSensitiveHlthInfoOnFileIndicator(rs.getString("CLT_SNTV_HLIND"));
-    ret.setCltSensitivityIndicator(rs.getString("CLT_SENSTV_IND"));
     ret.setCltSoc158PlacementCode(rs.getString("CLT_SOCPLC_CD"));
-    ret.setCltSoc158SealedClientIndicator(rs.getString("CLT_SOC158_IND"));
+
     ret.setCltSocialSecurityNumChangedCode(rs.getString("CLT_SSN_CHG_CD"));
     ret.setCltSocialSecurityNumber(rs.getString("CLT_SS_NO"));
     ret.setCltSuffixTitleDescription(rs.getString("CLT_SUFX_TLDSC"));
@@ -563,7 +571,6 @@ public class EsClientAddress extends ApiObjectIdentity
     ret.setAdrStreetSuffixCd(rs.getShort("ADR_ST_SFX_C"));
     ret.setAdrUnitDesignationCd(rs.getShort("ADR_UNT_DSGC"));
     ret.setAdrUnitNumber(rs.getString("ADR_UNIT_NO"));
-
     return ret;
   }
 

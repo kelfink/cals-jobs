@@ -266,12 +266,31 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
+   * Get initial load sql query
+   * 
+   * @param dbSchemaName The DB svhema name
+   * @param hideSealedAndSensitive True if sealed and sensitive data should be hidden.
+   * @return Inital load query
+   */
+  public String getInitialLoadQuery(String dbSchemaName, boolean hideSealedAndSensitive) {
+    StringBuilder buf = new StringBuilder();
+    buf.append("SELECT x.* FROM ");
+    buf.append(dbSchemaName);
+    buf.append(".");
+    buf.append(getInitialLoadViewName());
+    buf.append(" x ");
+
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
+    return buf.toString();
+  }
+
+  /**
    * Optional method to customize JDBC ORDER BY clause on initial load.
    * 
    * @return custom ORDER BY clause for JDBC query
    */
   public String getJdbcOrderBy() {
-    return " ORDER BY x.clt_identifier ";
+    return null;
   }
 
   /**
@@ -818,11 +837,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Detect platform or always force ORDER BY clause.
 
-      StringBuilder buf = new StringBuilder();
-      buf.append("SELECT x.* FROM ").append(getDBSchemaName()).append(".")
-          .append(getInitialLoadViewName()).append(" x ").append(getJdbcOrderBy())
-          .append(" FOR READ ONLY");
-      final String query = buf.toString();
+      // StringBuilder buf = new StringBuilder();
+      // buf.append("SELECT x.* FROM ").append(getDBSchemaName()).append(".")
+      // .append(getInitialLoadViewName()).append(" x ").append(getJdbcOrderBy())
+      // .append(" FOR READ ONLY");
+      // final String query = buf.toString();
+
+      final String query =
+          getInitialLoadQuery(getDBSchemaName(), getOpts().isHideSealedAndSensitive());
+
       M m;
 
       try (Statement stmt = con.createStatement()) {
@@ -1157,12 +1180,21 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected List<T> extractLastRunRecsFromTable(Date lastRunTime) {
     LOGGER.info("last successful run: {}", lastRunTime);
     final Class<?> entityClass = jobDao.getEntityClass();
-    final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
+
+    String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
+
+    // if (getOpts().isHideSealedAndSensitive()) {
+    // namedQueryName = entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
+    // } else {
+    // namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
+    // }
+
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
     Transaction txn = session.beginTransaction();
     try {
       NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
+
       q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
@@ -1194,7 +1226,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
 
     final Class<?> entityClass = getDenormalizedClass(); // view entity class
-    final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
+
+    String namedQueryName = null;
+    if (getOpts().isHideSealedAndSensitive()) {
+      namedQueryName = entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
+    } else {
+      namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
+    }
+
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
     Object lastId = new Object();

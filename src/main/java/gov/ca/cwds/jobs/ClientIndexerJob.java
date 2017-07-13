@@ -60,6 +60,28 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
+  public String getJdbcOrderBy() {
+    return " ORDER BY x.clt_identifier ";
+  }
+
+  @Override
+  public String getInitialLoadQuery(String dbSchemaName, boolean hideSealedAndSensitive) {
+    StringBuilder buf = new StringBuilder();
+    buf.append("SELECT x.* FROM ");
+    buf.append(dbSchemaName);
+    buf.append(".");
+    buf.append(getInitialLoadViewName());
+    buf.append(" x ");
+
+    if (hideSealedAndSensitive) {
+      buf.append(" WHERE (x.CLT_SENSTV_IND = 'N' AND x.CLT_SOC158_IND = 'N') ");
+    }
+
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
+    return buf.toString();
+  }
+
+  @Override
   protected List<ReplicatedClient> normalize(List<EsClientAddress> recs) {
     return EntityNormalizer.<ReplicatedClient, EsClientAddress>normalizeList(recs);
   }

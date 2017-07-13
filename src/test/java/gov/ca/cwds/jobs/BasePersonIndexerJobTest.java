@@ -105,12 +105,12 @@ public class BasePersonIndexerJobTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void getJdbcOrderBy_Args__() throws Exception {
-    String actual = target.getJdbcOrderBy();
-    String expected = " ORDER BY x.clt_identifier ";
-    assertThat(actual, is(equalTo(expected)));
-  }
+  // @Test
+  // public void getJdbcOrderBy_Args__() throws Exception {
+  // String actual = target.getJdbcOrderBy();
+  // String expected = " ORDER BY x.clt_identifier ";
+  // assertThat(actual, is(equalTo(expected)));
+  // }
 
   @Test
   public void jsonify_Args__Object() throws Exception {

@@ -54,6 +54,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     }
 
     EsChildPersonCase personCase = new EsChildPersonCase();
+
     //
     // Case
     //
@@ -97,7 +98,6 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
     personCase.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
     personCase.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
-
     return personCase;
   }
 

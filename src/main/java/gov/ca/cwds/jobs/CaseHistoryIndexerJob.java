@@ -53,6 +53,23 @@ public abstract class CaseHistoryIndexerJob
   }
 
   @Override
+  public String getInitialLoadQuery(String dbSchemaName, boolean hideSealedAndSensitive) {
+    StringBuilder buf = new StringBuilder();
+    buf.append("SELECT x.* FROM ");
+    buf.append(dbSchemaName);
+    buf.append(".");
+    buf.append(getInitialLoadViewName());
+    buf.append(" x ");
+
+    if (hideSealedAndSensitive) {
+      buf.append(" WHERE x.LIMITED_ACCESS_CODE = 'N' ");
+    }
+
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
+    return buf.toString();
+  }
+
+  @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonCases cases)
       throws IOException {
 

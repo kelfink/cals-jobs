@@ -77,6 +77,23 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
+  public String getInitialLoadQuery(String dbSchemaName, boolean hideSealedAndSensitive) {
+    StringBuilder buf = new StringBuilder();
+    buf.append("SELECT x.* FROM ");
+    buf.append(dbSchemaName);
+    buf.append(".");
+    buf.append(getInitialLoadViewName());
+    buf.append(" x ");
+
+    if (hideSealedAndSensitive) {
+      buf.append(" WHERE x.LIMITED_ACCESS_CODE = 'N' ");
+    }
+
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
+    return buf.toString();
+  }
+
+  @Override
   protected ReplicatedPersonReferrals normalizeSingle(List<EsPersonReferral> recs) {
     return normalize(recs).get(0);
   }

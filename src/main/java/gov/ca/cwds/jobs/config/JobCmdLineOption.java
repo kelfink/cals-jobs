@@ -61,7 +61,14 @@ public enum JobCmdLineOption {
    * Maximum key, inclusive.
    */
   MAX_ID(JobOptions.makeOpt("x", JobOptions.CMD_LINE_MAX_ID, "maximum identifier, exclusive", false,
-      1, String.class, ','));
+      1, String.class, ',')),
+
+  /**
+   * Maximum key, inclusive.
+   */
+  HIDE_SEALED_SENSITIVE(JobOptions.makeOpt("h", JobOptions.CMD_LINE_HIDE_SEALED_AND_SENSITIVE,
+      "true or false - hide sealed and sensitive data, default is false", false, 1, Boolean.class,
+      ','));
 
   private final Option opt;
 
