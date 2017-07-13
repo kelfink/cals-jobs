@@ -41,8 +41,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.query.NativeQuery;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -274,44 +272,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   public String getJdbcOrderBy() {
     return " ORDER BY x.clt_identifier ";
-  }
-
-  /**
-   * Refresh the view if needed.
-   * 
-   * @param conn connection
-   * @throws SQLException no longer used
-   */
-  protected void refreshView(Connection conn) throws SQLException {
-    // Default - do nothing
-  }
-
-  /**
-   * Only valid for DB2 MQTs
-   * 
-   * @param conn Connection
-   * @param viewName Name of MQT
-   * @throws SQLException no longer used
-   */
-  protected void refreshView(Connection conn, String viewName) throws SQLException {
-    Statement stmt = null;
-    try {
-      LOGGER.info("Refreshing view " + viewName + "...");
-      DateTime refreshStartTime = new DateTime();
-      StringBuilder buf = new StringBuilder();
-      buf.append("REFRESH TABLE ").append(getDBSchemaName()).append(".").append(viewName);
-      final String query = buf.toString();
-      stmt = conn.createStatement();
-      stmt.execute(query);
-      Duration duration = new Duration(refreshStartTime, new DateTime());
-      duration.getStandardSeconds();
-      LOGGER.info(
-          "DONE refreshing view " + viewName + " in " + duration.getStandardSeconds() + " seconds");
-    } finally {
-      if (stmt != null) {
-        stmt.close();
-      }
-    }
   }
 
   /**
@@ -634,7 +594,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void prepareInsertCollections(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-      throws JsonProcessingException {
+          throws JsonProcessingException {
 
     // Null out optional collections for updates.
     esp.clearOptionalCollections(keep);
@@ -657,7 +617,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected Pair<String, String> prepareUpsertJson(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-      throws JsonProcessingException {
+          throws JsonProcessingException {
 
     // Child classes: Set optional collections before serializing the insert JSON.
     prepareInsertCollections(esp, t, elementName, list, keep);
@@ -854,9 +814,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
       con.setReadOnly(true); // WARNING: fails with Postgres.
-
-      // Refresh view
-      // refreshView(con);
 
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Detect platform or always force ORDER BY clause.
@@ -1243,14 +1200,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Transaction txn = session.beginTransaction();
 
     try {
-      // Refresh view
-      // session.doWork(new Work() {
-      // @Override
-      // public void execute(Connection connection) throws SQLException {
-      // refreshView(connection);
-      // }
-      // });
-
       NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
       q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
 
@@ -1377,9 +1326,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           : opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
-                  String.valueOf(totalBuckets)),
-              BatchBucket.class);
+              .replaceAll("THE_ID_COL", getIdColumn())
+              .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
 
       ret = q.getResultList();
       session.clear();

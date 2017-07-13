@@ -8,7 +8,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.NamedNativeQuery;
 
 /**
- * Entity bean for view VW_PARENT_CASE_HIST for parent person cases.
+ * Entity bean for view VW_LST_PARENT_CASE_HIST for parent person cases.
  * 
  * @author CWDS API Team
  */

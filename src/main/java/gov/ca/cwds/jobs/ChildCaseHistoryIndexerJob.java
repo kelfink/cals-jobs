@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -109,17 +108,12 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
 
   @Override
   public String getInitialLoadViewName() {
-    return "VW_MQT_CASE_HIST";
+    return "MQT_CASE_HIST";
   }
 
   @Override
   public String getJdbcOrderBy() {
     return " ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID ";
-  }
-
-  @Override
-  protected void refreshView(Connection conn) throws SQLException {
-    super.refreshView(conn, getInitialLoadViewName());
   }
 
   /**

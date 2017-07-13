@@ -146,7 +146,7 @@ public class ClientIndexerJobTest {
     SessionFactory sessionFactory = null;
     ClientIndexerJob target = new ClientIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
+        // given
 
     // when
     Object actual = target.getDenormalizedClass();
@@ -165,13 +165,13 @@ public class ClientIndexerJobTest {
     SessionFactory sessionFactory = null;
     ClientIndexerJob target = new ClientIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
+        // given
 
     // when
     String actual = target.getInitialLoadViewName();
     // then
     // e.g. : verify(mocked).called();
-    String expected = "VW_MQT_CLIENT_ADDRESS";
+    String expected = "MQT_CLIENT_ADDRESS";
     assertThat(actual, is(equalTo(expected)));
   }
 

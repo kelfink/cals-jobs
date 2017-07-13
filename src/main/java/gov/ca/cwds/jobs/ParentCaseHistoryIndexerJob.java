@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -117,11 +116,6 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
   @Override
   public String getJdbcOrderBy() {
     return " ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID ";
-  }
-
-  @Override
-  protected void refreshView(Connection conn) throws SQLException {
-    super.refreshView(conn, "ES_CASE_HIST");
   }
 
   /**

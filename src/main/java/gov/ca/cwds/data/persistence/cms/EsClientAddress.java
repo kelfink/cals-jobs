@@ -29,8 +29,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 
 /**
- * Entity bean for Materialized Query Table (MQT), ES_CLIENT_ADDRESS, and last-change view,
- * VW_LST_CLIENT_ADDRESS.
+ * Entity bean for view VW_LST_CLIENT_ADDRESS.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.

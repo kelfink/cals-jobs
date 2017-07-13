@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -57,17 +56,12 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
   @Override
   public String getInitialLoadViewName() {
-    return "VW_MQT_CLIENT_ADDRESS";
+    return "MQT_CLIENT_ADDRESS";
   }
 
   @Override
   protected List<ReplicatedClient> normalize(List<EsClientAddress> recs) {
     return EntityNormalizer.<ReplicatedClient, EsClientAddress>normalizeList(recs);
-  }
-
-  @Override
-  protected void refreshView(Connection conn) throws SQLException {
-    super.refreshView(conn, getInitialLoadViewName());
   }
 
   /**

@@ -30,7 +30,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
- * Entity bean for Materialized Query Table (MQT), ES_REFERRAL_HIST.
+ * Entity bean for view VW_LST_REFERRAL_HIST.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedPersonReferrals}.
@@ -192,7 +192,7 @@ public class EsPersonReferral extends ApiObjectIdentity
   @Column(name = "PERPETRATOR_LAST_NM")
   private String perpetratorLastName;
 
-  @Column(name = "CLP_IBMSNAP_OPERATION")
+  @Column(name = "CLP_IBMSNAP_LOGMARKER")
   @Type(type = "timestamp")
   private Date perpetratorLastChanged;
 

@@ -6,8 +6,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.NamedNativeQuery;
 
 /**
- * Entity bean for Materialized Query Table (MQT), ES_CASE_HIST, and last change view,
- * VW_LST_CASE_HIST, for focus child person cases.
+ * Entity bean for view VW_LST_CASE_HIST for focus child person cases.
  * 
  * @author CWDS API Team
  */

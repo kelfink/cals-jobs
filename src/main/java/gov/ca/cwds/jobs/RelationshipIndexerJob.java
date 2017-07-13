@@ -1,7 +1,6 @@
 package gov.ca.cwds.jobs;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -74,11 +73,6 @@ public class RelationshipIndexerJob
   @Override
   public String getJdbcOrderBy() {
     return " ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID ";
-  }
-
-  @Override
-  protected void refreshView(Connection conn) throws SQLException {
-    super.refreshView(conn, "ES_REL_CLN_RELT_CLIENT");
   }
 
   @Override
