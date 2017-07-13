@@ -1,0 +1,112 @@
+--==========================
+-- TEST TRIGGERS: ALLGTN_T:
+--==========================
+
+-------------
+-- EXISTS: 
+-------------
+
+BEGIN ATOMIC
+
+	DECLARE v_tgt_id char(10);
+	DECLARE v_src_id char(10);
+	DECLARE v_op     char(1);
+	DECLARE v_chg    char(1);
+
+	SET v_tgt_id = 'AasihiE04Z';
+	SET v_src_id = 'AaWcqun00h'; -- test re-insert
+	
+	UPDATE CWSINT.ALLGTN_T r
+	SET 
+	    r.ABUSE_PDCD   = 'M',
+	    r.LST_UPD_ID   = '0x5',
+	    r.LST_UPD_TS   = current timestamp
+	WHERE r.IDENTIFIER = v_tgt_id ;
+
+	SET (v_op, v_chg) = (SELECT r.IBMSNAP_OPERATION, r.ABUSE_PDCD FROM CWSRS1.ALLGTN_T r WHERE r.IDENTIFIER = v_tgt_id);
+	IF (v_op != 'U' OR v_chg != 'M') THEN
+		SIGNAL SQLSTATE '70002'
+		SET MESSAGE_TEXT = 'Failed: update existing';
+	END IF;
+
+ 	DELETE FROM CWSINT.ALLGTN_T r WHERE r.IDENTIFIER = v_tgt_id ;
+
+	SET (v_op, v_chg) = (SELECT r.IBMSNAP_OPERATION, r.ABUSE_PDCD FROM CWSRS1.ALLGTN_T r WHERE r.IDENTIFIER = v_tgt_id);
+	IF (v_op != 'D' OR v_chg != 'M') THEN
+		SIGNAL SQLSTATE '70002'
+		SET MESSAGE_TEXT = 'Failed: delete existing';
+	END IF;
+ 
+ 	INSERT INTO CWSINT.ALLGTN_T (IDENTIFIER, ABUSE_ENDT, ABUSE_FREQ, ABUSE_PDCD, LOC_DSC, ABUSE_STDT, ALG_DSPC, ALG_TPC, DISPSN_DSC, DISPSN_DT, IJHM_DET_B, NON_PRT_CD, STFADD_IND, LST_UPD_ID, LST_UPD_TS, FKCLIENT_T, FKCLIENT_0, FKREFERL_T, CNTY_SPFCD, ZIPPY_IND, PLC_FCLC)
+	SELECT 
+	    v_tgt_id as IDENTIFIER,
+		ABUSE_ENDT, ABUSE_FREQ, ABUSE_PDCD, LOC_DSC, ABUSE_STDT, ALG_DSPC, ALG_TPC, DISPSN_DSC, DISPSN_DT, IJHM_DET_B, NON_PRT_CD, STFADD_IND, LST_UPD_ID, LST_UPD_TS, FKCLIENT_T, FKCLIENT_0, FKREFERL_T, CNTY_SPFCD, ZIPPY_IND, PLC_FCLC
+	FROM CWSINT.ALLGTN_T x
+	WHERE x.IDENTIFIER = v_src_id ;
+	
+	SET (v_op, v_chg) = (SELECT r.IBMSNAP_OPERATION, r.ABUSE_PDCD FROM CWSRS1.ALLGTN_T r WHERE r.IDENTIFIER = v_tgt_id);
+	IF (v_op != 'I') THEN
+		SIGNAL SQLSTATE '70002'
+		SET MESSAGE_TEXT = 'Failed: insert existing';
+	END IF;
+ 
+END;
+
+rollback;
+
+
+-------------
+-- NEW: 
+-------------
+
+BEGIN ATOMIC
+
+	DECLARE v_tgt_id  char(10);
+	DECLARE v_src_id  char(10);
+	DECLARE v_op      char(1);
+	DECLARE v_chg     char(1);
+
+	SET v_tgt_id = 'AasihiE04Z';
+	SET v_src_id = 'AaWcqun00h'; -- test re-insert
+	
+	INSERT INTO CWSINT.ALLGTN_T (IDENTIFIER, ABUSE_ENDT, ABUSE_FREQ, ABUSE_PDCD, LOC_DSC, ABUSE_STDT, ALG_DSPC, ALG_TPC, DISPSN_DSC, DISPSN_DT, IJHM_DET_B, NON_PRT_CD, STFADD_IND, LST_UPD_ID, LST_UPD_TS, FKCLIENT_T, FKCLIENT_0, FKREFERL_T, CNTY_SPFCD, ZIPPY_IND, PLC_FCLC)
+	SELECT 
+	    v_tgt_id as IDENTIFIER,
+		ABUSE_ENDT, ABUSE_FREQ, ABUSE_PDCD, LOC_DSC, ABUSE_STDT, ALG_DSPC, ALG_TPC, DISPSN_DSC, DISPSN_DT, IJHM_DET_B, NON_PRT_CD, STFADD_IND, LST_UPD_ID, LST_UPD_TS, FKCLIENT_T, FKCLIENT_0, FKREFERL_T, CNTY_SPFCD, ZIPPY_IND, PLC_FCLC
+	FROM CWSINT.ALLGTN_T x
+	WHERE x.IDENTIFIER = v_src_id ;
+	
+	SET (v_op, v_chg) = (SELECT r.IBMSNAP_OPERATION, r.ABUSE_PDCD FROM CWSRS1.ALLGTN_T r WHERE r.IDENTIFIER = v_tgt_id);
+	IF (v_op != 'I') THEN
+		SIGNAL SQLSTATE '70002'
+		SET MESSAGE_TEXT = 'Failed: insert new';
+	END IF;
+
+	UPDATE CWSINT.ALLGTN_T r
+	SET 
+	    r.ABUSE_PDCD   = 'M',
+	    r.LST_UPD_ID   = '0x5',
+	    r.LST_UPD_TS   = current timestamp
+	WHERE r.IDENTIFIER = v_tgt_id ;
+
+	SET (v_op, v_chg) = (SELECT r.IBMSNAP_OPERATION, r.ABUSE_PDCD FROM CWSRS1.ALLGTN_T r WHERE r.IDENTIFIER = v_tgt_id);
+	IF (v_op != 'U' OR v_chg != 'M') THEN
+		SIGNAL SQLSTATE '70002'
+		SET MESSAGE_TEXT = 'Failed: update new';
+	END IF;
+
+	DELETE FROM CWSINT.ALLGTN_T r WHERE r.IDENTIFIER = v_tgt_id ;
+
+	SET (v_op, v_chg) = (SELECT r.IBMSNAP_OPERATION, r.ABUSE_PDCD FROM CWSRS1.ALLGTN_T r WHERE r.IDENTIFIER = v_tgt_id);
+	IF (v_op != 'D') THEN
+		SIGNAL SQLSTATE '70002'
+		SET MESSAGE_TEXT = 'Failed: delete new';
+	END IF;
+
+END;
+
+rollback;
+
+
+
+
