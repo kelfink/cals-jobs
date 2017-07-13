@@ -1,4 +1,4 @@
--- DROP TRIGGER CWSINT.trg_claddr_del;
+DROP TRIGGER CWSINT.trg_claddr_del;
 
 CREATE TRIGGER CWSINT.trg_claddr_del
 AFTER DELETE ON CL_ADDRT
