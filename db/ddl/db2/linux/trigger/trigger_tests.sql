@@ -1,0 +1,146 @@
+-- TRIGGER TESTS:
+
+-- ADDRS_T:
+
+-- EXISTING:
+
+CREATE VARIABLE v_id CHAR(10);
+
+SET v_id = '0p2D1jW06s';
+
+SELECT r.IBMSNAP_OPERATION, r.IBMSNAP_LOGMARKER, r.ADDR_DSC, r.* FROM CWSRS1.ADDRS_T r WHERE r.IDENTIFIER = v_id FOR READ ONLY ;
+
+SELECT r.IBMSNAP_OPERATION, r.IBMSNAP_LOGMARKER, r.ADDR_DSC, r.* FROM CWSRS1.ADDRS_T r WHERE r.IDENTIFIER = v_id FOR READ ONLY ;
+
+
+DROP VARIABLE v_id;
+
+
+
+
+BEGIN ATOMIC
+
+	DECLARE UID   char(10);
+	DECLARE v_op  char(1);
+	DECLARE v_chg char(20);
+
+	---------------
+	-- Existing:
+	---------------
+	SET UID = '0p2D1jW06s';
+	
+	--savepoint savepoint1 on rollback retain cursors;
+
+	SET v_chg = (SELECT r.CITY_NM FROM CWSINT.ADDRS_T r WHERE r.IDENTIFIER = UID);
+	
+	IF (v_chg IS NULL) THEN
+		SIGNAL SQLSTATE '70002'
+		SET MESSAGE_TEXT = 'Failed: select existing';
+	END IF;
+
+	-- Delete:
+	DELETE FROM CWSINT.ADDRS_T r WHERE r.IDENTIFIER = UID ;
+	SET (v_op, v_chg) = (SELECT r.IBMSNAP_OPERATION, r.CITY_NM FROM CWSRS1.ADDRS_T r WHERE r.IDENTIFIER = UID);
+	
+	IF (v_op != 'D') THEN
+		SIGNAL SQLSTATE '70002'
+		SET MESSAGE_TEXT = 'Failed: delete existing';
+	END IF;
+
+END;
+
+rollback;
+
+
+BEGIN ATOMIC
+
+	DECLARE UID   char(10);
+	DECLARE v_op  char(1);
+	DECLARE v_chg char(20);
+
+	---------------
+	-- Existing:
+	---------------
+	SET UID = '0p2D1jW06s';
+	
+	-- Update:
+	UPDATE CWSINT.ADDRS_T r
+	SET 
+	    r.ADDR_DSC          = 'test 2',
+	    r.LST_UPD_ID        = '0x5',
+	    r.LST_UPD_TS        = current timestamp
+	WHERE r.IDENTIFIER = UID ;
+
+	SET (v_op, v_chg) = (SELECT r.IBMSNAP_OPERATION, r.CITY_NM FROM CWSRS1.ADDRS_T r WHERE r.IDENTIFIER = UID);
+	
+	IF (v_op != 'U') THEN
+		SIGNAL SQLSTATE '70002'
+		SET MESSAGE_TEXT = 'Failed: update existing';
+	END IF;
+
+END;
+
+rollback;
+
+
+
+UPDATE CWSINT.ADDRS_T r
+SET 
+    r.ADDR_DSC          = 'test 2',
+    r.LST_UPD_ID        = '0x5',
+    r.LST_UPD_TS        = current timestamp
+WHERE r.IDENTIFIER = '0p2D1jW06s' ;
+
+DELETE FROM CWSINT.ADDRS_T r WHERE r.IDENTIFIER = '0p2D1jW06s' ;
+
+
+-- NEW:
+
+SELECT r.IBMSNAP_OPERATION, r.IBMSNAP_LOGMARKER, r.ADDR_DSC, r.* FROM CWSRS1.ADDRS_T r WHERE r.IDENTIFIER = '0p2D1jW999' FOR READ ONLY ;
+
+
+
+INSERT INTO CWSINT.ADDRS_T (IDENTIFIER, CITY_NM, EMRG_TELNO, EMRG_EXTNO, FRG_ADRT_B, GVR_ENTC, MSG_TEL_NO, MSG_EXT_NO, HEADER_ADR, PRM_TEL_NO, PRM_EXT_NO, STATE_C, STREET_NM, STREET_NO, ZIP_NO, LST_UPD_ID, LST_UPD_TS, ADDR_DSC, ZIP_SFX_NO, POSTDIR_CD, PREDIR_CD, ST_SFX_C, UNT_DSGC, UNIT_NO)
+SELECT 
+    '0p2D1jW999' as IDENTIFIER,
+	CITY_NM,
+	EMRG_TELNO,
+	EMRG_EXTNO,
+	FRG_ADRT_B,
+	GVR_ENTC,
+	MSG_TEL_NO,
+	MSG_EXT_NO,
+	HEADER_ADR,
+	PRM_TEL_NO,
+	PRM_EXT_NO,
+	STATE_C,
+	STREET_NM,
+	STREET_NO,
+	ZIP_NO,
+	LST_UPD_ID,
+	LST_UPD_TS,
+	ADDR_DSC,
+	ZIP_SFX_NO,
+	POSTDIR_CD,
+	PREDIR_CD,
+	ST_SFX_C,
+	UNT_DSGC,
+	UNIT_NO
+FROM CWSINT.ADDRS_T x
+where x.IDENTIFIER = '0p2D1jW06s' ;
+
+
+DELETE FROM CWSINT.ADDRS_T r WHERE r.IDENTIFIER = '0p2D1jW999' ;
+
+
+UPDATE CWSINT.ADDRS_T r
+SET 
+    r.ADDR_DSC          = 'test 2',
+    r.LST_UPD_ID        = '0x5',
+    r.LST_UPD_TS        = current timestamp
+WHERE r.IDENTIFIER = '0p2D1jW999' ;
+
+
+
+
+
