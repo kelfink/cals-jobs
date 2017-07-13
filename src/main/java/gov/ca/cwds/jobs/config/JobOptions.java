@@ -54,7 +54,7 @@ public class JobOptions implements Serializable {
   /**
    * Name of index to create or use. If this is not provided then alias is used from ES Config file.
    */
-  private final String indexName;
+  private String indexName;
 
   /**
    * Last time job was executed in format 'yyyy-MM-dd HH.mm.ss' If this is provided then time stamp
@@ -432,6 +432,10 @@ public class JobOptions implements Serializable {
 
   public void setTotalBuckets(long totalBuckets) {
     this.totalBuckets = totalBuckets;
+  }
+
+  public void setIndexName(String indexName) {
+    this.indexName = indexName;
   }
 
   private static Date createDate(String timestamp) throws java.text.ParseException {

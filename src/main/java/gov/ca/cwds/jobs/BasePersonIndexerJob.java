@@ -1058,6 +1058,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       String indexNameOverride = getOpts().getIndexName();
       String effectiveIndexName = StringUtils.isBlank(indexNameOverride)
           ? esDao.getConfig().getElasticsearchAlias() : indexNameOverride;
+      getOpts().setIndexName(effectiveIndexName);
 
       /**
        * If last run time is provide in options then use it, otherwise use provided

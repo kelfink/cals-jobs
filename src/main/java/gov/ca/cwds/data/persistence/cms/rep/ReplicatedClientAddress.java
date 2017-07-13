@@ -30,7 +30,7 @@ public class ReplicatedClientAddress extends BaseClientAddress {
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "IDENTIFIER", referencedColumnName = "FKADDRS_T", insertable = false,
       updatable = false, unique = false)
-  protected Set<ReplicatedAddress> addresses = new LinkedHashSet<>();
+  protected transient Set<ReplicatedAddress> addresses = new LinkedHashSet<>();
 
   /**
    * Default constructor
