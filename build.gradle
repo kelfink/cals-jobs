@@ -19,7 +19,7 @@ apply plugin: 'jacoco'
 
 project.ext {
     log4jVersion = "2.8"
-    elasticsearchVersion = "5.3.2"
+    elasticsearchVersion = "5.5.0"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
 }
 
@@ -30,12 +30,17 @@ repositories {
     maven {
         url "http://maven2.cwds.tabordasolutions.net"
     }
+    maven {
+        url "https://artifacts.elastic.co/maven"
+    }
 }
 
 dependencies {
     // ES 5.x:
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
     compile group: 'org.elasticsearch.client', name: 'transport', version: elasticsearchVersion
+    compile ("org.elasticsearch.client:x-pack-transport:" + elasticsearchVersion)
+    compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
 
 	compile group: 'javax.validation', name: 'validation-api', version: '1.1.0.Final'
 	
@@ -55,6 +60,7 @@ dependencies {
 	// compile group: "gov.ca.cwds.api", name: "api", version: "0.22.928"
 
 	// Exclude transitive dependencies.
+    //TODO: update with newer version containg elastic search security
 	compile ('gov.ca.cwds.api:api-core:0.27.360') {
 	    exclude group: 'org.glassfish.jersey.core'
 	}
