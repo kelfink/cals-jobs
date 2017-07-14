@@ -23,7 +23,7 @@ project.ext {
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
 }
 
-version = 0.25
+version = 0.27
 
 repositories {
     mavenCentral()
@@ -55,7 +55,7 @@ dependencies {
 	// compile group: "gov.ca.cwds.api", name: "api", version: "0.22.928"
 
 	// Exclude transitive dependencies.
-	compile ('gov.ca.cwds.api:api-core:0.25.358') {
+	compile ('gov.ca.cwds.api:api-core:0.27.360') {
 	    exclude group: 'org.glassfish.jersey.core'
 	}
 	
