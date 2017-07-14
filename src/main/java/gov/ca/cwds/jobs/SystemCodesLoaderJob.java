@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.jdbc.Work;
@@ -44,7 +45,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemMeta;
 import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
 
 /**
- * Loads system codes from DB2 to Postgress.
+ * Loads system codes from DB2 to PostgreSQL.
  * 
  * @author CWDS API Team
  */
@@ -54,6 +55,11 @@ public class SystemCodesLoaderJob {
 
   private NsSystemCodeDao systemCodeDao;
 
+  /**
+   * Constructor
+   * 
+   * @param systemCodeDao system codes DAO
+   */
   @Inject
   public SystemCodesLoaderJob(NsSystemCodeDao systemCodeDao) {
     this.systemCodeDao = systemCodeDao;
@@ -83,11 +89,11 @@ public class SystemCodesLoaderJob {
       systemCodeMap.put(systemCode.getSystemId(), systemCode);
     }
 
-    Session session = systemCodeDao.getSessionFactory().getCurrentSession();
-    Transaction tx = session.beginTransaction();
+    final Session session = systemCodeDao.getSessionFactory().getCurrentSession();
+    final Transaction tx = session.beginTransaction();
 
     try {
-      // Delete all existing system codes from new system
+      // Delete all existing system codes from new system.
       session.doWork(new Work() {
         @Override
         public void execute(Connection connection) throws SQLException {
@@ -165,14 +171,12 @@ public class SystemCodesLoaderJob {
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LOGGER.info("Loading systen codes from legacy to new system...");
+    LOGGER.info("Loading system codes from legacy to new system...");
 
     try {
       Injector injector = Guice.createInjector(new SystemCodesLoaderModule());
 
-      /**
-       * Initialize system code cache
-       */
+      // Initialize system code cache.
       injector.getInstance(SystemCodeCache.class);
 
       NsSystemCodeDao systemCodeDao = injector.getInstance(NsSystemCodeDao.class);
@@ -183,6 +187,7 @@ public class SystemCodesLoaderJob {
       LOGGER.error(e);
       System.exit(-1);
     }
+
     System.exit(0);
   }
 
@@ -192,7 +197,7 @@ public class SystemCodesLoaderJob {
   // ============================================================================
   //
   /**
-   * System codes persistence class for new system
+   * System codes persistence class for new system.
    */
   @Entity
   @Table(name = "system_codes")
@@ -213,15 +218,19 @@ public class SystemCodesLoaderJob {
     private Integer subCategoryId;
 
     @Column(name = "DESCRIPTION")
+    @ColumnTransformer(read = "trim(DESCRIPTION)")
     private String description;
 
     @Column(name = "CATEGORY_DESCRIPTION")
+    @ColumnTransformer(read = "trim(CATEGORY_DESCRIPTION)")
     private String categoryDescription;
 
     @Column(name = "SUB_CATEGORY_DESCRIPTION")
+    @ColumnTransformer(read = "trim(SUB_CATEGORY_DESCRIPTION)")
     private String subCategoryDescription;
 
     @Column(name = "OTHER_CODE")
+    @ColumnTransformer(read = "trim(OTHER_CODE)")
     private String otherCode;
 
     /**
@@ -383,4 +392,5 @@ public class SystemCodesLoaderJob {
       return systemCodeCache;
     }
   }
+
 }
