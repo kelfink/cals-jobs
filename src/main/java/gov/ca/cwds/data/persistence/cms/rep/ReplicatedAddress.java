@@ -8,7 +8,7 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.cms.BaseAddress;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;

@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;

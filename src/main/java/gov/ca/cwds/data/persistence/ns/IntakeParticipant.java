@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAny;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonNestedPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReporter;

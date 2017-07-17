@@ -13,8 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
+import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;

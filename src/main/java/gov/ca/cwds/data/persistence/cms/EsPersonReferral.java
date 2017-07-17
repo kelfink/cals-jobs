@@ -15,7 +15,7 @@ import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchAccessLimitation;
+import gov.ca.cwds.data.es.ElasticSearchAccessLimitation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonNestedPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
