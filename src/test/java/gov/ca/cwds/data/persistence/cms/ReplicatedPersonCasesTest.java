@@ -13,8 +13,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
 import gov.ca.cwds.data.es.ElasticSearchPersonCase;
+import gov.ca.cwds.data.es.ElasticSearchPersonParent;
 
 public class ReplicatedPersonCasesTest {
 
