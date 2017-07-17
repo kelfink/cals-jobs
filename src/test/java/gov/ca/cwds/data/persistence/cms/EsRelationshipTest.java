@@ -18,7 +18,7 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonRelationship;
+import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 
 public class EsRelationshipTest {

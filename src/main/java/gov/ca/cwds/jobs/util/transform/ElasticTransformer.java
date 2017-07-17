@@ -15,9 +15,9 @@ import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
+import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
+import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
+import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiLanguageAware;
@@ -102,9 +102,9 @@ public class ElasticTransformer {
     return languages;
   }
 
-  protected static List<ElasticSearchPerson.ElasticSearchPersonPhone> handlePhone(
+  protected static List<ElasticSearchPersonPhone> handlePhone(
       ApiPersonAware p) {
-    List<ElasticSearchPerson.ElasticSearchPersonPhone> phones = null;
+    List<ElasticSearchPersonPhone> phones = null;
     if (p instanceof ApiMultiplePhonesAware) {
       phones = new ArrayList<>();
       ApiMultiplePhonesAware mphx = (ApiMultiplePhonesAware) p;

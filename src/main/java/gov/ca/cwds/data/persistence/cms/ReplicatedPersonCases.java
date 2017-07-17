@@ -9,8 +9,8 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
+import gov.ca.cwds.data.es.ElasticSearchPersonCase;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.data.std.ApiPersonAware;

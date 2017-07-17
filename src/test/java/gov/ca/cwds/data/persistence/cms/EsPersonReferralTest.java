@@ -14,8 +14,8 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
+import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
+import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;

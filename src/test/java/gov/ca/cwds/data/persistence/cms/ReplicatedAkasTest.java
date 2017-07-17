@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAka;
+import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 
 public class ReplicatedAkasTest {
 

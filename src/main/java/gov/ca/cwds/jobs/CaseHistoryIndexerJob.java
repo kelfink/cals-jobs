@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
+import gov.ca.cwds.data.es.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;

@@ -11,10 +11,10 @@ import javax.persistence.MappedSuperclass;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchAccessLimitation;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
+import gov.ca.cwds.data.es.ElasticSearchPersonCase;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;

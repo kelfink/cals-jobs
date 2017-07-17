@@ -16,11 +16,11 @@ import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchAccessLimitation;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonNestedPerson;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
+import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
+import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;

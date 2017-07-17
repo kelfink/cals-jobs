@@ -16,6 +16,7 @@ import gov.ca.cwds.dao.ns.IntakeParticipantDao;
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
+import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
@@ -114,7 +115,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
   @Override
   protected void setInsertCollections(ElasticSearchPerson esp, IntakeParticipant t,
       List<? extends ApiTypedIdentifier<String>> list) {
-    esp.setScreenings((List<ElasticSearchPerson.ElasticSearchPersonScreening>) list);
+    esp.setScreenings((List<ElasticSearchPersonScreening>) list);
   }
 
   /**

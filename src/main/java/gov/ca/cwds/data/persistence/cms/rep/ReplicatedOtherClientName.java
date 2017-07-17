@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAka;
+import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseOtherClientName;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
@@ -159,7 +159,7 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
     final ReplicatedAkas ret =
         isClientAdded ? map.get(this.clientId) : new ReplicatedAkas(this.clientId);
 
-    final ElasticSearchPersonAka aka = new ElasticSearchPersonAka();
+    final gov.ca.cwds.data.es.ElasticSearchPersonAka aka = new ElasticSearchPersonAka();
     ret.addAka(aka);
 
     if (StringUtils.isNotBlank(this.firstName)) {

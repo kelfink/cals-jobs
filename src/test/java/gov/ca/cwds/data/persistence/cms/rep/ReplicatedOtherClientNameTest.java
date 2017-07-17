@@ -21,7 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAka;
+import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
