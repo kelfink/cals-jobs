@@ -795,7 +795,7 @@ public class EsPersonReferralTest {
     int actual = target.hashCode();
     // then
     // e.g. : verify(mocked).called();
-    int expected = -1684923503;
+    int expected = -262837655;
     assertThat(actual, is(equalTo(expected)));
   }
 
