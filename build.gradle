@@ -60,8 +60,7 @@ dependencies {
 	// compile group: "gov.ca.cwds.api", name: "api", version: "0.22.928"
 
 	// Exclude transitive dependencies.
-    //TODO: update with newer version containg elastic search security
-	compile ('gov.ca.cwds.api:api-core:0.27.360') {
+	compile ('gov.ca.cwds.api:api-core:0.27.361') {
 	    exclude group: 'org.glassfish.jersey.core'
 	}
 	

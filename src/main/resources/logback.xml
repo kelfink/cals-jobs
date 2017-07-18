@@ -9,11 +9,15 @@
 		</layout>
 	</appender>
 
-	<logger name="gov.ca.cwds" level="debug" additivity="false">
+	<logger name="gov.ca.cwds" level="info" additivity="false">
 		<appender-ref ref="STDOUT" />
 	</logger>
 
-	<root level="error">
+	<logger name="org.hibernate" level="warn" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<root level="warn">
 		<appender-ref ref="STDOUT" />
 	</root>
 
