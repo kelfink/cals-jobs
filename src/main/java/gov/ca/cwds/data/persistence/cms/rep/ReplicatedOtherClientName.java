@@ -41,29 +41,21 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  */
 @NamedNativeQueries({
     @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findBucketRange",
-        query = "SELECT x.* FROM {h-schema}OCL_NM_T x "
-            + "WHERE x.THIRD_ID BETWEEN :min_id AND :max_id FOR READ ONLY",
-        resultClass = ReplicatedOtherClientName.class, readOnly = true),
-    @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findAllUpdatedAfter",
-        query = "select z.THIRD_ID, z.FIRST_NM, z.LAST_NM, z.MIDDLE_NM, z.NMPRFX_DSC, "
-            + "z.NAME_TPC, z.SUFX_TLDSC, z.LST_UPD_ID, z.LST_UPD_TS, z.FKCLIENT_T "
-            + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
-            + "from {h-schema}OCL_NM_T z WHERE z.IBMSNAP_LOGMARKER >= :after for read only ",
+        query = "SELECT r.* FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r WHERE r.THIRD_ID IN ( "
+            + "SELECT r1.THIRD_ID FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r1 "
+            + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + ") ORDER BY FKCLIENT_T FOR READ ONLY ",
         resultClass = ReplicatedOtherClientName.class),
     @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findPartitionedBuckets",
-        query = "select z.THIRD_ID, z.FIRST_NM, z.LAST_NM, z.MIDDLE_NM, z.NMPRFX_DSC, "
-            + "z.NAME_TPC, z.SUFX_TLDSC, z.LST_UPD_ID, z.LST_UPD_TS, z.FKCLIENT_T "
-            + ", 'U' as IBMSNAP_OPERATION, z.LST_UPD_TS as IBMSNAP_LOGMARKER "
-            + "from ( select mod(y.rn, CAST(:total_buckets AS INTEGER)) + 1 as bucket, y.* "
-            + "from ( select row_number() over (order by 1) as rn, x.* "
-            + "from {h-schema}OCL_NM_T x WHERE x.FKCLIENT_T >= :min_id and x.FKCLIENT_T < :max_id "
-            + ") y ) z where z.bucket = :bucket_num for read only",
+        name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findAllUpdatedAfterWithLimitedAccess",
+        query = "SELECT r.* FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r WHERE r.THIRD_ID IN ( "
+            + "SELECT r1.THIRD_ID FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r1 "
+            + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + ") AND r.CLIENT_SENSITIVITY_IND = 'N' ORDER BY FKCLIENT_T FOR READ ONLY ",
         resultClass = ReplicatedOtherClientName.class)})
 @Entity
-@Table(name = "OCL_NM_T")
+@Table(name = "VW_LST_OTHER_CLIENT_NAME")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReplicatedOtherClientName extends BaseOtherClientName implements CmsReplicatedEntity,
@@ -83,6 +75,9 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
   @Type(type = "timestamp")
   @Column(name = "IBMSNAP_LOGMARKER", updatable = false)
   private Date replicationDate;
+
+  @Column(name = "CLIENT_SENSITIVITY_IND", updatable = false)
+  private String clientSensitivityIndicator;
 
   // =======================
   // CmsReplicatedEntity:

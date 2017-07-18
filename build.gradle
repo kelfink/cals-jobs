@@ -60,7 +60,7 @@ dependencies {
 	// compile group: "gov.ca.cwds.api", name: "api", version: "0.22.928"
 
 	// Exclude transitive dependencies.
-	compile ('gov.ca.cwds.api:api-core:0.27.369') {
+	compile ('gov.ca.cwds.api:api-core:0.27.371') {
 	    exclude group: 'org.glassfish.jersey.core'
 	}
 	

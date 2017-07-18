@@ -110,7 +110,7 @@ public class JobOptions implements Serializable {
   private String maxId;
 
   /**
-   * If true then don't load sealed and sensitive data
+   * If true then don't load sealed and sensitive data.
    */
   private final boolean hideSealedAndSensitive;
 
@@ -346,7 +346,7 @@ public class JobOptions implements Serializable {
     long endBucket = 0L;
     long totalBuckets = 0L;
     long threadCount = 0L;
-    boolean hideSealedAndSensitive = false;
+    boolean hideSealedAndSensitive = true;
 
     String minId = " ";
     String maxId = "9999999999";

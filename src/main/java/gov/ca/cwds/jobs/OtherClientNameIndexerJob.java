@@ -107,13 +107,13 @@ public class OtherClientNameIndexerJob
 
   @Override
   public String getInitialLoadViewName() {
-    return "OCL_NM_T";
+    return "MQT_OTHER_CLIENT_NAME";
   }
 
   @Override
   @Deprecated
   protected String getLegacySourceTable() {
-    return getInitialLoadViewName();
+    return "OCL_NM_T";
   }
 
   /**
@@ -123,7 +123,24 @@ public class OtherClientNameIndexerJob
    */
   @Override
   public String getJdbcOrderBy() {
-    return " ORDER BY x.fkclient_t ";
+    return " ORDER BY x.FKCLIENT_T ";
+  }
+
+  @Override
+  public String getInitialLoadQuery(String dbSchemaName, boolean hideSealedAndSensitive) {
+    StringBuilder buf = new StringBuilder();
+    buf.append("SELECT x.* FROM ");
+    buf.append(dbSchemaName);
+    buf.append(".");
+    buf.append(getInitialLoadViewName());
+    buf.append(" x ");
+
+    if (hideSealedAndSensitive) {
+      buf.append(" WHERE x.CLIENT_SENSITIVITY_IND = 'N' ");
+    }
+
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
+    return buf.toString();
   }
 
   /**

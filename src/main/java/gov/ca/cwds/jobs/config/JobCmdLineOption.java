@@ -67,7 +67,7 @@ public enum JobCmdLineOption {
    * Maximum key, inclusive.
    */
   HIDE_SEALED_SENSITIVE(JobOptions.makeOpt("h", JobOptions.CMD_LINE_HIDE_SEALED_AND_SENSITIVE,
-      "true or false - hide sealed and sensitive data, default is false", false, 1, Boolean.class,
+      "true or false - hide sealed and sensitive data, default is true", false, 1, Boolean.class,
       ','));
 
   private final Option opt;
