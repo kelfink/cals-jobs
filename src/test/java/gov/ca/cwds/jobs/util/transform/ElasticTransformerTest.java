@@ -16,10 +16,11 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
+import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
+import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
+import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 
@@ -50,10 +51,10 @@ public class ElasticTransformerTest {
     ApiPersonAware p = new TestNormalizedEntity("abc123");
 
     // when
-    List<ElasticSearchPerson.ElasticSearchPersonPhone> actual = ElasticTransformer.handlePhone(p);
+    List<ElasticSearchPersonPhone> actual = ElasticTransformer.handlePhone(p);
     // then
     // e.g. : verify(mocked).called();
-    List<ElasticSearchPerson.ElasticSearchPersonPhone> expected = null;
+    List<ElasticSearchPersonPhone> expected = null;
     assertThat(actual, notNullValue());
   }
 

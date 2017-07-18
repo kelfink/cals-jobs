@@ -1,10 +1,8 @@
 package gov.ca.cwds.data.persistence.ns;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAny;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonNestedPerson;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReporter;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonStaff;
+import gov.ca.cwds.data.es.ElasticSearchPersonAny;
+import gov.ca.cwds.data.es.ElasticSearchPersonNestedPerson;
+import gov.ca.cwds.data.es.ElasticSearchPersonReporter;
 
 /**
  * Types for {@link ElasticSearchPersonNestedPerson} child classes.
@@ -19,12 +17,12 @@ public enum EsPersonType {
   REPORTER,
 
   /**
-   * For {@link ElasticSearchPersonSocialWorker}.
+   * For ElasticSearchPersonSocialWorker.
    */
   SOCIAL_WORKER,
 
   /**
-   * For {@link ElasticSearchPersonStaff}.
+   * For ElasticSearchPersonStaff.
    */
   STAFF,
 

@@ -10,11 +10,11 @@ import javax.persistence.MappedSuperclass;
 
 import org.hibernate.annotations.Type;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchAccessLimitation;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonCase;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonChild;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonParent;
+import gov.ca.cwds.data.es.ElasticSearchAccessLimitation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
+import gov.ca.cwds.data.es.ElasticSearchPersonCase;
+import gov.ca.cwds.data.es.ElasticSearchPersonChild;
+import gov.ca.cwds.data.es.ElasticSearchPersonParent;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
@@ -91,6 +91,9 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   @Column(name = "FOCUS_CHILD_LAST_UPDATED", updatable = false)
   private Date focusChildLastUpdated;
 
+  @Column(name = "FOCUS_CHILD_SENSITIVITY_IND")
+  private String focusChildSensitivityIndicator;
+
   // ==============
   // SOCIAL WORKER:
   // ==============
@@ -128,6 +131,9 @@ public abstract class EsPersonCase extends ApiObjectIdentity
 
   @Column(name = "PARENT_SOURCE_TABLE")
   private String parentSourceTable;
+
+  @Column(name = "PARENT_SENSITIVITY_IND")
+  private String parentSensitivityIndicator;
 
   // ==================
   // ACCESS LIMITATION:
@@ -346,6 +352,22 @@ public abstract class EsPersonCase extends ApiObjectIdentity
     this.limitedAccessGovernmentEntityId = limitedAccessGovernmentEntityId;
   }
 
+  public String getFocusChildSensitivityIndicator() {
+    return focusChildSensitivityIndicator;
+  }
+
+  public void setFocusChildSensitivityIndicator(String focusChildSensitivityIndicator) {
+    this.focusChildSensitivityIndicator = focusChildSensitivityIndicator;
+  }
+
+  public String getParentSensitivityIndicator() {
+    return parentSensitivityIndicator;
+  }
+
+  public void setParentSensitivityIndicator(String parentSensitivityIndicator) {
+    this.parentSensitivityIndicator = parentSensitivityIndicator;
+  }
+
   @Override
   public Class<ReplicatedPersonCases> getNormalizationClass() {
     return ReplicatedPersonCases.class;
@@ -395,6 +417,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
     child.setLastName(this.focusChildLastName);
     child.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.focusChildId,
         this.focusChildLastUpdated, LegacyTable.CLIENT));
+    // child.setSensitivityIndicator(this.focusChildSensitivityIndicator);
     esPersonCase.setFocusChild(child);
 
     //
@@ -437,6 +460,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
         SystemCodeCache.global().getSystemCodeShortDescription(this.parentRelationship));
     parent.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.parentId,
         this.parentLastUpdated, LegacyTable.CLIENT));
+    // parent.setSensitivityIndicator(this.parentSensitivityIndicator);
 
     cases.addCase(esPersonCase, parent);
     return cases;

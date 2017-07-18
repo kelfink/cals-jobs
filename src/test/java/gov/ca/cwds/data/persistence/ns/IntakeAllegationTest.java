@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
+import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 

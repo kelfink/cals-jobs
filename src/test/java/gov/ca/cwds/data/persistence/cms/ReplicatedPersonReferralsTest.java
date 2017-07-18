@@ -13,8 +13,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
+import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
+import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 
 public class ReplicatedPersonReferralsTest {
 
@@ -32,12 +32,7 @@ public class ReplicatedPersonReferralsTest {
   @Test
   public void geReferrals_Args__() throws Exception {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     List<ElasticSearchPersonReferral> actual = target.geReferrals();
-    // then
-    // e.g. : verify(mocked).called();
     List<ElasticSearchPersonReferral> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
@@ -46,25 +41,15 @@ public class ReplicatedPersonReferralsTest {
   public void addReferral_Args__ElasticSearchPersonReferral__ElasticSearchPersonAllegation()
       throws Exception {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
-    // given
     ElasticSearchPersonReferral referral = mock(ElasticSearchPersonReferral.class);
     ElasticSearchPersonAllegation allegation = mock(ElasticSearchPersonAllegation.class);
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     target.addReferral(referral, allegation);
-    // then
-    // e.g. : verify(mocked).called();
   }
 
   @Test
   public void getPrimaryKey_Args__() throws Exception {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     Serializable actual = target.getPrimaryKey();
-    // then
-    // e.g. : verify(mocked).called();
     Serializable expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -72,12 +57,7 @@ public class ReplicatedPersonReferralsTest {
   @Test
   public void getBirthDate_Args__() throws Exception {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     Date actual = target.getBirthDate();
-    // then
-    // e.g. : verify(mocked).called();
     Date expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -85,12 +65,7 @@ public class ReplicatedPersonReferralsTest {
   @Test
   public void getFirstName_Args__() throws Exception {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getFirstName();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -98,12 +73,7 @@ public class ReplicatedPersonReferralsTest {
   @Test
   public void getGender_Args__() throws Exception {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getGender();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -111,12 +81,7 @@ public class ReplicatedPersonReferralsTest {
   @Test
   public void getLastName_Args__() throws Exception {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getLastName();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -124,12 +89,7 @@ public class ReplicatedPersonReferralsTest {
   @Test
   public void getMiddleName_Args__() throws Exception {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getMiddleName();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -137,12 +97,7 @@ public class ReplicatedPersonReferralsTest {
   @Test
   public void getNameSuffix_Args__() throws Exception {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getNameSuffix();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -150,12 +105,7 @@ public class ReplicatedPersonReferralsTest {
   @Test
   public void getSsn_Args__() throws Exception {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getSsn();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }

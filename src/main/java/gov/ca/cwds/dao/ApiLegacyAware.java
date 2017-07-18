@@ -2,7 +2,7 @@ package gov.ca.cwds.dao;
 
 import java.io.Serializable;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 
 /**
  * Entity/persistence bean is aware of legacy identifiers. For new databases, such as Postgres,
@@ -32,5 +32,5 @@ public interface ApiLegacyAware extends Serializable {
    * 
    * @return Legacy descriptor.
    */
-  ElasticSearchPerson.ElasticSearchLegacyDescriptor getLegacyDescriptor();
+  ElasticSearchLegacyDescriptor getLegacyDescriptor();
 }

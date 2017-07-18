@@ -7,8 +7,8 @@ import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonNestedPerson;
+import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
+import gov.ca.cwds.data.es.ElasticSearchPersonNestedPerson;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;

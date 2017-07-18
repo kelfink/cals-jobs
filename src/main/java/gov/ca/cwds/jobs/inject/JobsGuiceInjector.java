@@ -182,8 +182,7 @@ public class JobsGuiceInjector extends AbstractModule {
 
   @Provides
   public CmsSystemCodeSerializer provideCmsSystemCodeSerializer(SystemCodeCache systemCodeCache) {
-    CmsSystemCodeSerializer systemCodeSerializer = new CmsSystemCodeSerializer(systemCodeCache);
-    return systemCodeSerializer;
+    return new CmsSystemCodeSerializer(systemCodeCache);
   }
 
   /**

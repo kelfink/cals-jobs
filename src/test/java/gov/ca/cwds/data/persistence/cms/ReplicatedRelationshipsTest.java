@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonRelationship;
+import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
 
 public class ReplicatedRelationshipsTest {
 

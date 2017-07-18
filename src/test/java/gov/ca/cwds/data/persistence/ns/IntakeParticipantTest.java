@@ -13,11 +13,11 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonNestedPerson;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
+import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
+import gov.ca.cwds.data.es.ElasticSearchPersonNestedPerson;
+import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
+import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 

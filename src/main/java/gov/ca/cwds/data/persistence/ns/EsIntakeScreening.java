@@ -22,8 +22,8 @@ import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAddress;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonPhone;
+import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
+import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;

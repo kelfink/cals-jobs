@@ -13,7 +13,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 
 public class ReplicatedSubstituteCareProviderTest {
 

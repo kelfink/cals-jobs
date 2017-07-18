@@ -64,7 +64,7 @@ dependencies {
 	    exclude group: 'org.glassfish.jersey.core'
 	}
 	
-    compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
+  compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
 	compile group: "javax.el", name: "javax.el-api", version: "2.2.4"
 	compile group: "org.glassfish.web", name: "javax.el", version: "2.2.4"
 	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.8.3'

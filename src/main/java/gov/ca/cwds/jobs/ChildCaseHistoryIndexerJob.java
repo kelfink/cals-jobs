@@ -72,6 +72,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
     personCase.setFocusChildLastName(ifNull(rs.getString("FOCUS_CHLD_LAST_NM")));
     personCase.setFocusChildLastUpdated(rs.getDate("FOCUS_CHILD_LAST_UPDATED"));
+    personCase.setFocusChildSensitivityIndicator(rs.getString("FOCUS_CHILD_SENSITIVITY_IND"));
 
     //
     // Parent
@@ -82,6 +83,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setParentRelationship(rs.getInt("PARENT_RELATIONSHIP"));
     personCase.setParentLastUpdated(rs.getDate("PARENT_LAST_UPDATED"));
     personCase.setParentSourceTable(rs.getString("PARENT_SOURCE_TABLE"));
+    personCase.setParentSensitivityIndicator(rs.getString("PARENT_SENSITIVITY_IND"));
 
     //
     // Worker (staff)

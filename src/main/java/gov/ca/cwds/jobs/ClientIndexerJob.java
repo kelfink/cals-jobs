@@ -74,7 +74,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     buf.append(" x ");
 
     if (hideSealedAndSensitive) {
-      buf.append(" WHERE (x.CLT_SENSTV_IND = 'N' AND x.CLT_SOC158_IND = 'N') ");
+      buf.append(" WHERE x.CLT_SENSTV_IND = 'N' ");
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");

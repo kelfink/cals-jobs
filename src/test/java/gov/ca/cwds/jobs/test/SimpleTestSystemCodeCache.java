@@ -16,6 +16,7 @@ public class SimpleTestSystemCodeCache implements SystemCodeCache {
     if (instance == null) {
       instance = new SimpleTestSystemCodeCache();
     }
+
   }
 
   public SimpleTestSystemCodeCache() {
@@ -25,7 +26,6 @@ public class SimpleTestSystemCodeCache implements SystemCodeCache {
   @Override
   public Set<SystemCode> getAllSystemCodes() {
     Set<SystemCode> systemCodes = new HashSet<>();
-
     // Add META_A_ active codes
     for (int i = 1; i < 4; i++) {
       systemCodes.add(new SystemCode(new Integer(i).shortValue(), null, "N", null,
@@ -62,31 +62,28 @@ public class SimpleTestSystemCodeCache implements SystemCodeCache {
       return new SystemCode(id.shortValue(), null, null, null, "Daughter/Mother (Birth)", null,
           null, "CLNTRELC", null);
     }
-    // TODO Auto-generated method stub
+
     return null;
   }
 
   @Override
   public String getSystemCodeShortDescription(Number arg0) {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public Set<SystemCode> getSystemCodesForMeta(String arg0) {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public boolean verifyActiveSystemCodeDescriptionForMeta(String arg0, String arg1) {
-    // TODO Auto-generated method stub
     return false;
   }
 
   @Override
   public boolean verifyActiveSystemCodeIdForMeta(Number arg0, String arg1) {
-    // TODO Auto-generated method stub
     return false;
   }
+
 }

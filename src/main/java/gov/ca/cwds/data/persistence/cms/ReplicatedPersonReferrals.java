@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAllegation;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
+import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
+import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.data.std.ApiPersonAware;

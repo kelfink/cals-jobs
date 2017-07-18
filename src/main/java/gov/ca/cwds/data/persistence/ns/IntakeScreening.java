@@ -20,8 +20,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonAny;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
+import gov.ca.cwds.data.es.ElasticSearchPersonAny;
+import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiPersonAware;
 

@@ -12,9 +12,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonScreening;
+import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.std.ApiPersonAware;
 
 public class IntakeScreeningTest {
@@ -38,7 +39,8 @@ public class IntakeScreeningTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void toEsScreening_Args__() throws Exception {
     IntakeScreening target = new IntakeScreening();
     ElasticSearchPersonScreening actual = target.toEsScreening();
@@ -54,7 +56,8 @@ public class IntakeScreeningTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void getEsScreenings_Args__() throws Exception {
     IntakeScreening target = new IntakeScreening();
     ElasticSearchPersonScreening[] actual = target.getEsScreenings();
@@ -303,7 +306,8 @@ public class IntakeScreeningTest {
     target.setScreeningDecisionDetail(screeningDecisionDetail);
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void getSocialWorker_Args__() throws Exception {
     IntakeScreening target = new IntakeScreening();
     IntakeParticipant actual = target.getSocialWorker();
@@ -334,7 +338,8 @@ public class IntakeScreeningTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void getReporter_Args__() throws Exception {
     IntakeScreening target = new IntakeScreening();
     target.setId("1234");
@@ -374,7 +379,8 @@ public class IntakeScreeningTest {
     target.setReferralId(referralId);
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void hashCode_Args__() throws Exception {
     IntakeScreening target = new IntakeScreening();
     int actual = target.hashCode();

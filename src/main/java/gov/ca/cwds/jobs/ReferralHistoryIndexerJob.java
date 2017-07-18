@@ -17,7 +17,7 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReferral;
+import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
@@ -159,6 +159,7 @@ public class ReferralHistoryIndexerJob
     referral.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
     referral.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
     referral.setPerpetratorLastChanged(rs.getDate("CLP_IBMSNAP_LOGMARKER"));
+    referral.setPerpetratorSensitivityIndicator(rs.getString("PERPETRATOR_SENSITIVITY_IND"));
 
     referral.setReporterId(ifNull(rs.getString("REPORTER_ID")));
     referral.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
@@ -169,6 +170,7 @@ public class ReferralHistoryIndexerJob
     referral.setVictimFirstName(ifNull(rs.getString("VICTIM_FIRST_NM")));
     referral.setVictimLastName(ifNull(rs.getString("VICTIM_LAST_NM")));
     referral.setVictimLastChanged(rs.getDate("CLV_IBMSNAP_LOGMARKER"));
+    referral.setVictimSensitivityIndicator(rs.getString("VICTIM_SENSITIVITY_IND"));
 
     referral.setWorkerId(ifNull(rs.getString("WORKER_ID")));
     referral.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
