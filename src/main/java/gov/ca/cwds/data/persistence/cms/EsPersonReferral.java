@@ -169,6 +169,9 @@ public class EsPersonReferral extends ApiObjectIdentity
   @Type(type = "timestamp")
   private Date victimLastChanged;
 
+  @Column(name = "VICTIM_SENSITIVITY_IND")
+  private String victimSensitivityIndicator;
+
   // ==================
   // ACCESS LIMITATION:
   // ==================
@@ -203,6 +206,9 @@ public class EsPersonReferral extends ApiObjectIdentity
   @Column(name = "CLP_IBMSNAP_LOGMARKER")
   @Type(type = "timestamp")
   private Date perpetratorLastChanged;
+
+  @Column(name = "PERPETRATOR_SENSITIVITY_IND")
+  private String perpetratorSensitivityIndicator;
 
   // =============
   // REDUCE:
@@ -295,6 +301,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     perpetrator.setLastName(this.perpetratorLastName);
     perpetrator.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.perpetratorId,
         this.perpetratorLastChanged, LegacyTable.CLIENT));
+    perpetrator.setSensitivityIndicator(this.perpetratorSensitivityIndicator);
     allegation.setPerpetrator(perpetrator);
 
     allegation.setPerpetratorId(this.perpetratorId);
@@ -308,6 +315,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     victim.setLastName(this.victimLastName);
     victim.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.victimId,
         this.victimLastChanged, LegacyTable.CLIENT));
+    victim.setSensitivityIndicator(this.victimSensitivityIndicator);
     allegation.setVictim(victim);
 
     allegation.setVictimId(this.victimId);
@@ -595,6 +603,22 @@ public class EsPersonReferral extends ApiObjectIdentity
 
   public void setPerpetratorLastChanged(Date perpetratorLastChanged) {
     this.perpetratorLastChanged = perpetratorLastChanged;
+  }
+
+  public String getVictimSensitivityIndicator() {
+    return victimSensitivityIndicator;
+  }
+
+  public void setVictimSensitivityIndicator(String victimSensitivityIndicator) {
+    this.victimSensitivityIndicator = victimSensitivityIndicator;
+  }
+
+  public String getPerpetratorSensitivityIndicator() {
+    return perpetratorSensitivityIndicator;
+  }
+
+  public void setPerpetratorSensitivityIndicator(String perpetratorSensitivityIndicator) {
+    this.perpetratorSensitivityIndicator = perpetratorSensitivityIndicator;
   }
 
   @Override
