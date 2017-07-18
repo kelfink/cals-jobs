@@ -16,7 +16,7 @@ import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.es.ElasticSearchAccessLimitation;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonReporter;
+import gov.ca.cwds.data.es.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
 import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPersonNestedPerson;
@@ -301,7 +301,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     perpetrator.setLastName(this.perpetratorLastName);
     perpetrator.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.perpetratorId,
         this.perpetratorLastChanged, LegacyTable.CLIENT));
-    perpetrator.setSensitivityIndicator(this.perpetratorSensitivityIndicator);
+    // perpetrator.setSensitivityIndicator(this.perpetratorSensitivityIndicator);
     allegation.setPerpetrator(perpetrator);
 
     allegation.setPerpetratorId(this.perpetratorId);
@@ -315,7 +315,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     victim.setLastName(this.victimLastName);
     victim.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.victimId,
         this.victimLastChanged, LegacyTable.CLIENT));
-    victim.setSensitivityIndicator(this.victimSensitivityIndicator);
+    // victim.setSensitivityIndicator(this.victimSensitivityIndicator);
     allegation.setVictim(victim);
 
     allegation.setVictimId(this.victimId);

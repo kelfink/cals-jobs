@@ -417,7 +417,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
     child.setLastName(this.focusChildLastName);
     child.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.focusChildId,
         this.focusChildLastUpdated, LegacyTable.CLIENT));
-    child.setSensitivityIndicator(this.focusChildSensitivityIndicator);
+    // child.setSensitivityIndicator(this.focusChildSensitivityIndicator);
     esPersonCase.setFocusChild(child);
 
     //
@@ -460,7 +460,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
         SystemCodeCache.global().getSystemCodeShortDescription(this.parentRelationship));
     parent.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.parentId,
         this.parentLastUpdated, LegacyTable.CLIENT));
-    parent.setSensitivityIndicator(this.parentSensitivityIndicator);
+    // parent.setSensitivityIndicator(this.parentSensitivityIndicator);
 
     cases.addCase(esPersonCase, parent);
     return cases;
