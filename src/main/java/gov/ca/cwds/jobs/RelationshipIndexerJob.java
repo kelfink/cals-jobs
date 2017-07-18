@@ -76,6 +76,23 @@ public class RelationshipIndexerJob
   }
 
   @Override
+  public String getInitialLoadQuery(String dbSchemaName, boolean hideSealedAndSensitive) {
+    StringBuilder buf = new StringBuilder();
+    buf.append("SELECT x.* FROM ");
+    buf.append(dbSchemaName);
+    buf.append(".");
+    buf.append(getInitialLoadViewName());
+    buf.append(" x ");
+
+    if (hideSealedAndSensitive) {
+      buf.append(" WHERE x.THIS_SENSITIVITY_IND = 'N' AND x.RELATED_SENSITIVITY_IND = 'N' ");
+    }
+
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
+    return buf.toString();
+  }
+
+  @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedRelationships p)
       throws IOException {
 
