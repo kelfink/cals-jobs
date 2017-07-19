@@ -204,6 +204,9 @@ public class JobsGuiceInjector extends AbstractModule {
                 Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {
         LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
+        if(client != null) {
+          client.close();
+        }
         throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
       }
     }
