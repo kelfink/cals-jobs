@@ -1036,7 +1036,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
               : extractLastRunRecsFromTable(lastRunDt);
 
       if (results != null && !results.isEmpty()) {
-        LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
+        LOGGER.warn(MessageFormat.format("Found {0} people to index", results.size()));
 
         results.stream().forEach(p -> {
           prepLastRunDoc(bp, p);
@@ -1046,8 +1046,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         recsPrepared.getAndAdd(results.size());
       }
 
-      if (deletionResults != null && !deletionResults.isEmpty()) {
-        LOGGER.info(MessageFormat.format("Found {0} people to delete", deletionResults.size()));
+      /**
+       * Delete records that are identified for deletion...
+       */
+      if (!deletionResults.isEmpty()) {
+        LOGGER.warn(MessageFormat.format("Found {0} people to delete", deletionResults.size())
+            + ", IDs: " + deletionResults);
         final String alias = getOpts().getIndexName();
         final String docType = esDao.getConfig().getElasticsearchDocType();
 
