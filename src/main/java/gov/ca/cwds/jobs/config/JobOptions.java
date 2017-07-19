@@ -45,7 +45,7 @@ public class JobOptions implements Serializable {
   public static final String CMD_LINE_THREADS = "thread-num";
   public static final String CMD_LINE_MIN_ID = "min_id";
   public static final String CMD_LINE_MAX_ID = "max_id";
-  public static final String CMD_LINE_HIDE_SEALED_AND_SENSITIVE = "hide-sealed-sensitive";
+  public static final String CMD_LINE_LOAD_SEALED_AND_SENSITIVE = "load-sealed-sensitive";
 
   /**
    * Location of Elasticsearch configuration file.
@@ -110,9 +110,9 @@ public class JobOptions implements Serializable {
   private String maxId;
 
   /**
-   * If true then don't load sealed and sensitive data.
+   * If true then load sealed and sensitive data.
    */
-  private final boolean hideSealedAndSensitive;
+  private final boolean loadSealedAndSensitive;
 
   /**
    * Construct from all settings.
@@ -126,11 +126,11 @@ public class JobOptions implements Serializable {
    * @param endBucket ending bucket number
    * @param totalBuckets total buckets
    * @param threadCount number of simultaneous threads
-   * @param hideSealedAndSensitive If true then don't load sealed and sensitive data
+   * @param loadSealedAndSensitive If true then load sealed and sensitive data
    */
   JobOptions(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
       boolean lastRunMode, long startBucket, long endBucket, long totalBuckets, long threadCount,
-      String minId, String maxId, boolean hideSealedAndSensitive) {
+      String minId, String maxId, boolean loadSealedAndSensitive) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
     this.lastRunTime = lastRunTime;
@@ -142,7 +142,7 @@ public class JobOptions implements Serializable {
     this.threadCount = threadCount;
     this.minId = minId;
     this.maxId = maxId;
-    this.hideSealedAndSensitive = hideSealedAndSensitive;
+    this.loadSealedAndSensitive = loadSealedAndSensitive;
   }
 
   /**
@@ -248,10 +248,10 @@ public class JobOptions implements Serializable {
   /**
    * Get if sealed and sensitive data should be loaded.
    * 
-   * @return true if sealed and sensitive data should not be loaded, false otherwise.
+   * @return true if sealed and sensitive data should be loaded, false otherwise.
    */
-  public boolean isHideSealedAndSensitive() {
-    return hideSealedAndSensitive;
+  public boolean isLoadSealedAndSensitive() {
+    return loadSealedAndSensitive;
   }
 
   /**
@@ -300,7 +300,7 @@ public class JobOptions implements Serializable {
     ret.addOption(JobCmdLineOption.BUCKET_RANGE.getOpt());
     ret.addOption(JobCmdLineOption.MIN_ID.getOpt());
     ret.addOption(JobCmdLineOption.MAX_ID.getOpt());
-    ret.addOption(JobCmdLineOption.HIDE_SEALED_SENSITIVE.getOpt());
+    ret.addOption(JobCmdLineOption.LOAD_SEALED_SENSITIVE.getOpt());
 
     // RUN MODE: mutually exclusive choice.
     OptionGroup group = new OptionGroup();
@@ -346,7 +346,7 @@ public class JobOptions implements Serializable {
     long endBucket = 0L;
     long totalBuckets = 0L;
     long threadCount = 0L;
-    boolean hideSealedAndSensitive = true;
+    boolean loadSealedAndSensitive = false;
 
     String minId = " ";
     String maxId = "9999999999";
@@ -407,8 +407,8 @@ public class JobOptions implements Serializable {
             maxId = opt.getValue().trim();
             break;
 
-          case CMD_LINE_HIDE_SEALED_AND_SENSITIVE:
-            hideSealedAndSensitive = Boolean.parseBoolean(opt.getValue().trim());
+          case CMD_LINE_LOAD_SEALED_AND_SENSITIVE:
+            loadSealedAndSensitive = Boolean.parseBoolean(opt.getValue().trim());
             break;
 
           default:
@@ -430,7 +430,7 @@ public class JobOptions implements Serializable {
     }
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode, startBucket,
-        endBucket, totalBuckets, threadCount, minId, maxId, hideSealedAndSensitive);
+        endBucket, totalBuckets, threadCount, minId, maxId, loadSealedAndSensitive);
   }
 
   public void setStartBucket(long startBucket) {

@@ -48,7 +48,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
             + ") ORDER BY FKCLIENT_T FOR READ ONLY ",
         resultClass = ReplicatedOtherClientName.class),
     @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findAllUpdatedAfterWithLimitedAccess",
+        name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findAllUpdatedAfterWithUnlimitedAccess",
         query = "SELECT r.* FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r WHERE r.THIRD_ID IN ( "
             + "SELECT r1.THIRD_ID FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r1 "
             + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "

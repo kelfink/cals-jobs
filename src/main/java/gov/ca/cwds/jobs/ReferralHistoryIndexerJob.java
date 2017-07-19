@@ -77,7 +77,7 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  public String getInitialLoadQuery(String dbSchemaName, boolean hideSealedAndSensitive) {
+  public String getInitialLoadQuery(String dbSchemaName) {
     StringBuilder buf = new StringBuilder();
     buf.append("SELECT x.* FROM ");
     buf.append(dbSchemaName);
@@ -85,12 +85,21 @@ public class ReferralHistoryIndexerJob
     buf.append(getInitialLoadViewName());
     buf.append(" x ");
 
-    if (hideSealedAndSensitive) {
+    if (!getOpts().isLoadSealedAndSensitive()) {
       buf.append(" WHERE x.LIMITED_ACCESS_CODE = 'N'  ");
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
     return buf.toString();
+  }
+
+  @Override
+  public boolean mustDeleteLimitedAccessRecords() {
+    /**
+     * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
+     * sensitive flag must be deleted.
+     */
+    return !getOpts().isLoadSealedAndSensitive();
   }
 
   @Override

@@ -24,7 +24,7 @@ public enum JobCmdLineOption {
   /**
    * Last run time in format 'yyyy-MM-dd HH:mm:ss'
    */
-  LAST_RUN_TIME(JobOptions.makeOpt("s", JobOptions.CMD_LINE_LAST_RUN_TIME,
+  LAST_RUN_TIME(JobOptions.makeOpt("a", JobOptions.CMD_LINE_LAST_RUN_TIME,
       "last run time (yyyy-MM-dd HH:mm:ss)", false, 1, String.class, ',')),
 
   /**
@@ -64,10 +64,10 @@ public enum JobCmdLineOption {
       1, String.class, ',')),
 
   /**
-   * Maximum key, inclusive.
+   * Indicate if sealed and sensitive data should be loaded
    */
-  HIDE_SEALED_SENSITIVE(JobOptions.makeOpt("h", JobOptions.CMD_LINE_HIDE_SEALED_AND_SENSITIVE,
-      "true or false - hide sealed and sensitive data, default is true", false, 1, Boolean.class,
+  LOAD_SEALED_SENSITIVE(JobOptions.makeOpt("s", JobOptions.CMD_LINE_LOAD_SEALED_AND_SENSITIVE,
+      "true or false - load sealed and sensitive data, default is false", false, 1, Boolean.class,
       ','));
 
   private final Option opt;

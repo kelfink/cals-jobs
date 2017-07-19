@@ -14,7 +14,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,6 +35,7 @@ import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.HibernateException;
@@ -269,19 +272,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Get initial load sql query
    * 
    * @param dbSchemaName The DB svhema name
-   * @param hideSealedAndSensitive True if sealed and sensitive data should be hidden.
    * @return Inital load query
    */
-  public String getInitialLoadQuery(String dbSchemaName, boolean hideSealedAndSensitive) {
-    StringBuilder buf = new StringBuilder();
-    buf.append("SELECT x.* FROM ");
-    buf.append(dbSchemaName);
-    buf.append(".");
-    buf.append(getInitialLoadViewName());
-    buf.append(" x ");
-
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
-    return buf.toString();
+  public String getInitialLoadQuery(String dbSchemaName) {
+    return null;
   }
 
   /**
@@ -291,6 +285,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   public String getJdbcOrderBy() {
     return null;
+  }
+
+  /**
+   * Determine if limited access records must be deleted from ES.
+   * 
+   * @return True if limited access records must be deleted from ES, false otherwise.
+   */
+  public boolean mustDeleteLimitedAccessRecords() {
+    return false;
   }
 
   /**
@@ -613,7 +616,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void prepareInsertCollections(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-      throws JsonProcessingException {
+          throws JsonProcessingException {
 
     // Null out optional collections for updates.
     esp.clearOptionalCollections(keep);
@@ -636,7 +639,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected Pair<String, String> prepareUpsertJson(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-      throws JsonProcessingException {
+          throws JsonProcessingException {
 
     // Child classes: Set optional collections before serializing the insert JSON.
     prepareInsertCollections(esp, t, elementName, list, keep);
@@ -843,8 +846,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // .append(" FOR READ ONLY");
       // final String query = buf.toString();
 
-      final String query =
-          getInitialLoadQuery(getDBSchemaName(), getOpts().isHideSealedAndSensitive());
+      final String query = getInitialLoadQuery(getDBSchemaName());
 
       M m;
 
@@ -1014,7 +1016,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    *
    * <p>
    * Fetch all records for the next batch run, either by bucket or last successful run date. Pulls
-   * either from an MQT via {@link #extractLastRunRecsFromView(Date)}, if
+   * either from an MQT via {@link #extractLastRunRecsFromView(Date, Set)}, if
    * {@link #isViewNormalizer()} is overridden, else from the base table directly via
    * {@link #extractLastRunRecsFromTable(Date)}.
    * </p>
@@ -1027,8 +1029,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       // One bulk processor for "last run" operations. BulkProcessor itself is thread-safe.
       final BulkProcessor bp = buildBulkProcessor();
-      final List<T> results = this.isViewNormalizer() ? extractLastRunRecsFromView(lastRunDt)
-          : extractLastRunRecsFromTable(lastRunDt);
+      Set<String> deletionResults = new HashSet<>();
+
+      final List<T> results =
+          this.isViewNormalizer() ? extractLastRunRecsFromView(lastRunDt, deletionResults)
+              : extractLastRunRecsFromTable(lastRunDt);
 
       if (results != null && !results.isEmpty()) {
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
@@ -1039,6 +1044,17 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
         // Track counts.
         recsPrepared.getAndAdd(results.size());
+      }
+
+      if (deletionResults != null && !deletionResults.isEmpty()) {
+        LOGGER.info(MessageFormat.format("Found {0} people to delete", deletionResults.size()));
+        final String alias = getOpts().getIndexName();
+        final String docType = esDao.getConfig().getElasticsearchDocType();
+
+        for (String deletionId : deletionResults) {
+          DeleteRequest deleteRequest = new DeleteRequest(alias, docType, deletionId);
+          bp.add(deleteRequest);
+        }
       }
 
       // Give it time to finish the last batch.
@@ -1183,12 +1199,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
 
-    // if (getOpts().isHideSealedAndSensitive()) {
-    // namedQueryName = entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
-    // } else {
-    // namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
-    // }
-
     Session session = jobDao.getSessionFactory().getCurrentSession();
 
     Transaction txn = session.beginTransaction();
@@ -1222,16 +1232,22 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param lastRunTime last successful run time
    * @return List of normalized entities
    */
-  protected List<T> extractLastRunRecsFromView(Date lastRunTime) {
+  protected List<T> extractLastRunRecsFromView(Date lastRunTime, Set<String> deletionResults) {
     LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
 
     final Class<?> entityClass = getDenormalizedClass(); // view entity class
 
     String namedQueryName = null;
-    if (getOpts().isHideSealedAndSensitive()) {
-      namedQueryName = entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
-    } else {
+    if (getOpts().isLoadSealedAndSensitive()) {
+      /**
+       * Lad everything
+       */
       namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
+    } else {
+      /**
+       * Load only unlimited access data
+       */
+      namedQueryName = entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
     }
 
     Session session = jobDao.getSessionFactory().getCurrentSession();
@@ -1240,15 +1256,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Transaction txn = session.beginTransaction();
 
     try {
+      /**
+       * Load records to index
+       */
       NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
       q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
-      final List<M> recs = q.list();
+      List<M> recs = q.list();
       LOGGER.warn("FOUND {} RECORDS", recs.size());
 
       // Convert denormalized view rows to normalized persistence objects.
-      List<M> groupRecs = new ArrayList<>();
+      final List<M> groupRecs = new ArrayList<>();
       for (M m : recs) {
         if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
           results.add(normalizeSingle(groupRecs));
@@ -1261,6 +1280,33 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       if (!groupRecs.isEmpty()) {
         results.add(normalizeSingle(groupRecs));
+      }
+
+
+      /**
+       * Load records to delete
+       */
+      if (mustDeleteLimitedAccessRecords()) {
+        String namedQueryNameForDeletion =
+            entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
+        NativeQuery<M> queryForDeletion = session.getNamedNativeQuery(namedQueryNameForDeletion);
+        queryForDeletion.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
+
+        final List<M> deletionRecs = queryForDeletion.list();
+
+        if (deletionRecs != null && !deletionRecs.isEmpty()) {
+          for (M rec : deletionRecs) {
+            /**
+             * Assuming group key represents ID of client to delete. This is true for client,
+             * referral history, case history jobs.
+             */
+            Object groupKey = rec.getNormalizationGroupKey();
+            if (groupKey != null) {
+              deletionResults.add(groupKey.toString());
+            }
+          }
+        }
+        LOGGER.warn("FOUND {} RECORDS FOR DELETION", deletionResults.size());
       }
 
       session.clear();
@@ -1366,9 +1412,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           : opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
-                  String.valueOf(totalBuckets)),
-              BatchBucket.class);
+              .replaceAll("THE_ID_COL", getIdColumn())
+              .replaceAll("THE_TOTAL_BUCKETS", String.valueOf(totalBuckets)), BatchBucket.class);
 
       ret = q.getResultList();
       session.clear();

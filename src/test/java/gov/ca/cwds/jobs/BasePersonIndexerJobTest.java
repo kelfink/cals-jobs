@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -499,7 +500,8 @@ public class BasePersonIndexerJobTest {
   // @Test
   public void extractLastRunRecsFromView_Args__Date() throws Exception {
     Date lastRunTime = mock(Date.class);
-    List<TestNormalizedEntity> actual = target.extractLastRunRecsFromView(lastRunTime);
+    List<TestNormalizedEntity> actual =
+        target.extractLastRunRecsFromView(lastRunTime, new HashSet<String>());
     List<Object> expected = null;
     assertThat(actual, is(equalTo(expected)));
   }

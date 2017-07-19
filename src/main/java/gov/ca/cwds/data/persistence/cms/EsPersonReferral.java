@@ -48,11 +48,19 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
     resultClass = EsPersonReferral.class, readOnly = true),
 
     @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithLimitedAccess",
+        name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithUnlimitedAccess",
         query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r WHERE r.CLIENT_ID IN ( "
             + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
             + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") AND r.LIMITED_ACCESS_CODE = 'N'  ORDER BY CLIENT_ID FOR READ ONLY ",
+        resultClass = EsPersonReferral.class, readOnly = true),
+
+    @NamedNativeQuery(
+        name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithLimitedAccess",
+        query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r WHERE r.CLIENT_ID IN ( "
+            + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
+            + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + ") AND r.LIMITED_ACCESS_CODE != 'N'  ORDER BY CLIENT_ID FOR READ ONLY ",
         resultClass = EsPersonReferral.class, readOnly = true)})
 public class EsPersonReferral extends ApiObjectIdentity
     implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals> {

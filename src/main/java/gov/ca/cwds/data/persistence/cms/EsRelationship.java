@@ -53,7 +53,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
             + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY ",
         resultClass = EsRelationship.class, readOnly = true),
     @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfterWithLimitedAccess",
+        name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfterWithUnlimitedAccess",
         query = "WITH driver as ( "
             + " SELECT v1.THIS_LEGACY_ID, v1.RELATED_LEGACY_ID FROM {h-schema}VW_LST_BI_DIR_RELATION v1 "
             + "where v1.LAST_CHG > CAST(:after AS TIMESTAMP) "

@@ -49,11 +49,19 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
         resultClass = EsClientAddress.class, readOnly = true),
 
     @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfterWithLimitedAccess",
+        name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfterWithUnlimitedAccess",
         query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
             + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
             + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") AND x.CLT_SENSTV_IND = 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY ",
+        resultClass = EsClientAddress.class, readOnly = true),
+
+    @NamedNativeQuery(
+        name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfterWithLimitedAccess",
+        query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
+            + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
+            + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + ") AND x.CLT_SENSTV_IND != 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY ",
         resultClass = EsClientAddress.class, readOnly = true)})
 public class EsClientAddress extends ApiObjectIdentity
     implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {

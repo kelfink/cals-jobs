@@ -76,7 +76,7 @@ public class RelationshipIndexerJob
   }
 
   @Override
-  public String getInitialLoadQuery(String dbSchemaName, boolean hideSealedAndSensitive) {
+  public String getInitialLoadQuery(String dbSchemaName) {
     StringBuilder buf = new StringBuilder();
     buf.append("SELECT x.* FROM ");
     buf.append(dbSchemaName);
@@ -84,7 +84,7 @@ public class RelationshipIndexerJob
     buf.append(getInitialLoadViewName());
     buf.append(" x ");
 
-    if (hideSealedAndSensitive) {
+    if (!getOpts().isLoadSealedAndSensitive()) {
       buf.append(" WHERE x.THIS_SENSITIVITY_IND = 'N' AND x.RELATED_SENSITIVITY_IND = 'N' ");
     }
 

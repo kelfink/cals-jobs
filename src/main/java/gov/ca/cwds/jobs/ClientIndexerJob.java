@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +29,8 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
  */
 public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsClientAddress>
     implements JobResultSetAware<EsClientAddress> {
+
+  private static final Logger LOGGER = LogManager.getLogger(ClientIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -65,7 +69,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  public String getInitialLoadQuery(String dbSchemaName, boolean hideSealedAndSensitive) {
+  public String getInitialLoadQuery(String dbSchemaName) {
     StringBuilder buf = new StringBuilder();
     buf.append("SELECT x.* FROM ");
     buf.append(dbSchemaName);
@@ -73,12 +77,21 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     buf.append(getInitialLoadViewName());
     buf.append(" x ");
 
-    if (hideSealedAndSensitive) {
+    if (!getOpts().isLoadSealedAndSensitive()) {
       buf.append(" WHERE x.CLT_SENSTV_IND = 'N' ");
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
     return buf.toString();
+  }
+
+  @Override
+  public boolean mustDeleteLimitedAccessRecords() {
+    /**
+     * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
+     * sensitive flag must be deleted.
+     */
+    return !getOpts().isLoadSealedAndSensitive();
   }
 
   @Override

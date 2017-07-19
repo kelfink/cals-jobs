@@ -127,7 +127,7 @@ public class OtherClientNameIndexerJob
   }
 
   @Override
-  public String getInitialLoadQuery(String dbSchemaName, boolean hideSealedAndSensitive) {
+  public String getInitialLoadQuery(String dbSchemaName) {
     StringBuilder buf = new StringBuilder();
     buf.append("SELECT x.* FROM ");
     buf.append(dbSchemaName);
@@ -135,7 +135,7 @@ public class OtherClientNameIndexerJob
     buf.append(getInitialLoadViewName());
     buf.append(" x ");
 
-    if (hideSealedAndSensitive) {
+    if (!getOpts().isLoadSealedAndSensitive()) {
       buf.append(" WHERE x.CLIENT_SENSITIVITY_IND = 'N' ");
     }
 
