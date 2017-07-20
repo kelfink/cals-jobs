@@ -48,6 +48,7 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
             + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
             + "FOR READ ONLY",
         resultClass = EsIntakeScreening.class, readOnly = true),
+
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter",
         query = "SELECT p.\"id\" AS ns_partc_id, p.legacy_id AS cms_legacy_id, vw.* "
@@ -58,7 +59,20 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
             + ") AND p.legacy_id IS NOT NULL "
             + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
             + "FOR READ ONLY",
+        resultClass = EsIntakeScreening.class, readOnly = true),
+
+    @NamedNativeQuery(
+        name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfterWithUnlimitedAccess",
+        query = "SELECT p.\"id\" AS ns_partc_id, p.legacy_id AS cms_legacy_id, vw.* "
+            + "FROM {h-schema}VW_SCREENING_HISTORY vw "
+            + "JOIN PARTICIPANTS p ON p.screening_id = vw.screening_id "
+            + "WHERE vw.participant_id IN ( SELECT DISTINCT vw1.participant_id "
+            + " FROM {h-schema}VW_SCREENING_HISTORY vw1 WHERE vw1.last_chg > CAST(:after AS TIMESTAMP) "
+            + ") AND p.legacy_id IS NOT NULL "
+            + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
+            + "FOR READ ONLY",
         resultClass = EsIntakeScreening.class, readOnly = true)})
+
 public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<IntakeParticipant> {
 
   private static final Logger LOGGER = LogManager.getLogger(EsIntakeScreening.class);
