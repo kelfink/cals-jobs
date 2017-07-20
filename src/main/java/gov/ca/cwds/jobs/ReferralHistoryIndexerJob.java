@@ -6,11 +6,11 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -38,7 +38,7 @@ public class ReferralHistoryIndexerJob
     extends BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral>
     implements JobResultSetAware<EsPersonReferral> {
 
-  private static final Logger LOGGER = LogManager.getLogger(ReferralHistoryIndexerJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -126,7 +126,7 @@ public class ReferralHistoryIndexerJob
         buf.append(esPersonReferrals.stream().map(this::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
-        LOGGER.fatal("ERROR SERIALIZING REFERRALS", e);
+        LOGGER.error("ERROR SERIALIZING REFERRALS", e);
         throw new JobsException(e);
       }
     }
@@ -135,8 +135,8 @@ public class ReferralHistoryIndexerJob
 
     final String updateJson = buf.toString();
     final String insertJson = mapper.writeValueAsString(esp);
-    LOGGER.trace("insertJson: {}", () -> insertJson);
-    LOGGER.trace("updateJson: {}", () -> updateJson);
+    LOGGER.trace("insertJson: {}", insertJson);
+    LOGGER.trace("updateJson: {}", updateJson);
 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();

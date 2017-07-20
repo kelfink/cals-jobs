@@ -15,12 +15,12 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
@@ -75,7 +75,7 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 
 public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<IntakeParticipant> {
 
-  private static final Logger LOGGER = LogManager.getLogger(EsIntakeScreening.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(EsIntakeScreening.class);
 
   /**
    * Default serialization.

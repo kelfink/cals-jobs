@@ -14,11 +14,11 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -66,7 +66,7 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
    */
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LogManager.getLogger(ReplicatedOtherClientName.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ReplicatedOtherClientName.class);
 
   @Enumerated(EnumType.STRING)
   @Column(name = "IBMSNAP_OPERATION", updatable = false)

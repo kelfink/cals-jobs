@@ -12,8 +12,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.util.JobLogUtils;
 
@@ -24,7 +24,7 @@ import gov.ca.cwds.jobs.util.JobLogUtils;
  */
 public abstract class LastSuccessfulRunJob implements Job {
 
-  private static final Logger LOGGER = LogManager.getLogger(LastSuccessfulRunJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LastSuccessfulRunJob.class);
 
   /**
    * Last run file date format. NOT thread-safe!

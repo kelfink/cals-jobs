@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +25,7 @@ import gov.ca.cwds.jobs.util.JobWriter;
  */
 public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T> {
 
-  private static final Logger LOGGER = LogManager.getLogger(ElasticJobWriter.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ElasticJobWriter.class);
   private Elasticsearch5xDao esDao;
   private BulkProcessor bulkProcessor;
   private ObjectMapper objectMapper;

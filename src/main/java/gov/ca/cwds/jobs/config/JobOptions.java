@@ -17,8 +17,8 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.exception.JobsException;
 
@@ -34,7 +34,7 @@ public class JobOptions implements Serializable {
    */
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LogManager.getLogger(JobOptions.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(JobOptions.class);
 
   public static final String CMD_LINE_ES_CONFIG = "config";
   public static final String CMD_LINE_INDEX_NAME = "index-name";
@@ -324,7 +324,7 @@ public class JobOptions implements Serializable {
       LOGGER.error(sw.toString());
     } catch (IOException e) {
       final String msg = "ERROR PRINTING HELP! How ironic. :-)";
-      LOGGER.fatal(msg, e);
+      LOGGER.error(msg, e);
       throw new JobsException(msg, e);
     }
   }

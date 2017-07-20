@@ -3,8 +3,8 @@ package gov.ca.cwds.jobs.util;
 import java.text.MessageFormat;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.exception.JobsException;
 
@@ -18,7 +18,7 @@ public final class JobLogUtils {
   /**
    * Standard Logger.
    */
-  protected static final Logger LOGGER = LogManager.getLogger(JobLogUtils.class);
+  protected static final Logger LOGGER = LoggerFactory.getLogger(JobLogUtils.class);
 
   private static final int DEFAULT_LOG_EVERY = 5000;
 
@@ -72,7 +72,7 @@ public final class JobLogUtils {
     final String pat = hasPattern ? pattern : StringUtils.join(objs, "{}");
     final String msg = hasPattern && hasArgs ? MessageFormat.format(pat, objs) : "";
 
-    logger.fatal(msg, e);
+    logger.error(msg, e);
     return new JobsException(msg, e);
   }
 

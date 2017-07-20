@@ -30,8 +30,6 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -44,6 +42,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.query.NativeQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -106,7 +106,7 @@ import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends LastSuccessfulRunJob implements AutoCloseable, JobResultSetAware<M> {
 
-  private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(BasePersonIndexerJob.class);
 
   private static final ESOptionalCollection[] KEEP_COLLECTIONS =
       new ESOptionalCollection[] {ESOptionalCollection.NONE};
@@ -176,6 +176,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Running count of records prepared for bulk indexing.
    */
   protected AtomicInteger recsPrepared = new AtomicInteger(0);
+
+  /**
+   * Running count of records prepared for bulk deletion.
+   */
+  protected AtomicInteger recsDeleted = new AtomicInteger(0);
 
   /**
    * Running count of records before bulk indexing.
@@ -1041,9 +1046,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         results.stream().forEach(p -> {
           prepLastRunDoc(bp, p);
         });
-
-        // Track counts.
-        recsPrepared.getAndAdd(results.size());
       }
 
       /**
@@ -1059,6 +1061,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           DeleteRequest deleteRequest = new DeleteRequest(alias, docType, deletionId);
           bp.add(deleteRequest);
         }
+
+        // Track counts.
+        recsDeleted.getAndAdd(deletionResults.size());
       }
 
       // Give it time to finish the last batch.
@@ -1157,11 +1162,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       // Result stats:
-      LOGGER.info("Prepared {} records to index", recsPrepared);
-      LOGGER.info("STATS: \nrecsBulkBefore:  {}\nrecsBulkAfter:  {}\nrecsBulkError: {}",
-          recsBulkBefore, recsBulkAfter, recsBulkError);
+      LOGGER.info(
+          "STATS: \nRecs To Index: {}\nRecs To Delete: {}\nrecsBulkBefore: {}\nrecsBulkAfter: {}\nrecsBulkError: {}",
+          recsPrepared, recsDeleted, recsBulkBefore, recsBulkAfter, recsBulkError);
 
-      LOGGER.warn("Updating last successful run time to {}", jobDateFormat.format(startTime));
+      LOGGER.info("Updating last successful run time to {}", jobDateFormat.format(startTime));
       return new Date(this.startTime);
 
     } catch (Exception e) {
@@ -1244,7 +1249,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     String namedQueryName = null;
     if (getOpts().isLoadSealedAndSensitive()) {
       /**
-       * Lad everything
+       * Load everything
        */
       namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
     } else {
@@ -1376,7 +1381,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       this.doneTransform = true;
 
       close();
-      // LogManager.shutdown(); // Flush appenders.
       Thread.sleep(SLEEP_MILLIS); // NOSONAR
 
       // Shutdown all remaining resources, even those not attached to this job.
@@ -1588,7 +1592,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       runJob(klass, args);
     } catch (Exception e) {
-      LOGGER.fatal("STOPPING BATCH: " + e.getMessage(), e);
+      LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
       throw e;
     }
   }

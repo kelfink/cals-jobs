@@ -6,11 +6,11 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -37,7 +37,7 @@ public class RelationshipIndexerJob
     extends BasePersonIndexerJob<ReplicatedRelationships, EsRelationship>
     implements JobResultSetAware<EsRelationship> {
 
-  private static final Logger LOGGER = LogManager.getLogger(RelationshipIndexerJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.

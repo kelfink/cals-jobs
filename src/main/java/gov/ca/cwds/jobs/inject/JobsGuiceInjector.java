@@ -3,10 +3,7 @@ package gov.ca.cwds.jobs.inject;
 import java.io.File;
 import java.net.InetAddress;
 
-import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
@@ -14,6 +11,8 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -63,6 +62,7 @@ import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
 import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
+import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -75,7 +75,8 @@ import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
  * @author CWDS API Team
  */
 public class JobsGuiceInjector extends AbstractModule {
-  private static final Logger LOGGER = LogManager.getLogger(JobsGuiceInjector.class);
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(JobsGuiceInjector.class);
 
   private File esConfig;
   private String lastJobRunTimeFilename;
@@ -175,7 +176,7 @@ public class JobsGuiceInjector extends AbstractModule {
       SystemMetaDao systemMetaDao) {
     final long secondsToRefreshCache = 15 * 24 * 60 * (long) 60; // 15 days
     SystemCodeCache systemCodeCache =
-        new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
+        new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, false);
     systemCodeCache.register();
     return systemCodeCache;
   }
@@ -197,14 +198,15 @@ public class JobsGuiceInjector extends AbstractModule {
       LOGGER.warn("Create NEW ES client");
       try {
         final ElasticsearchConfiguration config = elasticSearchConfig();
-        Settings.Builder settings = Settings.builder().put("cluster.name", config.getElasticsearchCluster());
+        Settings.Builder settings =
+            Settings.builder().put("cluster.name", config.getElasticsearchCluster());
         client = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
         client.addTransportAddress(
             new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
                 Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {
         LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
-        if(client != null) {
+        if (client != null) {
           client.close();
         }
         throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);

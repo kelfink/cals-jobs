@@ -5,10 +5,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.jobs.exception.JobsException;
@@ -20,7 +20,7 @@ import gov.ca.cwds.jobs.util.JobReader;
  */
 public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
 
-  private static final Logger LOGGER = LogManager.getLogger(JdbcJobReader.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(JdbcJobReader.class);
 
   private SessionFactory sessionFactory;
   private ResultSet resultSet;
@@ -77,7 +77,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
         statement = null;
       }
     } catch (SQLException e) {
-      LOGGER.error(e);
+      LOGGER.error(e.getMessage(), e);
     } finally {
       sessionFactory.close();
     }

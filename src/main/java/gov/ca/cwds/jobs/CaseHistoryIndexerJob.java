@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -34,7 +34,7 @@ public abstract class CaseHistoryIndexerJob
     extends BasePersonIndexerJob<ReplicatedPersonCases, EsPersonCase>
     implements JobResultSetAware<EsPersonCase> {
 
-  private static final Logger LOGGER = LogManager.getLogger(CaseHistoryIndexerJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CaseHistoryIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -102,7 +102,7 @@ public abstract class CaseHistoryIndexerJob
 
     final String insertJson = mapper.writeValueAsString(esp);
     final String updateJson = buf.toString();
-    LOGGER.trace("updateJson: {}", () -> updateJson);
+    LOGGER.trace("updateJson: {}", updateJson);
 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();

@@ -18,11 +18,11 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -71,7 +71,7 @@ public class EsRelationship
    */
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LogManager.getLogger(EsRelationship.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(EsRelationship.class);
 
   private static final Pattern RGX_RELATIONSHIP =
       Pattern.compile("([A-Za-z0-9 _-]+)[/]?([A-Za-z0-9 _-]+)?\\s*(\\([A-Za-z0-9 _-]+\\))?");
@@ -222,12 +222,12 @@ public class EsRelationship
         final String secRel = secondaryRel;
 
         // Log **only if** trace is enabled.
-        LOGGER.trace("primaryRel={}, secondaryRel={}", () -> priRel, () -> secRel);
+        LOGGER.trace("primaryRel={}, secondaryRel={}", priRel, secRel);
 
       } else {
         // Java lambda requires variables to be "effectively" final.
         // Variable wholeRel is not assignable and therefore can be used in lambda.
-        LOGGER.trace("NO MATCH!! rel={}", () -> wholeRel);
+        LOGGER.trace("NO MATCH!! rel={}", wholeRel);
       }
     }
   }

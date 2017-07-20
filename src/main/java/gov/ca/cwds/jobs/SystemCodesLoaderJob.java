@@ -16,8 +16,6 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -25,6 +23,8 @@ import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.jdbc.Work;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -51,7 +51,7 @@ import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
  */
 public class SystemCodesLoaderJob {
 
-  private static final Logger LOGGER = LogManager.getLogger(SystemCodesLoaderJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SystemCodesLoaderJob.class);
 
   private NsSystemCodeDao systemCodeDao;
 
@@ -184,7 +184,7 @@ public class SystemCodesLoaderJob {
       systemCodesJob.load();
       LOGGER.info("DONE loading system codes from legacy to new system.");
     } catch (Exception e) {
-      LOGGER.error(e);
+      LOGGER.error(e.getMessage(), e);
       System.exit(-1);
     }
 

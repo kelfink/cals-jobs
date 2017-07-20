@@ -2,12 +2,12 @@ package gov.ca.cwds.jobs;
 
 import java.io.File;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -49,7 +49,7 @@ import gov.ca.cwds.jobs.util.jdbc.RowMapper;
  */
 public class FacilityIndexerJob extends AbstractModule {
 
-  private static final Logger LOGGER = LogManager.getLogger(FacilityIndexerJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(FacilityIndexerJob.class);
 
   private static final String LIS_SESSION_FACTORY_NM = "lis-session-factory";
 
@@ -75,7 +75,7 @@ public class FacilityIndexerJob extends AbstractModule {
       Job job = injector.getInstance(Key.get(Job.class, Names.named("facility-job")));
       job.run();
     } catch (Exception e) {
-      LOGGER.fatal("ERROR: ", e.getMessage(), e);
+      LOGGER.error("ERROR: ", e.getMessage(), e);
     }
   }
 

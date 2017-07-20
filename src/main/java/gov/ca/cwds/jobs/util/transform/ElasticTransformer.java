@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +37,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
  */
 public class ElasticTransformer {
 
-  private static final Logger LOGGER = LogManager.getLogger(ElasticTransformer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ElasticTransformer.class);
 
   private ElasticTransformer() {
     // Static methods, don't instantiate.
@@ -103,8 +103,7 @@ public class ElasticTransformer {
     return languages;
   }
 
-  protected static List<ElasticSearchPersonPhone> handlePhone(
-      ApiPersonAware p) {
+  protected static List<ElasticSearchPersonPhone> handlePhone(ApiPersonAware p) {
     List<ElasticSearchPersonPhone> phones = null;
     if (p instanceof ApiMultiplePhonesAware) {
       phones = new ArrayList<>();

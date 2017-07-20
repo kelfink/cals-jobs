@@ -9,11 +9,7 @@
 		</layout>
 	</appender>
 
-	<logger name="gov.ca.cwds" level="info" additivity="false">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	
-	<root level="warn">
+	<root level="info">
 		<appender-ref ref="STDOUT" />
 	</root>
 

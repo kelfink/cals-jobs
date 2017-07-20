@@ -6,8 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.RowMapper;
@@ -17,7 +17,7 @@ import gov.ca.cwds.jobs.util.jdbc.RowMapper;
  */
 public class FacilityRowMapper implements RowMapper<FacilityRow> {
 
-  private static final Logger LOGGER = LogManager.getLogger(FacilityRowMapper.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(FacilityRowMapper.class);
 
   @Override
   public FacilityRow mapRow(ResultSet resultSet) throws SQLException {
