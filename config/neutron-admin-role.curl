@@ -1,0 +1,19 @@
+curl -XPOST -u elastic 'localhost:9200/_xpack/security/role/neutron_admin?pretty=true' -H 'Content-Type: application/json' -d'
+{
+  "run_as": [],
+  "cluster": [
+    "monitor"
+  ],
+  "indices": [
+    {
+      "names": [
+        "*people*",
+        "*screenings*"
+      ],
+      "privileges": [
+        "all"
+      ]
+    }
+  ]
+}
+'

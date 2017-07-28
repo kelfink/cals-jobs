@@ -1,0 +1,10 @@
+curl -XPOST -u elastic 'localhost:9200/_xpack/security/user/neutron' -H "Content-Type: application/json" -d '
+{
+  "password": "neutron",
+  "full_name": "Neutron System",
+  "email": "neutron@osi.ca.gov",
+  "roles": [
+    "neutron_admin"
+  ]
+}
+'
