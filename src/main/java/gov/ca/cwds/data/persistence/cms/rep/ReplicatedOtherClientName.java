@@ -45,14 +45,14 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         query = "SELECT r.* FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r WHERE r.THIRD_ID IN ( "
             + "SELECT r1.THIRD_ID FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r1 "
             + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") ORDER BY FKCLIENT_T FOR READ ONLY ",
+            + ") ORDER BY FKCLIENT_T FOR READ ONLY WITH UR ",
         resultClass = ReplicatedOtherClientName.class),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findAllUpdatedAfterWithUnlimitedAccess",
         query = "SELECT r.* FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r WHERE r.THIRD_ID IN ( "
             + "SELECT r1.THIRD_ID FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r1 "
             + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") AND r.CLIENT_SENSITIVITY_IND = 'N' ORDER BY FKCLIENT_T FOR READ ONLY ",
+            + ") AND r.CLIENT_SENSITIVITY_IND = 'N' ORDER BY FKCLIENT_T FOR READ ONLY WITH UR ",
         resultClass = ReplicatedOtherClientName.class)})
 @Entity
 @Table(name = "VW_LST_OTHER_CLIENT_NAME")

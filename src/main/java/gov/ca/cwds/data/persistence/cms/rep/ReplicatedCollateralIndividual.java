@@ -32,7 +32,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findBucketRange",
         query = "SELECT x.* FROM {h-schema}COLTRL_T x "
-            + "WHERE x.IDENTIFIER BETWEEN :min_id AND :max_id ORDER BY IDENTIFIER FOR READ ONLY",
+            + "WHERE x.IDENTIFIER BETWEEN :min_id AND :max_id ORDER BY IDENTIFIER FOR READ ONLY WITH UR",
         resultClass = ReplicatedCollateralIndividual.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findAllUpdatedAfter",
@@ -43,7 +43,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
             + "z.COMNT_DSC, z.GENDER_CD, z.BIRTH_DT, z.MRTL_STC, z.EMAIL_ADDR, "
             + "z.ESTBLSH_CD, z.ESTBLSH_ID, z.RESOST_IND "
             + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
-            + "from {h-schema}COLTRL_T z WHERE z.IBMSNAP_LOGMARKER >= :after for read only ",
+            + "from {h-schema}COLTRL_T z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR ",
         resultClass = ReplicatedCollateralIndividual.class),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findPartitionedBuckets",
@@ -57,7 +57,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
             + "from ( select mod(y.rn, CAST(:total_buckets AS INTEGER)) + 1 as bucket, y.* "
             + "from ( select row_number() over (order by 1) as rn, x.* "
             + "from {h-schema}COLTRL_T x WHERE x.IDENTIFIER >= :min_id and x.IDENTIFIER < :max_id "
-            + ") y ) z where z.bucket = :bucket_num for read only",
+            + ") y ) z where z.bucket = :bucket_num FOR READ ONLY WITH UR",
         resultClass = ReplicatedCollateralIndividual.class)})
 @Entity
 @Table(name = "COLTRL_T")

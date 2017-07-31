@@ -36,7 +36,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
             + "x.START_DT, x.LST_UPD_ID, x.LST_UPD_TS, x.FKPLC_HM_T, x.COMNT_DSC, "
             + "x.OTH_ADL_CD, x.IDENTFD_DT, x.RESOST_IND, x.PASSBC_CD "
             + ", x.IBMSNAP_OPERATION, x.IBMSNAP_LOGMARKER FROM {h-schema}OTH_ADLT x "
-            + "WHERE x.IDENTIFIER BETWEEN :min_id AND :max_id ORDER BY x.IDENTIFIER FOR READ ONLY",
+            + "WHERE x.IDENTIFIER BETWEEN :min_id AND :max_id ORDER BY x.IDENTIFIER FOR READ ONLY WITH UR",
         resultClass = ReplicatedOtherAdultInPlacemtHome.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome.findAllUpdatedAfter",
@@ -44,7 +44,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
             + "z.START_DT, z.LST_UPD_ID, z.LST_UPD_TS, z.FKPLC_HM_T, z.COMNT_DSC, "
             + "z.OTH_ADL_CD, z.IDENTFD_DT, z.RESOST_IND, z.PASSBC_CD "
             + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
-            + "FROM {h-schema}OTH_ADLT z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY ",
+            + "FROM {h-schema}OTH_ADLT z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR ",
         resultClass = ReplicatedOtherAdultInPlacemtHome.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome.findAllByBucket",
@@ -54,7 +54,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
             + ", 'U' as IBMSNAP_OPERATION, z.LST_UPD_TS AS IBMSNAP_LOGMARKER "
             + "FROM ( SELECT mod(y.rn, CAST(:total_buckets AS INTEGER)) + 1 as bucket, y.* "
             + "FROM ( SELECT row_number() over (order by 1) AS rn, x.* "
-            + "FROM {h-schema}OTH_ADLT x ) y ) z WHERE z.bucket = :bucket_num FOR READ ONLY",
+            + "FROM {h-schema}OTH_ADLT x ) y ) z WHERE z.bucket = :bucket_num FOR READ ONLY WITH UR",
         resultClass = ReplicatedOtherAdultInPlacemtHome.class, readOnly = true)})
 @Entity
 @Table(name = "OTH_ADLT")

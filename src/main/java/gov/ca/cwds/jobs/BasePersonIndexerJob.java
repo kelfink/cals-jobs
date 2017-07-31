@@ -1297,7 +1297,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         results.add(normalizeSingle(groupRecs));
       }
 
-
       /**
        * Load records to delete
        */

@@ -33,7 +33,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider.findBucketRange",
         query = "SELECT x.* FROM {h-schema}SB_PVDRT x "
-            + "WHERE x.IDENTIFIER BETWEEN :min_id AND :max_id FOR READ ONLY",
+            + "WHERE x.IDENTIFIER BETWEEN :min_id AND :max_id FOR READ ONLY WITH UR",
         resultClass = ReplicatedSubstituteCareProvider.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider.findAllUpdatedAfter",
@@ -46,7 +46,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
             + "z.STATE_C, z.STREET_NM, z.STREET_NO, z.SUFX_TLDSC, z.ZIP_NO, "
             + "z.ZIP_SFX_NO, z.LST_UPD_ID, z.LST_UPD_TS "
             + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
-            + "from {h-schema}SB_PVDRT z WHERE z.IBMSNAP_LOGMARKER >= :after for read only ",
+            + "from {h-schema}SB_PVDRT z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR ",
         resultClass = ReplicatedSubstituteCareProvider.class),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider.findAllByBucket",
@@ -61,7 +61,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
             + ", 'U' as IBMSNAP_OPERATION, z.LST_UPD_TS as IBMSNAP_LOGMARKER "
             + "from ( select mod(y.rn, CAST(:total_buckets AS INTEGER)) + 1 as bucket, y.* "
             + "from ( select row_number() over (order by 1) as rn, x.* "
-            + "from {h-schema}SB_PVDRT x ) y ) z where z.bucket = :bucket_num for read only",
+            + "from {h-schema}SB_PVDRT x ) y ) z where z.bucket = :bucket_num FOR READ ONLY WITH UR",
         resultClass = ReplicatedSubstituteCareProvider.class)})
 @Entity
 @Table(name = "SB_PVDRT")
