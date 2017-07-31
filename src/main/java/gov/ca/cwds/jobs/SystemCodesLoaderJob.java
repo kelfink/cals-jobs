@@ -134,6 +134,14 @@ public class SystemCodesLoaderJob {
             }
           }
 
+          String logicalId = systemCode.getLogicalId();
+          if (!StringUtils.isBlank(logicalId)) {
+            nsc.setLogicalId(logicalId);
+            if (logicalId.length() > 2) {
+              System.out.println("---------------------- logicalId: " + logicalId);
+            }
+          }
+
           systemCodeDao.createOrUpdate(nsc);
           loadedSystemCodes.put(nsc.getId(), nsc);
         }
@@ -233,6 +241,10 @@ public class SystemCodesLoaderJob {
     @ColumnTransformer(read = "trim(OTHER_CODE)")
     private String otherCode;
 
+    @Column(name = "LOGICAL_ID")
+    @ColumnTransformer(read = "trim(LOGICAL_ID)")
+    private String logicalId;
+
     /**
      * Default constructor.
      */
@@ -294,6 +306,14 @@ public class SystemCodesLoaderJob {
 
     public void setOtherCode(String otherCode) {
       this.otherCode = otherCode;
+    }
+
+    public String getLogicalId() {
+      return logicalId;
+    }
+
+    public void setLogicalId(String logicalId) {
+      this.logicalId = logicalId;
     }
 
     @Override
