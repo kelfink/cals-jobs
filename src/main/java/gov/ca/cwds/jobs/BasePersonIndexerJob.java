@@ -274,9 +274,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Get initial load sql query
+   * Get initial load SQL query.
    * 
-   * @param dbSchemaName The DB svhema name
+   * @param dbSchemaName The DB schema name
    * @return Inital load query
    */
   public String getInitialLoadQuery(String dbSchemaName) {
@@ -329,7 +329,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected BulkProcessor buildBulkProcessor() {
     return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
-
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
         recsBulkBefore.getAndAdd(request.numberOfActions());
@@ -347,7 +346,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         recsBulkError.getAndIncrement();
         LOGGER.error("ERROR EXECUTING BULK", failure);
       }
-
     }).setBulkActions(ES_BULK_SIZE).setConcurrentRequests(0).setName("jobs_bp").build();
   }
 
@@ -1049,7 +1047,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       /**
-       * Delete records that are identified for deletion...
+       * Delete records identified for deletion...
        */
       if (!deletionResults.isEmpty()) {
         LOGGER.warn(MessageFormat.format("Found {0} people to delete", deletionResults.size())
@@ -1207,13 +1205,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final Class<?> entityClass = jobDao.getEntityClass();
 
     String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
-
     Session session = jobDao.getSessionFactory().getCurrentSession();
-
     Transaction txn = session.beginTransaction();
+
     try {
       NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
-
       q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
@@ -1298,7 +1294,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       /**
-       * Load records to delete
+       * Load records to delete.
        */
       if (mustDeleteLimitedAccessRecords()) {
         String namedQueryNameForDeletion =
