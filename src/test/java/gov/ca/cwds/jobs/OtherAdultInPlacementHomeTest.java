@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.config.NeutronStaticSessionFactory;
 
 /**
  * 
@@ -28,14 +27,14 @@ public class OtherAdultInPlacementHomeTest {
 
   @SuppressWarnings("unused")
   private static ReplicatedOtherAdultInPlacemtHomeDao dao;
-  private static SessionFactory sessionFactory;
+  private static SessionFactory sessionFactory = NeutronTestCommon.getSessionfactory();
   private Session session;
 
   @BeforeClass
   public static void beforeClass() {
     // sessionFactory =
     // new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-    sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
+    // sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
     dao = new ReplicatedOtherAdultInPlacemtHomeDao(sessionFactory);
   }
 

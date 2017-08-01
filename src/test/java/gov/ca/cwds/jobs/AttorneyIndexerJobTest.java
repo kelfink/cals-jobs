@@ -18,10 +18,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
-import gov.ca.cwds.jobs.config.NeutronStaticSessionFactory;
 
 /**
- * 
  * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
@@ -29,12 +27,14 @@ public class AttorneyIndexerJobTest {
 
   @SuppressWarnings("unused")
   private static ReplicatedAttorneyDao attorneyDao;
-  private static SessionFactory sessionFactory;
+  private static SessionFactory sessionFactory = NeutronTestCommon.getSessionfactory();
   private Session session;
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
+    // sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
+    // sessionFactory =
+    // new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
     attorneyDao = new ReplicatedAttorneyDao(sessionFactory);
   }
 

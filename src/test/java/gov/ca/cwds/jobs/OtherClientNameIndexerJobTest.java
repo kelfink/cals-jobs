@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedAkaDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.config.NeutronStaticSessionFactory;
 
 /**
  * 
@@ -31,12 +30,12 @@ public class OtherClientNameIndexerJobTest {
 
   @SuppressWarnings("unused")
   private static ReplicatedAkaDao dao;
-  private static SessionFactory sessionFactory;
+  private static SessionFactory sessionFactory = NeutronTestCommon.getSessionfactory();
   private Session session;
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
+    // sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
     dao = new ReplicatedAkaDao(sessionFactory);
   }
 

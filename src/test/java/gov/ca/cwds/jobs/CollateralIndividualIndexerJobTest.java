@@ -110,12 +110,12 @@ public class CollateralIndividualIndexerJobTest {
     SessionFactory sessionFactory = null;
     CollateralIndividualIndexerJob target = new CollateralIndividualIndexerJob(mainDao,
         elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
+
     int actual = target.getJobTotalBuckets();
-    // then
-    // e.g. : verify(mocked).called();
+
+
     int expected = 12;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -129,25 +129,25 @@ public class CollateralIndividualIndexerJobTest {
     SessionFactory sessionFactory = null;
     CollateralIndividualIndexerJob target = new CollateralIndividualIndexerJob(mainDao,
         elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
+
     String actual = target.getLegacySourceTable();
-    // then
-    // e.g. : verify(mocked).called();
+
+
     String expected = "COLTRL_T";
     assertThat(actual, is(equalTo(expected)));
   }
 
   // @Test
   public void main_Args__StringArray() throws Exception {
-    // given
+
     String[] args = new String[] {};
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
     CollateralIndividualIndexerJob.main(args);
-    // then
-    // e.g. : verify(mocked).called();
+
+
   }
 
 }

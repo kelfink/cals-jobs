@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.config.NeutronStaticSessionFactory;
 
 /**
  * Test for {@link ReporterIndexerJob}.
@@ -29,12 +28,12 @@ public class ReporterIndexerJobTest {
 
   @SuppressWarnings("unused")
   private static ReplicatedReporterDao reporterDao;
-  private static SessionFactory sessionFactory;
+  private static SessionFactory sessionFactory = NeutronTestCommon.getSessionfactory();
   private Session session;
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
+    // sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
     reporterDao = new ReplicatedReporterDao(sessionFactory);
   }
 

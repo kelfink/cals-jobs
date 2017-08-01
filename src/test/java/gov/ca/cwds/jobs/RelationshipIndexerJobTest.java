@@ -53,13 +53,13 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
+
     ResultSet rs = mock(ResultSet.class);
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
     EsRelationship actual = target.extract(rs);
-    // then
-    // e.g. : verify(mocked).called();
+
+
     EsRelationship expected = new EsRelationship();
     assertThat(actual, is(equalTo(expected)));
   }
@@ -73,15 +73,15 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
+
     ResultSet rs = mock(ResultSet.class);
-    // e.g. : given(mocked.called()).willReturn(1);
+
     try {
-      // when
+
       target.extract(rs);
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
-      // then
+
     }
   }
 
@@ -94,12 +94,12 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
+
     Object actual = target.getDenormalizedClass();
-    // then
-    // e.g. : verify(mocked).called();
+
+
     Object expected = EsRelationship.class;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -113,12 +113,12 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
+
     String actual = target.getInitialLoadViewName();
-    // then
-    // e.g. : verify(mocked).called();
+
+
     String expected = "VW_MQT_BI_DIR_RELATION";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -132,12 +132,12 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
+
     String actual = target.getJdbcOrderBy();
-    // then
-    // e.g. : verify(mocked).called();
+
+
     String expected = " ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID ";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -152,14 +152,14 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
+
     ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
     ReplicatedRelationships p = mock(ReplicatedRelationships.class);
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
     UpdateRequest actual = target.prepareUpsertRequest(esp, p);
-    // then
-    // e.g. : verify(mocked).called();
+
+
     UpdateRequest expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -174,16 +174,16 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
+
     ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
     ReplicatedRelationships p = mock(ReplicatedRelationships.class);
-    // e.g. : given(mocked.called()).willReturn(1);
+
     try {
-      // when
+
       target.prepareUpsertRequest(esp, p);
       fail("Expected exception was not thrown!");
     } catch (IOException e) {
-      // then
+
     }
   }
 
@@ -196,13 +196,13 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
+
     List<EsRelationship> recs = new ArrayList<EsRelationship>();
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
     ReplicatedRelationships actual = target.normalizeSingle(recs);
-    // then
-    // e.g. : verify(mocked).called();
+
+
     ReplicatedRelationships expected = new ReplicatedRelationships();
     assertThat(actual, is(equalTo(expected)));
   }
@@ -216,26 +216,26 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
+
     List<EsRelationship> recs = new ArrayList<EsRelationship>();
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
     List<ReplicatedRelationships> actual = target.normalize(recs);
-    // then
-    // e.g. : verify(mocked).called();
+
+
     List<ReplicatedRelationships> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
 
   // @Test
   public void main_Args__StringArray() throws Exception {
-    // given
+
     String[] args = new String[] {};
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
     RelationshipIndexerJob.main(args);
-    // then
-    // e.g. : verify(mocked).called();
+
+
   }
 
 }

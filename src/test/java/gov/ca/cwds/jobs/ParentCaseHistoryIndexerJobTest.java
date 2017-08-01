@@ -47,13 +47,13 @@ public class ParentCaseHistoryIndexerJobTest {
     SessionFactory sessionFactory = null;
     ParentCaseHistoryIndexerJob target = new ParentCaseHistoryIndexerJob(clientDao,
         elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
+
     ResultSet rs = mock(ResultSet.class);
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
     EsParentPersonCase actual = target.extract(rs);
-    // then
-    // e.g. : verify(mocked).called();
+
+
     EsParentPersonCase expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -67,15 +67,15 @@ public class ParentCaseHistoryIndexerJobTest {
     SessionFactory sessionFactory = null;
     ParentCaseHistoryIndexerJob target = new ParentCaseHistoryIndexerJob(clientDao,
         elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
+
     ResultSet rs = mock(ResultSet.class);
-    // e.g. : given(mocked.called()).willReturn(1);
+
     try {
-      // when
+
       target.extract(rs);
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
-      // then
+
     }
   }
 
@@ -88,12 +88,12 @@ public class ParentCaseHistoryIndexerJobTest {
     SessionFactory sessionFactory = null;
     ParentCaseHistoryIndexerJob target = new ParentCaseHistoryIndexerJob(clientDao,
         elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
+
     Object actual = target.getDenormalizedClass();
-    // then
-    // e.g. : verify(mocked).called();
+
+
     Object expected = EsParentPersonCase.class;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -107,12 +107,12 @@ public class ParentCaseHistoryIndexerJobTest {
     SessionFactory sessionFactory = null;
     ParentCaseHistoryIndexerJob target = new ParentCaseHistoryIndexerJob(clientDao,
         elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
+
     String actual = target.getInitialLoadViewName();
-    // then
-    // e.g. : verify(mocked).called();
+
+
     String expected = "VW_MQT_PARENT_CASE_HIST";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -126,25 +126,25 @@ public class ParentCaseHistoryIndexerJobTest {
     SessionFactory sessionFactory = null;
     ParentCaseHistoryIndexerJob target = new ParentCaseHistoryIndexerJob(clientDao,
         elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
+
     String actual = target.getJdbcOrderBy();
-    // then
-    // e.g. : verify(mocked).called();
+
+
     String expected = " ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID ";
     assertThat(actual, is(equalTo(expected)));
   }
 
   // @Test
   public void main_Args__StringArray() throws Exception {
-    // given
+
     String[] args = new String[] {};
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
+
+
     ParentCaseHistoryIndexerJob.main(args);
-    // then
-    // e.g. : verify(mocked).called();
+
+
   }
 
 }

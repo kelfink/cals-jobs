@@ -19,10 +19,8 @@ import gov.ca.cwds.dao.cms.ReplicatedEducationProviderContactDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.config.NeutronStaticSessionFactory;
 
-
 /**
  * @author CWDS API Team
- *
  */
 @SuppressWarnings("javadoc")
 public class EducationProviderContactIndexerJobTest {
