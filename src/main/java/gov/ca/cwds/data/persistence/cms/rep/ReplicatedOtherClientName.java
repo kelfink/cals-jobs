@@ -203,7 +203,7 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
 
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
-    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
+    return ElasticTransformer.createLegacyDescriptor(getId(), getLastUpdatedTime(),
         LegacyTable.ALIAS_OR_OTHER_CLIENT_NAME);
   }
 
