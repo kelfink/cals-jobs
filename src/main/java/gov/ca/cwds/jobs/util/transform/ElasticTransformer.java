@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.util.transform;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -175,13 +176,15 @@ public class ElasticTransformer {
   public static ElasticSearchPerson buildElasticSearchPersonDoc(final ObjectMapper mapper,
       ApiPersonAware p) throws JsonProcessingException {
     ElasticSearchPerson ret;
+    Serializable primaryKey = p.getPrimaryKey();
 
-    if (p.getPrimaryKey() == null) {
-      LOGGER.warn("NO PRIMARY KEY!");
+    if (primaryKey == null) {
+      LOGGER.warn("NULL PRIMARY KEY: " + p);
+      primaryKey = "MISSING_ID";
     }
 
     // Write persistence object to Elasticsearch Person document.
-    ret = new ElasticSearchPerson(p.getPrimaryKey().toString(), // id
+    ret = new ElasticSearchPerson(primaryKey.toString(), // id
         p.getFirstName(), // first name
         p.getLastName(), // last name
         p.getMiddleName(), // middle name

@@ -157,34 +157,34 @@ public class ReferralHistoryIndexerJob
     referral.setLastChange(rs.getDate("LAST_CHG"));
     referral.setCounty(rs.getInt("REFERRAL_COUNTY"));
     referral.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
-    referral.setReferralLastUpdated(rs.getDate("REFERRAL_LAST_UPDATED"));
+    referral.setReferralLastUpdated(rs.getTimestamp("REFERRAL_LAST_UPDATED"));
 
     referral.setAllegationId(ifNull(rs.getString("ALLEGATION_ID")));
     referral.setAllegationType(rs.getInt("ALLEGATION_TYPE"));
     referral.setAllegationDisposition(rs.getInt("ALLEGATION_DISPOSITION"));
-    referral.setAllegationLastUpdated(rs.getDate("ALLEGATION_LAST_UPDATED"));
+    referral.setAllegationLastUpdated(rs.getTimestamp("ALLEGATION_LAST_UPDATED"));
 
     referral.setPerpetratorId(ifNull(rs.getString("PERPETRATOR_ID")));
     referral.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
     referral.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
-    referral.setPerpetratorLastUpdated(rs.getDate("PERPETRATOR_LAST_UPDATED"));
+    referral.setPerpetratorLastUpdated(rs.getTimestamp("PERPETRATOR_LAST_UPDATED"));
     referral.setPerpetratorSensitivityIndicator(rs.getString("PERPETRATOR_SENSITIVITY_IND"));
 
     referral.setReporterId(ifNull(rs.getString("REPORTER_ID")));
     referral.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
     referral.setReporterLastName(ifNull(rs.getString("REPORTER_LAST_NM")));
-    referral.setReporterLastUpdated(rs.getDate("REPORTER_LAST_UPDATED"));
+    referral.setReporterLastUpdated(rs.getTimestamp("REPORTER_LAST_UPDATED"));
 
     referral.setVictimId(ifNull(rs.getString("VICTIM_ID")));
     referral.setVictimFirstName(ifNull(rs.getString("VICTIM_FIRST_NM")));
     referral.setVictimLastName(ifNull(rs.getString("VICTIM_LAST_NM")));
-    referral.setVictimLastUpdated(rs.getDate("VICTIM_LAST_UPDATED"));
+    referral.setVictimLastUpdated(rs.getTimestamp("VICTIM_LAST_UPDATED"));
     referral.setVictimSensitivityIndicator(rs.getString("VICTIM_SENSITIVITY_IND"));
 
     referral.setWorkerId(ifNull(rs.getString("WORKER_ID")));
     referral.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
     referral.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
-    referral.setWorkerLastUpdated(rs.getDate("WORKER_LAST_UPDATED"));
+    referral.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
 
     referral.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
     referral.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));

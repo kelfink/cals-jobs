@@ -61,7 +61,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setCaseId(caseId);
     personCase.setStartDate(rs.getDate("START_DATE"));
     personCase.setEndDate(rs.getDate("END_DATE"));
-    personCase.setCaseLastUpdated(rs.getDate("CASE_LAST_UPDATED"));
+    personCase.setCaseLastUpdated(rs.getTimestamp("CASE_LAST_UPDATED"));
     personCase.setCounty(rs.getInt("COUNTY"));
     personCase.setServiceComponent(rs.getInt("SERVICE_COMP"));
 
@@ -71,7 +71,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setFocusChildId(focusChildId);
     personCase.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
     personCase.setFocusChildLastName(ifNull(rs.getString("FOCUS_CHLD_LAST_NM")));
-    personCase.setFocusChildLastUpdated(rs.getDate("FOCUS_CHILD_LAST_UPDATED"));
+    personCase.setFocusChildLastUpdated(rs.getTimestamp("FOCUS_CHILD_LAST_UPDATED"));
     personCase.setFocusChildSensitivityIndicator(rs.getString("FOCUS_CHILD_SENSITIVITY_IND"));
 
     //
@@ -81,7 +81,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setParentFirstName(ifNull(rs.getString("PARENT_FIRST_NM")));
     personCase.setParentLastName(ifNull(rs.getString("PARENT_LAST_NM")));
     personCase.setParentRelationship(rs.getInt("PARENT_RELATIONSHIP"));
-    personCase.setParentLastUpdated(rs.getDate("PARENT_LAST_UPDATED"));
+    personCase.setParentLastUpdated(rs.getTimestamp("PARENT_LAST_UPDATED"));
     personCase.setParentSourceTable(rs.getString("PARENT_SOURCE_TABLE"));
     personCase.setParentSensitivityIndicator(rs.getString("PARENT_SENSITIVITY_IND"));
 
@@ -91,7 +91,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setWorkerId(ifNull(rs.getString("WORKER_ID")));
     personCase.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
     personCase.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
-    personCase.setWorkerLastUpdated(rs.getDate("WORKER_LAST_UPDATED"));
+    personCase.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
 
     //
     // Access Limitation
