@@ -137,9 +137,8 @@ public class SystemCodesLoaderJob {
           String logicalId = systemCode.getLogicalId();
           if (!StringUtils.isBlank(logicalId)) {
             nsc.setLogicalId(logicalId);
-            if (logicalId.length() > 2) {
-              System.out.println("---------------------- logicalId: " + logicalId);
-            }
+          } else {
+            LOGGER.warn("Missing logical ID for system code " + systemCode.getSystemId());
           }
 
           systemCodeDao.createOrUpdate(nsc);
