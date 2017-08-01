@@ -239,7 +239,7 @@ public class EsPersonReferral extends ApiObjectIdentity
 
     referral.setId(this.referralId);
     referral.setLegacyId(this.referralId);
-    referral.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.lastChange));
+    referral.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.referralLastUpdated));
     referral.setStartDate(DomainChef.cookDate(this.startDate));
     referral.setEndDate(DomainChef.cookDate(this.endDate));
     referral.setCountyId(this.county == null ? null : this.county.toString());

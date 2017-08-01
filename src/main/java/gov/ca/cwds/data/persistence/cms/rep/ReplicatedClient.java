@@ -204,8 +204,7 @@ public class ReplicatedClient extends BaseClient
 
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
-    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
+    return ElasticTransformer.createLegacyDescriptor(getId(), getLastUpdatedTime(),
         LegacyTable.CLIENT);
   }
-
 }
