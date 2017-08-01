@@ -81,7 +81,7 @@ public class SystemCodesLoaderJob {
 
     Map<String, SystemMeta> systemMetaMap = new HashMap<>();
     for (SystemMeta systemMeta : allSystemMetas) {
-      systemMetaMap.put(systemMeta.getLogicalTableDsdName(), systemMeta);
+      systemMetaMap.put(StringUtils.trim(systemMeta.getLogicalTableDsdName()), systemMeta);
     }
 
     Map<Short, SystemCode> systemCodeMap = new HashMap<>();
@@ -109,14 +109,14 @@ public class SystemCodesLoaderJob {
           NsSystemCode nsc = new NsSystemCode();
           nsc.setId(systemCode.getSystemId().intValue());
           nsc.setDescription(systemCode.getShortDescription());
-          nsc.setOtherCode(systemCode.getOtherCd());
+          nsc.setOtherCode(StringUtils.trim(systemCode.getOtherCd()));
 
-          String categoryId = systemCode.getForeignKeyMetaTable();
+          String categoryId = StringUtils.trim(systemCode.getForeignKeyMetaTable());
           nsc.setCategoryId(categoryId);
 
           SystemMeta systemMeta = systemMetaMap.get(categoryId);
           if (systemMeta != null) {
-            nsc.setCategoryDescription(systemMeta.getShortDescriptionName());
+            nsc.setCategoryDescription(StringUtils.trim(systemMeta.getShortDescriptionName()));
           } else {
             LOGGER.warn("Missing system meta for category " + categoryId + " for system code "
                 + systemCode.getSystemId());
@@ -127,14 +127,15 @@ public class SystemCodesLoaderJob {
             nsc.setSubCategoryId(subCategoryId.intValue());
             SystemCode subCategoySystemCode = systemCodeMap.get(subCategoryId);
             if (subCategoySystemCode != null) {
-              nsc.setSubCategoryDescription(subCategoySystemCode.getShortDescription());
+              nsc.setSubCategoryDescription(
+                  StringUtils.trim(subCategoySystemCode.getShortDescription()));
             } else {
               LOGGER.warn("Missing system code for sub-category ID " + subCategoryId
                   + " for system code " + systemCode.getSystemId());
             }
           }
 
-          String logicalId = systemCode.getLogicalId();
+          String logicalId = StringUtils.trim(systemCode.getLogicalId());
           if (!StringUtils.isBlank(logicalId)) {
             nsc.setLogicalId(logicalId);
           } else {
@@ -411,5 +412,4 @@ public class SystemCodesLoaderJob {
       return systemCodeCache;
     }
   }
-
 }
