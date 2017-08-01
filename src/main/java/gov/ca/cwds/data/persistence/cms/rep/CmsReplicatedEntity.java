@@ -5,11 +5,21 @@ import java.util.Date;
 import gov.ca.cwds.dao.ApiLegacyAware;
 
 /**
- * Replicated entity interface adds common CMS replication columns to Hibernate entity classes.
+ * Provides common CMS replication columns and checks for Hibernate CMS entity classes.
  * 
  * @author CWDS API Team
  */
 public interface CmsReplicatedEntity extends ApiLegacyAware {
+
+  /**
+   * Determines whether record was deleted from companion transactional table.
+   * 
+   * @param t another replicated entity
+   * @return true if deleted
+   */
+  default boolean isDelete(CmsReplicatedEntity t) {
+    return t.getReplicationOperation() == CmsReplicationOperation.D;
+  }
 
   /**
    * Getter for replication operation.

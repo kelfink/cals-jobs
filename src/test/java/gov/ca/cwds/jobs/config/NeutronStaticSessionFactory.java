@@ -35,16 +35,18 @@ import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.metadata.CollectionMetadata;
 import org.hibernate.stat.Statistics;
 
-public class StaticSessionFactory {
+public class NeutronStaticSessionFactory {
 
-  public static class SharedSessionFactory implements SessionFactory {
+  public static class NeutronSharedSessionFactory implements SessionFactory {
+
+    private static final int DEFAULT_DELAY = 3500;
 
     private SessionFactory sf;
     private final Lock lock;
     private final Condition condition;
     private volatile boolean held = true;
 
-    public SharedSessionFactory(SessionFactory sf) {
+    public NeutronSharedSessionFactory(SessionFactory sf) {
       this.sf = sf;
       lock = new ReentrantLock();
       condition = lock.newCondition();
@@ -237,11 +239,11 @@ public class StaticSessionFactory {
     protected void runCloseThread() {
       new Thread(() -> {
         try {
-          Thread.sleep(1500); // NOSONAR
+          Thread.sleep(DEFAULT_DELAY); // NOSONAR
           while (true) {
             System.out.println("condition.await()");
             condition.await(); // Possible spurious wake-up. Must still evaluation the situation.
-            Thread.sleep(1500); // NOSONAR
+            Thread.sleep(DEFAULT_DELAY); // NOSONAR
 
             if (!held) {
               try {
@@ -281,10 +283,10 @@ public class StaticSessionFactory {
 
   }
 
-  private static SharedSessionFactory sessionFactory;
+  private static NeutronSharedSessionFactory sessionFactory;
 
   static {
-    sessionFactory = new SharedSessionFactory(
+    sessionFactory = new NeutronSharedSessionFactory(
         new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory());
   }
 

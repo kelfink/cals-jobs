@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.config.StaticSessionFactory;
+import gov.ca.cwds.jobs.config.NeutronStaticSessionFactory;
 
 /**
  * @author CWDS API Team
@@ -33,7 +33,7 @@ public class CollateralIndividualIndexerJobTest {
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = StaticSessionFactory.getSessionFactory();
+    sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
     dao = new ReplicatedCollateralIndividualDao(sessionFactory);
   }
 

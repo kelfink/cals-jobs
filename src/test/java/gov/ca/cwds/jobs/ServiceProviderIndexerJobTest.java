@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.config.StaticSessionFactory;
+import gov.ca.cwds.jobs.config.NeutronStaticSessionFactory;
 
 /**
  * @author CWDS API Team
@@ -38,7 +38,7 @@ public class ServiceProviderIndexerJobTest {
   public static void beforeClass() {
     // sessionFactory =
     // new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-    sessionFactory = StaticSessionFactory.getSessionFactory();
+    sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
     serviceProviderDao = new ReplicatedServiceProviderDao(sessionFactory);
   }
 

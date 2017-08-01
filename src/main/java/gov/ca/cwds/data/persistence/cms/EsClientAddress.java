@@ -45,7 +45,7 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
         query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
             + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
             + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") ORDER BY CLT_IDENTIFIER FOR READ ONLY ",
+            + ") ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
         resultClass = EsClientAddress.class, readOnly = true),
 
     @NamedNativeQuery(
@@ -53,7 +53,7 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
         query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
             + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
             + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") AND x.CLT_SENSTV_IND = 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY ",
+            + ") AND x.CLT_SENSTV_IND = 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR",
         resultClass = EsClientAddress.class, readOnly = true),
 
     @NamedNativeQuery(
@@ -61,7 +61,7 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
         query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
             + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
             + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") AND x.CLT_SENSTV_IND != 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY ",
+            + ") AND x.CLT_SENSTV_IND != 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
         resultClass = EsClientAddress.class, readOnly = true)})
 public class EsClientAddress extends ApiObjectIdentity
     implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {

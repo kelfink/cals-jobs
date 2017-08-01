@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
-import gov.ca.cwds.jobs.config.StaticSessionFactory;
+import gov.ca.cwds.jobs.config.NeutronStaticSessionFactory;
 
 /**
  * 
@@ -34,7 +34,7 @@ public class AttorneyIndexerJobTest {
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = StaticSessionFactory.getSessionFactory();
+    sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
     attorneyDao = new ReplicatedAttorneyDao(sessionFactory);
   }
 

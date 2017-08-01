@@ -20,7 +20,7 @@ import org.hibernate.annotations.NamedNativeQuery;
     query = "SELECT c.* FROM {h-schema}VW_LST_PARENT_CASE_HIST c WHERE c.CASE_ID IN ("
         + " SELECT c1.CASE_ID FROM {h-schema}VW_LST_PARENT_CASE_HIST c1 "
         + "WHERE c1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-        + ") ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID FOR READ ONLY ",
+        + ") ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsParentPersonCase.class, readOnly = true),
 
     @NamedNativeQuery(
@@ -28,7 +28,7 @@ import org.hibernate.annotations.NamedNativeQuery;
         query = "SELECT c.* FROM {h-schema}VW_LST_PARENT_CASE_HIST c WHERE c.CASE_ID IN ("
             + " SELECT c1.CASE_ID FROM {h-schema}VW_LST_PARENT_CASE_HIST c1 "
             + "WHERE c1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") AND c.LIMITED_ACCESS_CODE = 'N' ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID FOR READ ONLY ",
+            + ") AND c.LIMITED_ACCESS_CODE = 'N' ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsParentPersonCase.class, readOnly = true),
 
     @NamedNativeQuery(
@@ -36,7 +36,7 @@ import org.hibernate.annotations.NamedNativeQuery;
         query = "SELECT c.* FROM {h-schema}VW_LST_PARENT_CASE_HIST c WHERE c.CASE_ID IN ("
             + " SELECT c1.CASE_ID FROM {h-schema}VW_LST_PARENT_CASE_HIST c1 "
             + "WHERE c1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") AND c.LIMITED_ACCESS_CODE != 'N' ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID FOR READ ONLY ",
+            + ") AND c.LIMITED_ACCESS_CODE != 'N' ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsParentPersonCase.class, readOnly = true)})
 
 public class EsParentPersonCase extends EsPersonCase {

@@ -50,7 +50,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
             + ") SELECT V.* FROM {h-schema}VW_LST_BI_DIR_RELATION v "
             + "WHERE v.THIS_LEGACY_ID IN (select d1.THIS_LEGACY_ID from driver d1) "
             + "OR v.RELATED_LEGACY_ID IN (select d2.RELATED_LEGACY_ID from driver d2) "
-            + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY ",
+            + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY WITH UR ",
         resultClass = EsRelationship.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfterWithUnlimitedAccess",
@@ -61,7 +61,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
             + "WHERE (v.THIS_LEGACY_ID IN (select d1.THIS_LEGACY_ID from driver d1) "
             + "OR v.RELATED_LEGACY_ID IN (select d2.RELATED_LEGACY_ID from driver d2)) "
             + "AND (v.THIS_SENSITIVITY_IND = 'N' AND v.RELATED_SENSITIVITY_IND = 'N') "
-            + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY ",
+            + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY WITH UR ",
         resultClass = EsRelationship.class, readOnly = true)})
 public class EsRelationship
     implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationships> {

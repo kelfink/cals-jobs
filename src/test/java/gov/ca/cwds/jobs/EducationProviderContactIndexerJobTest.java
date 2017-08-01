@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedEducationProviderContactDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.config.StaticSessionFactory;
+import gov.ca.cwds.jobs.config.NeutronStaticSessionFactory;
 
 
 /**
@@ -34,7 +34,7 @@ public class EducationProviderContactIndexerJobTest {
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = StaticSessionFactory.getSessionFactory();
+    sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
     educationProviderContactDao = new ReplicatedEducationProviderContactDao(sessionFactory);
   }
 

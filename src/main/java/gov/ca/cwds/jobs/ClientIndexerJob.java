@@ -81,7 +81,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       buf.append(" WHERE x.CLT_SENSTV_IND = 'N' ");
     }
 
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR");
     return buf.toString();
   }
 
@@ -92,6 +92,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
      * sensitive flag must be deleted.
      */
     return !getOpts().isLoadSealedAndSensitive();
+  }
+
+  @Override
+  protected boolean isDelete(ReplicatedClient t) {
+    return t.isDelete(t);
   }
 
   @Override
