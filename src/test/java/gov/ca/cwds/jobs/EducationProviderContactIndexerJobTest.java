@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -17,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedEducationProviderContactDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.config.NeutronStaticSessionFactory;
 
 /**
  * @author CWDS API Team
@@ -32,7 +32,8 @@ public class EducationProviderContactIndexerJobTest {
 
   @BeforeClass
   public static void beforeClass() {
-    sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
+    sessionFactory =
+        new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
     educationProviderContactDao = new ReplicatedEducationProviderContactDao(sessionFactory);
   }
 

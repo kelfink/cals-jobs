@@ -54,46 +54,26 @@ public class ClientIndexerJobTest {
 
   // @Test(expected = JobsException.class)
   public void main_Args$StringArray() throws Exception {
-
     final String[] args = new String[] {};
-
-
     ClientIndexerJob.main(args);
-
-
   }
 
   // @Test(expected = JobsException.class)
   public void main_Args__StringArray__t_je() throws Exception {
-
     String[] args = new String[] {};
-
-
     ClientIndexerJob.main(args);
-
-
   }
 
   // @Test(expected = JobsException.class)
   public void main_Args__bucket_range() throws Exception {
-
     final String[] args = new String[] {"-c", "config/local.yaml", "-r", "21-22", "-b", "500"};
-
-
     ClientIndexerJob.main(args);
-
-
   }
 
   // @Test(expected = JobsException.class)
   public void main_Args__bucket_range_not_digit() throws Exception {
-
     final String[] args = new String[] {"-c", "config/local.yaml", "-r", "abc-xyz", "-b", "500"};
-
-
     ClientIndexerJob.main(args);
-
-
   }
 
   // @Test
@@ -105,13 +85,8 @@ public class ClientIndexerJobTest {
     SessionFactory sessionFactory = null;
     ClientIndexerJob target = new ClientIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
     ResultSet rs = mock(ResultSet.class);
-
-
     EsClientAddress actual = target.extract(rs);
-
-
     EsClientAddress expected = new EsClientAddress();
     assertThat(actual, is(equalTo(expected)));
   }
@@ -125,16 +100,13 @@ public class ClientIndexerJobTest {
     SessionFactory sessionFactory = null;
     ClientIndexerJob target = new ClientIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
     ResultSet rs = mock(ResultSet.class);
-
     try {
-
       target.extract(rs);
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
-
     }
+
   }
 
   @Test
@@ -146,12 +118,7 @@ public class ClientIndexerJobTest {
     SessionFactory sessionFactory = null;
     ClientIndexerJob target = new ClientIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
-
-
     Object actual = target.getDenormalizedClass();
-
-
     Object expected = EsClientAddress.class;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -165,12 +132,7 @@ public class ClientIndexerJobTest {
     SessionFactory sessionFactory = null;
     ClientIndexerJob target = new ClientIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
-
-
     String actual = target.getInitialLoadViewName();
-
-
     String expected = "MQT_CLIENT_ADDRESS";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -184,13 +146,8 @@ public class ClientIndexerJobTest {
     SessionFactory sessionFactory = null;
     ClientIndexerJob target = new ClientIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
     List<EsClientAddress> recs = new ArrayList<EsClientAddress>();
-
-
     List<ReplicatedClient> actual = target.normalize(recs);
-
-
     List<ReplicatedClient> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }

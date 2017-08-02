@@ -47,13 +47,8 @@ public class ChildCaseHistoryIndexerJobTest {
     SessionFactory sessionFactory = null;
     ChildCaseHistoryIndexerJob target = new ChildCaseHistoryIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
     ResultSet rs = mock(ResultSet.class);
-
-
     EsChildPersonCase actual = target.extract(rs);
-
-
     EsChildPersonCase expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -67,15 +62,11 @@ public class ChildCaseHistoryIndexerJobTest {
     SessionFactory sessionFactory = null;
     ChildCaseHistoryIndexerJob target = new ChildCaseHistoryIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
     ResultSet rs = mock(ResultSet.class);
-
     try {
-
       target.extract(rs);
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
-
     }
   }
 
@@ -88,12 +79,7 @@ public class ChildCaseHistoryIndexerJobTest {
     SessionFactory sessionFactory = null;
     ChildCaseHistoryIndexerJob target = new ChildCaseHistoryIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
-
-
     Object actual = target.getDenormalizedClass();
-
-
     Object expected = EsChildPersonCase.class;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -107,12 +93,7 @@ public class ChildCaseHistoryIndexerJobTest {
     SessionFactory sessionFactory = null;
     ChildCaseHistoryIndexerJob target = new ChildCaseHistoryIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
-
-
     String actual = target.getInitialLoadViewName();
-
-
     String expected = "MQT_CASE_HIST";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -126,25 +107,15 @@ public class ChildCaseHistoryIndexerJobTest {
     SessionFactory sessionFactory = null;
     ChildCaseHistoryIndexerJob target = new ChildCaseHistoryIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
-
-
     String actual = target.getJdbcOrderBy();
-
-
     String expected = " ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID ";
     assertThat(actual, is(equalTo(expected)));
   }
 
   // @Test
   public void main_Args__StringArray() throws Exception {
-
     String[] args = new String[] {};
-
-
     ChildCaseHistoryIndexerJob.main(args);
-
-
   }
 
 }

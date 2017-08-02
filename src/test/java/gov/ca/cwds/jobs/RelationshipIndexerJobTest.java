@@ -53,13 +53,8 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
     ResultSet rs = mock(ResultSet.class);
-
-
     EsRelationship actual = target.extract(rs);
-
-
     EsRelationship expected = new EsRelationship();
     assertThat(actual, is(equalTo(expected)));
   }
@@ -73,15 +68,11 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
     ResultSet rs = mock(ResultSet.class);
-
     try {
-
       target.extract(rs);
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
-
     }
   }
 
@@ -94,12 +85,7 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
-
-
     Object actual = target.getDenormalizedClass();
-
-
     Object expected = EsRelationship.class;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -113,12 +99,7 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
-
-
     String actual = target.getInitialLoadViewName();
-
-
     String expected = "VW_MQT_BI_DIR_RELATION";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -132,12 +113,7 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
-
-
     String actual = target.getJdbcOrderBy();
-
-
     String expected = " ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID ";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -152,14 +128,9 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
     ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
     ReplicatedRelationships p = mock(ReplicatedRelationships.class);
-
-
     UpdateRequest actual = target.prepareUpsertRequest(esp, p);
-
-
     UpdateRequest expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -174,16 +145,12 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
     ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
     ReplicatedRelationships p = mock(ReplicatedRelationships.class);
-
     try {
-
       target.prepareUpsertRequest(esp, p);
       fail("Expected exception was not thrown!");
     } catch (IOException e) {
-
     }
   }
 
@@ -196,13 +163,8 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
     List<EsRelationship> recs = new ArrayList<EsRelationship>();
-
-
     ReplicatedRelationships actual = target.normalizeSingle(recs);
-
-
     ReplicatedRelationships expected = new ReplicatedRelationships();
     assertThat(actual, is(equalTo(expected)));
   }
@@ -216,26 +178,16 @@ public class RelationshipIndexerJobTest {
     SessionFactory sessionFactory = null;
     RelationshipIndexerJob target = new RelationshipIndexerJob(clientDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-
     List<EsRelationship> recs = new ArrayList<EsRelationship>();
-
-
     List<ReplicatedRelationships> actual = target.normalize(recs);
-
-
     List<ReplicatedRelationships> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
 
   // @Test
   public void main_Args__StringArray() throws Exception {
-
     String[] args = new String[] {};
-
-
     RelationshipIndexerJob.main(args);
-
-
   }
 
 }

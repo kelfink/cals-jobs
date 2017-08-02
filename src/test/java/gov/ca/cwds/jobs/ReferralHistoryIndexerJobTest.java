@@ -36,7 +36,6 @@ public class ReferralHistoryIndexerJobTest {
   // ====================
   // TEST MEMBERS:
   // ====================
-
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
@@ -71,77 +70,47 @@ public class ReferralHistoryIndexerJobTest {
 
   @Test
   public void getDenormalizedClass_Args__() throws Exception {
-
-
-
     Object actual = target.getDenormalizedClass();
-
-
     Object expected = EsPersonReferral.class;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getViewName_Args__() throws Exception {
-
-
-
     String actual = target.getInitialLoadViewName();
-
-
     String expected = "MQT_REFERRAL_HIST";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getJdbcOrderBy_Args__() throws Exception {
-
-
-
     String actual = target.getJdbcOrderBy();
-
-
     String expected = " ORDER BY CLIENT_ID ";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getLegacySourceTable_Args__() throws Exception {
-
-
-
     String actual = target.getLegacySourceTable();
-
-
     String expected = "REFERL_T";
     assertThat(actual, is(equalTo(expected)));
   }
 
   // @Test
   public void normalizeSingle_Args__List() throws Exception {
-
     List<EsPersonReferral> recs = new ArrayList<EsPersonReferral>();
     EsPersonReferral addMe = new EsPersonReferral();
     addMe.setClientId("1234");
     recs.add(addMe);
-
-
     ReplicatedPersonReferrals actual = target.normalizeSingle(recs);
-
-
     ReplicatedPersonReferrals expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void normalize_Args__List() throws Exception {
-
     List<EsPersonReferral> recs = new ArrayList<EsPersonReferral>();
-
-
     List<ReplicatedPersonReferrals> actual = target.normalize(recs);
-
-
     List<ReplicatedPersonReferrals> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
@@ -149,14 +118,9 @@ public class ReferralHistoryIndexerJobTest {
   // @Test
   public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedPersonReferrals()
       throws Exception {
-
     ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
     ReplicatedPersonReferrals referrals = mock(ReplicatedPersonReferrals.class);
-
-
     UpdateRequest actual = target.prepareUpsertRequest(esp, referrals);
-
-
     UpdateRequest expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -164,55 +128,38 @@ public class ReferralHistoryIndexerJobTest {
   @Test
   public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedPersonReferrals_T__IOException()
       throws Exception {
-
     ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
     ReplicatedPersonReferrals referrals = mock(ReplicatedPersonReferrals.class);
-
     try {
-
       target.prepareUpsertRequest(esp, referrals);
       fail("Expected exception was not thrown!");
     } catch (IOException e) {
-
     }
   }
 
   // @Test
   public void extract_Args__ResultSet() throws Exception {
-
     ResultSet rs = mock(ResultSet.class);
-
-
     EsPersonReferral actual = target.extract(rs);
-
-
     EsPersonReferral expected = new EsPersonReferral();
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void extract_Args__ResultSet_T__SQLException() throws Exception {
-
     ResultSet rs = mock(ResultSet.class);
     doThrow(new SQLException()).when(rs).getString(any());
     try {
-
       target.extract(rs);
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
-
     }
   }
 
   // @Test
   public void main_Args__StringArray() throws Exception {
-
     String[] args = new String[] {};
-
-
     ReferralHistoryIndexerJob.main(args);
-
-
   }
 
 }

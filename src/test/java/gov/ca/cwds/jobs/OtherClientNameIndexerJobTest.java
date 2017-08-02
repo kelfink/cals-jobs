@@ -10,6 +10,7 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -30,12 +31,13 @@ public class OtherClientNameIndexerJobTest {
 
   @SuppressWarnings("unused")
   private static ReplicatedAkaDao dao;
-  private static SessionFactory sessionFactory = NeutronTestCommon.getSessionfactory();
+  private static SessionFactory sessionFactory;
   private Session session;
 
   @BeforeClass
   public static void beforeClass() {
-    // sessionFactory = NeutronStaticSessionFactory.getSessionFactory();
+    sessionFactory =
+        new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
     dao = new ReplicatedAkaDao(sessionFactory);
   }
 

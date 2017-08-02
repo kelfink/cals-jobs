@@ -40,26 +40,15 @@ public class JobsGuiceInjectorTest {
   @Test
   public void elasticsearchClient_Args__() throws Exception {
     JobsGuiceInjector target = new JobsGuiceInjector();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     Client actual = target.elasticsearchClient();
-    // then
-    // e.g. : verify(mocked).called();
     Client expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void elasticSearchConfig_Args__() throws Exception {
-
     JobsGuiceInjector target = new JobsGuiceInjector();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     ElasticsearchConfiguration actual = target.elasticSearchConfig();
-    // then
-    // e.g. : verify(mocked).called();
     ElasticsearchConfiguration expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
