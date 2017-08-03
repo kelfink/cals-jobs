@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.SessionFactory;
@@ -386,8 +387,8 @@ public class BasePersonIndexerJobTest {
   public void prepareUpsertRequestNoChecked_Args__ElasticSearchPerson__Object() throws Exception {
     ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
     TestNormalizedEntity t = new TestNormalizedEntity("abc12345");
-    UpdateRequest actual = target.prepareUpsertRequestNoChecked(esp, t);
-    UpdateRequest expected = null;
+    DocWriteRequest actual = target.prepareUpsertRequestNoChecked(esp, t);
+    DocWriteRequest expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
