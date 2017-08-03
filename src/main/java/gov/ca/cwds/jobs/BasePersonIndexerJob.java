@@ -30,6 +30,7 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -310,6 +311,19 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected boolean isDelete(T t) {
     return t instanceof CmsReplicatedEntity ? CmsReplicatedEntity.isDelete((CmsReplicatedEntity) t)
         : false;
+  }
+
+  /**
+   * Build a delete request to remove the document from the index.
+   * 
+   * @param id primary key
+   * @return bulk delete request
+   * @throws JsonProcessingException unable to parse
+   */
+  public DeleteRequest bulkDelete(String id) throws JsonProcessingException {
+    final String alias = getOpts().getIndexName();
+    final String docType = esDao.getConfig().getElasticsearchDocType();
+    return new DeleteRequest(alias, docType, id);
   }
 
   /**
@@ -687,15 +701,23 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param t normalized entity
    * @return prepared upsert request
    */
-  protected UpdateRequest prepareUpsertRequestNoChecked(ElasticSearchPerson esp, T t) {
+  @SuppressWarnings("rawtypes")
+  protected DocWriteRequest prepareUpsertRequestNoChecked(ElasticSearchPerson esp, T t) {
+    DocWriteRequest<?> ret;
     try {
-      recsPrepared.getAndIncrement();
-      return prepareUpsertRequest(esp, t);
+      if (isDelete(t)) {
+        ret = bulkDelete((String) t.getPrimaryKey());
+        recsDeleted.getAndIncrement();
+      } else {
+        recsPrepared.getAndIncrement();
+        ret = prepareUpsertRequest(esp, t);
+      }
     } catch (Exception e) {
-      JobLogUtils.raiseError(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
+      throw JobLogUtils.buildException(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}",
+          t.getPrimaryKey());
     }
 
-    return null;
+    return ret;
   }
 
   /**
@@ -1091,6 +1113,29 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   // ====================
 
   /**
+   * If last run time is provide in options then use it, otherwise use provided
+   * lastSuccessfulRunTime.
+   * 
+   * @param lastSuccessfulRunTime last successful run
+   * @return appropriate date to detect changes
+   */
+  protected Date calcLastRunDate(final Date lastSuccessfulRunTime) {
+    Date ret;
+    final Date lastSuccessfulRunTimeOverride = getOpts().getLastRunTime();
+
+    if (lastSuccessfulRunTimeOverride != null) {
+      ret = lastSuccessfulRunTimeOverride;
+    } else {
+      final Calendar cal = Calendar.getInstance();
+      cal.setTime(lastSuccessfulRunTime);
+      cal.add(Calendar.MINUTE, -25); // 25 minute window
+      ret = cal.getTime();
+    }
+
+    return ret;
+  }
+
+  /**
    * Lambda runs a number of threads up to max processor cores. Queued jobs wait until a worker
    * thread is available.
    * 
@@ -1107,6 +1152,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
+      final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 4);
+      System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+          String.valueOf(maxThreads));
+      LOGGER.info("Processors={}", maxThreads);
+
       /**
        * If index name is provided then use it, otherwise use alias from ES config.
        */
@@ -1115,30 +1165,19 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           ? esDao.getConfig().getElasticsearchAlias() : indexNameOverride;
       getOpts().setIndexName(effectiveIndexName);
 
-      /**
-       * If last run time is provide in options then use it, otherwise use provided
-       * lastSuccessfulRunTime.
-       */
-      Date lastSuccessfulRunTimeOverride = getOpts().getLastRunTime();
-      Date effectiveLastSuccessfulRunTime = lastSuccessfulRunTimeOverride != null
-          ? lastSuccessfulRunTimeOverride : lastSuccessfulRunTime;
-
+      final Date effectiveLastSuccessfulRunTime = calcLastRunDate(lastSuccessfulRunTime);
       String documentType = esDao.getConfig().getElasticsearchDocType();
       String peopleSettingsFile = "/elasticsearch/setting/people-index-settings.json";
       String personMappingFile = "/elasticsearch/mapping/map_person_5x_snake.json";
 
       LOGGER.info("Effective index name: " + effectiveIndexName);
       LOGGER.info(
-          "Effective last successsfull run time: " + effectiveLastSuccessfulRunTime.toString());
+          "Effective last successsful run time: " + effectiveLastSuccessfulRunTime.toString());
 
       // If the index is missing, create it.
       LOGGER.debug("Create index if missing, effectiveIndexName: " + effectiveIndexName);
       esDao.createIndexIfNeeded(effectiveIndexName, documentType, peopleSettingsFile,
           personMappingFile);
-
-      // esDao.createIndexIfNeeded(esDao.getConfig().getElasticsearchAlias());
-
-      LOGGER.debug("availableProcessors={}", Runtime.getRuntime().availableProcessors());
 
       // Smart/auto mode:
       final Calendar cal = Calendar.getInstance();
