@@ -132,7 +132,7 @@ public class ReplicatedServiceProvider extends BaseServiceProvider
 
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
-    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
+    return ElasticTransformer.createLegacyDescriptor(getId(), getLastUpdatedTime(),
         LegacyTable.SERVICE_PROVIDER);
   }
 }

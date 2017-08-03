@@ -139,7 +139,7 @@ public class ReplicatedSubstituteCareProvider extends BaseSubstituteCareProvider
 
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
-    return ElasticTransformer.createLegacyDescriptor(getId(), getReplicationDate(),
+    return ElasticTransformer.createLegacyDescriptor(getId(), getLastUpdatedTime(),
         LegacyTable.SUBSTITUTE_CARE_PROVIDER);
   }
 }
