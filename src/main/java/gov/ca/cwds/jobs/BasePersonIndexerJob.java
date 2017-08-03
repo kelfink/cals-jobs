@@ -308,7 +308,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return true if marked for deletion
    */
   protected boolean isDelete(T t) {
-    return false;
+    return t instanceof CmsReplicatedEntity ? CmsReplicatedEntity.isDelete((CmsReplicatedEntity) t)
+        : false;
   }
 
   /**
@@ -855,9 +856,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       con.setReadOnly(true); // WARNING: fails with Postgres.
 
       // Linux MQT lacks ORDER BY clause. Must sort manually.
-      // Detect platform or always force ORDER BY clause.
+      // Either detect platform or force ORDER BY clause.
       final String query = getInitialLoadQuery(getDBSchemaName());
       M m;
+
+      con.nativeSQL("SET CURRENT DEGREE = 'ANY'");
 
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(5000); // faster
@@ -1246,10 +1249,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected List<T> extractLastRunRecsFromView(Date lastRunTime, Set<String> deletionResults) {
     LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
-
     final Class<?> entityClass = getDenormalizedClass(); // view entity class
+    String namedQueryName;
 
-    String namedQueryName = null;
     if (getOpts().isLoadSealedAndSensitive()) {
       /**
        * Load everything

@@ -17,7 +17,7 @@ public interface CmsReplicatedEntity extends ApiLegacyAware {
    * @param t another replicated entity
    * @return true if deleted
    */
-  default boolean isDelete(CmsReplicatedEntity t) {
+  static boolean isDelete(CmsReplicatedEntity t) {
     return t.getReplicationOperation() == CmsReplicationOperation.D;
   }
 
