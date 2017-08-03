@@ -86,4 +86,9 @@ public class SimpleTestSystemCodeCache implements SystemCodeCache {
     return false;
   }
 
+  @Override
+  public boolean verifyActiveLogicalIdForMeta(String arg0, String arg1) {
+    return false;
+  }
+
 }
