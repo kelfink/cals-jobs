@@ -5,8 +5,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -15,7 +13,6 @@ import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
-import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
@@ -30,8 +27,6 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
  */
 public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsClientAddress>
     implements JobResultSetAware<EsClientAddress> {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(ClientIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -96,11 +91,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  protected boolean isDelete(ReplicatedClient t) {
-    return CmsReplicatedEntity.isDelete(t);
-  }
-
-  @Override
   protected List<ReplicatedClient> normalize(List<EsClientAddress> recs) {
     return EntityNormalizer.<ReplicatedClient, EsClientAddress>normalizeList(recs);
   }
@@ -115,4 +105,3 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
 }
-

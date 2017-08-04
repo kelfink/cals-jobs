@@ -530,7 +530,6 @@ public class EsClientAddress extends ApiObjectIdentity
     ret.setCltSecondaryLanguageType(rs.getShort("CLT_S_LANG_TC"));
     ret.setCltSensitiveHlthInfoOnFileIndicator(rs.getString("CLT_SNTV_HLIND"));
     ret.setCltSoc158PlacementCode(rs.getString("CLT_SOCPLC_CD"));
-
     ret.setCltSocialSecurityNumChangedCode(rs.getString("CLT_SSN_CHG_CD"));
     ret.setCltSocialSecurityNumber(rs.getString("CLT_SS_NO"));
     ret.setCltSuffixTitleDescription(rs.getString("CLT_SUFX_TLDSC"));
@@ -542,6 +541,7 @@ public class EsClientAddress extends ApiObjectIdentity
     ret.setCltReplicationDate(rs.getDate("CLT_IBMSNAP_LOGMARKER"));
     ret.setCltLastUpdatedId(rs.getString("CLT_LST_UPD_ID"));
     ret.setCltLastUpdatedTime(rs.getTimestamp("CLT_LST_UPD_TS"));
+
     ret.setClaReplicationOperation(strToRepOp(rs.getString("CLA_IBMSNAP_OPERATION")));
     ret.setClaReplicationDate(rs.getDate("CLA_IBMSNAP_LOGMARKER"));
     ret.setClaLastUpdatedId(rs.getString("CLA_LST_UPD_ID"));
@@ -555,6 +555,7 @@ public class EsClientAddress extends ApiObjectIdentity
     ret.setClaBkInmtId(rs.getString("CLA_BK_INMT_ID"));
     ret.setClaEffectiveEndDate(rs.getDate("CLA_EFF_END_DT"));
     ret.setClaEffectiveStartDate(rs.getDate("CLA_EFF_STRTDT"));
+
     ret.setAdrId(rs.getString("ADR_IDENTIFIER"));
     ret.setAdrReplicationOperation(strToRepOp(rs.getString("ADR_IBMSNAP_OPERATION")));
     ret.setAdrReplicationDate(rs.getDate("ADR_IBMSNAP_LOGMARKER"));
@@ -579,6 +580,9 @@ public class EsClientAddress extends ApiObjectIdentity
     ret.setAdrStreetSuffixCd(rs.getShort("ADR_ST_SFX_C"));
     ret.setAdrUnitDesignationCd(rs.getShort("ADR_UNT_DSGC"));
     ret.setAdrUnitNumber(rs.getString("ADR_UNIT_NO"));
+
+    ret.setLastChange(rs.getTimestamp("LAST_CHG"));
+
     return ret;
   }
 
@@ -664,7 +668,9 @@ public class EsClientAddress extends ApiObjectIdentity
       ret.setTribalMembrshpVerifctnIndicatorVar(getCltTribalMembrshpVerifctnIndicatorVar());
       ret.setUnemployedParentCode(getCltUnemployedParentCode());
       ret.setZippyCreatedIndicator(getCltZippyCreatedIndicator());
+
       ret.setReplicationDate(getCltReplicationDate());
+      ret.setReplicationOperation(getCltReplicationOperation());
       ret.setLastUpdatedTime(getCltLastUpdatedTime());
     }
 
@@ -680,6 +686,8 @@ public class EsClientAddress extends ApiObjectIdentity
       rca.setFkReferral(getClaFkReferral());
       rca.setHomelessInd(getClaHomelessInd());
       rca.setId(getClaId());
+      ret.setReplicationDate(getClaReplicationDate());
+      ret.setReplicationOperation(getClaReplicationOperation());
       ret.addClientAddress(rca);
 
       // Address proper:
@@ -1597,7 +1605,6 @@ public class EsClientAddress extends ApiObjectIdentity
    * <li>"Cook": convert String parameter to strong type</li>
    * <li>"Uncook": convert strong type parameter to String</li>
    * </ul>
-   *
    */
   @Override
   public Serializable getPrimaryKey() {
