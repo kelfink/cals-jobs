@@ -2,6 +2,7 @@ package gov.ca.cwds.data.persistence.cms.rep;
 
 import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
@@ -144,7 +145,7 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public Serializable getNormalizationGroupKey() {
     return this.getPrimaryKey();
   }
 

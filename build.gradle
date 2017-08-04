@@ -51,22 +51,19 @@ dependencies {
 	compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.1'
 	compile group: 'org.slf4j', name: 'slf4j-ext', version: '1.7.25'
 	// compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
-  	
+
 	compile group: 'com.google.inject', name: 'guice', version: '4.1.0'
 	compile group: "org.postgresql", name: "postgresql", version: "9.4.1212"
 	compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.0.0-rc4"
 
-	// NO LONGER DEPENDS ON API!! HALLELUJAH!!
-	// compile group: "gov.ca.cwds.api", name: "api", version: "0.22.928"
-
 	// Exclude transitive dependencies.
-	compile ('gov.ca.cwds.api:api-core:0.28.386') {
+	compile ('gov.ca.cwds.api:api-core:0.28.394') {
 	    exclude group: 'org.glassfish.jersey.core'
         exclude group: 'ch.qos.logback'
         exclude group: 'org.slf4j'
 	}
-	
-  compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
+
+    compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
 	compile group: "javax.el", name: "javax.el-api", version: "2.2.4"
 	compile group: "org.glassfish.web", name: "javax.el", version: "2.2.4"
 	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.8.3'
@@ -75,8 +72,6 @@ dependencies {
 	compile 'com.fasterxml.jackson.module:jackson-module-guice:2.8.2'
     compile group: 'org.json', name: 'json', version: '20090211'
 
-	// compile 'com.landawn:abacus-util:0.9.67'
-    
     compile fileTree(dir: 'lib', include: ['*.jar'])
 
     testCompile group: 'junit', name: 'junit', version: '4.+'
@@ -87,7 +82,7 @@ dependencies {
         exclude group: 'javax.servlet', module: 'javax.servlet-api'
         exclude group: 'junit', module: 'junit'
     }
-    
+
     // https://mvnrepository.com/artifact/nl.jqno.equalsverifier/equalsverifier
     testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
     testCompile 'org.ow2.asm:asm-all:5.1'

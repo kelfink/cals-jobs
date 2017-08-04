@@ -117,7 +117,7 @@ public class ReplicatedOtherAdultInPlacemtHome extends BaseOtherAdultInPlacemtHo
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public String getNormalizationGroupKey() {
     return this.getId();
   }
 

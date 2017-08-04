@@ -131,7 +131,7 @@ public class ReplicatedReporter extends BaseReporter
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public String getNormalizationGroupKey() {
     return this.getPrimaryKey();
   }
 

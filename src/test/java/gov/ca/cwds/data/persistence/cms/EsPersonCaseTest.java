@@ -26,7 +26,7 @@ public class EsPersonCaseTest {
     }
 
     @Override
-    public Object getNormalizationGroupKey() {
+    public String getNormalizationGroupKey() {
       return id;
     }
 

@@ -114,7 +114,7 @@ public class ReplicatedOtherChildInPlacemtHome extends BaseOtherChildInPlacemtHo
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public String getNormalizationGroupKey() {
     return this.getId();
   }
 

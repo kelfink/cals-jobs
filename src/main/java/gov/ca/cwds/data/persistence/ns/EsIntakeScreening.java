@@ -344,7 +344,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
    */
   @Override
   public IntakeParticipant normalize(Map<Object, IntakeParticipant> map) {
-    final String thisPartcId = (String) getNormalizationGroupKey();
+    final String thisPartcId = getNormalizationGroupKey();
 
     IntakeParticipant ret;
 
@@ -445,7 +445,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public String getNormalizationGroupKey() {
     return isNotBlank(thisLegacyId) ? thisLegacyId : thisParticipantId;
   }
 

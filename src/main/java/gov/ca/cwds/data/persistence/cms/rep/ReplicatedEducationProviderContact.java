@@ -114,7 +114,7 @@ public class ReplicatedEducationProviderContact extends BaseEducationProviderCon
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public String getNormalizationGroupKey() {
     return this.getId();
   }
 

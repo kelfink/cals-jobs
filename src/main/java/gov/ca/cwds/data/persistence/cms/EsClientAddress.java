@@ -1596,7 +1596,7 @@ public class EsClientAddress extends ApiObjectIdentity
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public String getNormalizationGroupKey() {
     return this.cltId;
   }
 

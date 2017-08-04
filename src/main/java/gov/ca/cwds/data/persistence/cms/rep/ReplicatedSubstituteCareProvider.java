@@ -124,7 +124,7 @@ public class ReplicatedSubstituteCareProvider extends BaseSubstituteCareProvider
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public String getNormalizationGroupKey() {
     return this.getId();
   }
 

@@ -337,7 +337,7 @@ public class EsPersonReferral extends ApiObjectIdentity
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public String getNormalizationGroupKey() {
     return this.clientId;
   }
 

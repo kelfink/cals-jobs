@@ -117,7 +117,7 @@ public class ReplicatedServiceProvider extends BaseServiceProvider
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public String getNormalizationGroupKey() {
     return this.getId();
   }
 

@@ -65,7 +65,7 @@ public class EsParentPersonCase extends EsPersonCase {
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public String getNormalizationGroupKey() {
     return this.parentPersonId;
   }
 

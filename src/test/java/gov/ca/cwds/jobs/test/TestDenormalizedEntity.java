@@ -30,13 +30,13 @@ public class TestDenormalizedEntity implements ApiGroupNormalizer<TestNormalized
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public String getNormalizationGroupKey() {
     return id;
   }
 
   @Override
   public TestNormalizedEntity normalize(Map<Object, TestNormalizedEntity> map) {
-    final String thisId = (String) getNormalizationGroupKey();
+    final String thisId = getNormalizationGroupKey();
 
     TestNormalizedEntity ret;
 

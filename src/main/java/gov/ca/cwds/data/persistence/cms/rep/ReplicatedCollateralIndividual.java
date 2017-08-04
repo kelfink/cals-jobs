@@ -119,7 +119,7 @@ public class ReplicatedCollateralIndividual extends BaseCollateralIndividual
   }
 
   @Override
-  public Object getNormalizationGroupKey() {
+  public String getNormalizationGroupKey() {
     return this.getId();
   }
 
