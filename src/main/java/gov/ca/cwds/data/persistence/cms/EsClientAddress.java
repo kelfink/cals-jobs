@@ -452,16 +452,6 @@ public class EsClientAddress extends ApiObjectIdentity
   private String adrUnitNumber;
 
   /**
-   * Convert IBM replication operation to enum.
-   * 
-   * @param op replication operation, IUD
-   * @return enumerated type
-   */
-  protected static CmsReplicationOperation strToRepOp(String op) {
-    return op != null ? CmsReplicationOperation.valueOf(op) : null;
-  }
-
-  /**
    * Build an EsClientAddress from an incoming ResultSet.
    * 
    * @param rs incoming tuple
@@ -537,13 +527,13 @@ public class EsClientAddress extends ApiObjectIdentity
     ret.setCltTribalMembrshpVerifctnIndicatorVar(rs.getString("CLT_TR_MBVRT_B"));
     ret.setCltUnemployedParentCode(rs.getString("CLT_UNEMPLY_CD"));
     ret.setCltZippyCreatedIndicator(rs.getString("CLT_ZIPPY_IND"));
-    ret.setCltReplicationOperation(strToRepOp(rs.getString("CLT_IBMSNAP_OPERATION")));
-    ret.setCltReplicationDate(rs.getDate("CLT_IBMSNAP_LOGMARKER"));
     ret.setCltLastUpdatedId(rs.getString("CLT_LST_UPD_ID"));
     ret.setCltLastUpdatedTime(rs.getTimestamp("CLT_LST_UPD_TS"));
 
-    ret.setClaReplicationOperation(strToRepOp(rs.getString("CLA_IBMSNAP_OPERATION")));
-    ret.setClaReplicationDate(rs.getDate("CLA_IBMSNAP_LOGMARKER"));
+    ret.setCltReplicationOperation(
+        CmsReplicationOperation.strToRepOp(rs.getString("CLT_IBMSNAP_OPERATION")));
+    ret.setCltReplicationDate(rs.getDate("CLT_IBMSNAP_LOGMARKER"));
+
     ret.setClaLastUpdatedId(rs.getString("CLA_LST_UPD_ID"));
     ret.setClaLastUpdatedTime(rs.getTimestamp("CLA_LST_UPD_TS"));
     ret.setClaId(rs.getString("CLA_IDENTIFIER"));
@@ -556,9 +546,11 @@ public class EsClientAddress extends ApiObjectIdentity
     ret.setClaEffectiveEndDate(rs.getDate("CLA_EFF_END_DT"));
     ret.setClaEffectiveStartDate(rs.getDate("CLA_EFF_STRTDT"));
 
+    ret.setClaReplicationOperation(
+        CmsReplicationOperation.strToRepOp(rs.getString("CLA_IBMSNAP_OPERATION")));
+    ret.setClaReplicationDate(rs.getDate("CLA_IBMSNAP_LOGMARKER"));
+
     ret.setAdrId(rs.getString("ADR_IDENTIFIER"));
-    ret.setAdrReplicationOperation(strToRepOp(rs.getString("ADR_IBMSNAP_OPERATION")));
-    ret.setAdrReplicationDate(rs.getDate("ADR_IBMSNAP_LOGMARKER"));
     ret.setAdrCity(rs.getString("ADR_CITY_NM"));
     ret.setAdrEmergencyNumber(rs.getBigDecimal("ADR_EMRG_TELNO"));
     ret.setAdrEmergencyExtension(rs.getInt("ADR_EMRG_EXTNO"));
@@ -580,6 +572,10 @@ public class EsClientAddress extends ApiObjectIdentity
     ret.setAdrStreetSuffixCd(rs.getShort("ADR_ST_SFX_C"));
     ret.setAdrUnitDesignationCd(rs.getShort("ADR_UNT_DSGC"));
     ret.setAdrUnitNumber(rs.getString("ADR_UNIT_NO"));
+
+    ret.setAdrReplicationOperation(
+        CmsReplicationOperation.strToRepOp(rs.getString("ADR_IBMSNAP_OPERATION")));
+    ret.setAdrReplicationDate(rs.getDate("ADR_IBMSNAP_LOGMARKER"));
 
     ret.setLastChange(rs.getTimestamp("LAST_CHG"));
 
@@ -677,6 +673,7 @@ public class EsClientAddress extends ApiObjectIdentity
     // Client Address:
     if (StringUtils.isNotBlank(getClaId())) {
       ReplicatedClientAddress rca = new ReplicatedClientAddress();
+      rca.setId(getClaId());
       rca.setAddressType(getClaAddressType());
       rca.setBkInmtId(getClaBkInmtId());
       rca.setEffEndDt(getClaEffectiveEndDate());
@@ -685,16 +682,18 @@ public class EsClientAddress extends ApiObjectIdentity
       rca.setFkClient(getClaFkClient());
       rca.setFkReferral(getClaFkReferral());
       rca.setHomelessInd(getClaHomelessInd());
-      rca.setId(getClaId());
-      ret.setReplicationDate(getClaReplicationDate());
-      ret.setReplicationOperation(getClaReplicationOperation());
+
+      rca.setReplicationDate(getClaReplicationDate());
+      rca.setReplicationOperation(getClaReplicationOperation());
+      rca.setLastUpdatedId(getClaLastUpdatedId());
+      rca.setLastUpdatedTime(getClaLastUpdatedTime());
       ret.addClientAddress(rca);
 
       // Address proper:
       if (StringUtils.isNotBlank(getAdrId())) {
         ReplicatedAddress adr = new ReplicatedAddress();
-        adr.setAddressDescription(getAdrAddressDescription());
         adr.setId(getAdrId());
+        adr.setAddressDescription(getAdrAddressDescription());
         adr.setCity(getAdrCity());
         adr.setEmergencyExtension(getAdrEmergencyExtension());
         adr.setEmergencyNumber(getAdrEmergencyNumber());
@@ -716,8 +715,10 @@ public class EsClientAddress extends ApiObjectIdentity
         adr.setUnitNumber(getAdrUnitNumber());
         adr.setZip(getAdrZip());
         adr.setZip4(getAdrZip4());
+
         adr.setReplicationDate(getAdrReplicationDate());
         adr.setReplicationOperation(getAdrReplicationOperation());
+        adr.setLastUpdatedId(getClaLastUpdatedId());
         adr.setLastUpdatedTime(getClaLastUpdatedTime());
         rca.addAddress(adr);
       }

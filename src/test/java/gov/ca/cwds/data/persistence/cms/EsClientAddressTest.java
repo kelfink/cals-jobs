@@ -188,14 +188,6 @@ public class EsClientAddressTest {
   }
 
   @Test
-  public void strToRepOp_Args__String() throws Exception {
-    String op = null;
-    CmsReplicationOperation actual = EsClientAddress.strToRepOp(op);
-    CmsReplicationOperation expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void extract_Args__ResultSet() throws Exception {
     final EsClientAddress actual = EsClientAddress.extract(rs);
     assertThat(actual, is(notNullValue()));
