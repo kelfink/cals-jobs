@@ -576,7 +576,6 @@ public class EsClientAddress extends ApiObjectIdentity
     ret.setAdrReplicationOperation(
         CmsReplicationOperation.strToRepOp(rs.getString("ADR_IBMSNAP_OPERATION")));
     ret.setAdrReplicationDate(rs.getDate("ADR_IBMSNAP_LOGMARKER"));
-
     ret.setLastChange(rs.getTimestamp("LAST_CHG"));
 
     return ret;
@@ -671,7 +670,8 @@ public class EsClientAddress extends ApiObjectIdentity
     }
 
     // Client Address:
-    if (StringUtils.isNotBlank(getClaId())) {
+    if (StringUtils.isNotBlank(getClaId())
+        && !CmsReplicationOperation.D.equals(getClaReplicationOperation())) {
       ReplicatedClientAddress rca = new ReplicatedClientAddress();
       rca.setId(getClaId());
       rca.setAddressType(getClaAddressType());
@@ -690,7 +690,8 @@ public class EsClientAddress extends ApiObjectIdentity
       ret.addClientAddress(rca);
 
       // Address proper:
-      if (StringUtils.isNotBlank(getAdrId())) {
+      if (StringUtils.isNotBlank(getAdrId())
+          && !CmsReplicationOperation.D.equals(getAdrReplicationOperation())) {
         ReplicatedAddress adr = new ReplicatedAddress();
         adr.setId(getAdrId());
         adr.setAddressDescription(getAdrAddressDescription());
