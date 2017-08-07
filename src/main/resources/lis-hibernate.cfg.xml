@@ -12,5 +12,7 @@
         <property name="hibernate.connection.url">${DB_LIS_JDBC_URL}</property>
         <property name="connection_pool_size">10</property>
         <property name="show_sql">true</property>
+		<property name="format_sql">true</property>
+		<property name="use_sql_comments">false</property>
     </session-factory>
 </hibernate-configuration>
