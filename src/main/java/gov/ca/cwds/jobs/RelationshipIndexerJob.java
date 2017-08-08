@@ -23,13 +23,13 @@ import gov.ca.cwds.data.persistence.cms.EsRelationship;
 import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
- * Job to load various relationships from CMS into ElasticSearch.
+ * Job to load familial relationships from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */
@@ -88,7 +88,7 @@ public class RelationshipIndexerJob
       buf.append(" WHERE x.THIS_SENSITIVITY_IND = 'N' AND x.RELATED_SENSITIVITY_IND = 'N' ");
     }
 
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
   }
 
@@ -105,8 +105,7 @@ public class RelationshipIndexerJob
         buf.append(p.getRelations().stream().map(this::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
-        LOGGER.error("ERROR SERIALIZING RELATIONSHIPS", e);
-        throw new JobsException(e);
+        JobLogUtils.raiseError(LOGGER, e, "ERROR SERIALIZING RELATIONSHIPS! {}", e.getMessage());
       }
     }
 

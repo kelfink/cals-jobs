@@ -20,8 +20,8 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
@@ -93,8 +93,7 @@ public abstract class CaseHistoryIndexerJob
         buf.append(esPersonCasess.stream().map(this::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
-        LOGGER.error("ERROR SERIALIZING CASES", e);
-        throw new JobsException(e);
+        JobLogUtils.raiseError(LOGGER, e, "ERROR SERIALIZING CASES! {}", e.getMessage());
       }
     }
 

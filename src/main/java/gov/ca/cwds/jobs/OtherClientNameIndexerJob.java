@@ -23,8 +23,8 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
@@ -88,8 +88,8 @@ public class OtherClientNameIndexerJob
         buf.append(p.getAkas().stream().map(this::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
-        LOGGER.error("ERROR SERIALIZING OTHER CLIENT NAMES", e);
-        throw new JobsException(e);
+        JobLogUtils.raiseError(LOGGER, e, "ERROR SERIALIZING OTHER CLIENT NAMES! {}",
+            e.getMessage());
       }
     }
 
@@ -139,7 +139,7 @@ public class OtherClientNameIndexerJob
       buf.append(" WHERE x.CLIENT_SENSITIVITY_IND = 'N' ");
     }
 
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
   }
 

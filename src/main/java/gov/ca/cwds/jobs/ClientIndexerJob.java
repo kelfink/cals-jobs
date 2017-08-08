@@ -77,7 +77,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       buf.append(" WHERE x.CLT_SENSTV_IND = 'N' ");
     }
 
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR");
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
   }
 

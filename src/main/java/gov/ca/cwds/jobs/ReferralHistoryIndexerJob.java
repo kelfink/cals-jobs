@@ -89,7 +89,7 @@ public class ReferralHistoryIndexerJob
       buf.append(" WHERE x.LIMITED_ACCESS_CODE = 'N'  ");
     }
 
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
   }
 
