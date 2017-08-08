@@ -882,7 +882,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final String query = getInitialLoadQuery(getDBSchemaName());
       M m;
 
-      con.nativeSQL("SET CURRENT DEGREE = 'ANY'"); // DB2 only
+      /**
+       * Enable parallelism for underlying database
+       */
+      enableParallelism(con);
 
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(5000); // faster
@@ -1671,5 +1674,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected static String getDBSchemaName() {
     return System.getProperty("DB_CMS_SCHEMA");
+  }
+
+  private static void enableParallelism(Connection con) throws SQLException {
+    String dbProductName = con.getMetaData().getDatabaseProductName();
+    if (StringUtils.containsIgnoreCase(dbProductName, "db2")) {
+      con.nativeSQL("SET CURRENT DEGREE = 'ANY'");
+    }
   }
 }
