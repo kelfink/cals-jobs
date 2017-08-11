@@ -1,9 +1,15 @@
 package gov.ca.cwds.data.persistence.cms;
 
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -270,7 +276,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     /**
      * TODO: missing column?
      */
-    CLIENT_SENSITIVITY_IND(COLUMN_TYPE.CHAR),
+    // CLIENT_SENSITIVITY_IND(COLUMN_TYPE.CHAR),
 
     REFERRAL_ID(COLUMN_TYPE.CHAR, (c, r) -> {
       r.setReferralId(c);
@@ -326,7 +332,9 @@ public class EsPersonReferral extends ApiObjectIdentity
 
     REFERRAL_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null),
 
-    // REPORTER_FIRST_NM(COLUMN_TYPE.CHAR), (c, r) -> r.setReporterFirstName(c) ),
+    // REPORTER_FIRST_NM(COLUMN_TYPE.CHAR), (c, r) -> {
+    // r.setReporterFirstName(c);
+    // }),
 
     REPORTER_LAST_NM(COLUMN_TYPE.CHAR),
 
@@ -393,7 +401,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     COLUMN_POSITION(COLUMN_TYPE type) {
       this.type = type;
       this.handler = (c, r) -> {
-        LOGGER.info("No handler for column {}, value: {}", this.name(), c);
+        LOGGER.warn("No handler for column {}, value: {}", this.name(), c);
       };
     }
 
@@ -846,8 +854,10 @@ public class EsPersonReferral extends ApiObjectIdentity
   }
 
   public static void main(String[] args) {
-    try {
-
+    Path pathIn = Paths.get(args[0]);
+    try (Stream<String> lines = Files.lines(pathIn)) {
+      final List<EsPersonReferral> rawReferrals =
+          lines.sequential().map(EsPersonReferral::parseLine).collect(Collectors.toList());
     } catch (Exception e) {
       e.printStackTrace();
     }
