@@ -504,9 +504,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     COLUMN_POSITION(COLUMN_TYPE type, BiConsumer<String, EsPersonReferral> handler) {
       this.type = type;
       this.handler = handler;
-      this.dateHandler = (c, r) -> {
-        LOGGER.debug("DEFAULT DATE HANDLER. column: {}", this.name());
-      };
+      this.dateHandler = null;
       this.intHandler = null;
     }
 
