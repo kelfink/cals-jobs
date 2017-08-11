@@ -238,17 +238,23 @@ public class EsPersonReferral extends ApiObjectIdentity
 
   public static enum COLUMN_TYPE {
 
+    /**
+     * Any String value.
+     */
     CHAR,
 
+    /**
+     * Integer, conforms to short.
+     */
     SMALLINT,
 
     /**
-     * 2005-11-08
+     * Format: 2005-11-08
      */
     DATE,
 
     /**
-     * 2017-08-04 14:39:17.021616
+     * Format: 2017-08-04 14:39:17.021616
      */
     TIMESTAMP
   }
@@ -313,11 +319,11 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setWorkerId(c);
     }),
 
-    START_DATE(COLUMN_TYPE.DATE, null, (c, r) -> {
+    START_DATE(COLUMN_TYPE.DATE, new Date(), (c, r) -> {
       r.setStartDate(c);
     }),
 
-    END_DATE(COLUMN_TYPE.DATE, null, (c, r) -> {
+    END_DATE(COLUMN_TYPE.DATE, new Date(), (c, r) -> {
       r.setEndDate(c);
     }),
 
@@ -329,7 +335,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setLimitedAccessCode(c);
     }),
 
-    LIMITED_ACCESS_DATE(COLUMN_TYPE.DATE, null, (c, r) -> {
+    LIMITED_ACCESS_DATE(COLUMN_TYPE.DATE, new Date(), (c, r) -> {
       r.setLimitedAccessDate(c);
     }),
 
@@ -337,11 +343,11 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setLimitedAccessDescription(c);
     }),
 
-    LIMITED_ACCESS_GOVERNMENT_ENT(COLUMN_TYPE.SMALLINT, (c, r) -> {
-      r.setLimitedAccessGovernmentEntityId(parseInteger(c));
+    LIMITED_ACCESS_GOVERNMENT_ENT(COLUMN_TYPE.SMALLINT, 1, (c, r) -> {
+      r.setLimitedAccessGovernmentEntityId(c);
     }),
 
-    REFERRAL_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null, (c, r) -> {
+    REFERRAL_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
       r.setReferralLastUpdated(c);
     }),
 
@@ -353,7 +359,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setReporterLastName(c);
     }),
 
-    REPORTER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null, (c, r) -> {
+    REPORTER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
       r.setReporterLastUpdated(c);
     }),
 
@@ -365,7 +371,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setWorkerLastName(c);
     }),
 
-    WORKER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null, (c, r) -> {
+    WORKER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
       r.setWorkerLastUpdated(c);
     }),
 
@@ -381,7 +387,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setVictimLastName(c);
     }),
 
-    VICTIM_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null, (c, r) -> {
+    VICTIM_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
       r.setVictimLastUpdated(c);
     }),
 
@@ -397,7 +403,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setPerpetratorLastName(c);
     }),
 
-    PERPETRATOR_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null, (c, r) -> {
+    PERPETRATOR_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
       r.setPerpetratorLastUpdated(c);
     }),
 
@@ -406,15 +412,15 @@ public class EsPersonReferral extends ApiObjectIdentity
      */
     REFERRAL_COUNTY(COLUMN_TYPE.SMALLINT),
 
-    ALLEGATION_DISPOSITION(COLUMN_TYPE.SMALLINT, (c, r) -> {
-      r.setAllegationDisposition(parseInteger(c));
+    ALLEGATION_DISPOSITION(COLUMN_TYPE.SMALLINT, 1, (c, r) -> {
+      r.setAllegationDisposition(c);
     }),
 
-    ALLEGATION_TYPE(COLUMN_TYPE.SMALLINT, (c, r) -> {
-      r.setAllegationType(parseInteger(c));
+    ALLEGATION_TYPE(COLUMN_TYPE.SMALLINT, 1, (c, r) -> {
+      r.setAllegationType(c);
     }),
 
-    ALLEGATION_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null, (c, r) -> {
+    ALLEGATION_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
       r.setAllegationLastUpdated(c);
     }),
 
@@ -484,14 +490,15 @@ public class EsPersonReferral extends ApiObjectIdentity
 
     private final BiConsumer<Date, EsPersonReferral> dateHandler;
 
+    private final BiConsumer<Integer, EsPersonReferral> intHandler;
+
     COLUMN_POSITION(COLUMN_TYPE type) {
       this.type = type;
       this.handler = (c, r) -> {
         LOGGER.debug("No handler for column: {}, value: {}", this.name(), c);
       };
-      this.dateHandler = (c, r) -> {
-        LOGGER.debug("DEFAULT DATE HANDLER. column: {}", this.name());
-      };
+      this.dateHandler = null;
+      this.intHandler = null;
     }
 
     COLUMN_POSITION(COLUMN_TYPE type, BiConsumer<String, EsPersonReferral> handler) {
@@ -500,13 +507,23 @@ public class EsPersonReferral extends ApiObjectIdentity
       this.dateHandler = (c, r) -> {
         LOGGER.debug("DEFAULT DATE HANDLER. column: {}", this.name());
       };
+      this.intHandler = null;
     }
 
-    COLUMN_POSITION(COLUMN_TYPE type, BiConsumer<String, EsPersonReferral> handler,
+    COLUMN_POSITION(COLUMN_TYPE type, Date wastedParamForRuntimeTypeErasure,
         BiConsumer<Date, EsPersonReferral> dateHandler) {
       this.type = type;
-      this.handler = handler;
+      this.handler = null;
       this.dateHandler = dateHandler;
+      this.intHandler = null;
+    }
+
+    COLUMN_POSITION(COLUMN_TYPE type, Integer whyNotStoreTypeInfoAtRuntimeSillyJava,
+        BiConsumer<Integer, EsPersonReferral> intHandler) {
+      this.type = type;
+      this.handler = null;
+      this.dateHandler = null;
+      this.intHandler = intHandler;
     }
 
     private final void handle(String c, EsPersonReferral ref) {
@@ -516,6 +533,8 @@ public class EsPersonReferral extends ApiObjectIdentity
             this.dateHandler.accept(parseTimestamp(c), ref);
           } else if (this.type == COLUMN_TYPE.DATE && this.dateHandler != null) {
             this.dateHandler.accept(parseDate(c), ref);
+          } else if (this.type == COLUMN_TYPE.SMALLINT && this.intHandler != null) {
+            this.intHandler.accept(parseInteger(c), ref);
           } else if (this.handler != null) {
             this.handler.accept(c, ref);
           }
@@ -530,6 +549,12 @@ public class EsPersonReferral extends ApiObjectIdentity
       COLUMN_POSITION.values()[pos].handle(col, ref);
     }
 
+    /**
+     * Parse a line from a tab delimited file.
+     * 
+     * @param line line to parse
+     * @return fresh to EsPersonReferral
+     */
     public static final EsPersonReferral parse(String line) {
       EsPersonReferral ret = new EsPersonReferral();
 
@@ -543,6 +568,12 @@ public class EsPersonReferral extends ApiObjectIdentity
 
   }
 
+  /**
+   * Parse a line from a tab delimited file.
+   * 
+   * @param line line to parse
+   * @return fresh to EsPersonReferral
+   */
   public static EsPersonReferral parseLine(String line) {
     return EsPersonReferral.COLUMN_POSITION.parse(line);
   }
