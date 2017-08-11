@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -252,8 +253,21 @@ public class EsPersonReferral extends ApiObjectIdentity
     TIMESTAMP
   }
 
+  public static Date uncookStrictTimestampString(String s) {
+    String trimTimestamp = StringUtils.trim(s);
+    if (StringUtils.isNotEmpty(trimTimestamp)) {
+      try {
+        final Timestamp ts = Timestamp.valueOf(s);
+        return new Date(ts.getTime());
+      } catch (Exception e) {
+        throw e;
+      }
+    }
+    return null;
+  }
+
   static Date parseTimestamp(String s) {
-    return DomainChef.uncookStrictTimestampString(s);
+    return uncookStrictTimestampString(s);
   }
 
   static Date parseDate(String s) {
@@ -264,19 +278,16 @@ public class EsPersonReferral extends ApiObjectIdentity
     return StringUtils.isNotBlank(s) ? Integer.parseInt(s) : null;
   }
 
-  static final BiConsumer<String, EsPersonReferral> dummyHandler = (c, r) -> {
-  };
-
-  public static enum COLUMN_POSITION {
+  public enum COLUMN_POSITION {
 
     CLIENT_ID(COLUMN_TYPE.CHAR, (c, r) -> {
       r.setClientId(c);
     }),
 
     /**
-     * TODO: missing column?
+     * TODO: missing column.
      */
-    // CLIENT_SENSITIVITY_IND(COLUMN_TYPE.CHAR),
+    CLIENT_SENSITIVITY_IND(COLUMN_TYPE.CHAR),
 
     REFERRAL_ID(COLUMN_TYPE.CHAR, (c, r) -> {
       r.setReferralId(c);
@@ -307,7 +318,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     }),
 
     END_DATE(COLUMN_TYPE.DATE, (c, r) -> {
-      r.setStartDate(parseDate(c));
+      r.setEndDate(parseDate(c));
     }),
 
     REFERRAL_RESPONSE_TYPE(COLUMN_TYPE.SMALLINT, (c, r) -> {
@@ -330,78 +341,148 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setLimitedAccessGovernmentEntityId(parseInteger(c));
     }),
 
-    REFERRAL_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null),
+    REFERRAL_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, (c, r) -> {
+      r.setReferralLastUpdated(parseTimestamp(c));
+    }),
 
-    // REPORTER_FIRST_NM(COLUMN_TYPE.CHAR), (c, r) -> {
-    // r.setReporterFirstName(c);
-    // }),
+    REPORTER_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setReporterFirstName(c);
+    }),
 
-    REPORTER_LAST_NM(COLUMN_TYPE.CHAR),
+    REPORTER_LAST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setReporterLastName(c);
+    }),
 
-    REPORTER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null),
+    REPORTER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, (c, r) -> {
+      r.setReporterLastUpdated(parseTimestamp(c));
+    }),
 
-    WORKER_FIRST_NM(COLUMN_TYPE.CHAR),
+    WORKER_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setWorkerFirstName(c);
+    }),
 
-    WORKER_LAST_NM(COLUMN_TYPE.CHAR),
+    WORKER_LAST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setWorkerLastName(c);
+    }),
 
-    WORKER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP),
+    WORKER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, (c, r) -> {
+      r.setWorkerLastUpdated(parseTimestamp(c));
+    }),
 
-    VICTIM_SENSITIVITY_IND(COLUMN_TYPE.CHAR),
+    VICTIM_SENSITIVITY_IND(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setVictimSensitivityIndicator(c);
+    }),
 
-    VICTIM_FIRST_NM(COLUMN_TYPE.CHAR),
+    VICTIM_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setVictimFirstName(c);
+    }),
 
-    VICTIM_LAST_NM(COLUMN_TYPE.CHAR),
+    VICTIM_LAST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setVictimLastName(c);
+    }),
 
-    VICTIM_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP),
+    VICTIM_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, (c, r) -> {
+      r.setVictimLastUpdated(parseTimestamp(c));
+    }),
 
-    PERPETRATOR_SENSITIVITY_IND(COLUMN_TYPE.CHAR),
+    PERPETRATOR_SENSITIVITY_IND(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setPerpetratorSensitivityIndicator(c);
+    }),
 
-    PERPETRATOR_FIRST_NM(COLUMN_TYPE.CHAR),
+    PERPETRATOR_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setPerpetratorFirstName(c);
+    }),
 
-    PERPETRATOR_LAST_NM(COLUMN_TYPE.CHAR),
+    PERPETRATOR_LAST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setPerpetratorLastName(c);
+    }),
 
-    PERPETRATOR_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP),
+    PERPETRATOR_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, (c, r) -> {
+      r.setPerpetratorLastUpdated(parseTimestamp(c));
+    }),
 
     REFERRAL_COUNTY(COLUMN_TYPE.SMALLINT),
 
-    ALLEGATION_DISPOSITION(COLUMN_TYPE.SMALLINT),
+    ALLEGATION_DISPOSITION(COLUMN_TYPE.SMALLINT, (c, r) -> {
+      r.setAllegationDisposition(parseInteger(c));
+    }),
 
-    ALLEGATION_TYPE(COLUMN_TYPE.SMALLINT),
+    ALLEGATION_TYPE(COLUMN_TYPE.SMALLINT, (c, r) -> {
+      r.setAllegationType(parseInteger(c));
+    }),
 
-    ALLEGATION_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP),
+    ALLEGATION_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, (c, r) -> {
+      r.setAllegationLastUpdated(parseTimestamp(c));
+    }),
 
+    /**
+     * In MQT but not in ES person document.
+     */
     RFL_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
 
+    /**
+     * In MQT but not in ES person document.
+     */
     RFL_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
 
+    /**
+     * In MQT but not in ES person document.
+     */
     STP_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
 
+    /**
+     * In MQT but not in ES person document.
+     */
     STP_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
 
+    /**
+     * In MQT but not in ES person document.
+     */
     RPT_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
 
+    /**
+     * In MQT but not in ES person document.
+     */
     RPT_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
 
+    /**
+     * In MQT but not in ES person document.
+     */
     ALG_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
 
+    /**
+     * In MQT but not in ES person document.
+     */
     ALG_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
 
+    /**
+     * In MQT but not in ES person document.
+     */
     CLV_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
 
+    /**
+     * In MQT but not in ES person document.
+     */
     CLV_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
 
+    /**
+     * In MQT but not in ES person document.
+     */
     CLP_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
 
+    /**
+     * In MQT but not in ES person document.
+     */
     CLP_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR);
 
-    final COLUMN_TYPE type;
+    private final COLUMN_TYPE type;
 
-    final BiConsumer<String, EsPersonReferral> handler;
+    private final BiConsumer<String, EsPersonReferral> handler;
 
     COLUMN_POSITION(COLUMN_TYPE type) {
       this.type = type;
       this.handler = (c, r) -> {
-        LOGGER.warn("No handler for column {}, value: {}", this.name(), c);
+        LOGGER.debug("No handler for column: {}, value: {}", this.name(), c);
       };
     }
 
@@ -414,9 +495,14 @@ public class EsPersonReferral extends ApiObjectIdentity
       return type;
     }
 
-    public final void handle(String col, EsPersonReferral ref) {
-      if (this.handler != null && StringUtils.isNotBlank(col)) {
-        this.handler.accept(col, ref);
+    public final void handle(String c, EsPersonReferral ref) {
+      try {
+        if (this.handler != null && StringUtils.isNotBlank(c)) {
+          this.handler.accept(c, ref);
+        }
+      } catch (Exception e) {
+        LOGGER.error("FAILED TO PARSE! column: {}, value: {}", this.name(), c);
+        throw e;
       }
     }
 
@@ -528,7 +614,6 @@ public class EsPersonReferral extends ApiObjectIdentity
     perpetrator.setLastName(this.perpetratorLastName);
     perpetrator.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.perpetratorId,
         this.perpetratorLastUpdated, LegacyTable.CLIENT));
-    // perpetrator.setSensitivityIndicator(this.perpetratorSensitivityIndicator);
     allegation.setPerpetrator(perpetrator);
 
     allegation.setPerpetratorId(this.perpetratorId);
@@ -542,7 +627,6 @@ public class EsPersonReferral extends ApiObjectIdentity
     victim.setLastName(this.victimLastName);
     victim.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.victimId,
         this.victimLastUpdated, LegacyTable.CLIENT));
-    // victim.setSensitivityIndicator(this.victimSensitivityIndicator);
     allegation.setVictim(victim);
 
     allegation.setVictimId(this.victimId);
@@ -856,10 +940,14 @@ public class EsPersonReferral extends ApiObjectIdentity
   public static void main(String[] args) {
     Path pathIn = Paths.get(args[0]);
     try (Stream<String> lines = Files.lines(pathIn)) {
-      final List<EsPersonReferral> rawReferrals =
+      // Maintain file order by client, referral.
+      final List<EsPersonReferral> results =
           lines.sequential().map(EsPersonReferral::parseLine).collect(Collectors.toList());
+      results.stream().forEach(t -> {
+        LOGGER.info("Raw Referral: {}", t);
+      });
     } catch (Exception e) {
-      e.printStackTrace();
+      LOGGER.error("Oops!", e);
     }
   }
 
