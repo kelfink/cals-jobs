@@ -3,17 +3,21 @@ package gov.ca.cwds.data.persistence.cms;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.es.ElasticSearchAccessLimitation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
@@ -65,6 +69,8 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         resultClass = EsPersonReferral.class, readOnly = true)})
 public class EsPersonReferral extends ApiObjectIdentity
     implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(EsPersonReferral.class);
 
   private static final long serialVersionUID = -2265057057202257108L;
 
@@ -223,6 +229,210 @@ public class EsPersonReferral extends ApiObjectIdentity
   // REDUCE:
   // =============
 
+  public static enum COLUMN_TYPE {
+
+    CHAR,
+
+    SMALLINT,
+
+    /**
+     * 2005-11-08
+     */
+    DATE,
+
+    /**
+     * 2017-08-04 14:39:17.021616
+     */
+    TIMESTAMP
+  }
+
+  static Date parseTimestamp(String s) {
+    return DomainChef.uncookStrictTimestampString(s);
+  }
+
+  static Date parseDate(String s) {
+    return DomainChef.uncookDateString(s);
+  }
+
+  static Integer parseInteger(String s) {
+    return StringUtils.isNotBlank(s) ? Integer.parseInt(s) : null;
+  }
+
+  static final BiConsumer<String, EsPersonReferral> dummyHandler = (c, r) -> {
+  };
+
+  public static enum COLUMN_POSITION {
+
+    CLIENT_ID(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setClientId(c);
+    }),
+
+    /**
+     * TODO: missing column?
+     */
+    CLIENT_SENSITIVITY_IND(COLUMN_TYPE.CHAR),
+
+    REFERRAL_ID(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setReferralId(c);
+    }),
+
+    ALLEGATION_ID(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setAllegationId(c);
+    }),
+
+    VICTIM_ID(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setVictimId(c);
+    }),
+
+    PERPETRATOR_ID(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setPerpetratorId(c);
+    }),
+
+    REPORTER_ID(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setReporterId(c);
+    }),
+
+    WORKER_ID(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setWorkerId(c);
+    }),
+
+    START_DATE(COLUMN_TYPE.DATE, (c, r) -> {
+      r.setStartDate(parseDate(c));
+    }),
+
+    END_DATE(COLUMN_TYPE.DATE, (c, r) -> {
+      r.setStartDate(parseDate(c));
+    }),
+
+    REFERRAL_RESPONSE_TYPE(COLUMN_TYPE.SMALLINT, (c, r) -> {
+      r.setReferralResponseType(parseInteger(c));
+    }),
+
+    LIMITED_ACCESS_CODE(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setLimitedAccessCode(c);
+    }),
+
+    LIMITED_ACCESS_DATE(COLUMN_TYPE.DATE, (c, r) -> {
+      r.setLimitedAccessDate(parseDate(c));
+    }),
+
+    LIMITED_ACCESS_DESCRIPTION(COLUMN_TYPE.CHAR, (c, r) -> {
+      r.setLimitedAccessDescription(c);
+    }),
+
+    LIMITED_ACCESS_GOVERNMENT_ENT(COLUMN_TYPE.SMALLINT, (c, r) -> {
+      r.setLimitedAccessGovernmentEntityId(parseInteger(c));
+    }),
+
+    REFERRAL_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null),
+
+    // REPORTER_FIRST_NM(COLUMN_TYPE.CHAR), (c, r) -> r.setReporterFirstName(c) ),
+
+    REPORTER_LAST_NM(COLUMN_TYPE.CHAR),
+
+    REPORTER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null),
+
+    WORKER_FIRST_NM(COLUMN_TYPE.CHAR),
+
+    WORKER_LAST_NM(COLUMN_TYPE.CHAR),
+
+    WORKER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP),
+
+    VICTIM_SENSITIVITY_IND(COLUMN_TYPE.CHAR),
+
+    VICTIM_FIRST_NM(COLUMN_TYPE.CHAR),
+
+    VICTIM_LAST_NM(COLUMN_TYPE.CHAR),
+
+    VICTIM_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP),
+
+    PERPETRATOR_SENSITIVITY_IND(COLUMN_TYPE.CHAR),
+
+    PERPETRATOR_FIRST_NM(COLUMN_TYPE.CHAR),
+
+    PERPETRATOR_LAST_NM(COLUMN_TYPE.CHAR),
+
+    PERPETRATOR_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP),
+
+    REFERRAL_COUNTY(COLUMN_TYPE.SMALLINT),
+
+    ALLEGATION_DISPOSITION(COLUMN_TYPE.SMALLINT),
+
+    ALLEGATION_TYPE(COLUMN_TYPE.SMALLINT),
+
+    ALLEGATION_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP),
+
+    RFL_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
+
+    RFL_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
+
+    STP_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
+
+    STP_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
+
+    RPT_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
+
+    RPT_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
+
+    ALG_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
+
+    ALG_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
+
+    CLV_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
+
+    CLV_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
+
+    CLP_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
+
+    CLP_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR);
+
+    final COLUMN_TYPE type;
+
+    final BiConsumer<String, EsPersonReferral> handler;
+
+    COLUMN_POSITION(COLUMN_TYPE type) {
+      this.type = type;
+      this.handler = (c, r) -> {
+        LOGGER.info("No handler for column {}, value: {}", this.name(), c);
+      };
+    }
+
+    COLUMN_POSITION(COLUMN_TYPE type, BiConsumer<String, EsPersonReferral> handler) {
+      this.type = type;
+      this.handler = handler;
+    }
+
+    public final COLUMN_TYPE getType() {
+      return type;
+    }
+
+    public final void handle(String col, EsPersonReferral ref) {
+      if (this.handler != null && StringUtils.isNotBlank(col)) {
+        this.handler.accept(col, ref);
+      }
+    }
+
+    public static final void handleColumn(int pos, String col, EsPersonReferral ref) {
+      COLUMN_POSITION.values()[pos].handle(col, ref);
+    }
+
+    public static final EsPersonReferral parse(String line) {
+      EsPersonReferral ret = new EsPersonReferral();
+
+      int pos = 0;
+      for (String c : line.split("\t")) {
+        COLUMN_POSITION.handleColumn(pos++, c, ret);
+      }
+
+      return ret;
+    }
+
+  }
+
+  public static EsPersonReferral parseLine(String line) {
+    return EsPersonReferral.COLUMN_POSITION.parse(line);
+  }
+
   @Override
   public Class<ReplicatedPersonReferrals> getNormalizationClass() {
     return ReplicatedPersonReferrals.class;
@@ -236,20 +446,20 @@ public class EsPersonReferral extends ApiObjectIdentity
       map.put(this.clientId, referrals);
     }
 
-    ElasticSearchPersonReferral referral = new ElasticSearchPersonReferral();
+    ElasticSearchPersonReferral r = new ElasticSearchPersonReferral();
 
-    referral.setId(this.referralId);
-    referral.setLegacyId(this.referralId);
-    referral.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.referralLastUpdated));
-    referral.setStartDate(DomainChef.cookDate(this.startDate));
-    referral.setEndDate(DomainChef.cookDate(this.endDate));
-    referral.setCountyId(this.county == null ? null : this.county.toString());
-    referral.setCountyName(SystemCodeCache.global().getSystemCodeShortDescription(this.county));
-    referral.setResponseTimeId(
+    r.setId(this.referralId);
+    r.setLegacyId(this.referralId);
+    r.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.referralLastUpdated));
+    r.setStartDate(DomainChef.cookDate(this.startDate));
+    r.setEndDate(DomainChef.cookDate(this.endDate));
+    r.setCountyId(this.county == null ? null : this.county.toString());
+    r.setCountyName(SystemCodeCache.global().getSystemCodeShortDescription(this.county));
+    r.setResponseTimeId(
         this.referralResponseType == null ? null : this.referralResponseType.toString());
-    referral.setResponseTime(
+    r.setResponseTime(
         SystemCodeCache.global().getSystemCodeShortDescription(this.referralResponseType));
-    referral.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.referralId,
+    r.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.referralId,
         this.referralLastUpdated, LegacyTable.REFERRAL));
 
     //
@@ -262,7 +472,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     reporter.setLastName(this.reporterLastName);
     reporter.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.reporterId,
         this.reporterLastUpdated, LegacyTable.REPORTER));
-    referral.setReporter(reporter);
+    r.setReporter(reporter);
 
     //
     // Assigned Worker
@@ -274,7 +484,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     assignedWorker.setLastName(this.workerLastName);
     assignedWorker.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
         this.workerLastUpdated, LegacyTable.STAFF_PERSON));
-    referral.setAssignedSocialWorker(assignedWorker);
+    r.setAssignedSocialWorker(assignedWorker);
 
     //
     // Access Limitation
@@ -287,7 +497,7 @@ public class EsPersonReferral extends ApiObjectIdentity
         ? null : this.limitedAccessGovernmentEntityId.toString());
     accessLimit.setLimitedAccessGovernmentEntityName(SystemCodeCache.global()
         .getSystemCodeShortDescription(this.limitedAccessGovernmentEntityId));
-    referral.setAccessLimitation(accessLimit);
+    r.setAccessLimitation(accessLimit);
 
     //
     // A referral may have more than one allegations
@@ -332,7 +542,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     allegation.setVictimFirstName(this.victimFirstName);
     allegation.setVictimLastName(this.victimLastName);
 
-    referrals.addReferral(referral, allegation);
+    referrals.addReferral(r, allegation);
     return referrals;
   }
 
@@ -633,6 +843,14 @@ public class EsPersonReferral extends ApiObjectIdentity
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE, false);
+  }
+
+  public static void main(String[] args) {
+    try {
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
 }

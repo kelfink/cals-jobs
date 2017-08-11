@@ -423,7 +423,7 @@ public class JobOptions implements Serializable {
       printUsage();
       LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
       throw new JobsException("Error parsing command line: " + e.getMessage(), e);
-    } catch (java.text.ParseException e) {
+    } catch (java.text.ParseException e) { // NOSONAR
       printUsage();
       LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
       throw new JobsException("Error parsing command line: " + e.getMessage(), e);
