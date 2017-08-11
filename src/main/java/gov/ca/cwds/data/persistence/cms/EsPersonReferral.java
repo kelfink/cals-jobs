@@ -313,12 +313,12 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setWorkerId(c);
     }),
 
-    START_DATE(COLUMN_TYPE.DATE, (c, r) -> {
-      r.setStartDate(parseDate(c));
+    START_DATE(COLUMN_TYPE.DATE, null, (c, r) -> {
+      r.setStartDate(c);
     }),
 
-    END_DATE(COLUMN_TYPE.DATE, (c, r) -> {
-      r.setEndDate(parseDate(c));
+    END_DATE(COLUMN_TYPE.DATE, null, (c, r) -> {
+      r.setEndDate(c);
     }),
 
     REFERRAL_RESPONSE_TYPE(COLUMN_TYPE.SMALLINT, (c, r) -> {
@@ -329,8 +329,8 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setLimitedAccessCode(c);
     }),
 
-    LIMITED_ACCESS_DATE(COLUMN_TYPE.DATE, (c, r) -> {
-      r.setLimitedAccessDate(parseDate(c));
+    LIMITED_ACCESS_DATE(COLUMN_TYPE.DATE, null, (c, r) -> {
+      r.setLimitedAccessDate(c);
     }),
 
     LIMITED_ACCESS_DESCRIPTION(COLUMN_TYPE.CHAR, (c, r) -> {
@@ -341,8 +341,8 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setLimitedAccessGovernmentEntityId(parseInteger(c));
     }),
 
-    REFERRAL_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, (c, r) -> {
-      r.setReferralLastUpdated(parseTimestamp(c));
+    REFERRAL_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null, (c, r) -> {
+      r.setReferralLastUpdated(c);
     }),
 
     REPORTER_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
@@ -353,8 +353,8 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setReporterLastName(c);
     }),
 
-    REPORTER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, (c, r) -> {
-      r.setReporterLastUpdated(parseTimestamp(c));
+    REPORTER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null, (c, r) -> {
+      r.setReporterLastUpdated(c);
     }),
 
     WORKER_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
@@ -365,8 +365,8 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setWorkerLastName(c);
     }),
 
-    WORKER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, (c, r) -> {
-      r.setWorkerLastUpdated(parseTimestamp(c));
+    WORKER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null, (c, r) -> {
+      r.setWorkerLastUpdated(c);
     }),
 
     VICTIM_SENSITIVITY_IND(COLUMN_TYPE.CHAR, (c, r) -> {
@@ -381,8 +381,8 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setVictimLastName(c);
     }),
 
-    VICTIM_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, (c, r) -> {
-      r.setVictimLastUpdated(parseTimestamp(c));
+    VICTIM_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null, (c, r) -> {
+      r.setVictimLastUpdated(c);
     }),
 
     PERPETRATOR_SENSITIVITY_IND(COLUMN_TYPE.CHAR, (c, r) -> {
@@ -397,10 +397,13 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setPerpetratorLastName(c);
     }),
 
-    PERPETRATOR_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, (c, r) -> {
-      r.setPerpetratorLastUpdated(parseTimestamp(c));
+    PERPETRATOR_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null, (c, r) -> {
+      r.setPerpetratorLastUpdated(c);
     }),
 
+    /**
+     * Not in MQT but will be needed for authorization.
+     */
     REFERRAL_COUNTY(COLUMN_TYPE.SMALLINT),
 
     ALLEGATION_DISPOSITION(COLUMN_TYPE.SMALLINT, (c, r) -> {
@@ -411,8 +414,8 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setAllegationType(parseInteger(c));
     }),
 
-    ALLEGATION_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, (c, r) -> {
-      r.setAllegationLastUpdated(parseTimestamp(c));
+    ALLEGATION_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, null, (c, r) -> {
+      r.setAllegationLastUpdated(c);
     }),
 
     /**
@@ -479,26 +482,43 @@ public class EsPersonReferral extends ApiObjectIdentity
 
     private final BiConsumer<String, EsPersonReferral> handler;
 
+    private final BiConsumer<Date, EsPersonReferral> dateHandler;
+
     COLUMN_POSITION(COLUMN_TYPE type) {
       this.type = type;
       this.handler = (c, r) -> {
         LOGGER.debug("No handler for column: {}, value: {}", this.name(), c);
+      };
+      this.dateHandler = (c, r) -> {
+        LOGGER.debug("DEFAULT DATE HANDLER. column: {}", this.name());
       };
     }
 
     COLUMN_POSITION(COLUMN_TYPE type, BiConsumer<String, EsPersonReferral> handler) {
       this.type = type;
       this.handler = handler;
+      this.dateHandler = (c, r) -> {
+        LOGGER.debug("DEFAULT DATE HANDLER. column: {}", this.name());
+      };
     }
 
-    public final COLUMN_TYPE getType() {
-      return type;
+    COLUMN_POSITION(COLUMN_TYPE type, BiConsumer<String, EsPersonReferral> handler,
+        BiConsumer<Date, EsPersonReferral> dateHandler) {
+      this.type = type;
+      this.handler = handler;
+      this.dateHandler = dateHandler;
     }
 
-    public final void handle(String c, EsPersonReferral ref) {
+    private final void handle(String c, EsPersonReferral ref) {
       try {
-        if (this.handler != null && StringUtils.isNotBlank(c)) {
-          this.handler.accept(c, ref);
+        if (StringUtils.isNotBlank(c)) {
+          if (this.type == COLUMN_TYPE.TIMESTAMP && this.dateHandler != null) {
+            this.dateHandler.accept(parseTimestamp(c), ref);
+          } else if (this.type == COLUMN_TYPE.DATE && this.dateHandler != null) {
+            this.dateHandler.accept(parseDate(c), ref);
+          } else if (this.handler != null) {
+            this.handler.accept(c, ref);
+          }
         }
       } catch (Exception e) {
         LOGGER.error("FAILED TO PARSE! column: {}, value: {}", this.name(), c);
@@ -506,7 +526,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       }
     }
 
-    public static final void handleColumn(int pos, String col, EsPersonReferral ref) {
+    private static final void handleColumn(int pos, String col, EsPersonReferral ref) {
       COLUMN_POSITION.values()[pos].handle(col, ref);
     }
 
