@@ -236,7 +236,7 @@ public class EsPersonReferral extends ApiObjectIdentity
   // REDUCE:
   // =============
 
-  public static enum COLUMN_TYPE {
+  public enum COLUMN_TYPE {
 
     /**
      * Any String value.
@@ -259,7 +259,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     TIMESTAMP
   }
 
-  public static Date uncookStrictTimestampString(String s) {
+  static Date parseTimestamp(String s) {
     String trimTimestamp = StringUtils.trim(s);
     if (StringUtils.isNotEmpty(trimTimestamp)) {
       try {
@@ -270,10 +270,6 @@ public class EsPersonReferral extends ApiObjectIdentity
       }
     }
     return null;
-  }
-
-  static Date parseTimestamp(String s) {
-    return uncookStrictTimestampString(s);
   }
 
   static Date parseDate(String s) {
@@ -422,67 +418,67 @@ public class EsPersonReferral extends ApiObjectIdentity
 
     ALLEGATION_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
       r.setAllegationLastUpdated(c);
-    }),
+    });
 
-    /**
-     * In MQT but not in ES person document.
-     */
-    RFL_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
-
-    /**
-     * In MQT but not in ES person document.
-     */
-    RFL_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
-
-    /**
-     * In MQT but not in ES person document.
-     */
-    STP_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
-
-    /**
-     * In MQT but not in ES person document.
-     */
-    STP_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
-
-    /**
-     * In MQT but not in ES person document.
-     */
-    RPT_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
-
-    /**
-     * In MQT but not in ES person document.
-     */
-    RPT_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
-
-    /**
-     * In MQT but not in ES person document.
-     */
-    ALG_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
-
-    /**
-     * In MQT but not in ES person document.
-     */
-    ALG_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
-
-    /**
-     * In MQT but not in ES person document.
-     */
-    CLV_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
-
-    /**
-     * In MQT but not in ES person document.
-     */
-    CLV_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
-
-    /**
-     * In MQT but not in ES person document.
-     */
-    CLP_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
-
-    /**
-     * In MQT but not in ES person document.
-     */
-    CLP_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR);
+    // /**
+    // * In MQT but not in ES person document.
+    // */
+    // RFL_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
+    //
+    // /**
+    // * In MQT but not in ES person document.
+    // */
+    // RFL_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
+    //
+    // /**
+    // * In MQT but not in ES person document.
+    // */
+    // STP_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
+    //
+    // /**
+    // * In MQT but not in ES person document.
+    // */
+    // STP_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
+    //
+    // /**
+    // * In MQT but not in ES person document.
+    // */
+    // RPT_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
+    //
+    // /**
+    // * In MQT but not in ES person document.
+    // */
+    // RPT_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
+    //
+    // /**
+    // * In MQT but not in ES person document.
+    // */
+    // ALG_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
+    //
+    // /**
+    // * In MQT but not in ES person document.
+    // */
+    // ALG_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
+    //
+    // /**
+    // * In MQT but not in ES person document.
+    // */
+    // CLV_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
+    //
+    // /**
+    // * In MQT but not in ES person document.
+    // */
+    // CLV_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR),
+    //
+    // /**
+    // * In MQT but not in ES person document.
+    // */
+    // CLP_IBMSNAP_LOGMARKER(COLUMN_TYPE.TIMESTAMP),
+    //
+    // /**
+    // * In MQT but not in ES person document.
+    // */
+    // CLP_IBMSNAP_OPERATION(COLUMN_TYPE.CHAR);
 
     private final COLUMN_TYPE type;
 
@@ -492,7 +488,7 @@ public class EsPersonReferral extends ApiObjectIdentity
 
     private final BiConsumer<Integer, EsPersonReferral> intHandler;
 
-    COLUMN_POSITION(COLUMN_TYPE type) {
+    private COLUMN_POSITION(COLUMN_TYPE type) {
       this.type = type;
       this.handler = (c, r) -> {
         LOGGER.debug("No handler for column: {}, value: {}", this.name(), c);
@@ -501,14 +497,14 @@ public class EsPersonReferral extends ApiObjectIdentity
       this.intHandler = null;
     }
 
-    COLUMN_POSITION(COLUMN_TYPE type, BiConsumer<String, EsPersonReferral> handler) {
+    private COLUMN_POSITION(COLUMN_TYPE type, BiConsumer<String, EsPersonReferral> handler) {
       this.type = type;
       this.handler = handler;
       this.dateHandler = null;
       this.intHandler = null;
     }
 
-    COLUMN_POSITION(COLUMN_TYPE type, Date wastedParamForRuntimeTypeErasure,
+    private COLUMN_POSITION(COLUMN_TYPE type, Date wastedParamForRuntimeTypeErasure,
         BiConsumer<Date, EsPersonReferral> dateHandler) {
       this.type = type;
       this.handler = null;
@@ -516,7 +512,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       this.intHandler = null;
     }
 
-    COLUMN_POSITION(COLUMN_TYPE type, Integer whyNotStoreTypeInfoAtRuntimeSillyJava,
+    private COLUMN_POSITION(COLUMN_TYPE type, Integer whyNotStoreTypeInfoAtRuntimeSillyJava,
         BiConsumer<Integer, EsPersonReferral> intHandler) {
       this.type = type;
       this.handler = null;
@@ -543,8 +539,18 @@ public class EsPersonReferral extends ApiObjectIdentity
       }
     }
 
+    private static final int COLUMN_POSITION_SIZE = COLUMN_POSITION.values().length;
+
     private static final void handleColumn(int pos, String col, EsPersonReferral ref) {
-      COLUMN_POSITION.values()[pos].handle(col, ref);
+      // Handle by column position.
+      try {
+        if (pos < COLUMN_POSITION_SIZE) {
+          COLUMN_POSITION.values()[pos].handle(col, ref);
+        }
+      } catch (Exception e) {
+        LOGGER.error("FAILED TO HANDLE COLUMN! pos: {}, col: {}", pos, col);
+        throw e;
+      }
     }
 
     /**
@@ -553,7 +559,7 @@ public class EsPersonReferral extends ApiObjectIdentity
      * @param line line to parse
      * @return fresh to EsPersonReferral
      */
-    public static final EsPersonReferral parse(String line) {
+    private static final EsPersonReferral parse(String line) {
       EsPersonReferral ret = new EsPersonReferral();
 
       int pos = 0;
