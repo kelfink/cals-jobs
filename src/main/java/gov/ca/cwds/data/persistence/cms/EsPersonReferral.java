@@ -35,6 +35,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
+import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -80,6 +81,8 @@ public class EsPersonReferral extends ApiObjectIdentity
   private static final Logger LOGGER = LoggerFactory.getLogger(EsPersonReferral.class);
 
   private static final long serialVersionUID = -2265057057202257108L;
+
+  private static final int COLUMN_POSITION_SIZE = COLUMN_POSITION.values().length;
 
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)
@@ -539,8 +542,6 @@ public class EsPersonReferral extends ApiObjectIdentity
       }
     }
 
-    private static final int COLUMN_POSITION_SIZE = COLUMN_POSITION.values().length;
-
     private static final void handleColumn(int pos, String col, EsPersonReferral ref) {
       // Handle by column position.
       try {
@@ -572,6 +573,8 @@ public class EsPersonReferral extends ApiObjectIdentity
 
   }
 
+  private static int linesProcessed = 0;
+
   /**
    * Parse a line from a tab delimited file.
    * 
@@ -579,6 +582,7 @@ public class EsPersonReferral extends ApiObjectIdentity
    * @return fresh to EsPersonReferral
    */
   public static EsPersonReferral parseLine(String line) {
+    JobLogUtils.logEvery(LOGGER, ++linesProcessed, "parse line", "nuttin");
     return EsPersonReferral.COLUMN_POSITION.parse(line);
   }
 
@@ -998,9 +1002,11 @@ public class EsPersonReferral extends ApiObjectIdentity
       // Maintain file order by client, referral.
       final List<EsPersonReferral> results =
           lines.sequential().map(EsPersonReferral::parseLine).collect(Collectors.toList());
-      results.stream().forEach(t -> {
-        LOGGER.info("Raw Referral: {}", t);
-      });
+
+      // results.stream().forEach(t -> {
+      // LOGGER.info("Raw Referral: {}", t);
+      // });
+
     } catch (Exception e) {
       LOGGER.error("Oops!", e);
     }
