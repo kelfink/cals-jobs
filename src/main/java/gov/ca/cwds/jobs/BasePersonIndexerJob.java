@@ -888,7 +888,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       enableParallelism(con);
 
       try (Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(5000); // faster
+        stmt.setFetchSize(25000); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(100000);
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
