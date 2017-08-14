@@ -148,19 +148,18 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     LOGGER.info("DONE: Extract " + i);
   }
 
-  protected Thread startExtractThread(final Pair<String, String> p) {
-    Thread t = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        runJdbcThread(p);
-      }
-    });
+  private Thread startExtractThread(final Pair<String, String> p) {
+    Runnable runner = () -> { // NOSONAR
+      runJdbcThread(p);
+    };
+
+    Thread t = new Thread(runner);
     threads.push(t);
     t.start();
     return t;
   }
 
-  private void waitOnThread(Thread t) {
+  private void waitOnThread(Thread t) { // NOSONAR
     try {
       t.join();
     } catch (InterruptedException ie) { // NOSONAR
@@ -197,6 +196,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   protected List<Pair<String, String>> getPartitionRanges() {
     List<Pair<String, String>> ret = new ArrayList<>();
 
+    // z/OS:
     ret.add(Pair.of(" ", "B3bMRWu8NV"));
     ret.add(Pair.of("B3bMRWu8NV", "DW5GzxJ30A"));
     ret.add(Pair.of("DW5GzxJ30A", "FNOBbaG6qq"));
