@@ -40,6 +40,7 @@ public class JobOptions implements Serializable {
   public static final String CMD_LINE_INDEX_NAME = "index-name";
   public static final String CMD_LINE_LAST_RUN_TIME = "last-run-time";
   public static final String CMD_LINE_LAST_RUN_FILE = "last-run-file";
+  public static final String CMD_LINE_ALT_INPUT_FILE = "alt-input-file";
   public static final String CMD_LINE_BUCKET_RANGE = "bucket-range";
   public static final String CMD_LINE_BUCKET_TOTAL = "total-buckets";
   public static final String CMD_LINE_THREADS = "thread-num";
@@ -67,6 +68,11 @@ public class JobOptions implements Serializable {
    * Location of last run file.
    */
   final String lastRunLoc;
+
+  /**
+   * Location of alternate input file.
+   */
+  String altInputFile = "junk";
 
   /**
    * Whether to run in periodic "last run" mode or "initial" mode. Defaults to true.
@@ -127,10 +133,11 @@ public class JobOptions implements Serializable {
    * @param totalBuckets total buckets
    * @param threadCount number of simultaneous threads
    * @param loadSealedAndSensitive If true then load sealed and sensitive data
+   * @param altInputFile alternate input file
    */
   JobOptions(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
       boolean lastRunMode, long startBucket, long endBucket, long totalBuckets, long threadCount,
-      String minId, String maxId, boolean loadSealedAndSensitive) {
+      String minId, String maxId, boolean loadSealedAndSensitive, String altInputFile) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
     this.lastRunTime = lastRunTime;
@@ -143,6 +150,7 @@ public class JobOptions implements Serializable {
     this.minId = minId;
     this.maxId = maxId;
     this.loadSealedAndSensitive = loadSealedAndSensitive;
+    this.altInputFile = altInputFile;
   }
 
   /**
@@ -301,6 +309,7 @@ public class JobOptions implements Serializable {
     ret.addOption(JobCmdLineOption.MIN_ID.getOpt());
     ret.addOption(JobCmdLineOption.MAX_ID.getOpt());
     ret.addOption(JobCmdLineOption.LOAD_SEALED_SENSITIVE.getOpt());
+    ret.addOption(JobCmdLineOption.ALT_INPUT_FILE.getOpt());
 
     // RUN MODE: mutually exclusive choice.
     OptionGroup group = new OptionGroup();
@@ -341,6 +350,7 @@ public class JobOptions implements Serializable {
     String indexName = null;
     Date lastRunTime = null;
     String lastRunLoc = null;
+    String altInputLoc = "junk";
     boolean lastRunMode = false;
     long startBucket = 0L;
     long endBucket = 0L;
@@ -375,6 +385,11 @@ public class JobOptions implements Serializable {
             String lastRunTimeStr = opt.getValue().trim();
             lastRunTime = createDate(lastRunTimeStr);
             LOGGER.info("last run time = " + lastRunTimeStr);
+            break;
+
+          case CMD_LINE_ALT_INPUT_FILE:
+            altInputLoc = opt.getValue().trim();
+            LOGGER.info("alternate input file = " + altInputLoc);
             break;
 
           case CMD_LINE_LAST_RUN_FILE:
@@ -430,7 +445,7 @@ public class JobOptions implements Serializable {
     }
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode, startBucket,
-        endBucket, totalBuckets, threadCount, minId, maxId, loadSealedAndSensitive);
+        endBucket, totalBuckets, threadCount, minId, maxId, loadSealedAndSensitive, altInputLoc);
   }
 
   public void setStartBucket(long startBucket) {
@@ -461,6 +476,10 @@ public class JobOptions implements Serializable {
     this.indexName = indexName;
   }
 
+  public String getAltInputFile() {
+    return altInputFile;
+  }
+
   private static Date createDate(String timestamp) throws java.text.ParseException {
     Date date = null;
     String trimTimestamp = StringUtils.trim(timestamp);
@@ -470,4 +489,5 @@ public class JobOptions implements Serializable {
     }
     return date;
   }
+
 }

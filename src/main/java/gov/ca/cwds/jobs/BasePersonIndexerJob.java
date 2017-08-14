@@ -389,8 +389,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected static synchronized Injector buildInjector(final JobOptions opts) throws JobsException {
     if (injector == null) {
       try {
-        injector = Guice.createInjector(
-            new JobsGuiceInjector(new File(opts.getEsConfigLoc()), opts.getLastRunLoc()));
+        injector = Guice.createInjector(new JobsGuiceInjector(new File(opts.getEsConfigLoc()),
+            opts.getLastRunLoc(), opts.getAltInputFile()));
 
         /**
          * Initialize system code cache

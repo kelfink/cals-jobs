@@ -54,9 +54,8 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
    * Lambda convenience method.
    * 
    * @param r referral to hand to next queue
-   * @return the referral
    */
-  protected EsPersonReferral handOff(final EsPersonReferral r) {
+  protected void handOff(final EsPersonReferral r) {
     try {
       if (r != null) {
         queueTransform.putLast(r);
@@ -65,7 +64,6 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "Hand off failed! {}", e.getMessage());
     }
-    return r;
   }
 
   @Override
@@ -77,7 +75,7 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
     try (Stream<String> lines = Files.lines(pathIn)) {
 
       // Maintain file order by client, referral.
-      lines.sequential().map(EsPersonReferral::parseLine).map(this::handOff);
+      lines.sequential().map(EsPersonReferral::parseLine).forEach(this::handOff);
 
     } catch (Exception e) {
       fatalError = true;
