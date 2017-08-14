@@ -57,7 +57,7 @@ dependencies {
 	compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.0.0-rc4"
 
 	// Exclude transitive dependencies.
-	compile ('gov.ca.cwds.api:api-core:0.28.398') {
+	compile ('gov.ca.cwds.api:api-core:3.6.400') {
 	    exclude group: 'org.glassfish.jersey.core'
         exclude group: 'ch.qos.logback'
         exclude group: 'org.slf4j'
