@@ -174,7 +174,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     LOGGER.info("BEGIN: main extract");
 
     try {
-      getPartitionRanges().parallelStream().map(this::startExtractThread)
+      getPartitionRanges().stream().sequential().map(this::startExtractThread)
           .forEach(this::waitOnThread);
     } catch (Exception e) {
       fatalError = true;

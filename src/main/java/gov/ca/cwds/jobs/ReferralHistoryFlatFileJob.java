@@ -85,7 +85,7 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
     Thread.currentThread().setName("extract_" + i);
     LOGGER.info("BEGIN: flat file extract " + i);
 
-    final Path pathIn = Paths.get(altInputFilenames[i]);
+    final Path pathIn = Paths.get(s);
     try (Stream<String> lines = Files.lines(pathIn)) {
       lines.sequential().forEach(this::handOff);
     } catch (Exception e) {
@@ -111,8 +111,6 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
       LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
       fatalError = true;
       Thread.currentThread().interrupt();
-    } finally {
-      doneExtract = true;
     }
   }
 
@@ -122,12 +120,13 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
     LOGGER.info("BEGIN: flat file extract");
 
     List<String> filenames = new ArrayList<>();
-    for (String s : filenames) {
+    for (String s : this.altInputFilenames) {
       filenames.add(s);
     }
 
     try {
-      filenames.parallelStream().map(this::startExtractThread).forEach(this::waitOnThread);
+      filenames.stream().sequential().forEach(this::startExtractThread);
+      // filenames.stream().sequential().map(this::runExtractThread).forEach(this::waitOnThread);
     } catch (Exception e) { // NOSONAR
       LOGGER.warn("ERROR!: {}", e.getMessage(), e);
       fatalError = true;

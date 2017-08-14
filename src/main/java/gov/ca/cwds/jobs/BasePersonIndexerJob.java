@@ -228,7 +228,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected volatile boolean doneTransform = false;
 
   /**
-   * Completion flag for <strong>Load</strong> method {@link #threadLoad()}.
+   * Completion flag for <strong>Load</strong> method {@link #threadIndex()}.
    */
   protected volatile boolean doneLoad = false;
 
@@ -830,7 +830,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       new Thread(this::threadExtractJdbc).start(); // Extract
       new Thread(this::threadTransform).start(); // Transform
-      new Thread(this::threadLoad).start(); // Load
+      new Thread(this::threadIndex).start(); // Load
 
       while (!(fatalError || (doneExtract && doneTransform && doneLoad))) {
         LOGGER.debug("runInitialLoad: sleep");
@@ -973,13 +973,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * The "load" part of ETL. Read from normalized record queue and push to ES.
    */
-  protected void threadLoad() {
-    Thread.currentThread().setName("load");
+  protected void threadIndex() {
+    Thread.currentThread().setName("index");
     final BulkProcessor bp = buildBulkProcessor();
     int cntr = 0;
     T t;
 
-    LOGGER.warn("BEGIN: Stage #3: Load");
+    LOGGER.warn("BEGIN: Stage #3: Index");
     try {
       while (!(fatalError || (doneExtract && doneTransform && queueLoad.isEmpty()))) {
         while ((t = queueLoad.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
@@ -1020,7 +1020,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       doneLoad = true;
     }
 
-    LOGGER.warn("DONE: Stage #3: ES loader");
+    LOGGER.warn("DONE: Stage #3: ES Index");
   }
 
   // =================

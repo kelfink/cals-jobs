@@ -471,7 +471,7 @@ public class BasePersonIndexerJobTest {
   // @Test
   public void threadLoad_Args__() throws Exception {
     runKillThread();
-    target.threadLoad();
+    target.threadIndex();
   }
 
   // @Test
