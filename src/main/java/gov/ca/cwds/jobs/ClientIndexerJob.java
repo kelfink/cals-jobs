@@ -4,9 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -42,9 +40,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientIndexerJob.class);
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
-
-  final Deque<Thread> threads = new ArrayDeque<>();
-
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -154,7 +149,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     };
 
     Thread t = new Thread(runner);
-    threads.push(t);
     t.start();
     return t;
   }

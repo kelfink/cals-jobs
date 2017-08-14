@@ -3,8 +3,8 @@ package gov.ca.cwds.jobs;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -80,7 +80,7 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
   /**
    * Launch an extract thread for a single file. Maintain file order by client id and referral id.
    */
-  protected void startExtractThread() {
+  protected void runExtractThread(String s) {
     final int i = nextThreadNum.getAndIncrement();
     Thread.currentThread().setName("extract_" + i);
     LOGGER.info("BEGIN: flat file extract " + i);
@@ -96,27 +96,43 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
     LOGGER.info("DONE: flat file extract " + i);
   }
 
+  private Thread startExtractThread(final String s) {
+    Thread t = new Thread(() -> { // NOSONAR
+      runExtractThread(s);
+    });
+    t.start();
+    return t;
+  }
+
+  private void waitOnThread(Thread t) { // NOSONAR
+    try {
+      t.join();
+    } catch (InterruptedException ie) { // NOSONAR
+      LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
+      fatalError = true;
+      Thread.currentThread().interrupt();
+    } finally {
+      doneExtract = true;
+    }
+  }
+
   @Override
   protected void threadExtractJdbc() {
     Thread.currentThread().setName("extract");
     LOGGER.info("BEGIN: flat file extract");
 
-    final Deque<Thread> threads = new ArrayDeque<>();
-    for (int i = 0; i < this.altInputFilenames.length; i++) {
-      Thread t = new Thread(this::startExtractThread);
-      threads.push(t);
-      t.start();
+    List<String> filenames = new ArrayList<>();
+    for (String s : filenames) {
+      filenames.add(s);
     }
 
-    Thread t;
     try {
-      while ((t = threads.pop()) != null) {
-        t.join();
-      }
-    } catch (InterruptedException ie) { // NOSONAR
-      LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
+      filenames.parallelStream().map(this::startExtractThread).forEach(this::waitOnThread);
+    } catch (Exception e) { // NOSONAR
+      LOGGER.warn("ERROR!: {}", e.getMessage(), e);
       fatalError = true;
       Thread.currentThread().interrupt();
+      throw e;
     } finally {
       doneExtract = true;
     }
