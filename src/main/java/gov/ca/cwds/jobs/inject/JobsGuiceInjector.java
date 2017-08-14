@@ -80,6 +80,7 @@ public class JobsGuiceInjector extends AbstractModule {
 
   private File esConfig;
   private String lastJobRunTimeFilename;
+  private String altInputFilename;
 
   /**
    * Default constructor.
@@ -163,6 +164,7 @@ public class JobsGuiceInjector extends AbstractModule {
 
     // Required for annotation injection.
     bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
+    bindConstant().annotatedWith(AltInputFile.class).to(this.altInputFilename);
 
     bind(SystemCodeDao.class);
     bind(SystemMetaDao.class);

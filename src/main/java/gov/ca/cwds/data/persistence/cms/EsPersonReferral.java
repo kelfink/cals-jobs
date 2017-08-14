@@ -84,6 +84,8 @@ public class EsPersonReferral extends ApiObjectIdentity
 
   private static final int COLUMN_POSITION_SIZE = COLUMN_POSITION.values().length;
 
+  private static int linesProcessed = 0;
+
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)
   private Date lastChange;
@@ -573,8 +575,6 @@ public class EsPersonReferral extends ApiObjectIdentity
 
   }
 
-  private static int linesProcessed = 0;
-
   /**
    * Parse a line from a tab delimited file.
    * 
@@ -582,8 +582,9 @@ public class EsPersonReferral extends ApiObjectIdentity
    * @return fresh to EsPersonReferral
    */
   public static EsPersonReferral parseLine(String line) {
-    JobLogUtils.logEvery(LOGGER, ++linesProcessed, "parse line", "nuttin");
-    return EsPersonReferral.COLUMN_POSITION.parse(line);
+    final EsPersonReferral ret = EsPersonReferral.COLUMN_POSITION.parse(line);
+    JobLogUtils.logEvery(LOGGER, ++linesProcessed, "parse line", ret);
+    return ret;
   }
 
   @Override
