@@ -888,7 +888,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       enableParallelism(con);
 
       try (Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(25000); // faster
+        stmt.setFetchSize(15000); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(100000);
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
@@ -1676,7 +1676,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return System.getProperty("DB_CMS_SCHEMA");
   }
 
-  private static void enableParallelism(Connection con) throws SQLException {
+  protected static void enableParallelism(Connection con) throws SQLException {
     String dbProductName = con.getMetaData().getDatabaseProductName();
     if (StringUtils.containsIgnoreCase(dbProductName, "db2")) {
       con.nativeSQL("SET CURRENT DEGREE = 'ANY'");
