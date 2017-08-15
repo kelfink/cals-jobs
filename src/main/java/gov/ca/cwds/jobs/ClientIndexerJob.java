@@ -226,7 +226,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   protected List<Pair<String, String>> getPartitionRanges() {
     List<Pair<String, String>> ret = new ArrayList<>();
 
-    if (getDBSchemaName().endsWith("RSQ") || getDBSchemaName().endsWith("REP")) {
+    if (getDBSchemaName().toUpperCase().endsWith("RSQ")
+        || getDBSchemaName().toUpperCase().endsWith("REP")) {
       // ----------------------------
       // z/OS, large data set:
       // ORDER: a,z,A,Z,0,9
