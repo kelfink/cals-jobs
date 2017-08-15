@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -95,11 +94,17 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     return buf.toString();
   }
 
+  /**
+   * Hand off all recs for same client id at same time.
+   * 
+   * @param grpRecs recs for same client id
+   */
   protected void handOff(List<EsClientAddress> grpRecs) {
     try {
       lock.readLock().unlock();
       lock.writeLock().lock();
       for (EsClientAddress cla : grpRecs) {
+        LOGGER.trace("lock: queueTransform.putLast: client id {}", cla.getCltId());
         queueTransform.putLast(cla);
       }
       lock.readLock().lock();
@@ -112,6 +117,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     }
   }
 
+  /**
+   * Read recs from a single partition.
+   * 
+   * @param p partition range to read
+   */
   protected void extractPartitionRange(final Pair<String, String> p) {
     final int i = nextThreadNum.incrementAndGet();
     Thread.currentThread().setName("extract_" + i);
@@ -124,8 +134,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       con.setAutoCommit(false);
       con.setReadOnly(true); // WARNING: fails with Postgres.
 
-      // Linux MQT lacks ORDER BY clause. Must sort manually.
-      // Either detect platform or force ORDER BY clause.
       final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
           .replaceAll(":toId", p.getRight());
       enableParallelism(con);
@@ -184,12 +192,14 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
     try {
       final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 2);
-      // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
-      // String.valueOf(maxThreads));
       LOGGER.info("JDBC processors={}", maxThreads);
-      ForkJoinPool forkJoinPool = new ForkJoinPool(maxThreads);
-      forkJoinPool
-          .submit(() -> getPartitionRanges().parallelStream().forEach(this::extractPartitionRange));
+
+      // ForkJoinPool forkJoinPool = new ForkJoinPool(maxThreads);
+      // forkJoinPool.submit(() ->
+      // getPartitionRanges().parallelStream().forEach(this::extractPartitionRange)
+      getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange)
+      // )
+      ;
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());

@@ -35,6 +35,8 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.common.unit.ByteSizeUnit;
+import org.elasticsearch.common.unit.ByteSizeValue;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -116,7 +118,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int DEFAULT_BATCH_WAIT = 25;
   private static final int DEFAULT_BUCKETS = 1;
 
-  private static final int ES_BULK_SIZE = 3000;
+  private static final int ES_BULK_SIZE = 5000;
 
   private static final int SLEEP_MILLIS = 2500;
   private static final int POLL_MILLIS = 5000;
@@ -230,6 +232,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected volatile boolean doneLoad = false;
 
+  /**
+   * Read/write lock for extract threads and sources, such as JDBC, Hibernate, or even flat files.
+   */
   protected final ReadWriteLock lock;
 
   // ======================
@@ -351,13 +356,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
         recsBulkBefore.getAndAdd(request.numberOfActions());
-        LOGGER.warn("Ready to execute bulk of {} actions", request.numberOfActions());
+        LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
       }
 
       @Override
       public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
         recsBulkAfter.getAndAdd(request.numberOfActions());
-        LOGGER.warn("Executed bulk of {} actions", request.numberOfActions());
+        LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
       }
 
       @Override
@@ -365,7 +370,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         recsBulkError.getAndIncrement();
         LOGGER.error("ERROR EXECUTING BULK", failure);
       }
-    }).setBulkActions(ES_BULK_SIZE).setConcurrentRequests(1).setName("jobs_bp").build();
+    }).setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(12, ByteSizeUnit.MB))
+        .setConcurrentRequests(1).setName("jobs_bp").build();
   }
 
   // ======================
@@ -825,6 +831,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       Thread t1 = new Thread(this::threadExtractJdbc); // Extract
       Thread t2 = new Thread(this::threadTransform); // Transform
       Thread t3 = new Thread(this::threadIndex); // Index
+      t3.setPriority(7);
 
       t1.start();
       t2.start();
@@ -948,6 +955,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
           grpRecs.add(m);
           lastId = m.getNormalizationGroupKey();
+          Thread.yield();
         }
 
         // Last bundle.
@@ -1022,15 +1030,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.info("Closed ES bulk processor");
 
     } catch (InterruptedException e) { // NOSONAR
-      LOGGER.warn("Publisher interrupted!");
+      LOGGER.warn("Indexer interrupted!");
       fatalError = true;
       Thread.currentThread().interrupt();
     } catch (JsonProcessingException e) {
       fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "Publisher: JsonProcessingException {}", e.getMessage());
+      JobLogUtils.raiseError(LOGGER, e, "Indexer: JsonProcessingException {}", e.getMessage());
     } catch (Exception e) {
       fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "Publisher: fatal error {}", e.getMessage());
+      JobLogUtils.raiseError(LOGGER, e, "Indexer: fatal error {}", e.getMessage());
     } finally {
       doneLoad = true;
     }
@@ -1172,7 +1180,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 8);
       // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
       // String.valueOf(maxThreads));
-      // LOGGER.info("Processors={}", maxThreads);
+      // LOGGER.info("Run settings: processors={}", maxThreads);
 
       /**
        * If index name is provided then use it, otherwise use alias from ES config.
