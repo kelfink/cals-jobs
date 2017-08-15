@@ -8,6 +8,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -62,7 +63,6 @@ import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
 import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
-import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -204,7 +204,10 @@ public class JobsGuiceInjector extends AbstractModule {
         final ElasticsearchConfiguration config = elasticSearchConfig();
         Settings.Builder settings =
             Settings.builder().put("cluster.name", config.getElasticsearchCluster());
-        client = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
+        // DRS: requires ES 5.5.x.
+        // client = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
+        client = new PreBuiltTransportClient(
+            Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build());
         client.addTransportAddress(
             new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
                 Integer.parseInt(config.getElasticsearchPort())));

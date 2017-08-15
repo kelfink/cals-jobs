@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -90,22 +91,24 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       buf.append(" AND x.CLT_SENSTV_IND = 'N' ");
     }
 
-    buf.append(getJdbcOrderBy()).append(" WITH UR ");
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
   }
 
   protected void handOff(List<EsClientAddress> grpRecs) {
     try {
-      lock.lockInterruptibly();
+      lock.readLock().unlock();
+      lock.writeLock().lock();
       for (EsClientAddress cla : grpRecs) {
         queueTransform.putLast(cla);
       }
+      lock.readLock().lock();
     } catch (InterruptedException ie) { // NOSONAR
       LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
       fatalError = true;
       Thread.currentThread().interrupt();
     } finally {
-      lock.unlock();
+      lock.writeLock().unlock();
     }
   }
 
@@ -136,7 +139,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         stmt.setFetchSize(5000); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(100000);
+
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
+        lock.readLock().lock();
 
         while (!fatalError && rs.next() && (m = extract(rs)) != null) {
           // Hand the baton to the next runner ...
@@ -154,6 +159,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         con.commit();
       } finally {
         // Statement closes automatically.
+        lock.readLock().unlock();
+
+        // Close connection, return to pool?
         jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
             .getService(ConnectionProvider.class).closeConnection(con);
       }
@@ -171,11 +179,17 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    */
   @Override
   protected void threadExtractJdbc() {
-    Thread.currentThread().setName("extract");
-    LOGGER.info("BEGIN: main extract");
+    Thread.currentThread().setName("extract_main");
+    LOGGER.info("BEGIN: main extract thread");
 
     try {
-      getPartitionRanges().parallelStream().forEach(this::extractPartitionRange);
+      final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 4);
+      // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+      // String.valueOf(maxThreads));
+      LOGGER.info("JDBC processors={}", maxThreads);
+      ForkJoinPool forkJoinPool = new ForkJoinPool(maxThreads);
+      forkJoinPool.submit(
+          () -> getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange));
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
@@ -183,7 +197,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       doneExtract = true;
     }
 
-    LOGGER.info("DONE: Stage #1: Extract");
+    LOGGER.info("DONE: main extract thread");
   }
 
   @Override

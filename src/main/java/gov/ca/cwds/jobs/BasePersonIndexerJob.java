@@ -20,10 +20,8 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import javax.persistence.Table;
@@ -118,10 +116,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int DEFAULT_BATCH_WAIT = 25;
   private static final int DEFAULT_BUCKETS = 1;
 
-  private static final int ES_BULK_SIZE = 4000;
+  private static final int ES_BULK_SIZE = 3000;
 
   private static final int SLEEP_MILLIS = 2500;
-  private static final int POLL_MILLIS = 3000;
+  private static final int POLL_MILLIS = 5000;
 
   /**
    * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it
@@ -206,12 +204,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Queue of raw, denormalized records waiting to be normalized.
    */
-  protected LinkedBlockingDeque<M> queueTransform = new LinkedBlockingDeque<>(250000);
+  protected LinkedBlockingDeque<M> queueTransform = new LinkedBlockingDeque<>(150000);
 
   /**
    * Queue of normalized records waiting to publish to Elasticsearch.
    */
-  protected LinkedBlockingDeque<T> queueLoad = new LinkedBlockingDeque<>(150000);
+  protected LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(150000);
 
   /**
    * Completion flag for <strong>Extract</strong> method {@link #threadExtractJdbc()}.
@@ -232,8 +230,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected volatile boolean doneLoad = false;
 
-  protected final Lock lock;
-  protected final Condition condition;
+  protected final ReadWriteLock lock;
 
   // ======================
   // CONSTRUCTOR:
@@ -258,10 +255,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     this.mapper = mapper;
     this.sessionFactory = sessionFactory;
 
-    lock = new ReentrantLock();
-    condition = lock.newCondition();
-
-    java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.INFO);
+    lock = new ReentrantReadWriteLock(false);
   }
 
   /**
@@ -371,7 +365,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         recsBulkError.getAndIncrement();
         LOGGER.error("ERROR EXECUTING BULK", failure);
       }
-    }).setBulkActions(ES_BULK_SIZE).setConcurrentRequests(0).setName("jobs_bp").build();
+    }).setBulkActions(ES_BULK_SIZE).setConcurrentRequests(1).setName("jobs_bp").build();
   }
 
   // ======================
@@ -828,12 +822,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected void doInitialLoadJdbc() throws IOException {
     Thread.currentThread().setName("main");
     try {
-      new Thread(this::threadExtractJdbc).start(); // Extract
-      new Thread(this::threadTransform).start(); // Transform
+      Thread t1 = new Thread(this::threadExtractJdbc); // Extract
+      Thread t2 = new Thread(this::threadTransform); // Transform
+      Thread t3 = new Thread(this::threadIndex); // Index
 
-      Thread t3 = new Thread(this::threadIndex);
-      // t3.setPriority(Thread.MAX_PRIORITY);
-      t3.start(); // Load
+      t1.start();
+      t2.start();
+      t3.start();
 
       while (!(fatalError || (doneExtract && doneTransform && doneLoad))) {
         LOGGER.debug("runInitialLoad: sleep");
@@ -847,6 +842,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           LOGGER.warn("Hibernate keep-alive error: {}", e.getMessage());
         }
       }
+
+      t1.join();
+      t2.join();
+      t3.join();
 
       Thread.sleep(SLEEP_MILLIS);
       this.close();
@@ -943,7 +942,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           // End of group. Normalize these group recs.
           if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1
               && (t = normalizeSingle(grpRecs)) != null) {
-            queueLoad.putLast(t);
+            queueIndex.putLast(t);
             grpRecs.clear(); // Single thread, re-use memory.
           }
 
@@ -953,7 +952,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
         // Last bundle.
         if (!grpRecs.isEmpty() && (t = normalizeSingle(grpRecs)) != null) {
-          queueLoad.putLast(t);
+          queueIndex.putLast(t);
           grpRecs.clear(); // Single thread, re-use memory.
         }
 
@@ -972,6 +971,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     LOGGER.info("DONE: Stage #2: Transform");
   }
 
+  protected void bulkPrepare(final BulkProcessor bp, int cntr)
+      throws IOException, InterruptedException {
+    T t;
+    while ((t = queueIndex.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
+      JobLogUtils.logEvery(++cntr, "Indexed", "recs to ES");
+      prepareDocument(bp, t);
+    }
+  }
+
   /**
    * The "load" part of ETL. Read from normalized record queue and push to ES.
    */
@@ -983,18 +991,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     LOGGER.warn("BEGIN: Stage #3: Index");
     try {
-      while (!(fatalError || (doneExtract && doneTransform && queueLoad.isEmpty()))) {
-        while ((t = queueLoad.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
-          JobLogUtils.logEvery(++cntr, "Published", "recs to ES");
-          prepareDocument(bp, t);
-        }
+      while (!fatalError || !(doneExtract && doneTransform && queueIndex.isEmpty())) {
+        bulkPrepare(bp, cntr);
       }
 
       // Just to be sure ...
-      while ((t = queueLoad.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
-        JobLogUtils.logEvery(++cntr, "Published", "recs to ES");
-        prepareDocument(bp, t);
-      }
+      bulkPrepare(bp, cntr);
 
       LOGGER.info("Flush ES bulk processor ...");
       bp.flush();
@@ -1157,10 +1159,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 2);
-      System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
-          String.valueOf(maxThreads));
-      LOGGER.info("Processors={}", maxThreads);
+      // final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 8);
+      // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+      // String.valueOf(maxThreads));
+      // LOGGER.info("Processors={}", maxThreads);
 
       /**
        * If index name is provided then use it, otherwise use alias from ES config.
