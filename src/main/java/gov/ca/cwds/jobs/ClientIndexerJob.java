@@ -172,8 +172,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         lock.readLock().unlock();
 
         // Close connection, return to pool?
-        jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
-            .getService(ConnectionProvider.class).closeConnection(con);
+        // jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
+        // .getService(ConnectionProvider.class).closeConnection(con);
       }
 
     } catch (Exception e) {
@@ -193,6 +193,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     LOGGER.info("BEGIN: main extract thread");
 
     try {
+      // CHALLENGE: parallel stream blocks the indexer thread somehow. Weird.
+      // But one reader thread works fine. Go figure.
+
       // final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 2);
       // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
       // String.valueOf(maxThreads));
@@ -202,8 +205,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       // forkJoinPool
       // .submit(() -> getPartitionRanges().parallelStream().forEach(this::extractPartitionRange));
 
-      // CHALLENGE: parallel stream blocks the indexer thread somehow. Weird.
-      // But this "roll your own" approach works fine. Go figure.
       final ForkJoinPool pool = new ForkJoinPool(1);
       for (Pair<String, String> pair : getPartitionRanges()) {
         LOGGER.info("submit partition pair: {},{}", pair.getLeft(), pair.getRight());
@@ -224,39 +225,59 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   protected List<Pair<String, String>> getPartitionRanges() {
     List<Pair<String, String>> ret = new ArrayList<>();
 
-    // z/OS:
-    ret.add(Pair.of("aaaaaaaaaa", "IDPEFPYCqG"));
-    ret.add(Pair.of("AecfYcR6ob", "Jazpdsz9Bz"));
-    ret.add(Pair.of("AhToAin36B", "JGwYL7F6vU"));
-    ret.add(Pair.of("AlLFYp730A", "JKkhRsT2PS"));
-    ret.add(Pair.of("ApFkob8AAz", "Kc6lWFcDiO"));
-    ret.add(Pair.of("Auw35HvJPy", "La3VJ8m6ec"));
-    ret.add(Pair.of("AymVbqn5Cx", "L29oFXo0Z6"));
-    ret.add(Pair.of("ACD6P5jA05", "L6XCNzNAkK"));
-    ret.add(Pair.of("AG1q7l3JEF", "Ojz475ILTa"));
-    ret.add(Pair.of("ALjSCgv9fX", "PcEJx6y4kN"));
-    ret.add(Pair.of("AO00JuMBhB", "QJUe02kDpj"));
-    ret.add(Pair.of("ASJpjKz15A", "QOdcBAH5Fe"));
-    ret.add(Pair.of("AWT9oVI5Cz", "RazJ43h4co"));
-    ret.add(Pair.of("A1uQSnF6cS", "SbpLwEj34A"));
-    ret.add(Pair.of("A5jjC42BT5", "0cbHoIw2vI"));
-    ret.add(Pair.of("A9hZQfK199", "1ay8aNAAEH"));
-    ret.add(Pair.of("BdnnwH03hy", "1j03gkN1GK"));
-    ret.add(Pair.of("Bg9wqxK3Qu", "2VUctLZ7vE"));
-    ret.add(Pair.of("BkUDS2A3hi", "4aZ4n0D44S"));
-    ret.add(Pair.of("BpQUJCnC8p", "4vyuDUPKIg"));
-    ret.add(Pair.of("BtZ3fJm3F8", "5bYZ6uI196"));
-    ret.add(Pair.of("Bx7c0W64nn", "6Tu8gB1LvU"));
-    ret.add(Pair.of("BC1AUSX40S", "6XeM5XV36B"));
-    ret.add(Pair.of("BGMTtQ9DpJ", "7dS8h5b5om"));
-    ret.add(Pair.of("BKziS9T0Nn", "7JBYW3mCtD"));
-    ret.add(Pair.of("BOIOd2i6ob", "8azzOhs5TH"));
-    ret.add(Pair.of("BSt47iRGvb", "8xDApdEAIP"));
-    ret.add(Pair.of("BXnKnpq5jU", "9a0dJR46Nh"));
-    ret.add(Pair.of("B1yKivZ36B", "9zgAgBa8Ph"));
-    ret.add(Pair.of("B5qgCXk3gw", "9DXBOFI5nJ"));
-    ret.add(Pair.of("B95y3Lq10o", "9LRPMQs199"));
-    ret.add(Pair.of("U5C2TMFCWB", "9999999999"));
+    if (getDBSchemaName().endsWith("Q") || getDBSchemaName().endsWith("P")) {
+      // z/OS, large data set:
+      // -------------
+      // z/OS ORDER:
+      // -------------
+      // a,z,A,Z,0
+      // 9
+
+      ret.add(Pair.of("aaaaaaaaaa", "IDPEFPYCqG"));
+      ret.add(Pair.of("AecfYcR6ob", "Jazpdsz9Bz"));
+      ret.add(Pair.of("AhToAin36B", "JGwYL7F6vU"));
+      ret.add(Pair.of("AlLFYp730A", "JKkhRsT2PS"));
+      ret.add(Pair.of("ApFkob8AAz", "Kc6lWFcDiO"));
+      ret.add(Pair.of("Auw35HvJPy", "La3VJ8m6ec"));
+      ret.add(Pair.of("AymVbqn5Cx", "L29oFXo0Z6"));
+      ret.add(Pair.of("ACD6P5jA05", "L6XCNzNAkK"));
+      ret.add(Pair.of("AG1q7l3JEF", "Ojz475ILTa"));
+      ret.add(Pair.of("ALjSCgv9fX", "PcEJx6y4kN"));
+      ret.add(Pair.of("AO00JuMBhB", "QJUe02kDpj"));
+      ret.add(Pair.of("ASJpjKz15A", "QOdcBAH5Fe"));
+      ret.add(Pair.of("AWT9oVI5Cz", "RazJ43h4co"));
+      ret.add(Pair.of("A1uQSnF6cS", "SbpLwEj34A"));
+      ret.add(Pair.of("A5jjC42BT5", "0cbHoIw2vI"));
+      ret.add(Pair.of("A9hZQfK199", "1ay8aNAAEH"));
+      ret.add(Pair.of("BdnnwH03hy", "1j03gkN1GK"));
+      ret.add(Pair.of("Bg9wqxK3Qu", "2VUctLZ7vE"));
+      ret.add(Pair.of("BkUDS2A3hi", "4aZ4n0D44S"));
+      ret.add(Pair.of("BpQUJCnC8p", "4vyuDUPKIg"));
+      ret.add(Pair.of("BtZ3fJm3F8", "5bYZ6uI196"));
+      ret.add(Pair.of("Bx7c0W64nn", "6Tu8gB1LvU"));
+      ret.add(Pair.of("BC1AUSX40S", "6XeM5XV36B"));
+      ret.add(Pair.of("BGMTtQ9DpJ", "7dS8h5b5om"));
+      ret.add(Pair.of("BKziS9T0Nn", "7JBYW3mCtD"));
+      ret.add(Pair.of("BOIOd2i6ob", "8azzOhs5TH"));
+      ret.add(Pair.of("BSt47iRGvb", "8xDApdEAIP"));
+      ret.add(Pair.of("BXnKnpq5jU", "9a0dJR46Nh"));
+      ret.add(Pair.of("B1yKivZ36B", "9zgAgBa8Ph"));
+      ret.add(Pair.of("B5qgCXk3gw", "9DXBOFI5nJ"));
+      ret.add(Pair.of("B95y3Lq10o", "9LRPMQs199"));
+      ret.add(Pair.of("U5C2TMFCWB", "9999999999"));
+    } else {
+      // Linux or small data set:
+      // -------------
+      // LINUX ORDER:
+      // -------------
+      // 0
+      // 9
+      // a
+      // A
+      // z
+      // Z
+      ret.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
+    }
 
     return ret;
   }
