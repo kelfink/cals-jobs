@@ -971,13 +971,25 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     LOGGER.info("DONE: Stage #2: Transform");
   }
 
-  protected void bulkPrepare(final BulkProcessor bp, int cntr)
+  /**
+   * Reusable method to poll index queue, track counts, and bulk prepare documents.
+   * 
+   * @param bp ES bulk processor
+   * @param cntr record count
+   * @throws IOException on IO error
+   * @throws InterruptedException if thread interrupted
+   * @return number of documents prepared
+   */
+  protected int bulkPrepare(final BulkProcessor bp, int cntr)
       throws IOException, InterruptedException {
+    int i = cntr;
     T t;
+
     while ((t = queueIndex.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
-      JobLogUtils.logEvery(++cntr, "Indexed", "recs to ES");
+      JobLogUtils.logEvery(++i, "Indexed", "recs to ES");
       prepareDocument(bp, t);
     }
+    return i;
   }
 
   /**
@@ -987,18 +999,17 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Thread.currentThread().setName("indexer");
     final BulkProcessor bp = buildBulkProcessor();
     int cntr = 0;
-    T t;
 
     LOGGER.warn("BEGIN: Stage #3: Index");
     try {
       while (!fatalError || !(doneExtract && doneTransform && queueIndex.isEmpty())) {
-        bulkPrepare(bp, cntr);
+        cntr = bulkPrepare(bp, cntr);
       }
 
       // Just to be sure ...
-      bulkPrepare(bp, cntr);
+      cntr = bulkPrepare(bp, cntr);
 
-      LOGGER.info("Flush ES bulk processor ...");
+      LOGGER.info("Flush ES bulk processor ... recs processed: {}", cntr);
       bp.flush();
 
       Thread.sleep(SLEEP_MILLIS);
@@ -1077,9 +1088,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
               : extractLastRunRecsFromTable(lastRunDt);
 
       if (results != null && !results.isEmpty()) {
-        LOGGER.warn(MessageFormat.format("Found {0} people to index", results.size()));
-
-        results.stream().forEach(p -> {
+        LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
+        results.stream().forEach(p -> { // NOSONAR
           prepLastRunDoc(bp, p);
         });
       }

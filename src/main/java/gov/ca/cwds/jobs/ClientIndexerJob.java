@@ -115,7 +115,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   protected void extractPartitionRange(final Pair<String, String> p) {
     final int i = nextThreadNum.incrementAndGet();
     Thread.currentThread().setName("extract_" + i);
-    LOGGER.info("BEGIN: Stage #1: extract " + i);
+    LOGGER.warn("BEGIN: extract thread " + i);
 
     try {
       Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
@@ -171,7 +171,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
-    LOGGER.info("DONE: Extract " + i);
+    LOGGER.warn("DONE: Extract thread " + i);
   }
 
   /**
@@ -183,13 +183,13 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     LOGGER.info("BEGIN: main extract thread");
 
     try {
-      final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 4);
+      final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 2);
       // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
       // String.valueOf(maxThreads));
       LOGGER.info("JDBC processors={}", maxThreads);
       ForkJoinPool forkJoinPool = new ForkJoinPool(maxThreads);
-      forkJoinPool.submit(
-          () -> getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange));
+      forkJoinPool
+          .submit(() -> getPartitionRanges().parallelStream().forEach(this::extractPartitionRange));
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
