@@ -1023,7 +1023,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     LOGGER.warn("BEGIN: Stage #3: Index");
     try {
-      while (!fatalError || !(doneExtract && doneTransform && queueIndex.isEmpty())) {
+      while (!(fatalError || (doneExtract && doneTransform && queueIndex.isEmpty()))) {
         LOGGER.warn("Stage #3: Index: just *do* something ...");
         cntr = bulkPrepare(bp, cntr);
       }
