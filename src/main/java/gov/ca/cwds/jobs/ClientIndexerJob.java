@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -146,7 +147,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(5000); // faster
         stmt.setMaxRows(0);
-        stmt.setQueryTimeout(100000);
+        stmt.setQueryTimeout(0);
 
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
         lock.readLock().lock();
@@ -162,6 +163,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
           grpRecs.add(m);
           lastId = m.getNormalizationGroupKey();
+          // Thread.yield();
         }
 
         con.commit();
@@ -191,15 +193,23 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     LOGGER.info("BEGIN: main extract thread");
 
     try {
-      final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 2);
-      LOGGER.info("JDBC processors={}", maxThreads);
+      // final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 2);
+      // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+      // String.valueOf(maxThreads));
+      // LOGGER.info("JDBC processors={}", maxThreads);
 
-      // ForkJoinPool forkJoinPool = new ForkJoinPool(maxThreads);
-      // forkJoinPool.submit(() ->
-      // getPartitionRanges().parallelStream().forEach(this::extractPartitionRange)
-      getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange)
-      // )
-      ;
+      // ForkJoinPool forkJoinPool = new ForkJoinPool(1);
+      // forkJoinPool
+      // .submit(() -> getPartitionRanges().parallelStream().forEach(this::extractPartitionRange));
+
+      // CHALLENGE: parallel stream blocks the indexer thread somehow. Weird.
+      // But this "roll your own" approach works fine. Go figure.
+      final ForkJoinPool pool = new ForkJoinPool(1);
+      for (Pair<String, String> pair : getPartitionRanges()) {
+        LOGGER.info("submit partition pair: {},{}", pair.getLeft(), pair.getRight());
+        pool.submit(() -> extractPartitionRange(pair));
+      }
+
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());

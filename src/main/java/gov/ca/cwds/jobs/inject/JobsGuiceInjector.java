@@ -202,9 +202,9 @@ public class JobsGuiceInjector extends AbstractModule {
       LOGGER.warn("Create NEW ES client");
       try {
         final ElasticsearchConfiguration config = elasticSearchConfig();
-        Settings.Builder settings =
-            Settings.builder().put("cluster.name", config.getElasticsearchCluster());
         // DRS: requires ES 5.5.x.
+        // Settings.Builder settings =
+        // Settings.builder().put("cluster.name", config.getElasticsearchCluster());
         // client = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
         client = new PreBuiltTransportClient(
             Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build());

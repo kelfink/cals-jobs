@@ -17,6 +17,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -121,7 +123,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int ES_BULK_SIZE = 5000;
 
   private static final int SLEEP_MILLIS = 2500;
-  private static final int POLL_MILLIS = 5000;
+  private static final int POLL_MILLIS = 2000;
 
   /**
    * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it
@@ -206,12 +208,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Queue of raw, denormalized records waiting to be normalized.
    */
-  protected LinkedBlockingDeque<M> queueTransform = new LinkedBlockingDeque<>(150000);
+  protected volatile LinkedBlockingDeque<M> queueTransform = new LinkedBlockingDeque<>(100000);
 
   /**
    * Queue of normalized records waiting to publish to Elasticsearch.
    */
-  protected LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(150000);
+  protected volatile LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(100000);
 
   /**
    * Completion flag for <strong>Extract</strong> method {@link #threadExtractJdbc()}.
@@ -828,14 +830,20 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected void doInitialLoadJdbc() throws IOException {
     Thread.currentThread().setName("main");
     try {
-      Thread t1 = new Thread(this::threadExtractJdbc); // Extract
-      Thread t2 = new Thread(this::threadTransform); // Transform
-      Thread t3 = new Thread(this::threadIndex); // Index
-      t3.setPriority(7);
+      // Thread t3 = new Thread(this::threadIndex); // Index
+      // t3.setPriority(8);
+      // t3.start();
 
-      t1.start();
-      t2.start();
-      t3.start();
+      // Thread t2 = new Thread(this::threadTransform); // Transform
+      // t2.start();
+
+      // Thread t1 = new Thread(this::threadExtractJdbc); // Extract
+      // t1.start();
+
+      final ForkJoinPool pool = new ForkJoinPool(3);
+      final ForkJoinTask<?> taskIndex = pool.submit(() -> threadIndex());
+      pool.submit(() -> threadTransform());
+      pool.submit(() -> threadExtractJdbc());
 
       while (!(fatalError || (doneExtract && doneTransform && doneLoad))) {
         LOGGER.debug("runInitialLoad: sleep");
@@ -850,9 +858,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
       }
 
-      t1.join();
-      t2.join();
-      t3.join();
+      // t1.join();
+      // t2.join();
+      // t3.join();
 
       Thread.sleep(SLEEP_MILLIS);
       this.close();
@@ -949,8 +957,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           // End of group. Normalize these group recs.
           if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1
               && (t = normalizeSingle(grpRecs)) != null) {
+            LOGGER.trace("queueIndex.putLast: id: {}", t.getPrimaryKey());
             queueIndex.putLast(t);
+            // LOGGER.info("queueIndex.size(): {}", queueIndex.size());
+
             grpRecs.clear(); // Single thread, re-use memory.
+            Thread.yield();
           }
 
           grpRecs.add(m);
@@ -994,6 +1006,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     T t;
 
     while ((t = queueIndex.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
+      LOGGER.trace("queueIndex.pollFirst: id {}", t.getPrimaryKey());
       JobLogUtils.logEvery(++i, "Indexed", "recs to ES");
       prepareDocument(bp, t);
     }
@@ -1004,13 +1017,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * The "load" part of ETL. Read from normalized record queue and push to ES.
    */
   protected void threadIndex() {
-    Thread.currentThread().setName("indexer");
+    Thread.currentThread().setName("just_index_me_already");
     final BulkProcessor bp = buildBulkProcessor();
     int cntr = 0;
 
     LOGGER.warn("BEGIN: Stage #3: Index");
     try {
       while (!fatalError || !(doneExtract && doneTransform && queueIndex.isEmpty())) {
+        LOGGER.warn("Stage #3: Index: just *do* something ...");
         cntr = bulkPrepare(bp, cntr);
       }
 
