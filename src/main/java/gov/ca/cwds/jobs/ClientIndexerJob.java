@@ -111,9 +111,12 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       final Pair<String, String> pair = getPartitionRanges().get(i);
       final String query = getInitialLoadQuery(getDBSchemaName())
           .replaceAll(":fromId", pair.getLeft()).replaceAll(":toId", pair.getRight());
-      EsClientAddress m;
-
       enableParallelism(con);
+
+      int cntr = 0;
+      EsClientAddress m;
+      Object lastId = new Object();
+      List<EsClientAddress> grpRecs = new ArrayList<>();
 
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(15000); // faster
@@ -121,14 +124,26 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         stmt.setQueryTimeout(100000);
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
 
-        int cntr = 0;
         while (!fatalError && rs.next()) {
           // Hand the baton to the next runner ...
           JobLogUtils.logEvery(++cntr, "Retrieved", "recs");
           if ((m = extract(rs)) != null) {
-            queueTransform.putLast(m);
+            // NOTE: Assumes that records are sorted by group key.
+            if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
+              // End of group. Normalize these group recs.
+              synchronized (queueTransform) {
+                for (EsClientAddress cla : grpRecs) {
+                  queueTransform.putLast(cla);
+                }
+                grpRecs.clear(); // Single thread, re-use memory.
+              }
+            }
+
+            grpRecs.add(m);
+            lastId = m.getNormalizationGroupKey();
           }
         }
+
 
         con.commit();
       } finally {
@@ -174,7 +189,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     LOGGER.info("BEGIN: main extract");
 
     try {
-      getPartitionRanges().stream().sequential().map(this::startExtractThread)
+      getPartitionRanges().parallelStream().map(this::startExtractThread)
           .forEach(this::waitOnThread);
     } catch (Exception e) {
       fatalError = true;
