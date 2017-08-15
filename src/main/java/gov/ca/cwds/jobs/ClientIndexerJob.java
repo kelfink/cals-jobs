@@ -90,12 +90,26 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       buf.append(" AND x.CLT_SENSTV_IND = 'N' ");
     }
 
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
+    buf.append(getJdbcOrderBy()).append(" WITH UR ");
     return buf.toString();
   }
 
-  protected void runJdbcThread(final Pair<String, String> p) {
-    final int i = nextThreadNum.getAndIncrement();
+  protected synchronized void handOff(List<EsClientAddress> grpRecs) {
+    try {
+      for (EsClientAddress cla : grpRecs) {
+        queueTransform.putLast(cla);
+      }
+    } catch (InterruptedException ie) { // NOSONAR
+      LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
+      fatalError = true;
+      Thread.currentThread().interrupt();
+    } finally {
+      doneExtract = true;
+    }
+  }
+
+  protected void extractPartitionRange(final Pair<String, String> p) {
+    final int i = nextThreadNum.incrementAndGet();
     Thread.currentThread().setName("extract_" + i);
     LOGGER.info("BEGIN: Stage #1: extract " + i);
 
@@ -108,9 +122,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Either detect platform or force ORDER BY clause.
-      final Pair<String, String> pair = getPartitionRanges().get(i);
-      final String query = getInitialLoadQuery(getDBSchemaName())
-          .replaceAll(":fromId", pair.getLeft()).replaceAll(":toId", pair.getRight());
+      final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
+          .replaceAll(":toId", p.getRight());
       enableParallelism(con);
 
       int cntr = 0;
@@ -119,7 +132,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       List<EsClientAddress> grpRecs = new ArrayList<>();
 
       try (Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(15000); // faster
+        stmt.setFetchSize(5000); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(100000);
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
@@ -130,20 +143,14 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
           if ((m = extract(rs)) != null) {
             // NOTE: Assumes that records are sorted by group key.
             if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
-              // End of group. Normalize these group recs.
-              synchronized (queueTransform) {
-                for (EsClientAddress cla : grpRecs) {
-                  queueTransform.putLast(cla);
-                }
-                grpRecs.clear(); // Single thread, re-use memory.
-              }
+              handOff(grpRecs);
+              grpRecs.clear(); // Single thread, re-use memory.
             }
 
             grpRecs.add(m);
             lastId = m.getNormalizationGroupKey();
           }
         }
-
 
         con.commit();
       } finally {
@@ -158,27 +165,27 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     LOGGER.info("DONE: Extract " + i);
   }
 
-  private Thread startExtractThread(final Pair<String, String> p) {
-    Runnable runner = () -> { // NOSONAR
-      runJdbcThread(p);
-    };
-
-    Thread t = new Thread(runner);
-    t.start();
-    return t;
-  }
-
-  private void waitOnThread(Thread t) { // NOSONAR
-    try {
-      t.join();
-    } catch (InterruptedException ie) { // NOSONAR
-      LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
-      fatalError = true;
-      Thread.currentThread().interrupt();
-    } finally {
-      doneExtract = true;
-    }
-  }
+  // private Thread startExtractThread(final Pair<String, String> p) {
+  // Runnable runner = () -> { // NOSONAR
+  // runJdbcThread(p);
+  // };
+  //
+  // Thread t = new Thread(runner);
+  // t.start();
+  // return t;
+  // }
+  //
+  // private void waitOnThread(Thread t) { // NOSONAR
+  // try {
+  // t.join();
+  // } catch (InterruptedException ie) { // NOSONAR
+  // LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
+  // fatalError = true;
+  // Thread.currentThread().interrupt();
+  // } finally {
+  // doneExtract = true;
+  // }
+  // }
 
   /**
    * The "extract" part of ETL. Single producer, chained consumers.
@@ -189,8 +196,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     LOGGER.info("BEGIN: main extract");
 
     try {
-      getPartitionRanges().parallelStream().map(this::startExtractThread)
-          .forEach(this::waitOnThread);
+      getPartitionRanges().parallelStream().forEach(this::extractPartitionRange);
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
@@ -206,7 +212,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     List<Pair<String, String>> ret = new ArrayList<>();
 
     // z/OS:
-    ret.add(Pair.of(" ", "B3bMRWu8NV"));
+    ret.add(Pair.of("aaaaaaaaaa", "B3bMRWu8NV"));
     ret.add(Pair.of("B3bMRWu8NV", "DW5GzxJ30A"));
     ret.add(Pair.of("DW5GzxJ30A", "FNOBbaG6qq"));
     ret.add(Pair.of("FNOBbaG6qq", "HJf1EJe25X"));
