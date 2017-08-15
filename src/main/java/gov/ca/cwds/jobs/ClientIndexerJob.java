@@ -227,48 +227,30 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     List<Pair<String, String>> ret = new ArrayList<>();
 
     if (getDBSchemaName().endsWith("RSQ") || getDBSchemaName().endsWith("REP")) {
+      // ----------------------------
       // z/OS, large data set:
-
+      // ORDER: a,z,A,Z,0,9
       // ----------------------------
-      // z/OS ORDER: a,z,A,Z,0,9
-      // ----------------------------
-      ret.add(Pair.of("aaaaaaaaaa", "IDPEFPYCqG"));
-      ret.add(Pair.of("AecfYcR6ob", "Jazpdsz9Bz"));
-      ret.add(Pair.of("AhToAin36B", "JGwYL7F6vU"));
-      ret.add(Pair.of("AlLFYp730A", "JKkhRsT2PS"));
-      ret.add(Pair.of("ApFkob8AAz", "Kc6lWFcDiO"));
-      ret.add(Pair.of("Auw35HvJPy", "La3VJ8m6ec"));
-      ret.add(Pair.of("AymVbqn5Cx", "L29oFXo0Z6"));
-      ret.add(Pair.of("ACD6P5jA05", "L6XCNzNAkK"));
-      ret.add(Pair.of("AG1q7l3JEF", "Ojz475ILTa"));
-      ret.add(Pair.of("ALjSCgv9fX", "PcEJx6y4kN"));
-      ret.add(Pair.of("AO00JuMBhB", "QJUe02kDpj"));
-      ret.add(Pair.of("ASJpjKz15A", "QOdcBAH5Fe"));
-      ret.add(Pair.of("AWT9oVI5Cz", "RazJ43h4co"));
-      ret.add(Pair.of("A1uQSnF6cS", "SbpLwEj34A"));
-      ret.add(Pair.of("A5jjC42BT5", "0cbHoIw2vI"));
-      ret.add(Pair.of("A9hZQfK199", "1ay8aNAAEH"));
-      ret.add(Pair.of("BdnnwH03hy", "1j03gkN1GK"));
-      ret.add(Pair.of("Bg9wqxK3Qu", "2VUctLZ7vE"));
-      ret.add(Pair.of("BkUDS2A3hi", "4aZ4n0D44S"));
-      ret.add(Pair.of("BpQUJCnC8p", "4vyuDUPKIg"));
-      ret.add(Pair.of("BtZ3fJm3F8", "5bYZ6uI196"));
-      ret.add(Pair.of("Bx7c0W64nn", "6Tu8gB1LvU"));
-      ret.add(Pair.of("BC1AUSX40S", "6XeM5XV36B"));
-      ret.add(Pair.of("BGMTtQ9DpJ", "7dS8h5b5om"));
-      ret.add(Pair.of("BKziS9T0Nn", "7JBYW3mCtD"));
-      ret.add(Pair.of("BOIOd2i6ob", "8azzOhs5TH"));
-      ret.add(Pair.of("BSt47iRGvb", "8xDApdEAIP"));
-      ret.add(Pair.of("BXnKnpq5jU", "9a0dJR46Nh"));
-      ret.add(Pair.of("B1yKivZ36B", "9zgAgBa8Ph"));
-      ret.add(Pair.of("B5qgCXk3gw", "9DXBOFI5nJ"));
-      ret.add(Pair.of("B95y3Lq10o", "9LRPMQs199"));
-      ret.add(Pair.of("U5C2TMFCWB", "9999999999"));
+      ret.add(Pair.of("aaaaaaaaaa", "B3bMRWu8NV"));
+      ret.add(Pair.of("B3bMRWu8NV", "DW5GzxJ30A"));
+      ret.add(Pair.of("DW5GzxJ30A", "FNOBbaG6qq"));
+      ret.add(Pair.of("FNOBbaG6qq", "HJf1EJe25X"));
+      ret.add(Pair.of("HJf1EJe25X", "JCoyq0Iz36"));
+      ret.add(Pair.of("JCoyq0Iz36", "LvijYcj01S"));
+      ret.add(Pair.of("LvijYcj01S", "Npf4LcB3Lr"));
+      ret.add(Pair.of("Npf4LcB3Lr", "PiJ6a0H49S"));
+      ret.add(Pair.of("PiJ6a0H49S", "RbL4aAL34A"));
+      ret.add(Pair.of("RbL4aAL34A", "S3qiIdg0BN"));
+      ret.add(Pair.of("S3qiIdg0BN", "0Ltok9y5Co"));
+      ret.add(Pair.of("0Ltok9y5Co", "2CFeyJd49S"));
+      ret.add(Pair.of("2CFeyJd49S", "4w3QDw136B"));
+      ret.add(Pair.of("4w3QDw136B", "6p9XaHC10S"));
+      ret.add(Pair.of("6p9XaHC10S", "8jw5J580MQ"));
+      ret.add(Pair.of("8jw5J580MQ", "9999999999"));
     } else {
-      // Linux or small data set:
-
       // ----------------------------
-      // LINUX ORDER: 0,9,a,A,z,Z
+      // Linux or small data set:
+      // ORDER: 0,9,a,A,z,Z
       // ----------------------------
       ret.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
     }
