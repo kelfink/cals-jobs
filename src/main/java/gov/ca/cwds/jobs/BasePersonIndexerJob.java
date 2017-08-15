@@ -1017,7 +1017,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * The "load" part of ETL. Read from normalized record queue and push to ES.
    */
   protected void threadIndex() {
-    Thread.currentThread().setName("just_index_me_already");
+    Thread.currentThread().setName("es_indexer");
     final BulkProcessor bp = buildBulkProcessor();
     int cntr = 0;
 

@@ -49,7 +49,7 @@ public class ReporterIndexerJob
   // @Override
   // protected List<Pair<String, String>> getPartitionRanges() {
   // List<Pair<String, String>> ret = new ArrayList<>();
-  // ret.add(Pair.of(" ", "CpE9999999"));
+  // ret.add(Pair.of("aaaaaaaaaa", "CpE9999999"));
   // ret.add(Pair.of("CpE9999999", "EE99999998"));
   // ret.add(Pair.of("EE99999998", "GUE9999997"));
   // ret.add(Pair.of("GUE9999997", "I999999996"));
@@ -64,7 +64,7 @@ public class ReporterIndexerJob
   // ret.add(Pair.of("099999999Y", "3pE999999X"));
   // ret.add(Pair.of("3pE999999X", "5E9999999W"));
   // ret.add(Pair.of("5E9999999W", "7UE999999V"));
-  // ret.add(Pair.of("7UE999999V", "999999999U"));
+  // ret.add(Pair.of("7UE999999V", "9999999999"));
   // return ret;
   // }
 
