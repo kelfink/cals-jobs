@@ -94,8 +94,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     return buf.toString();
   }
 
-  protected synchronized void handOff(List<EsClientAddress> grpRecs) {
+  protected void handOff(List<EsClientAddress> grpRecs) {
     try {
+      lock.lockInterruptibly();
       for (EsClientAddress cla : grpRecs) {
         queueTransform.putLast(cla);
       }
@@ -104,7 +105,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       fatalError = true;
       Thread.currentThread().interrupt();
     } finally {
-      doneExtract = true;
+      lock.unlock();
     }
   }
 
@@ -137,24 +138,24 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         stmt.setQueryTimeout(100000);
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
 
-        while (!fatalError && rs.next()) {
+        while (!fatalError && rs.next() && (m = extract(rs)) != null) {
           // Hand the baton to the next runner ...
           JobLogUtils.logEvery(++cntr, "Retrieved", "recs");
-          if ((m = extract(rs)) != null) {
-            // NOTE: Assumes that records are sorted by group key.
-            if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
-              handOff(grpRecs);
-              grpRecs.clear(); // Single thread, re-use memory.
-            }
-
-            grpRecs.add(m);
-            lastId = m.getNormalizationGroupKey();
+          // NOTE: Assumes that records are sorted by group key.
+          if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
+            handOff(grpRecs);
+            grpRecs.clear(); // Single thread, re-use memory.
           }
+
+          grpRecs.add(m);
+          lastId = m.getNormalizationGroupKey();
         }
 
         con.commit();
       } finally {
-        // The statement closes automatically.
+        // Statement closes automatically.
+        jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
+            .getService(ConnectionProvider.class).closeConnection(con);
       }
 
     } catch (Exception e) {
@@ -164,28 +165,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
     LOGGER.info("DONE: Extract " + i);
   }
-
-  // private Thread startExtractThread(final Pair<String, String> p) {
-  // Runnable runner = () -> { // NOSONAR
-  // runJdbcThread(p);
-  // };
-  //
-  // Thread t = new Thread(runner);
-  // t.start();
-  // return t;
-  // }
-  //
-  // private void waitOnThread(Thread t) { // NOSONAR
-  // try {
-  // t.join();
-  // } catch (InterruptedException ie) { // NOSONAR
-  // LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
-  // fatalError = true;
-  // Thread.currentThread().interrupt();
-  // } finally {
-  // doneExtract = true;
-  // }
-  // }
 
   /**
    * The "extract" part of ETL. Single producer, chained consumers.

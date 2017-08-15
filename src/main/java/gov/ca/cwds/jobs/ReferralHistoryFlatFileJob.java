@@ -96,23 +96,23 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
     LOGGER.info("DONE: flat file extract " + i);
   }
 
-  private Thread startExtractThread(final String s) {
-    Thread t = new Thread(() -> { // NOSONAR
-      runExtractThread(s);
-    });
-    t.start();
-    return t;
-  }
-
-  private void waitOnThread(Thread t) { // NOSONAR
-    try {
-      t.join();
-    } catch (InterruptedException ie) { // NOSONAR
-      LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
-      fatalError = true;
-      Thread.currentThread().interrupt();
-    }
-  }
+  // private Thread startExtractThread(final String s) {
+  // Thread t = new Thread(() -> { // NOSONAR
+  // runExtractThread(s);
+  // });
+  // t.start();
+  // return t;
+  // }
+  //
+  // private void waitOnThread(Thread t) { // NOSONAR
+  // try {
+  // t.join();
+  // } catch (InterruptedException ie) { // NOSONAR
+  // LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
+  // fatalError = true;
+  // Thread.currentThread().interrupt();
+  // }
+  // }
 
   @Override
   protected void threadExtractJdbc() {
@@ -125,7 +125,7 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
     }
 
     try {
-      filenames.stream().sequential().forEach(this::startExtractThread);
+      filenames.stream().sequential().forEach(this::runExtractThread);
       // filenames.stream().sequential().map(this::runExtractThread).forEach(this::waitOnThread);
     } catch (Exception e) { // NOSONAR
       LOGGER.warn("ERROR!: {}", e.getMessage(), e);

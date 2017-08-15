@@ -118,7 +118,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int DEFAULT_BATCH_WAIT = 25;
   private static final int DEFAULT_BUCKETS = 1;
 
-  private static final int ES_BULK_SIZE = 2000;
+  private static final int ES_BULK_SIZE = 4000;
 
   private static final int SLEEP_MILLIS = 2500;
   private static final int POLL_MILLIS = 3000;
@@ -206,12 +206,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Queue of raw, denormalized records waiting to be normalized.
    */
-  protected LinkedBlockingDeque<M> queueTransform = new LinkedBlockingDeque<>(100000);
+  protected LinkedBlockingDeque<M> queueTransform = new LinkedBlockingDeque<>(250000);
 
   /**
    * Queue of normalized records waiting to publish to Elasticsearch.
    */
-  protected LinkedBlockingDeque<T> queueLoad = new LinkedBlockingDeque<>(50000);
+  protected LinkedBlockingDeque<T> queueLoad = new LinkedBlockingDeque<>(150000);
 
   /**
    * Completion flag for <strong>Extract</strong> method {@link #threadExtractJdbc()}.
@@ -232,8 +232,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected volatile boolean doneLoad = false;
 
-  private final Lock lock;
-  private final Condition condition;
+  protected final Lock lock;
+  protected final Condition condition;
 
   // ======================
   // CONSTRUCTOR:
@@ -830,7 +830,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       new Thread(this::threadExtractJdbc).start(); // Extract
       new Thread(this::threadTransform).start(); // Transform
-      new Thread(this::threadIndex).start(); // Load
+
+      Thread t3 = new Thread(this::threadIndex);
+      // t3.setPriority(Thread.MAX_PRIORITY);
+      t3.start(); // Load
 
       while (!(fatalError || (doneExtract && doneTransform && doneLoad))) {
         LOGGER.debug("runInitialLoad: sleep");
@@ -937,12 +940,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           JobLogUtils.logEvery(++cntr, "Transformed", "recs");
 
           // NOTE: Assumes that records are sorted by group key.
-          if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
-            // End of group. Normalize these group recs.
-            if ((t = normalizeSingle(grpRecs)) != null) {
-              queueLoad.putLast(t);
-              grpRecs.clear(); // Single thread, re-use memory.
-            }
+          // End of group. Normalize these group recs.
+          if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1
+              && (t = normalizeSingle(grpRecs)) != null) {
+            queueLoad.putLast(t);
+            grpRecs.clear(); // Single thread, re-use memory.
           }
 
           grpRecs.add(m);
@@ -974,7 +976,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * The "load" part of ETL. Read from normalized record queue and push to ES.
    */
   protected void threadIndex() {
-    Thread.currentThread().setName("index");
+    Thread.currentThread().setName("indexer");
     final BulkProcessor bp = buildBulkProcessor();
     int cntr = 0;
     T t;
@@ -1155,7 +1157,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 4);
+      final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 2);
       System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
           String.valueOf(maxThreads));
       LOGGER.info("Processors={}", maxThreads);
