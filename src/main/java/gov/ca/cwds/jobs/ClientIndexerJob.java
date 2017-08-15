@@ -127,9 +127,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     Thread.currentThread().setName("extract_" + i);
     LOGGER.warn("BEGIN: extract thread " + i);
 
-    try {
-      Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
-          .getService(ConnectionProvider.class).getConnection();
+    try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
+        .getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
       con.setReadOnly(true); // WARNING: fails with Postgres.
@@ -166,10 +165,10 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         }
 
         con.commit();
-        con.close(); // return to pool.
       } finally {
-        // Statement closes automatically.
+        // Statement and connection close automatically.
         lock.readLock().unlock();
+        // con.close(); // return to pool.
 
         // Close connection, return to pool?
         // jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
@@ -227,7 +226,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   protected List<Pair<String, String>> getPartitionRanges() {
     List<Pair<String, String>> ret = new ArrayList<>();
 
-    if (getDBSchemaName().endsWith("Q") || getDBSchemaName().endsWith("P")) {
+    if (getDBSchemaName().endsWith("RSQ") || getDBSchemaName().endsWith("REP")) {
       // z/OS, large data set:
 
       // ----------------------------

@@ -94,6 +94,7 @@ public class JobsGuiceInjector extends AbstractModule {
    * 
    * @param esConfigFile location of Elasticsearch configuration file
    * @param lastJobRunTimeFilename location of last run file
+   * @param altInputFilename alternate input file
    */
   public JobsGuiceInjector(final File esConfigFile, String lastJobRunTimeFilename,
       String altInputFilename) {

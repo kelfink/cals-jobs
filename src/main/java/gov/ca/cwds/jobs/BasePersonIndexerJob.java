@@ -1024,7 +1024,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     LOGGER.warn("BEGIN: Stage #3: Index");
     try {
       while (!(fatalError || (doneExtract && doneTransform && queueIndex.isEmpty()))) {
-        LOGGER.warn("Stage #3: Index: just *do* something ...");
+        LOGGER.trace("Stage #3: Index: just *do* something ...");
         cntr = bulkPrepare(bp, cntr);
       }
 
@@ -1712,6 +1712,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return System.getProperty("DB_CMS_SCHEMA");
   }
 
+  /**
+   * Enable DB2 parallelism. Ignored for other databases.
+   * 
+   * @param con connection
+   * @throws SQLException connection error
+   */
   protected static void enableParallelism(Connection con) throws SQLException {
     String dbProductName = con.getMetaData().getDatabaseProductName();
     if (StringUtils.containsIgnoreCase(dbProductName, "db2")) {
