@@ -55,6 +55,7 @@ dependencies {
 	compile group: 'com.google.inject', name: 'guice', version: '4.1.0'
 	compile group: "org.postgresql", name: "postgresql", version: "9.4.1212"
 	compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.0.0-rc4"
+	compile 'org.hibernate:hibernate-c3p0:5.2.10.Final'
 
 	// Exclude transitive dependencies.
 	compile ('gov.ca.cwds.api:api-core:3.6.400') {

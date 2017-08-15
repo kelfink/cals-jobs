@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -167,6 +166,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         }
 
         con.commit();
+        con.close(); // return to pool.
       } finally {
         // Statement closes automatically.
         lock.readLock().unlock();
@@ -205,11 +205,13 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       // forkJoinPool
       // .submit(() -> getPartitionRanges().parallelStream().forEach(this::extractPartitionRange));
 
-      final ForkJoinPool pool = new ForkJoinPool(1);
-      for (Pair<String, String> pair : getPartitionRanges()) {
-        LOGGER.info("submit partition pair: {},{}", pair.getLeft(), pair.getRight());
-        pool.submit(() -> extractPartitionRange(pair));
-      }
+      // final ForkJoinPool pool = new ForkJoinPool(1);
+      // for (Pair<String, String> pair : getPartitionRanges()) {
+      // LOGGER.info("submit partition pair: {},{}", pair.getLeft(), pair.getRight());
+      // pool.submit(() -> extractPartitionRange(pair));
+      // }
+
+      getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange);
 
     } catch (Exception e) {
       fatalError = true;
@@ -227,12 +229,10 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
     if (getDBSchemaName().endsWith("Q") || getDBSchemaName().endsWith("P")) {
       // z/OS, large data set:
-      // -------------
-      // z/OS ORDER:
-      // -------------
-      // a,z,A,Z,0
-      // 9
 
+      // ----------------------------
+      // z/OS ORDER: a,z,A,Z,0,9
+      // ----------------------------
       ret.add(Pair.of("aaaaaaaaaa", "IDPEFPYCqG"));
       ret.add(Pair.of("AecfYcR6ob", "Jazpdsz9Bz"));
       ret.add(Pair.of("AhToAin36B", "JGwYL7F6vU"));
@@ -267,15 +267,10 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       ret.add(Pair.of("U5C2TMFCWB", "9999999999"));
     } else {
       // Linux or small data set:
-      // -------------
-      // LINUX ORDER:
-      // -------------
-      // 0
-      // 9
-      // a
-      // A
-      // z
-      // Z
+
+      // ----------------------------
+      // LINUX ORDER: 0,9,a,A,z,Z
+      // ----------------------------
       ret.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
     }
 

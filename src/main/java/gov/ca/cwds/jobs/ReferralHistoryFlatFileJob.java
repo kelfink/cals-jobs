@@ -59,7 +59,7 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
   /**
    * Lambda convenience method.
    * 
-   * @param r referral to hand to next queue
+   * @param line to process
    */
   protected void handOff(String line) {
     try {
@@ -79,6 +79,8 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
 
   /**
    * Launch an extract thread for a single file. Maintain file order by client id and referral id.
+   * 
+   * @param s String to extract from
    */
   protected void runExtractThread(String s) {
     final int i = nextThreadNum.getAndIncrement();
