@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -117,6 +118,7 @@ public class ServiceProviderIndexerJobTest {
   }
 
   @Test
+  @Ignore
   public void getPartitionRanges_Args__() throws Exception {
     ReplicatedServiceProviderDao dao = null;
     ElasticsearchDao esDao = null;

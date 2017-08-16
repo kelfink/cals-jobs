@@ -1741,7 +1741,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * <p>
    * SELECT statements using range partitions depend on sort order.
-   * <p/>
+   * </p>
    * 
    * @return true if DB2 is running on a mainframe
    */
