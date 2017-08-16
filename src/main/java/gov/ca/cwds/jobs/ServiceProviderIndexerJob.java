@@ -48,7 +48,7 @@ public class ServiceProviderIndexerJob
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
     List<Pair<String, String>> ret = new ArrayList<>();
-    ret.add(Pair.of(" ", "AI2pE99999"));
+    ret.add(Pair.of("aaaaaaaaaa", "AI2pE99999"));
     ret.add(Pair.of("AI2pE99999", "BhUE999998"));
     ret.add(Pair.of("BhUE999998", "BQMUE99997"));
     ret.add(Pair.of("BQMUE99997", "CpE9999996"));
