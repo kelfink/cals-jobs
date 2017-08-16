@@ -31,31 +31,25 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 @NamedNativeQueries({
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedServiceProvider.findBucketRange",
-        query = "SELECT x.* FROM {h-schema}SVC_PVRT x "
-            + "WHERE x.IDENTIFIER BETWEEN :min_id AND :max_id FOR READ ONLY WITH UR",
+        query = "select z.IDENTIFIER, trim(z.AGENCY_NM) AGENCY_NM, trim(z.CITY_NM) CITY_NM, "
+            + "z.FAX_NO, trim(z.FIRST_NM) FIRST_NM, trim(z.LAST_NM) LAST_NM, "
+            + "trim(z.NMPRFX_DSC) as NMPRFX_DSC, z.PHONE_NO, z.TEL_EXT_NO, "
+            + "trim(z.PSTITL_DSC) as PSTITL_DSC, z.SVCPVDRC, z.STATE_C, trim(z.STREET_NM) STREET_NM, "
+            + "trim(z.STREET_NO) STREET_NO, trim(z.SUFX_TLDSC) SUFX_TLDSC, z.ZIP_NM, "
+            + "z.LST_UPD_ID, z.LST_UPD_TS, z.ZIP_SFX_NO, z.ARCASS_IND, trim(z.EMAIL_ADDR) EMAIL_ADDR"
+            + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER FROM {h-schema}SVC_PVRT z "
+            + "WHERE z.IDENTIFIER > :min_id AND z.IDENTIFIER <= :max_id FOR READ ONLY WITH UR",
         resultClass = ReplicatedServiceProvider.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedServiceProvider.findAllUpdatedAfter",
-        query = "select z.IDENTIFIER, z.AGENCY_NM, z.CITY_NM, z.FAX_NO, z.FIRST_NM, z.LAST_NM, "
+        query = "select z.IDENTIFIER, trim(z.AGENCY_NM) AGENCY_NM, trim(z.CITY_NM) CITY_NM, "
+            + "z.FAX_NO, trim(z.FIRST_NM) FIRST_NM, trim(z.LAST_NM) LAST_NM, "
             + "trim(z.NMPRFX_DSC) as NMPRFX_DSC, z.PHONE_NO, z.TEL_EXT_NO, "
-            + "trim(z.PSTITL_DSC) as PSTITL_DSC, z.SVCPVDRC, z.STATE_C, "
-            + "z.STREET_NM, z.STREET_NO, z.SUFX_TLDSC, z.ZIP_NM, z.LST_UPD_ID, z.LST_UPD_TS, "
-            + "z.ZIP_SFX_NO, z.ARCASS_IND, z.EMAIL_ADDR "
+            + "trim(z.PSTITL_DSC) as PSTITL_DSC, z.SVCPVDRC, z.STATE_C, trim(z.STREET_NM) STREET_NM, "
+            + "trim(z.STREET_NO) STREET_NO, trim(z.SUFX_TLDSC) SUFX_TLDSC, z.ZIP_NM, "
+            + "z.LST_UPD_ID, z.LST_UPD_TS, z.ZIP_SFX_NO, z.ARCASS_IND, trim(z.EMAIL_ADDR) EMAIL_ADDR"
             + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
             + "from {h-schema}SVC_PVRT z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR ",
-        resultClass = ReplicatedServiceProvider.class),
-    @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedServiceProvider.findPartitionedBuckets",
-        query = "select z.IDENTIFIER, z.AGENCY_NM, z.CITY_NM, z.FAX_NO, z.FIRST_NM, z.LAST_NM, "
-            + "trim(z.NMPRFX_DSC) as NMPRFX_DSC, z.PHONE_NO, z.TEL_EXT_NO, "
-            + "trim(z.PSTITL_DSC) as PSTITL_DSC, z.SVCPVDRC, z.STATE_C, "
-            + "z.STREET_NM, z.STREET_NO, z.SUFX_TLDSC, z.ZIP_NM, z.LST_UPD_ID, z.LST_UPD_TS, "
-            + "z.ZIP_SFX_NO, z.ARCASS_IND, z.EMAIL_ADDR "
-            + ", 'U' as IBMSNAP_OPERATION, z.LST_UPD_TS as IBMSNAP_LOGMARKER "
-            + "from ( select mod(y.rn, CAST(:total_buckets AS INTEGER)) + 1 as bucket, y.* "
-            + "from ( select row_number() over (order by 1) as rn, x.* "
-            + "from {h-schema}SVC_PVRT x WHERE x.IDENTIFIER >= :min_id and x.IDENTIFIER < :max_id "
-            + ") y ) z where z.bucket = :bucket_num FOR READ ONLY WITH UR",
         resultClass = ReplicatedServiceProvider.class)})
 @Entity
 @Table(name = "SVC_PVRT")
