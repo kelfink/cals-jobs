@@ -35,6 +35,8 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
 
   private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
 
+  public static final int DEFAULT_FETCH_SIZE = 5000;
+
   /**
    * Constructor
    * 
@@ -168,11 +170,9 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
       Query query = session.getNamedQuery(namedQueryName).setInteger("bucket_num", (int) bucketNum)
           .setInteger("total_buckets", (int) totalBuckets).setString("min_id", minId)
           .setString("max_id", maxId).setCacheable(false).setFlushMode(FlushMode.MANUAL)
-          .setReadOnly(true).setCacheMode(CacheMode.IGNORE);
+          .setReadOnly(true).setCacheMode(CacheMode.IGNORE).setFetchSize(DEFAULT_FETCH_SIZE);
 
       // Iterate, process, flush.
-      final int fetchSize = 5000;
-      query.setFetchSize(fetchSize);
       ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
       ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
       int cnt = 0;
@@ -181,7 +181,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
         Object[] row = results.get();
         ret.add((T) row[0]);
 
-        if (((++cnt) % fetchSize) == 0) {
+        if (((++cnt) % DEFAULT_FETCH_SIZE) == 0) {
           LOGGER.info("recs read: {}", cnt);
           session.flush();
         }

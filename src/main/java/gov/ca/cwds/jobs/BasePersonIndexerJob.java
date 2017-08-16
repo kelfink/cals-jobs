@@ -63,6 +63,7 @@ import com.google.inject.Injector;
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.dao.cms.BatchBucket;
+import gov.ca.cwds.dao.cms.BatchDaoImpl;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.BaseDaoImpl;
@@ -129,7 +130,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int SLEEP_MILLIS = 2500;
   private static final int POLL_MILLIS = 2000;
 
-  private static final int DEFAULT_FETCH_SIZE = 5000;
+  private static final int DEFAULT_FETCH_SIZE = BatchDaoImpl.DEFAULT_FETCH_SIZE;
 
   /**
    * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it
@@ -1237,10 +1238,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         getOpts().setTotalBuckets(getJobTotalBuckets());
 
         if (this.getDenormalizedClass() != null) {
-          LOGGER.warn("LOAD FROM VIEW VIA JDBC!");
+          LOGGER.warn("LOAD FROM VIEW USING JDBC!");
           doInitialLoadJdbc();
         } else {
-          LOGGER.warn("LOAD REPLICATED TABLE QUERY VIA HIBERNATE!");
+          LOGGER.warn("LOAD REPLICATED TABLE QUERY USING HIBERNATE!");
           extractHibernate();
         }
 
@@ -1253,11 +1254,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       // Result stats:
-      LOGGER.info(
+      LOGGER.warn(
           "STATS: \nRecs To Index: {}\nRecs To Delete: {}\nrecsBulkBefore: {}\nrecsBulkAfter: {}\nrecsBulkError: {}",
           recsPrepared, recsDeleted, recsBulkBefore, recsBulkAfter, recsBulkError);
 
-      LOGGER.info("Updating last successful run time to {}", jobDateFormat.format(startTime));
+      LOGGER.warn("Updating last successful run time to {}", jobDateFormat.format(startTime));
       return new Date(this.startTime);
 
     } catch (Exception e) {
@@ -1651,9 +1652,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         } finally {
           doneExtract = true;
         }
-
-        // Track counts.
-        recsPrepared.getAndAdd(results.size());
       }
     }
 
