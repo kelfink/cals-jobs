@@ -40,7 +40,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
             + "trim(z.SUFX_TLDSC) SUFX_TLDSC, z.RPTR_ZIPNO, z.LST_UPD_ID, z.LST_UPD_TS, "
             + "z.FKREFERL_T, z.FKLAW_ENFT, z.ZIP_SFX_NO, z.CNTY_SPFCD "
             + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER FROM {h-schema}REPTR_T z "
-            + "WHERE z.FKREFERL_T BETWEEN :min_id AND :max_id FOR READ ONLY WITH UR",
+            + "WHERE z.FKREFERL_T > :min_id AND z.FKREFERL_T < :max_id FOR READ ONLY WITH UR",
         resultClass = ReplicatedReporter.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedReporter.findAllUpdatedAfter",
