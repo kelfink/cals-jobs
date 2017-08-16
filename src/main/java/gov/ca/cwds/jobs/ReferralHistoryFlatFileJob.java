@@ -89,7 +89,7 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
    * @param fileName String to extract from
    */
   protected void runExtract(final String fileName) {
-    final int i = nextThreadNum.getAndIncrement();
+    final int i = nextThreadNum.incrementAndGet();
     final String cleanFileName =
         fileName.substring(fileName.lastIndexOf(File.separatorChar) + 1).replace(' ', '_');
     final String threadName = "extract_" + i + "_" + cleanFileName;
