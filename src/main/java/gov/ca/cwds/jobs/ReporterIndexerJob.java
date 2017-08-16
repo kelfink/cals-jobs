@@ -54,8 +54,9 @@ public class ReporterIndexerJob
   protected List<Pair<String, String>> getPartitionRanges() {
     List<Pair<String, String>> ret = new ArrayList<>();
 
-    if (getDBSchemaName().toUpperCase().endsWith("RSQ")
-        || getDBSchemaName().toUpperCase().endsWith("REP")) {
+    final boolean isMainframe = isDB2OnZOS();
+    if (isMainframe && (getDBSchemaName().toUpperCase().endsWith("RSQ")
+        || getDBSchemaName().toUpperCase().endsWith("REP"))) {
       // ----------------------------
       // z/OS, large data set:
       // ORDER: a,z,A,Z,0,9
@@ -124,6 +125,12 @@ public class ReporterIndexerJob
       ret.add(Pair.of("8JpTu2j3K2", "9cRG3VmH6i"));
       ret.add(Pair.of("9cRHCIm6xC", "9GwwRzY7D3"));
       ret.add(Pair.of("9Gwxhdx41S", "9999999999"));
+    } else if (isMainframe) {
+      // ----------------------------
+      // z/OS, small data set:
+      // ORDER: a,z,A,Z,0,9
+      // ----------------------------
+      ret.add(Pair.of("aaaaaaaaaa", "9999999999"));
     } else {
       // ----------------------------
       // Linux or small data set:

@@ -118,7 +118,9 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
     }
 
     try {
-      filenames.parallelStream().forEach(this::runExtract);
+      // Can only run in parallel with locks or synchronization.
+      // filenames.parallelStream().forEach(this::runExtract);
+      filenames.stream().sequential().forEach(this::runExtract);
     } catch (Exception e) { // NOSONAR
       LOGGER.warn("ERROR!: {}", e.getMessage(), e);
       fatalError = true;

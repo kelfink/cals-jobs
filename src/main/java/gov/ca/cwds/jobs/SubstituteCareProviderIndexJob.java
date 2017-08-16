@@ -43,8 +43,9 @@ public class SubstituteCareProviderIndexJob extends
   protected List<Pair<String, String>> getPartitionRanges() {
     List<Pair<String, String>> ret = new ArrayList<>();
 
-    if (getDBSchemaName().toUpperCase().endsWith("RSQ")
-        || getDBSchemaName().toUpperCase().endsWith("REP")) {
+    final boolean isMainframe = isDB2OnZOS();
+    if (isMainframe && (getDBSchemaName().toUpperCase().endsWith("RSQ")
+        || getDBSchemaName().toUpperCase().endsWith("REP"))) {
       // ----------------------------
       // z/OS, large data set:
       // ORDER: a,z,A,Z,0,9
@@ -56,6 +57,12 @@ public class SubstituteCareProviderIndexJob extends
       ret.add(Pair.of("1a6ExS95Ch", "4u0U0MECwr"));
       ret.add(Pair.of("4u0VaS8B5d", "7NYwtxJ7Lu"));
       ret.add(Pair.of("7NYwtxJ7Lu", "9999999999"));
+    } else if (isMainframe) {
+      // ----------------------------
+      // z/OS, small data set:
+      // ORDER: a,z,A,Z,0,9
+      // ----------------------------
+      ret.add(Pair.of("aaaaaaaaaa", "9999999999"));
     } else {
       // ----------------------------
       // Linux or small data set:

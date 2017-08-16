@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -124,15 +125,22 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    */
   protected void extractPartitionRange(final Pair<String, String> p) {
     final int i = nextThreadNum.incrementAndGet();
-    final String threadName = "extract_" + p.getLeft() + "_" + p.getRight();
+    final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
-    LOGGER.warn("BEGIN: extract thread " + i);
+    LOGGER.warn("BEGIN: extract thread {}", threadName);
 
     try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
       con.setReadOnly(true); // WARNING: fails with Postgres.
+
+      final DatabaseMetaData meta = con.getMetaData();
+      LOGGER.warn("meta: {}", meta);
+      LOGGER.warn(
+          "meta:\nproduct name: {}\nproduction version: {}\nmajor: {}\nminor: {}\ncatalog term: {}",
+          meta.getDatabaseProductName(), meta.getDatabaseProductVersion(),
+          meta.getDatabaseMajorVersion(), meta.getDatabaseMinorVersion(), meta.getCatalogTerm());
 
       final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
           .replaceAll(":toId", p.getRight());
@@ -222,8 +230,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   protected List<Pair<String, String>> getPartitionRanges() {
     List<Pair<String, String>> ret = new ArrayList<>();
 
-    if (getDBSchemaName().toUpperCase().endsWith("RSQ")
-        || getDBSchemaName().toUpperCase().endsWith("REP")) {
+    final boolean isMainframe = isDB2OnZOS();
+    if (isMainframe && (getDBSchemaName().toUpperCase().endsWith("RSQ")
+        || getDBSchemaName().toUpperCase().endsWith("REP"))) {
       // ----------------------------
       // z/OS, large data set:
       // ORDER: a,z,A,Z,0,9
@@ -244,9 +253,15 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       ret.add(Pair.of("4w3QDw136B", "6p9XaHC10S"));
       ret.add(Pair.of("6p9XaHC10S", "8jw5J580MQ"));
       ret.add(Pair.of("8jw5J580MQ", "9999999999"));
+    } else if (isMainframe) {
+      // ----------------------------
+      // z/OS, small data set:
+      // ORDER: a,z,A,Z,0,9
+      // ----------------------------
+      ret.add(Pair.of("aaaaaaaaaa", "9999999999"));
     } else {
       // ----------------------------
-      // Linux or small data set:
+      // Linux:
       // ORDER: 0,9,a,A,z,Z
       // ----------------------------
       ret.add(Pair.of("0000000000", "ZZZZZZZZZZ"));

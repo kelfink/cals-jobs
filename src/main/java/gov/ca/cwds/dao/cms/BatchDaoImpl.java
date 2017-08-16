@@ -3,8 +3,6 @@ package gov.ca.cwds.dao.cms;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
@@ -14,6 +12,8 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 
@@ -22,7 +22,6 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.BatchBucketDao;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 
 /**
  * Base class for DAO with some common methods.
@@ -33,7 +32,7 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoImpl<T>
     implements BaseDao<T>, BatchBucketDao<T> {
 
-  private static final Logger LOGGER = LogManager.getLogger(BasePersonIndexerJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(BatchDaoImpl.class);
 
   public static final int DEFAULT_FETCH_SIZE = 5000;
 

@@ -5,6 +5,7 @@ import static gov.ca.cwds.data.persistence.cms.CmsPersistentObject.CMS_ID_LEN;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -1733,6 +1734,49 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected static String getDBSchemaName() {
     return System.getProperty("DB_CMS_SCHEMA");
+  }
+
+  /**
+   * Character sets differ by operating system, which affect ORDER BY and WHERE clauses.
+   * 
+   * <p>
+   * SELECT statements using range partitions depend on sort order.
+   * <p/>
+   * 
+   * @return true if DB2 is running on a mainframe
+   */
+  public boolean isDB2OnZOS() {
+    boolean ret = false;
+
+    // Z/OS:
+    // product name: DB2
+    // production version: DSN11010
+    // major: 11
+    // minor: 1
+    // catalog term: location
+    //
+    // LINUX:
+    // product name: DB2/LINUXX8664
+    // production version: SQL10057
+    // major: 10
+    // minor: 5
+    // catalog term: database
+
+    try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
+        .getService(ConnectionProvider.class).getConnection()) {
+
+      final DatabaseMetaData meta = con.getMetaData();
+      LOGGER.warn("meta: {}", meta);
+      LOGGER.warn("meta:\nproduct name: {}\nproduction version: {}\nmajor: {}\nminor: {}",
+          meta.getDatabaseProductName(), meta.getDatabaseProductVersion(),
+          meta.getDatabaseMajorVersion(), meta.getDatabaseMinorVersion());
+
+      ret = meta.getDatabaseProductVersion().startsWith("DSN");
+    } catch (Exception e) {
+      JobLogUtils.raiseError(LOGGER, e, "FAILED TO FIND DB2 PLATFORM! {}", e.getMessage());
+    }
+
+    return ret;
   }
 
   /**
