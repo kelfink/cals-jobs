@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -84,7 +85,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     buf.append(dbSchemaName);
     buf.append(".");
     buf.append(getInitialLoadViewName());
-    buf.append(" x WHERE x.clt_identifier > ':fromId' AND ':toId' <= x.clt_identifier ");
+    buf.append(" x WHERE x.clt_identifier > ':fromId' AND x.clt_identifier <= ':toId' ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
       buf.append(" AND x.CLT_SENSTV_IND = 'N' ");
@@ -124,7 +125,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    */
   protected void extractPartitionRange(final Pair<String, String> p) {
     final int i = nextThreadNum.incrementAndGet();
-    Thread.currentThread().setName("extract_" + i);
+    final String threadName = "extract_" + p.getLeft() + "_" + p.getRight();
+    Thread.currentThread().setName(threadName);
     LOGGER.warn("BEGIN: extract thread " + i);
 
     try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
@@ -135,6 +137,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
       final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
           .replaceAll(":toId", p.getRight());
+      LOGGER.warn("query: {}", query);
       enableParallelism(con);
 
       int cntr = 0;
@@ -161,18 +164,12 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
           grpRecs.add(m);
           lastId = m.getNormalizationGroupKey();
-          // Thread.yield();
         }
 
         con.commit();
       } finally {
         // Statement and connection close automatically.
         lock.readLock().unlock();
-        // con.close(); // return to pool.
-
-        // Close connection, return to pool?
-        // jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
-        // .getService(ConnectionProvider.class).closeConnection(con);
       }
 
     } catch (Exception e) {
@@ -204,13 +201,13 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       // forkJoinPool
       // .submit(() -> getPartitionRanges().parallelStream().forEach(this::extractPartitionRange));
 
-      // final ForkJoinPool pool = new ForkJoinPool(1);
-      // for (Pair<String, String> pair : getPartitionRanges()) {
-      // LOGGER.info("submit partition pair: {},{}", pair.getLeft(), pair.getRight());
-      // pool.submit(() -> extractPartitionRange(pair));
-      // }
+      final ForkJoinPool pool = new ForkJoinPool(1);
+      for (Pair<String, String> pair : getPartitionRanges()) {
+        LOGGER.warn("submit partition pair: {},{}", pair.getLeft(), pair.getRight());
+        pool.submit(() -> extractPartitionRange(pair));
+      }
 
-      getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange);
+      // getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange);
 
     } catch (Exception e) {
       fatalError = true;
