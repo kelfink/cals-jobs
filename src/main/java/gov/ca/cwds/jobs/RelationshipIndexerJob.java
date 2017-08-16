@@ -123,7 +123,7 @@ public class RelationshipIndexerJob
 
   @Override
   protected ReplicatedRelationships normalizeSingle(List<EsRelationship> recs) {
-    return normalize(recs).get(0);
+    return !recs.isEmpty() ? normalize(recs).get(0) : null;
   }
 
   @Override
