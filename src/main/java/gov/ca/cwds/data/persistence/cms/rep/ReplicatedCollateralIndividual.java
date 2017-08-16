@@ -39,7 +39,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
             + "z.GENDER_CD, z.BIRTH_DT, z.MRTL_STC, trim(z.EMAIL_ADDR) EMAIL_ADDR, "
             + "z.ESTBLSH_CD, z.ESTBLSH_ID, z.RESOST_IND, "
             + "IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER FROM {h-schema}COLTRL_T z "
-            + "WHERE z.IDENTIFIER >= :min_id AND z.IDENTIFIER < :max_id FOR READ ONLY WITH UR",
+            + "WHERE z.IDENTIFIER >= :min_id AND z.IDENTIFIER <= :max_id FOR READ ONLY WITH UR",
         resultClass = ReplicatedCollateralIndividual.class, readOnly = true),
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findAllUpdatedAfter",
@@ -63,7 +63,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
             + "z.GENDER_CD, z.BIRTH_DT, z.MRTL_STC, trim(z.EMAIL_ADDR) EMAIL_ADDR, "
             + "z.ESTBLSH_CD, z.ESTBLSH_ID, z.RESOST_IND, "
             + "IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER FROM {h-schema}COLTRL_T z "
-            + "WHERE z.IDENTIFIER >= :min_id AND z.IDENTIFIER < :max_id FOR READ ONLY WITH UR",
+            + "WHERE z.IDENTIFIER >= :min_id AND z.IDENTIFIER <= :max_id FOR READ ONLY WITH UR",
         resultClass = ReplicatedCollateralIndividual.class)})
 @Entity
 @Table(name = "COLTRL_T")
