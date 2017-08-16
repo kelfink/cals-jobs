@@ -70,12 +70,12 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
             + "z.HISP_UD_CD, z.SOCPLC_CD, z.CL_INDX_NO, z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
             + "from {h-schema}CLIENT_T z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR",
         resultClass = ReplicatedClient.class),
-    @NamedNativeQuery(
+    @NamedNativeQuery( // Obsolete. Too complex. Use MQT instead.
         name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient.findPartitionedBuckets",
         query = "select {a.*}, {b.*}, {c.*} from {h-schema}CLIENT_T a "
             + "LEFT OUTER JOIN {h-schema}CL_ADDRT b ON a.IDENTIFIER = b.FKCLIENT_T and b.EFF_END_DT is null "
             + "LEFT OUTER JOIN {h-schema}ADDRS_T c ON b.FKADDRS_T = c.IDENTIFIER "
-            + "WHERE a.IDENTIFIER BETWEEN :min_id and :max_id FOR READ ONLY WITH UR",
+            + "WHERE a.IDENTIFIER > :min_id and a.IDENTIFIER < :max_id FOR READ ONLY WITH UR",
         resultClass = ReplicatedClient.class, readOnly = true,
         comment = "b,a.clientAddresses;c,b.addresses")})
 @Entity

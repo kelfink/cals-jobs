@@ -80,11 +80,12 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
     Session session = getSessionFactory().getCurrentSession();
 
     Transaction txn = session.beginTransaction();
+    final java.sql.Timestamp ts = new java.sql.Timestamp(datetime.getTime());
     try {
-      // Compatible with both DB2 z/OS and Linux.
-      Query query = session.getNamedQuery(namedQueryName).setCacheable(false)
-          .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
-          .setTimestamp("after", new java.sql.Timestamp(datetime.getTime()));
+      // Cross platform DB2 (both z/OS and Linux).
+      Query query =
+          session.getNamedQuery(namedQueryName).setCacheable(false).setFlushMode(FlushMode.MANUAL)
+              .setReadOnly(true).setCacheMode(CacheMode.IGNORE).setTimestamp("after", ts);
 
       // Iterate, process, flush.
       final int fetchSize = 5000;
@@ -98,7 +99,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
         ret.add((T) row[0]);
 
         if (((++cnt) % fetchSize) == 0) {
-          LOGGER.info("recs read: {}", cnt);
+          LOGGER.info("find updated after {}. recs read: {}", ts, cnt);
           session.flush();
         }
       }

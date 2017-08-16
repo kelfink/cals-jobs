@@ -39,7 +39,11 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
+import org.hibernate.CacheMode;
+import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -124,6 +128,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   private static final int SLEEP_MILLIS = 2500;
   private static final int POLL_MILLIS = 2000;
+
+  private static final int DEFAULT_FETCH_SIZE = 5000;
 
   /**
    * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it
@@ -1553,12 +1559,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Divide work into buckets: pull a unique range of identifiers so that no bucket results overlap.
    * 
+   * <p>
+   * Where possible, prefer use {@link #threadExtractJdbc()} or {@link #extractHibernate()} instead.
+   * 
    * @param minId start of identifier range
    * @param maxId end of identifier range
-   * @deprecated use {@link #threadExtractJdbc()} or {@link #extractHibernate()} instead
    * @return collection of entity results
    */
-  @Deprecated
+  @SuppressWarnings("unchecked")
   protected List<T> pullBucketRange(String minId, String maxId) {
     LOGGER.info("PULL BUCKET RANGE {} to {}", minId, maxId);
     final Class<?> entityClass =
@@ -1569,15 +1577,30 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Transaction txn = session.beginTransaction();
     try {
       NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
-      q.setString("min_id", minId).setString("max_id", maxId);
+      q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
+          .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
+          .setFetchSize(DEFAULT_FETCH_SIZE);
 
       // No reduction/normalization.
-      ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
-      results.addAll(q.list());
+      // Iterate, process, flush.
+      ScrollableResults results = q.scroll(ScrollMode.FORWARD_ONLY);
+      ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
+      int cnt = 0;
 
-      session.clear();
+      while (results.next()) {
+        Object[] row = results.get();
+        ret.add((T) row[0]);
+
+        if (((++cnt) % DEFAULT_FETCH_SIZE) == 0) {
+          LOGGER.info("recs read: {}", cnt);
+          session.flush();
+        }
+      }
+
+      session.flush();
+      results.close();
       txn.commit();
-      return results.build();
+      return ret.build();
     } catch (HibernateException e) {
       fatalError = true;
       LOGGER.error("BATCH ERROR! {}", e.getMessage(), e);
@@ -1605,6 +1628,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final List<T> results = pullBucketRange(minId, maxId);
 
       if (results != null && !results.isEmpty()) {
+        // BulkProcessor is not thread safe.
+        // Construct one instance per thread.
         final BulkProcessor bp = buildBulkProcessor();
         results.stream().forEach(p -> {
           try {
