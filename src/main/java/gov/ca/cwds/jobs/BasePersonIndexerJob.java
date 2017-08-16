@@ -1255,7 +1255,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       // Result stats:
       LOGGER.warn(
-          "STATS: \nRecs To Index: {}\nRecs To Delete: {}\nrecsBulkBefore: {}\nrecsBulkAfter: {}\nrecsBulkError: {}",
+          "STATS: \nRecs To Index:  {}\nRecs To Delete: {}\nrecsBulkBefore: {}\nrecsBulkAfter:  {}\nrecsBulkError:  {}",
           recsPrepared, recsDeleted, recsBulkBefore, recsBulkAfter, recsBulkError);
 
       LOGGER.warn("Updating last successful run time to {}", jobDateFormat.format(startTime));
