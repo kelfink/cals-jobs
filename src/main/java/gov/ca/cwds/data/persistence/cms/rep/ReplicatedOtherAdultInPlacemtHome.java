@@ -35,7 +35,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
         query = "SELECT z.IDENTIFIER, z.BIRTH_DT, z.END_DT, z.GENDER_CD, trim(z.OTH_ADLTNM) OTH_ADLTNM, "
             + "z.START_DT, z.LST_UPD_ID, z.LST_UPD_TS, z.FKPLC_HM_T, trim(z.COMNT_DSC) COMNT_DSC, "
             + "z.OTH_ADL_CD, z.IDENTFD_DT, z.RESOST_IND, z.PASSBC_CD "
-            + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER FROM {h-schema}OTH_ADLT x "
+            + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER FROM {h-schema}OTH_ADLT z "
             + "WHERE z.IDENTIFIER < :min_id AND z.IDENTIFIER <= :max_id ORDER BY z.IDENTIFIER FOR READ ONLY WITH UR",
         resultClass = ReplicatedOtherAdultInPlacemtHome.class, readOnly = true),
     @NamedNativeQuery(
