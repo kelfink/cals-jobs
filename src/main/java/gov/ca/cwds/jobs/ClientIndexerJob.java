@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -201,13 +200,13 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       // forkJoinPool
       // .submit(() -> getPartitionRanges().parallelStream().forEach(this::extractPartitionRange));
 
-      final ForkJoinPool pool = new ForkJoinPool(1);
-      for (Pair<String, String> pair : getPartitionRanges()) {
-        LOGGER.warn("submit partition pair: {},{}", pair.getLeft(), pair.getRight());
-        pool.submit(() -> extractPartitionRange(pair));
-      }
+      // final ForkJoinPool pool = new ForkJoinPool(1);
+      // for (Pair<String, String> pair : getPartitionRanges()) {
+      // LOGGER.warn("submit partition pair: {},{}", pair.getLeft(), pair.getRight());
+      // pool.submit(() -> extractPartitionRange(pair));
+      // }
 
-      // getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange);
+      getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange);
 
     } catch (Exception e) {
       fatalError = true;
