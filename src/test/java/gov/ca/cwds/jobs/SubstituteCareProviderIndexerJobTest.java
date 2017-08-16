@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,6 +80,7 @@ public class SubstituteCareProviderIndexerJobTest {
   }
 
   @Test
+  @Ignore
   public void testFindAllByBucketNamedQueryExists() throws Exception {
     Query query = session.getNamedQuery(
         "gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider.findAllByBucket");
