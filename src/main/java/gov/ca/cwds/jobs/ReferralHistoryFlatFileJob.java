@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -80,14 +81,22 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
   /**
    * Launch an extract thread for a single file. Maintain file order by client id and referral id.
    * 
-   * @param s String to extract from
+   * <p>
+   * <strong>Files must sorted prior to processing!</strong> To maintain sort order, this method
+   * runs in a single thread.
+   * </p>
+   * 
+   * @param fileName String to extract from
    */
-  protected void runExtractThread(String s) {
+  protected void runExtract(final String fileName) {
     final int i = nextThreadNum.getAndIncrement();
-    Thread.currentThread().setName("extract_" + i);
-    LOGGER.info("BEGIN: flat file extract " + i);
+    final String cleanFileName =
+        fileName.substring(fileName.lastIndexOf(File.separatorChar) + 1).replace(' ', '_');
+    final String threadName = "extract_" + i + "_" + cleanFileName;
+    Thread.currentThread().setName(threadName);
+    LOGGER.warn("BEGIN: flat file extract: {}", threadName);
 
-    final Path pathIn = Paths.get(s);
+    final Path pathIn = Paths.get(fileName);
     try (Stream<String> lines = Files.lines(pathIn)) {
       lines.sequential().forEach(this::handOff);
     } catch (Exception e) {
@@ -95,31 +104,13 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
-    LOGGER.info("DONE: flat file extract " + i);
+    LOGGER.warn("DONE: flat file extract " + i);
   }
-
-  // private Thread startExtractThread(final String s) {
-  // Thread t = new Thread(() -> { // NOSONAR
-  // runExtractThread(s);
-  // });
-  // t.start();
-  // return t;
-  // }
-  //
-  // private void waitOnThread(Thread t) { // NOSONAR
-  // try {
-  // t.join();
-  // } catch (InterruptedException ie) { // NOSONAR
-  // LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
-  // fatalError = true;
-  // Thread.currentThread().interrupt();
-  // }
-  // }
 
   @Override
   protected void threadExtractJdbc() {
     Thread.currentThread().setName("extract");
-    LOGGER.info("BEGIN: flat file extract");
+    LOGGER.warn("BEGIN: flat file extract");
 
     List<String> filenames = new ArrayList<>();
     for (String s : this.altInputFilenames) {
@@ -127,8 +118,7 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
     }
 
     try {
-      filenames.stream().sequential().forEach(this::runExtractThread);
-      // filenames.stream().sequential().map(this::runExtractThread).forEach(this::waitOnThread);
+      filenames.parallelStream().forEach(this::runExtract);
     } catch (Exception e) { // NOSONAR
       LOGGER.warn("ERROR!: {}", e.getMessage(), e);
       fatalError = true;
@@ -138,7 +128,7 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
       doneExtract = true;
     }
 
-    LOGGER.info("DONE: flat file Extract");
+    LOGGER.warn("DONE: flat file Extract");
   }
 
   /**
