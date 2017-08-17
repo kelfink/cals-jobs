@@ -90,7 +90,8 @@ public class ReferralHistoryIndexerJob
   public String getInitialLoadQuery(String dbSchemaName) {
     StringBuilder buf = new StringBuilder();
     buf.append("SELECT x.* FROM ");
-    buf.append(dbSchemaName);
+    // buf.append(dbSchemaName);
+    buf.append("CWDSDSM"); // TODO: SPOOF until view created in replication schemas!
     buf.append(".");
     buf.append(getInitialLoadViewName());
     buf.append(" x WHERE x.CLIENT_ID > ':fromId' AND x.CLIENT_ID <= ':toId' ");
