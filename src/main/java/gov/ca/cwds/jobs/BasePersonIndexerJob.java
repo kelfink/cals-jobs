@@ -351,6 +351,22 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return ret;
   }
 
+  /**
+   * Just adds an object to the normalized index queue and traps InterruptedException. Suitable for
+   * streams and lambda.
+   * 
+   * @param norm obj to add to index queue
+   */
+  protected void addToIndexQueue(T norm) {
+    try {
+      queueIndex.putLast(norm);
+    } catch (InterruptedException e) {
+      fatalError = true;
+      Thread.currentThread().interrupt();
+      JobLogUtils.raiseError(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
+    }
+  }
+
   @Override
   public M extract(ResultSet rs) throws SQLException {
     return null;

@@ -1,7 +1,6 @@
 package gov.ca.cwds.jobs;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -134,13 +133,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
       con.setReadOnly(true); // WARNING: fails with Postgres.
-
-      final DatabaseMetaData meta = con.getMetaData();
-      LOGGER.warn("meta: {}", meta);
-      LOGGER.warn(
-          "meta:\nproduct name: {}\nproduction version: {}\nmajor: {}\nminor: {}\ncatalog term: {}",
-          meta.getDatabaseProductName(), meta.getDatabaseProductVersion(),
-          meta.getDatabaseMajorVersion(), meta.getDatabaseMinorVersion(), meta.getCatalogTerm());
 
       final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
           .replaceAll(":toId", p.getRight());

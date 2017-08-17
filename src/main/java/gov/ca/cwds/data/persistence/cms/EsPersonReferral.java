@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +76,8 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
             + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") AND r.LIMITED_ACCESS_CODE != 'N'  ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsPersonReferral.class, readOnly = true)})
-public class EsPersonReferral extends ApiObjectIdentity
-    implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals> {
+public class EsPersonReferral extends ApiObjectIdentity implements PersistentObject,
+    ApiGroupNormalizer<ReplicatedPersonReferrals>, Comparator<EsPersonReferral> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(EsPersonReferral.class);
 
@@ -1011,6 +1012,11 @@ public class EsPersonReferral extends ApiObjectIdentity
     } catch (Exception e) {
       LOGGER.error("Oops!", e);
     }
+  }
+
+  @Override
+  public int compare(EsPersonReferral o1, EsPersonReferral o2) {
+    return o1.getClientId().compareTo(o2.getClientId());
   }
 
 }
