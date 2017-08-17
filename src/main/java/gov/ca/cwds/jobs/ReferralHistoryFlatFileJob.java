@@ -79,12 +79,19 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
     }
   }
 
+  /**
+   * Just adds an object to the normalized index queue and traps InterruptedException. Suitable for
+   * streams and lambda.
+   * 
+   * @param norm obj to add to index queue
+   */
   protected void addToIndexQueue(ReplicatedPersonReferrals norm) {
     try {
       queueIndex.putLast(norm);
-    } catch (Exception e) {
+    } catch (InterruptedException e) {
       fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "Hand off failed! {}", e.getMessage());
+      Thread.currentThread().interrupt();
+      JobLogUtils.raiseError(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
     }
   }
 
