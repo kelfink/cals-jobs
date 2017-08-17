@@ -202,7 +202,6 @@ public class ElasticTransformer {
 
     // Sealed and sensitive.
     ret.setSensitivityIndicator(p.getSensitivityIndicator());
-    ret.setSoc158SealedClientIndicator(p.getSoc158SealedClientIndicator());
 
     return ret;
   }
