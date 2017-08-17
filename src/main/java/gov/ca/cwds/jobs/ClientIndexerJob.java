@@ -132,7 +132,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         .getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      con.setReadOnly(true); // WARNING: fails with Postgres.
+      // con.setReadOnly(true); // WARNING: fails with Postgres.
 
       final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
           .replaceAll(":toId", p.getRight());
@@ -206,6 +206,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       // pool.submit(() -> extractPartitionRange(pair));
       // }
 
+      // TODO: TOO SLOW!
+      // Make parallel and normalize on your own.
+      // Each partition range is self-contained.
       getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange);
 
     } catch (Exception e) {

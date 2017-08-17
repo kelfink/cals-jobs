@@ -2,9 +2,9 @@ package gov.ca.cwds.jobs;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -89,18 +89,18 @@ public class ReferralHistoryIndexerJob
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     StringBuilder buf = new StringBuilder();
-    buf.append("SELECT x.* FROM ");
+    buf.append("SELECT vw.* FROM ");
     // buf.append(dbSchemaName);
     buf.append("CWDSDSM"); // TODO: SPOOF until view created in replication schemas!
     buf.append(".");
     buf.append(getInitialLoadViewName());
-    buf.append(" x WHERE x.CLIENT_ID > ':fromId' AND x.CLIENT_ID <= ':toId' ");
+    buf.append(" vw WHERE vw.CLIENT_ID > ? AND vw.CLIENT_ID <= ? ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
-      buf.append(" AND x.LIMITED_ACCESS_CODE = 'N'  ");
+      buf.append(" AND vw.LIMITED_ACCESS_CODE = 'N'  ");
     }
 
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
+    buf.append(getJdbcOrderBy()).append(" OPTIMIZE FOR 1000000 ROWS FOR READ ONLY WITH UR ");
     return buf.toString();
   }
 
@@ -130,6 +130,10 @@ public class ReferralHistoryIndexerJob
   /**
    * Read recs from a single partition. Must sort results because the database won't do it for us.
    * 
+   * <p>
+   * Each call of this method may run in its own thread.
+   * </p>
+   * 
    * @param p partition range to read
    */
   protected void extractPartitionRange(final Pair<String, String> p) {
@@ -142,25 +146,26 @@ public class ReferralHistoryIndexerJob
         .getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      con.setReadOnly(true); // WARNING: fails with Postgres.
 
-      final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
-          .replaceAll(":toId", p.getRight());
-      LOGGER.warn("query: {}", query);
+      final String sql = getInitialLoadQuery(getDBSchemaName()).replaceAll("\\s+", " ")
+      // .replaceAll(":fromId", p.getLeft()).replaceAll(":toId", p.getRight())
+      ;
+
+      LOGGER.warn("SQL: {}", sql);
       enableParallelism(con);
 
       int cntr = 0;
       EsPersonReferral m;
       final List<EsPersonReferral> unsorted = new ArrayList<>(275000);
 
-      try (Statement stmt = con.createStatement()) {
+      try (PreparedStatement stmt = con.prepareStatement(sql)) {
         stmt.setFetchSize(5000); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
+        stmt.setString(1, p.getLeft());
+        stmt.setString(2, p.getRight());
 
-        final ResultSet rs = stmt.executeQuery(query); // NOSONAR
-        lock.readLock().lock();
-
+        final ResultSet rs = stmt.executeQuery(); // NOSONAR
         while (!fatalError && rs.next() && (m = extract(rs)) != null) {
           JobLogUtils.logEvery(++cntr, "Retrieved", "recs");
           unsorted.add(m);
@@ -169,7 +174,6 @@ public class ReferralHistoryIndexerJob
         con.commit();
       } finally {
         // Statement and connection close automatically.
-        lock.readLock().unlock();
       }
 
       unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
@@ -181,11 +185,11 @@ public class ReferralHistoryIndexerJob
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
-    LOGGER.warn("DONE: Extract thread " + i);
+    LOGGER.warn("DONE: Extract thread {}", threadName);
   }
 
   /**
-   * The "extract" part of ETL. Single producer, chained consumers.
+   * The "extract" part of ETL. Parallel stream produces runs partition ranges in separate threads.
    */
   @Override
   protected void threadExtractJdbc() {
@@ -207,6 +211,11 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
+  protected boolean useTransformThread() {
+    return false;
+  }
+
+  @Override
   protected List<Pair<String, String>> getPartitionRanges() {
     List<Pair<String, String>> ret = new ArrayList<>();
 
@@ -214,9 +223,12 @@ public class ReferralHistoryIndexerJob
     if (isMainframe && (getDBSchemaName().toUpperCase().endsWith("RSQ")
         || getDBSchemaName().toUpperCase().endsWith("REP"))) {
       // ----------------------------
-      // z/OS, large data set:
+      // z/OS, LARGE data set:
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
+
+      // ret.add(Pair.of("Daaaaaaaaa", "DZZZZZZZZZ"));
+
       ret.add(Pair.of("aaaaaaaaaa", "AmtsRRw21w"));
       ret.add(Pair.of("AmtsRRw21w", "AzV0bnX3oq"));
       ret.add(Pair.of("AzV0bnX3oq", "ANoJt9tA15"));
@@ -318,6 +330,7 @@ public class ReferralHistoryIndexerJob
       ret.add(Pair.of("0BaKWm65qq", "0OL6amP7PC"));
       ret.add(Pair.of("0OL6amP7PC", "01fAGnjEou"));
       ret.add(Pair.of("01fAGnjEou", "ZZZZZZZZZZ"));
+
     } else if (isMainframe) {
       // ----------------------------
       // z/OS, small data set:

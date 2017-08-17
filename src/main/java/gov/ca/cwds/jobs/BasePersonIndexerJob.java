@@ -367,6 +367,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
   }
 
+  protected boolean useTransformThread() {
+    return true;
+  }
+
   @Override
   public M extract(ResultSet rs) throws SQLException {
     return null;
@@ -866,7 +870,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       final ForkJoinPool pool = new ForkJoinPool(3);
       final ForkJoinTask<?> taskIndex = pool.submit(() -> threadIndex());
-      pool.submit(() -> threadTransform());
+
+      if (useTransformThread()) {
+        pool.submit(() -> threadTransform());
+      }
+
       pool.submit(() -> threadExtractJdbc());
 
       while (!(fatalError || (doneExtract && doneTransform && doneLoad))) {
