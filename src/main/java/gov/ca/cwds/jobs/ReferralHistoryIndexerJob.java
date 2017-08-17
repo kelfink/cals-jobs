@@ -199,7 +199,7 @@ public class ReferralHistoryIndexerJob
     try {
       // This job normalizes without the transform thread.
       doneTransform = true;
-      getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange);
+      getPartitionRanges().parallelStream().forEach(this::extractPartitionRange);
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
@@ -226,8 +226,6 @@ public class ReferralHistoryIndexerJob
       // z/OS, LARGE data set:
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
-
-      // ret.add(Pair.of("Daaaaaaaaa", "DZZZZZZZZZ"));
 
       ret.add(Pair.of("aaaaaaaaaa", "AmtsRRw21w"));
       ret.add(Pair.of("AmtsRRw21w", "AzV0bnX3oq"));

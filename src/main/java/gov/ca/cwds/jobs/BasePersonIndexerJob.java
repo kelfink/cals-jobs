@@ -18,8 +18,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -367,6 +365,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
   }
 
+  /**
+   * Transform (normalize) in the Job instead of relying on the transformation thread.
+   * 
+   * @return true if the transformer thread should run
+   */
   protected boolean useTransformThread() {
     return true;
   }
@@ -400,7 +403,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         recsBulkError.getAndIncrement();
         LOGGER.error("ERROR EXECUTING BULK", failure);
       }
-    }).setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(12, ByteSizeUnit.MB))
+    }).setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(14, ByteSizeUnit.MB))
         .setConcurrentRequests(1).setName("jobs_bp").build();
   }
 
@@ -858,24 +861,26 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected void doInitialLoadJdbc() throws IOException {
     Thread.currentThread().setName("main");
     try {
-      // Thread t3 = new Thread(this::threadIndex); // Index
+      Thread t3 = new Thread(this::threadIndex); // Index
       // t3.setPriority(8);
-      // t3.start();
-
-      // Thread t2 = new Thread(this::threadTransform); // Transform
-      // t2.start();
-
-      // Thread t1 = new Thread(this::threadExtractJdbc); // Extract
-      // t1.start();
-
-      final ForkJoinPool pool = new ForkJoinPool(3);
-      final ForkJoinTask<?> taskIndex = pool.submit(() -> threadIndex());
+      t3.start();
 
       if (useTransformThread()) {
-        pool.submit(() -> threadTransform());
+        Thread t2 = new Thread(this::threadTransform); // Transform
+        t2.start();
       }
 
-      pool.submit(() -> threadExtractJdbc());
+      Thread t1 = new Thread(this::threadExtractJdbc); // Extract
+      t1.start();
+
+      // final ForkJoinPool pool = new ForkJoinPool(3);
+      // final ForkJoinTask<?> taskIndex = pool.submit(() -> threadIndex());
+      //
+      // if (useTransformThread()) {
+      // pool.submit(() -> threadTransform());
+      // }
+      //
+      // pool.submit(() -> threadExtractJdbc());
 
       while (!(fatalError || (doneExtract && doneTransform && doneLoad))) {
         LOGGER.debug("runInitialLoad: sleep");
@@ -890,9 +895,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
       }
 
-      // t1.join();
+      t1.join();
       // t2.join();
-      // t3.join();
+      t3.join();
 
       Thread.sleep(SLEEP_MILLIS);
       this.close();
@@ -991,7 +996,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
               && (t = normalizeSingle(grpRecs)) != null) {
             LOGGER.trace("queueIndex.putLast: id: {}", t.getPrimaryKey());
             queueIndex.putLast(t);
-            // LOGGER.info("queueIndex.size(): {}", queueIndex.size());
 
             grpRecs.clear(); // Single thread, re-use memory.
             Thread.yield();
@@ -1223,10 +1227,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      // final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 8);
-      // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
-      // String.valueOf(maxThreads));
-      // LOGGER.info("Run settings: processors={}", maxThreads);
+      final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 4);
+      System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+          String.valueOf(maxThreads));
+      LOGGER.info("Run settings: processors={}", maxThreads);
 
       /**
        * If index name is provided then use it, otherwise use alias from ES config.
