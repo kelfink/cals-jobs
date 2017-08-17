@@ -366,7 +366,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
         recsBulkBefore.getAndAdd(request.numberOfActions());
-        LOGGER.info("Ready to execute bulk of {} actions", request.numberOfActions());
+        LOGGER.debug("Ready to execute bulk of {} actions", request.numberOfActions());
       }
 
       @Override
@@ -954,7 +954,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Object lastId = new Object();
     M m;
     T t;
-    List<M> grpRecs = new ArrayList<>();
+    final List<M> grpRecs = new ArrayList<>();
 
     while (!(fatalError || (doneExtract && queueTransform.isEmpty()))) {
       try {

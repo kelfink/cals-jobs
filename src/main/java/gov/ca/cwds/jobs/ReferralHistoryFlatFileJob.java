@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.hibernate.SessionFactory;
@@ -78,6 +79,15 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
     }
   }
 
+  protected void addToIndexQueue(ReplicatedPersonReferrals norm) {
+    try {
+      queueIndex.putLast(norm);
+    } catch (Exception e) {
+      fatalError = true;
+      JobLogUtils.raiseError(LOGGER, e, "Hand off failed! {}", e.getMessage());
+    }
+  }
+
   /**
    * Launch an extract thread for a single file. Maintain file order by client id and referral id.
    * 
@@ -98,7 +108,9 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
 
     final Path pathIn = Paths.get(fileName);
     try (Stream<String> lines = Files.lines(pathIn)) {
-      lines.sequential().forEach(this::handOff);
+      lines.sequential().map(EsPersonReferral::parseLine)
+          .collect(Collectors.groupingBy(EsPersonReferral::getClientId)).entrySet().stream()
+          .sequential().map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
@@ -118,9 +130,9 @@ public class ReferralHistoryFlatFileJob extends ReferralHistoryIndexerJob {
     }
 
     try {
-      // Can only run in parallel with locks or synchronization.
-      // filenames.parallelStream().forEach(this::runExtract);
-      filenames.stream().sequential().forEach(this::runExtract);
+      // This job normalizes without the transform thread.
+      doneTransform = true;
+      filenames.parallelStream().forEach(this::runExtract);
     } catch (Exception e) { // NOSONAR
       LOGGER.warn("ERROR!: {}", e.getMessage(), e);
       fatalError = true;
