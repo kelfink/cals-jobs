@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -140,7 +141,7 @@ public class ReferralHistoryIndexerJob
    * 
    * @param p partition range to read
    */
-  protected void extractPartitionRange(final Pair<String, String> p) {
+  protected void pullRange(final Pair<String, String> p) {
     final int i = nextThreadNum.incrementAndGet();
     final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
@@ -205,8 +206,13 @@ public class ReferralHistoryIndexerJob
     try {
       // This job normalizes without the transform thread.
       doneTransform = true;
+
+      ForkJoinPool forkJoinPool = new ForkJoinPool(2);
+      forkJoinPool
+          .submit(() -> getPartitionRanges().parallelStream().forEach(this::pullRange));
+
       // getPartitionRanges().parallelStream().forEach(this::extractPartitionRange);
-      getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange);
+      // getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange);
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());

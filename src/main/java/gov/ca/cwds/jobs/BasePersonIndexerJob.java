@@ -1227,10 +1227,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 4);
-      System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
-          String.valueOf(maxThreads));
-      LOGGER.info("Run settings: processors={}", maxThreads);
+      // final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 4);
+      // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+      // String.valueOf(maxThreads));
+      // LOGGER.info("Run settings: processors={}", maxThreads);
 
       /**
        * If index name is provided then use it, otherwise use alias from ES config.
