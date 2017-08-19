@@ -98,11 +98,10 @@ public class ReferralHistoryIndexerJob
     buf.append("CWDSDSM"); // TODO: SPOOF until view created in replication schemas!
     buf.append(".");
     buf.append(getInitialLoadViewName());
-    buf.append(" vw WHERE vw.REFERRAL_ID IN (SELECT rc.FKREFERL_T FROM CWDSDSM.CMP_REFR_CLT rc "
-        + "WHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?) ");
+    buf.append(" vw ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
-      buf.append(" AND vw.LIMITED_ACCESS_CODE = 'N'  ");
+      buf.append(" WHERE vw.LIMITED_ACCESS_CODE = 'N'  ");
     }
 
     buf.append(getJdbcOrderBy()).append(" OPTIMIZE FOR 1000000 ROWS FOR READ ONLY WITH UR ");
