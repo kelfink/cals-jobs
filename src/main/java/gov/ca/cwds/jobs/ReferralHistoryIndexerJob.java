@@ -47,6 +47,10 @@ public class ReferralHistoryIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
+  private static final String SQL_INSERT =
+      "INSERT INTO CWDSDSM.GT_IDS (IDENTIFIER)\n" + "SELECT DISTINCT rc.FKREFERL_T\n"
+          + "FROM CWDSDSM.CMP_REFR_CLT rc\n" + "WHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
+
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   /**
@@ -94,7 +98,8 @@ public class ReferralHistoryIndexerJob
     buf.append("CWDSDSM"); // TODO: SPOOF until view created in replication schemas!
     buf.append(".");
     buf.append(getInitialLoadViewName());
-    buf.append(" vw WHERE vw.CLIENT_ID > ? AND vw.CLIENT_ID <= ? ");
+    buf.append(" vw WHERE vw.REFERRAL_ID IN (SELECT rc.FKREFERL_T FROM CWDSDSM.CMP_REFR_CLT rc "
+        + "WHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?) ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
       buf.append(" AND vw.LIMITED_ACCESS_CODE = 'N'  ");
@@ -147,25 +152,27 @@ public class ReferralHistoryIndexerJob
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
 
-      final String sql = getInitialLoadQuery(getDBSchemaName()).replaceAll("\\s+", " ")
-      // .replaceAll(":fromId", p.getLeft()).replaceAll(":toId", p.getRight())
-      ;
+      final String sqlSelect = getInitialLoadQuery(getDBSchemaName()).replaceAll("\\s+", " ");
 
-      LOGGER.warn("SQL: {}", sql);
+      LOGGER.warn("SQL: {}", sqlSelect);
       enableParallelism(con);
 
       int cntr = 0;
       EsPersonReferral m;
       final List<EsPersonReferral> unsorted = new ArrayList<>(275000);
 
-      try (PreparedStatement stmt = con.prepareStatement(sql)) {
-        stmt.setFetchSize(5000); // faster
-        stmt.setMaxRows(0);
-        stmt.setQueryTimeout(0);
-        stmt.setString(1, p.getLeft());
-        stmt.setString(2, p.getRight());
+      try (PreparedStatement stmtInsert = con.prepareStatement(SQL_INSERT);
+          PreparedStatement stmtSelect = con.prepareStatement(sqlSelect)) {
 
-        final ResultSet rs = stmt.executeQuery(); // NOSONAR
+        stmtInsert.setString(1, p.getLeft());
+        stmtInsert.setString(2, p.getRight());
+        stmtInsert.executeUpdate();
+
+        stmtSelect.setFetchSize(5000); // faster
+        stmtSelect.setMaxRows(0);
+        stmtSelect.setQueryTimeout(0);
+
+        final ResultSet rs = stmtSelect.executeQuery(); // NOSONAR
         while (!fatalError && rs.next() && (m = extract(rs)) != null) {
           JobLogUtils.logEvery(++cntr, "Retrieved", "recs");
           unsorted.add(m);
