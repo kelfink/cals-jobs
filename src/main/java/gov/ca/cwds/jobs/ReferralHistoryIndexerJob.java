@@ -153,8 +153,7 @@ public class ReferralHistoryIndexerJob
       con.setAutoCommit(false);
 
       final String sqlSelect = getInitialLoadQuery(getDBSchemaName()).replaceAll("\\s+", " ");
-
-      LOGGER.warn("SQL: {}", sqlSelect);
+      LOGGER.trace("SQL: {}", sqlSelect);
       enableParallelism(con);
 
       int cntr = 0;
@@ -164,9 +163,13 @@ public class ReferralHistoryIndexerJob
       try (PreparedStatement stmtInsert = con.prepareStatement(SQL_INSERT);
           PreparedStatement stmtSelect = con.prepareStatement(sqlSelect)) {
 
+        stmtInsert.setMaxRows(0);
+        stmtInsert.setQueryTimeout(0);
         stmtInsert.setString(1, p.getLeft());
         stmtInsert.setString(2, p.getRight());
-        stmtInsert.executeUpdate();
+
+        final int referralCount = stmtInsert.executeUpdate();
+        LOGGER.info("referral count: {}", referralCount);
 
         stmtSelect.setFetchSize(5000); // faster
         stmtSelect.setMaxRows(0);
@@ -208,11 +211,10 @@ public class ReferralHistoryIndexerJob
       doneTransform = true;
 
       ForkJoinPool forkJoinPool = new ForkJoinPool(2);
-      forkJoinPool
-          .submit(() -> getPartitionRanges().parallelStream().forEach(this::pullRange));
+      forkJoinPool.submit(() -> getPartitionRanges().parallelStream().forEach(this::pullRange));
 
-      // getPartitionRanges().parallelStream().forEach(this::extractPartitionRange);
-      // getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange);
+      // getPartitionRanges().parallelStream().forEach(this::pullRange);
+      // getPartitionRanges().stream().sequential().forEach(this::pullRange);
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
