@@ -214,7 +214,7 @@ public class ReferralHistoryIndexerJob
       final List<Pair<String, String>> ranges = getPartitionRanges();
       final List<ForkJoinTask<?>> tasks = new ArrayList<>();
 
-      ForkJoinPool forkJoinPool = new ForkJoinPool(2);
+      ForkJoinPool forkJoinPool = new ForkJoinPool(3);
       for (Pair<String, String> p : ranges) {
         tasks.add(forkJoinPool.submit(() -> pullRange(p)));
       }
@@ -223,8 +223,6 @@ public class ReferralHistoryIndexerJob
         task.join();
       }
 
-      // getPartitionRanges().parallelStream().forEach(this::pullRange);
-      // getPartitionRanges().stream().sequential().forEach(this::pullRange);
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
