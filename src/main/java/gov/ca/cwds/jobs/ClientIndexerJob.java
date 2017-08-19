@@ -122,7 +122,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    * 
    * @param p partition range to read
    */
-  protected void extractPartitionRange(final Pair<String, String> p) {
+  protected void pullRange(final Pair<String, String> p) {
     final int i = nextThreadNum.incrementAndGet();
     final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
@@ -198,18 +198,18 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
       // ForkJoinPool forkJoinPool = new ForkJoinPool(1);
       // forkJoinPool
-      // .submit(() -> getPartitionRanges().parallelStream().forEach(this::extractPartitionRange));
+      // .submit(() -> getPartitionRanges().parallelStream().forEach(this::pullRange));
 
       // final ForkJoinPool pool = new ForkJoinPool(1);
       // for (Pair<String, String> pair : getPartitionRanges()) {
       // LOGGER.warn("submit partition pair: {},{}", pair.getLeft(), pair.getRight());
-      // pool.submit(() -> extractPartitionRange(pair));
+      // pool.submit(() -> pullRange(pair));
       // }
 
       // TODO: TOO SLOW!
       // Make parallel and normalize on your own.
       // Each partition range is self-contained.
-      getPartitionRanges().stream().sequential().forEach(this::extractPartitionRange);
+      getPartitionRanges().stream().sequential().forEach(this::pullRange);
 
     } catch (Exception e) {
       fatalError = true;

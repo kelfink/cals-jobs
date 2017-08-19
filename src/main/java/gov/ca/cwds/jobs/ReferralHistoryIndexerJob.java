@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -210,8 +211,17 @@ public class ReferralHistoryIndexerJob
       // This job normalizes without the transform thread.
       doneTransform = true;
 
+      final List<Pair<String, String>> ranges = getPartitionRanges();
+      final List<ForkJoinTask<?>> tasks = new ArrayList<>();
+
       ForkJoinPool forkJoinPool = new ForkJoinPool(2);
-      forkJoinPool.submit(() -> getPartitionRanges().parallelStream().forEach(this::pullRange));
+      for (Pair<String, String> p : ranges) {
+        tasks.add(forkJoinPool.submit(() -> pullRange(p)));
+      }
+
+      for (ForkJoinTask<?> task : tasks) {
+        task.join();
+      }
 
       // getPartitionRanges().parallelStream().forEach(this::pullRange);
       // getPartitionRanges().stream().sequential().forEach(this::pullRange);
