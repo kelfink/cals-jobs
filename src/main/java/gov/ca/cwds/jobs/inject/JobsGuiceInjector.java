@@ -33,6 +33,7 @@ import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
 import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
 import gov.ca.cwds.dao.cms.ReplicatedRelationshipsDao;
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
+import gov.ca.cwds.dao.cms.ReplicatedSafetyAlertsDao;
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
 import gov.ca.cwds.dao.ns.EsIntakeScreeningDao;
@@ -45,6 +46,7 @@ import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
+import gov.ca.cwds.data.persistence.cms.EsSafetyAlert;
 import gov.ca.cwds.data.persistence.cms.SystemCode;
 import gov.ca.cwds.data.persistence.cms.SystemMeta;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
@@ -136,7 +138,8 @@ public class JobsGuiceInjector extends AbstractModule {
             .addAnnotatedClass(ReplicatedClient.class)
             .addAnnotatedClass(ReplicatedClientAddress.class)
             .addAnnotatedClass(ReplicatedAddress.class).addAnnotatedClass(SystemCode.class)
-            .addAnnotatedClass(SystemMeta.class).buildSessionFactory());
+            .addAnnotatedClass(EsSafetyAlert.class).addAnnotatedClass(SystemMeta.class)
+            .buildSessionFactory());
 
     // PostgreSQL session factory:
     bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)
@@ -158,6 +161,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ReplicatedEducationProviderContactDao.class);
     bind(ReplicatedPersonReferralsDao.class);
     bind(ReplicatedPersonCasesDao.class);
+    bind(ReplicatedSafetyAlertsDao.class);
 
     // PostgreSQL:
     bind(EsIntakeScreeningDao.class);
