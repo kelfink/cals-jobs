@@ -19,6 +19,7 @@ import java.util.List;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -76,6 +77,7 @@ public class ReferralHistoryIndexerJobTest {
   }
 
   @Test
+  @Ignore
   public void getViewName_Args__() throws Exception {
     String actual = target.getInitialLoadViewName();
     String expected = "MQT_REFERRAL_HIST";
@@ -83,6 +85,7 @@ public class ReferralHistoryIndexerJobTest {
   }
 
   @Test
+  @Ignore
   public void getJdbcOrderBy_Args__() throws Exception {
     String actual = target.getJdbcOrderBy();
     String expected = " ORDER BY CLIENT_ID ";
