@@ -50,8 +50,9 @@ public class ReferralHistoryIndexerJob
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
   private static final String SQL_INSERT =
-      "INSERT INTO CWDSDSM.GT_IDS (IDENTIFIER)\n" + "SELECT DISTINCT rc.FKREFERL_T\n"
-          + "FROM CWDSDSM.CMP_REFR_CLT rc\n" + "WHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
+      "INSERT INTO CWDSDSM.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"
+          + "SELECT rc.FKREFERL_T, rc.FKCLIENT_T, rc.SENSTV_IND\n"
+          + "FROM CWDSDSM.CMP_REFR_CLT rc\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
@@ -83,8 +84,7 @@ public class ReferralHistoryIndexerJob
 
   @Override
   public String getJdbcOrderBy() {
-    // return " ORDER BY CLIENT_ID ";
-    return " "; // sort manually. database won't optimize the sort.
+    return " "; // sort manually cuz DB2 might not optimize the sort.
   }
 
   @Override
@@ -106,31 +106,8 @@ public class ReferralHistoryIndexerJob
       buf.append(" WHERE vw.LIMITED_ACCESS_CODE = 'N'  ");
     }
 
-    buf.append(getJdbcOrderBy()).append(" OPTIMIZE FOR 1000000 ROWS FOR READ ONLY WITH UR ");
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
-  }
-
-  /**
-   * Hand off all recs for same client id at same time.
-   * 
-   * @param grpRecs recs for same client id
-   */
-  protected void handOff(List<EsPersonReferral> grpRecs) {
-    try {
-      lock.readLock().unlock();
-      lock.writeLock().lock();
-      for (EsPersonReferral t : grpRecs) {
-        LOGGER.trace("lock: queueTransform.putLast: client id {}", t.getClientId());
-        queueTransform.putLast(t);
-      }
-      lock.readLock().lock();
-    } catch (InterruptedException ie) { // NOSONAR
-      LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
-      fatalError = true;
-      Thread.currentThread().interrupt();
-    } finally {
-      lock.writeLock().unlock();
-    }
   }
 
   /**
@@ -159,7 +136,7 @@ public class ReferralHistoryIndexerJob
 
       int cntr = 0;
       EsPersonReferral m;
-      final List<EsPersonReferral> unsorted = new ArrayList<>(275000);
+      final List<EsPersonReferral> unsorted = new ArrayList<>(50000);
 
       try (PreparedStatement stmtInsert = con.prepareStatement(SQL_INSERT);
           PreparedStatement stmtSelect = con.prepareStatement(sqlSelect)) {
@@ -214,7 +191,7 @@ public class ReferralHistoryIndexerJob
       final List<Pair<String, String>> ranges = getPartitionRanges();
       final List<ForkJoinTask<?>> tasks = new ArrayList<>();
 
-      ForkJoinPool forkJoinPool = new ForkJoinPool(3);
+      ForkJoinPool forkJoinPool = new ForkJoinPool(2);
       for (Pair<String, String> p : ranges) {
         tasks.add(forkJoinPool.submit(() -> pullRange(p)));
       }
