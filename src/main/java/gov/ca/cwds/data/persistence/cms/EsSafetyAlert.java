@@ -12,8 +12,6 @@ import javax.persistence.Table;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -59,8 +57,6 @@ public class EsSafetyAlert extends ApiObjectIdentity
     implements PersistentObject, ApiGroupNormalizer<ReplicatedSafetyAlerts> {
 
   private static final long serialVersionUID = -4358337986243075067L;
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(EsSafetyAlert.class);
 
   @Type(type = "timestamp")
   @Column(name = "LAST_CHANGED", updatable = false)
@@ -117,7 +113,9 @@ public class EsSafetyAlert extends ApiObjectIdentity
   /**
    * No-argument constructor
    */
-  public EsSafetyAlert() {}
+  public EsSafetyAlert() {
+    // No-argument default constructor
+  }
 
   @Override
   public Class<ReplicatedSafetyAlerts> getNormalizationClass() {
