@@ -112,7 +112,7 @@ public abstract class CaseHistoryIndexerJob
 
   @Override
   protected ReplicatedPersonCases normalizeSingle(List<EsPersonCase> recs) {
-    return normalize(recs).get(0);
+    return !recs.isEmpty() ? normalize(recs).get(0) : null;
   }
 
   @Override
