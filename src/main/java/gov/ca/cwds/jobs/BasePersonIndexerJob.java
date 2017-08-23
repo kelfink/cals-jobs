@@ -180,7 +180,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected JobOptions opts;
 
-  protected AtomicInteger recsQueuedToIndex = new AtomicInteger(0);
+  private AtomicInteger recsQueuedToIndex = new AtomicInteger(0);
+
+  private AtomicInteger recsSentToBulkProcessor = new AtomicInteger(0);
 
   /**
    * Running count of records prepared for bulk indexing.
@@ -624,6 +626,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   // COMMON JSON:
   // ===================
 
+  private void pushToBulkProcessor(BulkProcessor bp, DocWriteRequest<?> t) {
+    JobLogUtils.logEvery(recsSentToBulkProcessor.incrementAndGet(), "add to bulk processor",
+        "push doc");
+    bp.add(t);
+  }
+
   /**
    * Publish a Person record to Elasticsearch with a bulk processor.
    * 
@@ -640,7 +648,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void prepareDocument(BulkProcessor bp, T t) throws IOException {
     Arrays.stream(buildElasticSearchPersons(t)).map(p -> prepareUpsertRequestNoChecked(p, t))
-        .forEach(bp::add);
+        .forEach(x -> { // NOSONAR
+          pushToBulkProcessor(bp, x);
+        });
   }
 
   /**
@@ -730,7 +740,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Prepare an "upsert" request without a checked exception. Throws runtime {@link JobsException}
    * on error. This method's signature is easier to use in functional lambda and stream calls than
-   * older styles.
+   * other method signatures.
    * 
    * @param esp person document object
    * @param t normalized entity
