@@ -100,8 +100,16 @@ public class ReferralHistoryIndexerJob
   public String getInitialLoadQuery(String dbSchemaName) {
     StringBuilder buf = new StringBuilder();
     buf.append("SELECT vw.* FROM ");
-    // buf.append(dbSchemaName);
-    buf.append("CWDSDSM"); // TODO: SPOOF until view created in replication schema.
+
+    if (isDB2OnZOS() && (getDBSchemaName().toUpperCase().endsWith("RSQ")
+        || getDBSchemaName().toUpperCase().endsWith("REP"))) {
+      // TODO: HACK until view created in replication schema.
+      // Pointless to deploy DDL until we prove whole process.
+      buf.append("CWDSDSM");
+    } else {
+      buf.append(dbSchemaName);
+    }
+
     buf.append(".");
     buf.append(getInitialLoadViewName());
     buf.append(" vw ");
