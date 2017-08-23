@@ -50,9 +50,9 @@ public class ReferralHistoryIndexerJob
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
   private static final String SQL_INSERT =
-      "INSERT INTO CWDSDSM.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"
+      "INSERT INTO #SCHEMA#.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"
           + "SELECT rc.FKREFERL_T, rc.FKCLIENT_T, rc.SENSTV_IND\n"
-          + "FROM CWDSDSM.CMP_REFR_CLT rc\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
+          + "FROM #SCHEMA#.VW_REFR_CLT rc\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
   private AtomicInteger rowsRetrieved = new AtomicInteger(0);
 
@@ -100,15 +100,7 @@ public class ReferralHistoryIndexerJob
   public String getInitialLoadQuery(String dbSchemaName) {
     StringBuilder buf = new StringBuilder();
     buf.append("SELECT vw.* FROM ");
-
-    if (isDB2OnZOS() && (getDBSchemaName().toUpperCase().endsWith("RSQ")
-        || getDBSchemaName().toUpperCase().endsWith("REP"))) {
-      // TODO: HACK until view created in replication schema.
-      // Pointless to deploy DDL until we prove whole process.
-      buf.append("CWDSDSM");
-    } else {
-      buf.append(dbSchemaName);
-    }
+    buf.append(dbSchemaName);
 
     buf.append(".");
     buf.append(getInitialLoadViewName());
@@ -150,7 +142,9 @@ public class ReferralHistoryIndexerJob
       EsPersonReferral m;
       final List<EsPersonReferral> unsorted = new ArrayList<>(250000);
 
-      try (PreparedStatement stmtInsert = con.prepareStatement(SQL_INSERT);
+      try (
+          PreparedStatement stmtInsert =
+              con.prepareStatement(SQL_INSERT.replaceAll("#SCHEMA#", getDBSchemaName()));
           PreparedStatement stmtSelect = con.prepareStatement(sqlSelect)) {
 
         stmtInsert.setMaxRows(0);
