@@ -196,7 +196,7 @@ public class ReferralHistoryIndexerJob
       final List<Pair<String, String>> ranges = getPartitionRanges();
       final List<ForkJoinTask<?>> tasks = new ArrayList<>();
 
-      ForkJoinPool forkJoinPool = new ForkJoinPool(4);
+      ForkJoinPool forkJoinPool = new ForkJoinPool(3);
       for (Pair<String, String> p : ranges) {
         tasks.add(forkJoinPool.submit(() -> pullRange(p)));
       }
