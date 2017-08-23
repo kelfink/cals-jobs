@@ -138,7 +138,7 @@ public class ReferralHistoryIndexerJob
 
       int cntr = 0;
       EsPersonReferral m;
-      final List<EsPersonReferral> unsorted = new ArrayList<>(30000);
+      final List<EsPersonReferral> unsorted = new ArrayList<>(35000);
 
       try (PreparedStatement stmtInsert = con.prepareStatement(SQL_INSERT);
           PreparedStatement stmtSelect = con.prepareStatement(sqlSelect)) {
