@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -76,8 +75,9 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
             + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") AND r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsPersonReferral.class, readOnly = true)})
-public class EsPersonReferral extends ApiObjectIdentity implements PersistentObject,
-    ApiGroupNormalizer<ReplicatedPersonReferrals>, Comparator<EsPersonReferral> {
+public class EsPersonReferral extends ApiObjectIdentity
+    implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals>,
+    Comparable<EsPersonReferral>, Comparator<EsPersonReferral> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(EsPersonReferral.class);
 
@@ -998,25 +998,73 @@ public class EsPersonReferral extends ApiObjectIdentity implements PersistentObj
     return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE, false);
   }
 
+  @Override
+  public int compare(EsPersonReferral o1, EsPersonReferral o2) {
+    return o1.getClientId().compareTo(o2.getClientId());
+  }
+
+  @Override
+  public int compareTo(EsPersonReferral o) {
+    return compare(this, o);
+  }
+
+  /**
+   * Load from a tab delimited file.
+   * 
+   * @param args command line
+   */
   public static void main(String[] args) {
     Path pathIn = Paths.get(args[0]);
     try (Stream<String> lines = Files.lines(pathIn)) {
       // Maintain file order by client, referral.
-      final List<EsPersonReferral> results =
-          lines.sequential().map(EsPersonReferral::parseLine).collect(Collectors.toList());
-
-      // results.stream().forEach(t -> {
-      // LOGGER.info("Raw Referral: {}", t);
-      // });
-
+      lines.sequential().map(EsPersonReferral::parseLine).collect(Collectors.toList()).stream()
+          .forEach(t -> { // NOSONAR
+            LOGGER.info("Raw Referral: {}", t);
+          });
     } catch (Exception e) {
       LOGGER.error("Oops!", e);
     }
   }
 
   @Override
-  public int compare(EsPersonReferral o1, EsPersonReferral o2) {
-    return o1.getClientId().compareTo(o2.getClientId());
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + ((clientId == null) ? 0 : clientId.hashCode());
+    result = prime * result + ((referralId == null) ? 0 : referralId.hashCode());
+    result = prime * result + ((allegationId == null) ? 0 : allegationId.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (!super.equals(obj))
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    EsPersonReferral other = (EsPersonReferral) obj;
+
+    if (clientId == null) {
+      if (other.clientId != null)
+        return false;
+    } else if (!clientId.equals(other.clientId))
+      return false;
+
+    if (referralId == null) {
+      if (other.referralId != null)
+        return false;
+    } else if (!referralId.equals(other.referralId))
+      return false;
+
+    if (allegationId == null) {
+      if (other.allegationId != null)
+        return false;
+    } else if (!allegationId.equals(other.allegationId))
+      return false;
+
+    return true;
   }
 
 }
