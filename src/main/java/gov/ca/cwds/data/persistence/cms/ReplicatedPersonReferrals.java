@@ -3,9 +3,9 @@ package gov.ca.cwds.data.persistence.cms;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
@@ -24,13 +24,14 @@ public class ReplicatedPersonReferrals extends ApiObjectIdentity
   private static final long serialVersionUID = -8746969311364544478L;
 
   private String clientId;
-  private List<ElasticSearchPersonReferral> referrals = new ArrayList<>();
+  private Map<String, ElasticSearchPersonReferral> referrals = new ConcurrentHashMap<>();
 
   /**
    * Key: Referral ID <br>
    * Value: ElasticSearchPersonAllegation objects for the keyed referral id.
    */
-  private Map<String, List<ElasticSearchPersonAllegation>> referralAllegations = new HashMap<>();
+  private Map<String, List<ElasticSearchPersonAllegation>> referralAllegations =
+      new ConcurrentHashMap<>();
 
   /**
    * Default constructor.
@@ -51,20 +52,21 @@ public class ReplicatedPersonReferrals extends ApiObjectIdentity
   /**
    * @return The referrals collected in this container.
    */
-  public List<ElasticSearchPersonReferral> geReferrals() {
-    return referrals;
+  public List<ElasticSearchPersonReferral> getReferrals() {
+    return new ArrayList<>(referrals.values());
   }
 
   /**
    * Adds a referral to this container with optional allegation. Note that a referral may have more
    * than one allegations.
    * 
+   * @param clientId group for this client
    * @param referral The referral to add.
    * @param allegation The allegation to add.
    */
-  public void addReferral(ElasticSearchPersonReferral referral,
+  public void addReferral(String clientId, ElasticSearchPersonReferral referral,
       ElasticSearchPersonAllegation allegation) {
-    referrals.add(referral);
+    referrals.put(clientId, referral);
 
     // Add allegation
     if (allegation != null) {

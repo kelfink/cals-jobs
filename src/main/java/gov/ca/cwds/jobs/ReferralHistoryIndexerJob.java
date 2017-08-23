@@ -54,6 +54,8 @@ public class ReferralHistoryIndexerJob
           + "SELECT rc.FKREFERL_T, rc.FKCLIENT_T, rc.SENSTV_IND\n"
           + "FROM CWDSDSM.CMP_REFR_CLT rc\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
+  private AtomicInteger rowsRead = new AtomicInteger(0);
+
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   /**
@@ -97,7 +99,7 @@ public class ReferralHistoryIndexerJob
     StringBuilder buf = new StringBuilder();
     buf.append("SELECT vw.* FROM ");
     // buf.append(dbSchemaName);
-    buf.append("CWDSDSM"); // TODO: SPOOF until view created in replication schemas!
+    buf.append("CWDSDSM"); // TODO: SPOOF until view created in replication schema.
     buf.append(".");
     buf.append(getInitialLoadViewName());
     buf.append(" vw ");
@@ -107,7 +109,7 @@ public class ReferralHistoryIndexerJob
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
-    return buf.toString();
+    return buf.toString().replaceAll("\\s+", " ");
   }
 
   /**
@@ -130,7 +132,7 @@ public class ReferralHistoryIndexerJob
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
 
-      final String sqlSelect = getInitialLoadQuery(getDBSchemaName()).replaceAll("\\s+", " ");
+      final String sqlSelect = getInitialLoadQuery(getDBSchemaName());
       LOGGER.trace("SQL: {}", sqlSelect);
       enableParallelism(con);
 
@@ -147,7 +149,7 @@ public class ReferralHistoryIndexerJob
         stmtInsert.setString(2, p.getRight());
 
         final int referralCount = stmtInsert.executeUpdate();
-        LOGGER.info("referral count: {}", referralCount);
+        LOGGER.info("referral count for this batch: {}", referralCount);
 
         stmtSelect.setFetchSize(5000); // faster
         stmtSelect.setMaxRows(0);
@@ -164,9 +166,10 @@ public class ReferralHistoryIndexerJob
         // Statement and connection close automatically.
       }
 
-      unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
-          .collect(Collectors.groupingBy(EsPersonReferral::getClientId)).entrySet().stream()
-          .sequential().map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
+      // .sorted((e1, e2) -> e1.compare(e1, e2))
+      unsorted.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
+          .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
+          .forEach(this::addToIndexQueue);
 
     } catch (Exception e) {
       fatalError = true;
@@ -204,6 +207,7 @@ public class ReferralHistoryIndexerJob
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
+      LOGGER.info("extracted {} ES referral rows", this.rowsRead.get());
       doneExtract = true;
     }
 
@@ -3817,11 +3821,6 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  protected ReplicatedPersonReferrals normalizeSingle(List<EsPersonReferral> recs) {
-    return normalize(recs).get(0);
-  }
-
-  @Override
   protected List<ReplicatedPersonReferrals> normalize(List<EsPersonReferral> recs) {
     return EntityNormalizer.<ReplicatedPersonReferrals, EsPersonReferral>normalizeList(recs);
   }
@@ -3832,7 +3831,7 @@ public class ReferralHistoryIndexerJob
     StringBuilder buf = new StringBuilder();
     buf.append("{\"referrals\":[");
 
-    List<ElasticSearchPersonReferral> esPersonReferrals = referrals.geReferrals();
+    List<ElasticSearchPersonReferral> esPersonReferrals = referrals.getReferrals();
     esp.setReferrals(esPersonReferrals);
 
     if (esPersonReferrals != null && !esPersonReferrals.isEmpty()) {
@@ -3862,6 +3861,7 @@ public class ReferralHistoryIndexerJob
   @Override
   public EsPersonReferral extract(ResultSet rs) throws SQLException {
     EsPersonReferral referral = new EsPersonReferral();
+    JobLogUtils.logEvery(rowsRead.incrementAndGet(), "Extracted", "es person referrals");
 
     referral.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
     referral.setClientId(ifNull(rs.getString("CLIENT_ID")));

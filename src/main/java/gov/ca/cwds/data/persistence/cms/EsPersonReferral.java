@@ -66,7 +66,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r WHERE r.CLIENT_ID IN ( "
             + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
             + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") AND r.LIMITED_ACCESS_CODE = 'N'  ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
+            + ") AND r.LIMITED_ACCESS_CODE = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsPersonReferral.class, readOnly = true),
 
     @NamedNativeQuery(
@@ -74,7 +74,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r WHERE r.CLIENT_ID IN ( "
             + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
             + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") AND r.LIMITED_ACCESS_CODE != 'N'  ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
+            + ") AND r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsPersonReferral.class, readOnly = true)})
 public class EsPersonReferral extends ApiObjectIdentity implements PersistentObject,
     ApiGroupNormalizer<ReplicatedPersonReferrals>, Comparator<EsPersonReferral> {
@@ -655,7 +655,7 @@ public class EsPersonReferral extends ApiObjectIdentity implements PersistentObj
     r.setAccessLimitation(accessLimit);
 
     //
-    // A referral may have more than one allegations
+    // A referral may have more than one allegation.
     //
     ElasticSearchPersonAllegation allegation = new ElasticSearchPersonAllegation();
     allegation.setId(this.allegationId);
@@ -695,7 +695,7 @@ public class EsPersonReferral extends ApiObjectIdentity implements PersistentObj
     allegation.setVictimFirstName(this.victimFirstName);
     allegation.setVictimLastName(this.victimLastName);
 
-    referrals.addReferral(r, allegation);
+    referrals.addReferral(this.clientId, r, allegation);
     return referrals;
   }
 

@@ -125,9 +125,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int DEFAULT_BUCKETS = 1;
 
   private static final int ES_BULK_SIZE = 5000;
-
   private static final int SLEEP_MILLIS = 2500;
-  private static final int POLL_MILLIS = 2000;
+  private static final int POLL_MILLIS = 3000;
 
   private static final int DEFAULT_FETCH_SIZE = BatchDaoImpl.DEFAULT_FETCH_SIZE;
 
@@ -181,6 +180,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected JobOptions opts;
 
+  protected AtomicInteger recsQueuedToIndex = new AtomicInteger(0);
+
   /**
    * Running count of records prepared for bulk indexing.
    */
@@ -219,7 +220,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Queue of normalized records waiting to publish to Elasticsearch.
    */
-  protected volatile LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(100000);
+  protected volatile LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(250000);
 
   /**
    * Completion flag for <strong>Extract</strong> method {@link #threadExtractJdbc()}.
@@ -353,10 +354,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Just adds an object to the normalized index queue and traps InterruptedException. Suitable for
    * streams and lambda.
    * 
-   * @param norm obj to add to index queue
+   * @param norm object to add to index queue
    */
   protected void addToIndexQueue(T norm) {
     try {
+      JobLogUtils.logEvery(recsQueuedToIndex.incrementAndGet(), "added to index queue", "recs");
       queueIndex.putLast(norm);
     } catch (InterruptedException e) {
       fatalError = true;

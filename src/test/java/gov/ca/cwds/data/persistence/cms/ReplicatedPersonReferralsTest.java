@@ -32,7 +32,7 @@ public class ReplicatedPersonReferralsTest {
   @Test
   public void geReferrals_Args__() throws Exception {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
-    List<ElasticSearchPersonReferral> actual = target.geReferrals();
+    List<ElasticSearchPersonReferral> actual = target.getReferrals();
     List<ElasticSearchPersonReferral> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
@@ -43,7 +43,7 @@ public class ReplicatedPersonReferralsTest {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
     ElasticSearchPersonReferral referral = mock(ElasticSearchPersonReferral.class);
     ElasticSearchPersonAllegation allegation = mock(ElasticSearchPersonAllegation.class);
-    target.addReferral(referral, allegation);
+    target.addReferral("q1234", referral, allegation);
   }
 
   @Test
