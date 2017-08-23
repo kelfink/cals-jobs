@@ -63,6 +63,7 @@ import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
 import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -82,26 +83,31 @@ public class JobsGuiceInjector extends AbstractModule {
   private String lastJobRunTimeFilename;
   private String altInputFilename;
 
+  private final JobOptions opts;
+
   /**
    * Default constructor.
    */
   public JobsGuiceInjector() {
     // Default, no-op.
+    this.opts = null;
   }
 
   /**
    * Usual constructor.
    * 
+   * @param opts command line options
    * @param esConfigFile location of Elasticsearch configuration file
    * @param lastJobRunTimeFilename location of last run file
    * @param altInputFilename alternate input file
    */
-  public JobsGuiceInjector(final File esConfigFile, String lastJobRunTimeFilename,
-      String altInputFilename) {
+  public JobsGuiceInjector(final JobOptions opts, final File esConfigFile,
+      String lastJobRunTimeFilename, String altInputFilename) {
     this.esConfig = esConfigFile;
     this.lastJobRunTimeFilename =
         !StringUtils.isBlank(lastJobRunTimeFilename) ? lastJobRunTimeFilename : "";
     this.altInputFilename = !StringUtils.isBlank(altInputFilename) ? altInputFilename : "";
+    this.opts = opts;
   }
 
   /**
@@ -118,27 +124,23 @@ public class JobsGuiceInjector extends AbstractModule {
   @Override
   protected void configure() {
     // DB2 session factory:
-    // final Interceptor interceptor = new NeutronReferentialIntegrityInterceptor();
-    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
-        .toInstance(new Configuration().configure("jobs-cms-hibernate.cfg.xml")
-            // .setInterceptor(interceptor)
-            .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsClientAddress.class)
-            .addAnnotatedClass(EsRelationship.class).addAnnotatedClass(EsPersonReferral.class)
-            .addAnnotatedClass(EsChildPersonCase.class).addAnnotatedClass(EsParentPersonCase.class)
-            .addAnnotatedClass(ReplicatedAttorney.class)
-            .addAnnotatedClass(ReplicatedCollateralIndividual.class)
-            .addAnnotatedClass(ReplicatedEducationProviderContact.class)
-            .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
-            .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
-            .addAnnotatedClass(ReplicatedOtherClientName.class)
-            .addAnnotatedClass(ReplicatedReporter.class)
-            .addAnnotatedClass(ReplicatedServiceProvider.class)
-            .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
-            .addAnnotatedClass(ReplicatedClient.class)
-            .addAnnotatedClass(ReplicatedClientAddress.class)
-            .addAnnotatedClass(ReplicatedAddress.class).addAnnotatedClass(SystemCode.class)
-            .addAnnotatedClass(EsSafetyAlert.class).addAnnotatedClass(SystemMeta.class)
-            .buildSessionFactory());
+    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class).toInstance(new Configuration()
+        .configure("jobs-cms-hibernate.cfg.xml").addAnnotatedClass(BatchBucket.class)
+        .addAnnotatedClass(EsClientAddress.class).addAnnotatedClass(EsRelationship.class)
+        .addAnnotatedClass(EsPersonReferral.class).addAnnotatedClass(EsChildPersonCase.class)
+        .addAnnotatedClass(EsParentPersonCase.class).addAnnotatedClass(ReplicatedAttorney.class)
+        .addAnnotatedClass(ReplicatedCollateralIndividual.class)
+        .addAnnotatedClass(ReplicatedEducationProviderContact.class)
+        .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
+        .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
+        .addAnnotatedClass(ReplicatedOtherClientName.class)
+        .addAnnotatedClass(ReplicatedReporter.class)
+        .addAnnotatedClass(ReplicatedServiceProvider.class)
+        .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
+        .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
+        .addAnnotatedClass(ReplicatedAddress.class).addAnnotatedClass(SystemCode.class)
+        .addAnnotatedClass(EsSafetyAlert.class).addAnnotatedClass(SystemMeta.class)
+        .buildSessionFactory());
 
     // PostgreSQL session factory:
     bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)
