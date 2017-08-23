@@ -28,6 +28,21 @@ public final class JobLogUtils {
   }
 
   /**
+   * Log every N records.
+   * 
+   * @param log Logger
+   * @param logEvery log every N records
+   * @param cntr record count
+   * @param action action message (extract, transform, load, etc)
+   * @param args variable message arguments
+   */
+  public static void logEvery(Logger log, int logEvery, int cntr, String action, Object... args) {
+    if (cntr > 0 && (cntr % logEvery) == 0) {
+      log.info("{} {} {}", action, cntr, args);
+    }
+  }
+
+  /**
    * Log every {@link #DEFAULT_LOG_EVERY} records.
    * 
    * @param log Logger
@@ -36,9 +51,7 @@ public final class JobLogUtils {
    * @param args variable message arguments
    */
   public static void logEvery(Logger log, int cntr, String action, Object... args) {
-    if (cntr > 0 && (cntr % DEFAULT_LOG_EVERY) == 0) {
-      log.info("{} {} {}", action, cntr, args);
-    }
+    logEvery(log, DEFAULT_LOG_EVERY, cntr, action, args);
   }
 
   /**
