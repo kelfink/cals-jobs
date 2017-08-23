@@ -127,7 +127,7 @@ public class ReferralHistoryIndexerJob
     final int i = nextThreadNum.incrementAndGet();
     final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
-    LOGGER.info("BEGIN: extract thread {}", threadName);
+    LOGGER.debug("BEGIN: extract thread {}", threadName);
 
     try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection()) {
@@ -140,7 +140,7 @@ public class ReferralHistoryIndexerJob
 
       int cntr = 0;
       EsPersonReferral m;
-      final List<EsPersonReferral> unsorted = new ArrayList<>(150000);
+      final List<EsPersonReferral> unsorted = new ArrayList<>(250000);
 
       try (PreparedStatement stmtInsert = con.prepareStatement(SQL_INSERT);
           PreparedStatement stmtSelect = con.prepareStatement(sqlSelect)) {
@@ -153,7 +153,7 @@ public class ReferralHistoryIndexerJob
         final int clientReferralCount = stmtInsert.executeUpdate();
         LOGGER.info("bundle client/referrals: {}", clientReferralCount);
 
-        stmtSelect.setFetchSize(5000); // faster
+        stmtSelect.setFetchSize(15000); // faster
         stmtSelect.setMaxRows(0);
         stmtSelect.setQueryTimeout(0);
 
@@ -196,7 +196,7 @@ public class ReferralHistoryIndexerJob
       final List<Pair<String, String>> ranges = getPartitionRanges();
       final List<ForkJoinTask<?>> tasks = new ArrayList<>();
 
-      ForkJoinPool forkJoinPool = new ForkJoinPool(3);
+      ForkJoinPool forkJoinPool = new ForkJoinPool(4);
       for (Pair<String, String> p : ranges) {
         tasks.add(forkJoinPool.submit(() -> pullRange(p)));
       }
