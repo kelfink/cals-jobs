@@ -125,7 +125,7 @@ public class ReferralHistoryIndexerJob
     final int i = nextThreadNum.incrementAndGet();
     final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
-    LOGGER.warn("BEGIN: extract thread {}", threadName);
+    LOGGER.info("BEGIN: extract thread {}", threadName);
 
     try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection()) {
@@ -149,7 +149,7 @@ public class ReferralHistoryIndexerJob
         stmtInsert.setString(2, p.getRight());
 
         final int referralCount = stmtInsert.executeUpdate();
-        LOGGER.info("referral count for this batch: {}", referralCount);
+        LOGGER.info("client/referral count for this batch: {}", referralCount);
 
         stmtSelect.setFetchSize(5000); // faster
         stmtSelect.setMaxRows(0);
@@ -166,7 +166,6 @@ public class ReferralHistoryIndexerJob
         // Statement and connection close automatically.
       }
 
-      // .sorted((e1, e2) -> e1.compare(e1, e2))
       unsorted.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
           .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
           .forEach(this::addToIndexQueue);
@@ -176,7 +175,7 @@ public class ReferralHistoryIndexerJob
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
-    LOGGER.warn("DONE: Extract thread {}", threadName);
+    LOGGER.info("DONE: Extract thread {}", threadName);
   }
 
   /**
