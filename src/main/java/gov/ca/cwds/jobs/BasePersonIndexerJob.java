@@ -184,6 +184,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   private AtomicInteger recsSentToBulkProcessor = new AtomicInteger(0);
 
+  private AtomicInteger rowsNormalized = new AtomicInteger(0);
+
   /**
    * Running count of records prepared for bulk indexing.
    */
@@ -600,6 +602,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return normalized entity bean instance
    */
   protected T normalizeSingle(List<M> recs) {
+    JobLogUtils.logEvery(rowsNormalized.incrementAndGet(), "Normalized", "single");
     final List<T> list = normalize(recs);
     return list != null && !list.isEmpty() ? list.get(0) : null;
   }

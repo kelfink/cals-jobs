@@ -54,7 +54,9 @@ public class ReferralHistoryIndexerJob
           + "SELECT rc.FKREFERL_T, rc.FKCLIENT_T, rc.SENSTV_IND\n"
           + "FROM CWDSDSM.CMP_REFR_CLT rc\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
-  private AtomicInteger rowsRead = new AtomicInteger(0);
+  private AtomicInteger rowsRetrieved = new AtomicInteger(0);
+
+  private AtomicInteger rowsExtracted = new AtomicInteger(0);
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
@@ -148,8 +150,8 @@ public class ReferralHistoryIndexerJob
         stmtInsert.setString(1, p.getLeft());
         stmtInsert.setString(2, p.getRight());
 
-        final int referralCount = stmtInsert.executeUpdate();
-        LOGGER.info("client/referral count for this batch: {}", referralCount);
+        final int clientReferralCount = stmtInsert.executeUpdate();
+        LOGGER.info("bundle client/referral count: {}", clientReferralCount);
 
         stmtSelect.setFetchSize(5000); // faster
         stmtSelect.setMaxRows(0);
@@ -157,7 +159,8 @@ public class ReferralHistoryIndexerJob
 
         final ResultSet rs = stmtSelect.executeQuery(); // NOSONAR
         while (!fatalError && rs.next() && (m = extract(rs)) != null) {
-          JobLogUtils.logEvery(++cntr, "Retrieved", "recs");
+          JobLogUtils.logEvery(++cntr, "Retrieved this bundle", "bundle retrieved");
+          JobLogUtils.logEvery(rowsRetrieved.incrementAndGet(), "Total retrieved", "all retrieved");
           unsorted.add(m);
         }
 
@@ -206,7 +209,7 @@ public class ReferralHistoryIndexerJob
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      LOGGER.info("extracted {} ES referral rows", this.rowsRead.get());
+      LOGGER.info("extracted {} ES referral rows", this.rowsExtracted.get());
       doneExtract = true;
     }
 
@@ -3860,7 +3863,7 @@ public class ReferralHistoryIndexerJob
   @Override
   public EsPersonReferral extract(ResultSet rs) throws SQLException {
     EsPersonReferral referral = new EsPersonReferral();
-    JobLogUtils.logEvery(rowsRead.incrementAndGet(), "Extracted", "es person referrals");
+    JobLogUtils.logEvery(rowsExtracted.incrementAndGet(), "Extracted", "es person referrals");
 
     referral.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
     referral.setClientId(ifNull(rs.getString("CLIENT_ID")));
