@@ -140,7 +140,7 @@ public class ReferralHistoryIndexerJob
 
       int cntr = 0;
       EsPersonReferral m;
-      final List<EsPersonReferral> unsorted = new ArrayList<>(35000);
+      final List<EsPersonReferral> unsorted = new ArrayList<>(150000);
 
       try (PreparedStatement stmtInsert = con.prepareStatement(SQL_INSERT);
           PreparedStatement stmtSelect = con.prepareStatement(sqlSelect)) {
@@ -151,7 +151,7 @@ public class ReferralHistoryIndexerJob
         stmtInsert.setString(2, p.getRight());
 
         final int clientReferralCount = stmtInsert.executeUpdate();
-        LOGGER.info("bundle client/referral count: {}", clientReferralCount);
+        LOGGER.info("bundle client/referrals: {}", clientReferralCount);
 
         stmtSelect.setFetchSize(5000); // faster
         stmtSelect.setMaxRows(0);
@@ -159,7 +159,7 @@ public class ReferralHistoryIndexerJob
 
         final ResultSet rs = stmtSelect.executeQuery(); // NOSONAR
         while (!fatalError && rs.next() && (m = extract(rs)) != null) {
-          JobLogUtils.logEvery(++cntr, "Retrieved this bundle", "bundle retrieved");
+          JobLogUtils.logEvery(++cntr, "bundle retrieved", "bundle retrieved");
           JobLogUtils.logEvery(rowsRetrieved.incrementAndGet(), "Total retrieved", "all retrieved");
           unsorted.add(m);
         }
@@ -196,7 +196,7 @@ public class ReferralHistoryIndexerJob
       final List<Pair<String, String>> ranges = getPartitionRanges();
       final List<ForkJoinTask<?>> tasks = new ArrayList<>();
 
-      ForkJoinPool forkJoinPool = new ForkJoinPool(2);
+      ForkJoinPool forkJoinPool = new ForkJoinPool(3);
       for (Pair<String, String> p : ranges) {
         tasks.add(forkJoinPool.submit(() -> pullRange(p)));
       }
