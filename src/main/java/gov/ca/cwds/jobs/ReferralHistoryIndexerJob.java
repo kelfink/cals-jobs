@@ -54,6 +54,8 @@ public class ReferralHistoryIndexerJob
           + "SELECT rc.FKREFERL_T, rc.FKCLIENT_T, rc.SENSTV_IND\n"
           + "FROM #SCHEMA#.VW_REFR_CLT rc\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
+  private final ThreadLocal<List<EsPersonReferral>> alloc = new ThreadLocal<>();
+
   private AtomicInteger rowsRead = new AtomicInteger(0);
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
@@ -139,8 +141,12 @@ public class ReferralHistoryIndexerJob
       int cntr = 0;
       EsPersonReferral m;
 
-      // Consider pre-allocating memory and reusing by means of object pool, thread local, etc.
-      final List<EsPersonReferral> unsorted = new ArrayList<>(250000);
+      // Pre-allocate memory once for this thread and reuse it per key range.
+      if (alloc.get() == null) {
+        alloc.set(new ArrayList<>(250000));
+      }
+      final List<EsPersonReferral> unsorted = alloc.get();
+      unsorted.clear();
 
       try (
           PreparedStatement stmtInsert =
@@ -155,7 +161,7 @@ public class ReferralHistoryIndexerJob
         final int clientReferralCount = stmtInsert.executeUpdate();
         LOGGER.debug("bundle client/referrals: {}", clientReferralCount);
 
-        stmtSelect.setFetchSize(15000); // faster
+        stmtSelect.setFetchSize(5000); // faster
         stmtSelect.setMaxRows(0);
         stmtSelect.setQueryTimeout(0);
 
@@ -200,8 +206,8 @@ public class ReferralHistoryIndexerJob
       // Set thread pool size.
       final int cntReaderThreads =
           getOpts().getThreadCount() != 0L ? (int) getOpts().getThreadCount()
-              : Math.max(Runtime.getRuntime().availableProcessors() - 2, 4);
-      LOGGER.info("# extract threads: {}", cntReaderThreads);
+              : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
+      LOGGER.warn(">>>>> # extract threads: {}", cntReaderThreads);
       ForkJoinPool forkJoinPool = new ForkJoinPool(cntReaderThreads);
 
       // Queue execution.
