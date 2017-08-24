@@ -148,7 +148,7 @@ public class EsSafetyAlert extends ApiObjectIdentity
 
     esSafetyAlert.setDeactivationCounty(
         SystemCodeCache.global().getSystemCodeShortDescription(this.deactivationCountyCode));
-    esSafetyAlert.setActivationCountyId(
+    esSafetyAlert.setDeactivationCountyId(
         this.deactivationCountyCode != null ? this.deactivationCountyCode.toString() : null);
     esSafetyAlert.setDeactivationDate(DomainChef.cookDate(this.deactivationDate));
     esSafetyAlert.setDeactivationExplanation(this.deactivationExplanation);
