@@ -20,7 +20,7 @@ public final class JobLogUtils {
    */
   protected static final Logger LOGGER = LoggerFactory.getLogger(JobLogUtils.class);
 
-  private static final int DEFAULT_LOG_EVERY = 5000;
+  private static final int DEFAULT_LOG_EVERY = 10000;
 
   private JobLogUtils() {
     // Static methods only, no class instantiation. Evil singleton, blah, blah, blah ... I can't
