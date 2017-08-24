@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
@@ -27,6 +28,7 @@ public class ReferralJobRangesTest {
   }
 
   @Test
+  @Ignore
   public void getPartitionRanges_Args__BasePersonIndexerJob() throws Exception {
     ReferralJobRanges target = new ReferralJobRanges();
     BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job =
