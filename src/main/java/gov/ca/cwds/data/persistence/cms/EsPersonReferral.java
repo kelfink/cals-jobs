@@ -695,7 +695,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     allegation.setVictimFirstName(this.victimFirstName);
     allegation.setVictimLastName(this.victimLastName);
 
-    referrals.addReferral(this.clientId, r, allegation);
+    referrals.addReferral(r, allegation);
     return referrals;
   }
 

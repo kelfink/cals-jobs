@@ -127,7 +127,7 @@ public class ReferralHistoryIndexerJob
     final int i = nextThreadNum.incrementAndGet();
     final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
-    LOGGER.debug("BEGIN: extract thread {}", threadName);
+    LOGGER.debug("BEGIN");
 
     try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection()) {
@@ -140,6 +140,8 @@ public class ReferralHistoryIndexerJob
 
       int cntr = 0;
       EsPersonReferral m;
+
+      // Consider pre-allocating memory and reusing by means of object pool, thread local, etc.
       final List<EsPersonReferral> unsorted = new ArrayList<>(250000);
 
       try (
@@ -181,7 +183,7 @@ public class ReferralHistoryIndexerJob
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
-    LOGGER.info("DONE: Extract thread {}", threadName);
+    LOGGER.info("DONE");
   }
 
   /**
@@ -198,9 +200,9 @@ public class ReferralHistoryIndexerJob
       final List<ForkJoinTask<?>> tasks = new ArrayList<>();
 
       // Set thread pool size.
-      final int cntReaderThreads =
-          getOpts().getThreadCount() != 0L ? (int) getOpts().getThreadCount()
-              : Math.min(Math.min(Runtime.getRuntime().availableProcessors() - 2, 4), 2);
+      final int cntReaderThreads = 1;
+      // getOpts().getThreadCount() != 0L ? (int) getOpts().getThreadCount()
+      // : Math.min(Math.min(Runtime.getRuntime().availableProcessors() - 2, 4), 2);
       ForkJoinPool forkJoinPool = new ForkJoinPool(cntReaderThreads);
 
       // Queue execution.
@@ -256,6 +258,7 @@ public class ReferralHistoryIndexerJob
 
     List<ElasticSearchPersonReferral> esPersonReferrals = referrals.getReferrals();
     esp.setReferrals(esPersonReferrals);
+    // LOGGER.info("# of referrals: {}", esPersonReferrals.);
 
     if (esPersonReferrals != null && !esPersonReferrals.isEmpty()) {
       try {

@@ -60,23 +60,31 @@ public class ReplicatedPersonReferrals extends ApiObjectIdentity
    * Adds a referral to this container with optional allegation. Note that a referral may have more
    * than one allegations.
    * 
-   * @param clientId group for this client
-   * @param referral The referral to add.
+   * @param incomingReferral The referral to add.
    * @param allegation The allegation to add.
    */
-  public void addReferral(String clientId, ElasticSearchPersonReferral referral,
+  public void addReferral(ElasticSearchPersonReferral incomingReferral,
       ElasticSearchPersonAllegation allegation) {
-    referrals.put(clientId, referral);
 
-    // Add allegation
+    final String refId = incomingReferral.getId();
+    ElasticSearchPersonReferral referral;
+    if (referrals.containsKey(refId)) {
+      referral = referrals.get(refId);
+    } else {
+      referral = incomingReferral;
+    }
+
+    referrals.put(refId, referral);
+
+    // Add allegation.
     if (allegation != null) {
-      List<ElasticSearchPersonAllegation> allegations = referralAllegations.get(referral.getId());
+      List<ElasticSearchPersonAllegation> allegations = referralAllegations.get(refId);
       if (allegations == null) {
         allegations = new ArrayList<>();
-        referralAllegations.put(referral.getId(), allegations);
+        referralAllegations.put(incomingReferral.getId(), allegations);
       }
       allegations.add(allegation);
-      referral.setAllegations(allegations);
+      incomingReferral.setAllegations(allegations);
     }
   }
 

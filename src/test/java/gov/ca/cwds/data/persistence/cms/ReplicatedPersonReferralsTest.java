@@ -45,7 +45,7 @@ public class ReplicatedPersonReferralsTest {
     ReplicatedPersonReferrals target = new ReplicatedPersonReferrals();
     ElasticSearchPersonReferral referral = mock(ElasticSearchPersonReferral.class);
     ElasticSearchPersonAllegation allegation = mock(ElasticSearchPersonAllegation.class);
-    target.addReferral("q1234", referral, allegation);
+    target.addReferral(referral, allegation);
   }
 
   @Test

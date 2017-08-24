@@ -122,7 +122,7 @@ public class EsPersonReferralTest {
     referral.setLegacyId("ddusicnz7");
     referral.setLegacyDescriptor(
         ElasticTransformer.createLegacyDescriptor("ddusicnz7", null, LegacyTable.REFERRAL));
-    expected.addReferral(target.getClientId(), referral, allegation);
+    expected.addReferral(referral, allegation);
     // Value is a literal "null"? Is this right?
     // expected.geReferrals().get(0).getAccessLimitation().setLimitedAccessGovernmentEntityId("null");
     // referral.setCountyId("null");
