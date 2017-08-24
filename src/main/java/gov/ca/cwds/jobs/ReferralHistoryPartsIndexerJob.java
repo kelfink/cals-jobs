@@ -71,6 +71,41 @@ public class ReferralHistoryPartsIndexerJob
     String clientId;
     String referralId;
     String sensitivity;
+
+    MinClientReferral(String clientId, String referralId, String sensitivity) {
+      this.clientId = clientId;
+      this.referralId = referralId;
+      this.sensitivity = sensitivity;
+    }
+
+    protected static MinClientReferral extract(ResultSet rs) throws SQLException {
+      return new MinClientReferral(rs.getString("FKCLIENT_T"), rs.getString("FKREFERL_T"),
+          rs.getString("SENSTV_IND"));
+    }
+
+    String getClientId() {
+      return clientId;
+    }
+
+    void setClientId(String clientId) {
+      this.clientId = clientId;
+    }
+
+    String getReferralId() {
+      return referralId;
+    }
+
+    void setReferralId(String referralId) {
+      this.referralId = referralId;
+    }
+
+    String getSensitivity() {
+      return sensitivity;
+    }
+
+    void setSensitivity(String sensitivity) {
+      this.sensitivity = sensitivity;
+    }
   }
 
   /**
@@ -108,7 +143,6 @@ public class ReferralHistoryPartsIndexerJob
 
   @Override
   public String getInitialLoadViewName() {
-    // return "VW_MQT_REFERRAL_HIST";
     return "VW_MQT_REFRL_ONLY";
   }
 
@@ -169,10 +203,12 @@ public class ReferralHistoryPartsIndexerJob
         allocAllegations.set(new HashMap<>(125000));
       }
 
-      final Map<String, EsPersonReferral> listReferrals = allocReferrals.get();
-      final Map<String, EsPersonReferral> listAllegations = allocAllegations.get();
-      listReferrals.clear();
-      listAllegations.clear();
+      final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
+      final Map<String, EsPersonReferral> mapAllegations = allocAllegations.get();
+      mapReferrals.clear();
+      mapAllegations.clear();
+
+      final List<MinClientReferral> listClientReferral = new ArrayList<>(30000);
 
       try (
           final PreparedStatement stmtInsClient =
@@ -180,7 +216,7 @@ public class ReferralHistoryPartsIndexerJob
           final PreparedStatement stmtSelClient =
               con.prepareStatement(SELECT_CLIENT.replaceAll("#SCHEMA#", getDBSchemaName()));
           final PreparedStatement stmtSelReferral =
-              con.prepareStatement(SELECT_REFERRAL.replaceAll("#SCHEMA#", getDBSchemaName()));
+              con.prepareStatement(getInitialLoadQuery(getDBSchemaName()));
           final PreparedStatement stmtSelAllegation =
               con.prepareStatement(SELECT_ALLEGATION.replaceAll("#SCHEMA#", getDBSchemaName()))) {
 
@@ -206,12 +242,40 @@ public class ReferralHistoryPartsIndexerJob
         stmtSelAllegation.setQueryTimeout(0);
         stmtSelAllegation.setFetchSize(5000);
 
-        final ResultSet rs = stmtSelAllegation.executeQuery(); // NOSONAR
-        while (!fatalError && rs.next() && (m = extract(rs)) != null) {
-          JobLogUtils.logEvery(++cntr, "read", "bundle referral");
-          JobLogUtils.logEvery(LOGGER, 50000, rowsRead.incrementAndGet(), "Total read",
-              "total read");
-          listReferrals.put(m.getReferralId(), m);
+        {
+          final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
+          MinClientReferral mx;
+          while (!fatalError && rs.next() && (mx = MinClientReferral.extract(rs)) != null) {
+            listClientReferral.add(mx);
+          }
+        }
+
+        final Map<String, List<MinClientReferral>> mapReferralByClient =
+            listClientReferral.stream().sorted((e1, e2) -> e1.clientId.compareTo(e2.clientId))
+                .collect(Collectors.groupingBy(MinClientReferral::getClientId));
+
+        final Map<String, List<MinClientReferral>> mapClientByReferral =
+            listClientReferral.stream().sorted((e1, e2) -> e1.referralId.compareTo(e2.referralId))
+                .collect(Collectors.groupingBy(MinClientReferral::getReferralId));
+
+        {
+          final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
+          while (!fatalError && rs.next() && (m = extractReferral(rs)) != null) {
+            JobLogUtils.logEvery(++cntr, "read", "bundle referral");
+            JobLogUtils.logEvery(LOGGER, 50000, rowsRead.incrementAndGet(), "Total read",
+                "referrals");
+            mapReferrals.put(m.getReferralId(), m);
+          }
+        }
+
+        {
+          final ResultSet rs = stmtSelAllegation.executeQuery(); // NOSONAR
+          while (!fatalError && rs.next() && (m = extractAllegation(rs)) != null) {
+            JobLogUtils.logEvery(++cntr, "read", "bundle allegation");
+            JobLogUtils.logEvery(LOGGER, 50000, rowsRead.incrementAndGet(), "Total read",
+                "allegations");
+            mapAllegations.put(m.getReferralId(), m);
+          }
         }
 
         con.commit();
@@ -220,6 +284,8 @@ public class ReferralHistoryPartsIndexerJob
       }
 
       LOGGER.warn("sort, group, normalize, and send to index queue");
+      // unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
+
       // listReferrals.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
       // .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
       // .forEach(this::addToIndexQueue);
@@ -330,7 +396,7 @@ public class ReferralHistoryPartsIndexerJob
         .upsert(new IndexRequest(alias, docType, esp.getId()).source(insertJson));
   }
 
-  public EsPersonReferral extractReferral(ResultSet rs) throws SQLException {
+  protected EsPersonReferral extractReferral(ResultSet rs) throws SQLException {
     EsPersonReferral referral = new EsPersonReferral();
 
     referral.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
@@ -360,7 +426,7 @@ public class ReferralHistoryPartsIndexerJob
     return referral;
   }
 
-  public EsPersonReferral extractAllegation(ResultSet rs) throws SQLException {
+  protected EsPersonReferral extractAllegation(ResultSet rs) throws SQLException {
     EsPersonReferral referral = new EsPersonReferral();
 
     referral.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
