@@ -54,9 +54,7 @@ public class ReferralHistoryIndexerJob
           + "SELECT rc.FKREFERL_T, rc.FKCLIENT_T, rc.SENSTV_IND\n"
           + "FROM #SCHEMA#.VW_REFR_CLT rc\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
-  private AtomicInteger rowsRetrieved = new AtomicInteger(0);
-
-  private AtomicInteger rowsExtracted = new AtomicInteger(0);
+  private AtomicInteger rowsRead = new AtomicInteger(0);
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
@@ -164,7 +162,7 @@ public class ReferralHistoryIndexerJob
         final ResultSet rs = stmtSelect.executeQuery(); // NOSONAR
         while (!fatalError && rs.next() && (m = extract(rs)) != null) {
           JobLogUtils.logEvery(++cntr, "retrieved", "bundle");
-          JobLogUtils.logEvery(LOGGER, 50000, rowsRetrieved.incrementAndGet(), "Total read",
+          JobLogUtils.logEvery(LOGGER, 50000, rowsRead.incrementAndGet(), "Total read",
               "total read");
           unsorted.add(m);
         }
@@ -200,9 +198,10 @@ public class ReferralHistoryIndexerJob
       final List<ForkJoinTask<?>> tasks = new ArrayList<>();
 
       // Set thread pool size.
-      final int cntReaderThreads = 1;
-      // getOpts().getThreadCount() != 0L ? (int) getOpts().getThreadCount()
-      // : Math.min(Math.min(Runtime.getRuntime().availableProcessors() - 2, 4), 2);
+      final int cntReaderThreads =
+          getOpts().getThreadCount() != 0L ? (int) getOpts().getThreadCount()
+              : Math.max(Runtime.getRuntime().availableProcessors() - 2, 4);
+      LOGGER.info("# extract threads: {}", cntReaderThreads);
       ForkJoinPool forkJoinPool = new ForkJoinPool(cntReaderThreads);
 
       // Queue execution.
@@ -219,7 +218,7 @@ public class ReferralHistoryIndexerJob
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      LOGGER.info("extracted {} ES referral rows", this.rowsExtracted.get());
+      LOGGER.info("extracted {} ES referral rows", this.rowsRead.get());
       doneExtract = true;
     }
 
@@ -258,7 +257,6 @@ public class ReferralHistoryIndexerJob
 
     List<ElasticSearchPersonReferral> esPersonReferrals = referrals.getReferrals();
     esp.setReferrals(esPersonReferrals);
-    // LOGGER.info("# of referrals: {}", esPersonReferrals.);
 
     if (esPersonReferrals != null && !esPersonReferrals.isEmpty()) {
       try {
@@ -287,7 +285,6 @@ public class ReferralHistoryIndexerJob
   @Override
   public EsPersonReferral extract(ResultSet rs) throws SQLException {
     EsPersonReferral referral = new EsPersonReferral();
-    JobLogUtils.logEvery(rowsExtracted.incrementAndGet(), "Extracted", "es person referrals");
 
     referral.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
     referral.setClientId(ifNull(rs.getString("CLIENT_ID")));

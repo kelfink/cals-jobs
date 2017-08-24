@@ -23,6 +23,7 @@ public class ReferralJobRanges {
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
 
+      // Small test range.
       // ret.add(Pair.of("AajKlhI4rg", "AajKlhI4rh"));
 
       ret.add(Pair.of("aaaaaaaaaa", "AaPUUx01CV"));
