@@ -127,7 +127,7 @@ public class ReferralHistoryIndexerJob
     final int i = nextThreadNum.incrementAndGet();
     final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
-    LOGGER.debug("BEGIN");
+    LOGGER.info("BEGIN");
 
     try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection()) {
@@ -178,6 +178,7 @@ public class ReferralHistoryIndexerJob
         // Statement and connection close automatically.
       }
 
+      LOGGER.warn("sort, group, normalize, and send to index queue");
       unsorted.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
           .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
           .forEach(this::addToIndexQueue);
@@ -187,7 +188,7 @@ public class ReferralHistoryIndexerJob
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
-    LOGGER.info("DONE");
+    LOGGER.warn("DONE");
   }
 
   /**

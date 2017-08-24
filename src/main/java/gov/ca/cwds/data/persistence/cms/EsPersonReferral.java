@@ -601,6 +601,8 @@ public class EsPersonReferral extends ApiObjectIdentity
       map.put(this.clientId, referrals);
     }
 
+    // BEGIN DUPLICATED COLUMNS:
+
     ElasticSearchPersonReferral r = new ElasticSearchPersonReferral();
 
     r.setId(this.referralId);
@@ -653,6 +655,8 @@ public class EsPersonReferral extends ApiObjectIdentity
     accessLimit.setLimitedAccessGovernmentEntityName(SystemCodeCache.global()
         .getSystemCodeShortDescription(this.limitedAccessGovernmentEntityId));
     r.setAccessLimitation(accessLimit);
+
+    // END DUPLICATED COLUMNS.
 
     //
     // A referral may have more than one allegation.
