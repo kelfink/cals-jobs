@@ -49,11 +49,18 @@ public class ReferralHistoryIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
-  private static final String SQL_INSERT =
+  private static final String INSERT_CLIENT =
       "INSERT INTO #SCHEMA#.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"
           + "SELECT rc.FKREFERL_T, rc.FKCLIENT_T, rc.SENSTV_IND\n"
           + "FROM #SCHEMA#.VW_REFR_CLT rc\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
+  private static final String SELECT_CLIENT =
+      "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM #SCHEMA#.GT_REFR_CLT";
+
+  /**
+   * Allocate memory once and reuse for multiple key ranges. Avoid repeated, expensive memory
+   * allocation of large containers.
+   */
   private final ThreadLocal<List<EsPersonReferral>> alloc = new ThreadLocal<>();
 
   private AtomicInteger rowsRead = new AtomicInteger(0);
@@ -134,8 +141,8 @@ public class ReferralHistoryIndexerJob
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
 
-      final String sqlSelect = getInitialLoadQuery(getDBSchemaName());
-      LOGGER.trace("SQL: {}", sqlSelect);
+      final String sqlSelReferralAllegation = getInitialLoadQuery(getDBSchemaName());
+      LOGGER.trace("SQL: {}", sqlSelReferralAllegation);
       enableParallelism(con);
 
       int cntr = 0;
@@ -149,23 +156,30 @@ public class ReferralHistoryIndexerJob
       unsorted.clear();
 
       try (
-          PreparedStatement stmtInsert =
-              con.prepareStatement(SQL_INSERT.replaceAll("#SCHEMA#", getDBSchemaName()));
-          PreparedStatement stmtSelect = con.prepareStatement(sqlSelect)) {
+          final PreparedStatement stmtInsClient =
+              con.prepareStatement(INSERT_CLIENT.replaceAll("#SCHEMA#", getDBSchemaName()));
+          final PreparedStatement stmtSelClient =
+              con.prepareStatement(SELECT_CLIENT.replaceAll("#SCHEMA#", getDBSchemaName()));
+          final PreparedStatement stmtSelReferralAllegation =
+              con.prepareStatement(sqlSelReferralAllegation)) {
 
-        stmtInsert.setMaxRows(0);
-        stmtInsert.setQueryTimeout(0);
-        stmtInsert.setString(1, p.getLeft());
-        stmtInsert.setString(2, p.getRight());
+        stmtInsClient.setMaxRows(0);
+        stmtInsClient.setQueryTimeout(0);
+        stmtInsClient.setString(1, p.getLeft());
+        stmtInsClient.setString(2, p.getRight());
 
-        final int clientReferralCount = stmtInsert.executeUpdate();
-        LOGGER.debug("bundle client/referrals: {}", clientReferralCount);
+        stmtSelClient.setMaxRows(0);
+        stmtSelClient.setQueryTimeout(0);
+        stmtSelClient.setFetchSize(5000); // faster
 
-        stmtSelect.setFetchSize(5000); // faster
-        stmtSelect.setMaxRows(0);
-        stmtSelect.setQueryTimeout(0);
+        final int cntInsClientReferral = stmtInsClient.executeUpdate();
+        LOGGER.debug("bundle client/referrals: {}", cntInsClientReferral);
 
-        final ResultSet rs = stmtSelect.executeQuery(); // NOSONAR
+        stmtSelReferralAllegation.setMaxRows(0);
+        stmtSelReferralAllegation.setQueryTimeout(0);
+        stmtSelReferralAllegation.setFetchSize(5000); // faster
+
+        final ResultSet rs = stmtSelReferralAllegation.executeQuery(); // NOSONAR
         while (!fatalError && rs.next() && (m = extract(rs)) != null) {
           JobLogUtils.logEvery(++cntr, "retrieved", "bundle");
           JobLogUtils.logEvery(LOGGER, 50000, rowsRead.incrementAndGet(), "Total read",
@@ -208,7 +222,7 @@ public class ReferralHistoryIndexerJob
       final int cntReaderThreads =
           getOpts().getThreadCount() != 0L ? (int) getOpts().getThreadCount()
               : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
-      LOGGER.warn(">>>>> # extract threads: {}", cntReaderThreads);
+      LOGGER.warn(">>>>>>>> EXTRACT THREADS: {} <<<<<<<<", cntReaderThreads);
       ForkJoinPool forkJoinPool = new ForkJoinPool(cntReaderThreads);
 
       // Queue execution.

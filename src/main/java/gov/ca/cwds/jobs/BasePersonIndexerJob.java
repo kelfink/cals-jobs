@@ -180,7 +180,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected JobOptions opts;
 
-  private AtomicInteger recsQueuedToIndex = new AtomicInteger(0);
+  private AtomicInteger recsSentToIndexQueue = new AtomicInteger(0);
 
   private AtomicInteger recsSentToBulkProcessor = new AtomicInteger(0);
 
@@ -189,12 +189,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Running count of records prepared for bulk indexing.
    */
-  protected AtomicInteger recsPrepared = new AtomicInteger(0);
+  protected AtomicInteger recsBulkPrepared = new AtomicInteger(0);
 
   /**
    * Running count of records prepared for bulk deletion.
    */
-  protected AtomicInteger recsDeleted = new AtomicInteger(0);
+  protected AtomicInteger recsBulkDeleted = new AtomicInteger(0);
 
   /**
    * Running count of records before bulk indexing.
@@ -218,6 +218,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   /**
    * Queue of raw, denormalized records waiting to be normalized.
+   * <p>
+   * NOTE: some jobs normalize on their own, since the step is inexpensive.
+   * </p>
    */
   protected volatile LinkedBlockingDeque<M> queueTransform = new LinkedBlockingDeque<>(100000);
 
@@ -362,7 +365,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void addToIndexQueue(T norm) {
     try {
-      JobLogUtils.logEvery(recsQueuedToIndex.incrementAndGet(), "added to index queue", "recs");
+      JobLogUtils.logEvery(recsSentToIndexQueue.incrementAndGet(), "added to index queue", "recs");
       queueIndex.putLast(norm);
     } catch (InterruptedException e) {
       fatalError = true;
@@ -755,9 +758,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       if (isDelete(t)) {
         ret = bulkDelete((String) t.getPrimaryKey());
-        recsDeleted.getAndIncrement();
+        recsBulkDeleted.getAndIncrement();
       } else {
-        recsPrepared.getAndIncrement();
+        recsBulkPrepared.getAndIncrement();
         ret = prepareUpsertRequest(esp, t);
       }
     } catch (Exception e) {
@@ -1182,7 +1185,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
 
         // Track counts.
-        recsDeleted.getAndAdd(deletionResults.size());
+        recsBulkDeleted.getAndAdd(deletionResults.size());
       }
 
       // Give it time to finish the last batch.
@@ -1300,7 +1303,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Result stats:
       LOGGER.warn(
           "STATS: \nRecs To Index:  {}\nRecs To Delete: {}\nrecsBulkBefore: {}\nrecsBulkAfter:  {}\nrecsBulkError:  {}",
-          recsPrepared, recsDeleted, recsBulkBefore, recsBulkAfter, recsBulkError);
+          recsBulkPrepared, recsBulkDeleted, recsBulkBefore, recsBulkAfter, recsBulkError);
 
       LOGGER.warn("Updating last successful run time to {}", jobDateFormat.format(startTime));
       return new Date(this.startTime);
@@ -1699,7 +1702,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }
 
-    return recsPrepared.get();
+    return recsBulkPrepared.get();
   }
 
   // ===========================
