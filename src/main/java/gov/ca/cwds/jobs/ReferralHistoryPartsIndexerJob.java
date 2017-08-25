@@ -68,6 +68,8 @@ public class ReferralHistoryPartsIndexerJob
   private static final String SELECT_ALLEGATION =
       "SELECT vw.* FROM #SCHEMA#.VW_MQT_ALGTN_ONLY vw FOR READ ONLY WITH UR";
 
+  private static final int FETCH_SIZE = 5000;
+
   private static class MinClientReferral implements ApiMarker {
     String clientId;
     String referralId;
@@ -113,7 +115,7 @@ public class ReferralHistoryPartsIndexerJob
    * Allocate memory once and reuse for multiple key ranges. Avoid repeated, expensive memory
    * allocation of large containers.
    */
-  private final ThreadLocal<Map<String, EsPersonReferral>> allocReferrals = new ThreadLocal<>();
+  // private final ThreadLocal<Map<String, EsPersonReferral>> allocReferrals = new ThreadLocal<>();
 
   private AtomicInteger rowsReadReferrals = new AtomicInteger(0);
 
@@ -200,15 +202,16 @@ public class ReferralHistoryPartsIndexerJob
       EsPersonReferral m;
 
       // Allocate memory once for this thread and reuse it per key range.
-      if (allocReferrals.get() == null) {
-        allocReferrals.set(new HashMap<>(50000));
-      }
+      // if (allocReferrals.get() == null) {
+      // allocReferrals.set(new HashMap<>(50000));
+      // }
 
-      final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
-      mapReferrals.clear();
+      // final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
 
-      final List<MinClientReferral> listClientReferral = new ArrayList<>(30000);
+      final List<MinClientReferral> listClientReferral = new ArrayList<>(12000);
+      final Map<String, EsPersonReferral> mapReferrals = new HashMap<>(12011); // prime
       final List<EsPersonReferral> listAllegations = new ArrayList<>(50000);
+
       final String schema = "CWDSDSM"; // getDBSchemaName()
 
       try (
@@ -233,15 +236,15 @@ public class ReferralHistoryPartsIndexerJob
         // Prepare retrieval.
         stmtSelClient.setMaxRows(0);
         stmtSelClient.setQueryTimeout(0);
-        stmtSelClient.setFetchSize(5000);
+        stmtSelClient.setFetchSize(FETCH_SIZE);
 
         stmtSelReferral.setMaxRows(0);
         stmtSelReferral.setQueryTimeout(0);
-        stmtSelReferral.setFetchSize(5000);
+        stmtSelReferral.setFetchSize(FETCH_SIZE);
 
         stmtSelAllegation.setMaxRows(0);
         stmtSelAllegation.setQueryTimeout(0);
-        stmtSelAllegation.setFetchSize(5000);
+        stmtSelAllegation.setFetchSize(FETCH_SIZE);
 
         {
           LOGGER.info("pull client/referral keys");
@@ -253,6 +256,7 @@ public class ReferralHistoryPartsIndexerJob
         }
 
         {
+          cntr = 0;
           LOGGER.info("pull referrals");
           final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
           while (!fatalError && rs.next() && (m = extractReferral(rs)) != null) {
@@ -264,6 +268,7 @@ public class ReferralHistoryPartsIndexerJob
         }
 
         {
+          cntr = 0;
           LOGGER.info("pull allegations");
           final ResultSet rs = stmtSelAllegation.executeQuery(); // NOSONAR
           while (!fatalError && rs.next() && (m = extractAllegation(rs)) != null) {
@@ -291,34 +296,41 @@ public class ReferralHistoryPartsIndexerJob
 
       // For each client:
       for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
+
         // Loop referrals for this client:
         final String clientId = rc.getKey();
-
         if (StringUtils.isNotBlank(clientId)) {
           readyToNorm.clear();
           for (MinClientReferral rc1 : rc.getValue()) {
-            final EsPersonReferral ref = mapReferrals.get(rc1.referralId);
+            final String referralId = rc1.referralId;
+            final EsPersonReferral ref = mapReferrals.get(referralId);
 
             if (ref != null) {
               // Loop allegations for this referral:
-              for (EsPersonReferral alg : mapAllegationByReferral.get(rc1.referralId)) {
-                alg.mergeClientReferralInfo(rc1.clientId, ref);
-                readyToNorm.add(alg);
+              if (mapAllegationByReferral.containsKey(referralId)) {
+                for (EsPersonReferral alg : mapAllegationByReferral.get(referralId)) {
+                  alg.mergeClientReferralInfo(clientId, ref);
+                  readyToNorm.add(alg);
+                }
+              } else {
+                readyToNorm.add(ref);
               }
             } else {
-              // POSSIBLE ISSUE: 3,571 referrals have no allegations.
-              LOGGER.warn("null referral? id={}", rc1.referralId);
+              LOGGER.warn("null referral? ref id={}, client id={}", referralId, clientId);
             }
           }
+
+          final ReplicatedPersonReferrals repl = normalizeSingle(readyToNorm);
+          if (repl != null) {
+            repl.setClientId(clientId);
+            addToIndexQueue(repl);
+          } else {
+            LOGGER.warn("null normalized? client id={}", clientId);
+          }
+        } else {
+          LOGGER.warn("empty client? client id={}", clientId);
         }
 
-        final ReplicatedPersonReferrals repl = normalizeSingle(readyToNorm);
-        if (repl != null) {
-          repl.setClientId(rc.getKey());
-          addToIndexQueue(repl);
-        } else {
-          LOGGER.warn("null normalized? client id={}", clientId);
-        }
       }
 
       // mapReferralByClient.entrySet().stream().
@@ -436,107 +448,106 @@ public class ReferralHistoryPartsIndexerJob
   }
 
   protected EsPersonReferral extractReferral(ResultSet rs) throws SQLException {
-    EsPersonReferral referral = new EsPersonReferral();
+    EsPersonReferral ret = new EsPersonReferral();
 
-    referral.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
+    ret.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
 
-    referral.setStartDate(rs.getDate("START_DATE"));
-    referral.setEndDate(rs.getDate("END_DATE"));
-    referral.setLastChange(rs.getDate("LAST_CHG"));
-    referral.setCounty(rs.getInt("REFERRAL_COUNTY"));
-    referral.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
-    referral.setReferralLastUpdated(rs.getTimestamp("REFERRAL_LAST_UPDATED"));
+    ret.setStartDate(rs.getDate("START_DATE"));
+    ret.setEndDate(rs.getDate("END_DATE"));
+    ret.setLastChange(rs.getDate("LAST_CHG"));
+    ret.setCounty(rs.getInt("REFERRAL_COUNTY"));
+    ret.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
+    ret.setReferralLastUpdated(rs.getTimestamp("REFERRAL_LAST_UPDATED"));
 
-    referral.setReporterId(ifNull(rs.getString("REPORTER_ID")));
-    referral.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
-    referral.setReporterLastName(ifNull(rs.getString("REPORTER_LAST_NM")));
-    referral.setReporterLastUpdated(rs.getTimestamp("REPORTER_LAST_UPDATED"));
+    ret.setReporterId(ifNull(rs.getString("REPORTER_ID")));
+    ret.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
+    ret.setReporterLastName(ifNull(rs.getString("REPORTER_LAST_NM")));
+    ret.setReporterLastUpdated(rs.getTimestamp("REPORTER_LAST_UPDATED"));
 
-    referral.setWorkerId(ifNull(rs.getString("WORKER_ID")));
-    referral.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
-    referral.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
-    referral.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
+    ret.setWorkerId(ifNull(rs.getString("WORKER_ID")));
+    ret.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
+    ret.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
+    ret.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
 
-    referral.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
-    referral.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
-    referral.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
-    referral.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
+    ret.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
+    ret.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
+    ret.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
+    ret.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
 
-    return referral;
+    return ret;
   }
 
   protected EsPersonReferral extractAllegation(ResultSet rs) throws SQLException {
-    EsPersonReferral referral = new EsPersonReferral();
+    EsPersonReferral ret = new EsPersonReferral();
 
-    referral.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
+    ret.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
+    ret.setAllegationId(ifNull(rs.getString("ALLEGATION_ID")));
+    ret.setAllegationType(rs.getInt("ALLEGATION_TYPE"));
+    ret.setAllegationDisposition(rs.getInt("ALLEGATION_DISPOSITION"));
+    ret.setAllegationLastUpdated(rs.getTimestamp("ALLEGATION_LAST_UPDATED"));
 
-    referral.setAllegationId(ifNull(rs.getString("ALLEGATION_ID")));
-    referral.setAllegationType(rs.getInt("ALLEGATION_TYPE"));
-    referral.setAllegationDisposition(rs.getInt("ALLEGATION_DISPOSITION"));
-    referral.setAllegationLastUpdated(rs.getTimestamp("ALLEGATION_LAST_UPDATED"));
+    ret.setPerpetratorId(ifNull(rs.getString("PERPETRATOR_ID")));
+    ret.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
+    ret.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
+    ret.setPerpetratorLastUpdated(rs.getTimestamp("PERPETRATOR_LAST_UPDATED"));
+    ret.setPerpetratorSensitivityIndicator(rs.getString("PERPETRATOR_SENSITIVITY_IND"));
 
-    referral.setPerpetratorId(ifNull(rs.getString("PERPETRATOR_ID")));
-    referral.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
-    referral.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
-    referral.setPerpetratorLastUpdated(rs.getTimestamp("PERPETRATOR_LAST_UPDATED"));
-    referral.setPerpetratorSensitivityIndicator(rs.getString("PERPETRATOR_SENSITIVITY_IND"));
+    ret.setVictimId(ifNull(rs.getString("VICTIM_ID")));
+    ret.setVictimFirstName(ifNull(rs.getString("VICTIM_FIRST_NM")));
+    ret.setVictimLastName(ifNull(rs.getString("VICTIM_LAST_NM")));
+    ret.setVictimLastUpdated(rs.getTimestamp("VICTIM_LAST_UPDATED"));
+    ret.setVictimSensitivityIndicator(rs.getString("VICTIM_SENSITIVITY_IND"));
 
-    referral.setVictimId(ifNull(rs.getString("VICTIM_ID")));
-    referral.setVictimFirstName(ifNull(rs.getString("VICTIM_FIRST_NM")));
-    referral.setVictimLastName(ifNull(rs.getString("VICTIM_LAST_NM")));
-    referral.setVictimLastUpdated(rs.getTimestamp("VICTIM_LAST_UPDATED"));
-    referral.setVictimSensitivityIndicator(rs.getString("VICTIM_SENSITIVITY_IND"));
-
-    return referral;
+    return ret;
   }
 
   @Override
   public EsPersonReferral extract(ResultSet rs) throws SQLException {
-    EsPersonReferral referral = new EsPersonReferral();
+    EsPersonReferral ret = new EsPersonReferral();
 
-    referral.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
-    referral.setClientId(ifNull(rs.getString("CLIENT_ID")));
+    ret.setClientId(ifNull(rs.getString("CLIENT_ID")));
+    ret.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
 
-    referral.setStartDate(rs.getDate("START_DATE"));
-    referral.setEndDate(rs.getDate("END_DATE"));
-    referral.setLastChange(rs.getDate("LAST_CHG"));
-    referral.setCounty(rs.getInt("REFERRAL_COUNTY"));
-    referral.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
-    referral.setReferralLastUpdated(rs.getTimestamp("REFERRAL_LAST_UPDATED"));
+    ret.setStartDate(rs.getDate("START_DATE"));
+    ret.setEndDate(rs.getDate("END_DATE"));
+    ret.setLastChange(rs.getDate("LAST_CHG"));
+    ret.setCounty(rs.getInt("REFERRAL_COUNTY"));
+    ret.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
+    ret.setReferralLastUpdated(rs.getTimestamp("REFERRAL_LAST_UPDATED"));
 
-    referral.setAllegationId(ifNull(rs.getString("ALLEGATION_ID")));
-    referral.setAllegationType(rs.getInt("ALLEGATION_TYPE"));
-    referral.setAllegationDisposition(rs.getInt("ALLEGATION_DISPOSITION"));
-    referral.setAllegationLastUpdated(rs.getTimestamp("ALLEGATION_LAST_UPDATED"));
+    ret.setAllegationId(ifNull(rs.getString("ALLEGATION_ID")));
+    ret.setAllegationType(rs.getInt("ALLEGATION_TYPE"));
+    ret.setAllegationDisposition(rs.getInt("ALLEGATION_DISPOSITION"));
+    ret.setAllegationLastUpdated(rs.getTimestamp("ALLEGATION_LAST_UPDATED"));
 
-    referral.setPerpetratorId(ifNull(rs.getString("PERPETRATOR_ID")));
-    referral.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
-    referral.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
-    referral.setPerpetratorLastUpdated(rs.getTimestamp("PERPETRATOR_LAST_UPDATED"));
-    referral.setPerpetratorSensitivityIndicator(rs.getString("PERPETRATOR_SENSITIVITY_IND"));
+    ret.setPerpetratorId(ifNull(rs.getString("PERPETRATOR_ID")));
+    ret.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
+    ret.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
+    ret.setPerpetratorLastUpdated(rs.getTimestamp("PERPETRATOR_LAST_UPDATED"));
+    ret.setPerpetratorSensitivityIndicator(rs.getString("PERPETRATOR_SENSITIVITY_IND"));
 
-    referral.setReporterId(ifNull(rs.getString("REPORTER_ID")));
-    referral.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
-    referral.setReporterLastName(ifNull(rs.getString("REPORTER_LAST_NM")));
-    referral.setReporterLastUpdated(rs.getTimestamp("REPORTER_LAST_UPDATED"));
+    ret.setReporterId(ifNull(rs.getString("REPORTER_ID")));
+    ret.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
+    ret.setReporterLastName(ifNull(rs.getString("REPORTER_LAST_NM")));
+    ret.setReporterLastUpdated(rs.getTimestamp("REPORTER_LAST_UPDATED"));
 
-    referral.setVictimId(ifNull(rs.getString("VICTIM_ID")));
-    referral.setVictimFirstName(ifNull(rs.getString("VICTIM_FIRST_NM")));
-    referral.setVictimLastName(ifNull(rs.getString("VICTIM_LAST_NM")));
-    referral.setVictimLastUpdated(rs.getTimestamp("VICTIM_LAST_UPDATED"));
-    referral.setVictimSensitivityIndicator(rs.getString("VICTIM_SENSITIVITY_IND"));
+    ret.setVictimId(ifNull(rs.getString("VICTIM_ID")));
+    ret.setVictimFirstName(ifNull(rs.getString("VICTIM_FIRST_NM")));
+    ret.setVictimLastName(ifNull(rs.getString("VICTIM_LAST_NM")));
+    ret.setVictimLastUpdated(rs.getTimestamp("VICTIM_LAST_UPDATED"));
+    ret.setVictimSensitivityIndicator(rs.getString("VICTIM_SENSITIVITY_IND"));
 
-    referral.setWorkerId(ifNull(rs.getString("WORKER_ID")));
-    referral.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
-    referral.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
-    referral.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
+    ret.setWorkerId(ifNull(rs.getString("WORKER_ID")));
+    ret.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
+    ret.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
+    ret.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
 
-    referral.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
-    referral.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
-    referral.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
-    referral.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
+    ret.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
+    ret.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
+    ret.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
+    ret.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
 
-    return referral;
+    return ret;
   }
 
   /**
