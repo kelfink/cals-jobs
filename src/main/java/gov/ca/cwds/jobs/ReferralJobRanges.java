@@ -16,7 +16,8 @@ public class ReferralJobRanges {
 
     final boolean isMainframe = job.isDB2OnZOS();
     final String schema = BasePersonIndexerJob.getDBSchemaName().toUpperCase();
-    if (isMainframe && (schema.endsWith("RSQ") || schema.endsWith("REP"))) {
+    if (isMainframe
+        && (schema.endsWith("RSQ") || schema.endsWith("REP") || schema.endsWith("DSM"))) {
 
       // ----------------------------
       // z/OS, LARGE data set:

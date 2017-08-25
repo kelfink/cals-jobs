@@ -160,7 +160,8 @@ public class ReferralHistoryPartsIndexerJob
   public String getInitialLoadQuery(String dbSchemaName) {
     StringBuilder buf = new StringBuilder();
     buf.append("SELECT vw.* FROM ");
-    buf.append(dbSchemaName);
+    // buf.append(dbSchemaName);
+    buf.append("CWDSDSM");
     buf.append(".");
     buf.append(getInitialLoadViewName());
     buf.append(" vw ");
@@ -207,16 +208,17 @@ public class ReferralHistoryPartsIndexerJob
 
       final List<MinClientReferral> listClientReferral = new ArrayList<>(30000);
       final List<EsPersonReferral> listAllegations = new ArrayList<>(50000);
+      final String schema = "CWDSDSM"; // getDBSchemaName()
 
       try (
           final PreparedStatement stmtInsClient =
-              con.prepareStatement(INSERT_CLIENT.replaceAll("#SCHEMA#", getDBSchemaName()));
+              con.prepareStatement(INSERT_CLIENT.replaceAll("#SCHEMA#", schema));
           final PreparedStatement stmtSelClient =
-              con.prepareStatement(SELECT_CLIENT.replaceAll("#SCHEMA#", getDBSchemaName()));
+              con.prepareStatement(SELECT_CLIENT.replaceAll("#SCHEMA#", schema));
           final PreparedStatement stmtSelReferral =
-              con.prepareStatement(getInitialLoadQuery(getDBSchemaName()));
+              con.prepareStatement(getInitialLoadQuery(schema));
           final PreparedStatement stmtSelAllegation =
-              con.prepareStatement(SELECT_ALLEGATION.replaceAll("#SCHEMA#", getDBSchemaName()))) {
+              con.prepareStatement(SELECT_ALLEGATION.replaceAll("#SCHEMA#", schema))) {
 
         // Prepare client list.
         stmtInsClient.setMaxRows(0);
@@ -289,6 +291,7 @@ public class ReferralHistoryPartsIndexerJob
       // For each client:
       for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
         // Loop referrals for this client:
+        ReplicatedPersonReferrals repl = new ReplicatedPersonReferrals();
         for (MinClientReferral rc1 : rc.getValue()) {
           final EsPersonReferral ref = mapReferrals.get(rc1.referralId);
           readyToNorm.clear();
@@ -297,11 +300,12 @@ public class ReferralHistoryPartsIndexerJob
           for (EsPersonReferral alg : mapAllegationByReferral.get(rc1.referralId)) {
             alg.mergeClientReferralInfo(rc1.clientId, ref);
             readyToNorm.add(alg);
+            repl = normalizeSingle(readyToNorm);
           }
-          addToIndexQueue(normalizeSingle(readyToNorm));
 
           // POSSIBLE ISSUE: 3,571 referrals have no allegations.
         }
+        addToIndexQueue(repl);
       }
 
       // mapReferralByClient.entrySet().stream().

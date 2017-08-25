@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -241,7 +240,7 @@ public class EsPersonReferral extends ApiObjectIdentity
   @Column(name = "PERPETRATOR_SENSITIVITY_IND")
   private String perpetratorSensitivityIndicator;
 
-  private List<EsPersonReferral> allegations;
+  // private List<EsPersonReferral> allegations;
 
   // =============
   // REDUCE:
@@ -1020,13 +1019,13 @@ public class EsPersonReferral extends ApiObjectIdentity
     return true;
   }
 
-  List<EsPersonReferral> getAllegations() {
-    return allegations;
-  }
-
-  void setAllegations(List<EsPersonReferral> allegations) {
-    this.allegations = allegations;
-  }
+  // List<EsPersonReferral> getAllegations() {
+  // return allegations;
+  // }
+  //
+  // void setAllegations(List<EsPersonReferral> allegations) {
+  // this.allegations = allegations;
+  // }
 
   /**
    * Load from a tab delimited file.
