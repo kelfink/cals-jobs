@@ -14,6 +14,7 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -291,22 +292,33 @@ public class ReferralHistoryPartsIndexerJob
       // For each client:
       for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
         // Loop referrals for this client:
-        readyToNorm.clear();
-        for (MinClientReferral rc1 : rc.getValue()) {
-          final EsPersonReferral ref = mapReferrals.get(rc1.referralId);
+        final String clientId = rc.getKey();
 
-          // Loop allegations for this referral:
-          for (EsPersonReferral alg : mapAllegationByReferral.get(rc1.referralId)) {
-            alg.mergeClientReferralInfo(rc1.clientId, ref);
-            readyToNorm.add(alg);
+        if (StringUtils.isNotBlank(clientId)) {
+          readyToNorm.clear();
+          for (MinClientReferral rc1 : rc.getValue()) {
+            final EsPersonReferral ref = mapReferrals.get(rc1.referralId);
+
+            if (ref != null) {
+              // Loop allegations for this referral:
+              for (EsPersonReferral alg : mapAllegationByReferral.get(rc1.referralId)) {
+                alg.mergeClientReferralInfo(rc1.clientId, ref);
+                readyToNorm.add(alg);
+              }
+            } else {
+              // POSSIBLE ISSUE: 3,571 referrals have no allegations.
+              LOGGER.warn("null referral? id={}", rc1.referralId);
+            }
           }
-
-          // POSSIBLE ISSUE: 3,571 referrals have no allegations.
         }
 
         final ReplicatedPersonReferrals repl = normalizeSingle(readyToNorm);
-        repl.setClientId(rc.getKey());
-        addToIndexQueue(repl);
+        if (repl != null) {
+          repl.setClientId(rc.getKey());
+          addToIndexQueue(repl);
+        } else {
+          LOGGER.warn("null normalized? client id={}", clientId);
+        }
       }
 
       // mapReferralByClient.entrySet().stream().
