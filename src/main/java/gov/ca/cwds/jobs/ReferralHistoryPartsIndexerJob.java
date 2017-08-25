@@ -248,17 +248,9 @@ public class ReferralHistoryPartsIndexerJob
             JobLogUtils.logEvery(++cntr, "read", "bundle referral");
             JobLogUtils.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
                 "referrals");
-
-            if ("LnJnA5y199".equals(m.getReferralId())) {
-              LOGGER.warn(">>>>>>>>>>> referral id LnJnA5y199 is in result set");
-            }
-
             mapReferrals.put(m.getReferralId(), m);
           }
         }
-
-        LOGGER.warn(">>>>>>>>>>> is referral id LnJnA5y199 in referral map? {}",
-            mapReferrals.containsKey("LnJnA5y199"));
 
         {
           cntr = 0;
@@ -310,7 +302,7 @@ public class ReferralHistoryPartsIndexerJob
                 readyToNorm.add(ref);
               }
             } else {
-              LOGGER.warn("sensitive referral? ref id={}, client id={}", referralId, clientId);
+              LOGGER.debug("sensitive referral? ref id={}, client id={}", referralId, clientId);
             }
           }
 
@@ -319,10 +311,10 @@ public class ReferralHistoryPartsIndexerJob
             repl.setClientId(clientId);
             addToIndexQueue(repl);
           } else {
-            LOGGER.warn("null normalized? sensitive? client id={}", clientId);
+            LOGGER.debug("null normalized? sensitive? client id={}", clientId);
           }
         } else {
-          LOGGER.warn("empty client? client id={}", clientId);
+          LOGGER.debug("empty client? client id={}", clientId);
         }
 
       }
