@@ -291,6 +291,7 @@ public class ReferralHistoryPartsIndexerJob
             final String referralId = rc1.referralId;
             final EsPersonReferral ref = mapReferrals.get(referralId);
 
+            // Sealed and sensitive may be excluded.
             if (ref != null) {
               // Loop allegations for this referral:
               if (mapAllegationByReferral.containsKey(referralId)) {
@@ -316,7 +317,6 @@ public class ReferralHistoryPartsIndexerJob
         } else {
           LOGGER.debug("empty client? client id={}", clientId);
         }
-
       }
 
       // mapReferralByClient.entrySet().stream().
