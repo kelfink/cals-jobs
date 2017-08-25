@@ -136,4 +136,12 @@ public class ReplicatedPersonReferrals extends ApiObjectIdentity
     return null;
   }
 
+  public String getClientId() {
+    return clientId;
+  }
+
+  public void setClientId(String clientId) {
+    this.clientId = clientId;
+  }
+
 }

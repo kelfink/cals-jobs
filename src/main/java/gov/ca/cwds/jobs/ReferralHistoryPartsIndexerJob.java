@@ -291,20 +291,21 @@ public class ReferralHistoryPartsIndexerJob
       // For each client:
       for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
         // Loop referrals for this client:
-        ReplicatedPersonReferrals repl = new ReplicatedPersonReferrals();
+        readyToNorm.clear();
         for (MinClientReferral rc1 : rc.getValue()) {
           final EsPersonReferral ref = mapReferrals.get(rc1.referralId);
-          readyToNorm.clear();
 
           // Loop allegations for this referral:
           for (EsPersonReferral alg : mapAllegationByReferral.get(rc1.referralId)) {
             alg.mergeClientReferralInfo(rc1.clientId, ref);
             readyToNorm.add(alg);
-            repl = normalizeSingle(readyToNorm);
           }
 
           // POSSIBLE ISSUE: 3,571 referrals have no allegations.
         }
+
+        final ReplicatedPersonReferrals repl = normalizeSingle(readyToNorm);
+        repl.setClientId(rc.getKey());
         addToIndexQueue(repl);
       }
 

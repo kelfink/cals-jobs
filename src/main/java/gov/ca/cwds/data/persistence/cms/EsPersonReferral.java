@@ -240,10 +240,8 @@ public class EsPersonReferral extends ApiObjectIdentity
   @Column(name = "PERPETRATOR_SENSITIVITY_IND")
   private String perpetratorSensitivityIndicator;
 
-  // private List<EsPersonReferral> allegations;
-
   // =============
-  // REDUCE:
+  // TAB FILE:
   // =============
 
   public enum COLUMN_TYPE {
@@ -1018,14 +1016,6 @@ public class EsPersonReferral extends ApiObjectIdentity
 
     return true;
   }
-
-  // List<EsPersonReferral> getAllegations() {
-  // return allegations;
-  // }
-  //
-  // void setAllegations(List<EsPersonReferral> allegations) {
-  // this.allegations = allegations;
-  // }
 
   /**
    * Load from a tab delimited file.
