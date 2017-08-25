@@ -196,7 +196,7 @@ public class ReferralHistoryPartsIndexerJob
       final Map<String, EsPersonReferral> mapReferrals = new HashMap<>(21019); // prime
       final List<EsPersonReferral> listAllegations = new ArrayList<>(50000);
 
-      final String schema = "CWDSDSM"; // getDBSchemaName()
+      final String schema = getDBSchemaName();
 
       try (
           final PreparedStatement stmtInsClient =
@@ -319,10 +319,7 @@ public class ReferralHistoryPartsIndexerJob
         }
       }
 
-      // mapReferralByClient.entrySet().stream().
-      // mapReferrals
       // unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
-
       // listReferrals.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
       // .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
       // .forEach(this::addToIndexQueue);
@@ -355,8 +352,11 @@ public class ReferralHistoryPartsIndexerJob
       LOGGER.warn(">>>>>>>> EXTRACT THREADS: {} <<<<<<<<", cntReaderThreads);
       ForkJoinPool forkJoinPool = new ForkJoinPool(cntReaderThreads);
 
+      final List<Pair<String, String>> ranges = getPartitionRanges();
+      LOGGER.warn(">>>>>>>> RANGE COUNT: {} <<<<<<<<", ranges);
+
       // Queue execution.
-      for (Pair<String, String> p : getPartitionRanges()) {
+      for (Pair<String, String> p : ranges) {
         tasks.add(forkJoinPool.submit(() -> pullRange(p)));
       }
 
