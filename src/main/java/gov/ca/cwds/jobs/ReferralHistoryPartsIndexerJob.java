@@ -111,12 +111,6 @@ public class ReferralHistoryPartsIndexerJob
     }
   }
 
-  /**
-   * Allocate memory once and reuse for multiple key ranges. Avoid repeated, expensive memory
-   * allocation of large containers.
-   */
-  // private final ThreadLocal<Map<String, EsPersonReferral>> allocReferrals = new ThreadLocal<>();
-
   private AtomicInteger rowsReadReferrals = new AtomicInteger(0);
 
   private AtomicInteger rowsReadAllegations = new AtomicInteger(0);
@@ -163,8 +157,7 @@ public class ReferralHistoryPartsIndexerJob
   public String getInitialLoadQuery(String dbSchemaName) {
     StringBuilder buf = new StringBuilder();
     buf.append("SELECT vw.* FROM ");
-    // buf.append(dbSchemaName);
-    buf.append("CWDSDSM");
+    buf.append(dbSchemaName);
     buf.append(".");
     buf.append(getInitialLoadViewName());
     buf.append(" vw ");
@@ -199,17 +192,8 @@ public class ReferralHistoryPartsIndexerJob
       enableParallelism(con);
 
       int cntr = 0;
-      EsPersonReferral m;
-
-      // Allocate memory once for this thread and reuse it per key range.
-      // if (allocReferrals.get() == null) {
-      // allocReferrals.set(new HashMap<>(50000));
-      // }
-
-      // final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
-
       final List<MinClientReferral> listClientReferral = new ArrayList<>(12000);
-      final Map<String, EsPersonReferral> mapReferrals = new HashMap<>(12011); // prime
+      final Map<String, EsPersonReferral> mapReferrals = new HashMap<>(21019); // prime
       final List<EsPersonReferral> listAllegations = new ArrayList<>(50000);
 
       final String schema = "CWDSDSM"; // getDBSchemaName()
@@ -257,23 +241,33 @@ public class ReferralHistoryPartsIndexerJob
 
         {
           cntr = 0;
+          EsPersonReferral m;
           LOGGER.info("pull referrals");
           final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
           while (!fatalError && rs.next() && (m = extractReferral(rs)) != null) {
             JobLogUtils.logEvery(++cntr, "read", "bundle referral");
-            JobLogUtils.logEvery(LOGGER, 50000, rowsReadReferrals.incrementAndGet(), "Total read",
+            JobLogUtils.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
                 "referrals");
+
+            if ("LnJnA5y199".equals(m.getReferralId())) {
+              LOGGER.warn(">>>>>>>>>>> referral id LnJnA5y199 is in result set");
+            }
+
             mapReferrals.put(m.getReferralId(), m);
           }
         }
 
+        LOGGER.warn(">>>>>>>>>>> is referral id LnJnA5y199 in referral map? {}",
+            mapReferrals.containsKey("LnJnA5y199"));
+
         {
           cntr = 0;
+          EsPersonReferral m;
           LOGGER.info("pull allegations");
           final ResultSet rs = stmtSelAllegation.executeQuery(); // NOSONAR
           while (!fatalError && rs.next() && (m = extractAllegation(rs)) != null) {
             JobLogUtils.logEvery(++cntr, "read", "bundle allegation");
-            JobLogUtils.logEvery(LOGGER, 50000, rowsReadAllegations.incrementAndGet(), "Total read",
+            JobLogUtils.logEvery(LOGGER, 15000, rowsReadAllegations.incrementAndGet(), "Total read",
                 "allegations");
             listAllegations.add(m);
           }
@@ -316,7 +310,7 @@ public class ReferralHistoryPartsIndexerJob
                 readyToNorm.add(ref);
               }
             } else {
-              LOGGER.warn("null referral? ref id={}, client id={}", referralId, clientId);
+              LOGGER.warn("sensitive referral? ref id={}, client id={}", referralId, clientId);
             }
           }
 
@@ -325,7 +319,7 @@ public class ReferralHistoryPartsIndexerJob
             repl.setClientId(clientId);
             addToIndexQueue(repl);
           } else {
-            LOGGER.warn("null normalized? client id={}", clientId);
+            LOGGER.warn("null normalized? sensitive? client id={}", clientId);
           }
         } else {
           LOGGER.warn("empty client? client id={}", clientId);
@@ -450,8 +444,7 @@ public class ReferralHistoryPartsIndexerJob
   protected EsPersonReferral extractReferral(ResultSet rs) throws SQLException {
     EsPersonReferral ret = new EsPersonReferral();
 
-    ret.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
-
+    ret.setReferralId(rs.getString("REFERRAL_ID"));
     ret.setStartDate(rs.getDate("START_DATE"));
     ret.setEndDate(rs.getDate("END_DATE"));
     ret.setLastChange(rs.getDate("LAST_CHG"));
