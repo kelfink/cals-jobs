@@ -114,9 +114,9 @@ public class ReferralHistoryPartsIndexerJob
    */
   private final ThreadLocal<Map<String, EsPersonReferral>> allocReferrals = new ThreadLocal<>();
 
-  private final ThreadLocal<Map<String, EsPersonReferral>> allocAllegations = new ThreadLocal<>();
+  private AtomicInteger rowsReadReferrals = new AtomicInteger(0);
 
-  private AtomicInteger rowsRead = new AtomicInteger(0);
+  private AtomicInteger rowsReadAllegations = new AtomicInteger(0);
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
@@ -200,15 +200,13 @@ public class ReferralHistoryPartsIndexerJob
       // Allocate memory once for this thread and reuse it per key range.
       if (allocReferrals.get() == null) {
         allocReferrals.set(new HashMap<>(50000));
-        allocAllegations.set(new HashMap<>(125000));
       }
 
       final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
-      final Map<String, EsPersonReferral> mapAllegations = allocAllegations.get();
       mapReferrals.clear();
-      mapAllegations.clear();
 
       final List<MinClientReferral> listClientReferral = new ArrayList<>(30000);
+      final List<EsPersonReferral> listAllegations = new ArrayList<>(50000);
 
       try (
           final PreparedStatement stmtInsClient =
@@ -243,6 +241,7 @@ public class ReferralHistoryPartsIndexerJob
         stmtSelAllegation.setFetchSize(5000);
 
         {
+          LOGGER.info("pull client/referral keys");
           final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
           MinClientReferral mx;
           while (!fatalError && rs.next() && (mx = MinClientReferral.extract(rs)) != null) {
@@ -250,40 +249,63 @@ public class ReferralHistoryPartsIndexerJob
           }
         }
 
-        final Map<String, List<MinClientReferral>> mapReferralByClient =
-            listClientReferral.stream().sorted((e1, e2) -> e1.clientId.compareTo(e2.clientId))
-                .collect(Collectors.groupingBy(MinClientReferral::getClientId));
-
-        final Map<String, List<MinClientReferral>> mapClientByReferral =
-            listClientReferral.stream().sorted((e1, e2) -> e1.referralId.compareTo(e2.referralId))
-                .collect(Collectors.groupingBy(MinClientReferral::getReferralId));
-
         {
+          LOGGER.info("pull referrals");
           final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
           while (!fatalError && rs.next() && (m = extractReferral(rs)) != null) {
             JobLogUtils.logEvery(++cntr, "read", "bundle referral");
-            JobLogUtils.logEvery(LOGGER, 50000, rowsRead.incrementAndGet(), "Total read",
+            JobLogUtils.logEvery(LOGGER, 50000, rowsReadReferrals.incrementAndGet(), "Total read",
                 "referrals");
             mapReferrals.put(m.getReferralId(), m);
           }
         }
 
         {
+          LOGGER.info("pull allegations");
           final ResultSet rs = stmtSelAllegation.executeQuery(); // NOSONAR
           while (!fatalError && rs.next() && (m = extractAllegation(rs)) != null) {
             JobLogUtils.logEvery(++cntr, "read", "bundle allegation");
-            JobLogUtils.logEvery(LOGGER, 50000, rowsRead.incrementAndGet(), "Total read",
+            JobLogUtils.logEvery(LOGGER, 50000, rowsReadAllegations.incrementAndGet(), "Total read",
                 "allegations");
-            mapAllegations.put(m.getReferralId(), m);
+            listAllegations.add(m);
           }
         }
 
         con.commit();
       } finally {
-        // Statement and connection close automatically.
+        // Connection and statements close automatically.
       }
 
-      LOGGER.warn("sort, group, normalize, and send to index queue");
+      final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferral.stream()
+          .sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
+          .collect(Collectors.groupingBy(MinClientReferral::getClientId));
+
+      final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
+          .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
+          .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
+
+      final List<EsPersonReferral> readyToNorm = new ArrayList<>();
+
+      // For each client:
+      for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
+        // Loop referrals for this client:
+        for (MinClientReferral rc1 : rc.getValue()) {
+          final EsPersonReferral ref = mapReferrals.get(rc1.referralId);
+          readyToNorm.clear();
+
+          // Loop allegations for this referral:
+          for (EsPersonReferral alg : mapAllegationByReferral.get(rc1.referralId)) {
+            alg.mergeClientReferralInfo(rc1.clientId, ref);
+            readyToNorm.add(alg);
+          }
+          addToIndexQueue(normalizeSingle(readyToNorm));
+
+          // POSSIBLE ISSUE: 3,571 referrals have no allegations.
+        }
+      }
+
+      // mapReferralByClient.entrySet().stream().
+      // mapReferrals
       // unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
 
       // listReferrals.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
@@ -303,8 +325,8 @@ public class ReferralHistoryPartsIndexerJob
    */
   @Override
   protected void threadExtractJdbc() {
-    Thread.currentThread().setName("extract_main");
-    LOGGER.info("BEGIN: main extract thread");
+    Thread.currentThread().setName("read_main");
+    LOGGER.info("BEGIN: main read thread");
 
     try {
       // This job normalizes **without** the transform thread.
@@ -332,11 +354,11 @@ public class ReferralHistoryPartsIndexerJob
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      LOGGER.info("extracted {} ES referral rows", this.rowsRead.get());
+      LOGGER.info("read {} ES referral rows", this.rowsReadReferrals.get());
       doneExtract = true;
     }
 
-    LOGGER.info("DONE: main extract thread");
+    LOGGER.info("DONE: main read thread");
   }
 
   @Override

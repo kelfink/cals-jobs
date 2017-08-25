@@ -1,24 +1,16 @@
 package gov.ca.cwds.data.persistence.cms;
 
 import java.io.Serializable;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.NamedNativeQueries;
@@ -34,9 +26,9 @@ import gov.ca.cwds.data.es.ElasticSearchPersonNestedPerson;
 import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.es.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.EsPersonReferral.COLUMN_POSITION;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
-import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -54,33 +46,33 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 @Entity
 @Table(name = "VW_LST_REFERRAL_HIST")
 @NamedNativeQueries({@NamedNativeQuery(
-    name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
+    name = "gov.ca.cwds.data.persistence.cms.EsClientReferral.findAllUpdatedAfter",
     query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r WHERE r.CLIENT_ID IN ( "
         + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
         + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
         + ") ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
-    resultClass = EsPersonReferral.class, readOnly = true),
+    resultClass = EsClientReferral.class, readOnly = true),
 
     @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithUnlimitedAccess",
+        name = "gov.ca.cwds.data.persistence.cms.EsClientReferral.findAllUpdatedAfterWithUnlimitedAccess",
         query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r WHERE r.CLIENT_ID IN ( "
             + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
             + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") AND r.LIMITED_ACCESS_CODE = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
-        resultClass = EsPersonReferral.class, readOnly = true),
+        resultClass = EsClientReferral.class, readOnly = true),
 
     @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithLimitedAccess",
+        name = "gov.ca.cwds.data.persistence.cms.EsClientReferral.findAllUpdatedAfterWithLimitedAccess",
         query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r WHERE r.CLIENT_ID IN ( "
             + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
             + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") AND r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
-        resultClass = EsPersonReferral.class, readOnly = true)})
-public class EsPersonReferral extends ApiObjectIdentity
+        resultClass = EsClientReferral.class, readOnly = true)})
+public class EsClientReferral extends ApiObjectIdentity
     implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals>,
-    Comparable<EsPersonReferral>, Comparator<EsPersonReferral> {
+    Comparable<EsClientReferral>, Comparator<EsClientReferral> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(EsPersonReferral.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(EsClientReferral.class);
 
   private static final long serialVersionUID = -2265057057202257108L;
 
@@ -99,8 +91,6 @@ public class EsPersonReferral extends ApiObjectIdentity
   @Id
   @Column(name = "CLIENT_ID")
   private String clientId;
-
-  private String clientSensitivity;
 
   @Id
   @Column(name = "REFERRAL_ID")
@@ -241,389 +231,77 @@ public class EsPersonReferral extends ApiObjectIdentity
   @Column(name = "PERPETRATOR_SENSITIVITY_IND")
   private String perpetratorSensitivityIndicator;
 
-  private List<EsPersonReferral> allegations;
-
-  // =============
-  // REDUCE:
-  // =============
-
-  public enum COLUMN_TYPE {
-
-    /**
-     * Any String value.
-     */
-    CHAR,
-
-    /**
-     * Integer, conforms to short.
-     */
-    SMALLINT,
-
-    /**
-     * Format: 2005-11-08
-     */
-    DATE,
-
-    /**
-     * Format: 2017-08-04 14:39:17.021616
-     */
-    TIMESTAMP
-  }
-
-  static Date parseTimestamp(String s) {
-    String trimTimestamp = StringUtils.trim(s);
-    if (StringUtils.isNotEmpty(trimTimestamp)) {
-      try {
-        final Timestamp ts = Timestamp.valueOf(s);
-        return new Date(ts.getTime());
-      } catch (Exception e) {
-        throw e;
-      }
-    }
-    return null;
-  }
-
-  static Date parseDate(String s) {
-    return DomainChef.uncookDateString(s);
-  }
-
-  static Integer parseInteger(String s) {
-    return StringUtils.isNotBlank(s) ? Integer.parseInt(s) : null;
-  }
-
-  public enum COLUMN_POSITION {
-
-    CLIENT_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setClientId(c);
-    }),
-
-    /**
-     * TODO: missing column.
-     */
-    CLIENT_SENSITIVITY_IND(COLUMN_TYPE.CHAR),
-
-    REFERRAL_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setReferralId(c);
-    }),
-
-    ALLEGATION_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setAllegationId(c);
-    }),
-
-    VICTIM_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setVictimId(c);
-    }),
-
-    PERPETRATOR_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setPerpetratorId(c);
-    }),
-
-    REPORTER_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setReporterId(c);
-    }),
-
-    WORKER_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setWorkerId(c);
-    }),
-
-    START_DATE(COLUMN_TYPE.DATE, new Date(), (c, r) -> {
-      r.setStartDate(c);
-    }),
-
-    END_DATE(COLUMN_TYPE.DATE, new Date(), (c, r) -> {
-      r.setEndDate(c);
-    }),
-
-    REFERRAL_RESPONSE_TYPE(COLUMN_TYPE.SMALLINT, (c, r) -> {
-      r.setReferralResponseType(parseInteger(c));
-    }),
-
-    LIMITED_ACCESS_CODE(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setLimitedAccessCode(c);
-    }),
-
-    LIMITED_ACCESS_DATE(COLUMN_TYPE.DATE, new Date(), (c, r) -> {
-      r.setLimitedAccessDate(c);
-    }),
-
-    LIMITED_ACCESS_DESCRIPTION(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setLimitedAccessDescription(c);
-    }),
-
-    LIMITED_ACCESS_GOVERNMENT_ENT(COLUMN_TYPE.SMALLINT, 1, (c, r) -> {
-      r.setLimitedAccessGovernmentEntityId(c);
-    }),
-
-    REFERRAL_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
-      r.setReferralLastUpdated(c);
-    }),
-
-    REPORTER_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setReporterFirstName(c);
-    }),
-
-    REPORTER_LAST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setReporterLastName(c);
-    }),
-
-    REPORTER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
-      r.setReporterLastUpdated(c);
-    }),
-
-    WORKER_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setWorkerFirstName(c);
-    }),
-
-    WORKER_LAST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setWorkerLastName(c);
-    }),
-
-    WORKER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
-      r.setWorkerLastUpdated(c);
-    }),
-
-    VICTIM_SENSITIVITY_IND(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setVictimSensitivityIndicator(c);
-    }),
-
-    VICTIM_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setVictimFirstName(c);
-    }),
-
-    VICTIM_LAST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setVictimLastName(c);
-    }),
-
-    VICTIM_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
-      r.setVictimLastUpdated(c);
-    }),
-
-    PERPETRATOR_SENSITIVITY_IND(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setPerpetratorSensitivityIndicator(c);
-    }),
-
-    PERPETRATOR_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setPerpetratorFirstName(c);
-    }),
-
-    PERPETRATOR_LAST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setPerpetratorLastName(c);
-    }),
-
-    PERPETRATOR_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
-      r.setPerpetratorLastUpdated(c);
-    }),
-
-    /**
-     * Not in MQT but will be needed for authorization.
-     */
-    REFERRAL_COUNTY(COLUMN_TYPE.SMALLINT),
-
-    ALLEGATION_DISPOSITION(COLUMN_TYPE.SMALLINT, 1, (c, r) -> {
-      r.setAllegationDisposition(c);
-    }),
-
-    ALLEGATION_TYPE(COLUMN_TYPE.SMALLINT, 1, (c, r) -> {
-      r.setAllegationType(c);
-    }),
-
-    ALLEGATION_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
-      r.setAllegationLastUpdated(c);
-    });
-
-    private final COLUMN_TYPE type;
-
-    private final BiConsumer<String, EsPersonReferral> handler;
-
-    private final BiConsumer<Date, EsPersonReferral> dateHandler;
-
-    private final BiConsumer<Integer, EsPersonReferral> intHandler;
-
-    private COLUMN_POSITION(COLUMN_TYPE type) {
-      this.type = type;
-      this.handler = (c, r) -> {
-        LOGGER.debug("No handler for column: {}, value: {}", this.name(), c);
-      };
-      this.dateHandler = null;
-      this.intHandler = null;
-    }
-
-    private COLUMN_POSITION(COLUMN_TYPE type, BiConsumer<String, EsPersonReferral> handler) {
-      this.type = type;
-      this.handler = handler;
-      this.dateHandler = null;
-      this.intHandler = null;
-    }
-
-    private COLUMN_POSITION(COLUMN_TYPE type, Date wastedParamForRuntimeTypeErasure,
-        BiConsumer<Date, EsPersonReferral> dateHandler) {
-      this.type = type;
-      this.handler = null;
-      this.dateHandler = dateHandler;
-      this.intHandler = null;
-    }
-
-    private COLUMN_POSITION(COLUMN_TYPE type, Integer whyNotStoreTypeInfoAtRuntimeSillyJava,
-        BiConsumer<Integer, EsPersonReferral> intHandler) {
-      this.type = type;
-      this.handler = null;
-      this.dateHandler = null;
-      this.intHandler = intHandler;
-    }
-
-    private final void handle(String c, EsPersonReferral ref) {
-      try {
-        if (StringUtils.isNotBlank(c)) {
-          if (this.type == COLUMN_TYPE.TIMESTAMP && this.dateHandler != null) {
-            this.dateHandler.accept(parseTimestamp(c), ref);
-          } else if (this.type == COLUMN_TYPE.DATE && this.dateHandler != null) {
-            this.dateHandler.accept(parseDate(c), ref);
-          } else if (this.type == COLUMN_TYPE.SMALLINT && this.intHandler != null) {
-            this.intHandler.accept(parseInteger(c), ref);
-          } else if (this.handler != null) {
-            this.handler.accept(c, ref);
-          }
-        }
-      } catch (Exception e) {
-        LOGGER.error("FAILED TO PARSE! column: {}, value: {}", this.name(), c);
-        throw e;
-      }
-    }
-
-    private static final void handleColumn(int pos, String col, EsPersonReferral ref) {
-      // Handle by column position.
-      try {
-        if (pos < COLUMN_POSITION_SIZE) {
-          COLUMN_POSITION.values()[pos].handle(col, ref);
-        }
-      } catch (Exception e) {
-        LOGGER.error("FAILED TO HANDLE COLUMN! pos: {}, col: {}", pos, col);
-        throw e;
-      }
-    }
-
-    /**
-     * Parse a line from a tab delimited file.
-     * 
-     * @param line line to parse
-     * @return fresh to EsPersonReferral
-     */
-    private static final EsPersonReferral parse(String line) {
-      EsPersonReferral ret = new EsPersonReferral();
-
-      int pos = 0;
-      for (String c : line.split("\t")) {
-        COLUMN_POSITION.handleColumn(pos++, c, ret);
-      }
-
-      return ret;
-    }
-
-  }
-
-  /**
-   * Parse a line from a tab delimited file.
-   * 
-   * @param line line to parse
-   * @return fresh to EsPersonReferral
-   */
-  public static EsPersonReferral parseLine(String line) {
-    final EsPersonReferral ret = EsPersonReferral.COLUMN_POSITION.parse(line);
-    JobLogUtils.logEvery(LOGGER, ++linesProcessed, "parse line", ret);
-    return ret;
-  }
+  private List<EsClientReferral> allegations;
 
   @Override
   public Class<ReplicatedPersonReferrals> getNormalizationClass() {
     return ReplicatedPersonReferrals.class;
   }
 
-  public void mergeClientReferralInfo(String clientId, EsPersonReferral ref) {
-    this.clientId = clientId;
-    this.referralId = ref.referralId;
-    this.county = ref.county;
-    this.startDate = ref.startDate;
-    this.endDate = ref.endDate;
-    this.referralResponseType = ref.referralResponseType;
-    this.referralLastUpdated = ref.referralLastUpdated;
-    this.limitedAccessCode = ref.limitedAccessCode;
-    this.limitedAccessDate = ref.limitedAccessDate;
-    this.limitedAccessDescription = ref.limitedAccessDescription;
-    this.limitedAccessGovernmentEntityId = ref.limitedAccessGovernmentEntityId;
-    this.reporterFirstName = ref.reporterFirstName;
-    this.reporterId = ref.reporterId;
-    this.reporterLastName = ref.reporterLastName;
-    this.reporterLastUpdated = ref.reporterLastUpdated;
-    this.workerFirstName = ref.workerFirstName;
-    this.workerId = ref.workerId;
-    this.workerLastName = ref.workerLastName;
-    this.workerLastUpdated = ref.workerLastUpdated;
-  }
-
   @Override
   public ReplicatedPersonReferrals normalize(Map<Object, ReplicatedPersonReferrals> map) {
-    ReplicatedPersonReferrals ret = map.get(this.clientId);
-    if (ret == null) {
-      ret = new ReplicatedPersonReferrals(this.clientId);
-      map.put(this.clientId, ret);
+    ReplicatedPersonReferrals referrals = map.get(this.clientId);
+    if (referrals == null) {
+      referrals = new ReplicatedPersonReferrals(this.clientId);
+      map.put(this.clientId, referrals);
     }
 
-    final boolean isNewReferral = !ret.hasReferral(this.referralId);
-    final ElasticSearchPersonReferral r =
-        !isNewReferral ? ret.getReferral(referralId) : new ElasticSearchPersonReferral();
+    // BEGIN DUPLICATED COLUMNS:
 
-    if (isNewReferral) {
-      r.setId(this.referralId);
-      r.setLegacyId(this.referralId);
-      r.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.referralLastUpdated));
-      r.setStartDate(DomainChef.cookDate(this.startDate));
-      r.setEndDate(DomainChef.cookDate(this.endDate));
-      r.setCountyId(this.county == null ? null : this.county.toString());
-      r.setCountyName(SystemCodeCache.global().getSystemCodeShortDescription(this.county));
-      r.setResponseTimeId(
-          this.referralResponseType == null ? null : this.referralResponseType.toString());
-      r.setResponseTime(
-          SystemCodeCache.global().getSystemCodeShortDescription(this.referralResponseType));
-      r.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.referralId,
-          this.referralLastUpdated, LegacyTable.REFERRAL));
+    ElasticSearchPersonReferral r = new ElasticSearchPersonReferral();
 
-      //
-      // Reporter
-      //
-      ElasticSearchPersonReporter reporter = new ElasticSearchPersonReporter();
-      reporter.setId(this.reporterId);
-      reporter.setLegacyClientId(this.reporterId);
-      reporter.setFirstName(this.reporterFirstName);
-      reporter.setLastName(this.reporterLastName);
-      reporter.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.reporterId,
-          this.reporterLastUpdated, LegacyTable.REPORTER));
-      r.setReporter(reporter);
+    r.setId(this.referralId);
+    r.setLegacyId(this.referralId);
+    r.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.referralLastUpdated));
+    r.setStartDate(DomainChef.cookDate(this.startDate));
+    r.setEndDate(DomainChef.cookDate(this.endDate));
+    r.setCountyId(this.county == null ? null : this.county.toString());
+    r.setCountyName(SystemCodeCache.global().getSystemCodeShortDescription(this.county));
+    r.setResponseTimeId(
+        this.referralResponseType == null ? null : this.referralResponseType.toString());
+    r.setResponseTime(
+        SystemCodeCache.global().getSystemCodeShortDescription(this.referralResponseType));
+    r.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.referralId,
+        this.referralLastUpdated, LegacyTable.REFERRAL));
 
-      //
-      // Assigned Worker
-      //
-      ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
-      assignedWorker.setId(this.workerId);
-      assignedWorker.setLegacyClientId(this.workerId);
-      assignedWorker.setFirstName(this.workerFirstName);
-      assignedWorker.setLastName(this.workerLastName);
-      assignedWorker.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
-          this.workerLastUpdated, LegacyTable.STAFF_PERSON));
-      r.setAssignedSocialWorker(assignedWorker);
+    //
+    // Reporter
+    //
+    ElasticSearchPersonReporter reporter = new ElasticSearchPersonReporter();
+    reporter.setId(this.reporterId);
+    reporter.setLegacyClientId(this.reporterId);
+    reporter.setFirstName(this.reporterFirstName);
+    reporter.setLastName(this.reporterLastName);
+    reporter.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.reporterId,
+        this.reporterLastUpdated, LegacyTable.REPORTER));
+    r.setReporter(reporter);
 
-      //
-      // Access Limitation
-      //
-      ElasticSearchAccessLimitation accessLimit = new ElasticSearchAccessLimitation();
-      accessLimit.setLimitedAccessCode(this.limitedAccessCode);
-      accessLimit.setLimitedAccessDate(DomainChef.cookDate(this.limitedAccessDate));
-      accessLimit.setLimitedAccessDescription(this.limitedAccessDescription);
-      accessLimit.setLimitedAccessGovernmentEntityId(this.limitedAccessGovernmentEntityId == null
-          ? null : this.limitedAccessGovernmentEntityId.toString());
-      accessLimit.setLimitedAccessGovernmentEntityName(SystemCodeCache.global()
-          .getSystemCodeShortDescription(this.limitedAccessGovernmentEntityId));
-      r.setAccessLimitation(accessLimit);
-    }
+    //
+    // Assigned Worker
+    //
+    ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
+    assignedWorker.setId(this.workerId);
+    assignedWorker.setLegacyClientId(this.workerId);
+    assignedWorker.setFirstName(this.workerFirstName);
+    assignedWorker.setLastName(this.workerLastName);
+    assignedWorker.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
+        this.workerLastUpdated, LegacyTable.STAFF_PERSON));
+    r.setAssignedSocialWorker(assignedWorker);
+
+    //
+    // Access Limitation
+    //
+    ElasticSearchAccessLimitation accessLimit = new ElasticSearchAccessLimitation();
+    accessLimit.setLimitedAccessCode(this.limitedAccessCode);
+    accessLimit.setLimitedAccessDate(DomainChef.cookDate(this.limitedAccessDate));
+    accessLimit.setLimitedAccessDescription(this.limitedAccessDescription);
+    accessLimit.setLimitedAccessGovernmentEntityId(this.limitedAccessGovernmentEntityId == null
+        ? null : this.limitedAccessGovernmentEntityId.toString());
+    accessLimit.setLimitedAccessGovernmentEntityName(SystemCodeCache.global()
+        .getSystemCodeShortDescription(this.limitedAccessGovernmentEntityId));
+    r.setAccessLimitation(accessLimit);
+
+    // END DUPLICATED COLUMNS.
 
     //
     // A referral may have more than one allegation.
@@ -666,8 +344,8 @@ public class EsPersonReferral extends ApiObjectIdentity
     allegation.setVictimFirstName(this.victimFirstName);
     allegation.setVictimLastName(this.victimLastName);
 
-    ret.addReferral(r, allegation);
-    return ret;
+    referrals.addReferral(r, allegation);
+    return referrals;
   }
 
   @Override
@@ -970,12 +648,12 @@ public class EsPersonReferral extends ApiObjectIdentity
   }
 
   @Override
-  public int compare(EsPersonReferral o1, EsPersonReferral o2) {
+  public int compare(EsClientReferral o1, EsClientReferral o2) {
     return o1.getClientId().compareTo(o2.getClientId());
   }
 
   @Override
-  public int compareTo(EsPersonReferral o) {
+  public int compareTo(EsClientReferral o) {
     return compare(this, o);
   }
 
@@ -997,7 +675,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       return false;
     if (getClass() != obj.getClass())
       return false;
-    EsPersonReferral other = (EsPersonReferral) obj;
+    EsClientReferral other = (EsClientReferral) obj;
 
     if (clientId == null) {
       if (other.clientId != null)
@@ -1020,38 +698,12 @@ public class EsPersonReferral extends ApiObjectIdentity
     return true;
   }
 
-  List<EsPersonReferral> getAllegations() {
+  List<EsClientReferral> getAllegations() {
     return allegations;
   }
 
-  void setAllegations(List<EsPersonReferral> allegations) {
+  void setAllegations(List<EsClientReferral> allegations) {
     this.allegations = allegations;
-  }
-
-  /**
-   * Load from a tab delimited file.
-   * 
-   * @param args command line
-   */
-  public static void main(String[] args) {
-    Path pathIn = Paths.get(args[0]);
-    try (Stream<String> lines = Files.lines(pathIn)) {
-      // Maintain file order by client, referral.
-      lines.sequential().map(EsPersonReferral::parseLine).collect(Collectors.toList()).stream()
-          .forEach(t -> { // NOSONAR
-            LOGGER.info("Raw Referral: {}", t);
-          });
-    } catch (Exception e) {
-      LOGGER.error("Oops!", e);
-    }
-  }
-
-  String getClientSensitivity() {
-    return clientSensitivity;
-  }
-
-  void setClientSensitivity(String clientSensitivity) {
-    this.clientSensitivity = clientSensitivity;
   }
 
 }

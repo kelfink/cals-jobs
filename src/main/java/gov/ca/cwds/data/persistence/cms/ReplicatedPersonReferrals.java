@@ -56,6 +56,14 @@ public class ReplicatedPersonReferrals extends ApiObjectIdentity
     return new ArrayList<>(referrals.values());
   }
 
+  public boolean hasReferral(String referralId) {
+    return referrals.containsKey(referralId);
+  }
+
+  public ElasticSearchPersonReferral getReferral(String referralId) {
+    return referrals.get(referralId);
+  }
+
   /**
    * Adds a referral to this container with optional allegation. Note that a referral may have more
    * than one allegations.
