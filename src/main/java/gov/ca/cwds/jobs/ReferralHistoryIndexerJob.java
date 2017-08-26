@@ -61,8 +61,8 @@ public class ReferralHistoryIndexerJob
   private static final String SELECT_CLIENT =
       "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM #SCHEMA#.GT_REFR_CLT";
 
-  private static final String SELECT_REFERRAL =
-      "SELECT vw.* FROM #SCHEMA#.VW_MQT_REFRL_ONLY vw FOR READ ONLY WITH UR";
+  // private static final String SELECT_REFERRAL =
+  // "SELECT vw.* FROM #SCHEMA#.VW_MQT_REFRL_ONLY vw FOR READ ONLY WITH UR";
 
   private static final String SELECT_ALLEGATION =
       "SELECT vw.* FROM #SCHEMA#.VW_MQT_ALGTN_ONLY vw FOR READ ONLY WITH UR";
@@ -109,6 +109,12 @@ public class ReferralHistoryIndexerJob
       this.sensitivity = sensitivity;
     }
   }
+
+  private final ThreadLocal<List<EsPersonReferral>> allocAllegations = new ThreadLocal<>();
+
+  private final ThreadLocal<Map<String, EsPersonReferral>> allocReferrals = new ThreadLocal<>();
+
+  private final ThreadLocal<List<MinClientReferral>> allocClientReferralKeys = new ThreadLocal<>();
 
   private AtomicInteger rowsReadReferrals = new AtomicInteger(0);
 
@@ -191,9 +197,21 @@ public class ReferralHistoryIndexerJob
       enableParallelism(con);
 
       int cntr = 0;
-      final List<MinClientReferral> listClientReferral = new ArrayList<>(12000);
-      final Map<String, EsPersonReferral> mapReferrals = new HashMap<>(21019); // prime
-      final List<EsPersonReferral> listAllegations = new ArrayList<>(50000);
+
+      // Pre-allocate memory once for this thread and reuse it per key range.
+      if (allocAllegations.get() == null) {
+        allocAllegations.set(new ArrayList<>(150000));
+        allocReferrals.set(new HashMap<>(99881));
+        allocClientReferralKeys.set(new ArrayList<>(12000));
+      }
+
+      final List<EsPersonReferral> listAllegations = allocAllegations.get();
+      final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
+      final List<MinClientReferral> listClientReferralKeys = allocClientReferralKeys.get();
+
+      listAllegations.clear();
+      mapReferrals.clear();
+      listClientReferralKeys.clear();
 
       final String schema = getDBSchemaName();
 
@@ -214,7 +232,7 @@ public class ReferralHistoryIndexerJob
         stmtInsClient.setString(2, p.getRight());
 
         final int cntInsClientReferral = stmtInsClient.executeUpdate();
-        LOGGER.debug("bundle client/referrals: {}", cntInsClientReferral);
+        LOGGER.info("bundle client/referrals: {}", cntInsClientReferral);
 
         // Prepare retrieval.
         stmtSelClient.setMaxRows(0);
@@ -234,7 +252,7 @@ public class ReferralHistoryIndexerJob
           final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
           MinClientReferral mx;
           while (!fatalError && rs.next() && (mx = MinClientReferral.extract(rs)) != null) {
-            listClientReferral.add(mx);
+            listClientReferralKeys.add(mx);
           }
         }
 
@@ -269,7 +287,7 @@ public class ReferralHistoryIndexerJob
         // Connection and statements close automatically.
       }
 
-      final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferral.stream()
+      final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys.stream()
           .sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
           .collect(Collectors.groupingBy(MinClientReferral::getClientId));
 
@@ -302,7 +320,7 @@ public class ReferralHistoryIndexerJob
                 readyToNorm.add(ref);
               }
             } else {
-              LOGGER.debug("sensitive referral? ref id={}, client id={}", referralId, clientId);
+              LOGGER.trace("sensitive referral? ref id={}, client id={}", referralId, clientId);
             }
           }
 
@@ -311,10 +329,10 @@ public class ReferralHistoryIndexerJob
             repl.setClientId(clientId);
             addToIndexQueue(repl);
           } else {
-            LOGGER.debug("null normalized? sensitive? client id={}", clientId);
+            LOGGER.trace("null normalized? sensitive? client id={}", clientId);
           }
         } else {
-          LOGGER.debug("empty client? client id={}", clientId);
+          LOGGER.trace("empty client? client id={}", clientId);
         }
       }
 
@@ -328,7 +346,7 @@ public class ReferralHistoryIndexerJob
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
-    LOGGER.warn("DONE");
+    LOGGER.info("DONE");
   }
 
   /**
