@@ -191,7 +191,7 @@ public class ReferralHistoryIndexerJob
         .getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      con.setReadOnly(true);
+      // con.setReadOnly(true);
       enableParallelism(con);
 
       // ((DB2Connection)con).
