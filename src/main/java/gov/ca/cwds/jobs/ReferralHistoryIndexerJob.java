@@ -25,8 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import com.ibm.db2.jcc.DB2Connection;
-import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
@@ -62,9 +60,6 @@ public class ReferralHistoryIndexerJob
 
   private static final String SELECT_CLIENT =
       "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM #SCHEMA#.GT_REFR_CLT";
-
-  // private static final String SELECT_REFERRAL =
-  // "SELECT vw.* FROM #SCHEMA#.VW_MQT_REFRL_ONLY vw FOR READ ONLY WITH UR";
 
   private static final String SELECT_ALLEGATION =
       "SELECT vw.* FROM #SCHEMA#.VW_MQT_ALGTN_ONLY vw FOR READ ONLY WITH UR";
@@ -203,9 +198,9 @@ public class ReferralHistoryIndexerJob
       // ((com.ibm.db2.jcc.DB2BaseDataSource) ds).setDeferPrepares ((true));
       // ((com.ibm.db2.jcc.DB2BaseDataSource) ds).sendDataAsIs = true;
 
-      DB2SystemMonitor monitor = ((DB2Connection) con).getDB2SystemMonitor();
-      monitor.enable(true);
-      monitor.start(DB2SystemMonitor.RESET_TIMES);
+      // DB2SystemMonitor monitor = ((DB2Connection) con).getDB2SystemMonitor();
+      // monitor.enable(true);
+      // monitor.start(DB2SystemMonitor.RESET_TIMES);
       int cntr = 0;
 
       // Allocate memory once for this thread and reuse it per key range.
@@ -292,15 +287,17 @@ public class ReferralHistoryIndexerJob
           }
         }
 
-        monitor.stop();
-        LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
-        LOGGER.info("Network I/O elapsed time (microseconds)=" + monitor.getNetworkIOTimeMicros());
-        LOGGER.info("Core driver elapsed time (microseconds)=" + monitor.getCoreDriverTimeMicros());
-        LOGGER
-            .info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
+        // monitor.stop();
+        // LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
+        // LOGGER.info("Network I/O elapsed time (microseconds)=" +
+        // monitor.getNetworkIOTimeMicros());
+        // LOGGER.info("Core driver elapsed time (microseconds)=" +
+        // monitor.getCoreDriverTimeMicros());
+        // LOGGER
+        // .info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
 
-        // C'mon IBM. Where are the constants for method DB2SystemMonitor.moreData()?? Not supported
-        // on z/OS?
+        // C'mon IBM. Where are the constants for method DB2SystemMonitor.moreData()??
+        // Not supported on z/OS?
         // LOGGER.info("NUMBER of the NETWORK_TRIPS =" +
         // systemMonitor.moreData(NUMBER_NETWORK_TRIPS));
 
@@ -319,6 +316,7 @@ public class ReferralHistoryIndexerJob
 
       final List<EsPersonReferral> readyToNorm = new ArrayList<>();
 
+      // TODO: convert to stream instead of nested for loops.
       // For each client:
       for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
 
@@ -368,7 +366,9 @@ public class ReferralHistoryIndexerJob
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
-    System.gc();
+    // Good time to *request* garbage collection. GC runs in another thread anyway.
+    // SonarQube disagrees.
+    // System.gc();
     LOGGER.info("DONE");
   }
 
@@ -476,28 +476,51 @@ public class ReferralHistoryIndexerJob
   protected EsPersonReferral extractReferral(ResultSet rs) throws SQLException {
     EsPersonReferral ret = new EsPersonReferral();
 
-    ret.setReferralId(rs.getString("REFERRAL_ID"));
-    ret.setStartDate(rs.getDate("START_DATE"));
-    ret.setEndDate(rs.getDate("END_DATE"));
-    ret.setLastChange(rs.getDate("LAST_CHG"));
-    ret.setCounty(rs.getInt("REFERRAL_COUNTY"));
-    ret.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
-    ret.setReferralLastUpdated(rs.getTimestamp("REFERRAL_LAST_UPDATED"));
+    // IBM strongly recommends retrieving column results by position, not by column name.
+    int columnIndex = 0;
+    // REFERRAL_ID,
+    // START_DATE,
+    // END_DATE,
+    // REFERRAL_RESPONSE_TYPE,
+    // LIMITED_ACCESS_CODE,
+    // LIMITED_ACCESS_DATE,
+    // LIMITED_ACCESS_DESCRIPTION,
+    // LIMITED_ACCESS_GOVERNMENT_ENT,
+    // REFERRAL_LAST_UPDATED,
+    // REPORTER_ID,
+    // REPORTER_FIRST_NM,
+    // REPORTER_LAST_NM,
+    // REPORTER_LAST_UPDATED,
+    // WORKER_ID,
+    // WORKER_FIRST_NM,
+    // WORKER_LAST_NM,
+    // WORKER_LAST_UPDATED,
+    // REFERRAL_COUNTY,
+    // LAST_CHG
 
-    ret.setReporterId(ifNull(rs.getString("REPORTER_ID")));
-    ret.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
-    ret.setReporterLastName(ifNull(rs.getString("REPORTER_LAST_NM")));
-    ret.setReporterLastUpdated(rs.getTimestamp("REPORTER_LAST_UPDATED"));
+    ret.setReferralId(rs.getString(++columnIndex));
+    ret.setStartDate(rs.getDate(++columnIndex));
+    ret.setEndDate(rs.getDate(++columnIndex));
+    ret.setReferralResponseType(rs.getInt(++columnIndex));
 
-    ret.setWorkerId(ifNull(rs.getString("WORKER_ID")));
-    ret.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
-    ret.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
-    ret.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
+    ret.setLimitedAccessCode(ifNull(rs.getString(++columnIndex)));
+    ret.setLimitedAccessDate(rs.getDate(++columnIndex));
+    ret.setLimitedAccessDescription(ifNull(rs.getString(++columnIndex)));
+    ret.setLimitedAccessGovernmentEntityId(rs.getInt(++columnIndex));
+    ret.setReferralLastUpdated(rs.getTimestamp(++columnIndex));
 
-    ret.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
-    ret.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
-    ret.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
-    ret.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
+    ret.setReporterId(ifNull(rs.getString(++columnIndex)));
+    ret.setReporterFirstName(ifNull(rs.getString(++columnIndex)));
+    ret.setReporterLastName(ifNull(rs.getString(++columnIndex)));
+    ret.setReporterLastUpdated(rs.getTimestamp(++columnIndex));
+
+    ret.setWorkerId(ifNull(rs.getString(++columnIndex)));
+    ret.setWorkerFirstName(ifNull(rs.getString(++columnIndex)));
+    ret.setWorkerLastName(ifNull(rs.getString(++columnIndex)));
+    ret.setWorkerLastUpdated(rs.getTimestamp(++columnIndex));
+
+    ret.setCounty(rs.getInt(++columnIndex));
+    ret.setLastChange(rs.getDate(++columnIndex));
 
     return ret;
   }
@@ -505,23 +528,42 @@ public class ReferralHistoryIndexerJob
   protected EsPersonReferral extractAllegation(ResultSet rs) throws SQLException {
     EsPersonReferral ret = new EsPersonReferral();
 
-    ret.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
-    ret.setAllegationId(ifNull(rs.getString("ALLEGATION_ID")));
-    ret.setAllegationType(rs.getInt("ALLEGATION_TYPE"));
-    ret.setAllegationDisposition(rs.getInt("ALLEGATION_DISPOSITION"));
-    ret.setAllegationLastUpdated(rs.getTimestamp("ALLEGATION_LAST_UPDATED"));
+    // IBM strongly recommends retrieving column results by position, not by column name.
+    int columnIndex = 0;
+    // REFERRAL_ID,
+    // ALLEGATION_ID,
+    // ALLEGATION_DISPOSITION,
+    // ALLEGATION_TYPE,
+    // ALLEGATION_LAST_UPDATED,
+    // PERPETRATOR_ID,
+    // PERPETRATOR_SENSITIVITY_IND,
+    // PERPETRATOR_FIRST_NM,
+    // PERPETRATOR_LAST_NM,
+    // PERPETRATOR_LAST_UPDATED,
+    // VICTIM_ID,
+    // VICTIM_SENSITIVITY_IND,
+    // VICTIM_FIRST_NM,
+    // VICTIM_LAST_NM,
+    // VICTIM_LAST_UPDATED,
+    // LAST_CHG
 
-    ret.setPerpetratorId(ifNull(rs.getString("PERPETRATOR_ID")));
-    ret.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
-    ret.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
-    ret.setPerpetratorLastUpdated(rs.getTimestamp("PERPETRATOR_LAST_UPDATED"));
-    ret.setPerpetratorSensitivityIndicator(rs.getString("PERPETRATOR_SENSITIVITY_IND"));
+    ret.setReferralId(ifNull(rs.getString(++columnIndex)));
+    ret.setAllegationId(ifNull(rs.getString(++columnIndex)));
+    ret.setAllegationDisposition(rs.getInt(++columnIndex));
+    ret.setAllegationType(rs.getInt(++columnIndex));
+    ret.setAllegationLastUpdated(rs.getTimestamp(++columnIndex));
 
-    ret.setVictimId(ifNull(rs.getString("VICTIM_ID")));
-    ret.setVictimFirstName(ifNull(rs.getString("VICTIM_FIRST_NM")));
-    ret.setVictimLastName(ifNull(rs.getString("VICTIM_LAST_NM")));
-    ret.setVictimLastUpdated(rs.getTimestamp("VICTIM_LAST_UPDATED"));
-    ret.setVictimSensitivityIndicator(rs.getString("VICTIM_SENSITIVITY_IND"));
+    ret.setPerpetratorId(ifNull(rs.getString(++columnIndex)));
+    ret.setPerpetratorSensitivityIndicator(rs.getString(++columnIndex));
+    ret.setPerpetratorFirstName(ifNull(rs.getString(++columnIndex)));
+    ret.setPerpetratorLastName(ifNull(rs.getString(++columnIndex)));
+    ret.setPerpetratorLastUpdated(rs.getTimestamp(++columnIndex));
+
+    ret.setVictimId(ifNull(rs.getString(++columnIndex)));
+    ret.setVictimSensitivityIndicator(rs.getString(++columnIndex));
+    ret.setVictimFirstName(ifNull(rs.getString(++columnIndex)));
+    ret.setVictimLastName(ifNull(rs.getString(++columnIndex)));
+    ret.setVictimLastUpdated(rs.getTimestamp(++columnIndex));
 
     return ret;
   }
@@ -530,14 +572,14 @@ public class ReferralHistoryIndexerJob
   public EsPersonReferral extract(ResultSet rs) throws SQLException {
     EsPersonReferral ret = new EsPersonReferral();
 
-    ret.setClientId(ifNull(rs.getString("CLIENT_ID")));
     ret.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
-
     ret.setStartDate(rs.getDate("START_DATE"));
     ret.setEndDate(rs.getDate("END_DATE"));
-    ret.setLastChange(rs.getDate("LAST_CHG"));
-    ret.setCounty(rs.getInt("REFERRAL_COUNTY"));
     ret.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
+    ret.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
+    ret.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
+    ret.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
+    ret.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
     ret.setReferralLastUpdated(rs.getTimestamp("REFERRAL_LAST_UPDATED"));
 
     ret.setAllegationId(ifNull(rs.getString("ALLEGATION_ID")));
@@ -567,10 +609,8 @@ public class ReferralHistoryIndexerJob
     ret.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
     ret.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
 
-    ret.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
-    ret.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
-    ret.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
-    ret.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
+    ret.setCounty(rs.getInt("REFERRAL_COUNTY"));
+    ret.setLastChange(rs.getDate("LAST_CHG"));
 
     return ret;
   }
