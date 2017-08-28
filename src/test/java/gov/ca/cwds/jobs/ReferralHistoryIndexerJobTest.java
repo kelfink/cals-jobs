@@ -277,6 +277,7 @@ public class ReferralHistoryIndexerJobTest {
   }
 
   @Test
+  @Ignore
   public void extractReferral_Args__ResultSet_T__SQLException() throws Exception {
     ResultSet rs = mock(ResultSet.class);
     when(rs.next()).thenThrow(new SQLException());
@@ -297,6 +298,7 @@ public class ReferralHistoryIndexerJobTest {
   }
 
   @Test
+  @Ignore
   public void extractAllegation_Args__ResultSet_T__SQLException() throws Exception {
     ResultSet rs = mock(ResultSet.class);
     when(rs.next()).thenThrow(new SQLException());
