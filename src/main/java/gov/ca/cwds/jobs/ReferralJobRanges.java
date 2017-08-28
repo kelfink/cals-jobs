@@ -42,11 +42,11 @@ public class ReferralJobRanges {
           IOUtils.readLines(this.getClass().getResourceAsStream("/referral_ranges.tsv")).stream()) {
         ret = lines.sequential().map(this::splitLine).collect(Collectors.toList());
       } catch (Exception e) {
-        LOGGER.error("Oops!", e);
+        LOGGER.error("Failed to load referral ranges!", e);
       }
 
-      if (job.getOpts() != null && job.getOpts().getStartBucket() != 0L
-          && job.getOpts().getEndBucket() != 0L) {
+      if (job.getOpts() != null && job.getOpts().getStartBucket() > 1L
+          && job.getOpts().getStartBucket() != job.getOpts().getEndBucket()) {
         final List<Pair<String, String>> list = new ArrayList<>();
 
         final int start = ((int) job.getOpts().getStartBucket()) - 1;

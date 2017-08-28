@@ -310,4 +310,11 @@ public class ReferralHistoryIndexerJobTest {
     }
   }
 
+  @Test
+  public void isRangeSelfManaging_Args__() throws Exception {
+    boolean actual = target.isRangeSelfManaging();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
 }

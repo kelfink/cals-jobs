@@ -66,7 +66,7 @@ public class ReferralHistoryIndexerJob
 
   private static final int FETCH_SIZE = 5000;
 
-  private static class MinClientReferral implements ApiMarker {
+  public static class MinClientReferral implements ApiMarker {
     String clientId;
     String referralId;
     String sensitivity;
