@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import com.ibm.db2.jcc.DB2Connection;
+import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
@@ -194,11 +196,19 @@ public class ReferralHistoryIndexerJob
         .getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
+      con.setReadOnly(true);
       enableParallelism(con);
 
+      // ((DB2Connection)con).
+      // ((com.ibm.db2.jcc.DB2BaseDataSource) ds).setDeferPrepares ((true));
+      // ((com.ibm.db2.jcc.DB2BaseDataSource) ds).sendDataAsIs = true;
+
+      DB2SystemMonitor systemMonitor = ((DB2Connection) con).getDB2SystemMonitor();
+      systemMonitor.enable(true);
+      systemMonitor.start(DB2SystemMonitor.RESET_TIMES);
       int cntr = 0;
 
-      // Pre-allocate memory once for this thread and reuse it per key range.
+      // Allocate memory once for this thread and reuse it per key range.
       if (allocAllegations.get() == null) {
         allocAllegations.set(new ArrayList<>(150000));
         allocReferrals.set(new HashMap<>(99881));
@@ -282,13 +292,17 @@ public class ReferralHistoryIndexerJob
           }
         }
 
+        systemMonitor.stop();
+        // LOGGER.info("NUMBER of the NETWORK_TRIPS =" +
+        // systemMonitor.moreData(NUMBER_NETWORK_TRIPS));
+
         con.commit();
       } finally {
         // Connection and statements close automatically.
       }
 
-      final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys.stream()
-          .sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
+      final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys
+          .stream().sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
           .collect(Collectors.groupingBy(MinClientReferral::getClientId));
 
       final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
@@ -346,6 +360,7 @@ public class ReferralHistoryIndexerJob
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
+    System.gc();
     LOGGER.info("DONE");
   }
 
