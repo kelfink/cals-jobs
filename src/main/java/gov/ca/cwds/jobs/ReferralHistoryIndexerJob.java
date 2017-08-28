@@ -203,9 +203,9 @@ public class ReferralHistoryIndexerJob
       // ((com.ibm.db2.jcc.DB2BaseDataSource) ds).setDeferPrepares ((true));
       // ((com.ibm.db2.jcc.DB2BaseDataSource) ds).sendDataAsIs = true;
 
-      DB2SystemMonitor systemMonitor = ((DB2Connection) con).getDB2SystemMonitor();
-      systemMonitor.enable(true);
-      systemMonitor.start(DB2SystemMonitor.RESET_TIMES);
+      DB2SystemMonitor monitor = ((DB2Connection) con).getDB2SystemMonitor();
+      monitor.enable(true);
+      monitor.start(DB2SystemMonitor.RESET_TIMES);
       int cntr = 0;
 
       // Allocate memory once for this thread and reuse it per key range.
@@ -292,7 +292,15 @@ public class ReferralHistoryIndexerJob
           }
         }
 
-        systemMonitor.stop();
+        monitor.stop();
+        LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
+        LOGGER.info("Network I/O elapsed time (microseconds)=" + monitor.getNetworkIOTimeMicros());
+        LOGGER.info("Core driver elapsed time (microseconds)=" + monitor.getCoreDriverTimeMicros());
+        LOGGER
+            .info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
+
+        // C'mon IBM. Where are the constants for method DB2SystemMonitor.moreData()?? Not supported
+        // on z/OS?
         // LOGGER.info("NUMBER of the NETWORK_TRIPS =" +
         // systemMonitor.moreData(NUMBER_NETWORK_TRIPS));
 
@@ -381,11 +389,11 @@ public class ReferralHistoryIndexerJob
       final int cntReaderThreads =
           getOpts().getThreadCount() != 0L ? (int) getOpts().getThreadCount()
               : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
-      LOGGER.warn(">>>>>>>> EXTRACT THREADS: {} <<<<<<<<", cntReaderThreads);
+      LOGGER.warn(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", cntReaderThreads);
       ForkJoinPool forkJoinPool = new ForkJoinPool(cntReaderThreads);
 
       final List<Pair<String, String>> ranges = getPartitionRanges();
-      LOGGER.warn(">>>>>>>> RANGE COUNT: {} <<<<<<<<", ranges);
+      LOGGER.warn(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
