@@ -1228,6 +1228,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return ret;
   }
 
+  protected boolean isRangeSelfManaging() {
+    return false;
+  }
+
   /**
    * Lambda runs a number of threads up to max processor cores. Queued jobs wait until a worker
    * thread is available.
@@ -1297,7 +1301,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         doLastRun(effectiveLastSuccessfulRunTime);
       } else {
         LOGGER.warn("DIRECT BUCKET MODE!");
-        extractHibernate();
+        if (isRangeSelfManaging()) {
+          doInitialLoadJdbc();
+        } else {
+          extractHibernate();
+        }
       }
 
       // Result stats:

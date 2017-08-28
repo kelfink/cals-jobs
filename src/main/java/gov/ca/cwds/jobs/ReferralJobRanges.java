@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,8 +45,19 @@ public class ReferralJobRanges {
         LOGGER.error("Oops!", e);
       }
 
-      // Small test range.
-      // ret.add(Pair.of("AajKlhI4rg", "AajKlhI4rh"));
+      if (job.getOpts() != null && job.getOpts().getStartBucket() != 0L
+          && job.getOpts().getEndBucket() != 0L) {
+        final List<Pair<String, String>> list = new ArrayList<>();
+
+        final int start = ((int) job.getOpts().getStartBucket()) - 1;
+        final int end = ((int) job.getOpts().getEndBucket()) - 1;
+
+        for (int i = start; i <= end; i++) {
+          list.add(ret.get(i));
+        }
+
+        ret = list;
+      }
 
     } else if (isMainframe) {
       // ----------------------------
@@ -61,7 +73,7 @@ public class ReferralJobRanges {
       ret.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
     }
 
-    return ret;
+    return Collections.unmodifiableList(ret);
   }
 
 }

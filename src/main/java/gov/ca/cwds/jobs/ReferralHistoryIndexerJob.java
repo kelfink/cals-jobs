@@ -624,4 +624,9 @@ public class ReferralHistoryIndexerJob
     runMain(ReferralHistoryIndexerJob.class, args);
   }
 
+  @Override
+  protected boolean isRangeSelfManaging() {
+    return true;
+  }
+
 }
