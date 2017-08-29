@@ -113,6 +113,8 @@ public class ReferralHistoryIndexerJob
 
   private final ThreadLocal<List<MinClientReferral>> allocClientReferralKeys = new ThreadLocal<>();
 
+  private final ThreadLocal<List<EsPersonReferral>> allocReadyToNorm = new ThreadLocal<>();
+
   private AtomicInteger rowsReadReferrals = new AtomicInteger(0);
 
   private AtomicInteger rowsReadAllegations = new AtomicInteger(0);
@@ -206,6 +208,7 @@ public class ReferralHistoryIndexerJob
       // Allocate memory once for this thread and reuse it per key range.
       if (allocAllegations.get() == null) {
         allocAllegations.set(new ArrayList<>(150000));
+        allocReadyToNorm.set(new ArrayList<>(150000));
         allocReferrals.set(new HashMap<>(99881));
         allocClientReferralKeys.set(new ArrayList<>(12000));
       }
@@ -213,10 +216,12 @@ public class ReferralHistoryIndexerJob
       final List<EsPersonReferral> listAllegations = allocAllegations.get();
       final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
       final List<MinClientReferral> listClientReferralKeys = allocClientReferralKeys.get();
+      final List<EsPersonReferral> readyToNorm = allocReadyToNorm.get();
 
       listAllegations.clear();
       mapReferrals.clear();
       listClientReferralKeys.clear();
+      readyToNorm.clear();
 
       final String schema = getDBSchemaName();
 
@@ -314,8 +319,6 @@ public class ReferralHistoryIndexerJob
           .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
           .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
 
-      final List<EsPersonReferral> readyToNorm = new ArrayList<>();
-
       // TODO: convert to stream instead of nested for loops.
       // For each client:
       for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
@@ -368,7 +371,10 @@ public class ReferralHistoryIndexerJob
 
     // Good time to *request* garbage collection. GC runs in another thread anyway.
     // SonarQube disagrees.
-    // System.gc();
+    // The catch: when multiple threads are running, the default parallel GC may not get sufficient
+    // bandwidth until heap memory is exhausted. Yes, this is a good place to drop a hint to GC that
+    // it *might* want to clean up memory.
+    System.gc(); // NOSONAR
     LOGGER.info("DONE");
   }
 
