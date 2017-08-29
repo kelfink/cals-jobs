@@ -107,6 +107,14 @@ public class ReferralHistoryIndexerJob
     }
   }
 
+  /**
+   * Allocate memory once for each thread and reuse per key range.
+   * 
+   * <p>
+   * Note: <strong>use thread local variables sparingly</strong> because they stick to the thread.
+   * This Neutron job reuses threads for performance, since thread creation is expensive.
+   * </p>
+   */
   private final ThreadLocal<List<EsPersonReferral>> allocAllegations = new ThreadLocal<>();
 
   private final ThreadLocal<Map<String, EsPersonReferral>> allocReferrals = new ThreadLocal<>();
