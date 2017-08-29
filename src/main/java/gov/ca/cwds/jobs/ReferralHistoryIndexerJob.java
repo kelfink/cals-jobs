@@ -343,6 +343,8 @@ public class ReferralHistoryIndexerJob
         .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
     listAllegations.clear();
 
+    LOGGER.info("Normalize all: START");
+
     // TODO: convert to stream instead of nested for loops.
     // For each client:
     for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
@@ -383,6 +385,8 @@ public class ReferralHistoryIndexerJob
         LOGGER.trace("empty client? client id={}", clientId);
       }
     }
+
+    LOGGER.info("Normalize all: END");
 
     // unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
     // listReferrals.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
