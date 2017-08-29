@@ -330,12 +330,6 @@ public class ReferralHistoryIndexerJob
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
-    // Release heap objects.
-    listAllegations.clear();
-    listClientReferralKeys.clear();
-    mapReferrals.clear();
-    readyToNorm.clear();
-
     cntr = 0;
     final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys.stream()
         .sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
@@ -395,6 +389,11 @@ public class ReferralHistoryIndexerJob
     // .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
     // .forEach(this::addToIndexQueue);
 
+    listAllegations.clear();
+    listClientReferralKeys.clear();
+    mapReferrals.clear();
+    readyToNorm.clear();
+
     // Good time to *request* garbage collection. GC runs in another thread anyway.
     // SonarQube disagrees.
     // The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
@@ -402,6 +401,7 @@ public class ReferralHistoryIndexerJob
     // clean up memory.
     System.gc(); // NOSONAR
     LOGGER.info("DONE");
+
     return cntr;
   }
 
