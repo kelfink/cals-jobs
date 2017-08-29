@@ -211,15 +211,21 @@ public class ReferralHistoryIndexerJob
     final List<EsPersonReferral> readyToNorm = allocReadyToNorm.get();
 
     listAllegations.clear();
-    mapReferrals.clear();
     listClientReferralKeys.clear();
+    mapReferrals.clear();
     readyToNorm.clear();
 
     try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
+
+      // Works the first time but fails on subsequent calls.
+      // if (!con.isReadOnly()) {
       // con.setReadOnly(true);
+      // }
+
+      LOGGER.info("transaction isolation level: {}", con.getTransactionIsolation());
       enableParallelism(con);
 
       // ((DB2Connection)con).
