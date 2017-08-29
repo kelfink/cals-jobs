@@ -537,7 +537,7 @@ public class EsPersonReferral extends ApiObjectIdentity
 
   /**
    * Merge common Referral fields into this Allegation before normalizing. Very silly, yes, but it
-   * works with the existing code without refactoring.
+   * works with existing code without refactoring.
    * 
    * @param clientId target client id
    * @param ref parent referral to merge
@@ -630,7 +630,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     }
 
     //
-    // A referral may have more than one allegation.
+    // A referral may have multiple allegations.
     //
     ElasticSearchPersonAllegation allegation = new ElasticSearchPersonAllegation();
     allegation.setId(this.allegationId);

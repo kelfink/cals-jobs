@@ -197,6 +197,24 @@ public class ReferralHistoryIndexerJob
     Thread.currentThread().setName(threadName);
     LOGGER.info("BEGIN");
 
+    // Allocate memory once for this thread and reuse it per key range.
+    if (allocAllegations.get() == null) {
+      allocAllegations.set(new ArrayList<>(150000));
+      allocReadyToNorm.set(new ArrayList<>(150000));
+      allocReferrals.set(new HashMap<>(99881));
+      allocClientReferralKeys.set(new ArrayList<>(12000));
+    }
+
+    final List<EsPersonReferral> listAllegations = allocAllegations.get();
+    final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
+    final List<MinClientReferral> listClientReferralKeys = allocClientReferralKeys.get();
+    final List<EsPersonReferral> readyToNorm = allocReadyToNorm.get();
+
+    listAllegations.clear();
+    mapReferrals.clear();
+    listClientReferralKeys.clear();
+    readyToNorm.clear();
+
     try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
@@ -212,24 +230,6 @@ public class ReferralHistoryIndexerJob
       // monitor.enable(true);
       // monitor.start(DB2SystemMonitor.RESET_TIMES);
       int cntr = 0;
-
-      // Allocate memory once for this thread and reuse it per key range.
-      if (allocAllegations.get() == null) {
-        allocAllegations.set(new ArrayList<>(150000));
-        allocReadyToNorm.set(new ArrayList<>(150000));
-        allocReferrals.set(new HashMap<>(99881));
-        allocClientReferralKeys.set(new ArrayList<>(12000));
-      }
-
-      final List<EsPersonReferral> listAllegations = allocAllegations.get();
-      final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
-      final List<MinClientReferral> listClientReferralKeys = allocClientReferralKeys.get();
-      final List<EsPersonReferral> readyToNorm = allocReadyToNorm.get();
-
-      listAllegations.clear();
-      mapReferrals.clear();
-      listClientReferralKeys.clear();
-      readyToNorm.clear();
 
       final String schema = getDBSchemaName();
 
@@ -266,7 +266,7 @@ public class ReferralHistoryIndexerJob
         stmtSelAllegation.setFetchSize(FETCH_SIZE);
 
         {
-          LOGGER.info("pull client/referral keys");
+          LOGGER.info("pull client referral keys");
           final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
           MinClientReferral mx;
           while (!fatalError && rs.next() && (mx = MinClientReferral.extract(rs)) != null) {
@@ -301,13 +301,13 @@ public class ReferralHistoryIndexerJob
         }
 
         // monitor.stop();
-        // LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
-        // LOGGER.info("Network I/O elapsed time (microseconds)=" +
+        // LOGGER.debug("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
+        // LOGGER.debug("Network I/O elapsed time (microseconds)=" +
         // monitor.getNetworkIOTimeMicros());
-        // LOGGER.info("Core driver elapsed time (microseconds)=" +
+        // LOGGER.debug("Core driver elapsed time (microseconds)=" +
         // monitor.getCoreDriverTimeMicros());
         // LOGGER
-        // .info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
+        // .debug("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
 
         // C'mon IBM. Where are the constants for method DB2SystemMonitor.moreData()??
         // Not supported on z/OS?
@@ -323,9 +323,13 @@ public class ReferralHistoryIndexerJob
           .stream().sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
           .collect(Collectors.groupingBy(MinClientReferral::getClientId));
 
+      // Release heap objects early and often.
+      listClientReferralKeys.clear();
+
       final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
           .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
           .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
+      listAllegations.clear();
 
       // TODO: convert to stream instead of nested for loops.
       // For each client:
@@ -377,12 +381,18 @@ public class ReferralHistoryIndexerJob
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
+    // Release heap objects.
+    listAllegations.clear();
+    listClientReferralKeys.clear();
+    mapReferrals.clear();
+    readyToNorm.clear();
+
     // Good time to *request* garbage collection. GC runs in another thread anyway.
     // SonarQube disagrees.
-    // The catch: when multiple threads are running, the default parallel GC may not get sufficient
-    // bandwidth until heap memory is exhausted. Yes, this is a good place to drop a hint to GC that
-    // it *might* want to clean up memory.
-    // System.gc(); // NOSONAR
+    // The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
+    // memory is exhausted. Yes, this is a good place to drop a hint to GC that it *might* want to
+    // clean up memory.
+    System.gc(); // NOSONAR
     LOGGER.info("DONE");
   }
 
