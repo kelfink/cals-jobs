@@ -191,10 +191,11 @@ public class ReferralHistoryIndexerJob
    * 
    * @param p partition range to read
    */
-  protected void pullRange(final Pair<String, String> p) {
+  protected int pullRange(final Pair<String, String> p) {
     final int i = nextThreadNum.incrementAndGet();
     final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
+    int cntr = 0;
     LOGGER.info("BEGIN");
 
     // Allocate memory once for this thread and reuse it per key range.
@@ -225,7 +226,7 @@ public class ReferralHistoryIndexerJob
       // con.setReadOnly(true);
       // }
 
-      LOGGER.info("transaction isolation level: {}", con.getTransactionIsolation());
+      LOGGER.debug("transaction isolation level: {}", con.getTransactionIsolation());
       enableParallelism(con);
 
       // ((DB2Connection)con).
@@ -235,7 +236,6 @@ public class ReferralHistoryIndexerJob
       // DB2SystemMonitor monitor = ((DB2Connection) con).getDB2SystemMonitor();
       // monitor.enable(true);
       // monitor.start(DB2SystemMonitor.RESET_TIMES);
-      int cntr = 0;
 
       final String schema = getDBSchemaName();
 
@@ -325,63 +325,6 @@ public class ReferralHistoryIndexerJob
         // Connection and statements close automatically.
       }
 
-      final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys
-          .stream().sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
-          .collect(Collectors.groupingBy(MinClientReferral::getClientId));
-
-      // Release heap objects early and often.
-      listClientReferralKeys.clear();
-
-      final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
-          .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
-          .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
-      listAllegations.clear();
-
-      // TODO: convert to stream instead of nested for loops.
-      // For each client:
-      for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
-
-        // Loop referrals for this client:
-        final String clientId = rc.getKey();
-        if (StringUtils.isNotBlank(clientId)) {
-          readyToNorm.clear();
-          for (MinClientReferral rc1 : rc.getValue()) {
-            final String referralId = rc1.referralId;
-            final EsPersonReferral ref = mapReferrals.get(referralId);
-
-            // Sealed and sensitive may be excluded.
-            if (ref != null) {
-              // Loop allegations for this referral:
-              if (mapAllegationByReferral.containsKey(referralId)) {
-                for (EsPersonReferral alg : mapAllegationByReferral.get(referralId)) {
-                  alg.mergeClientReferralInfo(clientId, ref);
-                  readyToNorm.add(alg);
-                }
-              } else {
-                readyToNorm.add(ref);
-              }
-            } else {
-              LOGGER.trace("sensitive referral? ref id={}, client id={}", referralId, clientId);
-            }
-          }
-
-          final ReplicatedPersonReferrals repl = normalizeSingle(readyToNorm);
-          if (repl != null) {
-            repl.setClientId(clientId);
-            addToIndexQueue(repl);
-          } else {
-            LOGGER.trace("null normalized? sensitive? client id={}", clientId);
-          }
-        } else {
-          LOGGER.trace("empty client? client id={}", clientId);
-        }
-      }
-
-      // unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
-      // listReferrals.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
-      // .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
-      // .forEach(this::addToIndexQueue);
-
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
@@ -393,6 +336,65 @@ public class ReferralHistoryIndexerJob
     mapReferrals.clear();
     readyToNorm.clear();
 
+    cntr = 0;
+    final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys.stream()
+        .sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
+        .collect(Collectors.groupingBy(MinClientReferral::getClientId));
+
+    // Release heap objects early and often.
+    listClientReferralKeys.clear();
+
+    final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
+        .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
+        .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
+    listAllegations.clear();
+
+    // TODO: convert to stream instead of nested for loops.
+    // For each client:
+    for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
+
+      // Loop referrals for this client:
+      final String clientId = rc.getKey();
+      if (StringUtils.isNotBlank(clientId)) {
+        readyToNorm.clear();
+        for (MinClientReferral rc1 : rc.getValue()) {
+          final String referralId = rc1.referralId;
+          final EsPersonReferral ref = mapReferrals.get(referralId);
+
+          // Sealed and sensitive may be excluded.
+          if (ref != null) {
+            // Loop allegations for this referral:
+            if (mapAllegationByReferral.containsKey(referralId)) {
+              for (EsPersonReferral alg : mapAllegationByReferral.get(referralId)) {
+                alg.mergeClientReferralInfo(clientId, ref);
+                readyToNorm.add(alg);
+              }
+            } else {
+              readyToNorm.add(ref);
+            }
+          } else {
+            LOGGER.trace("sensitive referral? ref id={}, client id={}", referralId, clientId);
+          }
+        }
+
+        final ReplicatedPersonReferrals repl = normalizeSingle(readyToNorm);
+        if (repl != null) {
+          ++cntr;
+          repl.setClientId(clientId);
+          addToIndexQueue(repl);
+        } else {
+          LOGGER.trace("null normalized? sensitive? client id={}", clientId);
+        }
+      } else {
+        LOGGER.trace("empty client? client id={}", clientId);
+      }
+    }
+
+    // unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
+    // listReferrals.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
+    // .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
+    // .forEach(this::addToIndexQueue);
+
     // Good time to *request* garbage collection. GC runs in another thread anyway.
     // SonarQube disagrees.
     // The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
@@ -400,6 +402,7 @@ public class ReferralHistoryIndexerJob
     // clean up memory.
     System.gc(); // NOSONAR
     LOGGER.info("DONE");
+    return cntr;
   }
 
   /**
@@ -427,12 +430,13 @@ public class ReferralHistoryIndexerJob
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
+        // Thread.sleep(1500); // Avoid C3P0 deadlock
         tasks.add(forkJoinPool.submit(() -> pullRange(p)));
       }
 
       // Join threads. Don't return from method until they complete.
       for (ForkJoinTask<?> task : tasks) {
-        task.join();
+        task.get();
       }
 
     } catch (Exception e) {
