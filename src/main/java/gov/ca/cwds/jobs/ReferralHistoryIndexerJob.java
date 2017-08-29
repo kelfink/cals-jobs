@@ -374,7 +374,7 @@ public class ReferralHistoryIndexerJob
     // The catch: when multiple threads are running, the default parallel GC may not get sufficient
     // bandwidth until heap memory is exhausted. Yes, this is a good place to drop a hint to GC that
     // it *might* want to clean up memory.
-    System.gc(); // NOSONAR
+    // System.gc(); // NOSONAR
     LOGGER.info("DONE");
   }
 

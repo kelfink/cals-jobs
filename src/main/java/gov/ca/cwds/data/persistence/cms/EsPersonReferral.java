@@ -535,6 +535,13 @@ public class EsPersonReferral extends ApiObjectIdentity
     return ReplicatedPersonReferrals.class;
   }
 
+  /**
+   * Merge common Referral fields into this Allegation before normalizing. Very silly, yes, but it
+   * works with the existing code without refactoring.
+   * 
+   * @param clientId target client id
+   * @param ref parent referral to merge
+   */
   public void mergeClientReferralInfo(String clientId, EsPersonReferral ref) {
     this.clientId = clientId;
     this.referralId = ref.referralId;
