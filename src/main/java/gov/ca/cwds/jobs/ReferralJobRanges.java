@@ -50,10 +50,10 @@ public class ReferralJobRanges {
       if (opts != null && opts.isRangeGiven()) {
         final List<Pair<String, String>> list = new ArrayList<>();
 
-        final int start = ((int) job.getOpts().getStartBucket()) - 1;
-        final int end = ((int) job.getOpts().getEndBucket()) - 1;
+        final int start = ((int) opts.getStartBucket()) - 1;
+        final int end = ((int) opts.getEndBucket()) - 1;
 
-        LOGGER.warn("KEY RANGES: {} to {}", start, end);
+        LOGGER.warn("KEY RANGES: {} to {}", opts.getStartBucket(), opts.getEndBucket());
         for (int i = start; i <= end; i++) {
           list.add(ret.get(i));
         }
