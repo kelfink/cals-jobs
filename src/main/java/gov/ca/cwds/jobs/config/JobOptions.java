@@ -2,7 +2,6 @@ package gov.ca.cwds.jobs.config;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.exception.JobsException;
 
 /**
@@ -27,7 +27,7 @@ import gov.ca.cwds.jobs.exception.JobsException;
  * 
  * @author CWDS API Team
  */
-public class JobOptions implements Serializable {
+public class JobOptions implements ApiMarker {
 
   /**
    * Base serialization version. Increment by class change.
