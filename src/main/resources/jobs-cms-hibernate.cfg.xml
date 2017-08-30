@@ -38,7 +38,7 @@
 		<!-- To prefix or not to prefix, that is the question. -->
 		<property name="hibernate.c3p0.min_size">2</property>
 		<property name="hibernate.c3p0.max_size">8</property>
-		<property name="hibernate.c3p0.maxAdministrativeTaskTime">20</property>
+		<property name="hibernate.c3p0.maxAdministrativeTaskTime">45</property>
 		<property name="hibernate.c3p0.timeout">110</property>
 		<property name="hibernate.c3p0.statementCacheNumDeferredCloseThreads">1</property>
 		<property name="hibernate.c3p0.max_statements">0</property>
