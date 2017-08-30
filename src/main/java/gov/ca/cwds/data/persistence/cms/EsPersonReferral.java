@@ -658,10 +658,11 @@ public class EsPersonReferral extends ApiObjectIdentity
       perpetrator.setSensitivityIndicator(perpetratorSensitivityIndicator);
       allegation.setPerpetrator(perpetrator);
 
-      // allegation.setPerpetratorId(this.perpetratorId);
-      // allegation.setPerpetratorLegacyClientId(this.perpetratorId);
-      // allegation.setPerpetratorFirstName(this.perpetratorFirstName);
-      // allegation.setPerpetratorLastName(this.perpetratorLastName);
+      // TODO: #148091785: deprecated person fields.
+      allegation.setPerpetratorId(this.perpetratorId);
+      allegation.setPerpetratorLegacyClientId(this.perpetratorId);
+      allegation.setPerpetratorFirstName(this.perpetratorFirstName);
+      allegation.setPerpetratorLastName(this.perpetratorLastName);
     } else {
       LOGGER.trace("OMIT sealed or sensitive perpetrator: id={}", this.perpetratorId);
     }
@@ -677,10 +678,11 @@ public class EsPersonReferral extends ApiObjectIdentity
       victim.setSensitivityIndicator(victimSensitivityIndicator);
       allegation.setVictim(victim);
 
-      // allegation.setVictimId(this.victimId);
-      // allegation.setVictimLegacyClientId(this.victimId);
-      // allegation.setVictimFirstName(this.victimFirstName);
-      // allegation.setVictimLastName(this.victimLastName);
+      // TODO: #148091785: deprecated person fields.
+      allegation.setVictimId(this.victimId);
+      allegation.setVictimLegacyClientId(this.victimId);
+      allegation.setVictimFirstName(this.victimFirstName);
+      allegation.setVictimLastName(this.victimLastName);
     } else {
       LOGGER.trace("OMIT sealed or sensitive victim: id={}", this.victimId);
     }
