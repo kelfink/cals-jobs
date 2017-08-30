@@ -33,6 +33,7 @@
 		<property name="hibernate.connection.keepAliveTimeOut">8</property>
 		<property name="hibernate.jdbc.time_zone">America/Los_Angeles</property>
 
+		<!-- <property name="hibernate.connection.readOnly">true</property> -->
 		<property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
 		
 		<!-- To prefix or not to prefix, that is the question. -->

@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import com.ibm.db2.jcc.DB2Connection;
+import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
@@ -227,21 +229,32 @@ public class ReferralHistoryIndexerJob
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
 
-      // Works the first time but fails on subsequent calls.
+      // Set before connecting.
       // if (!con.isReadOnly()) {
+      // try {
       // con.setReadOnly(true);
+      // } catch (SQLException e) {
+      // LOGGER.warn("set connection to read only. {}", e.getMessage());
+      // }
       // }
 
       LOGGER.debug("transaction isolation level: {}", con.getTransactionIsolation());
       enableParallelism(con);
 
-      // ((DB2Connection)con).
-      // ((com.ibm.db2.jcc.DB2BaseDataSource) ds).setDeferPrepares ((true));
-      // ((com.ibm.db2.jcc.DB2BaseDataSource) ds).sendDataAsIs = true;
+      final com.ibm.db2.jcc.t4.b nativeCon =
+          (com.ibm.db2.jcc.t4.b) ((com.mchange.v2.c3p0.impl.NewProxyConnection) con)
+              .unwrap(Class.forName("com.ibm.db2.jcc.t4.b"));
+      final DB2Connection db2Con = nativeCon;
 
-      // DB2SystemMonitor monitor = ((DB2Connection) con).getDB2SystemMonitor();
-      // monitor.enable(true);
-      // monitor.start(DB2SystemMonitor.RESET_TIMES);
+      LOGGER.info("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
+          nativeCon.enableRowsetSupport_);
+
+      // db2Con.setDeferPrepares((true));
+      // db2Con.sendDataAsIs = true;
+
+      final DB2SystemMonitor monitor = db2Con.getDB2SystemMonitor();
+      monitor.enable(true);
+      monitor.start(DB2SystemMonitor.RESET_TIMES);
 
       final String schema = getDBSchemaName();
 
@@ -312,19 +325,18 @@ public class ReferralHistoryIndexerJob
           }
         }
 
-        // monitor.stop();
-        // LOGGER.debug("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
-        // LOGGER.debug("Network I/O elapsed time (microseconds)=" +
-        // monitor.getNetworkIOTimeMicros());
-        // LOGGER.debug("Core driver elapsed time (microseconds)=" +
-        // monitor.getCoreDriverTimeMicros());
-        // LOGGER
-        // .debug("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
+        monitor.stop();
+        LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
+        LOGGER.info("Network I/O elapsed time (microseconds)=" + monitor.getNetworkIOTimeMicros());
+        LOGGER.info("Core driver elapsed time (microseconds)=" + monitor.getCoreDriverTimeMicros());
+        LOGGER
+            .info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
+        LOGGER.info("monitor.moreData: 0: {}" + monitor.moreData(0));
+        LOGGER.info("monitor.moreData: 1: {}" + monitor.moreData(1));
+        LOGGER.info("monitor.moreData: 2: {}" + monitor.moreData(2));
 
         // C'mon IBM. Where are the constants for method DB2SystemMonitor.moreData()??
-        // Not supported on z/OS?
-        // LOGGER.info("NUMBER of the NETWORK_TRIPS =" +
-        // systemMonitor.moreData(NUMBER_NETWORK_TRIPS));
+        // LOGGER.info("NETWORK_TRIPS: {}", monitor.moreData(NUMBER_NETWORK_TRIPS));
 
         con.commit();
       } finally {
