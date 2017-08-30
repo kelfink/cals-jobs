@@ -120,6 +120,8 @@ public class JobOptions implements Serializable {
    */
   private final boolean loadSealedAndSensitive;
 
+  private final boolean rangeGiven;
+
   /**
    * Construct from all settings.
    * 
@@ -137,7 +139,8 @@ public class JobOptions implements Serializable {
    */
   JobOptions(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
       boolean lastRunMode, long startBucket, long endBucket, long totalBuckets, long threadCount,
-      String minId, String maxId, boolean loadSealedAndSensitive, String altInputFile) {
+      String minId, String maxId, boolean loadSealedAndSensitive, String altInputFile,
+      boolean rangeGiven) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
     this.lastRunTime = lastRunTime;
@@ -151,6 +154,7 @@ public class JobOptions implements Serializable {
     this.maxId = maxId;
     this.loadSealedAndSensitive = loadSealedAndSensitive;
     this.altInputFile = altInputFile;
+    this.rangeGiven = rangeGiven;
   }
 
   /**
@@ -357,6 +361,7 @@ public class JobOptions implements Serializable {
     long totalBuckets = 0L;
     long threadCount = 0L;
     boolean loadSealedAndSensitive = false;
+    boolean rangeGiven = false;
 
     String minId = " ";
     String maxId = "9999999999";
@@ -406,6 +411,7 @@ public class JobOptions implements Serializable {
 
           case CMD_LINE_BUCKET_RANGE:
             lastRunMode = false;
+            rangeGiven = true;
             startBucket = Long.parseLong(opt.getValues()[0]);
             endBucket = Long.parseLong(opt.getValues()[1]);
             break;
@@ -445,7 +451,8 @@ public class JobOptions implements Serializable {
     }
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode, startBucket,
-        endBucket, totalBuckets, threadCount, minId, maxId, loadSealedAndSensitive, altInputLoc);
+        endBucket, totalBuckets, threadCount, minId, maxId, loadSealedAndSensitive, altInputLoc,
+        rangeGiven);
   }
 
   public void setStartBucket(long startBucket) {
@@ -488,6 +495,10 @@ public class JobOptions implements Serializable {
       date = df.parse(trimTimestamp);
     }
     return date;
+  }
+
+  public boolean isRangeGiven() {
+    return rangeGiven;
   }
 
 }

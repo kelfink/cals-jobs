@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
+import gov.ca.cwds.jobs.config.JobOptions;
 
 public class ReferralJobRanges {
 
@@ -45,13 +46,14 @@ public class ReferralJobRanges {
         LOGGER.error("Failed to load referral ranges!", e);
       }
 
-      if (job.getOpts() != null && job.getOpts().getStartBucket() > 1L
-          && job.getOpts().getStartBucket() != job.getOpts().getEndBucket()) {
+      final JobOptions opts = job.getOpts();
+      if (opts != null && opts.isRangeGiven()) {
         final List<Pair<String, String>> list = new ArrayList<>();
 
         final int start = ((int) job.getOpts().getStartBucket()) - 1;
         final int end = ((int) job.getOpts().getEndBucket()) - 1;
 
+        LOGGER.warn("KEY RANGES: {} to {}", start, end);
         for (int i = start; i <= end; i++) {
           list.add(ret.get(i));
         }

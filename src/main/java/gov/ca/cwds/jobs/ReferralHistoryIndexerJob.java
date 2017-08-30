@@ -182,6 +182,12 @@ public class ReferralHistoryIndexerJob
     return buf.toString().replaceAll("\\s+", " ");
   }
 
+  protected synchronized Connection getConnection() throws SQLException, InterruptedException {
+    Thread.sleep(300);
+    return jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
+        .getService(ConnectionProvider.class).getConnection();
+  }
+
   /**
    * Read recs from a single partition. Must sort results because the database won't do it for us.
    * 
@@ -216,8 +222,7 @@ public class ReferralHistoryIndexerJob
     mapReferrals.clear();
     readyToNorm.clear();
 
-    try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
-        .getService(ConnectionProvider.class).getConnection()) {
+    try (final Connection con = getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
 
