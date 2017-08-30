@@ -35,6 +35,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
@@ -84,6 +85,8 @@ public class EsPersonReferral extends ApiObjectIdentity
   private static final long serialVersionUID = -2265057057202257108L;
 
   private static final int COLUMN_POSITION_SIZE = COLUMN_POSITION.values().length;
+
+  private static JobOptions opts;
 
   private static int linesProcessed = 0;
 
@@ -644,31 +647,43 @@ public class EsPersonReferral extends ApiObjectIdentity
     allegation.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.allegationId,
         this.allegationLastUpdated, LegacyTable.ALLEGATION));
 
-    ElasticSearchPersonNestedPerson perpetrator = new ElasticSearchPersonNestedPerson();
-    perpetrator.setId(this.perpetratorId);
-    perpetrator.setFirstName(this.perpetratorFirstName);
-    perpetrator.setLastName(this.perpetratorLastName);
-    perpetrator.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.perpetratorId,
-        this.perpetratorLastUpdated, LegacyTable.CLIENT));
-    allegation.setPerpetrator(perpetrator);
+    if (opts.isLoadSealedAndSensitive() || (perpetratorSensitivityIndicator == null
+        || "N".equalsIgnoreCase(perpetratorSensitivityIndicator))) {
+      ElasticSearchPersonNestedPerson perpetrator = new ElasticSearchPersonNestedPerson();
+      perpetrator.setId(this.perpetratorId);
+      perpetrator.setFirstName(this.perpetratorFirstName);
+      perpetrator.setLastName(this.perpetratorLastName);
+      perpetrator.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.perpetratorId,
+          this.perpetratorLastUpdated, LegacyTable.CLIENT));
+      perpetrator.setSensitivityIndicator(perpetratorSensitivityIndicator);
+      allegation.setPerpetrator(perpetrator);
 
-    allegation.setPerpetratorId(this.perpetratorId);
-    allegation.setPerpetratorLegacyClientId(this.perpetratorId);
-    allegation.setPerpetratorFirstName(this.perpetratorFirstName);
-    allegation.setPerpetratorLastName(this.perpetratorLastName);
+      // allegation.setPerpetratorId(this.perpetratorId);
+      // allegation.setPerpetratorLegacyClientId(this.perpetratorId);
+      // allegation.setPerpetratorFirstName(this.perpetratorFirstName);
+      // allegation.setPerpetratorLastName(this.perpetratorLastName);
+    } else {
+      LOGGER.trace("OMIT sealed or sensitive perpetrator: id={}", this.perpetratorId);
+    }
 
-    ElasticSearchPersonNestedPerson victim = new ElasticSearchPersonNestedPerson();
-    victim.setId(this.victimId);
-    victim.setFirstName(this.victimFirstName);
-    victim.setLastName(this.victimLastName);
-    victim.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.victimId,
-        this.victimLastUpdated, LegacyTable.CLIENT));
-    allegation.setVictim(victim);
+    if (opts.isLoadSealedAndSensitive() || (victimSensitivityIndicator == null
+        || "N".equalsIgnoreCase(victimSensitivityIndicator))) {
+      ElasticSearchPersonNestedPerson victim = new ElasticSearchPersonNestedPerson();
+      victim.setId(this.victimId);
+      victim.setFirstName(this.victimFirstName);
+      victim.setLastName(this.victimLastName);
+      victim.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.victimId,
+          this.victimLastUpdated, LegacyTable.CLIENT));
+      victim.setSensitivityIndicator(victimSensitivityIndicator);
+      allegation.setVictim(victim);
 
-    allegation.setVictimId(this.victimId);
-    allegation.setVictimLegacyClientId(this.victimId);
-    allegation.setVictimFirstName(this.victimFirstName);
-    allegation.setVictimLastName(this.victimLastName);
+      // allegation.setVictimId(this.victimId);
+      // allegation.setVictimLegacyClientId(this.victimId);
+      // allegation.setVictimFirstName(this.victimFirstName);
+      // allegation.setVictimLastName(this.victimLastName);
+    } else {
+      LOGGER.trace("OMIT sealed or sensitive victim: id={}", this.victimId);
+    }
 
     ret.addReferral(r, allegation);
     return ret;
@@ -1048,6 +1063,10 @@ public class EsPersonReferral extends ApiObjectIdentity
 
   void setClientSensitivity(String clientSensitivity) {
     this.clientSensitivity = clientSensitivity;
+  }
+
+  public static void setOpts(JobOptions opts) {
+    EsPersonReferral.opts = opts;
   }
 
 }

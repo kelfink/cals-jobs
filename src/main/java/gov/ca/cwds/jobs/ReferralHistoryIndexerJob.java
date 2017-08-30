@@ -175,6 +175,7 @@ public class ReferralHistoryIndexerJob
     buf.append(" vw ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
+      // Called on initial load only. *MUST* delete the index prior to running!
       buf.append(" WHERE vw.LIMITED_ACCESS_CODE = 'N' ");
     }
 
@@ -421,6 +422,7 @@ public class ReferralHistoryIndexerJob
   protected void threadExtractJdbc() {
     Thread.currentThread().setName("read_main");
     LOGGER.info("BEGIN: main read thread");
+    EsPersonReferral.setOpts(getOpts());
 
     try {
       // This job normalizes **without** the transform thread.
@@ -521,26 +523,6 @@ public class ReferralHistoryIndexerJob
 
     // IBM strongly recommends retrieving column results by position, not by column name.
     int columnIndex = 0;
-    // REFERRAL_ID,
-    // START_DATE,
-    // END_DATE,
-    // REFERRAL_RESPONSE_TYPE,
-    // LIMITED_ACCESS_CODE,
-    // LIMITED_ACCESS_DATE,
-    // LIMITED_ACCESS_DESCRIPTION,
-    // LIMITED_ACCESS_GOVERNMENT_ENT,
-    // REFERRAL_LAST_UPDATED,
-    // REPORTER_ID,
-    // REPORTER_FIRST_NM,
-    // REPORTER_LAST_NM,
-    // REPORTER_LAST_UPDATED,
-    // WORKER_ID,
-    // WORKER_FIRST_NM,
-    // WORKER_LAST_NM,
-    // WORKER_LAST_UPDATED,
-    // REFERRAL_COUNTY,
-    // LAST_CHG
-
     ret.setReferralId(rs.getString(++columnIndex));
     ret.setStartDate(rs.getDate(++columnIndex));
     ret.setEndDate(rs.getDate(++columnIndex));
@@ -573,23 +555,6 @@ public class ReferralHistoryIndexerJob
 
     // IBM strongly recommends retrieving column results by position, not by column name.
     int columnIndex = 0;
-    // REFERRAL_ID,
-    // ALLEGATION_ID,
-    // ALLEGATION_DISPOSITION,
-    // ALLEGATION_TYPE,
-    // ALLEGATION_LAST_UPDATED,
-    // PERPETRATOR_ID,
-    // PERPETRATOR_SENSITIVITY_IND,
-    // PERPETRATOR_FIRST_NM,
-    // PERPETRATOR_LAST_NM,
-    // PERPETRATOR_LAST_UPDATED,
-    // VICTIM_ID,
-    // VICTIM_SENSITIVITY_IND,
-    // VICTIM_FIRST_NM,
-    // VICTIM_LAST_NM,
-    // VICTIM_LAST_UPDATED,
-    // LAST_CHG
-
     ret.setReferralId(ifNull(rs.getString(++columnIndex)));
     ret.setAllegationId(ifNull(rs.getString(++columnIndex)));
     ret.setAllegationDisposition(rs.getInt(++columnIndex));
