@@ -427,7 +427,10 @@ public class ReferralHistoryIndexerJob
     try {
       // This job normalizes **without** the transform thread.
       doneTransform = true;
-      final List<ForkJoinTask<?>> tasks = new ArrayList<>();
+      final List<Pair<String, String>> ranges = getPartitionRanges();
+      LOGGER.warn(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
+
+      final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
 
       // Set thread pool size.
       final int cntReaderThreads =
@@ -436,12 +439,8 @@ public class ReferralHistoryIndexerJob
       LOGGER.warn(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", cntReaderThreads);
       ForkJoinPool forkJoinPool = new ForkJoinPool(cntReaderThreads);
 
-      final List<Pair<String, String>> ranges = getPartitionRanges();
-      LOGGER.warn(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
-
       // Queue execution.
       for (Pair<String, String> p : ranges) {
-        // Thread.sleep(1500); // Avoid C3P0 deadlock
         tasks.add(forkJoinPool.submit(() -> pullRange(p)));
       }
 
