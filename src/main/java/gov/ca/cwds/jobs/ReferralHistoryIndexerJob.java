@@ -199,6 +199,7 @@ public class ReferralHistoryIndexerJob
    * </p>
    * 
    * @param p partition range to read
+   * @return number of client documents affected
    */
   protected int pullRange(final Pair<String, String> p) {
     final int i = nextThreadNum.incrementAndGet();
@@ -228,15 +229,6 @@ public class ReferralHistoryIndexerJob
     try (final Connection con = getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-
-      // Set before connecting.
-      // if (!con.isReadOnly()) {
-      // try {
-      // con.setReadOnly(true);
-      // } catch (SQLException e) {
-      // LOGGER.warn("set connection to read only. {}", e.getMessage());
-      // }
-      // }
 
       LOGGER.debug("transaction isolation level: {}", con.getTransactionIsolation());
       enableParallelism(con);
