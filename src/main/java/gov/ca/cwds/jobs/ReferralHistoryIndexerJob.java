@@ -104,46 +104,50 @@ public class ReferralHistoryIndexerJob
       + "LEFT JOIN #SCHEMA#.REPTR_T      RPT  ON RPT.FKREFERL_T = RFL.IDENTIFIER "
       + "LEFT JOIN #SCHEMA#.STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER ";
 
-
   private static final int FETCH_SIZE = 5000;
 
+  /**
+   * Carrier bean for client referral keys.
+   * 
+   * @author CWDS API Team
+   */
   public static class MinClientReferral implements ApiMarker {
     String clientId;
     String referralId;
     String sensitivity;
 
-    MinClientReferral(String clientId, String referralId, String sensitivity) {
+    public MinClientReferral(String clientId, String referralId, String sensitivity) {
       this.clientId = clientId;
       this.referralId = referralId;
       this.sensitivity = sensitivity;
     }
 
-    protected static MinClientReferral extract(ResultSet rs) throws SQLException {
+    public static MinClientReferral extract(ResultSet rs) throws SQLException {
       return new MinClientReferral(rs.getString("FKCLIENT_T"), rs.getString("FKREFERL_T"),
           rs.getString("SENSTV_IND"));
     }
 
-    String getClientId() {
+    public String getClientId() {
       return clientId;
     }
 
-    void setClientId(String clientId) {
+    public void setClientId(String clientId) {
       this.clientId = clientId;
     }
 
-    String getReferralId() {
+    public String getReferralId() {
       return referralId;
     }
 
-    void setReferralId(String referralId) {
+    public void setReferralId(String referralId) {
       this.referralId = referralId;
     }
 
-    String getSensitivity() {
+    public String getSensitivity() {
       return sensitivity;
     }
 
-    void setSensitivity(String sensitivity) {
+    public void setSensitivity(String sensitivity) {
       this.sensitivity = sensitivity;
     }
   }

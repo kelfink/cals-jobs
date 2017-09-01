@@ -16,6 +16,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -102,6 +103,7 @@ public class EsPersonReferral extends ApiObjectIdentity
   @Column(name = "CLIENT_ID")
   private String clientId;
 
+  @Transient
   private String clientSensitivity;
 
   @Id
