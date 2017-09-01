@@ -132,7 +132,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         .getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      // con.setReadOnly(true); // WARNING: fails with Postgres.
 
       final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
           .replaceAll(":toId", p.getRight());

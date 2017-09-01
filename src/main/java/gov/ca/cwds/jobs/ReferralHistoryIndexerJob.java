@@ -63,8 +63,47 @@ public class ReferralHistoryIndexerJob
   private static final String SELECT_CLIENT =
       "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM #SCHEMA#.GT_REFR_CLT";
 
-  private static final String SELECT_ALLEGATION =
-      "SELECT vw.* FROM #SCHEMA#.VW_MQT_ALGTN_ONLY vw FOR READ ONLY WITH UR";
+  // private static final String SELECT_ALLEGATION =
+  // "SELECT vw.* FROM #SCHEMA#.VW_MQT_ALGTN_ONLY vw FOR READ ONLY WITH UR";
+
+  private static final String SELECT_ALLEGATION = "SELECT "
+      + " RC.FKREFERL_T         AS REFERRAL_ID," + " ALG.IDENTIFIER        AS ALLEGATION_ID,"
+      + " ALG.ALG_DSPC          AS ALLEGATION_DISPOSITION,"
+      + " ALG.ALG_TPC           AS ALLEGATION_TYPE,"
+      + " ALG.LST_UPD_TS        AS ALLEGATION_LAST_UPDATED,"
+      + " CLP.IDENTIFIER        AS PERPETRATOR_ID,"
+      + " CLP.SENSTV_IND        AS PERPETRATOR_SENSITIVITY_IND,"
+      + " TRIM(CLP.COM_FST_NM)  AS PERPETRATOR_FIRST_NM,"
+      + " TRIM(CLP.COM_LST_NM)  AS PERPETRATOR_LAST_NM,"
+      + " CLP.LST_UPD_TS        AS PERPETRATOR_LAST_UPDATED,"
+      + " CLV.IDENTIFIER        AS VICTIM_ID," + " CLV.SENSTV_IND        AS VICTIM_SENSITIVITY_IND,"
+      + " TRIM(CLV.COM_FST_NM)  AS VICTIM_FIRST_NM," + " TRIM(CLV.COM_LST_NM)  AS VICTIM_LAST_NM,"
+      + " CLV.LST_UPD_TS        AS VICTIM_LAST_UPDATED," + " CURRENT TIMESTAMP AS LAST_CHG "
+      + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM #SCHEMA#.GT_REFR_CLT rc1) RC "
+      + "JOIN #SCHEMA#.ALLGTN_T       ALG  ON ALG.FKREFERL_T = RC.FKREFERL_T "
+      + "JOIN #SCHEMA#.CLIENT_T       CLV  ON CLV.IDENTIFIER = ALG.FKCLIENT_T "
+      + "LEFT JOIN #SCHEMA#.CLIENT_T  CLP  ON CLP.IDENTIFIER = ALG.FKCLIENT_0 "
+      + " FOR READ ONLY WITH UR ";
+
+  private static final String SELECT_REFERRAL = "SELECT " + " RFL.IDENTIFIER        AS REFERRAL_ID,"
+      + " RFL.REF_RCV_DT        AS START_DATE," + " RFL.REFCLSR_DT        AS END_DATE,"
+      + " RFL.RFR_RSPC          AS REFERRAL_RESPONSE_TYPE,"
+      + " RFL.LMT_ACSSCD        AS LIMITED_ACCESS_CODE,"
+      + " RFL.LMT_ACS_DT        AS LIMITED_ACCESS_DATE,"
+      + " TRIM(RFL.LMT_ACSDSC)  AS LIMITED_ACCESS_DESCRIPTION,"
+      + " RFL.L_GVR_ENTC        AS LIMITED_ACCESS_GOVERNMENT_ENT,"
+      + " RFL.LST_UPD_TS        AS REFERRAL_LAST_UPDATED,"
+      + " RPT.FKREFERL_T        AS REPORTER_ID," + " TRIM(RPT.RPTR_FSTNM)  AS REPORTER_FIRST_NM,"
+      + " TRIM(RPT.RPTR_LSTNM)  AS REPORTER_LAST_NM,"
+      + " RPT.LST_UPD_TS        AS REPORTER_LAST_UPDATED," + " STP.IDENTIFIER        AS WORKER_ID,"
+      + " TRIM(STP.FIRST_NM)    AS WORKER_FIRST_NM," + " TRIM(STP.LAST_NM)     AS WORKER_LAST_NM,"
+      + " STP.LST_UPD_TS        AS WORKER_LAST_UPDATED,"
+      + " RFL.GVR_ENTC          AS REFERRAL_COUNTY," + " CURRENT TIMESTAMP     AS LAST_CHG "
+      + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM #SCHEMA#.GT_REFR_CLT rc1) RC "
+      + "JOIN #SCHEMA#.REFERL_T          RFL  ON RFL.IDENTIFIER = RC.FKREFERL_T "
+      + "LEFT JOIN #SCHEMA#.REPTR_T      RPT  ON RPT.FKREFERL_T = RFL.IDENTIFIER "
+      + "LEFT JOIN #SCHEMA#.STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER ";
+
 
   private static final int FETCH_SIZE = 5000;
 
@@ -170,23 +209,35 @@ public class ReferralHistoryIndexerJob
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     StringBuilder buf = new StringBuilder();
-    buf.append("SELECT vw.* FROM ");
-    buf.append(dbSchemaName);
-    buf.append(".");
-    buf.append(getInitialLoadViewName());
-    buf.append(" vw ");
+    // buf.append("SELECT vw.* FROM ");
+    // buf.append(dbSchemaName);
+    // buf.append(".");
+    // buf.append(getInitialLoadViewName());
+    // buf.append(" vw ");
+
+    buf.append(SELECT_REFERRAL.replaceAll("#SCHEMA#", dbSchemaName));
 
     if (!getOpts().isLoadSealedAndSensitive()) {
       // Called on initial load only. *MUST* delete the index prior to running!
-      buf.append(" WHERE vw.LIMITED_ACCESS_CODE = 'N' ");
+      // buf.append(" WHERE LIMITED_ACCESS_CODE = 'N' ");
+      buf.append(" WHERE RFL.LMT_ACSSCD = 'N' ");
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
-    return buf.toString().replaceAll("\\s+", " ");
+    final String ret = buf.toString().replaceAll("\\s+", " ");
+    LOGGER.warn("REFERRAL SQL: {}", ret);
+    return ret;
   }
 
+  /**
+   * Synchronize grabbing connections from the connection pool to prevent deadlocks in C3P0.
+   * 
+   * @return a connection
+   * @throws SQLException on database error
+   * @throws InterruptedException on thread error
+   */
   protected synchronized Connection getConnection() throws SQLException, InterruptedException {
-    Thread.sleep(300);
+    // Thread.sleep(300);
     return jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection();
   }
