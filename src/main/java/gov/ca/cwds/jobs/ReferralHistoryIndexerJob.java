@@ -192,6 +192,7 @@ public class ReferralHistoryIndexerJob
 
   @Override
   protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
+    EsPersonReferral.setOpts(getOpts());
     return EsPersonReferral.class;
   }
 
@@ -680,6 +681,11 @@ public class ReferralHistoryIndexerJob
     return ret;
   }
 
+  @Override
+  protected boolean isRangeSelfManaging() {
+    return true;
+  }
+
   /**
    * Batch job entry point.
    * 
@@ -687,11 +693,6 @@ public class ReferralHistoryIndexerJob
    */
   public static void main(String... args) {
     runMain(ReferralHistoryIndexerJob.class, args);
-  }
-
-  @Override
-  protected boolean isRangeSelfManaging() {
-    return true;
   }
 
 }
