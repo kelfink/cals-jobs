@@ -218,7 +218,6 @@ public class ReferralHistoryIndexerJob
     buf.append(SELECT_REFERRAL.replaceAll("#SCHEMA#", dbSchemaName));
 
     if (!getOpts().isLoadSealedAndSensitive()) {
-      // Called on initial load only. *MUST* delete the index prior to running!
       // buf.append(" WHERE LIMITED_ACCESS_CODE = 'N' ");
       buf.append(" WHERE RFL.LMT_ACSSCD = 'N' ");
     }
@@ -374,9 +373,9 @@ public class ReferralHistoryIndexerJob
         LOGGER.info("Core driver elapsed time (microseconds)=" + monitor.getCoreDriverTimeMicros());
         LOGGER
             .info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
-        LOGGER.info("monitor.moreData: 0: {}" + monitor.moreData(0));
-        LOGGER.info("monitor.moreData: 1: {}" + monitor.moreData(1));
-        LOGGER.info("monitor.moreData: 2: {}" + monitor.moreData(2));
+        LOGGER.info("monitor.moreData: 0: {}", monitor.moreData(0));
+        LOGGER.info("monitor.moreData: 1: {}", monitor.moreData(1));
+        LOGGER.info("monitor.moreData: 2: {}", monitor.moreData(2));
 
         // C'mon IBM. Where are the constants for method DB2SystemMonitor.moreData()??
         // LOGGER.info("NETWORK_TRIPS: {}", monitor.moreData(NUMBER_NETWORK_TRIPS));
