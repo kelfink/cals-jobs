@@ -268,161 +268,84 @@ public class ReferralHistoryIndexerJob
   }
 
   /**
-   * Read recs from a single partition. Must sort results because the database won't do it for us.
+   * Stop the DB2 monitor and report stats.
    * 
-   * <p>
-   * Each call of this method may run in its own thread.
-   * </p>
-   * 
-   * @param p partition range to read
-   * @return number of client documents affected
+   * @param monitor current monitor instance
+   * @throws SQLException on JDBC error
    */
-  protected int pullRange(final Pair<String, String> p) {
-    final int i = nextThreadNum.incrementAndGet();
-    final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
-    Thread.currentThread().setName(threadName);
+  private void monitorStopAndReport(final DB2SystemMonitor monitor) throws SQLException {
+    monitor.stop();
+    LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
+    LOGGER.info("Network I/O elapsed time (microseconds)=" + monitor.getNetworkIOTimeMicros());
+    LOGGER.info("Core driver elapsed time (microseconds)=" + monitor.getCoreDriverTimeMicros());
+    LOGGER.info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
+    LOGGER.info("monitor.moreData: 0: {}", monitor.moreData(0));
+    LOGGER.info("monitor.moreData: 1: {}", monitor.moreData(1));
+    LOGGER.info("monitor.moreData: 2: {}", monitor.moreData(2));
+
+    // C'mon IBM. Where are the constants for method DB2SystemMonitor.moreData()??
+    // LOGGER.info("NETWORK_TRIPS: {}", monitor.moreData(NUMBER_NETWORK_TRIPS));
+  }
+
+  private void readReferrals(final PreparedStatement stmtSelReferral,
+      final Map<String, EsPersonReferral> mapReferrals) throws SQLException {
+    stmtSelReferral.setMaxRows(0);
+    stmtSelReferral.setQueryTimeout(0);
+    stmtSelReferral.setFetchSize(FETCH_SIZE);
+
     int cntr = 0;
-    LOGGER.info("BEGIN");
-
-    allocateThreadMemory();
-    final List<EsPersonReferral> listAllegations = allocAllegations.get();
-    final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
-    final List<MinClientReferral> listClientReferralKeys = allocClientReferralKeys.get();
-    final List<EsPersonReferral> listReadyToNorm = allocReadyToNorm.get();
-
-    listAllegations.clear();
-    listClientReferralKeys.clear();
-    listReadyToNorm.clear();
-    mapReferrals.clear();
-
-    try (final Connection con = getConnection()) {
-      con.setSchema(getDBSchemaName());
-      con.setAutoCommit(false);
-
-      LOGGER.debug("transaction isolation level: {}", con.getTransactionIsolation());
-      enableParallelism(con);
-
-      final com.ibm.db2.jcc.t4.b nativeCon =
-          (com.ibm.db2.jcc.t4.b) ((com.mchange.v2.c3p0.impl.NewProxyConnection) con)
-              .unwrap(Class.forName("com.ibm.db2.jcc.t4.b"));
-      final DB2Connection db2Con = nativeCon;
-
-      LOGGER.info("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
-          nativeCon.enableRowsetSupport_);
-
-      final DB2SystemMonitor monitor = db2Con.getDB2SystemMonitor();
-      monitor.enable(true);
-      monitor.start(DB2SystemMonitor.RESET_TIMES);
-
-      final String schema = getDBSchemaName();
-
-      try (
-          final PreparedStatement stmtInsClient =
-              con.prepareStatement(INSERT_CLIENT.replaceAll("#SCHEMA#", schema));
-          final PreparedStatement stmtSelClient =
-              con.prepareStatement(SELECT_CLIENT.replaceAll("#SCHEMA#", schema));
-          final PreparedStatement stmtSelReferral =
-              con.prepareStatement(getInitialLoadQuery(schema));
-          final PreparedStatement stmtSelAllegation =
-              con.prepareStatement(SELECT_ALLEGATION.replaceAll("#SCHEMA#", schema))) {
-
-        // Prepare client list.
-        stmtInsClient.setMaxRows(0);
-        stmtInsClient.setQueryTimeout(0);
-        stmtInsClient.setString(1, p.getLeft());
-        stmtInsClient.setString(2, p.getRight());
-
-        final int cntInsClientReferral = stmtInsClient.executeUpdate();
-        LOGGER.info("bundle client/referrals: {}", cntInsClientReferral);
-
-        // Prepare retrieval.
-        stmtSelClient.setMaxRows(0);
-        stmtSelClient.setQueryTimeout(0);
-        stmtSelClient.setFetchSize(FETCH_SIZE);
-
-        stmtSelReferral.setMaxRows(0);
-        stmtSelReferral.setQueryTimeout(0);
-        stmtSelReferral.setFetchSize(FETCH_SIZE);
-
-        stmtSelAllegation.setMaxRows(0);
-        stmtSelAllegation.setQueryTimeout(0);
-        stmtSelAllegation.setFetchSize(FETCH_SIZE);
-
-        {
-          LOGGER.info("pull client referral keys");
-          final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
-          MinClientReferral mx;
-          while (!fatalError && rs.next() && (mx = MinClientReferral.extract(rs)) != null) {
-            listClientReferralKeys.add(mx);
-          }
-        }
-
-        {
-          cntr = 0;
-          EsPersonReferral m;
-          LOGGER.info("pull referrals");
-          final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
-          while (!fatalError && rs.next() && (m = extractReferral(rs)) != null) {
-            JobLogUtils.logEvery(++cntr, "read", "bundle referral");
-            JobLogUtils.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
-                "referrals");
-            mapReferrals.put(m.getReferralId(), m);
-          }
-        }
-
-        {
-          cntr = 0;
-          EsPersonReferral m;
-          LOGGER.info("pull allegations");
-          final ResultSet rs = stmtSelAllegation.executeQuery(); // NOSONAR
-          while (!fatalError && rs.next() && (m = extractAllegation(rs)) != null) {
-            JobLogUtils.logEvery(++cntr, "read", "bundle allegation");
-            JobLogUtils.logEvery(LOGGER, 15000, rowsReadAllegations.incrementAndGet(), "Total read",
-                "allegations");
-            listAllegations.add(m);
-          }
-        }
-
-        monitor.stop();
-        LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
-        LOGGER.info("Network I/O elapsed time (microseconds)=" + monitor.getNetworkIOTimeMicros());
-        LOGGER.info("Core driver elapsed time (microseconds)=" + monitor.getCoreDriverTimeMicros());
-        LOGGER
-            .info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
-        LOGGER.info("monitor.moreData: 0: {}", monitor.moreData(0));
-        LOGGER.info("monitor.moreData: 1: {}", monitor.moreData(1));
-        LOGGER.info("monitor.moreData: 2: {}", monitor.moreData(2));
-
-        // C'mon IBM. Where are the constants for method DB2SystemMonitor.moreData()??
-        // LOGGER.info("NETWORK_TRIPS: {}", monitor.moreData(NUMBER_NETWORK_TRIPS));
-
-        con.commit();
-      } finally {
-        // Connection and statements close automatically.
-      }
-
-    } catch (Exception e) {
-      fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+    EsPersonReferral m;
+    LOGGER.info("pull referrals");
+    final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
+    while (!fatalError && rs.next() && (m = extractReferral(rs)) != null) {
+      JobLogUtils.logEvery(++cntr, "read", "bundle referral");
+      JobLogUtils.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
+          "referrals");
+      mapReferrals.put(m.getReferralId(), m);
     }
+  }
 
-    cntr = 0;
-    final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys.stream()
-        .sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
-        .collect(Collectors.groupingBy(MinClientReferral::getClientId));
+  private void readAllegations(final PreparedStatement stmtSelAllegation,
+      final List<EsPersonReferral> listAllegations) throws SQLException {
+    stmtSelAllegation.setMaxRows(0);
+    stmtSelAllegation.setQueryTimeout(0);
+    stmtSelAllegation.setFetchSize(FETCH_SIZE);
 
-    // Release heap objects early and often.
-    listClientReferralKeys.clear();
+    int cntr = 0;
+    EsPersonReferral m;
+    LOGGER.info("pull allegations");
+    final ResultSet rs = stmtSelAllegation.executeQuery(); // NOSONAR
+    while (!fatalError && rs.next() && (m = extractAllegation(rs)) != null) {
+      JobLogUtils.logEvery(++cntr, "read", "bundle allegation");
+      JobLogUtils.logEvery(LOGGER, 15000, rowsReadAllegations.incrementAndGet(), "Total read",
+          "allegations");
+      listAllegations.add(m);
+    }
+  }
 
-    final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
-        .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
-        .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
-    listAllegations.clear();
+  private DB2SystemMonitor monitorStart(final Connection con)
+      throws SQLException, ClassNotFoundException {
+    final com.ibm.db2.jcc.t4.b nativeCon =
+        (com.ibm.db2.jcc.t4.b) ((com.mchange.v2.c3p0.impl.NewProxyConnection) con)
+            .unwrap(Class.forName("com.ibm.db2.jcc.t4.b"));
+    final DB2Connection db2Con = nativeCon;
+    LOGGER.info("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
+        nativeCon.enableRowsetSupport_);
 
+    final DB2SystemMonitor monitor = db2Con.getDB2SystemMonitor();
+    monitor.enable(true);
+    monitor.start(DB2SystemMonitor.RESET_TIMES);
+    return monitor;
+  }
+
+  private void normalizeQueryResults(final Map<String, EsPersonReferral> mapReferrals,
+      final List<EsPersonReferral> listReadyToNorm,
+      final Map<String, List<MinClientReferral>> mapReferralByClient,
+      final Map<String, List<EsPersonReferral>> mapAllegationByReferral) {
     LOGGER.info("Normalize all: START");
 
     // TODO: convert to stream instead of nested for loops.
-    // For each client:
+    int cntr = 0;
     for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
 
       // Loop referrals for this client:
@@ -461,14 +384,113 @@ public class ReferralHistoryIndexerJob
         LOGGER.trace("empty client? client id={}", clientId);
       }
     }
-
     LOGGER.info("Normalize all: END");
+  }
+
+  /**
+   * Read records from a single partition. Then sort results on our own.
+   * 
+   * <p>
+   * Each call of this method may run in its own thread.
+   * </p>
+   * 
+   * @param p partition range to read
+   * @return number of client documents affected
+   */
+  protected int pullRange(final Pair<String, String> p) {
+    final int i = nextThreadNum.incrementAndGet();
+    final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
+    Thread.currentThread().setName(threadName);
+    int cntr = 0;
+    LOGGER.info("BEGIN");
+
+    allocateThreadMemory();
+    final List<EsPersonReferral> listAllegations = allocAllegations.get();
+    final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
+    final List<MinClientReferral> listClientReferralKeys = allocClientReferralKeys.get();
+    final List<EsPersonReferral> listReadyToNorm = allocReadyToNorm.get();
+
+    // Clear collections, just for safety.
+    listAllegations.clear();
+    listClientReferralKeys.clear();
+    listReadyToNorm.clear();
+    mapReferrals.clear();
+
+    try (final Connection con = getConnection()) {
+      con.setSchema(getDBSchemaName());
+      con.setAutoCommit(false);
+      enableParallelism(con);
+
+      final DB2SystemMonitor monitor = monitorStart(con);
+      final String schema = getDBSchemaName();
+
+      try (
+          final PreparedStatement stmtInsClient =
+              con.prepareStatement(INSERT_CLIENT.replaceAll("#SCHEMA#", schema));
+          final PreparedStatement stmtSelClient =
+              con.prepareStatement(SELECT_CLIENT.replaceAll("#SCHEMA#", schema));
+          final PreparedStatement stmtSelReferral =
+              con.prepareStatement(getInitialLoadQuery(schema));
+          final PreparedStatement stmtSelAllegation =
+              con.prepareStatement(SELECT_ALLEGATION.replaceAll("#SCHEMA#", schema))) {
+
+        // Prepare client list.
+        stmtInsClient.setMaxRows(0);
+        stmtInsClient.setQueryTimeout(0);
+        stmtInsClient.setString(1, p.getLeft());
+        stmtInsClient.setString(2, p.getRight());
+
+        final int cntInsClientReferral = stmtInsClient.executeUpdate();
+        LOGGER.info("bundle client/referrals: {}", cntInsClientReferral);
+
+        // Prepare retrieval.
+        stmtSelClient.setMaxRows(0);
+        stmtSelClient.setQueryTimeout(0);
+        stmtSelClient.setFetchSize(FETCH_SIZE);
+
+        {
+          LOGGER.info("pull client referral keys");
+          final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
+          MinClientReferral mx;
+          while (!fatalError && rs.next() && (mx = MinClientReferral.extract(rs)) != null) {
+            listClientReferralKeys.add(mx);
+          }
+        }
+
+        readReferrals(stmtSelReferral, mapReferrals);
+        readAllegations(stmtSelAllegation, listAllegations);
+        monitorStopAndReport(monitor);
+        con.commit();
+      } finally {
+        // Connection and statements close automatically.
+      }
+
+    } catch (Exception e) {
+      fatalError = true;
+      JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+    }
+
+    cntr = 0;
+    final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys.stream()
+        .sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
+        .collect(Collectors.groupingBy(MinClientReferral::getClientId));
+    listClientReferralKeys.clear();
+
+    final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
+        .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
+        .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
+    listAllegations.clear();
+
+    // For each client:
+    normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
+        mapAllegationByReferral);
 
     // unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
     // listReferrals.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
     // .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
     // .forEach(this::addToIndexQueue);
 
+    // Release heap objects early and often.
     listAllegations.clear();
     listClientReferralKeys.clear();
     mapReferrals.clear();
