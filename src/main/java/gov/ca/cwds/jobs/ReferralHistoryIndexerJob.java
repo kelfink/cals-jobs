@@ -55,6 +55,8 @@ public class ReferralHistoryIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
+  // DBA turn-around time is too long. Roll your own.
+
   // private static final String INSERT_CLIENT =
   // "INSERT INTO #SCHEMA#.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"
   // + "SELECT rc.FKREFERL_T, rc.FKCLIENT_T, rc.SENSTV_IND\n"
@@ -254,6 +256,18 @@ public class ReferralHistoryIndexerJob
   }
 
   /**
+   * Allocate memory once for this thread and reuse it per key range.
+   */
+  protected void allocateThreadMemory() {
+    if (allocAllegations.get() == null) {
+      allocAllegations.set(new ArrayList<>(150000));
+      allocReadyToNorm.set(new ArrayList<>(150000));
+      allocReferrals.set(new HashMap<>(99881));
+      allocClientReferralKeys.set(new ArrayList<>(12000));
+    }
+  }
+
+  /**
    * Read recs from a single partition. Must sort results because the database won't do it for us.
    * 
    * <p>
@@ -270,23 +284,16 @@ public class ReferralHistoryIndexerJob
     int cntr = 0;
     LOGGER.info("BEGIN");
 
-    // Allocate memory once for this thread and reuse it per key range.
-    if (allocAllegations.get() == null) {
-      allocAllegations.set(new ArrayList<>(150000));
-      allocReadyToNorm.set(new ArrayList<>(150000));
-      allocReferrals.set(new HashMap<>(99881));
-      allocClientReferralKeys.set(new ArrayList<>(12000));
-    }
-
+    allocateThreadMemory();
     final List<EsPersonReferral> listAllegations = allocAllegations.get();
     final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
     final List<MinClientReferral> listClientReferralKeys = allocClientReferralKeys.get();
-    final List<EsPersonReferral> readyToNorm = allocReadyToNorm.get();
+    final List<EsPersonReferral> listReadyToNorm = allocReadyToNorm.get();
 
     listAllegations.clear();
     listClientReferralKeys.clear();
+    listReadyToNorm.clear();
     mapReferrals.clear();
-    readyToNorm.clear();
 
     try (final Connection con = getConnection()) {
       con.setSchema(getDBSchemaName());
@@ -421,7 +428,7 @@ public class ReferralHistoryIndexerJob
       // Loop referrals for this client:
       final String clientId = rc.getKey();
       if (StringUtils.isNotBlank(clientId)) {
-        readyToNorm.clear();
+        listReadyToNorm.clear();
         for (MinClientReferral rc1 : rc.getValue()) {
           final String referralId = rc1.referralId;
           final EsPersonReferral ref = mapReferrals.get(referralId);
@@ -432,17 +439,17 @@ public class ReferralHistoryIndexerJob
             if (mapAllegationByReferral.containsKey(referralId)) {
               for (EsPersonReferral alg : mapAllegationByReferral.get(referralId)) {
                 alg.mergeClientReferralInfo(clientId, ref);
-                readyToNorm.add(alg);
+                listReadyToNorm.add(alg);
               }
             } else {
-              readyToNorm.add(ref);
+              listReadyToNorm.add(ref);
             }
           } else {
             LOGGER.trace("sensitive referral? ref id={}, client id={}", referralId, clientId);
           }
         }
 
-        final ReplicatedPersonReferrals repl = normalizeSingle(readyToNorm);
+        final ReplicatedPersonReferrals repl = normalizeSingle(listReadyToNorm);
         if (repl != null) {
           ++cntr;
           repl.setClientId(clientId);
@@ -465,7 +472,7 @@ public class ReferralHistoryIndexerJob
     listAllegations.clear();
     listClientReferralKeys.clear();
     mapReferrals.clear();
-    readyToNorm.clear();
+    listReadyToNorm.clear();
 
     // Good time to *request* garbage collection. GC runs in another thread anyway.
     // SonarQube disagrees.
