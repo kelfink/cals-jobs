@@ -250,7 +250,6 @@ public class ReferralHistoryIndexerJob
    * @throws InterruptedException on thread error
    */
   protected synchronized Connection getConnection() throws SQLException, InterruptedException {
-    // Thread.sleep(300);
     return jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection();
   }
@@ -365,16 +364,20 @@ public class ReferralHistoryIndexerJob
     return monitor;
   }
 
-  private void normalizeQueryResults(final Map<String, EsPersonReferral> mapReferrals,
+  private int normalizeQueryResults(final Map<String, EsPersonReferral> mapReferrals,
       final List<EsPersonReferral> listReadyToNorm,
       final Map<String, List<MinClientReferral>> mapReferralByClient,
       final Map<String, List<EsPersonReferral>> mapAllegationByReferral) {
     LOGGER.info("Normalize all: START");
 
     // TODO: convert to stream instead of nested for loops.
+    // unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
+    // listReferrals.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
+    // .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
+    // .forEach(this::addToIndexQueue);
+
     int cntr = 0;
     for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
-
       // Loop referrals for this client:
       final String clientId = rc.getKey();
       if (StringUtils.isNotBlank(clientId)) {
@@ -394,9 +397,10 @@ public class ReferralHistoryIndexerJob
             } else {
               listReadyToNorm.add(ref);
             }
-          } else {
-            LOGGER.trace("sensitive referral? ref id={}, client id={}", referralId, clientId);
           }
+          // else {
+          // LOGGER.trace("sensitive referral? ref id={}, client id={}", referralId, clientId);
+          // }
         }
 
         final ReplicatedPersonReferrals repl = normalizeSingle(listReadyToNorm);
@@ -404,14 +408,17 @@ public class ReferralHistoryIndexerJob
           ++cntr;
           repl.setClientId(clientId);
           addToIndexQueue(repl);
-        } else {
-          LOGGER.trace("null normalized? sensitive? client id={}", clientId);
         }
-      } else {
-        LOGGER.trace("empty client? client id={}", clientId);
+        // else {
+        // LOGGER.trace("null normalized? sensitive? client id={}", clientId);
+        // }
       }
+      // else {
+      // LOGGER.trace("empty client? client id={}", clientId);
+      // }
     }
     LOGGER.info("Normalize all: END");
+    return cntr;
   }
 
   private void releaseLocalMemory(final List<EsPersonReferral> listAllegations,
@@ -438,7 +445,6 @@ public class ReferralHistoryIndexerJob
     final int i = nextThreadNum.incrementAndGet();
     final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
-    int cntr = 0;
     LOGGER.info("BEGIN");
 
     allocateThreadMemory();
@@ -473,7 +479,7 @@ public class ReferralHistoryIndexerJob
         monitorStopAndReport(monitor);
         con.commit();
       } finally {
-        // The connection and statements close automatically.
+        // The statements and result sets close automatically.
       }
 
     } catch (Exception e) {
@@ -481,7 +487,6 @@ public class ReferralHistoryIndexerJob
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
-    cntr = 0;
     final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys.stream()
         .sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
         .collect(Collectors.groupingBy(MinClientReferral::getClientId));
@@ -493,13 +498,8 @@ public class ReferralHistoryIndexerJob
     listAllegations.clear();
 
     // For each client:
-    normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
+    int cntr = normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
         mapAllegationByReferral);
-
-    // unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
-    // listReferrals.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
-    // .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
-    // .forEach(this::addToIndexQueue);
 
     // Release heap objects early and often.
     releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);

@@ -41,7 +41,6 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
-import gov.ca.cwds.jobs.SystemCodesLoaderJob.NsSystemCodeDao;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 
@@ -53,31 +52,36 @@ public class ReferralHistoryIndexerJobTest {
 
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
+
   SessionFactory sessionFactory;
   ReplicatedPersonReferralsDao dao;
   ElasticsearchDao esDao;
   File tempFile;
   String lastJobRunTimeFilename;
   ObjectMapper mapper = ElasticSearchPerson.MAPPER;
+  SessionFactoryOptions sfo;
+  StandardServiceRegistry reg;
+  ConnectionProvider cp;
+  Connection con;
+  DatabaseMetaData meta;
+
   ReferralHistoryIndexerJob target;
 
   @BeforeClass
   public static void setupClass() throws Exception {
     SessionFactory sessionFactory = mock(SessionFactory.class);
     Session session = mock(Session.class);
-
     Transaction transaction = mock(Transaction.class);
+
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(session.beginTransaction()).thenReturn(transaction);
 
-    NsSystemCodeDao dao = new NsSystemCodeDao(sessionFactory);
     SimpleTestSystemCodeCache.init();
   }
 
   @Before
   public void setup() throws Exception {
     sessionFactory = mock(SessionFactory.class);
-
     dao = new ReplicatedPersonReferralsDao(sessionFactory);
     esDao = mock(ElasticsearchDao.class);
     tempFile = tempFolder.newFile("tempFile.txt");
@@ -86,19 +90,19 @@ public class ReferralHistoryIndexerJobTest {
         new ReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
 
-    SessionFactoryOptions sfo = mock(SessionFactoryOptions.class);
+    sfo = mock(SessionFactoryOptions.class);
     when(sessionFactory.getSessionFactoryOptions()).thenReturn(sfo);
 
-    StandardServiceRegistry reg = mock(StandardServiceRegistry.class);
+    reg = mock(StandardServiceRegistry.class);
     when(sfo.getServiceRegistry()).thenReturn(reg);
 
-    ConnectionProvider cp = mock(ConnectionProvider.class);
+    cp = mock(ConnectionProvider.class);
     when(reg.getService(ConnectionProvider.class)).thenReturn(cp);
 
-    Connection con = mock(Connection.class);
+    con = mock(Connection.class);
     when(cp.getConnection()).thenReturn(con);
 
-    DatabaseMetaData meta = mock(DatabaseMetaData.class);
+    meta = mock(DatabaseMetaData.class);
     when(con.getMetaData()).thenReturn(meta);
     when(meta.getDatabaseMajorVersion()).thenReturn(11);
     when(meta.getDatabaseMinorVersion()).thenReturn(2);
@@ -146,7 +150,8 @@ public class ReferralHistoryIndexerJobTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void normalizeSingle_Args__List() throws Exception {
     List<EsPersonReferral> recs = new ArrayList<EsPersonReferral>();
     EsPersonReferral addMe = new EsPersonReferral();
@@ -186,7 +191,6 @@ public class ReferralHistoryIndexerJobTest {
       fail("Expected exception was not thrown!");
     } catch (IOException e) {
     }
-
   }
 
   @Test
@@ -207,7 +211,6 @@ public class ReferralHistoryIndexerJobTest {
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
     }
-
   }
 
   @Test
@@ -315,6 +318,37 @@ public class ReferralHistoryIndexerJobTest {
     boolean actual = target.isRangeSelfManaging();
     boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getConnection_Args__() throws Exception {
+    Connection actual = target.getConnection();
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
+  public void getConnection_Args___T__SQLException() throws Exception {
+    when(cp.getConnection()).thenThrow(SQLException.class);
+    try {
+      target.getConnection();
+      fail("Expected exception was not thrown!");
+    } catch (SQLException e) {
+    }
+  }
+
+  @Test
+  public void getConnection_Args___T__InterruptedException() throws Exception {
+    when(cp.getConnection()).thenThrow(InterruptedException.class);
+    try {
+      target.getConnection();
+      fail("Expected exception was not thrown!");
+    } catch (InterruptedException e) {
+    }
+  }
+
+  @Test
+  public void allocateThreadMemory_Args__() throws Exception {
+    target.allocateThreadMemory();
   }
 
 }
