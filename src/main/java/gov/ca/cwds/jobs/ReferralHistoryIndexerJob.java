@@ -62,8 +62,8 @@ public class ReferralHistoryIndexerJob
 
   private static final String INSERT_CLIENT =
       "INSERT INTO #SCHEMA#.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)"
-          + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, rc.SENSTV_IND" + "\nFROM REFR_CLT rc"
-          + "\nJOIN CLIENT_T c  on c.IDENTIFIER = rc.FKCLIENT_T"
+          + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, rc.SENSTV_IND\nFROM #SCHEMA#.REFR_CLT rc"
+          + "\nJOIN #SCHEMA#.CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
   private static final String SELECT_CLIENT =
