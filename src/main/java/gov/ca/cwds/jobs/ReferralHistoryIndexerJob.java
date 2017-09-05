@@ -62,12 +62,12 @@ public class ReferralHistoryIndexerJob
 
   private static final String INSERT_CLIENT =
       "INSERT INTO #SCHEMA#.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)"
-          + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, rc.SENSTV_IND\nFROM #SCHEMA#.REFR_CLT rc"
+          + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM #SCHEMA#.REFR_CLT rc"
           + "\nJOIN #SCHEMA#.CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
   private static final String SELECT_CLIENT =
-      "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM #SCHEMA#.GT_REFR_CLT";
+      "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM #SCHEMA#.GT_REFR_CLT RC";
 
   // private static final String SELECT_ALLEGATION =
   // "SELECT vw.* FROM #SCHEMA#.VW_MQT_ALGTN_ONLY vw FOR READ ONLY WITH UR";
@@ -219,6 +219,7 @@ public class ReferralHistoryIndexerJob
 
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
+    // Roll your own. Can't wait for DBA turn-around.
     StringBuilder buf = new StringBuilder();
     // buf.append("SELECT vw.* FROM ");
     // buf.append(dbSchemaName);
@@ -301,9 +302,6 @@ public class ReferralHistoryIndexerJob
 
       LOGGER.info("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
           nativeCon.enableRowsetSupport_);
-
-      // db2Con.setDeferPrepares((true));
-      // db2Con.sendDataAsIs = true;
 
       final DB2SystemMonitor monitor = db2Con.getDB2SystemMonitor();
       monitor.enable(true);
