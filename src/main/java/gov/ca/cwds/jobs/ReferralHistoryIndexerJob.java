@@ -287,6 +287,33 @@ public class ReferralHistoryIndexerJob
     // LOGGER.info("NETWORK_TRIPS: {}", monitor.moreData(NUMBER_NETWORK_TRIPS));
   }
 
+  private void readClients(final PreparedStatement stmtInsClient,
+      final PreparedStatement stmtSelClient, final List<MinClientReferral> listClientReferralKeys,
+      final Pair<String, String> p) throws SQLException {
+    // Prepare client list.
+    stmtInsClient.setMaxRows(0);
+    stmtInsClient.setQueryTimeout(0);
+    stmtInsClient.setString(1, p.getLeft());
+    stmtInsClient.setString(2, p.getRight());
+
+    final int cntInsClientReferral = stmtInsClient.executeUpdate();
+    LOGGER.info("bundle client/referrals: {}", cntInsClientReferral);
+
+    // Prepare retrieval.
+    stmtSelClient.setMaxRows(0);
+    stmtSelClient.setQueryTimeout(0);
+    stmtSelClient.setFetchSize(FETCH_SIZE);
+
+    {
+      LOGGER.info("pull client referral keys");
+      final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
+      MinClientReferral mx;
+      while (!fatalError && rs.next() && (mx = MinClientReferral.extract(rs)) != null) {
+        listClientReferralKeys.add(mx);
+      }
+    }
+  }
+
   private void readReferrals(final PreparedStatement stmtSelReferral,
       final Map<String, EsPersonReferral> mapReferrals) throws SQLException {
     stmtSelReferral.setMaxRows(0);
@@ -387,6 +414,16 @@ public class ReferralHistoryIndexerJob
     LOGGER.info("Normalize all: END");
   }
 
+  private void releaseLocalMemory(final List<EsPersonReferral> listAllegations,
+      final Map<String, EsPersonReferral> mapReferrals,
+      final List<MinClientReferral> listClientReferralKeys,
+      final List<EsPersonReferral> listReadyToNorm) {
+    listAllegations.clear();
+    listClientReferralKeys.clear();
+    listReadyToNorm.clear();
+    mapReferrals.clear();
+  }
+
   /**
    * Read records from a single partition. Then sort results on our own.
    * 
@@ -410,11 +447,8 @@ public class ReferralHistoryIndexerJob
     final List<MinClientReferral> listClientReferralKeys = allocClientReferralKeys.get();
     final List<EsPersonReferral> listReadyToNorm = allocReadyToNorm.get();
 
-    // Clear collections, just for safety.
-    listAllegations.clear();
-    listClientReferralKeys.clear();
-    listReadyToNorm.clear();
-    mapReferrals.clear();
+    // Clear collections, for safety.
+    releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
 
     try (final Connection con = getConnection()) {
       con.setSchema(getDBSchemaName());
@@ -433,36 +467,13 @@ public class ReferralHistoryIndexerJob
               con.prepareStatement(getInitialLoadQuery(schema));
           final PreparedStatement stmtSelAllegation =
               con.prepareStatement(SELECT_ALLEGATION.replaceAll("#SCHEMA#", schema))) {
-
-        // Prepare client list.
-        stmtInsClient.setMaxRows(0);
-        stmtInsClient.setQueryTimeout(0);
-        stmtInsClient.setString(1, p.getLeft());
-        stmtInsClient.setString(2, p.getRight());
-
-        final int cntInsClientReferral = stmtInsClient.executeUpdate();
-        LOGGER.info("bundle client/referrals: {}", cntInsClientReferral);
-
-        // Prepare retrieval.
-        stmtSelClient.setMaxRows(0);
-        stmtSelClient.setQueryTimeout(0);
-        stmtSelClient.setFetchSize(FETCH_SIZE);
-
-        {
-          LOGGER.info("pull client referral keys");
-          final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
-          MinClientReferral mx;
-          while (!fatalError && rs.next() && (mx = MinClientReferral.extract(rs)) != null) {
-            listClientReferralKeys.add(mx);
-          }
-        }
-
+        readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
         readReferrals(stmtSelReferral, mapReferrals);
         readAllegations(stmtSelAllegation, listAllegations);
         monitorStopAndReport(monitor);
         con.commit();
       } finally {
-        // Connection and statements close automatically.
+        // The connection and statements close automatically.
       }
 
     } catch (Exception e) {
@@ -491,12 +502,9 @@ public class ReferralHistoryIndexerJob
     // .forEach(this::addToIndexQueue);
 
     // Release heap objects early and often.
-    listAllegations.clear();
-    listClientReferralKeys.clear();
-    mapReferrals.clear();
-    listReadyToNorm.clear();
+    releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
 
-    // Good time to *request* garbage collection. GC runs in another thread anyway.
+    // Good time to *request* garbage collection, not *demand* it. GC runs in another thread anyway.
     // SonarQube disagrees.
     // The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
     // memory is exhausted. Yes, this is a good place to drop a hint to GC that it *might* want to
@@ -519,9 +527,10 @@ public class ReferralHistoryIndexerJob
     try {
       // This job normalizes **without** the transform thread.
       doneTransform = true;
+
+      // Init the task list.
       final List<Pair<String, String>> ranges = getPartitionRanges();
       LOGGER.warn(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
-
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
 
       // Set thread pool size.
