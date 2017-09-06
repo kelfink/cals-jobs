@@ -63,6 +63,7 @@ public class ReferralHistoryIndexerJobTest {
   StandardServiceRegistry reg;
   ConnectionProvider cp;
   Connection con;
+  ResultSet rs;
   DatabaseMetaData meta;
 
   ReferralHistoryIndexerJob target;
@@ -101,6 +102,8 @@ public class ReferralHistoryIndexerJobTest {
 
     con = mock(Connection.class);
     when(cp.getConnection()).thenReturn(con);
+
+    rs = mock(ResultSet.class);
 
     meta = mock(DatabaseMetaData.class);
     when(con.getMetaData()).thenReturn(meta);
@@ -196,7 +199,6 @@ public class ReferralHistoryIndexerJobTest {
   @Test
   @Ignore
   public void extract_Args__ResultSet() throws Exception {
-    ResultSet rs = mock(ResultSet.class);
     EsPersonReferral actual = target.extract(rs);
     EsPersonReferral expected = new EsPersonReferral();
     assertThat(actual, is(equalTo(expected)));
@@ -204,7 +206,6 @@ public class ReferralHistoryIndexerJobTest {
 
   @Test
   public void extract_Args__ResultSet_T__SQLException() throws Exception {
-    ResultSet rs = mock(ResultSet.class);
     doThrow(new SQLException()).when(rs).getString(any());
     try {
       target.extract(rs);
@@ -223,7 +224,6 @@ public class ReferralHistoryIndexerJobTest {
   @Test
   public void getInitialLoadViewName_Args__() throws Exception {
     String actual = target.getInitialLoadViewName();
-    // String expected = null;
     assertThat(actual, notNullValue());
   }
 
@@ -232,7 +232,6 @@ public class ReferralHistoryIndexerJobTest {
   public void getInitialLoadQuery_Args__String() throws Exception {
     String dbSchemaName = null;
     String actual = target.getInitialLoadQuery(dbSchemaName);
-    // String expected = null;
     assertThat(actual, notNullValue());
   }
 
@@ -273,7 +272,6 @@ public class ReferralHistoryIndexerJobTest {
 
   @Test
   public void extractReferral_Args__ResultSet() throws Exception {
-    ResultSet rs = mock(ResultSet.class);
     EsPersonReferral actual = target.extractReferral(rs);
     EsPersonReferral expected = null;
     assertThat(actual, notNullValue());
@@ -282,7 +280,6 @@ public class ReferralHistoryIndexerJobTest {
   @Test
   @Ignore
   public void extractReferral_Args__ResultSet_T__SQLException() throws Exception {
-    ResultSet rs = mock(ResultSet.class);
     when(rs.next()).thenThrow(new SQLException());
     when(rs.getString(any())).thenThrow(new SQLException());
     try {
@@ -294,23 +291,17 @@ public class ReferralHistoryIndexerJobTest {
 
   @Test
   public void extractAllegation_Args__ResultSet() throws Exception {
-    ResultSet rs = mock(ResultSet.class);
     EsPersonReferral actual = target.extractAllegation(rs);
     EsPersonReferral expected = null;
     assertThat(actual, notNullValue());
   }
 
-  @Test
-  @Ignore
+  @Test(expected = SQLException.class)
+  // @Ignore
   public void extractAllegation_Args__ResultSet_T__SQLException() throws Exception {
-    ResultSet rs = mock(ResultSet.class);
     when(rs.next()).thenThrow(new SQLException());
     when(rs.getString(any())).thenThrow(new SQLException());
-    try {
-      target.extractAllegation(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    target.extractAllegation(rs);
   }
 
   @Test

@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -98,7 +99,8 @@ public class OtherClientNameIndexerJobTest {
     assertThat(target, notNullValue());
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void getPartitionRanges_Args__() throws Exception {
     ReplicatedAkaDao mainDao = null;
     ElasticsearchDao elasticsearchDao = null;
@@ -107,12 +109,7 @@ public class OtherClientNameIndexerJobTest {
     SessionFactory sessionFactory = null;
     OtherClientNameIndexerJob target = new OtherClientNameIndexerJob(mainDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     List actual = target.getPartitionRanges();
-    // then
-    // e.g. : verify(mocked).called();
     List expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -126,25 +123,17 @@ public class OtherClientNameIndexerJobTest {
     SessionFactory sessionFactory = null;
     OtherClientNameIndexerJob target = new OtherClientNameIndexerJob(mainDao, elasticsearchDao,
         lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getLegacySourceTable();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = "OCL_NM_T";
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void main_Args__StringArray() throws Exception {
-    // given
     String[] args = new String[] {};
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     OtherClientNameIndexerJob.main(args);
-    // then
-    // e.g. : verify(mocked).called();
   }
 
 }
+
