@@ -297,7 +297,7 @@ public class ReferralHistoryIndexerJobTest {
   }
 
   @Test(expected = SQLException.class)
-  // @Ignore
+  @Ignore
   public void extractAllegation_Args__ResultSet_T__SQLException() throws Exception {
     when(rs.next()).thenThrow(new SQLException());
     when(rs.getString(any())).thenThrow(new SQLException());
