@@ -104,7 +104,7 @@ public class EsPersonReferral extends ApiObjectIdentity
   private String clientId;
 
   @Transient
-  private String clientSensitivity;
+  private transient String clientSensitivity;
 
   @Id
   @Column(name = "REFERRAL_ID")
@@ -987,6 +987,18 @@ public class EsPersonReferral extends ApiObjectIdentity
     this.perpetratorSensitivityIndicator = perpetratorSensitivityIndicator;
   }
 
+  public String getClientSensitivity() {
+    return clientSensitivity;
+  }
+
+  public void setClientSensitivity(String clientSensitivity) {
+    this.clientSensitivity = clientSensitivity;
+  }
+
+  public static void setOpts(JobOptions opts) {
+    EsPersonReferral.opts = opts;
+  }
+
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE, false);
@@ -1059,18 +1071,6 @@ public class EsPersonReferral extends ApiObjectIdentity
     } catch (Exception e) {
       LOGGER.error("Oops!", e);
     }
-  }
-
-  String getClientSensitivity() {
-    return clientSensitivity;
-  }
-
-  void setClientSensitivity(String clientSensitivity) {
-    this.clientSensitivity = clientSensitivity;
-  }
-
-  public static void setOpts(JobOptions opts) {
-    EsPersonReferral.opts = opts;
   }
 
 }
