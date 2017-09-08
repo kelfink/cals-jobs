@@ -1228,6 +1228,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return ret;
   }
 
+  /**
+   * @return true if the job provides its own ranges
+   */
   protected boolean isRangeSelfManaging() {
     return false;
   }
@@ -1405,11 +1408,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
 
     Session session = jobDao.getSessionFactory().getCurrentSession();
-
     Object lastId = new Object();
     Transaction txn = session.beginTransaction();
 
     try {
+      prepHibernatePull(session, txn, lastRunTime);
+
       /**
        * Load records to index
        */
@@ -1420,7 +1424,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       List<M> recs = q.list();
       LOGGER.warn("FOUND {} RECORDS", recs.size());
 
-      // Convert denormalized view rows to normalized persistence objects.
+      // Convert de-normalized view rows to normalized persistence objects.
       final List<M> groupRecs = new ArrayList<>();
       for (M m : recs) {
         if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
@@ -1470,6 +1474,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       session.clear();
       txn.commit();
       return results.build();
+    } catch (SQLException h) {
+      fatalError = true;
+      txn.rollback();
+      throw JobLogUtils.buildException(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
     } catch (HibernateException h) {
       fatalError = true;
       txn.rollback();
@@ -1615,17 +1623,31 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return ret;
   }
 
-  protected void prepHibernatePull(final Session session, final Transaction txn) {
-    // final Work work = new Work() {
-    // @Override
-    // public void execute(Connection connection) throws SQLException {
-    //
-    // }
-    // };
-
-    // if (work != null) {
-    // session.doWork(work);
-    // }
+  /**
+   * Execute JDBC prior to calling method {@link #pullBucketRange(String, String)}.
+   * 
+   * <p>
+   * <blockquote>
+   * 
+   * <pre>
+   * final Work work = new Work() {
+   *   &#64;Override
+   *   public void execute(Connection connection) throws SQLException {
+   *     // Run JDBC here.
+   *   }
+   * };
+   * session.doWork(work);
+   * </pre>
+   * 
+   * </blockquote>
+   * </p>
+   * 
+   * @param session current Hibernate session
+   * @param txn current transaction
+   */
+  protected void prepHibernatePull(final Session session, final Transaction txn,
+      final Date lastRunTime) throws SQLException {
+    // Default is no-op.
   }
 
   /**
@@ -1647,7 +1669,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final Session session = jobDao.getSessionFactory().getCurrentSession();
     final Transaction txn = session.beginTransaction();
     try {
-      prepHibernatePull(session, txn);
       NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
           .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)

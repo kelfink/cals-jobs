@@ -5,7 +5,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +20,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,24 +60,35 @@ public class ReferralHistoryIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
-  // DBA turn-around time is too long. Roll your own.
+  // Database turn-around time is too long. Roll your own.
 
-  // private static final String INSERT_CLIENT =
-  // "INSERT INTO #SCHEMA#.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"
-  // + "SELECT rc.FKREFERL_T, rc.FKCLIENT_T, rc.SENSTV_IND\n"
-  // + "FROM #SCHEMA#.VW_REFR_CLT rc\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
-
-  private static final String INSERT_CLIENT =
+  private static final String INSERT_CLIENT_FULL =
       "INSERT INTO #SCHEMA#.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)"
           + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM #SCHEMA#.REFR_CLT rc"
           + "\nJOIN #SCHEMA#.CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
+  private static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO #SCHEMA#.GT_ID (IDENTIFIER) "
+      + "WITH step1 as ( " + " SELECT ALG.FKREFERL_T AS REFERRAL_ID "
+      + " FROM #SCHEMA#.ALLGTN_T ALG  " + " WHERE ALG.IBMSNAP_LOGMARKER > ? " + "), step2 as ( "
+      + " SELECT ALG.FKREFERL_T AS REFERRAL_ID " + " FROM #SCHEMA#.CLIENT_T C  "
+      + " JOIN #SCHEMA#.ALLGTN_T ALG ON (C.IDENTIFIER = ALG.FKCLIENT_0 OR C.IDENTIFIER = ALG.FKCLIENT_T) "
+      + " WHERE C.IBMSNAP_LOGMARKER > ? " + "), step3 as ( "
+      + " SELECT RCT.FKREFERL_T AS REFERRAL_ID " + " FROM #SCHEMA#.REFR_CLT RCT "
+      + " WHERE RCT.IBMSNAP_LOGMARKER > ? " + "), step4 as ( "
+      + " SELECT RFL.IDENTIFIER AS REFERRAL_ID " + " FROM #SCHEMA#.REFERL_T RFL "
+      + " WHERE RFL.IBMSNAP_LOGMARKER > ? " + "), step5 as ( "
+      + " SELECT RPT.FKREFERL_T AS REFERRAL_ID " + " FROM #SCHEMA#.REPTR_T RPT "
+      + " WHERE RPT.IBMSNAP_LOGMARKER > ? " + "), get_em_all as ( "
+      + " SELECT s1.REFERRAL_ID FROM STEP1 s1 " + " UNION ALL "
+      + " SELECT s2.REFERRAL_ID FROM STEP2 s2 " + " UNION ALL "
+      + " SELECT s3.REFERRAL_ID FROM STEP3 s3 " + " UNION ALL "
+      + " SELECT s4.REFERRAL_ID FROM STEP4 s4 " + " UNION ALL "
+      + " SELECT s5.REFERRAL_ID FROM STEP5 s5 " + ") "
+      + "SELECT DISTINCT g.REFERRAL_ID from get_em_all g ";
+
   private static final String SELECT_CLIENT =
       "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM #SCHEMA#.GT_REFR_CLT RC";
-
-  // private static final String SELECT_ALLEGATION =
-  // "SELECT vw.* FROM #SCHEMA#.VW_MQT_ALGTN_ONLY vw FOR READ ONLY WITH UR";
 
   private static final String SELECT_ALLEGATION = "SELECT "
       + " RC.FKREFERL_T         AS REFERRAL_ID," + " ALG.IDENTIFIER        AS ALLEGATION_ID,"
@@ -466,7 +482,7 @@ public class ReferralHistoryIndexerJob
 
       try (
           final PreparedStatement stmtInsClient =
-              con.prepareStatement(INSERT_CLIENT.replaceAll("#SCHEMA#", schema));
+              con.prepareStatement(INSERT_CLIENT_FULL.replaceAll("#SCHEMA#", schema));
           final PreparedStatement stmtSelClient =
               con.prepareStatement(SELECT_CLIENT.replaceAll("#SCHEMA#", schema));
           final PreparedStatement stmtSelReferral =
@@ -559,6 +575,33 @@ public class ReferralHistoryIndexerJob
     }
 
     LOGGER.info("DONE: main read thread");
+  }
+
+  @Override
+  protected void prepHibernatePull(Session session, Transaction txn, final Date lastRunTime)
+      throws SQLException {
+    final String schema = BasePersonIndexerJob.getDBSchemaName();
+    final Work work = new Work() {
+      @Override
+      public void execute(Connection con) throws SQLException {
+        try (final PreparedStatement stmtInsClient =
+            con.prepareStatement(INSERT_CLIENT_LAST_CHG.replaceAll("#SCHEMA#", schema))) {
+          stmtInsClient.setQueryTimeout(100);
+
+          final Timestamp ts = new Timestamp(lastRunTime.getTime());
+          stmtInsClient.setTimestamp(1, ts);
+          stmtInsClient.setTimestamp(2, ts);
+          stmtInsClient.setTimestamp(3, ts);
+          stmtInsClient.setTimestamp(4, ts);
+          stmtInsClient.setTimestamp(5, ts);
+          final int cntInsClientReferral = stmtInsClient.executeUpdate();
+          LOGGER.info("bundle client/referrals: {}", cntInsClientReferral);
+        } finally {
+          // The statement closes automatically.
+        }
+      }
+    };
+    session.doWork(work);
   }
 
   @Override
