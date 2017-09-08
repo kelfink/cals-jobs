@@ -47,6 +47,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.jdbc.Work;
 import org.hibernate.query.NativeQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1594,11 +1595,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Return a list of partition keys to optimize batch SELECT statements. See ReplicatedClient
    * native named query, "findPartitionedBuckets".
    * 
+   * <p>
+   * Prefer methods {@link #threadExtractJdbc()} or {@link #extractHibernate()} over this one.
+   * </p>
+   * 
    * @return list of partition key pairs
    * @see ReplicatedClient
-   * @deprecated use {@link #threadExtractJdbc()} or {@link #extractHibernate()} instead
+   * 
    */
-  @Deprecated
   protected List<Pair<String, String>> getPartitionRanges() {
     LOGGER.info("DETERMINE BUCKET RANGES ...");
     List<Pair<String, String>> ret = new ArrayList<>();
@@ -1611,6 +1615,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     return ret;
   }
+
+  protected void prepHibernatePull() {}
 
   /**
    * Divide work into buckets: pull a unique range of identifiers so that no bucket results overlap.
@@ -1628,17 +1634,19 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final Class<?> entityClass =
         getDenormalizedClass() != null ? getDenormalizedClass() : jobDao.getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findBucketRange";
-    Session session = jobDao.getSessionFactory().getCurrentSession();
-
+    final Session session = jobDao.getSessionFactory().getCurrentSession();
     Transaction txn = session.beginTransaction();
     try {
+      final Work work = prepHibernatePull();
+      if (work != null) {
+        session.doWork(work);
+      }
       NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
           .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
           .setFetchSize(DEFAULT_FETCH_SIZE);
 
-      // No reduction/normalization.
-      // Iterate, process, flush.
+      // No reduction/normalization. Iterate, process, flush.
       ScrollableResults results = q.scroll(ScrollMode.FORWARD_ONLY);
       ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
       int cnt = 0;
@@ -1684,8 +1692,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final List<T> results = pullBucketRange(minId, maxId);
 
       if (results != null && !results.isEmpty()) {
-        // BulkProcessor is not thread safe.
-        // Construct one instance per thread.
+        // BulkProcessor is NOT thread safe. Construct one instance per thread.
         final BulkProcessor bp = buildBulkProcessor();
         results.stream().forEach(p -> {
           try {
