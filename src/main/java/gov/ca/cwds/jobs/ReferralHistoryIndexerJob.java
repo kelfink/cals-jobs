@@ -586,8 +586,6 @@ public class ReferralHistoryIndexerJob
       public void execute(Connection con) throws SQLException {
         try (final PreparedStatement stmtInsClient =
             con.prepareStatement(INSERT_CLIENT_LAST_CHG.replaceAll("#SCHEMA#", schema))) {
-          stmtInsClient.setQueryTimeout(100);
-
           final Timestamp ts = new Timestamp(lastRunTime.getTime());
           stmtInsClient.setTimestamp(1, ts);
           stmtInsClient.setTimestamp(2, ts);
