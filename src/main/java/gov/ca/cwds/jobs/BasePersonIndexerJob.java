@@ -47,7 +47,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.hibernate.jdbc.Work;
 import org.hibernate.query.NativeQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1616,7 +1615,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return ret;
   }
 
-  protected void prepHibernatePull() {}
+  protected void prepHibernatePull(final Session session, final Transaction txn) {
+    // final Work work = new Work() {
+    // @Override
+    // public void execute(Connection connection) throws SQLException {
+    //
+    // }
+    // };
+
+    // if (work != null) {
+    // session.doWork(work);
+    // }
+  }
 
   /**
    * Divide work into buckets: pull a unique range of identifiers so that no bucket results overlap.
@@ -1635,12 +1645,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         getDenormalizedClass() != null ? getDenormalizedClass() : jobDao.getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findBucketRange";
     final Session session = jobDao.getSessionFactory().getCurrentSession();
-    Transaction txn = session.beginTransaction();
+    final Transaction txn = session.beginTransaction();
     try {
-      final Work work = prepHibernatePull();
-      if (work != null) {
-        session.doWork(work);
-      }
+      prepHibernatePull(session, txn);
       NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
           .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
