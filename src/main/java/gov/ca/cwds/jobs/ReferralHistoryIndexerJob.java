@@ -68,23 +68,23 @@ public class ReferralHistoryIndexerJob
           + "\nJOIN #SCHEMA#.CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
-  private static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO GT_ID (IDENTIFIER) "
-      + "WITH step1 as ( " + " SELECT ALG.FKREFERL_T AS REFERRAL_ID " + " FROM ALLGTN_T ALG  "
-      + " WHERE ALG.IBMSNAP_LOGMARKER > ? " + "), step2 as ( "
-      + " SELECT ALG.FKREFERL_T AS REFERRAL_ID " + " FROM CLIENT_T C  "
-      + " JOIN ALLGTN_T ALG ON (C.IDENTIFIER = ALG.FKCLIENT_0 OR C.IDENTIFIER = ALG.FKCLIENT_T) "
-      + " WHERE C.IBMSNAP_LOGMARKER > ? " + "), step3 as ( "
-      + " SELECT RCT.FKREFERL_T AS REFERRAL_ID " + " FROM REFR_CLT RCT "
-      + " WHERE RCT.IBMSNAP_LOGMARKER > ? " + "), step4 as ( "
-      + " SELECT RFL.IDENTIFIER AS REFERRAL_ID " + " FROM REFERL_T RFL "
-      + " WHERE RFL.IBMSNAP_LOGMARKER > ? " + "), step5 as ( "
-      + " SELECT RPT.FKREFERL_T AS REFERRAL_ID " + " FROM REPTR_T RPT "
-      + " WHERE RPT.IBMSNAP_LOGMARKER > ? " + "), get_em_all as ( "
-      + " SELECT s1.REFERRAL_ID FROM STEP1 s1 " + " UNION ALL "
-      + " SELECT s2.REFERRAL_ID FROM STEP2 s2 " + " UNION ALL "
-      + " SELECT s3.REFERRAL_ID FROM STEP3 s3 " + " UNION ALL "
-      + " SELECT s4.REFERRAL_ID FROM STEP4 s4 " + " UNION ALL "
-      + " SELECT s5.REFERRAL_ID FROM STEP5 s5 " + ") "
+  private static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO #SCHEMA#.GT_ID (IDENTIFIER)\n"
+      + "WITH step1 as ( SELECT ALG.FKREFERL_T AS REFERRAL_ID "
+      + " FROM #SCHEMA#.ALLGTN_T ALG  WHERE ALG.IBMSNAP_LOGMARKER > ?), step2 as ( "
+      + " SELECT ALG.FKREFERL_T AS REFERRAL_ID FROM #SCHEMA#.CLIENT_T C  "
+      + " JOIN #SCHEMA#.ALLGTN_T ALG ON (C.IDENTIFIER = ALG.FKCLIENT_0 OR C.IDENTIFIER = ALG.FKCLIENT_T) "
+      + " WHERE C.IBMSNAP_LOGMARKER > ?), step3 as ( "
+      + " SELECT RCT.FKREFERL_T AS REFERRAL_ID FROM #SCHEMA#.REFR_CLT RCT "
+      + " WHERE RCT.IBMSNAP_LOGMARKER > ?), step4 as ( "
+      + " SELECT RFL.IDENTIFIER AS REFERRAL_ID FROM #SCHEMA#.REFERL_T RFL "
+      + " WHERE RFL.IBMSNAP_LOGMARKER > ?), step5 as ( "
+      + " SELECT RPT.FKREFERL_T AS REFERRAL_ID FROM #SCHEMA#.REPTR_T RPT "
+      + " WHERE RPT.IBMSNAP_LOGMARKER > ?), get_em_all as ( "
+      + " SELECT s1.REFERRAL_ID FROM STEP1 s1 UNION ALL "
+      + " SELECT s2.REFERRAL_ID FROM STEP2 s2 UNION ALL "
+      + " SELECT s3.REFERRAL_ID FROM STEP3 s3 UNION ALL "
+      + " SELECT s4.REFERRAL_ID FROM STEP4 s4 UNION ALL "
+      + " SELECT s5.REFERRAL_ID FROM STEP5 s5 ) "
       + "SELECT DISTINCT g.REFERRAL_ID from get_em_all g ";
 
   private static final String SELECT_CLIENT =
@@ -586,15 +586,19 @@ public class ReferralHistoryIndexerJob
         con.setSchema(getDBSchemaName());
         con.setAutoCommit(false);
         enableParallelism(con);
-        try (final PreparedStatement stmtInsClient = con.prepareStatement(INSERT_CLIENT_LAST_CHG)) {
+        con.set
+        
+        try (final PreparedStatement stmt = con
+            .prepareStatement(INSERT_CLIENT_LAST_CHG.replaceAll("#SCHEMA#", getDBSchemaName()))) {
           final Timestamp ts = new Timestamp(lastRunTime.getTime());
-          stmtInsClient.setTimestamp(1, ts);
-          stmtInsClient.setTimestamp(2, ts);
-          stmtInsClient.setTimestamp(3, ts);
-          stmtInsClient.setTimestamp(4, ts);
-          stmtInsClient.setTimestamp(5, ts);
-          final int cntInsClientReferral = stmtInsClient.executeUpdate();
-          LOGGER.info("bundle client/referrals: {}", cntInsClientReferral);
+          stmt.setTimestamp(1, ts);
+          stmt.setTimestamp(2, ts);
+          stmt.setTimestamp(3, ts);
+          stmt.setTimestamp(4, ts);
+          stmt.setTimestamp(5, ts);
+          LOGGER.info("Find referrals new/changed since {}", lastRunTime);
+          final int cntInsClientReferral = stmt.executeUpdate();
+          LOGGER.info("Total referrals new/changed: {}", cntInsClientReferral);
         } finally {
           // The statement closes automatically.
         }
