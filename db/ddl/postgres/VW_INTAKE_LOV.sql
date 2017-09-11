@@ -1,7 +1,10 @@
+DROP VIEW VW_INTAKE_LOV ;
+
 CREATE VIEW VW_INTAKE_LOV (
 	LG_META,
 	INTAKE_TYPE,
 	PARENT_CAT_ID,
+	PARENT_INTAKE_TYPE,
 	LG_SYS_ID,
 	PARENT_SYS_ID,
 	LG_LOG_ID,
@@ -17,6 +20,7 @@ CREATE VIEW VW_INTAKE_LOV (
 	ct.lg_meta, 
 	ct.intake_type, 
 	ct.PARENT_CAT_ID, 
+	ct2.INTAKE_TYPE as PARENT_INTAKE_TYPE, 
 	cd.lg_sys_id, 
 	cd.parent_lg_sys_id, 
 	sc.logical_id as LG_LOG_ID,
@@ -36,3 +40,4 @@ CREATE VIEW VW_INTAKE_LOV (
 
 
 GRANT SELECT ON VW_INTAKE_LOV to PUBLIC;
+

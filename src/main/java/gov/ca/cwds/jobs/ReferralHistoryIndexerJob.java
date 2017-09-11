@@ -5,7 +5,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -61,6 +62,11 @@ public class ReferralHistoryIndexerJob
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
   // Database turn-around time is too long. Roll your own.
+
+  /**
+   * Common timestamp format for legacy DB.
+   */
+  public static final String LEGACY_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
   private static final String INSERT_CLIENT_FULL =
       "INSERT INTO #SCHEMA#.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)"
@@ -586,22 +592,36 @@ public class ReferralHistoryIndexerJob
         con.setAutoCommit(false);
         enableParallelism(con);
 
-        final String sql = INSERT_CLIENT_LAST_CHG.replaceAll("#SCHEMA#", getDBSchemaName());
+        final StringBuilder buf = new StringBuilder();
+        buf.append("TIMESTAMP('")
+            .append(new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT).format(lastRunTime)).append("')");
+
+        final String sql = INSERT_CLIENT_LAST_CHG.replaceAll("#SCHEMA#", getDBSchemaName())
+            .replaceAll("##TIMESTAMP##", buf.toString());
         LOGGER.info("Prep SQL: {}", sql);
 
-        try (final PreparedStatement stmt = con.prepareStatement(sql)) {
-          final Timestamp ts = new Timestamp(lastRunTime.getTime());
-          stmt.setTimestamp(1, ts);
-          stmt.setTimestamp(2, ts);
-          stmt.setTimestamp(3, ts);
-          stmt.setTimestamp(4, ts);
-          stmt.setTimestamp(5, ts);
+        try (final Statement stmt =
+            con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
           LOGGER.info("Find referrals new/changed since {}", lastRunTime);
-          final int cntInsClientReferral = stmt.executeUpdate();
+          final int cntInsClientReferral = stmt.executeUpdate(sql);
           LOGGER.info("Total referrals new/changed: {}", cntInsClientReferral);
         } finally {
           // The statement closes automatically.
         }
+
+        // try (final PreparedStatement stmt = con.prepareStatement(sql)) {
+        // final Timestamp ts = new Timestamp(lastRunTime.getTime());
+        // stmt.setTimestamp(1, ts);
+        // stmt.setTimestamp(2, ts);
+        // stmt.setTimestamp(3, ts);
+        // stmt.setTimestamp(4, ts);
+        // stmt.setTimestamp(5, ts);
+        // LOGGER.info("Find referrals new/changed since {}", lastRunTime);
+        // final int cntInsClientReferral = stmt.executeUpdate();
+        // LOGGER.info("Total referrals new/changed: {}", cntInsClientReferral);
+        // } finally {
+        // // The statement closes automatically.
+        // }
       }
     };
     session.doWork(work);
