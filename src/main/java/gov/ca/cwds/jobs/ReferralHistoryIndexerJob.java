@@ -592,6 +592,8 @@ public class ReferralHistoryIndexerJob
         con.setAutoCommit(false);
         enableParallelism(con);
 
+        // The DB2 optimizer on z/OS treats timestamps in a JDBC prepared statements. Roll SQL.
+        // To quote our beloved president, "Sad!" :-)
         final StringBuilder buf = new StringBuilder();
         buf.append("TIMESTAMP('")
             .append(new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT).format(lastRunTime)).append("')");
@@ -609,19 +611,6 @@ public class ReferralHistoryIndexerJob
           // The statement closes automatically.
         }
 
-        // try (final PreparedStatement stmt = con.prepareStatement(sql)) {
-        // final Timestamp ts = new Timestamp(lastRunTime.getTime());
-        // stmt.setTimestamp(1, ts);
-        // stmt.setTimestamp(2, ts);
-        // stmt.setTimestamp(3, ts);
-        // stmt.setTimestamp(4, ts);
-        // stmt.setTimestamp(5, ts);
-        // LOGGER.info("Find referrals new/changed since {}", lastRunTime);
-        // final int cntInsClientReferral = stmt.executeUpdate();
-        // LOGGER.info("Total referrals new/changed: {}", cntInsClientReferral);
-        // } finally {
-        // // The statement closes automatically.
-        // }
       }
     };
     session.doWork(work);

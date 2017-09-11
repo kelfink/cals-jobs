@@ -52,7 +52,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         // + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
         // + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
         // + ") "
-        + "WHERE current timestamp > CAST(:after AS TIMESTAMP) "
+        + "WHERE (1=1 OR current timestamp < CAST(:after AS TIMESTAMP))"
         + "ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsPersonReferral.class, readOnly = true),
 
@@ -62,7 +62,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
             // + "WHERE r.CLIENT_ID IN ( "
             // + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
             // + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) " + ") "
-            + "WHERE current timestamp > CAST(:after AS TIMESTAMP) "
+            + "WHERE (1=1 OR current timestamp < CAST(:after AS TIMESTAMP))"
             + "AND r.LIMITED_ACCESS_CODE = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsPersonReferral.class, readOnly = true),
 
@@ -73,7 +73,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
             // + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
             // + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             // + ") "
-            + "WHERE current timestamp > CAST(:after AS TIMESTAMP) "
+            + "WHERE (1=1 OR current timestamp < CAST(:after AS TIMESTAMP))"
             + "AND r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsPersonReferral.class, readOnly = true)})
 public class EsPersonReferral extends ApiObjectIdentity
