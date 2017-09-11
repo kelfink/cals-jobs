@@ -1627,7 +1627,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Execute JDBC prior to calling method {@link #pullBucketRange(String, String)}.
    * 
-   * <p>
    * <blockquote>
    * 
    * <pre>
@@ -1641,10 +1640,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * </pre>
    * 
    * </blockquote>
-   * </p>
    * 
    * @param session current Hibernate session
    * @param txn current transaction
+   * @param lastRunTime last successful run datetime
    */
   protected void prepHibernatePull(final Session session, final Transaction txn,
       final Date lastRunTime) throws SQLException {
