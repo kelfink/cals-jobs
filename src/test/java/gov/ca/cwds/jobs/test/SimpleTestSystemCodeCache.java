@@ -82,12 +82,12 @@ public class SimpleTestSystemCodeCache implements SystemCodeCache {
   }
 
   @Override
-  public boolean verifyActiveSystemCodeIdForMeta(Number arg0, String arg1) {
+  public boolean verifyActiveLogicalIdForMeta(String arg0, String arg1) {
     return false;
   }
 
   @Override
-  public boolean verifyActiveLogicalIdForMeta(String arg0, String arg1) {
+  public boolean verifyActiveSystemCodeIdForMeta(Number arg0, String arg1, boolean arg2) {
     return false;
   }
 
