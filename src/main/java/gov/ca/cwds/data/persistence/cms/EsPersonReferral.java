@@ -1,16 +1,9 @@
 package gov.ca.cwds.data.persistence.cms;
 
 import java.io.Serializable;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.NamedNativeQueries;
@@ -37,7 +29,6 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.jobs.config.JobOptions;
-import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -61,6 +52,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         // + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
         // + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
         // + ") "
+        + "WHERE current timestamp > CAST(:after AS TIMESTAMP) "
         + "ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsPersonReferral.class, readOnly = true),
 
@@ -70,7 +62,8 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
             // + "WHERE r.CLIENT_ID IN ( "
             // + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
             // + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) " + ") "
-            + "WHERE r.LIMITED_ACCESS_CODE = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
+            + "WHERE current timestamp > CAST(:after AS TIMESTAMP) "
+            + "AND r.LIMITED_ACCESS_CODE = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsPersonReferral.class, readOnly = true),
 
     @NamedNativeQuery(
@@ -80,7 +73,8 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
             // + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
             // + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             // + ") "
-            + "WHERE r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
+            + "WHERE current timestamp > CAST(:after AS TIMESTAMP) "
+            + "AND r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsPersonReferral.class, readOnly = true)})
 public class EsPersonReferral extends ApiObjectIdentity
     implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals>,
@@ -90,11 +84,7 @@ public class EsPersonReferral extends ApiObjectIdentity
 
   private static final long serialVersionUID = -2265057057202257108L;
 
-  private static final int COLUMN_POSITION_SIZE = COLUMN_POSITION.values().length;
-
   private static JobOptions opts;
-
-  private static int linesProcessed = 0;
 
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)
@@ -249,296 +239,6 @@ public class EsPersonReferral extends ApiObjectIdentity
 
   @Column(name = "PERPETRATOR_SENSITIVITY_IND")
   private String perpetratorSensitivityIndicator;
-
-  // =============
-  // TAB FILE:
-  // =============
-
-  public enum COLUMN_TYPE {
-
-    /**
-     * Any String value.
-     */
-    CHAR,
-
-    /**
-     * Integer, conforms to short.
-     */
-    SMALLINT,
-
-    /**
-     * Format: 2005-11-08
-     */
-    DATE,
-
-    /**
-     * Format: 2017-08-04 14:39:17.021616
-     */
-    TIMESTAMP
-  }
-
-  static Date parseTimestamp(String s) {
-    String trimTimestamp = StringUtils.trim(s);
-    if (StringUtils.isNotEmpty(trimTimestamp)) {
-      try {
-        final Timestamp ts = Timestamp.valueOf(s);
-        return new Date(ts.getTime());
-      } catch (Exception e) {
-        throw e;
-      }
-    }
-    return null;
-  }
-
-  static Date parseDate(String s) {
-    return DomainChef.uncookDateString(s);
-  }
-
-  static Integer parseInteger(String s) {
-    return StringUtils.isNotBlank(s) ? Integer.parseInt(s) : null;
-  }
-
-  public enum COLUMN_POSITION {
-
-    CLIENT_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setClientId(c);
-    }),
-
-    /**
-     * TODO: missing column.
-     */
-    CLIENT_SENSITIVITY_IND(COLUMN_TYPE.CHAR),
-
-    REFERRAL_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setReferralId(c);
-    }),
-
-    ALLEGATION_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setAllegationId(c);
-    }),
-
-    VICTIM_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setVictimId(c);
-    }),
-
-    PERPETRATOR_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setPerpetratorId(c);
-    }),
-
-    REPORTER_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setReporterId(c);
-    }),
-
-    WORKER_ID(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setWorkerId(c);
-    }),
-
-    START_DATE(COLUMN_TYPE.DATE, new Date(), (c, r) -> {
-      r.setStartDate(c);
-    }),
-
-    END_DATE(COLUMN_TYPE.DATE, new Date(), (c, r) -> {
-      r.setEndDate(c);
-    }),
-
-    REFERRAL_RESPONSE_TYPE(COLUMN_TYPE.SMALLINT, (c, r) -> {
-      r.setReferralResponseType(parseInteger(c));
-    }),
-
-    LIMITED_ACCESS_CODE(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setLimitedAccessCode(c);
-    }),
-
-    LIMITED_ACCESS_DATE(COLUMN_TYPE.DATE, new Date(), (c, r) -> {
-      r.setLimitedAccessDate(c);
-    }),
-
-    LIMITED_ACCESS_DESCRIPTION(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setLimitedAccessDescription(c);
-    }),
-
-    LIMITED_ACCESS_GOVERNMENT_ENT(COLUMN_TYPE.SMALLINT, 1, (c, r) -> {
-      r.setLimitedAccessGovernmentEntityId(c);
-    }),
-
-    REFERRAL_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
-      r.setReferralLastUpdated(c);
-    }),
-
-    REPORTER_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setReporterFirstName(c);
-    }),
-
-    REPORTER_LAST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setReporterLastName(c);
-    }),
-
-    REPORTER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
-      r.setReporterLastUpdated(c);
-    }),
-
-    WORKER_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setWorkerFirstName(c);
-    }),
-
-    WORKER_LAST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setWorkerLastName(c);
-    }),
-
-    WORKER_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
-      r.setWorkerLastUpdated(c);
-    }),
-
-    VICTIM_SENSITIVITY_IND(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setVictimSensitivityIndicator(c);
-    }),
-
-    VICTIM_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setVictimFirstName(c);
-    }),
-
-    VICTIM_LAST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setVictimLastName(c);
-    }),
-
-    VICTIM_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
-      r.setVictimLastUpdated(c);
-    }),
-
-    PERPETRATOR_SENSITIVITY_IND(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setPerpetratorSensitivityIndicator(c);
-    }),
-
-    PERPETRATOR_FIRST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setPerpetratorFirstName(c);
-    }),
-
-    PERPETRATOR_LAST_NM(COLUMN_TYPE.CHAR, (c, r) -> {
-      r.setPerpetratorLastName(c);
-    }),
-
-    PERPETRATOR_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
-      r.setPerpetratorLastUpdated(c);
-    }),
-
-    /**
-     * Not in MQT but will be needed for authorization.
-     */
-    REFERRAL_COUNTY(COLUMN_TYPE.SMALLINT),
-
-    ALLEGATION_DISPOSITION(COLUMN_TYPE.SMALLINT, 1, (c, r) -> {
-      r.setAllegationDisposition(c);
-    }),
-
-    ALLEGATION_TYPE(COLUMN_TYPE.SMALLINT, 1, (c, r) -> {
-      r.setAllegationType(c);
-    }),
-
-    ALLEGATION_LAST_UPDATED(COLUMN_TYPE.TIMESTAMP, new Date(), (c, r) -> {
-      r.setAllegationLastUpdated(c);
-    });
-
-    private final COLUMN_TYPE type;
-
-    private final BiConsumer<String, EsPersonReferral> handler;
-
-    private final BiConsumer<Date, EsPersonReferral> dateHandler;
-
-    private final BiConsumer<Integer, EsPersonReferral> intHandler;
-
-    private COLUMN_POSITION(COLUMN_TYPE type) {
-      this.type = type;
-      this.handler = (c, r) -> {
-        LOGGER.debug("No handler for column: {}, value: {}", this.name(), c);
-      };
-      this.dateHandler = null;
-      this.intHandler = null;
-    }
-
-    private COLUMN_POSITION(COLUMN_TYPE type, BiConsumer<String, EsPersonReferral> handler) {
-      this.type = type;
-      this.handler = handler;
-      this.dateHandler = null;
-      this.intHandler = null;
-    }
-
-    private COLUMN_POSITION(COLUMN_TYPE type, Date wastedParamForRuntimeTypeErasure,
-        BiConsumer<Date, EsPersonReferral> dateHandler) {
-      this.type = type;
-      this.handler = null;
-      this.dateHandler = dateHandler;
-      this.intHandler = null;
-    }
-
-    private COLUMN_POSITION(COLUMN_TYPE type, Integer whyNotStoreTypeInfoAtRuntimeSillyJava,
-        BiConsumer<Integer, EsPersonReferral> intHandler) {
-      this.type = type;
-      this.handler = null;
-      this.dateHandler = null;
-      this.intHandler = intHandler;
-    }
-
-    private final void handle(String c, EsPersonReferral ref) {
-      try {
-        if (StringUtils.isNotBlank(c)) {
-          if (this.type == COLUMN_TYPE.TIMESTAMP && this.dateHandler != null) {
-            this.dateHandler.accept(parseTimestamp(c), ref);
-          } else if (this.type == COLUMN_TYPE.DATE && this.dateHandler != null) {
-            this.dateHandler.accept(parseDate(c), ref);
-          } else if (this.type == COLUMN_TYPE.SMALLINT && this.intHandler != null) {
-            this.intHandler.accept(parseInteger(c), ref);
-          } else if (this.handler != null) {
-            this.handler.accept(c, ref);
-          }
-        }
-      } catch (Exception e) {
-        LOGGER.error("FAILED TO PARSE! column: {}, value: {}", this.name(), c);
-        throw e;
-      }
-    }
-
-    private static final void handleColumn(int pos, String col, EsPersonReferral ref) {
-      // Handle by column position.
-      try {
-        if (pos < COLUMN_POSITION_SIZE) {
-          COLUMN_POSITION.values()[pos].handle(col, ref);
-        }
-      } catch (Exception e) {
-        LOGGER.error("FAILED TO HANDLE COLUMN! pos: {}, col: {}", pos, col);
-        throw e;
-      }
-    }
-
-    /**
-     * Parse a line from a tab delimited file.
-     * 
-     * @param line line to parse
-     * @return fresh to EsPersonReferral
-     */
-    private static final EsPersonReferral parse(String line) {
-      EsPersonReferral ret = new EsPersonReferral();
-
-      int pos = 0;
-      for (String c : line.split("\t")) {
-        COLUMN_POSITION.handleColumn(pos++, c, ret);
-      }
-
-      return ret;
-    }
-
-  }
-
-  /**
-   * Parse a line from a tab delimited file.
-   * 
-   * @param line line to parse
-   * @return fresh to EsPersonReferral
-   */
-  public static EsPersonReferral parseLine(String line) {
-    final EsPersonReferral ret = EsPersonReferral.COLUMN_POSITION.parse(line);
-    JobLogUtils.logEvery(LOGGER, ++linesProcessed, "parse line", ret);
-    return ret;
-  }
 
   @Override
   public Class<ReplicatedPersonReferrals> getNormalizationClass() {
@@ -1058,24 +758,6 @@ public class EsPersonReferral extends ApiObjectIdentity
       return false;
 
     return true;
-  }
-
-  /**
-   * Load from a tab delimited file.
-   * 
-   * @param args command line
-   */
-  public static void main(String[] args) {
-    Path pathIn = Paths.get(args[0]);
-    try (Stream<String> lines = Files.lines(pathIn)) {
-      // Maintain file order by client, referral.
-      lines.sequential().map(EsPersonReferral::parseLine).collect(Collectors.toList()).stream()
-          .forEach(t -> { // NOSONAR
-            LOGGER.info("Raw Referral: {}", t);
-          });
-    } catch (Exception e) {
-      LOGGER.error("Oops!", e);
-    }
   }
 
 }
