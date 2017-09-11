@@ -1361,7 +1361,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Transaction txn = session.beginTransaction();
 
     try {
-      NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
+      final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
@@ -1417,7 +1417,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       /**
        * Load records to index
        */
-      NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
+      final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
       q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
 
       ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
@@ -1451,7 +1451,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       if (mustDeleteLimitedAccessRecords()) {
         String namedQueryNameForDeletion =
             entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
-        NativeQuery<M> queryForDeletion = session.getNamedNativeQuery(namedQueryNameForDeletion);
+        final NativeQuery<M> queryForDeletion =
+            session.getNamedNativeQuery(namedQueryNameForDeletion);
         queryForDeletion.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
 
         final List<M> deletionRecs = queryForDeletion.list();

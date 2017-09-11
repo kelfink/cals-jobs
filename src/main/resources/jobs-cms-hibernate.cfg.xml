@@ -32,6 +32,7 @@
 		<property name="hibernate.connection.loginTimeout">1000000</property>
 		<property name="hibernate.connection.keepAliveTimeOut">8</property>
 		<property name="hibernate.connection.enableRowsetSupport">1</property>
+		<property name="hibernate.connection.sqljAvoidTimeStampConversion">true</property>
 		<property name="hibernate.jdbc.time_zone">America/Los_Angeles</property>
 
 		<!-- <property name="hibernate.connection.readOnly">true</property> -->

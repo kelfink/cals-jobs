@@ -69,23 +69,22 @@ public class ReferralHistoryIndexerJob
           + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
   private static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO #SCHEMA#.GT_ID (IDENTIFIER)\n"
-      + "WITH step1 as ( SELECT ALG.FKREFERL_T AS REFERRAL_ID "
-      + " FROM #SCHEMA#.ALLGTN_T ALG  WHERE ALG.IBMSNAP_LOGMARKER > ?), step2 as ( "
+      + "WITH step1 AS (\nSELECT ALG.FKREFERL_T AS REFERRAL_ID "
+      + " FROM #SCHEMA#.ALLGTN_T ALG  WHERE ALG.IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP)), step2 AS (\n"
       + " SELECT ALG.FKREFERL_T AS REFERRAL_ID FROM #SCHEMA#.CLIENT_T C  "
       + " JOIN #SCHEMA#.ALLGTN_T ALG ON (C.IDENTIFIER = ALG.FKCLIENT_0 OR C.IDENTIFIER = ALG.FKCLIENT_T) "
-      + " WHERE C.IBMSNAP_LOGMARKER > ?), step3 as ( "
+      + " WHERE C.IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP)), step3 AS (\n"
       + " SELECT RCT.FKREFERL_T AS REFERRAL_ID FROM #SCHEMA#.REFR_CLT RCT "
-      + " WHERE RCT.IBMSNAP_LOGMARKER > ?), step4 as ( "
+      + " WHERE RCT.IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP)), step4 AS (\n"
       + " SELECT RFL.IDENTIFIER AS REFERRAL_ID FROM #SCHEMA#.REFERL_T RFL "
-      + " WHERE RFL.IBMSNAP_LOGMARKER > ?), step5 as ( "
+      + " WHERE RFL.IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP)), step5 AS (\n"
       + " SELECT RPT.FKREFERL_T AS REFERRAL_ID FROM #SCHEMA#.REPTR_T RPT "
-      + " WHERE RPT.IBMSNAP_LOGMARKER > ?), get_em_all as ( "
-      + " SELECT s1.REFERRAL_ID FROM STEP1 s1 UNION ALL "
-      + " SELECT s2.REFERRAL_ID FROM STEP2 s2 UNION ALL "
-      + " SELECT s3.REFERRAL_ID FROM STEP3 s3 UNION ALL "
-      + " SELECT s4.REFERRAL_ID FROM STEP4 s4 UNION ALL "
-      + " SELECT s5.REFERRAL_ID FROM STEP5 s5 ) "
-      + "SELECT DISTINCT g.REFERRAL_ID from get_em_all g ";
+      + " WHERE RPT.IBMSNAP_LOGMARKER > CAST(:after AS TIMESTAMP)), hoard AS (\n"
+      + " SELECT s1.REFERRAL_ID FROM STEP1 s1 UNION ALL\n"
+      + " SELECT s2.REFERRAL_ID FROM STEP2 s2 UNION ALL\n"
+      + " SELECT s3.REFERRAL_ID FROM STEP3 s3 UNION ALL\n"
+      + " SELECT s4.REFERRAL_ID FROM STEP4 s4 UNION ALL\n"
+      + " SELECT s5.REFERRAL_ID FROM STEP5 s5 )\n" + "SELECT DISTINCT g.REFERRAL_ID from hoard g ";
 
   private static final String SELECT_CLIENT =
       "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM #SCHEMA#.GT_REFR_CLT RC";
@@ -586,10 +585,11 @@ public class ReferralHistoryIndexerJob
         con.setSchema(getDBSchemaName());
         con.setAutoCommit(false);
         enableParallelism(con);
-        con.set
-        
-        try (final PreparedStatement stmt = con
-            .prepareStatement(INSERT_CLIENT_LAST_CHG.replaceAll("#SCHEMA#", getDBSchemaName()))) {
+
+        final String sql = INSERT_CLIENT_LAST_CHG.replaceAll("#SCHEMA#", getDBSchemaName());
+        LOGGER.info("Prep SQL: {}", sql);
+
+        try (final PreparedStatement stmt = con.prepareStatement(sql)) {
           final Timestamp ts = new Timestamp(lastRunTime.getTime());
           stmt.setTimestamp(1, ts);
           stmt.setTimestamp(2, ts);
