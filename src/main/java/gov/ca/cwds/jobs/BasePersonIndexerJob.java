@@ -1644,6 +1644,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param session current Hibernate session
    * @param txn current transaction
    * @param lastRunTime last successful run datetime
+   * @throws SQLException on disconnect, invalid parameters, etc.
    */
   protected void prepHibernatePull(final Session session, final Transaction txn,
       final Date lastRunTime) throws SQLException {
