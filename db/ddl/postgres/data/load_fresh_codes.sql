@@ -1,5 +1,6 @@
 
 -- INITIAL STEPS: truncate and load intake_raw_codes.
+
 --TRUNCATE TABLE postgres.public.intake_raw_codes CASCADE ;
 --commit;
 

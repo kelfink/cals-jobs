@@ -316,3 +316,5 @@ INSERT INTO postgres.public.intake_lov_code(cat_id, lg_sys_id, intake_code, inta
 INSERT INTO postgres.public.intake_lov_code(cat_id, lg_sys_id, intake_code, intake_display, omit_ind, parent_lg_sys_id) VALUES (16, 842, 'European', 'White - European', 'f', 839);
 INSERT INTO postgres.public.intake_lov_code(cat_id, lg_sys_id, intake_code, intake_display, omit_ind, parent_lg_sys_id) VALUES (16, 843, 'Middle Eastern', 'White - Middle Eastern', 'f', 839);
 INSERT INTO postgres.public.intake_lov_code(cat_id, lg_sys_id, intake_code, intake_display, omit_ind, parent_lg_sys_id) VALUES (16, 844, 'Romanian', 'White - Romanian', 'f', 839);
+
+commit;

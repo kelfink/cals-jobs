@@ -318,3 +318,5 @@ INSERT INTO postgres.public.intake_raw_codes(lg_sys_id, lg_meta, lg_shrt_dsc, lg
 INSERT INTO postgres.public.intake_raw_codes(lg_sys_id, lg_meta, lg_shrt_dsc, lg_log_id, lg_inactive, lg_cat_id, lg_oth_cd, lg_lng_dsc, intake_type, intake_code, intake_display, use_log_id, parent_sys_id, parent_intake_type, omit_ind) VALUES (1879, 'STATE_C', 'West Virginia', 'WV', 'N', '', '', 'West Virginia', 'US_STATE', 'WV', 'West Virginia', 'f', null, '', 'f');
 INSERT INTO postgres.public.intake_raw_codes(lg_sys_id, lg_meta, lg_shrt_dsc, lg_log_id, lg_inactive, lg_cat_id, lg_oth_cd, lg_lng_dsc, intake_type, intake_code, intake_display, use_log_id, parent_sys_id, parent_intake_type, omit_ind) VALUES (1878, 'STATE_C', 'Wisconsin', 'WI', 'N', '', '', 'Wisconsin', 'US_STATE', 'WI', 'Wisconsin', 'f', null, '', 'f');
 INSERT INTO postgres.public.intake_raw_codes(lg_sys_id, lg_meta, lg_shrt_dsc, lg_log_id, lg_inactive, lg_cat_id, lg_oth_cd, lg_lng_dsc, intake_type, intake_code, intake_display, use_log_id, parent_sys_id, parent_intake_type, omit_ind) VALUES (1880, 'STATE_C', 'Wyoming', 'WY', 'N', '', '', 'Wyoming', 'US_STATE', 'WY', 'Wyoming', 'f', null, '', 'f');
+
+commit;

@@ -14,3 +14,5 @@ INSERT INTO postgres.public.intake_lov_category(lg_meta, intake_type, parent_cat
 INSERT INTO postgres.public.intake_lov_category(lg_meta, intake_type, parent_cat_id, use_log_id, cat_descr) VALUES ('ETHNCTYC', 'RACE_ASIAN', 5, 'f', 'fill me ');
 INSERT INTO postgres.public.intake_lov_category(lg_meta, intake_type, parent_cat_id, use_log_id, cat_descr) VALUES ('ETHNCTYC', 'RACE_HISPANIC', 5, 'f', 'fill me ');
 INSERT INTO postgres.public.intake_lov_category(lg_meta, intake_type, parent_cat_id, use_log_id, cat_descr) VALUES ('ETHNCTYC', 'RACE_WHITE', 5, 'f', 'fill me ');
+
+commit;
