@@ -29,7 +29,7 @@ import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
- * Job to load Intake Screening from PostgreSQL into ElasticSearch.
+ * Job loads Intake Screenings from PostgreSQL into ElasticSearch.
  * 
  * @author CWDS API Team
  */
@@ -65,7 +65,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
   @Override
   protected void threadExtractJdbc() {
     Thread.currentThread().setName("extract");
-    LOGGER.warn("BEGIN: Stage #1: NS View Reader");
+    LOGGER.info("BEGIN: Stage #1: NS View Reader");
 
     try {
       final List<EsIntakeScreening> results = this.viewDao.findAll();
@@ -82,7 +82,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
       doneExtract = true;
     }
 
-    LOGGER.warn("DONE: Stage #1: NS View Reader");
+    LOGGER.info("DONE: Stage #1: NS View Reader");
   }
 
   @Override
