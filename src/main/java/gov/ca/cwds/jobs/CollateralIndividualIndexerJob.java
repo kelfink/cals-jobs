@@ -26,7 +26,7 @@ public final class CollateralIndividualIndexerJob
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param mainDao Attorney DAO
+   * @param mainDao collateral individual DAO
    * @param elasticsearchDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper

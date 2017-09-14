@@ -281,7 +281,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   /**
    * Get the view or materialized query table name, if used. Any child classes relying on a
-   * denormalized view must define the name.
+   * de-normalized view must define the name.
    * 
    * @return name of view or materialized query table or null if none
    */
@@ -293,7 +293,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Get initial load SQL query.
    * 
    * @param dbSchemaName The DB schema name
-   * @return Inital load query
+   * @return Initial load query
    */
   public String getInitialLoadQuery(String dbSchemaName) {
     return null;
