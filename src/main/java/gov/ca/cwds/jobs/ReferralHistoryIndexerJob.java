@@ -243,6 +243,7 @@ public class ReferralHistoryIndexerJob
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     // Roll your own. Can't wait for DBA turn-around.
+
     StringBuilder buf = new StringBuilder();
     // buf.append("SELECT vw.* FROM ");
     // buf.append(dbSchemaName);
@@ -282,7 +283,7 @@ public class ReferralHistoryIndexerJob
     if (allocAllegations.get() == null) {
       allocAllegations.set(new ArrayList<>(150000));
       allocReadyToNorm.set(new ArrayList<>(150000));
-      allocReferrals.set(new HashMap<>(99881));
+      allocReferrals.set(new HashMap<>(99881)); // Prime
       allocClientReferralKeys.set(new ArrayList<>(12000));
     }
   }
@@ -303,13 +304,14 @@ public class ReferralHistoryIndexerJob
     LOGGER.info("monitor.moreData: 1: {}", monitor.moreData(1));
     LOGGER.info("monitor.moreData: 2: {}", monitor.moreData(2));
 
-    // C'mon IBM. Where are the constants for method DB2SystemMonitor.moreData()??
+    // C'mon IBM! Where are the constants for method DB2SystemMonitor.moreData()??
     // LOGGER.info("NETWORK_TRIPS: {}", monitor.moreData(NUMBER_NETWORK_TRIPS));
   }
 
   private void readClients(final PreparedStatement stmtInsClient,
       final PreparedStatement stmtSelClient, final List<MinClientReferral> listClientReferralKeys,
       final Pair<String, String> p) throws SQLException {
+
     // Prepare client list.
     stmtInsClient.setMaxRows(0);
     stmtInsClient.setQueryTimeout(0);
@@ -324,13 +326,11 @@ public class ReferralHistoryIndexerJob
     stmtSelClient.setQueryTimeout(0);
     stmtSelClient.setFetchSize(FETCH_SIZE);
 
-    {
-      LOGGER.info("pull client referral keys");
-      final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
-      MinClientReferral mx;
-      while (!fatalError && rs.next() && (mx = MinClientReferral.extract(rs)) != null) {
-        listClientReferralKeys.add(mx);
-      }
+    LOGGER.info("pull client referral keys");
+    final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
+    MinClientReferral mx;
+    while (!fatalError && rs.next() && (mx = MinClientReferral.extract(rs)) != null) {
+      listClientReferralKeys.add(mx);
     }
   }
 
@@ -419,9 +419,6 @@ public class ReferralHistoryIndexerJob
               listReadyToNorm.add(ref);
             }
           }
-          // else {
-          // LOGGER.trace("sensitive referral? ref id={}, client id={}", referralId, clientId);
-          // }
         }
 
         final ReplicatedPersonReferrals repl = normalizeSingle(listReadyToNorm);
@@ -430,14 +427,9 @@ public class ReferralHistoryIndexerJob
           repl.setClientId(clientId);
           addToIndexQueue(repl);
         }
-        // else {
-        // LOGGER.trace("null normalized? sensitive? client id={}", clientId);
-        // }
       }
-      // else {
-      // LOGGER.trace("empty client? client id={}", clientId);
-      // }
     }
+
     LOGGER.info("Normalize all: END");
     return cntr;
   }
@@ -592,7 +584,8 @@ public class ReferralHistoryIndexerJob
         con.setAutoCommit(false);
         enableParallelism(con);
 
-        // The DB2 optimizer on z/OS treats timestamps in a JDBC prepared statements. Roll SQL.
+        // The DB2 optimizer on z/OS treats timestamps in a JDBC prepared statements differently
+        // from static SQL. For plan reliability build SQL and execute without a prepared statement.
         // To quote our beloved president, "Sad!" :-)
         final StringBuilder buf = new StringBuilder();
         buf.append("TIMESTAMP('")
