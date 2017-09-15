@@ -175,4 +175,5 @@ public class SafetyAlertIndexerJob
   public static void main(String... args) {
     runMain(SafetyAlertIndexerJob.class, args);
   }
+
 }

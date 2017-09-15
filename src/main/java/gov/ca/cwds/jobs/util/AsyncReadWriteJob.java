@@ -86,7 +86,6 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
     chunk.clear();
   }
 
-  @SuppressWarnings("ThrowFromFinallyBlock")
   @Override
   public void run() {
     try {

@@ -1856,8 +1856,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         .getService(ConnectionProvider.class).getConnection()) {
 
       final DatabaseMetaData meta = con.getMetaData();
-      LOGGER.warn("meta: {}", meta);
-      LOGGER.warn("meta:\nproduct name: {}\nproduction version: {}\nmajor: {}\nminor: {}",
+      LOGGER.info("meta:\nproduct name: {}\nproduction version: {}\nmajor: {}\nminor: {}",
           meta.getDatabaseProductName(), meta.getDatabaseProductVersion(),
           meta.getDatabaseMajorVersion(), meta.getDatabaseMinorVersion());
 
