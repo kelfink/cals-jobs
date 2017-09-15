@@ -10,107 +10,42 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.spi.SessionFactoryOptions;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ibm.db2.jcc.am.DatabaseMetaData;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
-import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 
-public class ReferralHistoryIndexerJobTest {
+public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
   // ====================
   // TEST MEMBERS:
   // ====================
 
-  @Rule
-  public TemporaryFolder tempFolder = new TemporaryFolder();
-
-  SessionFactory sessionFactory;
   ReplicatedPersonReferralsDao dao;
-  ElasticsearchDao esDao;
-  File tempFile;
-  String lastJobRunTimeFilename;
-  ObjectMapper mapper = ElasticSearchPerson.MAPPER;
-  SessionFactoryOptions sfo;
-  StandardServiceRegistry reg;
-  ConnectionProvider cp;
-  Connection con;
-  ResultSet rs;
-  DatabaseMetaData meta;
-
   ReferralHistoryIndexerJob target;
 
-  @BeforeClass
-  public static void setupClass() throws Exception {
-    SessionFactory sessionFactory = mock(SessionFactory.class);
-    Session session = mock(Session.class);
-    Transaction transaction = mock(Transaction.class);
-
-    when(sessionFactory.getCurrentSession()).thenReturn(session);
-    when(session.beginTransaction()).thenReturn(transaction);
-
-    SimpleTestSystemCodeCache.init();
-  }
-
+  @Override
   @Before
   public void setup() throws Exception {
-    sessionFactory = mock(SessionFactory.class);
+    super.setup();
+
     dao = new ReplicatedPersonReferralsDao(sessionFactory);
-    esDao = mock(ElasticsearchDao.class);
-    tempFile = tempFolder.newFile("tempFile.txt");
-    lastJobRunTimeFilename = tempFile.getAbsolutePath();
     target =
         new ReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
-
-    sfo = mock(SessionFactoryOptions.class);
-    when(sessionFactory.getSessionFactoryOptions()).thenReturn(sfo);
-
-    reg = mock(StandardServiceRegistry.class);
-    when(sfo.getServiceRegistry()).thenReturn(reg);
-
-    cp = mock(ConnectionProvider.class);
-    when(reg.getService(ConnectionProvider.class)).thenReturn(cp);
-
-    con = mock(Connection.class);
-    when(cp.getConnection()).thenReturn(con);
-
-    rs = mock(ResultSet.class);
-
-    meta = mock(DatabaseMetaData.class);
-    when(con.getMetaData()).thenReturn(meta);
-    when(meta.getDatabaseMajorVersion()).thenReturn(11);
-    when(meta.getDatabaseMinorVersion()).thenReturn(2);
-    when(meta.getDatabaseProductName()).thenReturn("DB2");
-    when(meta.getDatabaseProductVersion()).thenReturn("DSN11010");
   }
 
   @Test
@@ -249,7 +184,6 @@ public class ReferralHistoryIndexerJobTest {
   }
 
   @Test
-  @Ignore
   public void useTransformThread_Args__() throws Exception {
     boolean actual = target.useTransformThread();
     boolean expected = false;
@@ -257,9 +191,8 @@ public class ReferralHistoryIndexerJobTest {
   }
 
   @Test
-  @Ignore
   public void getPartitionRanges_Args__() throws Exception {
-    List actual = target.getPartitionRanges();
+    final List actual = target.getPartitionRanges();
     assertThat(actual, notNullValue());
   }
 
@@ -278,10 +211,9 @@ public class ReferralHistoryIndexerJobTest {
   }
 
   @Test
-  @Ignore
   public void extractReferral_Args__ResultSet_T__SQLException() throws Exception {
     when(rs.next()).thenThrow(new SQLException());
-    when(rs.getString(any())).thenThrow(new SQLException());
+    when(rs.getString(any(Integer.class))).thenThrow(new SQLException());
     try {
       target.extractReferral(rs);
       fail("Expected exception was not thrown!");
@@ -292,15 +224,13 @@ public class ReferralHistoryIndexerJobTest {
   @Test
   public void extractAllegation_Args__ResultSet() throws Exception {
     EsPersonReferral actual = target.extractAllegation(rs);
-    EsPersonReferral expected = null;
     assertThat(actual, notNullValue());
   }
 
   @Test(expected = SQLException.class)
-  @Ignore
   public void extractAllegation_Args__ResultSet_T__SQLException() throws Exception {
     when(rs.next()).thenThrow(new SQLException());
-    when(rs.getString(any())).thenThrow(new SQLException());
+    when(rs.getString(any(Integer.class))).thenThrow(new SQLException());
     target.extractAllegation(rs);
   }
 

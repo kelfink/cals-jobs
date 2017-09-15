@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.util.JobLogUtils;
 
 public class ReferralJobRanges {
 
@@ -32,18 +33,14 @@ public class ReferralJobRanges {
     final String schema = BasePersonIndexerJob.getDBSchemaName().toUpperCase();
     if (isMainframe
         && (schema.endsWith("RSQ") || schema.endsWith("REP") || schema.endsWith("DSM"))) {
-
-      // ----------------------------
-      // z/OS, LARGE data set:
-      // ORDER: a,z,A,Z,0,9
-      // ----------------------------
+      LOGGER.warn("z/OS, LARGE data set, ORDER: a,z,A,Z,0,9");
 
       try (@SuppressWarnings("unchecked")
-      Stream<String> lines =
+      final Stream<String> lines =
           IOUtils.readLines(this.getClass().getResourceAsStream("/referral_ranges.tsv")).stream()) {
         ret = lines.sequential().map(this::splitLine).collect(Collectors.toList());
       } catch (Exception e) {
-        LOGGER.error("Failed to load referral ranges!", e);
+        JobLogUtils.raiseError(LOGGER, e, "Failed to load referral ranges!");
       }
 
       final JobOptions opts = job.getOpts();
@@ -62,16 +59,10 @@ public class ReferralJobRanges {
       }
 
     } else if (isMainframe) {
-      // ----------------------------
-      // z/OS, small data set:
-      // ORDER: a,z,A,Z,0,9
-      // ----------------------------
+      LOGGER.warn("z/OS, small data set, ORDER: a,z,A,Z,0,9");
       ret.add(Pair.of("aaaaaaaaaa", "9999999999"));
     } else {
-      // ----------------------------
-      // Linux:
-      // ORDER: 0,9,a,A,z,Z
-      // ----------------------------
+      LOGGER.warn("Linux, ORDER: 0,9,a,A,z,Z");
       ret.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
     }
 

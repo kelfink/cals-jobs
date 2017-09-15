@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -15,22 +16,12 @@ import org.junit.Test;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 
-public class ReferralJobRangesTest {
+public class ReferralJobRangesTest extends PersonJobTester {
 
-  @Test
-  public void type() throws Exception {
-    assertThat(ReferralJobRanges.class, notNullValue());
-  }
-
-  @Test
-  public void instantiation() throws Exception {
-    ReferralJobRanges target = new ReferralJobRanges();
-    assertThat(target, notNullValue());
-  }
+  ReferralJobRanges target = new ReferralJobRanges();
 
   private void checkPartitionRanges(String schema, boolean isZOS, int expectedCnt)
       throws Exception {
-    ReferralJobRanges target = new ReferralJobRanges();
     System.setProperty("DB_CMS_SCHEMA", schema);
     BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job =
         mock(BasePersonIndexerJob.class);
@@ -39,8 +30,18 @@ public class ReferralJobRangesTest {
     final int cntActual = actual.size();
     assertThat(cntActual, is(equalTo(expectedCnt)));
 
-    // TODO: Check key order and range for ASCII and EBCDIC.
+    // NOTE: consider checking key order and range for ASCII and EBCDIC.
     final Pair<String, String> p = actual.get(0);
+  }
+
+  @Test
+  public void type() throws Exception {
+    assertThat(ReferralJobRanges.class, notNullValue());
+  }
+
+  @Test
+  public void instantiation() throws Exception {
+    assertThat(target, notNullValue());
   }
 
   @Test
@@ -61,6 +62,16 @@ public class ReferralJobRangesTest {
   @Test
   public void getPartitionRanges_RS1_Linux() throws Exception {
     checkPartitionRanges("CWSRS1", false, 1);
+  }
+
+  @Test
+  public void getPartitionRanges_Args__BasePersonIndexerJob() throws Exception {
+    BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job =
+        mock(BasePersonIndexerJob.class);
+    final List actual = target.getPartitionRanges(job);
+    final List expected = new ArrayList<>();
+    expected.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
+    assertThat(actual, is(equalTo(expected)));
   }
 
 }

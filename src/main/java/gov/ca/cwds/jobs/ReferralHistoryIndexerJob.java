@@ -53,6 +53,10 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 /**
  * Job to load person referrals from CMS into ElasticSearch.
  * 
+ * <p>
+ * Turn-around time for database objects is too long. Embed SQL in Java instead.
+ * </p>
+ * 
  * @author CWDS API Team
  */
 public class ReferralHistoryIndexerJob
@@ -60,8 +64,6 @@ public class ReferralHistoryIndexerJob
     implements JobResultSetAware<EsPersonReferral> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
-
-  // Database turn-around time is too long. Roll your own.
 
   /**
    * Common timestamp format for legacy DB.
@@ -391,7 +393,7 @@ public class ReferralHistoryIndexerJob
       final Map<String, List<EsPersonReferral>> mapAllegationByReferral) {
     LOGGER.info("Normalize all: START");
 
-    // TODO: convert to stream instead of nested for loops.
+    // NOTE: convert to stream instead of nested for loops.
     // unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
     // listReferrals.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
     // .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
@@ -528,6 +530,13 @@ public class ReferralHistoryIndexerJob
     return cntr;
   }
 
+  private int calcReaderThreads() {
+    final int ret = getOpts().getThreadCount() != 0L ? (int) getOpts().getThreadCount()
+        : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
+    LOGGER.warn(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
+    return ret;
+  }
+
   /**
    * The "extract" part of ETL. Parallel stream produces runs partition ranges in separate threads.
    */
@@ -541,17 +550,12 @@ public class ReferralHistoryIndexerJob
       // This job normalizes **without** the transform thread.
       doneTransform = true;
 
-      // Init the task list.
+      // Init task list.
       final List<Pair<String, String>> ranges = getPartitionRanges();
       LOGGER.warn(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
 
-      // Set thread pool size.
-      final int cntReaderThreads =
-          getOpts().getThreadCount() != 0L ? (int) getOpts().getThreadCount()
-              : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
-      LOGGER.warn(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", cntReaderThreads);
-      ForkJoinPool forkJoinPool = new ForkJoinPool(cntReaderThreads);
+      ForkJoinPool forkJoinPool = new ForkJoinPool(calcReaderThreads());
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
@@ -656,8 +660,6 @@ public class ReferralHistoryIndexerJob
 
     final String updateJson = buf.toString();
     final String insertJson = mapper.writeValueAsString(esp);
-    LOGGER.trace("insertJson: {}", insertJson);
-    LOGGER.trace("updateJson: {}", updateJson);
 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
@@ -666,10 +668,16 @@ public class ReferralHistoryIndexerJob
         .upsert(new IndexRequest(alias, docType, esp.getId()).source(insertJson));
   }
 
+  /**
+   * IBM strongly recommends retrieving column results by position, not by column name.
+   * 
+   * @param rs result set
+   * @return denormalized record
+   * @throws SQLException on DB error
+   */
   protected EsPersonReferral extractReferral(ResultSet rs) throws SQLException {
     EsPersonReferral ret = new EsPersonReferral();
 
-    // IBM strongly recommends retrieving column results by position, not by column name.
     int columnIndex = 0;
     ret.setReferralId(rs.getString(++columnIndex));
     ret.setStartDate(rs.getDate(++columnIndex));
@@ -701,7 +709,6 @@ public class ReferralHistoryIndexerJob
   protected EsPersonReferral extractAllegation(ResultSet rs) throws SQLException {
     EsPersonReferral ret = new EsPersonReferral();
 
-    // IBM strongly recommends retrieving column results by position, not by column name.
     int columnIndex = 0;
     ret.setReferralId(ifNull(rs.getString(++columnIndex)));
     ret.setAllegationId(ifNull(rs.getString(++columnIndex)));
