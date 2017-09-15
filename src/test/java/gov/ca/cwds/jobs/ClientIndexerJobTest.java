@@ -5,51 +5,31 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.spi.SessionFactoryOptions;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ibm.db2.jcc.am.DatabaseMetaData;
 
 import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
-import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
-import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
-import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 /**
  * 
  * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
-public class ClientIndexerJobTest {
+public class ClientIndexerJobTest extends PersonJobTester {
 
   protected static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
 
@@ -59,70 +39,13 @@ public class ClientIndexerJobTest {
     System.setProperty("DB_CMS_SCHEMA", "CWSINT");
   }
 
-  @Rule
-  public TemporaryFolder tempFolder = new TemporaryFolder();
-
   ReplicatedClientDao dao;
-  ElasticsearchDao esDao;
-  JobOptions opts;
-  ElasticsearchConfiguration esConfig;
-  File tempFile;
-  String lastJobRunTimeFilename;
-
-  SessionFactory sessionFactory;
-  Session session;
-  SessionFactoryOptions sfo;
-  Transaction transaction;
-  StandardServiceRegistry reg;
-  ConnectionProvider cp;
-  Connection con;
-  Statement stmt;
-  ResultSet rs;
-  DatabaseMetaData meta;
-
   ClientIndexerJob target;
 
+  @Override
   @Before
   public void setup() throws Exception {
-    sessionFactory = mock(SessionFactory.class);
-    tempFile = tempFolder.newFile("tempFile.txt");
-    lastJobRunTimeFilename = tempFile.getAbsolutePath();
-
-    sessionFactory = mock(SessionFactory.class);
-    session = mock(Session.class);
-    transaction = mock(Transaction.class);
-    sfo = mock(SessionFactoryOptions.class);
-    reg = mock(StandardServiceRegistry.class);
-    cp = mock(ConnectionProvider.class);
-    con = mock(Connection.class);
-    rs = mock(ResultSet.class);
-    meta = mock(DatabaseMetaData.class);
-    stmt = mock(Statement.class);
-
-    when(sessionFactory.getCurrentSession()).thenReturn(session);
-    when(session.beginTransaction()).thenReturn(transaction);
-    when(sessionFactory.getSessionFactoryOptions()).thenReturn(sfo);
-    when(sfo.getServiceRegistry()).thenReturn(reg);
-    when(reg.getService(ConnectionProvider.class)).thenReturn(cp);
-    when(cp.getConnection()).thenReturn(con);
-    when(con.getMetaData()).thenReturn(meta);
-    when(con.createStatement()).thenReturn(stmt);
-    when(meta.getDatabaseMajorVersion()).thenReturn(11);
-    when(meta.getDatabaseMinorVersion()).thenReturn(2);
-    when(meta.getDatabaseProductName()).thenReturn("DB2");
-    when(meta.getDatabaseProductVersion()).thenReturn("DSN11010");
-    when(stmt.executeQuery(any())).thenReturn(rs);
-
-    opts = mock(JobOptions.class);
-    esDao = mock(ElasticsearchDao.class);
-    esConfig = mock(ElasticsearchConfiguration.class);
-    when(opts.isLoadSealedAndSensitive()).thenReturn(false);
-    when(esDao.getConfig()).thenReturn(esConfig);
-    when(esConfig.getElasticsearchAlias()).thenReturn("people");
-    when(esConfig.getElasticsearchDocType()).thenReturn("person");
-
-    SimpleTestSystemCodeCache.init();
-
+    super.setup();
     dao = new ReplicatedClientDao(sessionFactory);
     target = new ClientIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
     target.setOpts(opts);
