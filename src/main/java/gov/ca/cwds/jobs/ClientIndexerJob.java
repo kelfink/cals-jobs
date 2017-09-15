@@ -99,21 +99,22 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    * 
    * @param grpRecs recs for same client id
    */
-  protected void handOff(List<EsClientAddress> grpRecs) {
+  protected void handOff(final List<EsClientAddress> grpRecs) {
     try {
-      lock.readLock().unlock();
-      lock.writeLock().lock();
-      for (EsClientAddress cla : grpRecs) {
-        LOGGER.trace("lock: queueTransform.putLast: client id {}", cla.getCltId());
-        queueTransform.putLast(cla);
+      try {
+        lock.writeLock().lock();
+        for (EsClientAddress cla : grpRecs) {
+          LOGGER.trace("lock: queueTransform.putLast: client id {}", cla.getCltId());
+          queueTransform.putLast(cla);
+        }
+      } finally {
+        lock.writeLock().unlock();
       }
       lock.readLock().lock();
     } catch (InterruptedException ie) { // NOSONAR
       LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
       fatalError = true;
       Thread.currentThread().interrupt();
-    } finally {
-      lock.writeLock().unlock();
     }
   }
 
@@ -135,7 +136,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
       final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
           .replaceAll(":toId", p.getRight());
-      LOGGER.warn("query: {}", query);
+      LOGGER.info("query: {}", query);
       enableParallelism(con);
 
       int cntr = 0;
@@ -149,7 +150,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         stmt.setQueryTimeout(0);
 
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
-        lock.readLock().lock();
 
         while (!fatalError && rs.next() && (m = extract(rs)) != null) {
           // Hand the baton to the next runner ...
@@ -167,7 +167,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         con.commit();
       } finally {
         // Statement and connection close automatically.
-        lock.readLock().unlock();
       }
 
     } catch (Exception e) {

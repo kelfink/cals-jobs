@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,6 +13,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,6 +76,7 @@ public class ClientIndexerJobTest {
   StandardServiceRegistry reg;
   ConnectionProvider cp;
   Connection con;
+  Statement stmt;
   ResultSet rs;
   DatabaseMetaData meta;
 
@@ -94,6 +97,7 @@ public class ClientIndexerJobTest {
     con = mock(Connection.class);
     rs = mock(ResultSet.class);
     meta = mock(DatabaseMetaData.class);
+    stmt = mock(Statement.class);
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(session.beginTransaction()).thenReturn(transaction);
@@ -102,10 +106,12 @@ public class ClientIndexerJobTest {
     when(reg.getService(ConnectionProvider.class)).thenReturn(cp);
     when(cp.getConnection()).thenReturn(con);
     when(con.getMetaData()).thenReturn(meta);
+    when(con.createStatement()).thenReturn(stmt);
     when(meta.getDatabaseMajorVersion()).thenReturn(11);
     when(meta.getDatabaseMinorVersion()).thenReturn(2);
     when(meta.getDatabaseProductName()).thenReturn("DB2");
     when(meta.getDatabaseProductVersion()).thenReturn("DSN11010");
+    when(stmt.executeQuery(any())).thenReturn(rs);
 
     opts = mock(JobOptions.class);
     esDao = mock(ElasticsearchDao.class);
