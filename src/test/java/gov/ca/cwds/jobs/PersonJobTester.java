@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.db2.jcc.am.DatabaseMetaData;
 
 import gov.ca.cwds.ObjectMapperUtils;
-import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
@@ -37,16 +36,15 @@ public class PersonJobTester {
   @BeforeClass
   public static void setupClass() {
     BasePersonIndexerJob.setTestMode(true);
-    System.setProperty("DB_CMS_SCHEMA", "CWSINT");
   }
 
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  ReplicatedClientDao dao;
-  ElasticsearchDao esDao;
-  JobOptions opts;
   ElasticsearchConfiguration esConfig;
+  ElasticsearchDao esDao;
+
+  JobOptions opts;
   File tempFile;
   String lastJobRunTimeFilename;
 
@@ -63,10 +61,13 @@ public class PersonJobTester {
 
   @Before
   public void setup() throws Exception {
-    sessionFactory = mock(SessionFactory.class);
+    System.setProperty("DB_CMS_SCHEMA", "CWSINT");
+
+    // Last run time:
     tempFile = tempFolder.newFile("tempFile.txt");
     lastJobRunTimeFilename = tempFile.getAbsolutePath();
 
+    // JDBC:
     sessionFactory = mock(SessionFactory.class);
     session = mock(Session.class);
     transaction = mock(Transaction.class);
@@ -86,19 +87,25 @@ public class PersonJobTester {
     when(cp.getConnection()).thenReturn(con);
     when(con.getMetaData()).thenReturn(meta);
     when(con.createStatement()).thenReturn(stmt);
+    when(stmt.executeQuery(any())).thenReturn(rs);
+
+    // DB2 platform and version:
     when(meta.getDatabaseMajorVersion()).thenReturn(11);
     when(meta.getDatabaseMinorVersion()).thenReturn(2);
     when(meta.getDatabaseProductName()).thenReturn("DB2");
     when(meta.getDatabaseProductVersion()).thenReturn("DSN11010");
-    when(stmt.executeQuery(any())).thenReturn(rs);
 
-    opts = mock(JobOptions.class);
+    // Elasticsearch:
     esDao = mock(ElasticsearchDao.class);
     esConfig = mock(ElasticsearchConfiguration.class);
-    when(opts.isLoadSealedAndSensitive()).thenReturn(false);
+
     when(esDao.getConfig()).thenReturn(esConfig);
     when(esConfig.getElasticsearchAlias()).thenReturn("people");
     when(esConfig.getElasticsearchDocType()).thenReturn("person");
+
+    // Job options:
+    opts = mock(JobOptions.class);
+    when(opts.isLoadSealedAndSensitive()).thenReturn(false);
 
     SimpleTestSystemCodeCache.init();
   }

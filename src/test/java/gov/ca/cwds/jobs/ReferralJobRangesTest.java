@@ -68,6 +68,9 @@ public class ReferralJobRangesTest extends PersonJobTester {
   public void getPartitionRanges_Args__BasePersonIndexerJob() throws Exception {
     BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job =
         mock(BasePersonIndexerJob.class);
+    job.setOpts(opts);
+    when(opts.isRangeGiven()).thenReturn(true);
+
     final List actual = target.getPartitionRanges(job);
     final List expected = new ArrayList<>();
     expected.add(Pair.of("0000000000", "ZZZZZZZZZZ"));

@@ -1833,27 +1833,41 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * SELECT statements using range partitions depend on sort order.
    * </p>
    * 
+   * <h4>Database platforms and versions:</h4>
+   * <table>
+   * <tr>
+   * <th align="justify">Platform</th>
+   * <th align="justify">Name</th>
+   * <th align="justify">Version</th>
+   * <th align="justify">Major</th>
+   * <th align="justify">Minor</th>
+   * <th align="justify">Catalog</th>
+   * </tr>
+   * <tr>
+   * <td align="justify">z/OS</td>
+   * <td align="justify">DB2</td>
+   * <td align="justify">DSN11010</td>
+   * <td align="justify">11</td>
+   * <td align="justify">1</td>
+   * <td align="justify">location</td>
+   * </tr>
+   * <tr>
+   * <td align="justify">Linux</td>
+   * <td align="justify">DB2/LINUXX8664</td>
+   * <td align="justify">SQL10057</td>
+   * <td align="justify">10</td>
+   * <td align="justify">5</td>
+   * <td align="justify">database</td>
+   * </tr>
+   * </table>
+   * 
    * @return true if DB2 is running on a mainframe
    */
   public boolean isDB2OnZOS() {
     boolean ret = false;
 
-    // Z/OS:
-    // product name: DB2
-    // production version: DSN11010
-    // major: 11
-    // minor: 1
-    // catalog term: location
-    //
-    // LINUX:
-    // product name: DB2/LINUXX8664
-    // production version: SQL10057
-    // major: 10
-    // minor: 5
-    // catalog term: database
-
-    try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
-        .getService(ConnectionProvider.class).getConnection()) {
+    try (final Connection con = jobDao.getSessionFactory().getSessionFactoryOptions()
+        .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
 
       final DatabaseMetaData meta = con.getMetaData();
       LOGGER.info("meta:\nproduct name: {}\nproduction version: {}\nmajor: {}\nminor: {}",
