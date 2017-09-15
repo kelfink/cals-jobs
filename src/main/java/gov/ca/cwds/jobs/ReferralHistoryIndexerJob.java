@@ -234,7 +234,7 @@ public class ReferralHistoryIndexerJob
 
   @Override
   public String getJdbcOrderBy() {
-    return " "; // sort manually cuz DB2 might not optimize the sort.
+    return ""; // sort manually cuz DB2 might not optimize the sort.
   }
 
   @Override

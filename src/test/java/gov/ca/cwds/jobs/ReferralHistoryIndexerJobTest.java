@@ -66,18 +66,16 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
   public void getViewName_Args__() throws Exception {
     String actual = target.getInitialLoadViewName();
-    String expected = "MQT_REFERRAL_HIST";
+    String expected = "VW_MQT_REFRL_ONLY";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
-  @Ignore
   public void getJdbcOrderBy_Args__() throws Exception {
-    String actual = target.getJdbcOrderBy();
-    String expected = " ORDER BY CLIENT_ID ";
+    String actual = target.getJdbcOrderBy().trim();
+    String expected = "";
     assertThat(actual, is(equalTo(expected)));
   }
 
