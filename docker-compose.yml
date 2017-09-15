@@ -16,16 +16,16 @@ services:
       - neutronnet
     ports:
       - "5432:5432"
-  neutron-elasticsearch_xpack_data:
-    image: cwds/elasticsearch_xpack_data
-    restart: always
-    volumes:
-      - ./jvm.options:/usr/share/elasticsearch/config/jvm.options
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    networks:
-      - neutronnet
+#  neutron-elasticsearch_xpack_data:
+#    image: cwds/elasticsearch_xpack_data
+#    restart: always
+#    volumes:
+#      - ./jvm.options:/usr/share/elasticsearch/config/jvm.options
+#    ports:
+#      - "9200:9200"
+#      - "9300:9300"
+#    networks:
+#      - neutronnet
   
 networks:
   neutronnet:
