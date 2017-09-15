@@ -270,11 +270,18 @@ public class ClientIndexerJobTest {
   }
 
   @Test
-  public void getPartitionRanges_Args__() throws Exception {
+  public void getPartitionRanges_Args() throws Exception {
     final List actual = target.getPartitionRanges();
     final List expected = new ArrayList<>();
     expected.add(Pair.of("aaaaaaaaaa", "9999999999"));
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getPartitionRanges_RSQ() throws Exception {
+    System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
+    final List actual = target.getPartitionRanges();
+    assertThat(actual.size(), is(equalTo(16)));
   }
 
   @Test
