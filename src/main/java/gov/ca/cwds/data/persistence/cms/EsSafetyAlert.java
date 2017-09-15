@@ -131,7 +131,6 @@ public class EsSafetyAlert extends ApiObjectIdentity
     }
 
     ElasticSearchSafetyAlert esSafetyAlert = new ElasticSearchSafetyAlert();
-
     esSafetyAlert.setId(this.alertId);
 
     esSafetyAlert.setActivationReason(
