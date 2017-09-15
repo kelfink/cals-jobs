@@ -51,7 +51,7 @@ import gov.ca.cwds.rest.ElasticsearchConfiguration;
 @SuppressWarnings("javadoc")
 public class ClientIndexerJobTest {
 
-  private static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
+  protected static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
 
   @BeforeClass
   public static void setupClass() {
@@ -259,14 +259,14 @@ public class ClientIndexerJobTest {
   }
 
   @Test
-  public void pullRange_Args__Pair() throws Exception {
-    final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
-    target.pullRange(p);
+  public void threadExtractJdbc_Args__() throws Exception {
+    target.threadExtractJdbc();
   }
 
   @Test
-  public void threadExtractJdbc_Args__() throws Exception {
-    target.threadExtractJdbc();
+  public void pullRange_Args__Pair() throws Exception {
+    final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
+    target.pullRange(p);
   }
 
   @Test

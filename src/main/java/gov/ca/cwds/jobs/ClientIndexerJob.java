@@ -104,7 +104,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       try {
         lock.writeLock().lock();
         for (EsClientAddress cla : grpRecs) {
-          LOGGER.trace("lock: queueTransform.putLast: client id {}", cla.getCltId());
           queueTransform.putLast(cla);
         }
       } finally {
@@ -194,9 +193,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       // String.valueOf(maxThreads));
       // LOGGER.info("JDBC processors={}", maxThreads);
 
-      // ForkJoinPool forkJoinPool = new ForkJoinPool(1);
-      // forkJoinPool
-      // .submit(() -> getPartitionRanges().parallelStream().forEach(this::pullRange));
+      // ForkJoinPool pool = new ForkJoinPool(1);
+      // pool.submit(() -> getPartitionRanges().parallelStream().forEach(this::pullRange));
 
       // final ForkJoinPool pool = new ForkJoinPool(1);
       // for (Pair<String, String> pair : getPartitionRanges()) {

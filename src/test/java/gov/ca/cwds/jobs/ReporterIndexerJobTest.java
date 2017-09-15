@@ -5,19 +5,16 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
-import gov.ca.cwds.data.es.ElasticsearchDao;
 
 /**
  * Test for {@link ReporterIndexerJob}.
@@ -25,34 +22,42 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
  * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
-public class ReporterIndexerJobTest {
+public class ReporterIndexerJobTest extends PersonJobTester {
 
   @SuppressWarnings("unused")
-  private static ReplicatedReporterDao reporterDao;
-  private static SessionFactory sessionFactory;
-  private Session session;
+  private ReplicatedReporterDao dao;
 
-  @BeforeClass
-  public static void beforeClass() {
-    sessionFactory =
-        new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-    reporterDao = new ReplicatedReporterDao(sessionFactory);
-  }
+  private ReporterIndexerJob target;
 
-  @AfterClass
-  public static void afterClass() {
-    sessionFactory.close();
-  }
+  // private static SessionFactory sessionFactory;
+  // private Session session;
 
+  // @BeforeClass
+  // public static void beforeClass() {
+  // sessionFactory =
+  // new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
+  // dao = new ReplicatedReporterDao(sessionFactory);
+  // }
+  //
+  // @AfterClass
+  // public static void afterClass() {
+  // sessionFactory.close();
+  // }
+
+  @Override
   @Before
-  public void setup() {
-    session = sessionFactory.getCurrentSession();
-    session.beginTransaction();
+  public void setup() throws Exception {
+    super.setup();
+    dao = new ReplicatedReporterDao(sessionFactory);
+    target = new ReporterIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    target.setOpts(opts);
+    // session = sessionFactory.getCurrentSession();
+    // session.beginTransaction();
   }
 
   @After
   public void teardown() {
-    session.getTransaction().rollback();
+    // session.getTransaction().rollback();
   }
 
   @Test
@@ -62,13 +67,6 @@ public class ReporterIndexerJobTest {
 
   @Test
   public void testInstantiation() throws Exception {
-    ReplicatedReporterDao reporterDao = null;
-    ElasticsearchDao elasticsearchDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ReporterIndexerJob target = new ReporterIndexerJob(reporterDao, elasticsearchDao,
-        lastJobRunTimeFilename, mapper, sessionFactory);
     assertThat(target, notNullValue());
   }
 
@@ -79,64 +77,43 @@ public class ReporterIndexerJobTest {
 
   @Test
   public void instantiation() throws Exception {
-    ReplicatedReporterDao dao = null;
-    ElasticsearchDao esDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ReporterIndexerJob target =
-        new ReporterIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
     assertThat(target, notNullValue());
   }
 
   @Test
   public void getIdColumn_Args__() throws Exception {
-    ReplicatedReporterDao dao = null;
-    ElasticsearchDao esDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    final ReporterIndexerJob target =
-        new ReporterIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     final String actual = target.getIdColumn();
-    // then
-    // e.g. : verify(mocked).called();
     final String expected = "FKREFERL_T";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getLegacySourceTable_Args__() throws Exception {
-    ReplicatedReporterDao dao = null;
-    ElasticsearchDao esDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ReporterIndexerJob target =
-        new ReporterIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     final String actual = target.getLegacySourceTable();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = "REPTR_T";
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void main_Args__StringArray() throws Exception {
-    // TODO auto-generated by JUnit Helper.
-    // given
     String[] args = new String[] {};
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     ReporterIndexerJob.main(args);
-    // then
-    // e.g. : verify(mocked).called();
+  }
+
+  @Test
+  public void getPartitionRanges_Args() throws Exception {
+    final List actual = target.getPartitionRanges();
+    final List expected = new ArrayList<>();
+    expected.add(Pair.of("aaaaaaaaaa", "9999999999"));
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getPartitionRanges_RSQ() throws Exception {
+    System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
+    final List actual = target.getPartitionRanges();
+    assertThat(actual.size(), is(equalTo(64)));
   }
 
 }
