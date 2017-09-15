@@ -33,14 +33,14 @@ public class ClientIndexerJobTest extends PersonJobTester {
 
   protected static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
 
+  ReplicatedClientDao dao;
+  ClientIndexerJob target;
+
   @BeforeClass
   public static void setupClass() {
     BasePersonIndexerJob.setTestMode(true);
     System.setProperty("DB_CMS_SCHEMA", "CWSINT");
   }
-
-  ReplicatedClientDao dao;
-  ClientIndexerJob target;
 
   @Override
   @Before

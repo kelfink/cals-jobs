@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -24,25 +23,8 @@ import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
 @SuppressWarnings("javadoc")
 public class ReporterIndexerJobTest extends PersonJobTester {
 
-  @SuppressWarnings("unused")
   private ReplicatedReporterDao dao;
-
   private ReporterIndexerJob target;
-
-  // private static SessionFactory sessionFactory;
-  // private Session session;
-
-  // @BeforeClass
-  // public static void beforeClass() {
-  // sessionFactory =
-  // new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-  // dao = new ReplicatedReporterDao(sessionFactory);
-  // }
-  //
-  // @AfterClass
-  // public static void afterClass() {
-  // sessionFactory.close();
-  // }
 
   @Override
   @Before
@@ -51,13 +33,6 @@ public class ReporterIndexerJobTest extends PersonJobTester {
     dao = new ReplicatedReporterDao(sessionFactory);
     target = new ReporterIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
     target.setOpts(opts);
-    // session = sessionFactory.getCurrentSession();
-    // session.beginTransaction();
-  }
-
-  @After
-  public void teardown() {
-    // session.getTransaction().rollback();
   }
 
   @Test
