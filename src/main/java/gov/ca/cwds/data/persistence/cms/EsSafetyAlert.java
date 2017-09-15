@@ -130,32 +130,32 @@ public class EsSafetyAlert extends ApiObjectIdentity
       map.put(this.clientId, alerts);
     }
 
-    ElasticSearchSafetyAlert esSafetyAlert = new ElasticSearchSafetyAlert();
-    esSafetyAlert.setId(this.alertId);
+    ElasticSearchSafetyAlert alert = new ElasticSearchSafetyAlert();
+    alert.setId(this.alertId);
 
-    esSafetyAlert.setActivationReason(
+    alert.setActivationReason(
         SystemCodeCache.global().getSystemCodeShortDescription(this.activationReasonCode));
-    esSafetyAlert.setActivationReasonId(
+    alert.setActivationReasonId(
         this.activationReasonCode != null ? this.activationReasonCode.toString() : null);
 
-    esSafetyAlert.setActivationCounty(
+    alert.setActivationCounty(
         SystemCodeCache.global().getSystemCodeShortDescription(this.activationCountyCode));
-    esSafetyAlert.setActivationCountyId(
+    alert.setActivationCountyId(
         this.activationCountyCode != null ? this.activationCountyCode.toString() : null);
-    esSafetyAlert.setActivationDate(DomainChef.cookDate(this.activationDate));
-    esSafetyAlert.setActivationExplanation(this.activationExplanation);
+    alert.setActivationDate(DomainChef.cookDate(this.activationDate));
+    alert.setActivationExplanation(this.activationExplanation);
 
-    esSafetyAlert.setDeactivationCounty(
+    alert.setDeactivationCounty(
         SystemCodeCache.global().getSystemCodeShortDescription(this.deactivationCountyCode));
-    esSafetyAlert.setDeactivationCountyId(
+    alert.setDeactivationCountyId(
         this.deactivationCountyCode != null ? this.deactivationCountyCode.toString() : null);
-    esSafetyAlert.setDeactivationDate(DomainChef.cookDate(this.deactivationDate));
-    esSafetyAlert.setDeactivationExplanation(this.deactivationExplanation);
+    alert.setDeactivationDate(DomainChef.cookDate(this.deactivationDate));
+    alert.setDeactivationExplanation(this.deactivationExplanation);
 
-    esSafetyAlert.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.alertId,
+    alert.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.alertId,
         this.lastUpdatedTimestamp, LegacyTable.SAFETY_ALERT));
 
-    alerts.addSafetyAlert(esSafetyAlert);
+    alerts.addSafetyAlert(alert);
     return alerts;
   }
 

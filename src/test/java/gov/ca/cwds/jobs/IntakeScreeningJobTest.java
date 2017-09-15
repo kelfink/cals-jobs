@@ -56,8 +56,6 @@ public class IntakeScreeningJobTest {
   // final IntakeScreeningJob target = new IntakeScreeningJob(normalizedDao, viewDao, esDao,
   // lastJobRunTimeFilename, mapper, sessionFactory);
   //
-  //
-  //
   // target.threadExtractJdbc();
   //
   //

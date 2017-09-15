@@ -104,7 +104,7 @@ public class SafetyAlertIndexerJob
 
   @Override
   protected ReplicatedSafetyAlerts normalizeSingle(List<EsSafetyAlert> recs) {
-    return normalize(recs).get(0);
+    return recs != null && !recs.isEmpty() ? normalize(recs).get(0) : new ReplicatedSafetyAlerts();
   }
 
   @Override
@@ -118,7 +118,7 @@ public class SafetyAlertIndexerJob
     StringBuilder buf = new StringBuilder();
     buf.append("{\"safety_alerts\":[");
 
-    List<ElasticSearchSafetyAlert> esSafetyAlerts = safetyAlerts.getSafetyAlerts();
+    final List<ElasticSearchSafetyAlert> esSafetyAlerts = safetyAlerts.getSafetyAlerts();
     esp.setSafetyAlerts(esSafetyAlerts);
 
     if (esSafetyAlerts != null && !esSafetyAlerts.isEmpty()) {

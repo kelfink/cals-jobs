@@ -13,6 +13,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -32,7 +33,8 @@ public class DocumentMetadataDaoImplTest {
     assertThat(target, notNullValue());
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void findByLastJobRunTimeMinusOneMinute_Args__Date() throws Exception {
     SessionFactory sessionFactory = Mockito.mock(SessionFactory.class);
     Session session = Mockito.mock(Session.class);
@@ -42,13 +44,8 @@ public class DocumentMetadataDaoImplTest {
     when(session.getNamedQuery(any())).thenReturn(query);
 
     DocumentMetadataDaoImpl target = new DocumentMetadataDaoImpl(sessionFactory);
-    // given
     Date lastJobRunTime = new Date();
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     List<DocumentMetadata> actual = target.findByLastJobRunTimeMinusOneMinute(lastJobRunTime);
-    // then
-    // e.g. : verify(mocked).called();
     List<DocumentMetadata> expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
