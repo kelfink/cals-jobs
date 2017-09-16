@@ -643,7 +643,7 @@ public class ReferralHistoryIndexerJob
     StringBuilder buf = new StringBuilder();
     buf.append("{\"referrals\":[");
 
-    List<ElasticSearchPersonReferral> esPersonReferrals = referrals.getReferrals();
+    final List<ElasticSearchPersonReferral> esPersonReferrals = referrals.getReferrals();
     esp.setReferrals(esPersonReferrals);
 
     if (esPersonReferrals != null && !esPersonReferrals.isEmpty()) {

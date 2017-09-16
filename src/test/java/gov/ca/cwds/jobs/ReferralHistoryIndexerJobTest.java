@@ -87,15 +87,14 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
   public void normalizeSingle_Args__List() throws Exception {
     List<EsPersonReferral> recs = new ArrayList<EsPersonReferral>();
     EsPersonReferral addMe = new EsPersonReferral();
     addMe.setClientId("qz11234567");
+    addMe.setReferralId("abc1234567");
     recs.add(addMe);
     ReplicatedPersonReferrals actual = target.normalizeSingle(recs);
-    ReplicatedPersonReferrals expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, notNullValue());
   }
 
   @Test
@@ -107,21 +106,20 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
   public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedPersonReferrals()
       throws Exception {
-    ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
-    ReplicatedPersonReferrals referrals = mock(ReplicatedPersonReferrals.class);
+    ElasticSearchPerson esp = new ElasticSearchPerson();
+    ReplicatedPersonReferrals referrals = new ReplicatedPersonReferrals();
     UpdateRequest actual = target.prepareUpsertRequest(esp, referrals);
-    UpdateRequest expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, notNullValue());
   }
 
   @Test
   public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedPersonReferrals_T__IOException()
       throws Exception {
-    ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
-    ReplicatedPersonReferrals referrals = mock(ReplicatedPersonReferrals.class);
+    ElasticSearchPerson esp = new ElasticSearchPerson();
+    ReplicatedPersonReferrals referrals = new ReplicatedPersonReferrals();
+    when(esDao.getConfig().getElasticsearchAlias()).thenThrow(new IOException());
     try {
       target.prepareUpsertRequest(esp, referrals);
       fail("Expected exception was not thrown!");
