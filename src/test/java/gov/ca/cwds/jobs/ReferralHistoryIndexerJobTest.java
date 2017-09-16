@@ -7,7 +7,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
@@ -17,18 +16,76 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibm.db2.jcc.DB2SystemMonitor;
+
 import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
 import gov.ca.cwds.jobs.exception.JobsException;
 
 public class ReferralHistoryIndexerJobTest extends PersonJobTester {
+
+  private static class TestDB2SystemMonitor implements DB2SystemMonitor {
+
+    @Override
+    public void enable(boolean paramBoolean) throws SQLException {}
+
+    @Override
+    public void start(int paramInt) throws SQLException {}
+
+    @Override
+    public void stop() throws SQLException {}
+
+    @Override
+    public long getServerTimeMicros() throws SQLException {
+      return 0;
+    }
+
+    @Override
+    public long getNetworkIOTimeMicros() throws SQLException {
+      return 0;
+    }
+
+    @Override
+    public long getCoreDriverTimeMicros() throws SQLException {
+      return 0;
+    }
+
+    @Override
+    public long getApplicationTimeMillis() throws SQLException {
+      return 0;
+    }
+
+    @Override
+    public Object moreData(int paramInt) throws SQLException {
+      return "nothin";
+    }
+
+  }
+
+  private static class TestReferralHistoryIndexerJob extends ReferralHistoryIndexerJob {
+
+    public TestReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao,
+        ElasticsearchDao esDao, String lastJobRunTimeFilename, ObjectMapper mapper,
+        SessionFactory sessionFactory) {
+      super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    }
+
+    @Override
+    protected DB2SystemMonitor monitorStart(final Connection con) {
+      return new TestDB2SystemMonitor();
+    }
+
+  }
 
   // ====================
   // TEST MEMBERS:
@@ -128,11 +185,9 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
   public void extract_Args__ResultSet() throws Exception {
     EsPersonReferral actual = target.extract(rs);
-    EsPersonReferral expected = new EsPersonReferral();
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, notNullValue());
   }
 
   @Test
@@ -159,17 +214,19 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
+  // @Ignore
   public void getInitialLoadQuery_Args__String() throws Exception {
-    String dbSchemaName = null;
+    String dbSchemaName = "CWSRS1";
     String actual = target.getInitialLoadQuery(dbSchemaName);
     assertThat(actual, notNullValue());
   }
 
   @Test
-  @Ignore
   public void pullRange_Args__Pair() throws Exception {
-    Pair<String, String> p = mock(Pair.class);
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
+        sessionFactory);
+    target.setOpts(JobOptionsTest.makeGeneric());
+    final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
     target.pullRange(p);
   }
 

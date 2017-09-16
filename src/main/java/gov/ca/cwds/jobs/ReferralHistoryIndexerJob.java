@@ -243,25 +243,18 @@ public class ReferralHistoryIndexerJob
 
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
-    // Roll your own. Can't wait for DBA turn-around.
+    // Roll your own SQL. Turn-around on DB2 objects from other teams takes too long.
 
     StringBuilder buf = new StringBuilder();
-    // buf.append("SELECT vw.* FROM ");
-    // buf.append(dbSchemaName);
-    // buf.append(".");
-    // buf.append(getInitialLoadViewName());
-    // buf.append(" vw ");
-
     buf.append(SELECT_REFERRAL.replaceAll("#SCHEMA#", dbSchemaName));
 
     if (!getOpts().isLoadSealedAndSensitive()) {
-      // buf.append(" WHERE LIMITED_ACCESS_CODE = 'N' ");
       buf.append(" WHERE RFL.LMT_ACSSCD = 'N' ");
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     final String ret = buf.toString().replaceAll("\\s+", " ");
-    LOGGER.warn("REFERRAL SQL: {}", ret);
+    LOGGER.info("REFERRAL SQL: {}", ret);
     return ret;
   }
 
@@ -295,7 +288,7 @@ public class ReferralHistoryIndexerJob
    * @param monitor current monitor instance
    * @throws SQLException on JDBC error
    */
-  private void monitorStopAndReport(final DB2SystemMonitor monitor) throws SQLException {
+  protected void monitorStopAndReport(final DB2SystemMonitor monitor) throws SQLException {
     monitor.stop();
     LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
     LOGGER.info("Network I/O elapsed time (microseconds)=" + monitor.getNetworkIOTimeMicros());
@@ -309,7 +302,7 @@ public class ReferralHistoryIndexerJob
     // LOGGER.info("NETWORK_TRIPS: {}", monitor.moreData(NUMBER_NETWORK_TRIPS));
   }
 
-  private void readClients(final PreparedStatement stmtInsClient,
+  protected void readClients(final PreparedStatement stmtInsClient,
       final PreparedStatement stmtSelClient, final List<MinClientReferral> listClientReferralKeys,
       final Pair<String, String> p) throws SQLException {
 
@@ -335,7 +328,7 @@ public class ReferralHistoryIndexerJob
     }
   }
 
-  private void readReferrals(final PreparedStatement stmtSelReferral,
+  protected void readReferrals(final PreparedStatement stmtSelReferral,
       final Map<String, EsPersonReferral> mapReferrals) throws SQLException {
     stmtSelReferral.setMaxRows(0);
     stmtSelReferral.setQueryTimeout(0);
@@ -353,7 +346,7 @@ public class ReferralHistoryIndexerJob
     }
   }
 
-  private void readAllegations(final PreparedStatement stmtSelAllegation,
+  protected void readAllegations(final PreparedStatement stmtSelAllegation,
       final List<EsPersonReferral> listAllegations) throws SQLException {
     stmtSelAllegation.setMaxRows(0);
     stmtSelAllegation.setQueryTimeout(0);
@@ -371,7 +364,15 @@ public class ReferralHistoryIndexerJob
     }
   }
 
-  private DB2SystemMonitor monitorStart(final Connection con)
+  /**
+   * Get a DB2 monitor and start it for this transaction.
+   * 
+   * @param con database connection
+   * @return DB2 monitor
+   * @throws SQLException general database error
+   * @throws ClassNotFoundException wrong driver or connection pool
+   */
+  protected DB2SystemMonitor monitorStart(final Connection con)
       throws SQLException, ClassNotFoundException {
     final com.ibm.db2.jcc.t4.b nativeCon =
         (com.ibm.db2.jcc.t4.b) ((com.mchange.v2.c3p0.impl.NewProxyConnection) con)
@@ -386,7 +387,7 @@ public class ReferralHistoryIndexerJob
     return monitor;
   }
 
-  private int normalizeQueryResults(final Map<String, EsPersonReferral> mapReferrals,
+  protected int normalizeQueryResults(final Map<String, EsPersonReferral> mapReferrals,
       final List<EsPersonReferral> listReadyToNorm,
       final Map<String, List<MinClientReferral>> mapReferralByClient,
       final Map<String, List<EsPersonReferral>> mapAllegationByReferral) {
@@ -435,7 +436,7 @@ public class ReferralHistoryIndexerJob
     return cntr;
   }
 
-  private void releaseLocalMemory(final List<EsPersonReferral> listAllegations,
+  protected void releaseLocalMemory(final List<EsPersonReferral> listAllegations,
       final Map<String, EsPersonReferral> mapReferrals,
       final List<MinClientReferral> listClientReferralKeys,
       final List<EsPersonReferral> listReadyToNorm) {
@@ -529,7 +530,7 @@ public class ReferralHistoryIndexerJob
     return cntr;
   }
 
-  private int calcReaderThreads() {
+  protected int calcReaderThreads() {
     final int ret = getOpts().getThreadCount() != 0L ? (int) getOpts().getThreadCount()
         : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
     LOGGER.warn(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
@@ -553,12 +554,11 @@ public class ReferralHistoryIndexerJob
       final List<Pair<String, String>> ranges = getPartitionRanges();
       LOGGER.warn(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
-
-      ForkJoinPool forkJoinPool = new ForkJoinPool(calcReaderThreads());
+      final ForkJoinPool threadPool = new ForkJoinPool(calcReaderThreads());
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
-        tasks.add(forkJoinPool.submit(() -> pullRange(p)));
+        tasks.add(threadPool.submit(() -> pullRange(p)));
       }
 
       // Join threads. Don't return from method until they complete.
@@ -566,11 +566,12 @@ public class ReferralHistoryIndexerJob
         task.get();
       }
 
+      LOGGER.info("read {} ES referral rows", this.rowsReadReferrals.get());
+
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      LOGGER.info("read {} ES referral rows", this.rowsReadReferrals.get());
       doneExtract = true;
     }
 
