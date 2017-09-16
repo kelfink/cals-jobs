@@ -6,8 +6,10 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Timestamp;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -88,6 +90,15 @@ public class PersonJobTester {
     when(con.getMetaData()).thenReturn(meta);
     when(con.createStatement()).thenReturn(stmt);
     when(stmt.executeQuery(any())).thenReturn(rs);
+
+    // Result set:
+    when(rs.next()).thenReturn(false);
+    when(rs.getString(any())).thenReturn("abc123456789");
+    when(rs.getInt(any())).thenReturn(0);
+
+    final java.util.Date date = new java.util.Date();
+    when(rs.getDate(any())).thenReturn(new Date(date.getTime()));
+    when(rs.getTimestamp(any())).thenReturn(new Timestamp(date.getTime()));
 
     // DB2 platform and version:
     when(meta.getDatabaseMajorVersion()).thenReturn(11);

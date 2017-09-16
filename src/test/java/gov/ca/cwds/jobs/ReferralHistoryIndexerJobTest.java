@@ -240,7 +240,6 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
     PreparedStatement stmtSelClient = mock(PreparedStatement.class);
 
     when(stmtSelClient.executeQuery()).thenReturn(rs);
-    when(rs.next()).thenReturn(false);
 
     final List<MinClientReferral> listClientReferralKeys = new ArrayList<>();
     final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
