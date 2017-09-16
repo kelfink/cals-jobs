@@ -61,7 +61,7 @@ public class PersonJobTester {
 
   @Before
   public void setup() throws Exception {
-    System.setProperty("DB_CMS_SCHEMA", "CWSINT");
+    System.setProperty("DB_CMS_SCHEMA", "CWSRS1");
 
     // Last run time:
     tempFile = tempFolder.newFile("tempFile.txt");

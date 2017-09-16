@@ -7,9 +7,11 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
+import gov.ca.cwds.jobs.ReferralHistoryIndexerJob.MinClientReferral;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
 import gov.ca.cwds.jobs.exception.JobsException;
 
@@ -83,6 +86,13 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
     @Override
     protected DB2SystemMonitor monitorStart(final Connection con) {
       return new TestDB2SystemMonitor();
+    }
+
+    @Override
+    public void readClients(final PreparedStatement stmtInsClient,
+        final PreparedStatement stmtSelClient, final List<MinClientReferral> listClientReferralKeys,
+        final Pair<String, String> p) throws SQLException {
+      super.readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
     }
 
   }
@@ -214,7 +224,6 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  // @Ignore
   public void getInitialLoadQuery_Args__String() throws Exception {
     String dbSchemaName = "CWSRS1";
     String actual = target.getInitialLoadQuery(dbSchemaName);
@@ -222,6 +231,25 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   }
 
   @Test
+  public void testReadClients() throws Exception {
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
+        sessionFactory);
+    target.setOpts(JobOptionsTest.makeGeneric());
+
+    PreparedStatement stmtInsClient = mock(PreparedStatement.class);
+    PreparedStatement stmtSelClient = mock(PreparedStatement.class);
+
+    when(stmtSelClient.executeQuery()).thenReturn(rs);
+    when(rs.next()).thenReturn(false);
+
+    final List<MinClientReferral> listClientReferralKeys = new ArrayList<>();
+    final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
+
+    target.readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
+  }
+
+  @Test
+  @Ignore
   public void pullRange_Args__Pair() throws Exception {
     target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
         sessionFactory);
