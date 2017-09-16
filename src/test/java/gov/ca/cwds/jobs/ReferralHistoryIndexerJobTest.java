@@ -249,6 +249,22 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   }
 
   @Test
+  public void testReadAllegations() throws Exception {
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
+        sessionFactory);
+    target.setOpts(JobOptionsTest.makeGeneric());
+
+    final PreparedStatement stmtSelAllegation = mock(PreparedStatement.class);
+
+    when(stmtSelAllegation.executeQuery()).thenReturn(rs);
+    when(rs.next()).thenReturn(false);
+
+    final List<EsPersonReferral> listAllegations = new ArrayList<>();
+
+    target.readAllegations(stmtSelAllegation, listAllegations);
+  }
+
+  @Test
   @Ignore
   public void pullRange_Args__Pair() throws Exception {
     target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
