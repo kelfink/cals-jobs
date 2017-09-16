@@ -1833,8 +1833,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * SELECT statements using range partitions depend on sort order.
    * </p>
    * 
-   * <h4>Database platforms and versions:</h4>
-   * <table>
+   * <p>
+   * Database platforms and versions:
+   * </p>
+   * 
+   * <table summary="">
    * <tr>
    * <th align="justify">Platform</th>
    * <th align="justify">Name</th>

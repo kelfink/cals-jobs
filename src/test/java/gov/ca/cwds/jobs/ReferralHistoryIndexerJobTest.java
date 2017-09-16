@@ -10,7 +10,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -27,6 +26,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
+import gov.ca.cwds.jobs.exception.JobsException;
 
 public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
@@ -115,15 +115,15 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedPersonReferrals_T__IOException()
+  public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedPersonReferrals_T__Exception()
       throws Exception {
     ElasticSearchPerson esp = new ElasticSearchPerson();
     ReplicatedPersonReferrals referrals = new ReplicatedPersonReferrals();
-    when(esDao.getConfig().getElasticsearchAlias()).thenThrow(new IOException());
+    when(esDao.getConfig().getElasticsearchAlias()).thenThrow(new JobsException("test"));
     try {
       target.prepareUpsertRequest(esp, referrals);
       fail("Expected exception was not thrown!");
-    } catch (IOException e) {
+    } catch (Exception e) {
     }
   }
 
