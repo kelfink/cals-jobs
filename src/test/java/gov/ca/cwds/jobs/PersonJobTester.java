@@ -96,11 +96,14 @@ public class PersonJobTester {
     when(rs.next()).thenReturn(false);
     when(rs.getString(any())).thenReturn("abc123456789");
     when(rs.getString(contains("IBMSNAP_OPERATION"))).thenReturn("I");
+    when(rs.getString("LIMITED_ACCESS_CODE")).thenReturn("N");
     when(rs.getInt(any())).thenReturn(0);
 
     final java.util.Date date = new java.util.Date();
+    final Timestamp ts = new Timestamp(date.getTime());
     when(rs.getDate(any())).thenReturn(new Date(date.getTime()));
-    when(rs.getTimestamp(any())).thenReturn(new Timestamp(date.getTime()));
+    when(rs.getTimestamp("LIMITED_ACCESS_CODE")).thenReturn(ts);
+    when(rs.getTimestamp(any())).thenReturn(ts);
 
     // DB2 platform and version:
     when(meta.getDatabaseMajorVersion()).thenReturn(11);
