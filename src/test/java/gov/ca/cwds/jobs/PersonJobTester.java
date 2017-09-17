@@ -12,7 +12,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.persistence.EntityManager;
+
+import org.elasticsearch.client.Client;
+import org.elasticsearch.common.settings.Settings;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -88,14 +94,17 @@ public class PersonJobTester {
 
   ElasticsearchConfiguration esConfig;
   ElasticsearchDao esDao;
+  Client client;
   ElasticSearchPerson esp = new ElasticSearchPerson();
 
   JobOptions opts;
   File tempFile;
   String lastJobRunTimeFilename;
+  java.util.Date lastRunTime = new java.util.Date();
 
   SessionFactory sessionFactory;
   Session session;
+  EntityManager em;
   SessionFactoryOptions sfo;
   Transaction transaction;
   StandardServiceRegistry reg;
@@ -124,8 +133,12 @@ public class PersonJobTester {
     rs = mock(ResultSet.class);
     meta = mock(DatabaseMetaData.class);
     stmt = mock(Statement.class);
+    em = mock(EntityManager.class);
+    client = mock(Client.class);
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
+    when(sessionFactory.getCurrentSession()).thenReturn(session);
+    when(sessionFactory.createEntityManager()).thenReturn(em);
     when(session.beginTransaction()).thenReturn(transaction);
     when(sessionFactory.getSessionFactoryOptions()).thenReturn(sfo);
     when(sfo.getServiceRegistry()).thenReturn(reg);
@@ -159,12 +172,20 @@ public class PersonJobTester {
     esConfig = mock(ElasticsearchConfiguration.class);
 
     when(esDao.getConfig()).thenReturn(esConfig);
+    when(esDao.getClient()).thenReturn(client);
+
+    final Map<String, String> mapSettings = new HashMap<>();
+    final Settings settings = Settings.builder().put(mapSettings).build();;
+    when(client.settings()).thenReturn(settings);
+
     when(esConfig.getElasticsearchAlias()).thenReturn("people");
     when(esConfig.getElasticsearchDocType()).thenReturn("person");
 
     // Job options:
+    final File esConfileFile = tempFolder.newFile("es.yml");
     opts = mock(JobOptions.class);
     when(opts.isLoadSealedAndSensitive()).thenReturn(false);
+    // when(opts.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
   }
 
 }

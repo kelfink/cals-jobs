@@ -31,6 +31,11 @@ public class TestIndexerJob
   }
 
   @Override
+  public String getDriverTable() {
+    return "GOOBER_T";
+  }
+
+  @Override
   public TestNormalizedEntity normalizeSingle(List<TestDenormalizedEntity> recs) {
     return new TestNormalizedEntity((String) recs.get(0).getPrimaryKey());
   }

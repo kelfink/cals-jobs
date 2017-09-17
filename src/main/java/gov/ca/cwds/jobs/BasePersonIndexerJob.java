@@ -131,8 +131,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int DEFAULT_FETCH_SIZE = BatchDaoImpl.DEFAULT_FETCH_SIZE;
 
   /**
-   * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it
-   * runs just fine.
+   * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it's
+   * not too bad (table scan performance).
    * 
    * @see #doInitialLoadJdbc()
    */
@@ -1356,9 +1356,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     LOGGER.info("last successful run: {}", lastRunTime);
     final Class<?> entityClass = jobDao.getEntityClass();
 
-    String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
-    Session session = jobDao.getSessionFactory().getCurrentSession();
-    Transaction txn = session.beginTransaction();
+    final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
+    final Session session = jobDao.getSessionFactory().getCurrentSession();
+    final Transaction txn = session.beginTransaction();
 
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
@@ -1670,14 +1670,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final Session session = jobDao.getSessionFactory().getCurrentSession();
     final Transaction txn = session.beginTransaction();
     try {
-      NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
+      final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
           .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
           .setFetchSize(DEFAULT_FETCH_SIZE);
 
       // No reduction/normalization. Iterate, process, flush.
-      ScrollableResults results = q.scroll(ScrollMode.FORWARD_ONLY);
-      ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
+      final ScrollableResults results = q.scroll(ScrollMode.FORWARD_ONLY);
+      final ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
       int cnt = 0;
 
       while (results.next()) {
@@ -1706,7 +1706,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Pull replicated records from named query "findBucketRange".
    * 
    * <p>
-   * Thread safety: both BulkProcessor are ElasticsearchDao are thread-safe.
+   * Thread safety: ElasticsearchDao is thread-safe, but BulkProcessor is <strong>NOT</strong>.
+   * Construct one BulkProcessor per thread.
    * </p>
    * 
    * @return number of records processed
@@ -1721,7 +1722,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final List<T> results = pullBucketRange(minId, maxId);
 
       if (results != null && !results.isEmpty()) {
-        // BulkProcessor is NOT thread safe. Construct one instance per thread.
         final BulkProcessor bp = buildBulkProcessor();
         results.stream().forEach(p -> {
           try {
