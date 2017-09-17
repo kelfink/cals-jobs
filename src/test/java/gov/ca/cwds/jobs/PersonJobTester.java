@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -94,6 +95,7 @@ public class PersonJobTester {
     // Result set:
     when(rs.next()).thenReturn(false);
     when(rs.getString(any())).thenReturn("abc123456789");
+    when(rs.getString(contains("IBMSNAP_OPERATION"))).thenReturn("I");
     when(rs.getInt(any())).thenReturn(0);
 
     final java.util.Date date = new java.util.Date();

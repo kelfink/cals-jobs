@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class ClientIndexerJobTest extends PersonJobTester {
   @BeforeClass
   public static void setupClass() {
     BasePersonIndexerJob.setTestMode(true);
-    System.setProperty("DB_CMS_SCHEMA", "CWSINT");
+    System.setProperty("DB_CMS_SCHEMA", "CWSRS1");
   }
 
   @Override
@@ -92,6 +93,7 @@ public class ClientIndexerJobTest extends PersonJobTester {
 
   @Test
   public void extract_Args__ResultSet() throws Exception {
+    when(rs.getString("CLT_IBMSNAP_OPERATION")).thenReturn("I");
     final EsClientAddress actual = target.extract(rs);
     final EsClientAddress expected = new EsClientAddress();
 
