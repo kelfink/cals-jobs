@@ -14,7 +14,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -238,12 +240,10 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
     PreparedStatement stmtInsClient = mock(PreparedStatement.class);
     PreparedStatement stmtSelClient = mock(PreparedStatement.class);
-
     when(stmtSelClient.executeQuery()).thenReturn(rs);
 
     final List<MinClientReferral> listClientReferralKeys = new ArrayList<>();
     final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
-
     target.readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
   }
 
@@ -254,13 +254,25 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
     target.setOpts(JobOptionsTest.makeGeneric());
 
     final PreparedStatement stmtSelAllegation = mock(PreparedStatement.class);
-
     when(stmtSelAllegation.executeQuery()).thenReturn(rs);
     when(rs.next()).thenReturn(false);
 
     final List<EsPersonReferral> listAllegations = new ArrayList<>();
-
     target.readAllegations(stmtSelAllegation, listAllegations);
+  }
+
+  @Test
+  public void testReadReferrals() throws Exception {
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
+        sessionFactory);
+    target.setOpts(JobOptionsTest.makeGeneric());
+
+    final PreparedStatement stmtSelReferral = mock(PreparedStatement.class);
+    when(stmtSelReferral.executeQuery()).thenReturn(rs);
+    when(rs.next()).thenReturn(false);
+
+    final Map<String, EsPersonReferral> mapReferrals = new HashMap<>();
+    target.readReferrals(stmtSelReferral, mapReferrals);
   }
 
   @Test
