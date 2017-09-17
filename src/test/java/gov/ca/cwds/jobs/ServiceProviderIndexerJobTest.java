@@ -7,14 +7,10 @@ import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.List;
 
-import org.hibernate.Query;
-import org.hibernate.Session;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -22,39 +18,44 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.jobs.config.JobOptionsTest;
 
 /**
  * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
-public class ServiceProviderIndexerJobTest {
+public class ServiceProviderIndexerJobTest extends PersonJobTester {
 
-  @SuppressWarnings("unused")
-  private static ReplicatedServiceProviderDao serviceProviderDao;
-  private static SessionFactory sessionFactory;
-  private Session session;
+  private static final class TestServiceProviderIndexerJob extends ServiceProviderIndexerJob {
 
-  @BeforeClass
-  public static void beforeClass() {
-    sessionFactory =
-        new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-    serviceProviderDao = new ReplicatedServiceProviderDao(sessionFactory);
+    public TestServiceProviderIndexerJob(ReplicatedServiceProviderDao dao, ElasticsearchDao esDao,
+        String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory) {
+      super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    }
+
+    // @Override
+    // protected DB2SystemMonitor monitorStart(final Connection con) {
+    // return new TestDB2SystemMonitor();
+    // }
+
   }
 
-  @AfterClass
-  public static void afterClass() {
-    sessionFactory.close();
-  }
+  ServiceProviderIndexerJob target;
+  ReplicatedServiceProviderDao dao;
 
+  @Override
   @Before
-  public void setup() {
-    session = sessionFactory.getCurrentSession();
-    session.beginTransaction();
+  public void setup() throws Exception {
+    super.setup();
+    dao = new ReplicatedServiceProviderDao(sessionFactory);
+    target =
+        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    target.setOpts(JobOptionsTest.makeGeneric());
   }
 
   @After
   public void teardown() {
-    session.getTransaction().rollback();
+    // session.getTransaction().rollback();
   }
 
   @Test
@@ -64,22 +65,17 @@ public class ServiceProviderIndexerJobTest {
 
   @Test
   public void testInstantiation() throws Exception {
-    ReplicatedServiceProviderDao serviceProviderDao = null;
-    ElasticsearchDao elasticsearchDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ServiceProviderIndexerJob target = new ServiceProviderIndexerJob(serviceProviderDao,
-        elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    target =
+        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
     assertThat(target, notNullValue());
   }
 
-  @Test
-  public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-    Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedServiceProvider.findAllUpdatedAfter");
-    assertThat(query, is(notNullValue()));
-  }
+  // @Test
+  // public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
+  // Query query = session.getNamedQuery(
+  // "gov.ca.cwds.data.persistence.cms.rep.ReplicatedServiceProvider.findAllUpdatedAfter");
+  // assertThat(query, is(notNullValue()));
+  // }
 
   @Test
   public void type() throws Exception {
@@ -88,63 +84,31 @@ public class ServiceProviderIndexerJobTest {
 
   @Test
   public void instantiation() throws Exception {
-    ReplicatedServiceProviderDao dao = null;
-    ElasticsearchDao esDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ServiceProviderIndexerJob target =
-        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
     assertThat(target, notNullValue());
   }
 
   @Test
   public void getLegacySourceTable_Args__() throws Exception {
-    ReplicatedServiceProviderDao dao = null;
-    ElasticsearchDao esDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ServiceProviderIndexerJob target =
+    target =
         new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getLegacySourceTable();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = "SVC_PVRT";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
-  @Ignore
   public void getPartitionRanges_Args__() throws Exception {
-    ReplicatedServiceProviderDao dao = null;
-    ElasticsearchDao esDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ServiceProviderIndexerJob target =
+    target =
         new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
-    List actual = target.getPartitionRanges();
-    // then
-    // e.g. : verify(mocked).called();
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void main_Args__StringArray() throws Exception {
-    // given
     String[] args = new String[] {};
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     ServiceProviderIndexerJob.main(args);
-    // then
-    // e.g. : verify(mocked).called();
   }
 
 }

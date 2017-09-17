@@ -39,44 +39,6 @@ import gov.ca.cwds.jobs.exception.JobsException;
 
 public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
-  private static class TestDB2SystemMonitor implements DB2SystemMonitor {
-
-    @Override
-    public void enable(boolean paramBoolean) throws SQLException {}
-
-    @Override
-    public void start(int paramInt) throws SQLException {}
-
-    @Override
-    public void stop() throws SQLException {}
-
-    @Override
-    public long getServerTimeMicros() throws SQLException {
-      return 0;
-    }
-
-    @Override
-    public long getNetworkIOTimeMicros() throws SQLException {
-      return 0;
-    }
-
-    @Override
-    public long getCoreDriverTimeMicros() throws SQLException {
-      return 0;
-    }
-
-    @Override
-    public long getApplicationTimeMillis() throws SQLException {
-      return 0;
-    }
-
-    @Override
-    public Object moreData(int paramInt) throws SQLException {
-      return "nothin";
-    }
-
-  }
-
   private static class TestReferralHistoryIndexerJob extends ReferralHistoryIndexerJob {
 
     public TestReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao,
