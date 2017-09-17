@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs.test;
 
+import java.util.List;
+
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +28,11 @@ public class TestIndexerJob
   @Override
   public String getInitialLoadViewName() {
     return "VW_NUTTIN";
+  }
+
+  @Override
+  public TestNormalizedEntity normalizeSingle(List<TestDenormalizedEntity> recs) {
+    return new TestNormalizedEntity((String) recs.get(0).getPrimaryKey());
   }
 
 }

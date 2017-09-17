@@ -247,7 +247,6 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
     final PreparedStatement stmtSelReferral = mock(PreparedStatement.class);
     when(stmtSelReferral.executeQuery()).thenReturn(rs);
-    when(rs.next()).thenReturn(false);
 
     final Map<String, EsPersonReferral> mapReferrals = new HashMap<>();
     target.readReferrals(stmtSelReferral, mapReferrals);
@@ -262,7 +261,6 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
     final PreparedStatement stmtSelReferral = mock(PreparedStatement.class);
     when(stmtSelReferral.executeQuery()).thenReturn(rs);
-    when(rs.next()).thenReturn(false);
 
     final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
     target.pullRange(p);

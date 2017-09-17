@@ -1,16 +1,19 @@
 package gov.ca.cwds.jobs.test;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
 /**
  * Denormalized
  */
 @JsonPropertyOrder(alphabetic = true)
-public class TestDenormalizedEntity implements ApiGroupNormalizer<TestNormalizedEntity> {
+public class TestDenormalizedEntity
+    implements PersistentObject, ApiGroupNormalizer<TestNormalizedEntity> {
 
   private String id;
   private String[] names;
@@ -54,6 +57,11 @@ public class TestDenormalizedEntity implements ApiGroupNormalizer<TestNormalized
     }
 
     return ret;
+  }
+
+  @Override
+  public Serializable getPrimaryKey() {
+    return "abc1234567";
   }
 
 }

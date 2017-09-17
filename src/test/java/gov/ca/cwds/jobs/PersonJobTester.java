@@ -29,6 +29,7 @@ import com.ibm.db2.jcc.DB2SystemMonitor;
 import com.ibm.db2.jcc.am.DatabaseMetaData;
 
 import gov.ca.cwds.ObjectMapperUtils;
+import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
@@ -79,6 +80,7 @@ public class PersonJobTester {
   @BeforeClass
   public static void setupClass() {
     BasePersonIndexerJob.setTestMode(true);
+    SimpleTestSystemCodeCache.init();
   }
 
   @Rule
@@ -86,6 +88,7 @@ public class PersonJobTester {
 
   ElasticsearchConfiguration esConfig;
   ElasticsearchDao esDao;
+  ElasticSearchPerson esp = new ElasticSearchPerson();
 
   JobOptions opts;
   File tempFile;
@@ -162,8 +165,6 @@ public class PersonJobTester {
     // Job options:
     opts = mock(JobOptions.class);
     when(opts.isLoadSealedAndSensitive()).thenReturn(false);
-
-    SimpleTestSystemCodeCache.init();
   }
 
 }

@@ -17,13 +17,14 @@ import gov.ca.cwds.data.std.ApiLanguageAware;
 import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
 import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
+import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 @JsonPropertyOrder(alphabetic = true)
-public class TestNormalizedEntity
+public class TestNormalizedEntity extends ApiObjectIdentity
     implements PersistentObject, ApiPersonAware, ApiTypedIdentifier<String>, ApiLegacyAware,
     ApiMultiplePhonesAware, ApiMultipleAddressesAware, ApiMultipleLanguagesAware {
 

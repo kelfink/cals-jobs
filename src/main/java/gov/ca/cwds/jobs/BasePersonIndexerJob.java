@@ -217,7 +217,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected final long startTime = System.currentTimeMillis();
 
   /**
-   * Queue of raw, denormalized records waiting to be normalized.
+   * Queue of raw, de-normalized records waiting to be normalized.
    * <p>
    * NOTE: some jobs normalize on their own, since the step is inexpensive.
    * </p>
@@ -601,7 +601,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Normalize view records for a single grouping (such as all the same client) into a normalized
    * entity bean, consisting of a parent object and its child objects.
    * 
-   * @param recs denormalized view beans
+   * @param recs de-normalized view beans
    * @return normalized entity bean instance
    */
   protected T normalizeSingle(List<M> recs) {
@@ -620,7 +620,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * True if the Job class reduces denormalized results to normalized ones.
+   * True if the Job class reduces de-normalized results to normalized ones.
    * 
    * @return true if class overrides {@link #normalize(List)}
    */
@@ -991,7 +991,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   /**
    * The "transform" part of ETL. Single thread consumer, second stage of initial load. Convert
-   * denormalized view records to normalized ones and pass to the load queue.
+   * de-normalized view records to normalized ones and pass to the load queue.
    */
   protected void threadTransform() {
     Thread.currentThread().setName("transform");
@@ -1345,7 +1345,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Pull records changed since the last successful run.
    * 
    * <p>
-   * If this job defines a denormalized view entity, then pull from that. Otherwise, pull from the
+   * If this job defines a de-normalized view entity, then pull from that. Otherwise, pull from the
    * table entity.
    * </p>
    * 
