@@ -105,6 +105,15 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   }
 
   @Test
+  public void getPartitionRanges_RSQ() throws Exception {
+    System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
+    target =
+        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
   @Ignore
   public void main_Args__StringArray() throws Exception {
     String[] args = new String[] {};
