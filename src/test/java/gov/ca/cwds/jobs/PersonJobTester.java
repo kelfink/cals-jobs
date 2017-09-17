@@ -133,7 +133,7 @@ public class PersonJobTester {
     when(stmt.executeQuery(any())).thenReturn(rs);
 
     // Result set:
-    when(rs.next()).thenReturn(false);
+    when(rs.next()).thenReturn(true).thenReturn(false);
     when(rs.getString(any())).thenReturn("abc123456789");
     when(rs.getString(contains("IBMSNAP_OPERATION"))).thenReturn("I");
     when(rs.getString("LIMITED_ACCESS_CODE")).thenReturn("N");

@@ -217,7 +217,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
     final PreparedStatement stmtSelAllegation = mock(PreparedStatement.class);
     when(stmtSelAllegation.executeQuery()).thenReturn(rs);
-    when(rs.next()).thenReturn(false);
+    when(rs.next()).thenReturn(true).thenReturn(false);
 
     final List<EsPersonReferral> listAllegations = new ArrayList<>();
     target.readAllegations(stmtSelAllegation, listAllegations);
