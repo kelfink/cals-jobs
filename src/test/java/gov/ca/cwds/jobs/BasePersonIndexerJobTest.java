@@ -129,15 +129,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void buildElasticSearchPersons_Args__Object() throws Exception {
     final TestNormalizedEntity p = new TestNormalizedEntity("abc1234567");
     ElasticSearchPerson[] actual = target.buildElasticSearchPersons(p);
-    // final String json =
-    // "[{\"first_name\":null,\"middle_name\":null,\"last_name\":null,\"name_suffix\":null,"
-    // +
-    // "\"date_of_birth\":null,\"gender\":null,\"ssn\":null,\"type\":\"gov.ca.cwds.jobs.test.TestNormalizedEntity\","
-    // + "\"sensitivity_indicator\":null,\"soc158_sealed_client_indicator\":null,"
-    // +
-    // "\"source\":\"{\"addresses\":[{\"city\":\"Sacramento\",\"county\":\"Sacramento\",\"state\":\"CA\",\"streetAddress\":\"abc1234567\",\"zip\":\"95660\",\"addressId\":null,\"stateCd\":null,\"streetName\":null,\"streetNumber\":null,\"apiAdrZip4\":null,\"apiAdrUnitNumber\":null,\"apiAdrAddressType\":null,\"apiAdrUnitType\":null}],\"birthDate\":null,\"firstName\":null,\"gender\":null,\"id\":\"abc1234567\",\"lastName\":null,\"legacyDescriptor\":{},\"legacyId\":\"abc1234567\",\"middleName\":null,\"name\":null,\"nameSuffix\":null,\"phones\":[{\"phoneId\":\"abc1234567\",\"phoneNumber\":\"408-374-2790\",\"phoneNumberExtension\":\"\",\"phoneType\":{}}],\"primaryKey\":\"abc1234567\",\"sensitivityIndicator\":null,\"soc158SealedClientIndicator\":null,\"ssn\":null,\"title\":null}\",\"legacy_descriptor\":{},\"legacy_source_table\":null,\"legacy_id\":null,\"addresses\":[{\"id\":null,\"city\":\"Sacramento\",\"state_code\":null,\"state_name\":null,\"zip\":\"95660\",\"legacy_descriptor\":{}}],\"phone_numbers\":[{\"number\":\"408-374-2790\",\"type\":\"Home\"}],\"languages\":[],\"screenings\":[],\"referrals\":[],\"relationships\":[],\"cases\":[],\"akas\":[],\"id\":\"abc1234567\"}]";
-    // ElasticSearchPerson[] expected = mapper.readValue(json, ElasticSearchPerson[].class);
-    // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, is(notNullValue()));
   }
 
@@ -443,12 +434,10 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   @Test
   public void getDriverTable_Args__() throws Exception {
     String actual = target.getDriverTable();
-    // assertThat(actual, notNullValue());
   }
 
   @Test
   public void getPartitionRanges_Args__() throws Exception {
-    // Queries:
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
 
@@ -498,8 +487,10 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
   public void extractHibernate_Args__() throws Exception {
+    final javax.persistence.Query q = mock(javax.persistence.Query.class);
+    when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+
     int actual = target.extractHibernate();
     int expected = 0;
     assertThat(actual, is(equalTo(expected)));

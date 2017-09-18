@@ -1065,6 +1065,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.warn("Indexer interrupted!");
       fatalError = true;
       Thread.currentThread().interrupt();
+      JobLogUtils.raiseError(LOGGER, e, "Indexer: Interrupted! {}", e.getMessage());
     } catch (JsonProcessingException e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "Indexer: JsonProcessingException {}", e.getMessage());
@@ -1121,7 +1122,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       // One bulk processor for "last run" operations. BulkProcessor itself is thread-safe.
       final BulkProcessor bp = buildBulkProcessor();
-      Set<String> deletionResults = new HashSet<>();
+      final Set<String> deletionResults = new HashSet<>();
 
       final List<T> results =
           this.isViewNormalizer() ? extractLastRunRecsFromView(lastRunDt, deletionResults)
