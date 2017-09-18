@@ -465,9 +465,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
   public void buildBucketList_Args__String() throws Exception {
-    // Queries:
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
 
@@ -516,7 +514,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   @Test
   @Ignore
   public void pullBucketRange_Args__String__String() throws Exception {
-    // Queries:
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(q);
 
@@ -554,14 +551,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
-  public void runMain_Args__Class__StringArray() throws Exception {
-    Class klass = null;
-    String[] args = new String[] {};
-    BasePersonIndexerJob.runMain(klass, args);
-  }
-
-  @Test
   public void isTestMode_Args__() throws Exception {
     boolean actual = BasePersonIndexerJob.isTestMode();
     boolean expected = true;
@@ -572,6 +561,14 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void setTestMode_Args__boolean() throws Exception {
     boolean testMode = false;
     BasePersonIndexerJob.setTestMode(testMode);
+  }
+
+  @Test
+  @Ignore
+  public void runMain_Args__Class__StringArray() throws Exception {
+    Class klass = null;
+    String[] args = new String[] {};
+    BasePersonIndexerJob.runMain(klass, args);
   }
 
 }
