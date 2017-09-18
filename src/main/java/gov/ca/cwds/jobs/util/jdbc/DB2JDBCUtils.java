@@ -67,12 +67,14 @@ public class DB2JDBCUtils {
    * </tr>
    * </table>
    * 
+   * @param dao DAO
+   * 
    * @return true if DB2 is running on a mainframe
    */
-  public static boolean isDB2OnZOS(final BaseDaoImpl jobDao) {
+  public static boolean isDB2OnZOS(final BaseDaoImpl<?> dao) {
     boolean ret = false;
 
-    try (final Connection con = jobDao.getSessionFactory().getSessionFactoryOptions()
+    try (final Connection con = dao.getSessionFactory().getSessionFactoryOptions()
         .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
 
       final DatabaseMetaData meta = con.getMetaData();

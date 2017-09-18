@@ -25,6 +25,8 @@ import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.hibernate.query.NativeQuery;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -600,6 +602,28 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
+  public void pullBucketRange_Args__String__String() throws Exception {
+    BasePersonIndexerJob.setTestMode(true);
+
+    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
+    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
+    when(q.setFlushMode(any(FlushMode.class))).thenReturn(q);
+    when(q.setReadOnly(any(Boolean.class))).thenReturn(q);
+    when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
+    when(q.setFetchSize(any(Integer.class))).thenReturn(q);
+    when(q.setCacheable(any(Boolean.class))).thenReturn(q);
+
+    final ScrollableResults results = mock(ScrollableResults.class);
+    when(q.scroll(any(ScrollMode.class))).thenReturn(results);
+
+    final String minId = "1";
+    final String maxId = "2";
+    final List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
   @Ignore
   public void prepHibernatePull_Args__Session__Transaction__Date_T__SQLException()
       throws Exception {
@@ -608,34 +632,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
     }
-  }
-
-  @Test
-  @Ignore
-  public void pullBucketRange_Args__String__String() throws Exception {
-    // Enabling this test causes buildBucketList_Args__String() to fail. Weird.
-
-    // final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
-    // q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
-    // .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
-    // .setFetchSize(DEFAULT_FETCH_SIZE);
-
-    BasePersonIndexerJob.setTestMode(true);
-
-    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
-    when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
-    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
-    when(q.setCacheable(any())).thenReturn(q);
-    when(q.setFlushMode(any(FlushMode.class))).thenReturn(q);
-    when(q.setReadOnly(true)).thenReturn(q);
-    when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
-    when(q.setFetchSize(any())).thenReturn(q);
-
-    final String minId = "1";
-    final String maxId = "2";
-    final List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
-    List<Object> expected = null;
-    assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
