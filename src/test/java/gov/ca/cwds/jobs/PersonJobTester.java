@@ -83,6 +83,8 @@ public class PersonJobTester {
 
   protected static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
 
+  public static final String DEFAULT_CLIENT_ID = "abc1234567";
+
   @BeforeClass
   public static void setupClass() {
     BasePersonIndexerJob.setTestMode(true);

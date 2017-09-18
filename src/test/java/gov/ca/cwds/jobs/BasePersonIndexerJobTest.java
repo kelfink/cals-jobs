@@ -48,8 +48,6 @@ import gov.ca.cwds.jobs.util.jdbc.DB2JDBCUtils;
 
 public class BasePersonIndexerJobTest extends PersonJobTester {
 
-  public static final String DEFAULT_CLIENT_ID = "abc1234567";
-
   TestNormalizedEntityDao dao;
   TestIndexerJob target;
 
