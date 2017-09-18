@@ -46,6 +46,7 @@ import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.jdbc.Db2JdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
@@ -474,7 +475,7 @@ public class ReferralHistoryIndexerJob
     try (final Connection con = getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      enableParallelism(con);
+      Db2JdbcUtils.enableParallelism(con);
 
       final DB2SystemMonitor monitor = monitorStart(con);
       final String schema = getDBSchemaName();
@@ -586,7 +587,7 @@ public class ReferralHistoryIndexerJob
       public void execute(Connection con) throws SQLException {
         con.setSchema(getDBSchemaName());
         con.setAutoCommit(false);
-        enableParallelism(con);
+        Db2JdbcUtils.enableParallelism(con);
 
         // The DB2 optimizer on z/OS treats timestamps in a JDBC prepared statements differently
         // from static SQL. For plan reliability build SQL and execute without a prepared statement.

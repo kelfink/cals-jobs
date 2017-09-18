@@ -77,6 +77,7 @@ import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.jdbc.Db2JdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
@@ -911,7 +912,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       /**
        * Enable parallelism for underlying database
        */
-      enableParallelism(con);
+      Db2JdbcUtils.enableParallelism(con);
 
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(15000); // faster
@@ -1838,18 +1839,5 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
 
     return ret;
-  }
-
-  /**
-   * Enable DB2 parallelism. Ignored for other databases.
-   * 
-   * @param con connection
-   * @throws SQLException connection error
-   */
-  protected static void enableParallelism(Connection con) throws SQLException {
-    String dbProductName = con.getMetaData().getDatabaseProductName();
-    if (StringUtils.containsIgnoreCase(dbProductName, "db2")) {
-      con.nativeSQL("SET CURRENT DEGREE = 'ANY'");
-    }
   }
 }

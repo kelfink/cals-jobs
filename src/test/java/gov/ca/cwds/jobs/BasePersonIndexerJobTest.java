@@ -42,6 +42,7 @@ import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
+import gov.ca.cwds.jobs.util.jdbc.Db2JdbcUtils;
 
 public class BasePersonIndexerJobTest extends PersonJobTester {
 
@@ -312,7 +313,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void getDriverTable_Args__() throws Exception {
-    String actual = target.getDriverTableNative();
+    final String actual = target.getDriverTableNative();
   }
 
   @Test
@@ -320,7 +321,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
 
-    List actual = target.getPartitionRanges();
+    final List actual = target.getPartitionRanges();
     assertThat(actual, notNullValue());
   }
 
@@ -408,38 +409,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void threadExtractJdbc_Args__() throws Exception {
     runKillThread();
     target.threadExtractJdbc();
-  }
-
-  @Test
-  @Ignore
-  public void pullBucketRange_Args__String__String() throws Exception {
-    // Enabling this test causes buildBucketList_Args__String() to fail. Weird.
-    // final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
-    // q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
-    // .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
-    // .setFetchSize(DEFAULT_FETCH_SIZE);
-    BasePersonIndexerJob.setTestMode(true);
-    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
-    when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
-    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
-    when(q.setCacheable(any())).thenReturn(q);
-    when(q.setFlushMode(any(FlushMode.class))).thenReturn(q);
-    when(q.setReadOnly(true)).thenReturn(q);
-    when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
-    when(q.setFetchSize(any())).thenReturn(q);
-    final String minId = "1";
-    final String maxId = "2";
-    final List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
-    List<Object> expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  @Ignore
-  public void runMain_Args__Class__StringArray() throws Exception {
-    Class klass = null;
-    String[] args = new String[] {};
-    BasePersonIndexerJob.runMain(klass, args);
   }
 
   @Test
@@ -553,47 +522,12 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
-  public void doInitialLoadJdbc_Args___T__IOException() throws Exception {
-    try {
-      runKillThread();
-      target.doInitialLoadJdbc();
-      fail("Expected exception was not thrown!");
-    } catch (IOException e) {
-    }
-  }
-
-  @Test
   public void bulkPrepare_Args__BulkProcessor__int() throws Exception {
     BulkProcessor bp = mock(BulkProcessor.class);
     int cntr = 0;
     int actual = target.bulkPrepare(bp, cntr);
     int expected = 0;
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  @Ignore
-  public void bulkPrepare_Args__BulkProcessor__int_T__IOException() throws Exception {
-    BulkProcessor bp = mock(BulkProcessor.class);
-    int cntr = 0;
-    try {
-      target.bulkPrepare(bp, cntr);
-      fail("Expected exception was not thrown!");
-    } catch (IOException e) {
-    }
-  }
-
-  @Test
-  @Ignore
-  public void bulkPrepare_Args__BulkProcessor__int_T__InterruptedException() throws Exception {
-    BulkProcessor bp = mock(BulkProcessor.class);
-    int cntr = 0;
-    try {
-      target.bulkPrepare(bp, cntr);
-      fail("Expected exception was not thrown!");
-    } catch (InterruptedException e) {
-    }
   }
 
   @Test
@@ -640,17 +574,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
-  public void prepHibernatePull_Args__Session__Transaction__Date_T__SQLException()
-      throws Exception {
-    try {
-      target.prepHibernatePull(session, transaction, lastRunTime);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
-  }
-
-  @Test
   public void getLegacySourceTable_Args__() throws Exception {
     final String actual = target.getLegacySourceTable();
     String expected = null;
@@ -673,17 +596,54 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void enableParallelism_Args__Connection() throws Exception {
-    BasePersonIndexerJob.enableParallelism(con);
+    Db2JdbcUtils.enableParallelism(con);
   }
 
   @Test
   @Ignore
-  public void enableParallelism_Args__Connection_T__SQLException() throws Exception {
+  public void prepHibernatePull_Args__Session__Transaction__Date_T__SQLException()
+      throws Exception {
     try {
-      BasePersonIndexerJob.enableParallelism(con);
+      target.prepHibernatePull(session, transaction, lastRunTime);
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
     }
+  }
+
+  @Test
+  @Ignore
+  public void pullBucketRange_Args__String__String() throws Exception {
+    // Enabling this test causes buildBucketList_Args__String() to fail. Weird.
+
+    // final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
+    // q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
+    // .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
+    // .setFetchSize(DEFAULT_FETCH_SIZE);
+
+    BasePersonIndexerJob.setTestMode(true);
+
+    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
+    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
+    when(q.setCacheable(any())).thenReturn(q);
+    when(q.setFlushMode(any(FlushMode.class))).thenReturn(q);
+    when(q.setReadOnly(true)).thenReturn(q);
+    when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
+    when(q.setFetchSize(any())).thenReturn(q);
+
+    final String minId = "1";
+    final String maxId = "2";
+    final List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
+    List<Object> expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  @Ignore
+  public void runMain_Args__Class__StringArray() throws Exception {
+    Class klass = null;
+    String[] args = new String[] {};
+    BasePersonIndexerJob.runMain(klass, args);
   }
 
 }
