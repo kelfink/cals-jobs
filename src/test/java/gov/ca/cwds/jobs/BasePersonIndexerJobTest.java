@@ -467,26 +467,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
-  public void pullBucketRange_Args__String__String() throws Exception {
-    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
-    when(session.getNamedNativeQuery(any())).thenReturn(q);
-
-    when(q.setFlushMode(any(FlushMode.class))).thenReturn(q);
-    when(q.setReadOnly(true)).thenReturn(q);
-    when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
-    when(q.setCacheable(any())).thenReturn(q);
-    when(q.setFetchSize(any())).thenReturn(q);
-    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
-
-    String minId = "1";
-    String maxId = "2";
-    final List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
-    List<Object> expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void extractHibernate_Args__() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
@@ -518,6 +498,26 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void setTestMode_Args__boolean() throws Exception {
     boolean testMode = false;
     BasePersonIndexerJob.setTestMode(testMode);
+  }
+
+  @Test
+  @Ignore
+  public void pullBucketRange_Args__String__String() throws Exception {
+    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any())).thenReturn(q);
+
+    when(q.setFlushMode(any(FlushMode.class))).thenReturn(q);
+    when(q.setReadOnly(true)).thenReturn(q);
+    when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
+    when(q.setCacheable(any())).thenReturn(q);
+    when(q.setFetchSize(any())).thenReturn(q);
+    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
+
+    String minId = "1";
+    String maxId = "2";
+    final List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
+    List<Object> expected = null;
+    assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
