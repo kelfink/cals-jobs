@@ -238,8 +238,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   @Test
   public void getDenormalizedClass_Args__() throws Exception {
     Object actual = target.getDenormalizedClass();
-    Object expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, notNullValue());
   }
 
   @Test
@@ -273,7 +272,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   @Test
   public void isViewNormalizer_Args__() throws Exception {
     boolean actual = target.isViewNormalizer();
-    boolean expected = false;
+    boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -370,18 +369,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
-  public void prepareUpsertRequest_Args__ElasticSearchPerson__Object_T__IOException()
-      throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity("abc1234567");
-    try {
-      target.prepareUpsertRequest(esp, t);
-      fail("Expected exception was not thrown!");
-    } catch (IOException e) {
-    }
-  }
-
-  @Test
   public void keepCollections_Args__() throws Exception {
     final ESOptionalCollection[] actual = target.keepCollections();
     assertThat(actual, notNullValue());
@@ -400,7 +387,8 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void doInitialLoadJdbc_Args__() throws Exception {
     try {
       runKillThread();
@@ -461,13 +449,16 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void extractLastRunRecsFromTable_Args__Date() throws Exception {
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(q);
+
     final List<TestNormalizedEntity> actual = target.extractLastRunRecsFromTable(lastRunTime);
     assertThat(actual, notNullValue());
   }
 
   @Test
-  @Ignore
   public void extractLastRunRecsFromView_Args__Date() throws Exception {
+    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any())).thenReturn(q);
+
     final List<TestNormalizedEntity> actual =
         target.extractLastRunRecsFromView(lastRunTime, new HashSet<String>());
     assertThat(actual, notNullValue());

@@ -7,6 +7,8 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.inject.LastRunFile;
@@ -38,6 +40,11 @@ public class TestIndexerJob
   @Override
   public TestNormalizedEntity normalizeSingle(List<TestDenormalizedEntity> recs) {
     return new TestNormalizedEntity((String) recs.get(0).getPrimaryKey());
+  }
+
+  @Override
+  public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
+    return TestDenormalizedEntity.class;
   }
 
 }
