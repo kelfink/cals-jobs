@@ -98,4 +98,5 @@ public class SystemCodesLoaderJobTest {
     nsc.setCategoryDescription(categoryDesc);
     return nsc;
   }
+
 }
