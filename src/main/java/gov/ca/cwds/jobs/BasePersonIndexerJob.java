@@ -4,7 +4,6 @@ import static gov.ca.cwds.data.persistence.cms.CmsPersistentObject.CMS_ID_LEN;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -77,7 +76,7 @@ import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
-import gov.ca.cwds.jobs.util.jdbc.Db2JdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.DB2JDBCUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
@@ -912,7 +911,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       /**
        * Enable parallelism for underlying database
        */
-      Db2JdbcUtils.enableParallelism(con);
+      DB2JDBCUtils.enableParallelism(con);
 
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(15000); // faster
@@ -1823,21 +1822,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return true if DB2 is running on a mainframe
    */
   public boolean isDB2OnZOS() {
-    boolean ret = false;
-
-    try (final Connection con = jobDao.getSessionFactory().getSessionFactoryOptions()
-        .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
-
-      final DatabaseMetaData meta = con.getMetaData();
-      LOGGER.info("meta:\nproduct name: {}\nproduction version: {}\nmajor: {}\nminor: {}",
-          meta.getDatabaseProductName(), meta.getDatabaseProductVersion(),
-          meta.getDatabaseMajorVersion(), meta.getDatabaseMinorVersion());
-
-      ret = meta.getDatabaseProductVersion().startsWith("DSN");
-    } catch (Exception e) {
-      JobLogUtils.raiseError(LOGGER, e, "FAILED TO FIND DB2 PLATFORM! {}", e.getMessage());
-    }
-
-    return ret;
+    return DB2JDBCUtils.isDB2OnZOS(jobDao);
   }
+
 }

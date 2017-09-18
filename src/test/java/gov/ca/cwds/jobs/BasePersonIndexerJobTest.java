@@ -42,7 +42,7 @@ import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
-import gov.ca.cwds.jobs.util.jdbc.Db2JdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.DB2JDBCUtils;
 
 public class BasePersonIndexerJobTest extends PersonJobTester {
 
@@ -596,7 +596,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void enableParallelism_Args__Connection() throws Exception {
-    Db2JdbcUtils.enableParallelism(con);
+    DB2JDBCUtils.enableParallelism(con);
   }
 
   @Test
