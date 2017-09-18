@@ -11,7 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -104,18 +103,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void extract_Args__ResultSet() throws Exception {
     final Object actual = target.extract(rs);
     // You survived. Good enough.
-  }
-
-  @Test
-  @Ignore
-  public void extract_Args__ResultSet_T__SQLException() throws Exception {
-    doThrow(new SQLException()).when(rs).getString(any());
-    doThrow(new SQLException()).when(rs).next();
-    try {
-      target.extract(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
   }
 
   @Test
@@ -285,21 +272,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
-  public void prepareInsertCollections_Args__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray_T__JsonProcessingException()
-      throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity("abc1234567");
-    String elementName = "slop";
-    List list = new ArrayList();
-    ESOptionalCollection[] keep = new ESOptionalCollection[] {};
-    try {
-      target.prepareInsertCollections(esp, t, elementName, list, keep);
-      fail("Expected exception was not thrown!");
-    } catch (JsonProcessingException e) {
-    }
-  }
-
-  @Test
   public void prepareUpsertJson_Args__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray()
       throws Exception {
     TestNormalizedEntity t = new TestNormalizedEntity("abc1234567");
@@ -341,35 +313,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
     final List<? extends ApiTypedIdentifier<String>> actual = target.getOptionalCollection(esp, t);
     final List<? extends ApiTypedIdentifier<String>> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  @Ignore
-  public void doInitialLoadJdbc_Args__() throws Exception {
-    try {
-      runKillThread();
-      target.doInitialLoadJdbc();
-      fail("Expected exception was not thrown!");
-    } catch (IOException e) {
-    }
-  }
-
-  @Test
-  @Ignore
-  public void doInitialLoadJdbc_Args___T__IOException() throws Exception {
-    try {
-      runKillThread();
-      target.doInitialLoadJdbc();
-      fail("Expected exception was not thrown!");
-    } catch (IOException e) {
-    }
-  }
-
-  @Test
-  @Ignore
-  public void threadExtractJdbc_Args__() throws Exception {
-    runKillThread();
-    target.threadExtractJdbc();
   }
 
   @Test
@@ -493,13 +436,40 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  // @Ignore
   public void _run_Args__Date() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
 
     Date actual = target._run(lastRunTime);
     assertThat(actual, notNullValue());
+  }
+
+  @Test
+  public void threadExtractJdbc_Args__() throws Exception {
+    runKillThread();
+    target.threadExtractJdbc();
+  }
+
+  @Test
+  @Ignore
+  public void doInitialLoadJdbc_Args__() throws Exception {
+    try {
+      runKillThread();
+      target.doInitialLoadJdbc();
+      fail("Expected exception was not thrown!");
+    } catch (IOException e) {
+    }
+  }
+
+  @Test
+  @Ignore
+  public void doInitialLoadJdbc_Args___T__IOException() throws Exception {
+    try {
+      runKillThread();
+      target.doInitialLoadJdbc();
+      fail("Expected exception was not thrown!");
+    } catch (IOException e) {
+    }
   }
 
   @Test
