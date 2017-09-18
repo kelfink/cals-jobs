@@ -11,14 +11,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
@@ -41,6 +44,8 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
 public class BasePersonIndexerJobTest extends PersonJobTester {
+
+  public static final String DEFAULT_CLIENT_ID = "abc1234567";
 
   TestNormalizedEntityDao dao;
   TestIndexerJob target;
@@ -66,6 +71,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
         target.doneTransform = true;
         target.fatalError = true;
       }
+
     }).start();
   }
 
@@ -88,11 +94,10 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void jsonify_Args__Object() throws Exception {
-    TestNormalizedEntity obj = new TestNormalizedEntity("abc1234567");
+    TestNormalizedEntity obj = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     obj.setName("whatever");
     obj.setLastName("whatever");
     String actual = target.jsonify(obj);
-
     final String expected =
         "{\"birthDate\":null,\"firstName\":\"whatever\",\"gender\":null,\"id\":\"abc1234567\",\"lastName\":\"whatever\",\"legacyDescriptor\":{},\"legacyId\":\"abc1234567\",\"middleName\":null,\"name\":\"whatever\",\"nameSuffix\":null,\"primaryKey\":\"abc1234567\",\"sensitivityIndicator\":null,\"soc158SealedClientIndicator\":null,\"ssn\":null,\"title\":null}";
     // assertThat(actual, is(equalTo(expected)));
@@ -113,43 +118,20 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void buildElasticSearchPersons_Args__Object() throws Exception {
-    final TestNormalizedEntity p = new TestNormalizedEntity("abc1234567");
+    final TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     ElasticSearchPerson[] actual = target.buildElasticSearchPersons(p);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
-  @Ignore
-  public void buildElasticSearchPersons_Args__Object_T__JsonProcessingException() throws Exception {
-    TestNormalizedEntity p = new TestNormalizedEntity("abc1234567");
-    try {
-      target.buildElasticSearchPersons(p);
-      fail("Expected exception was not thrown!");
-    } catch (JsonProcessingException e) {
-    }
-  }
-
-  @Test
   public void buildElasticSearchPerson_Args__Object() throws Exception {
-    final String key = "abc1234567";
+    final String key = DEFAULT_CLIENT_ID;
     TestNormalizedEntity p = new TestNormalizedEntity(key);
     ElasticSearchPerson actual = target.buildElasticSearchPerson(p);
     ElasticSearchPerson expected = new ElasticSearchPerson();
     expected.setId(key);
     // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
-  @Ignore
-  public void buildElasticSearchPerson_Args__Object_T__JsonProcessingException() throws Exception {
-    TestNormalizedEntity p = new TestNormalizedEntity("abc1234567");
-    // doThrow(new SQLException()).when(rs).next();
-    try {
-      target.buildElasticSearchPerson(p);
-      fail("Expected exception was not thrown!");
-    } catch (JsonProcessingException e) {
-    }
   }
 
   @Test
@@ -176,6 +158,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
       fail("Expected exception was not thrown!");
     } catch (JsonProcessingException e) {
     }
+
   }
 
   @Test
@@ -202,10 +185,10 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   @Test
   public void normalize_Args__List() throws Exception {
     final List<TestDenormalizedEntity> recs = new ArrayList<>();
-    recs.add(new TestDenormalizedEntity("abc1234567", "one", "two", "three", "four"));
+    recs.add(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "one", "two", "three", "four"));
     final List<TestNormalizedEntity> actual = target.normalize(recs);
     final List<TestNormalizedEntity> expected = new ArrayList<>();
-    final TestNormalizedEntity expect = new TestNormalizedEntity("abc1234567");
+    final TestNormalizedEntity expect = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     expected.add(expect);
     // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, notNullValue());
@@ -214,9 +197,9 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   @Test
   public void normalizeSingle_Args__List() throws Exception {
     final List<TestDenormalizedEntity> recs = new ArrayList<>();
-    recs.add(new TestDenormalizedEntity("abc1234567"));
+    recs.add(new TestDenormalizedEntity(DEFAULT_CLIENT_ID));
     final TestNormalizedEntity actual = target.normalizeSingle(recs);
-    final TestNormalizedEntity expected = new TestNormalizedEntity("abc1234567");
+    final TestNormalizedEntity expected = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -237,26 +220,13 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   @Test
   public void prepareDocument_Args__BulkProcessor__Object() throws Exception {
     BulkProcessor bp = mock(BulkProcessor.class);
-    TestNormalizedEntity t = new TestNormalizedEntity("abc1234567");
+    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     target.prepareDocument(bp, t);
   }
 
   @Test
-  @Ignore
-  public void prepareDocument_Args__BulkProcessor__Object_T__IOException() throws Exception {
-    BulkProcessor bp = mock(BulkProcessor.class);
-    TestNormalizedEntity t = new TestNormalizedEntity("abc1234567");
-    when(bp.add(any(DocWriteRequest.class))).thenThrow(new IOException("uh oh"));
-    try {
-      target.prepareDocument(bp, t);
-      fail("Expected exception was not thrown!");
-    } catch (IOException e) {
-    }
-  }
-
-  @Test
   public void setInsertCollections_Args__ElasticSearchPerson__Object__List() throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity("abc1234567");
+    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     List list = new ArrayList();
     target.setInsertCollections(esp, t, list);
   }
@@ -264,7 +234,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   @Test
   public void prepareInsertCollections_Args__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray()
       throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity("abc1234567");
+    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     String elementName = "slop";
     List list = new ArrayList();
     ESOptionalCollection[] keep = new ESOptionalCollection[] {};
@@ -274,7 +244,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   @Test
   public void prepareUpsertJson_Args__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray()
       throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity("abc1234567");
+    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     String elementName = "slop";
     List list = new ArrayList();
     ESOptionalCollection[] keep = new ESOptionalCollection[] {};
@@ -284,14 +254,14 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void prepareUpsertRequestNoChecked_Args__ElasticSearchPerson__Object() throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity("abc1234567");
+    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     DocWriteRequest actual = target.prepareUpsertRequestNoChecked(esp, t);
     assertThat(actual, notNullValue());
   }
 
   @Test
   public void prepareUpsertRequest_Args__ElasticSearchPerson__Object() throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity("abc1234567");
+    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     UpdateRequest actual = target.prepareUpsertRequest(esp, t);
     assertThat(actual, notNullValue());
   }
@@ -309,7 +279,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void getOptionalCollection_Args__ElasticSearchPerson__Object() throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity("abc1234567");
+    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     final List<? extends ApiTypedIdentifier<String>> actual = target.getOptionalCollection(esp, t);
     final List<? extends ApiTypedIdentifier<String>> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
@@ -319,13 +289,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void threadTransform_Args__() throws Exception {
     runKillThread();
     target.threadTransform();
-  }
-
-  @Test
-  @Ignore
-  public void threadLoad_Args__() throws Exception {
-    runKillThread();
-    target.threadIndex();
   }
 
   @Test
@@ -375,6 +338,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
       fail("Expected exception was not thrown!");
     } catch (IOException e) {
     }
+
   }
 
   @Test
@@ -386,7 +350,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void extractHibernate_Args__() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
-
     int actual = target.extractHibernate();
     int expected = 0;
     assertThat(actual, is(equalTo(expected)));
@@ -420,7 +383,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void buildBucketList_Args__String() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
-
     final String table = "SOMETBL";
     final List<BatchBucket> actual = target.buildBucketList(table);
     assertThat(actual, notNullValue());
@@ -430,7 +392,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void doLastRun_Args__Date() throws Exception {
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
-
     final Date actual = target.doLastRun(lastRunTime);
     assertThat(actual, notNullValue());
   }
@@ -439,8 +400,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void _run_Args__Date() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
-
-    Date actual = target._run(lastRunTime);
+    final Date actual = target._run(lastRunTime);
     assertThat(actual, notNullValue());
   }
 
@@ -452,13 +412,144 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   @Ignore
-  public void doInitialLoadJdbc_Args__() throws Exception {
+  public void pullBucketRange_Args__String__String() throws Exception {
+    // Enabling this test causes buildBucketList_Args__String() to fail. Weird.
+    // final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
+    // q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
+    // .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
+    // .setFetchSize(DEFAULT_FETCH_SIZE);
+    BasePersonIndexerJob.setTestMode(true);
+    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
+    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
+    when(q.setCacheable(any())).thenReturn(q);
+    when(q.setFlushMode(any(FlushMode.class))).thenReturn(q);
+    when(q.setReadOnly(true)).thenReturn(q);
+    when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
+    when(q.setFetchSize(any())).thenReturn(q);
+    final String minId = "1";
+    final String maxId = "2";
+    final List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
+    List<Object> expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  @Ignore
+  public void runMain_Args__Class__StringArray() throws Exception {
+    Class klass = null;
+    String[] args = new String[] {};
+    BasePersonIndexerJob.runMain(klass, args);
+  }
+
+  @Test
+  public void getInitialLoadViewName_Args__() throws Exception {
+    String actual = target.getInitialLoadViewName();
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
+  public void getInitialLoadQuery_Args__String() throws Exception {
+    final String dbSchemaName = "CWSRS1";
+    final String actual = target.getInitialLoadQuery(dbSchemaName);
+    // assertThat(actual, notNullValue());
+  }
+
+  @Test
+  public void getJdbcOrderBy_Args__() throws Exception {
+    final String actual = target.getJdbcOrderBy();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void mustDeleteLimitedAccessRecords_Args__() throws Exception {
+    boolean actual = target.mustDeleteLimitedAccessRecords();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isDelete_Args__Object() throws Exception {
+    TestNormalizedEntity t = null;
+    boolean actual = target.isDelete(t);
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void bulkDelete_Args__String() throws Exception {
+    String id = DEFAULT_CLIENT_ID;
+    DeleteRequest actual = target.bulkDelete(id);
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
+  @Ignore
+  public void bulkDelete_Args__String_T__JsonProcessingException() throws Exception {
+    String id = DEFAULT_CLIENT_ID;
     try {
-      runKillThread();
-      target.doInitialLoadJdbc();
+      target.bulkDelete(id);
       fail("Expected exception was not thrown!");
-    } catch (IOException e) {
+    } catch (JsonProcessingException e) {
     }
+  }
+
+  @Test
+  public void addToIndexQueue_Args__Object() throws Exception {
+    TestNormalizedEntity norm = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    target.addToIndexQueue(norm);
+  }
+
+  @Test
+  public void useTransformThread_Args__() throws Exception {
+    boolean actual = target.useTransformThread();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  // @Test
+  // public void newJob_Args__Class__StringArray() throws Exception {
+  // Class<Object> klass = mock(Class.class);
+  // String[] args = new String[] {};
+  // Object actual = BasePersonIndexerJob.newJob(klass, args);
+  // Object expected = null;
+  // assertThat(actual, is(equalTo(expected)));
+  // }
+  //
+  // @Test
+  // public void newJob_Args__Class__StringArray_T__JobsException() throws Exception {
+  // Class<Object> klass = mock(Class.class);
+  // String[] args = new String[] {};
+  // try {
+  // BasePersonIndexerJob.newJob(klass, args);
+  // fail("Expected exception was not thrown!");
+  // } catch (JobsException e) {
+  // }
+  // }
+
+  // @Test
+  // public void runJob_Args__Class__StringArray() throws Exception {
+  // Class<Object> klass = mock(Class.class);
+  // String[] args = new String[] {};
+  // BasePersonIndexerJob.runJob(klass, args);
+  // }
+  //
+  // @Test
+  // public void runJob_Args__Class__StringArray_T__JobsException() throws Exception {
+  // Class<Object> klass = mock(Class.class);
+  // String[] args = new String[] {};
+  // try {
+  // BasePersonIndexerJob.runJob(klass, args);
+  // fail("Expected exception was not thrown!");
+  // } catch (JobsException e) {
+  // }
+  // }
+
+  @Test
+  public void doInitialLoadJdbc_Args__() throws Exception {
+    runKillThread();
+    target.doInitialLoadJdbc();
   }
 
   @Test
@@ -473,39 +564,126 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
-  public void pullBucketRange_Args__String__String() throws Exception {
-    // Enabling this test causes buildBucketList_Args__String() to fail. Weird.
-
-    // final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
-    // q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
-    // .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
-    // .setFetchSize(DEFAULT_FETCH_SIZE);
-
-    BasePersonIndexerJob.setTestMode(true);
-    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
-    when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
-
-    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
-    when(q.setCacheable(any())).thenReturn(q);
-    when(q.setFlushMode(any(FlushMode.class))).thenReturn(q);
-    when(q.setReadOnly(true)).thenReturn(q);
-    when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
-    when(q.setFetchSize(any())).thenReturn(q);
-
-    final String minId = "1";
-    final String maxId = "2";
-    final List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
-    List<Object> expected = null;
+  public void bulkPrepare_Args__BulkProcessor__int() throws Exception {
+    BulkProcessor bp = mock(BulkProcessor.class);
+    int cntr = 0;
+    int actual = target.bulkPrepare(bp, cntr);
+    int expected = 0;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   @Ignore
-  public void runMain_Args__Class__StringArray() throws Exception {
-    Class klass = null;
-    String[] args = new String[] {};
-    BasePersonIndexerJob.runMain(klass, args);
+  public void bulkPrepare_Args__BulkProcessor__int_T__IOException() throws Exception {
+    BulkProcessor bp = mock(BulkProcessor.class);
+    int cntr = 0;
+    try {
+      target.bulkPrepare(bp, cntr);
+      fail("Expected exception was not thrown!");
+    } catch (IOException e) {
+    }
+  }
+
+  @Test
+  @Ignore
+  public void bulkPrepare_Args__BulkProcessor__int_T__InterruptedException() throws Exception {
+    BulkProcessor bp = mock(BulkProcessor.class);
+    int cntr = 0;
+    try {
+      target.bulkPrepare(bp, cntr);
+      fail("Expected exception was not thrown!");
+    } catch (InterruptedException e) {
+    }
+  }
+
+  @Test
+  public void threadIndex_Args__() throws Exception {
+    runKillThread();
+    target.threadIndex();
+  }
+
+  @Test
+  public void prepLastRunDoc_Args__BulkProcessor__Object() throws Exception {
+    BulkProcessor bp = mock(BulkProcessor.class);
+    TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    target.prepLastRunDoc(bp, p);
+  }
+
+  @Test
+  public void calcLastRunDate_Args__Date() throws Exception {
+    final Date actual = target.calcLastRunDate(lastRunTime);
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
+  public void isRangeSelfManaging_Args__() throws Exception {
+    final boolean actual = target.isRangeSelfManaging();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void extractLastRunRecsFromView_Args__Date__Set() throws Exception {
+    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any())).thenReturn(q);
+
+    final Set<String> deletionResults = mock(Set.class);
+    final List<TestNormalizedEntity> actual =
+        target.extractLastRunRecsFromView(lastRunTime, deletionResults);
+    final List<TestNormalizedEntity> expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void prepHibernatePull_Args__Session__Transaction__Date() throws Exception {
+    target.prepHibernatePull(session, transaction, lastRunTime);
+  }
+
+  @Test
+  @Ignore
+  public void prepHibernatePull_Args__Session__Transaction__Date_T__SQLException()
+      throws Exception {
+    try {
+      target.prepHibernatePull(session, transaction, lastRunTime);
+      fail("Expected exception was not thrown!");
+    } catch (SQLException e) {
+    }
+  }
+
+  @Test
+  public void getLegacySourceTable_Args__() throws Exception {
+    final String actual = target.getLegacySourceTable();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getDBSchemaName_Args__() throws Exception {
+    final String actual = BasePersonIndexerJob.getDBSchemaName();
+    String expected = "CWSRS1";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isDB2OnZOS_Args__() throws Exception {
+    boolean actual = target.isDB2OnZOS();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void enableParallelism_Args__Connection() throws Exception {
+    BasePersonIndexerJob.enableParallelism(con);
+  }
+
+  @Test
+  @Ignore
+  public void enableParallelism_Args__Connection_T__SQLException() throws Exception {
+    try {
+      BasePersonIndexerJob.enableParallelism(con);
+      fail("Expected exception was not thrown!");
+    } catch (SQLException e) {
+    }
   }
 
 }

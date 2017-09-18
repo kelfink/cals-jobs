@@ -23,8 +23,8 @@ public class TestIndexerJob
   }
 
   @Override
-  protected String getLegacySourceTable() {
-    return "NOBUENO";
+  public String getLegacySourceTable() {
+    return super.getLegacySourceTable();
   }
 
   @Override

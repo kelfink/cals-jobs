@@ -844,7 +844,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Thread.currentThread().setName("main");
     try {
       Thread t3 = new Thread(this::threadIndex); // Index
-      // t3.setPriority(8);
       t3.start();
 
       if (useTransformThread()) {
@@ -854,15 +853,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       Thread t1 = new Thread(this::threadExtractJdbc); // Extract
       t1.start();
-
-      // final ForkJoinPool pool = new ForkJoinPool(3);
-      // final ForkJoinTask<?> taskIndex = pool.submit(() -> threadIndex());
-      //
-      // if (useTransformThread()) {
-      // pool.submit(() -> threadTransform());
-      // }
-      //
-      // pool.submit(() -> threadExtractJdbc());
 
       while (!(fatalError || (doneExtract && doneTransform && doneLoad))) {
         LOGGER.debug("runInitialLoad: sleep");
