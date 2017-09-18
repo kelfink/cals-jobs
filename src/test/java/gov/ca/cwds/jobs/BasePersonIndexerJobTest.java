@@ -36,7 +36,6 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.config.JobOptions;
-import gov.ca.cwds.jobs.config.JobOptionsTest;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -53,7 +52,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
     super.setup();
     dao = new TestNormalizedEntityDao(sessionFactory);
     target = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
-    target.setOpts(JobOptionsTest.makeGeneric());
+    target.setOpts(opts);
   }
 
   protected void runKillThread() {
@@ -483,14 +482,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
-  public void doLastRun_Args__Date() throws Exception {
-    Date actual = target.doLastRun(lastRunTime);
-    Date expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void buildBucketList_Args__String() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
@@ -501,13 +492,25 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
+  public void doLastRun_Args__Date() throws Exception {
+    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
+
+    final Date actual = target.doLastRun(lastRunTime);
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
   @Ignore
   public void pullBucketRange_Args__String__String() throws Exception {
+    // Enabling this test causes buildBucketList_Args__String() to fail. Weird.
+
     // final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
     // q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
     // .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
     // .setFetchSize(DEFAULT_FETCH_SIZE);
 
+    BasePersonIndexerJob.setTestMode(true);
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
 
