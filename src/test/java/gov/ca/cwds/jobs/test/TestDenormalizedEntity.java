@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.test;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Entity;
@@ -11,8 +12,10 @@ import org.hibernate.annotations.NamedNativeQuery;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.data.std.ApiPersonAware;
 
 /**
  * Denormalized
@@ -73,7 +76,51 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
             + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY WITH UR ",
         resultClass = TestDenormalizedEntity.class, readOnly = true)})
 public class TestDenormalizedEntity
-    implements PersistentObject, ApiGroupNormalizer<TestNormalizedEntity> {
+    implements PersistentObject, ApiGroupNormalizer<TestNormalizedEntity>, ApiMultiplePersonAware {
+
+  private static final class TestOnlyApiPersonAware implements ApiPersonAware {
+
+    @Override
+    public Serializable getPrimaryKey() {
+      return null;
+    }
+
+    @Override
+    public String getFirstName() {
+      return null;
+    }
+
+    @Override
+    public String getMiddleName() {
+      return null;
+    }
+
+    @Override
+    public String getLastName() {
+      return null;
+    }
+
+    @Override
+    public String getGender() {
+      return null;
+    }
+
+    @Override
+    public Date getBirthDate() {
+      return null;
+    }
+
+    @Override
+    public String getSsn() {
+      return null;
+    }
+
+    @Override
+    public String getNameSuffix() {
+      return null;
+    }
+
+  }
 
   private String id;
   private String[] names;
@@ -122,6 +169,12 @@ public class TestDenormalizedEntity
   @Override
   public Serializable getPrimaryKey() {
     return "abc1234567";
+  }
+
+  @Override
+  public ApiPersonAware[] getPersons() {
+    final ApiPersonAware[] ret = {new TestOnlyApiPersonAware()};
+    return ret;
   }
 
 }

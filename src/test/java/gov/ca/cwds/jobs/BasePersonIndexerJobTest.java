@@ -353,6 +353,28 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void extractHibernate_Args__() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+
+    final List<BatchBucket> buckets = new ArrayList<>();
+    final BatchBucket b = new BatchBucket();
+    b.setBucket(1);
+    b.setBucketCount(2);
+    b.setMaxId("1");
+    b.setMaxId("2");
+    buckets.add(b);
+    when(q.getResultList()).thenReturn(buckets);
+
+    final NativeQuery<TestDenormalizedEntity> nq = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any(String.class))).thenReturn(nq);
+    when(nq.setString(any(String.class), any(String.class))).thenReturn(nq);
+    when(nq.setFlushMode(any(FlushMode.class))).thenReturn(nq);
+    when(nq.setReadOnly(any(Boolean.class))).thenReturn(nq);
+    when(nq.setCacheMode(any(CacheMode.class))).thenReturn(nq);
+    when(nq.setFetchSize(any(Integer.class))).thenReturn(nq);
+    when(nq.setCacheable(any(Boolean.class))).thenReturn(nq);
+
+    final ScrollableResults results = mock(ScrollableResults.class);
+    when(nq.scroll(any(ScrollMode.class))).thenReturn(results);
+
     int actual = target.extractHibernate();
     int expected = 0;
     assertThat(actual, is(equalTo(expected)));
@@ -386,6 +408,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void buildBucketList_Args__String() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+
     final String table = "SOMETBL";
     final List<BatchBucket> actual = target.buildBucketList(table);
     assertThat(actual, notNullValue());
@@ -395,6 +418,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void doLastRun_Args__Date() throws Exception {
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
+
     final Date actual = target.doLastRun(lastRunTime);
     assertThat(actual, notNullValue());
   }
@@ -403,6 +427,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void _run_Args__Date() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+
     final Date actual = target._run(lastRunTime);
     assertThat(actual, notNullValue());
   }

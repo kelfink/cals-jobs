@@ -1483,7 +1483,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Finish job and close resources. Default implementation exits the JVM.
+   * Finish job and close resources.
    */
   @Override
   protected synchronized void finish() {
@@ -1496,12 +1496,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       close();
       Thread.sleep(SLEEP_MILLIS); // NOSONAR
 
-      // Shutdown all remaining resources, even those not attached to this job.
-      // Runtime.getRuntime().exit(0); // NOSONAR
-
     } catch (InterruptedException e) {
       fatalError = true;
       Thread.currentThread().interrupt();
+      throw JobLogUtils.buildException(LOGGER, e, "INTERRUPTED!: {}", e.getMessage());
     } catch (IOException ioe) {
       fatalError = true;
       throw JobLogUtils.buildException(LOGGER, ioe, "ERROR FINISHING JOB: {}", ioe.getMessage());
