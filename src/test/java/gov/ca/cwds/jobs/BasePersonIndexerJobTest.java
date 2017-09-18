@@ -599,6 +599,24 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
     assertThat(actual, notNullValue());
   }
 
+  @Test(expected = SQLException.class)
+  @Ignore
+  public void extractLastRunRecsFromView_Args__sql_error() throws Exception {
+    final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any())).thenReturn(qn);
+
+    final List<TestDenormalizedEntity> denorms = new ArrayList<>();
+    TestDenormalizedEntity m = new TestDenormalizedEntity(DEFAULT_CLIENT_ID);
+    denorms.add(m);
+    when(qn.list()).thenReturn(denorms);
+    // when(qn.list()).thenThrow(new SQLException());
+
+    final Set<String> deletionResults = mock(Set.class);
+    final List<TestNormalizedEntity> actual =
+        target.extractLastRunRecsFromView(lastRunTime, deletionResults);
+    assertThat(actual, notNullValue());
+  }
+
   @Test
   public void prepHibernatePull_Args__Session__Transaction__Date() throws Exception {
     target.prepHibernatePull(session, transaction, lastRunTime);
