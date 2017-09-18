@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.AbstractModule;
+import com.google.inject.CreationException;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Provides;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
@@ -64,6 +67,8 @@ import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -79,11 +84,16 @@ public class JobsGuiceInjector extends AbstractModule {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobsGuiceInjector.class);
 
+  /**
+   * Guice Injector used for all Job instances during the life of this batch JVM.
+   */
+  public static Injector injector;
+
   private File esConfig;
   private String lastJobRunTimeFilename;
   private String altInputFilename;
 
-  private final JobOptions opts;
+  private JobOptions opts;
 
   /**
    * Default constructor.
@@ -247,6 +257,34 @@ public class JobsGuiceInjector extends AbstractModule {
       }
     }
     return ret;
+  }
+
+  /**
+   * Build the Guice Injector once, which is used for all Job instances during the life of this
+   * batch JVM.
+   * 
+   * @param opts command line options
+   * @return Guice Injector
+   * @throws JobsException if unable to construct dependencies
+   */
+  public static synchronized Injector buildInjector(final JobOptions opts) throws JobsException {
+    if (injector == null) {
+      try {
+        injector = Guice.createInjector(new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()),
+            opts.getLastRunLoc(), opts.getAltInputFile()));
+
+        /**
+         * Initialize system code cache
+         */
+        injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
+
+      } catch (CreationException e) {
+        throw JobLogUtils.buildException(LOGGER, e, "FAILED TO BUILD INJECTOR!: {}",
+            e.getMessage());
+      }
+    }
+
+    return injector;
   }
 
 }

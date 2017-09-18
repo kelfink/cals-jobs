@@ -162,7 +162,7 @@ public class JobOptions implements ApiMarker {
    * 
    * @return location of Elasticsearch configuration file
    */
-  public final String getEsConfigLoc() {
+  public String getEsConfigLoc() {
     return esConfigLoc;
   }
 
@@ -208,7 +208,7 @@ public class JobOptions implements ApiMarker {
    * 
    * @return starting bucket
    */
-  public final long getStartBucket() {
+  public long getStartBucket() {
     return startBucket;
   }
 
@@ -217,7 +217,7 @@ public class JobOptions implements ApiMarker {
    * 
    * @return last bucket
    */
-  public final long getEndBucket() {
+  public long getEndBucket() {
     return endBucket;
   }
 
@@ -226,7 +226,7 @@ public class JobOptions implements ApiMarker {
    * 
    * @return total buckets
    */
-  public final long getTotalBuckets() {
+  public long getTotalBuckets() {
     return totalBuckets;
   }
 
@@ -235,7 +235,7 @@ public class JobOptions implements ApiMarker {
    * 
    * @return thread count
    */
-  public final long getThreadCount() {
+  public long getThreadCount() {
     return threadCount;
   }
 

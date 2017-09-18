@@ -2,7 +2,6 @@ package gov.ca.cwds.jobs;
 
 import static gov.ca.cwds.data.persistence.cms.CmsPersistentObject.CMS_ID_LEN;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -55,9 +54,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.CreationException;
-import com.google.inject.Guice;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
@@ -143,11 +140,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           + "SELECT c.THE_ID_COL, ROW_NUMBER() OVER (ORDER BY 1) AS rn, COUNT(*) OVER (ORDER BY 1) AS total_cnt "
           + "FROM {h-schema}THE_TABLE c ORDER BY c.THE_ID_COL) y ORDER BY y.rn "
           + ") z GROUP BY z.bucket FOR READ ONLY WITH UR ";
-
-  /**
-   * Guice Injector used for all Job instances during the life of this batch JVM.
-   */
-  protected static Injector injector;
 
   /**
    * For unit tests where resources either may not close properly or where expensive resources
@@ -421,34 +413,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   // ======================
 
   /**
-   * Build the Guice Injector once, which is used for all Job instances during the life of this
-   * batch JVM.
-   * 
-   * @param opts command line options
-   * @return Guice Injector
-   * @throws JobsException if unable to construct dependencies
-   */
-  protected static synchronized Injector buildInjector(final JobOptions opts) throws JobsException {
-    if (injector == null) {
-      try {
-        injector = Guice.createInjector(new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()),
-            opts.getLastRunLoc(), opts.getAltInputFile()));
-
-        /**
-         * Initialize system code cache
-         */
-        injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
-
-      } catch (CreationException e) {
-        throw JobLogUtils.buildException(LOGGER, e, "FAILED TO BUILD INJECTOR!: {}",
-            e.getMessage());
-      }
-    }
-
-    return injector;
-  }
-
-  /**
    * Prepare a batch job with all required dependencies.
    * 
    * @param klass batch job class
@@ -461,7 +425,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       String... args) throws JobsException {
     try {
       final JobOptions opts = JobOptions.parseCommandLine(args);
-      final T ret = buildInjector(opts).getInstance(klass);
+      final T ret = JobsGuiceInjector.buildInjector(opts).getInstance(klass);
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {

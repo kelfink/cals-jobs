@@ -99,6 +99,7 @@ public class PersonJobTester {
 
   JobOptions opts;
   File tempFile;
+  File esConfileFile;
   String lastJobRunTimeFilename;
   java.util.Date lastRunTime = new java.util.Date();
 
@@ -182,10 +183,10 @@ public class PersonJobTester {
     when(esConfig.getElasticsearchDocType()).thenReturn("person");
 
     // Job options:
-    final File esConfileFile = tempFolder.newFile("es.yml");
+    esConfileFile = tempFolder.newFile("es.yml");
     opts = mock(JobOptions.class);
     when(opts.isLoadSealedAndSensitive()).thenReturn(false);
-    // when(opts.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
+    when(opts.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
   }
 
 }

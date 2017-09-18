@@ -29,7 +29,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.inject.Injector;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
@@ -38,7 +37,6 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
-import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -125,23 +123,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void buildBulkProcessor_Args__() throws Exception {
     final BulkProcessor actual = target.buildBulkProcessor();
     assertThat(actual, notNullValue());
-  }
-
-  @Test
-  @Ignore
-  public void buildInjector_Args__JobOptions() throws Exception {
-    final Injector actual = BasePersonIndexerJob.buildInjector(opts);
-    assertThat(actual, notNullValue());
-  }
-
-  @Test
-  @Ignore
-  public void buildInjector_Args__JobOptions_T__JobsException() throws Exception {
-    try {
-      BasePersonIndexerJob.buildInjector(opts);
-      fail("Expected exception was not thrown!");
-    } catch (JobsException e) {
-    }
   }
 
   @Test
@@ -337,21 +318,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
     ESOptionalCollection[] keep = new ESOptionalCollection[] {};
     final Pair<String, String> actual = target.prepareUpsertJson(esp, t, elementName, list, keep);
     assertThat(actual, notNullValue());
-  }
-
-  @Test
-  @Ignore
-  public void prepareUpsertJson_Args__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray_T__JsonProcessingException()
-      throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity("abc1234567");
-    String elementName = "slop";
-    List list = new ArrayList();
-    ESOptionalCollection[] keep = new ESOptionalCollection[] {};
-    try {
-      target.prepareUpsertJson(esp, t, elementName, list, keep);
-      fail("Expected exception was not thrown!");
-    } catch (JsonProcessingException e) {
-    }
   }
 
   @Test
