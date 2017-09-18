@@ -386,14 +386,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
-  public void _run_Args__Date() throws Exception {
-    Date actual = target._run(lastRunTime);
-    Date expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void extractLastRunRecsFromTable_Args__Date() throws Exception {
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(q);
@@ -497,6 +489,16 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
 
     final Date actual = target.doLastRun(lastRunTime);
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
+  // @Ignore
+  public void _run_Args__Date() throws Exception {
+    final javax.persistence.Query q = mock(javax.persistence.Query.class);
+    when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+
+    Date actual = target._run(lastRunTime);
     assertThat(actual, notNullValue());
   }
 
