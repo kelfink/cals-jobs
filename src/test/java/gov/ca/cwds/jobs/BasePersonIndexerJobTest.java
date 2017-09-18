@@ -312,7 +312,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void getDriverTable_Args__() throws Exception {
-    String actual = target.getDriverTable();
+    String actual = target.getDriverTableNative();
   }
 
   @Test
