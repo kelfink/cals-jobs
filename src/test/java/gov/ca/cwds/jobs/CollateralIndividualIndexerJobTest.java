@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -98,6 +99,18 @@ public class CollateralIndividualIndexerJobTest extends PersonJobTester {
   @Test
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
+    final List actual = target.getPartitionRanges();
+    assertThat(target, notNullValue());
+  }
+
+  @Test
+  public void getPartitionRanges_Linux() throws Exception {
+    System.setProperty("DB_CMS_SCHEMA", "CWSRS1");
+
+    when(meta.getDatabaseMajorVersion()).thenReturn(12);
+    when(meta.getDatabaseMinorVersion()).thenReturn(1);
+    when(meta.getDatabaseProductVersion()).thenReturn("DB2/LINUXX8664");
+
     final List actual = target.getPartitionRanges();
     assertThat(target, notNullValue());
   }
