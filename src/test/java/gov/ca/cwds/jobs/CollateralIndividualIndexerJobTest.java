@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -63,24 +65,19 @@ public class CollateralIndividualIndexerJobTest extends PersonJobTester {
 
   @Test
   public void instantiation() throws Exception {
-    ReplicatedCollateralIndividualDao dao = null;
     assertThat(target, notNullValue());
   }
 
   @Test
   public void getJobTotalBuckets_Args__() throws Exception {
-    target = new CollateralIndividualIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
-        sessionFactory);
-    int actual = target.getJobTotalBuckets();
-    int expected = 12;
+    final int actual = target.getJobTotalBuckets();
+    final int expected = 12;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getLegacySourceTable_Args__() throws Exception {
-    target = new CollateralIndividualIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
-        sessionFactory);
-    String actual = target.getLegacySourceTable();
+    final String actual = target.getLegacySourceTable();
     String expected = "COLTRL_T";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -92,5 +89,17 @@ public class CollateralIndividualIndexerJobTest extends PersonJobTester {
     CollateralIndividualIndexerJob.main(args);
   }
 
-}
+  @Test
+  public void getPartitionRanges_Args__() throws Exception {
+    final List actual = target.getPartitionRanges();
+    assertThat(target, notNullValue());
+  }
 
+  @Test
+  public void getPartitionRanges_RSQ() throws Exception {
+    System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
+    final List actual = target.getPartitionRanges();
+    assertThat(target, notNullValue());
+  }
+
+}
