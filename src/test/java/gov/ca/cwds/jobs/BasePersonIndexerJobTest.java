@@ -388,14 +388,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   @Ignore
-  public void doLastRun_Args__Date() throws Exception {
-    Date actual = target.doLastRun(lastRunTime);
-    Date expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  @Ignore
   public void _run_Args__Date() throws Exception {
     Date actual = target._run(lastRunTime);
     Date expected = null;
@@ -418,16 +410,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
     final List<TestNormalizedEntity> actual =
         target.extractLastRunRecsFromView(lastRunTime, new HashSet<String>());
-    assertThat(actual, notNullValue());
-  }
-
-  @Test
-  public void buildBucketList_Args__String() throws Exception {
-    final javax.persistence.Query q = mock(javax.persistence.Query.class);
-    when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
-
-    String table = "SOMETBL";
-    List<BatchBucket> actual = target.buildBucketList(table);
     assertThat(actual, notNullValue());
   }
 
@@ -502,19 +484,42 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   @Ignore
-  public void pullBucketRange_Args__String__String() throws Exception {
-    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
-    when(session.getNamedNativeQuery(any())).thenReturn(q);
+  public void doLastRun_Args__Date() throws Exception {
+    Date actual = target.doLastRun(lastRunTime);
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
 
+  @Test
+  public void buildBucketList_Args__String() throws Exception {
+    final javax.persistence.Query q = mock(javax.persistence.Query.class);
+    when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+
+    final String table = "SOMETBL";
+    final List<BatchBucket> actual = target.buildBucketList(table);
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
+  @Ignore
+  public void pullBucketRange_Args__String__String() throws Exception {
+    // final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
+    // q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
+    // .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
+    // .setFetchSize(DEFAULT_FETCH_SIZE);
+
+    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
+
+    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
+    when(q.setCacheable(any())).thenReturn(q);
     when(q.setFlushMode(any(FlushMode.class))).thenReturn(q);
     when(q.setReadOnly(true)).thenReturn(q);
     when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
-    when(q.setCacheable(any())).thenReturn(q);
     when(q.setFetchSize(any())).thenReturn(q);
-    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
 
-    String minId = "1";
-    String maxId = "2";
+    final String minId = "1";
+    final String maxId = "2";
     final List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
     List<Object> expected = null;
     assertThat(actual, is(equalTo(expected)));
