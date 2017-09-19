@@ -48,6 +48,7 @@ public class OtherClientNameIndexerJob
    * Construct batch job instance with all required dependencies.
    * 
    * @param dao Relationship View DAO
+   * @param denormDao de-normalized DAO
    * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
