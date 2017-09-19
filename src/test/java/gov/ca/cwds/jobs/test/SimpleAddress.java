@@ -1,8 +1,9 @@
 package gov.ca.cwds.jobs.test;
 
 import gov.ca.cwds.data.std.ApiAddressAware;
+import gov.ca.cwds.data.std.ApiMarker;
 
-public final class SimpleAddress implements ApiAddressAware {
+public class SimpleAddress implements ApiAddressAware, ApiMarker {
 
   private String city;
   private String county;

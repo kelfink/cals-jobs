@@ -23,6 +23,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.test.SimpleAddress;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestOnlyApiPersonAware;
 
@@ -53,9 +54,11 @@ public class ElasticTransformerTest extends PersonJobTester {
   @Test
   public void handleAddress_Args__ApiPersonAware() throws Exception {
     final TestOnlyApiPersonAware p = new TestOnlyApiPersonAware();
-    List<ElasticSearchPersonAddress> actual = ElasticTransformer.handleAddress(p);
-    List<ElasticSearchPersonAddress> expected = new ArrayList<>();
-    assertThat(actual, is(equalTo(expected)));
+    SimpleAddress addr = new SimpleAddress("Provo", "Utah", "UT", "206 Hinckley Center", "84602");
+    p.addAddress(addr);
+
+    final List<ElasticSearchPersonAddress> actual = ElasticTransformer.handleAddress(p);
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -93,8 +96,7 @@ public class ElasticTransformerTest extends PersonJobTester {
   public void handleLegacyDescriptor_Args__ApiPersonAware() throws Exception {
     final ApiPersonAware p = new TestOnlyApiPersonAware();
     ElasticSearchLegacyDescriptor actual = ElasticTransformer.handleLegacyDescriptor(p);
-    ElasticSearchLegacyDescriptor expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
 }

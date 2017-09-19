@@ -207,7 +207,25 @@ public class TestOnlyApiPersonAware implements ApiPersonAwareWritable, ApiPhoneA
 
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
-    return null;
+    final ElasticSearchLegacyDescriptor ret = new ElasticSearchLegacyDescriptor();
+    ret.setLegacyId(id);
+    ret.setLegacyLastUpdated(new Date().toString());
+    ret.setLegacyTableDescription("Client");
+    ret.setLegacyTableName("CLIENT_T");
+
+    return ret;
+  }
+
+  public void addAddress(ApiAddressAware addr) {
+    addresses.add(addr);
+  }
+
+  public void addLanguage(ApiLanguageAware lang) {
+    languages.add(lang);
+  }
+
+  public void addPhone(ApiPhoneAware phone) {
+    phones.add(phone);
   }
 
 }
