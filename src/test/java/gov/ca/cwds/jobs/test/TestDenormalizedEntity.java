@@ -1,7 +1,6 @@
 package gov.ca.cwds.jobs.test;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Entity;
@@ -77,50 +76,6 @@ import gov.ca.cwds.data.std.ApiPersonAware;
         resultClass = TestDenormalizedEntity.class, readOnly = true)})
 public class TestDenormalizedEntity
     implements PersistentObject, ApiGroupNormalizer<TestNormalizedEntity>, ApiMultiplePersonAware {
-
-  private static final class TestOnlyApiPersonAware implements ApiPersonAware {
-
-    @Override
-    public Serializable getPrimaryKey() {
-      return null;
-    }
-
-    @Override
-    public String getFirstName() {
-      return null;
-    }
-
-    @Override
-    public String getMiddleName() {
-      return null;
-    }
-
-    @Override
-    public String getLastName() {
-      return null;
-    }
-
-    @Override
-    public String getGender() {
-      return null;
-    }
-
-    @Override
-    public Date getBirthDate() {
-      return null;
-    }
-
-    @Override
-    public String getSsn() {
-      return null;
-    }
-
-    @Override
-    public String getNameSuffix() {
-      return null;
-    }
-
-  }
 
   private String id;
   private String[] names;

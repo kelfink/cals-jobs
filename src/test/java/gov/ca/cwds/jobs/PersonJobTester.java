@@ -9,7 +9,6 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -31,7 +30,6 @@ import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ibm.db2.jcc.DB2SystemMonitor;
 import com.ibm.db2.jcc.am.DatabaseMetaData;
 
 import gov.ca.cwds.ObjectMapperUtils;
@@ -42,44 +40,6 @@ import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 public class PersonJobTester {
-
-  public static class TestDB2SystemMonitor implements DB2SystemMonitor {
-
-    @Override
-    public void enable(boolean paramBoolean) throws SQLException {}
-
-    @Override
-    public void start(int paramInt) throws SQLException {}
-
-    @Override
-    public void stop() throws SQLException {}
-
-    @Override
-    public long getServerTimeMicros() throws SQLException {
-      return 0;
-    }
-
-    @Override
-    public long getNetworkIOTimeMicros() throws SQLException {
-      return 0;
-    }
-
-    @Override
-    public long getCoreDriverTimeMicros() throws SQLException {
-      return 0;
-    }
-
-    @Override
-    public long getApplicationTimeMillis() throws SQLException {
-      return 0;
-    }
-
-    @Override
-    public Object moreData(int paramInt) throws SQLException {
-      return "nothin";
-    }
-
-  }
 
   protected static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
 
@@ -139,7 +99,6 @@ public class PersonJobTester {
     em = mock(EntityManager.class);
     client = mock(Client.class);
 
-    when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(sessionFactory.createEntityManager()).thenReturn(em);
     when(session.beginTransaction()).thenReturn(transaction);
