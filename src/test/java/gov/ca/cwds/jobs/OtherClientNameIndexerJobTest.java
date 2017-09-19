@@ -26,6 +26,7 @@ import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.ReplicatedAkaDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
 
@@ -157,7 +158,12 @@ public class OtherClientNameIndexerJobTest extends PersonJobTester {
   public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedAkas() throws Exception {
     ElasticSearchPerson esp = new ElasticSearchPerson();
     final ReplicatedAkas p = new ReplicatedAkas(DEFAULT_CLIENT_ID);
-    UpdateRequest actual = target.prepareUpsertRequest(esp, p);
+    ElasticSearchPersonAka aka = new ElasticSearchPersonAka();
+    aka.setFirstName("Albert");
+    aka.setLastName("Einstein");
+    p.addAka(aka);
+
+    final UpdateRequest actual = target.prepareUpsertRequest(esp, p);
     assertThat(actual, notNullValue());
   }
 
