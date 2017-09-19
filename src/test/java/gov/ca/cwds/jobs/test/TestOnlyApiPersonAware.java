@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
+import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiAddressAwareWritable;
 import gov.ca.cwds.data.std.ApiLanguageAware;
@@ -16,11 +18,13 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPersonAwareWritable;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.data.std.ApiPhoneAwareWritable;
+import gov.ca.cwds.jobs.PersonJobTester;
 
 public class TestOnlyApiPersonAware implements ApiPersonAwareWritable, ApiPhoneAwareWritable,
     ApiAddressAwareWritable, ApiMultiplePersonAware, ApiMultipleAddressesAware,
-    ApiMultipleLanguagesAware, ApiMultiplePhonesAware {
+    ApiMultipleLanguagesAware, ApiMultiplePhonesAware, ApiLegacyAware {
 
+  private String id = PersonJobTester.DEFAULT_CLIENT_ID;
   private String firstName = "Albert";
   private String lastName = "Einstein";
   private String middleName;
@@ -190,5 +194,20 @@ public class TestOnlyApiPersonAware implements ApiPersonAwareWritable, ApiPhoneA
 
   @Override
   public void setPhoneType(PhoneType arg0) {}
+
+  @Override
+  public String getId() {
+    return id;
+  }
+
+  @Override
+  public String getLegacyId() {
+    return id;
+  }
+
+  @Override
+  public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
+    return null;
+  }
 
 }
