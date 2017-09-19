@@ -1562,12 +1562,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @return list of partition key pairs
    * @see ReplicatedClient
-   * 
    */
   protected List<Pair<String, String>> getPartitionRanges() {
     LOGGER.info("DETERMINE BUCKET RANGES ...");
-    List<Pair<String, String>> ret = new ArrayList<>();
-    List<BatchBucket> buckets = buildBucketList(getDriverTable());
+    final List<Pair<String, String>> ret = new ArrayList<>();
+    final List<BatchBucket> buckets = buildBucketList(getDriverTable());
 
     for (BatchBucket b : buckets) {
       LOGGER.warn("BUCKET RANGE: {} to {}", b.getMinId(), b.getMaxId());

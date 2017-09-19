@@ -30,17 +30,17 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param clientDao Case history view DAO
+   * @param dao Case history view DAO
    * @param elasticsearchDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public ParentCaseHistoryIndexerJob(final ReplicatedPersonCasesDao clientDao,
+  public ParentCaseHistoryIndexerJob(final ReplicatedPersonCasesDao dao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    super(dao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   @Override

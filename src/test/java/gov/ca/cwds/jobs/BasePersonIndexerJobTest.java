@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.Query;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -321,7 +323,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
 
-    final List actual = target.getPartitionRanges();
+    final List<?> actual = target.getPartitionRanges();
     assertThat(actual, notNullValue());
   }
 
@@ -339,7 +341,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
       fail("Expected exception was not thrown!");
     } catch (IOException e) {
     }
-
   }
 
   @Test
@@ -349,7 +350,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void extractHibernate_Args__() throws Exception {
-    final javax.persistence.Query q = mock(javax.persistence.Query.class);
+    final Query q = mock(Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
 
     final List<BatchBucket> buckets = new ArrayList<>();
@@ -414,8 +415,8 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void doLastRun_Args__Date() throws Exception {
-    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
-    when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
+    final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any(String.class))).thenReturn(qn);
 
     final Date actual = target.doLastRun(lastRunTime);
     assertThat(actual, notNullValue());
@@ -607,7 +608,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
     TestDenormalizedEntity m = new TestDenormalizedEntity(DEFAULT_CLIENT_ID);
     denorms.add(m);
     when(qn.list()).thenReturn(denorms);
-    // when(qn.list()).thenThrow(new SQLException());
 
     final Set<String> deletionResults = mock(Set.class);
     final List<TestNormalizedEntity> actual =

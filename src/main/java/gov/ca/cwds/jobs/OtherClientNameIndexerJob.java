@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.persistence.Table;
+
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.SessionFactory;
@@ -16,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedAkaDao;
+import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -39,6 +42,8 @@ public class OtherClientNameIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OtherClientNameIndexerJob.class);
 
+  private ReplicatedOtherClientNameDao denormDao;
+
   /**
    * Construct batch job instance with all required dependencies.
    * 
@@ -49,10 +54,12 @@ public class OtherClientNameIndexerJob
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public OtherClientNameIndexerJob(final ReplicatedAkaDao dao, final ElasticsearchDao esDao,
+  public OtherClientNameIndexerJob(final ReplicatedAkaDao dao,
+      final ReplicatedOtherClientNameDao denormDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    this.denormDao = denormDao;
   }
 
   @Override
@@ -66,13 +73,24 @@ public class OtherClientNameIndexerJob
   }
 
   @Override
-  protected ReplicatedAkas normalizeSingle(List<ReplicatedOtherClientName> recs) {
-    return normalize(recs).get(0);
+  protected ReplicatedAkas normalizeSingle(final List<ReplicatedOtherClientName> recs) {
+    return recs != null && !recs.isEmpty() ? normalize(recs).get(0) : null;
   }
 
   @Override
-  protected List<ReplicatedAkas> normalize(List<ReplicatedOtherClientName> recs) {
+  protected List<ReplicatedAkas> normalize(final List<ReplicatedOtherClientName> recs) {
     return EntityNormalizer.<ReplicatedAkas, ReplicatedOtherClientName>normalizeList(recs);
+  }
+
+  @Override
+  protected String getDriverTable() {
+    String ret = null;
+    final Table tbl = this.denormDao.getEntityClass().getDeclaredAnnotation(Table.class);
+    if (tbl != null) {
+      ret = tbl.name();
+    }
+
+    return ret;
   }
 
   @Override

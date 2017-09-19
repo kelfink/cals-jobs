@@ -82,15 +82,15 @@ public abstract class CaseHistoryIndexerJob
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonCases cases)
       throws IOException {
 
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append("{\"cases\":[");
 
-    List<ElasticSearchPersonCase> esPersonCasess = cases.getCases();
-    esp.setCases(esPersonCasess);
+    List<ElasticSearchPersonCase> esPersonCases = cases.getCases();
+    esp.setCases(esPersonCases);
 
-    if (!esPersonCasess.isEmpty()) {
+    if (!esPersonCases.isEmpty()) {
       try {
-        buf.append(esPersonCasess.stream().map(this::jsonify).sorted(String::compareTo)
+        buf.append(esPersonCases.stream().map(this::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
         JobLogUtils.raiseError(LOGGER, e, "ERROR SERIALIZING CASES! {}", e.getMessage());
@@ -111,12 +111,12 @@ public abstract class CaseHistoryIndexerJob
   }
 
   @Override
-  protected ReplicatedPersonCases normalizeSingle(List<EsPersonCase> recs) {
-    return !recs.isEmpty() ? normalize(recs).get(0) : null;
+  protected ReplicatedPersonCases normalizeSingle(final List<EsPersonCase> recs) {
+    return recs != null && !recs.isEmpty() ? normalize(recs).get(0) : null;
   }
 
   @Override
-  protected List<ReplicatedPersonCases> normalize(List<EsPersonCase> recs) {
+  protected List<ReplicatedPersonCases> normalize(final List<EsPersonCase> recs) {
     return EntityNormalizer.<ReplicatedPersonCases, EsPersonCase>normalizeList(recs);
   }
 }
