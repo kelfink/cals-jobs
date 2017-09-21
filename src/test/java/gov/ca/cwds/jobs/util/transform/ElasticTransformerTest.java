@@ -73,7 +73,7 @@ public class ElasticTransformerTest extends PersonJobTester {
   @Test
   public void buildElasticSearchPersonDoc_Args__ObjectMapper__ApiPersonAware() throws Exception {
     TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    ElasticSearchPerson actual = ElasticTransformer.buildElasticSearchPersonDoc(mapper, p);
+    ElasticSearchPerson actual = ElasticTransformer.buildElasticSearchPersonDoc(MAPPER, p);
     // ElasticSearchPerson expected = mapper.readValue(
     // this.getClass().getResourceAsStream("/fixtures/ElasticTransformerTestFixture.json"),
     // ElasticSearchPerson.class);

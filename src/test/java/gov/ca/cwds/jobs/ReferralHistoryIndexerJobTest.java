@@ -75,7 +75,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
     dao = new ReplicatedPersonReferralsDao(sessionFactory);
     target =
-        new ReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+        new ReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
   }
 
@@ -196,7 +196,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
   @Test
   public void testReadClients() throws Exception {
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
         sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
 
@@ -211,7 +211,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
   @Test
   public void testReadAllegations() throws Exception {
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
         sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
 
@@ -225,7 +225,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
   @Test
   public void testMonitorStopAndReport() throws Exception {
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
         sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
     target.monitorStopAndReport(new TestDB2SystemMonitor());
@@ -233,7 +233,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
   @Test
   public void testCalcThreads() throws Exception {
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
         sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
     target.calcReaderThreads();
@@ -241,7 +241,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
   @Test
   public void testReadReferrals() throws Exception {
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
         sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
 
@@ -255,7 +255,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   @Test
   @Ignore
   public void pullRange_Args__Pair() throws Exception {
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
         sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
 

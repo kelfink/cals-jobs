@@ -49,7 +49,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
     super.setup();
     dao = new ReplicatedServiceProviderDao(sessionFactory);
     target =
-        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
   }
 
@@ -66,7 +66,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   @Test
   public void testInstantiation() throws Exception {
     target =
-        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     assertThat(target, notNullValue());
   }
 
@@ -90,7 +90,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   @Test
   public void getLegacySourceTable_Args__() throws Exception {
     target =
-        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     String actual = target.getLegacySourceTable();
     String expected = "SVC_PVRT";
     assertThat(actual, is(equalTo(expected)));
@@ -99,7 +99,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   @Test
   public void getPartitionRanges_Args__() throws Exception {
     target =
-        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }
@@ -108,7 +108,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
     target =
-        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }

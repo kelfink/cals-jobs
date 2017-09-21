@@ -41,7 +41,7 @@ import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 public class PersonJobTester {
 
-  protected static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
+  protected static final ObjectMapper MAPPER = ObjectMapperUtils.createObjectMapper();
 
   public static final String DEFAULT_CLIENT_ID = "abc1234567";
 

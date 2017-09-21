@@ -58,7 +58,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void setup() throws Exception {
     super.setup();
     dao = new TestNormalizedEntityDao(sessionFactory);
-    target = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    target = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     target.setOpts(opts);
   }
 
@@ -147,7 +147,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
             + "\"source\":\"{\\\"id\\\":\\\"abc123\\\",\\\"name\\\":null,\\\"middleName\\\":null,\\\"firstName\\\":null,\\\"ssn\\\":null,\\\"lastName\\\":null,"
             + "\\\"gender\\\":null,\\\"birthDate\\\":null,\\\"nameSuffix\\\":null,\\\"primaryKey\\\":\\\"abc123\\\"}"
             + "\",\"legacy_source_table\":null,\"legacy_id\":null,\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"screenings\":[],\"referrals\":[],\"relationships\":[],\"cases\":[],\"id\":\"abc123\"}";
-    ElasticSearchPerson expected = mapper.readValue(json, ElasticSearchPerson.class);
+    ElasticSearchPerson expected = MAPPER.readValue(json, ElasticSearchPerson.class);
     // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, notNullValue());
   }

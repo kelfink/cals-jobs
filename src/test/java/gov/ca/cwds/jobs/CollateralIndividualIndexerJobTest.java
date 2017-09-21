@@ -30,7 +30,7 @@ public class CollateralIndividualIndexerJobTest extends PersonJobTester {
     super.setup();
 
     dao = new ReplicatedCollateralIndividualDao(sessionFactory);
-    target = new CollateralIndividualIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper,
+    target = new CollateralIndividualIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
         sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
   }

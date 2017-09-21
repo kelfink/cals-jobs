@@ -31,7 +31,7 @@ public class ReporterIndexerJobTest extends PersonJobTester {
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedReporterDao(sessionFactory);
-    target = new ReporterIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    target = new ReporterIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     target.setOpts(opts);
   }
 

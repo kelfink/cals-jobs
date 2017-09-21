@@ -41,7 +41,7 @@ public class CaseHistoryIndexerJobTest extends PersonJobTester {
     super.setup();
     dao = new ReplicatedPersonCasesDao(sessionFactory);
     target =
-        new TestCaseHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+        new TestCaseHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     target.setOpts(opts);
   }
 
