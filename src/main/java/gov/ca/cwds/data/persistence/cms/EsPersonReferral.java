@@ -48,10 +48,6 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 @NamedNativeQueries({@NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
     query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
-        // + "WHERE r.CLIENT_ID IN ( "
-        // + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
-        // + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-        // + ") "
         + "WHERE (1=1 OR current timestamp < CAST(:after AS TIMESTAMP))"
         + "ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsPersonReferral.class, readOnly = true),
@@ -59,9 +55,6 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithUnlimitedAccess",
         query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
-            // + "WHERE r.CLIENT_ID IN ( "
-            // + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
-            // + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) " + ") "
             + "WHERE (1=1 OR current timestamp < CAST(:after AS TIMESTAMP))"
             + "AND r.LIMITED_ACCESS_CODE = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsPersonReferral.class, readOnly = true),
@@ -69,10 +62,6 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithLimitedAccess",
         query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
-            // + "WHERE r.CLIENT_ID IN ( "
-            // + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_REFERRAL_HIST r1 "
-            // + "WHERE r1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            // + ") "
             + "WHERE (1=1 OR current timestamp < CAST(:after AS TIMESTAMP))"
             + "AND r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsPersonReferral.class, readOnly = true)})
