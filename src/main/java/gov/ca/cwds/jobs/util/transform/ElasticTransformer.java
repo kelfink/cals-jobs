@@ -30,6 +30,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
  * Methods to transform {@link ApiPersonAware} into {@link ElasticSearchPerson}.
@@ -79,26 +80,25 @@ public class ElasticTransformer {
     return legacyDesc;
   }
 
-  protected static List<String> handleLanguage(ApiPersonAware p) {
-    List<String> languages = null;
+  protected static List<ElasticSearchPersonLanguage> handleLanguage(ApiPersonAware p) {
+    List<ElasticSearchPersonLanguage> languages = null;
+
     if (p instanceof ApiMultipleLanguagesAware) {
       ApiMultipleLanguagesAware mlx = (ApiMultipleLanguagesAware) p;
       languages = new ArrayList<>();
       for (ApiLanguageAware lx : mlx.getLanguages()) {
-        final ElasticSearchPersonLanguage lang =
-            ElasticSearchPersonLanguage.findBySysId(lx.getLanguageSysId());
-        if (lang != null) {
-          languages.add(lang.getDescription());
-        }
+        Integer languageId = lx.getLanguageSysId();
+        ElasticSearchPersonLanguage lang = new ElasticSearchPersonLanguage(languageId.toString(),
+            SystemCodeCache.global().getSystemCodeShortDescription(languageId), lx.getPrimary());
+        languages.add(lang);
       }
     } else if (p instanceof ApiLanguageAware) {
       languages = new ArrayList<>();
       ApiLanguageAware lx = (ApiLanguageAware) p;
-      final ElasticSearchPersonLanguage lang =
-          ElasticSearchPersonLanguage.findBySysId(lx.getLanguageSysId());
-      if (lang != null) {
-        languages.add(lang.getDescription());
-      }
+      Integer languageId = lx.getLanguageSysId();
+      ElasticSearchPersonLanguage lang = new ElasticSearchPersonLanguage(languageId.toString(),
+          SystemCodeCache.global().getSystemCodeShortDescription(languageId), lx.getPrimary());
+      languages.add(lang);
     }
 
     return languages;

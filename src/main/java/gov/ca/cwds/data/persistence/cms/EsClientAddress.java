@@ -515,9 +515,12 @@ public class EsClientAddress extends ApiObjectIdentity
     ret.setCltPrevOtherDescription(rs.getString("CLT_POTH_DESC"));
     ret.setCltPrevRegionalCenterIndicator(rs.getString("CLT_PREREG_IND"));
     ret.setCltPrimaryEthnicityType(rs.getShort("CLT_P_ETHNCTYC"));
+
+    // Languages
     ret.setCltPrimaryLanguageType(rs.getShort("CLT_P_LANG_TPC"));
-    ret.setCltReligionType(rs.getShort("CLT_RLGN_TPC"));
     ret.setCltSecondaryLanguageType(rs.getShort("CLT_S_LANG_TC"));
+
+    ret.setCltReligionType(rs.getShort("CLT_RLGN_TPC"));
     ret.setCltSensitiveHlthInfoOnFileIndicator(rs.getString("CLT_SNTV_HLIND"));
     ret.setCltSoc158PlacementCode(rs.getString("CLT_SOCPLC_CD"));
     ret.setCltSocialSecurityNumChangedCode(rs.getString("CLT_SSN_CHG_CD"));
@@ -649,9 +652,12 @@ public class EsClientAddress extends ApiObjectIdentity
       ret.setPrevOtherDescription(getCltPrevOtherDescription());
       ret.setPrevRegionalCenterIndicator(getCltPrevRegionalCenterIndicator());
       ret.setPrimaryEthnicityType(getCltPrimaryEthnicityType());
+
+      // Languages
       ret.setPrimaryLanguageType(getCltPrimaryLanguageType());
-      ret.setReligionType(getCltReligionType());
       ret.setSecondaryLanguageType(getCltSecondaryLanguageType());
+
+      ret.setReligionType(getCltReligionType());
       ret.setSensitiveHlthInfoOnFileIndicator(getCltSensitiveHlthInfoOnFileIndicator());
       ret.setSensitivityIndicator(getCltSensitivityIndicator());
       ret.setSoc158PlacementCode(getCltSoc158PlacementCode());

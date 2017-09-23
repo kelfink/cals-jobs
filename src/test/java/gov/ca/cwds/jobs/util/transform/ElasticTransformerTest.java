@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
+import gov.ca.cwds.data.es.ElasticSearchPersonLanguage;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.std.ApiPersonAware;
@@ -37,9 +38,9 @@ public class ElasticTransformerTest extends PersonJobTester {
   @Test
   public void handleLanguage_Args__ApiPersonAware() throws Exception {
     ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    List<String> actual = ElasticTransformer.handleLanguage(p);
-    List<String> expected = new ArrayList<>();
-    expected.add("Arabic");
+    List<ElasticSearchPersonLanguage> actual = ElasticTransformer.handleLanguage(p);
+    List<ElasticSearchPersonLanguage> expected = new ArrayList<>();
+    expected.add(new ElasticSearchPersonLanguage("1249", null, false));
     assertThat(actual, is(equalTo(expected)));
   }
 
