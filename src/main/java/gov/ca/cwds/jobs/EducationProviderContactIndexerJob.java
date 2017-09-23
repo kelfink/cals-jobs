@@ -52,7 +52,7 @@ public class EducationProviderContactIndexerJob extends
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(EducationProviderContactIndexerJob.class, args);
+    runStandalone(EducationProviderContactIndexerJob.class, args);
   }
 
 }

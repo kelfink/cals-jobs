@@ -131,7 +131,7 @@ public class ServiceProviderIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(ServiceProviderIndexerJob.class, args);
+    runStandalone(ServiceProviderIndexerJob.class, args);
   }
 
 }

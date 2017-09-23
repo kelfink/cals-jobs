@@ -168,7 +168,7 @@ public class OtherClientNameIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(OtherClientNameIndexerJob.class, args);
+    runStandalone(OtherClientNameIndexerJob.class, args);
   }
 
 }

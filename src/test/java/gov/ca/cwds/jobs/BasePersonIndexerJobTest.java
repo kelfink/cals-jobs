@@ -42,6 +42,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -392,7 +393,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void isTestMode_Args__() throws Exception {
-    boolean actual = BasePersonIndexerJob.isTestMode();
+    boolean actual = JobRunner.isTestMode();
     boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -400,7 +401,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   @Test
   public void setTestMode_Args__boolean() throws Exception {
     boolean testMode = false;
-    BasePersonIndexerJob.setTestMode(testMode);
+    JobRunner.setTestMode(testMode);
   }
 
   @Test
@@ -648,7 +649,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void pullBucketRange_Args__String__String() throws Exception {
-    BasePersonIndexerJob.setTestMode(true);
+    JobRunner.setTestMode(true);
 
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
@@ -684,7 +685,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void runMain_Args__Class__StringArray() throws Exception {
     Class klass = null;
     String[] args = new String[] {};
-    BasePersonIndexerJob.runMain(klass, args);
+    BasePersonIndexerJob.runStandalone(klass, args);
   }
 
 }

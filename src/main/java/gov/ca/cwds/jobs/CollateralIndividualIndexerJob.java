@@ -148,7 +148,7 @@ public final class CollateralIndividualIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(CollateralIndividualIndexerJob.class, args);
+    runStandalone(CollateralIndividualIndexerJob.class, args);
   }
 
 }

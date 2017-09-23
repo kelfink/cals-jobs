@@ -124,7 +124,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(ParentCaseHistoryIndexerJob.class, args);
+    runStandalone(ParentCaseHistoryIndexerJob.class, args);
   }
 }
 

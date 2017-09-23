@@ -80,7 +80,7 @@ public class SubstituteCareProviderIndexJob extends
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(SubstituteCareProviderIndexJob.class, args);
+    runStandalone(SubstituteCareProviderIndexJob.class, args);
   }
 
 }

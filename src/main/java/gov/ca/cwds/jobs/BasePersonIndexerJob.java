@@ -52,7 +52,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.CreationException;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.ApiLegacyAware;
@@ -73,7 +72,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
+import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.DB2JDBCUtils;
@@ -110,7 +109,7 @@ import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends LastSuccessfulRunJob implements AutoCloseable, JobResultSetAware<M> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(BasePersonIndexerJob.class);
+  static final Logger LOGGER = LoggerFactory.getLogger(BasePersonIndexerJob.class);
 
   private static final ESOptionalCollection[] KEEP_COLLECTIONS =
       new ESOptionalCollection[] {ESOptionalCollection.NONE};
@@ -140,12 +139,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           + "SELECT c.THE_ID_COL, ROW_NUMBER() OVER (ORDER BY 1) AS rn, COUNT(*) OVER (ORDER BY 1) AS total_cnt "
           + "FROM {h-schema}THE_TABLE c ORDER BY c.THE_ID_COL) y ORDER BY y.rn "
           + ") z GROUP BY z.bucket FOR READ ONLY WITH UR ";
-
-  /**
-   * For unit tests where resources either may not close properly or where expensive resources
-   * should be mocked.
-   */
-  private static boolean testMode = false;
 
   /**
    * Jackson ObjectMapper.
@@ -339,7 +332,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param obj object to serialize
    * @return JSON for this screening
    */
-  protected String jsonify(Object obj) {
+  public String jsonify(Object obj) {
     String ret = "";
     try {
       ret = mapper.writeValueAsString(obj);
@@ -406,63 +399,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }).setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(14, ByteSizeUnit.MB))
         .setConcurrentRequests(1).setName("jobs_bp").build();
-  }
-
-  // ======================
-  // STATIC, INJECTION:
-  // ======================
-
-  /**
-   * Prepare a batch job with all required dependencies.
-   * 
-   * @param klass batch job class
-   * @param args command line arguments
-   * @return batch job, ready to run
-   * @param <T> Person persistence type
-   * @throws JobsException if unable to parse command line or load dependencies
-   */
-  public static <T extends BasePersonIndexerJob<?, ?>> T newJob(final Class<T> klass,
-      String... args) throws JobsException {
-    try {
-      final JobOptions opts = JobOptions.parseCommandLine(args);
-      final T ret = JobsGuiceInjector.buildInjector(opts).getInstance(klass);
-      ret.setOpts(opts);
-      return ret;
-    } catch (CreationException e) {
-      throw JobLogUtils.buildException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
-    }
-  }
-
-  /**
-   * Batch job entry point.
-   * 
-   * <p>
-   * This method automatically closes the Hibernate session factory and ElasticSearch DAO and EXITs
-   * the JVM.
-   * </p>
-   * 
-   * @param klass batch job class
-   * @param args command line arguments
-   * @param <T> Person persistence type
-   * @throws JobsException unexpected runtime error
-   */
-  public static <T extends BasePersonIndexerJob<?, ?>> void runJob(final Class<T> klass,
-      String... args) throws JobsException {
-    int exitCode = 0;
-    try (final T job = newJob(klass, args)) { // Close resources automatically.
-      job.run();
-    } catch (Throwable e) { // NOSONAR
-      // Intentionally catch a Throwable, not an Exception.
-      // Close orphaned resources forcibly, if necessary, by system exit.
-      exitCode = 1;
-      throw JobLogUtils.buildException(LOGGER, e, "JOB FAILED!: {}", e.getMessage());
-    } finally {
-      // WARNING: kills the JVM in testing but may be needed to shutdown resources.
-      if (!isTestMode()) {
-        // Shutdown all remaining resources, even those not attached to this job.
-        Runtime.getRuntime().exit(exitCode); // NOSONAR
-      }
-    }
   }
 
   // ===================
@@ -1741,34 +1677,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param args command line arguments
    */
   @SuppressWarnings("rawtypes")
-  public static void runMain(final Class<? extends BasePersonIndexerJob> klass, String... args) {
+  public static void runStandalone(final Class<? extends BasePersonIndexerJob> klass, String... args) {
     LOGGER.info("Run job {}", klass.getName());
     try {
-      runJob(klass, args);
+      JobRunner.runStandalone(klass, args);
     } catch (Exception e) {
       LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
       throw e;
     }
-  }
-
-  /**
-   * For unit tests where resources either may not close properly or where expensive resources
-   * should be mocked.
-   * 
-   * @return whether in test mode
-   */
-  public static boolean isTestMode() {
-    return testMode;
-  }
-
-  /**
-   * For unit tests where resources either may not close properly or where expensive resources
-   * should be mocked.
-   * 
-   * @param testMode whether in test mode
-   */
-  public static void setTestMode(boolean testMode) {
-    BasePersonIndexerJob.testMode = testMode;
   }
 
   /**

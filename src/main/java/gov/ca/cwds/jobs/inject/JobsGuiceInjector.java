@@ -66,6 +66,7 @@ import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
 import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
+import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.util.JobLogUtils;
@@ -87,12 +88,11 @@ public class JobsGuiceInjector extends AbstractModule {
   /**
    * Guice Injector used for all Job instances during the life of this batch JVM.
    */
-  public static Injector injector;
+  private static Injector injector;
 
   private File esConfig;
   private String lastJobRunTimeFilename;
   private String altInputFilename;
-
   private JobOptions opts;
 
   /**
@@ -118,6 +118,78 @@ public class JobsGuiceInjector extends AbstractModule {
         !StringUtils.isBlank(lastJobRunTimeFilename) ? lastJobRunTimeFilename : "";
     this.altInputFilename = !StringUtils.isBlank(altInputFilename) ? altInputFilename : "";
     this.opts = opts;
+  }
+
+
+  /**
+   * Build the Guice Injector once, which is used for all Job instances during the life of this
+   * batch JVM.
+   * 
+   * @param opts command line options
+   * @return Guice Injector
+   * @throws JobsException if unable to construct dependencies
+   */
+  public static synchronized Injector buildInjector(final JobOptions opts) throws JobsException {
+    if (injector == null) {
+      try {
+        injector = Guice.createInjector(new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()),
+            opts.getLastRunLoc(), opts.getAltInputFile()));
+
+        /**
+         * Initialize system code cache
+         */
+        injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
+
+      } catch (CreationException e) {
+        throw JobLogUtils.buildException(LOGGER, e, "FAILED TO BUILD INJECTOR!: {}",
+            e.getMessage());
+      }
+    }
+
+    return injector;
+  }
+
+  /**
+   * Prepare a batch job with all required dependencies in a <strong>continuous mode</strong> with
+   * the static injector.
+   * 
+   * @param klass batch job class
+   * @param opts options for this job execution
+   * @return batch job, ready to run
+   * @param <T> Person persistence type
+   * @throws JobsException if unable to parse command line or load dependencies
+   */
+  public static <T extends BasePersonIndexerJob<?, ?>> T newJobInstance(final Class<T> klass,
+      final JobOptions opts) throws JobsException {
+    try {
+      final T ret = injector.getInstance(klass);
+      ret.setOpts(opts);
+      return ret;
+    } catch (CreationException e) {
+      throw JobLogUtils.buildException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
+    }
+  }
+
+  /**
+   * Prepare a batch job with all required dependencies.
+   * 
+   * @param klass batch job class
+   * @param args command line arguments
+   * @return batch job, ready to run
+   * @param <T> Person persistence type
+   * @throws JobsException if unable to parse command line or load dependencies
+   */
+  public static <T extends BasePersonIndexerJob<?, ?>> T newStandaloneJob(final Class<T> klass,
+      String... args) throws JobsException {
+    try {
+      final JobOptions opts = JobOptions.parseCommandLine(args);
+      final T ret = buildInjector(opts).getInstance(klass);
+      ret.setOpts(opts);
+      return ret;
+    } catch (CreationException e) {
+      throw JobLogUtils.buildException(JobRunner.LOGGER, e, "FAILED TO CREATE JOB!: {}",
+          e.getMessage());
+    }
   }
 
   /**
@@ -218,10 +290,12 @@ public class JobsGuiceInjector extends AbstractModule {
       LOGGER.warn("Create NEW ES client");
       try {
         final ElasticsearchConfiguration config = elasticSearchConfig();
+
         // DRS: requires ES 5.5.x.
         // Settings.Builder settings =
         // Settings.builder().put("cluster.name", config.getElasticsearchCluster());
         // client = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
+
         client = new PreBuiltTransportClient(
             Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build());
         client.addTransportAddress(
@@ -259,32 +333,12 @@ public class JobsGuiceInjector extends AbstractModule {
     return ret;
   }
 
-  /**
-   * Build the Guice Injector once, which is used for all Job instances during the life of this
-   * batch JVM.
-   * 
-   * @param opts command line options
-   * @return Guice Injector
-   * @throws JobsException if unable to construct dependencies
-   */
-  public static synchronized Injector buildInjector(final JobOptions opts) throws JobsException {
-    if (injector == null) {
-      try {
-        injector = Guice.createInjector(new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()),
-            opts.getLastRunLoc(), opts.getAltInputFile()));
+  public JobOptions getOpts() {
+    return opts;
+  }
 
-        /**
-         * Initialize system code cache
-         */
-        injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
-
-      } catch (CreationException e) {
-        throw JobLogUtils.buildException(LOGGER, e, "FAILED TO BUILD INJECTOR!: {}",
-            e.getMessage());
-      }
-    }
-
-    return injector;
+  public void setOpts(JobOptions opts) {
+    this.opts = opts;
   }
 
 }

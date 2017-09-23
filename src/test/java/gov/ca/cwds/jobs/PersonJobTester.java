@@ -36,6 +36,7 @@ import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
@@ -47,7 +48,7 @@ public class PersonJobTester {
 
   @BeforeClass
   public static void setupClass() {
-    BasePersonIndexerJob.setTestMode(true);
+    JobRunner.setTestMode(true);
     SimpleTestSystemCodeCache.init();
   }
 

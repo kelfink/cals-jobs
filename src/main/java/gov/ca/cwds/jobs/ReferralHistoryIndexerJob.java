@@ -792,7 +792,7 @@ public class ReferralHistoryIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(ReferralHistoryIndexerJob.class, args);
+    runStandalone(ReferralHistoryIndexerJob.class, args);
   }
 
 }

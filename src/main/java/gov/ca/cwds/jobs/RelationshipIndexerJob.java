@@ -137,7 +137,7 @@ public class RelationshipIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(RelationshipIndexerJob.class, args);
+    runStandalone(RelationshipIndexerJob.class, args);
   }
 
 }

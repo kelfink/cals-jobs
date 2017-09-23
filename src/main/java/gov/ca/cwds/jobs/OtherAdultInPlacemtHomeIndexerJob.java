@@ -47,7 +47,7 @@ public class OtherAdultInPlacemtHomeIndexerJob extends
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(OtherAdultInPlacemtHomeIndexerJob.class, args);
+    runStandalone(OtherAdultInPlacemtHomeIndexerJob.class, args);
   }
 
 }

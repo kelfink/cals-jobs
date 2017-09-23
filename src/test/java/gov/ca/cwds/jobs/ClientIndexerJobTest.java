@@ -24,6 +24,7 @@ import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.inject.JobRunner;
 
 /**
  * 
@@ -39,7 +40,7 @@ public class ClientIndexerJobTest extends PersonJobTester {
 
   @BeforeClass
   public static void setupClass() {
-    BasePersonIndexerJob.setTestMode(true);
+    JobRunner.setTestMode(true);
     System.setProperty("DB_CMS_SCHEMA", "CWSRS1");
   }
 

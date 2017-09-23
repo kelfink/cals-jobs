@@ -173,7 +173,7 @@ public class SafetyAlertIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(SafetyAlertIndexerJob.class, args);
+    runStandalone(SafetyAlertIndexerJob.class, args);
   }
 
 }

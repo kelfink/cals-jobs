@@ -143,7 +143,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(IntakeScreeningJob.class, args);
+    runStandalone(IntakeScreeningJob.class, args);
   }
 
 }

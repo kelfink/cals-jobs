@@ -148,7 +148,7 @@ public class ReporterIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(ReporterIndexerJob.class, args);
+    runStandalone(ReporterIndexerJob.class, args);
   }
 
 }

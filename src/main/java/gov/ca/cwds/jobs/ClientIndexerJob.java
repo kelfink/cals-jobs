@@ -283,7 +283,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runMain(ClientIndexerJob.class, args);
+    runStandalone(ClientIndexerJob.class, args);
   }
 
 }
