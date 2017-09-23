@@ -27,6 +27,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
+import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
@@ -37,8 +38,9 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
  * 
  * @author CWDS API Team
  */
-public class IntakeParticipant implements PersistentObject, ApiPersonAware,
-    ApiMultipleAddressesAware, ApiMultiplePhonesAware, ApiScreeningAware, ApiLegacyAware {
+public class IntakeParticipant extends ApiObjectIdentity
+    implements PersistentObject, ApiPersonAware, ApiMultipleAddressesAware, ApiMultiplePhonesAware,
+    ApiScreeningAware, ApiLegacyAware {
 
   /**
    * Default serialization.
