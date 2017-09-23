@@ -102,6 +102,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    */
   protected void handOff(final List<EsClientAddress> grpRecs) {
     try {
+
       try {
         lock.writeLock().lock();
         for (EsClientAddress cla : grpRecs) {
@@ -110,7 +111,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       } finally {
         lock.writeLock().unlock();
       }
-      lock.readLock().lock();
+
     } catch (InterruptedException ie) { // NOSONAR
       LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
       fatalError = true;
