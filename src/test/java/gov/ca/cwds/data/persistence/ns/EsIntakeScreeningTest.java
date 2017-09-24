@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.jobs.PersonJobTester;
@@ -65,16 +64,13 @@ public class EsIntakeScreeningTest {
   }
 
   @Test
-  @Ignore
   public void fillParticipant_Args__boolean() throws Exception {
     boolean isOther = false;
     IntakeParticipant actual = target.fillParticipant(isOther);
-    IntakeParticipant expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, notNullValue());
   }
 
   @Test
-  @Ignore
   public void fillScreening_Args__IntakeScreening() throws Exception {
     IntakeScreening s = new IntakeScreening();
     IntakeScreening actual = target.fillScreening(s);
@@ -94,7 +90,6 @@ public class EsIntakeScreeningTest {
     Map<Object, IntakeParticipant> map = new HashMap<Object, IntakeParticipant>();
     IntakeParticipant actual = target.normalize(map);
     IntakeParticipant expected = null;
-    // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, notNullValue());
   }
 
