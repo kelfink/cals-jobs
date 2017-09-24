@@ -83,7 +83,6 @@ public class EsIntakeScreeningTest {
   }
 
   @Test
-  @Ignore
   public void fillScreening_Args__() throws Exception {
     IntakeScreening actual = target.fillScreening();
     IntakeScreening expected = new IntakeScreening();
@@ -100,10 +99,9 @@ public class EsIntakeScreeningTest {
   }
 
   @Test
-  @Ignore
   public void getNormalizationGroupKey_Args__() throws Exception {
     Object actual = target.getNormalizationGroupKey();
-    Object expected = null;
+    Object expected = PersonJobTester.DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -115,10 +113,9 @@ public class EsIntakeScreeningTest {
   }
 
   @Test
-  @Ignore
   public void hashCode_Args__() throws Exception {
     int actual = target.hashCode();
-    int expected = 164947504;
+    int expected = 1148289955;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -144,18 +141,15 @@ public class EsIntakeScreeningTest {
   }
 
   @Test
-  @Ignore
   public void toString_Args__() throws Exception {
-    String actual = target.toString();
-    String expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    final String actual = target.toString();
+    assertThat(actual, notNullValue());
   }
 
   @Test
-  @Ignore
   public void getThisParticipantId_Args__() throws Exception {
-    String actual = target.getThisParticipantId();
-    String expected = null;
+    final String actual = target.getThisParticipantId();
+    String expected = "1";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -193,7 +187,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getReference_Args__() throws Exception {
-    String actual = target.getReference();
+    final String actual = target.getReference();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -232,7 +226,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getReferralId_Args__() throws Exception {
-    String actual = target.getReferralId();
+    final String actual = target.getReferralId();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -245,7 +239,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getIncidentDate_Args__() throws Exception {
-    String actual = target.getIncidentDate();
+    final String actual = target.getIncidentDate();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -258,7 +252,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getLocationType_Args__() throws Exception {
-    String actual = target.getLocationType();
+    final String actual = target.getLocationType();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -271,7 +265,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getCommunicationMethod_Args__() throws Exception {
-    String actual = target.getCommunicationMethod();
+    final String actual = target.getCommunicationMethod();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -284,7 +278,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getScreeningName_Args__() throws Exception {
-    String actual = target.getScreeningName();
+    final String actual = target.getScreeningName();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -297,7 +291,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getScreeningDecision_Args__() throws Exception {
-    String actual = target.getScreeningDecision();
+    final String actual = target.getScreeningDecision();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -310,7 +304,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getIncidentCounty_Args__() throws Exception {
-    String actual = target.getIncidentCounty();
+    final String actual = target.getIncidentCounty();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -323,7 +317,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getReportNarrative_Args__() throws Exception {
-    String actual = target.getReportNarrative();
+    final String actual = target.getReportNarrative();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -336,7 +330,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getAssignee_Args__() throws Exception {
-    String actual = target.getAssignee();
+    final String actual = target.getAssignee();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -349,7 +343,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getAdditionalInformation_Args__() throws Exception {
-    String actual = target.getAdditionalInformation();
+    final String actual = target.getAdditionalInformation();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -362,7 +356,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getScreeningDecisionDetail_Args__() throws Exception {
-    String actual = target.getScreeningDecisionDetail();
+    final String actual = target.getScreeningDecisionDetail();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -375,7 +369,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getOtherParticipantId_Args__() throws Exception {
-    String actual = target.getOtherParticipantId();
+    final String actual = target.getOtherParticipantId();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -388,7 +382,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getOtherLegacyId_Args__() throws Exception {
-    String actual = target.getOtherLegacyId();
+    final String actual = target.getOtherLegacyId();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -414,7 +408,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getFirstName_Args__() throws Exception {
-    String actual = target.getFirstName();
+    final String actual = target.getFirstName();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -427,7 +421,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getLastName_Args__() throws Exception {
-    String actual = target.getLastName();
+    final String actual = target.getLastName();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -440,7 +434,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getGender_Args__() throws Exception {
-    String actual = target.getGender();
+    final String actual = target.getGender();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -453,7 +447,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getSsn_Args__() throws Exception {
-    String actual = target.getSsn();
+    final String actual = target.getSsn();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -466,7 +460,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getRoles_Args__() throws Exception {
-    String[] actual = target.getRoles();
+    final String[] actual = target.getRoles();
     String[] expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -518,7 +512,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getAllegationId_Args__() throws Exception {
-    String actual = target.getAllegationId();
+    final String actual = target.getAllegationId();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -531,7 +525,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getAllegationTypes_Args__() throws Exception {
-    String actual = target.getAllegationTypes();
+    final String actual = target.getAllegationTypes();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -544,7 +538,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getAddressId_Args__() throws Exception {
-    String actual = target.getAddressId();
+    final String actual = target.getAddressId();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -557,7 +551,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getAddressType_Args__() throws Exception {
-    String actual = target.getAddressType();
+    final String actual = target.getAddressType();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -570,7 +564,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getStreetAddress_Args__() throws Exception {
-    String actual = target.getStreetAddress();
+    final String actual = target.getStreetAddress();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -583,7 +577,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getCity_Args__() throws Exception {
-    String actual = target.getCity();
+    final String actual = target.getCity();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -596,7 +590,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getState_Args__() throws Exception {
-    String actual = target.getState();
+    final String actual = target.getState();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -609,7 +603,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getZip_Args__() throws Exception {
-    String actual = target.getZip();
+    final String actual = target.getZip();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -622,7 +616,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getPhoneNumberId_Args__() throws Exception {
-    String actual = target.getPhoneNumberId();
+    final String actual = target.getPhoneNumberId();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -635,7 +629,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getPhoneNumber_Args__() throws Exception {
-    String actual = target.getPhoneNumber();
+    final String actual = target.getPhoneNumber();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -648,7 +642,7 @@ public class EsIntakeScreeningTest {
 
   @Test
   public void getPhoneType_Args__() throws Exception {
-    String actual = target.getPhoneType();
+    final String actual = target.getPhoneType();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
