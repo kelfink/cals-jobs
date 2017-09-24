@@ -23,7 +23,7 @@ project.ext {
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
 }
 
-version = 0.31
+version = 0.32
 
 repositories {
     mavenCentral()
