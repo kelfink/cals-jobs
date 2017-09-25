@@ -27,12 +27,7 @@ public class FacilityRowTest {
   @Test
   public void getPrimaryKey_Args__() throws Exception {
     FacilityRow target = new FacilityRow();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     Serializable actual = target.getPrimaryKey();
-    // then
-    // e.g. : verify(mocked).called();
     Serializable expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -40,11 +35,7 @@ public class FacilityRowTest {
   @Test
   public void getId_Args__() throws Exception {
     FacilityRow target = new FacilityRow();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getId();
-    // then
     // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
@@ -53,24 +44,14 @@ public class FacilityRowTest {
   @Test
   public void setId_Args__String() throws Exception {
     FacilityRow target = new FacilityRow();
-    // given
     String id = null;
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     target.setId(id);
-    // then
-    // e.g. : verify(mocked).called();
   }
 
   @Test
   public void getType_Args__() throws Exception {
     FacilityRow target = new FacilityRow();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getType();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -78,39 +59,23 @@ public class FacilityRowTest {
   @Test
   public void setType_Args__String() throws Exception {
     FacilityRow target = new FacilityRow();
-    // given
     String type = null;
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     target.setType(type);
-    // then
-    // e.g. : verify(mocked).called();
   }
 
   @Test
   public void getName_Args__() throws Exception {
     FacilityRow target = new FacilityRow();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getName();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void setName_Args__String() throws Exception {
-
     FacilityRow target = new FacilityRow();
-    // given
     String name = null;
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     target.setName(name);
-    // then
-    // e.g. : verify(mocked).called();
   }
 
   @Test

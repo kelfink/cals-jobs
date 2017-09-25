@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
 import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
-import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 public class EntityNormalizerTest {
 
@@ -23,16 +22,10 @@ public class EntityNormalizerTest {
 
   @Test
   public void normalizeList_Args__List() throws Exception {
-    // given
     final List<EsRelationship> denormalized = new ArrayList<EsRelationship>();
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     final List<ReplicatedRelationships> actual =
         EntityNormalizer.<ReplicatedRelationships, EsRelationship>normalizeList(denormalized);
-    // then
-    // e.g. : verify(mocked).called();
     final List<ReplicatedRelationships> expected = new ArrayList<>();
-    // expected.add(new ReplicatedRelationships());
     assertThat(actual, is(equalTo(expected)));
   }
 

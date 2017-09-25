@@ -23,12 +23,7 @@ public class JobConfigurationTest {
   @Test
   public void getJobLisReaderQuery_Args__() throws Exception {
     JobConfiguration target = new JobConfiguration();
-    // given
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     String actual = target.getJobLisReaderQuery();
-    // then
-    // e.g. : verify(mocked).called();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }

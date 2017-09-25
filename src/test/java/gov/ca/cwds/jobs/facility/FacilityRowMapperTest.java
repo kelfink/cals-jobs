@@ -10,9 +10,18 @@ import static org.mockito.Mockito.mock;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class FacilityRowMapperTest {
+
+  private FacilityRowMapper target = new FacilityRowMapper();
+
+  @Before
+  public void setup() {
+    target = new FacilityRowMapper();
+  }
 
   @Test
   public void type() throws Exception {
@@ -21,36 +30,26 @@ public class FacilityRowMapperTest {
 
   @Test
   public void instantiation() throws Exception {
-    FacilityRowMapper target = new FacilityRowMapper();
     assertThat(target, notNullValue());
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void mapRow_Args__ResultSet() throws Exception {
-    FacilityRowMapper target = new FacilityRowMapper();
-    // given
     ResultSet rs = mock(ResultSet.class);
-    // e.g. : given(mocked.called()).willReturn(1);
-    // when
     FacilityRow actual = target.mapRow(rs);
-    // then
-    // e.g. : verify(mocked).called();
     FacilityRow expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void mapRow_Args__ResultSet_T__SQLException() throws Exception {
-    FacilityRowMapper target = new FacilityRowMapper();
-    // given
     ResultSet rs = mock(ResultSet.class);
-    // e.g. : given(mocked.called()).willReturn(1);
     try {
-      // when
       target.mapRow(rs);
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
-      // then
     }
   }
 
