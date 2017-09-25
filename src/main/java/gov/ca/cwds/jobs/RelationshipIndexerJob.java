@@ -147,7 +147,7 @@ public class RelationshipIndexerJob
       throws IOException {
 
     // If at first you don't succeed, cheat. :-)
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append("{\"relationships\":[");
 
     if (!p.getRelations().isEmpty()) {
