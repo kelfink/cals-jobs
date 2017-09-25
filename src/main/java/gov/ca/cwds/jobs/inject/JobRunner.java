@@ -9,7 +9,7 @@ import gov.ca.cwds.jobs.util.JobLogUtils;
 
 public class JobRunner {
 
-  static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
 
   /**
    * For unit tests where resources either may not close properly or where expensive resources
@@ -35,7 +35,8 @@ public class JobRunner {
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) throws JobsException {
     int exitCode = 0;
-    try (final T job = JobsGuiceInjector.newStandaloneJob(klass, args)) { // Close resources automatically.
+    try (final T job = JobsGuiceInjector.newStandaloneJob(klass, args)) { // Close resources
+                                                                          // automatically.
       job.run();
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.

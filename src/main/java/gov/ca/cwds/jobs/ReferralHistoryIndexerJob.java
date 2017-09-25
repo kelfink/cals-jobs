@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import com.ibm.db2.jcc.DB2Connection;
 import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
@@ -46,8 +45,8 @@ import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
-import gov.ca.cwds.jobs.util.jdbc.DB2JDBCUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
@@ -64,11 +63,6 @@ public class ReferralHistoryIndexerJob
     implements JobResultSetAware<EsPersonReferral> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
-
-  /**
-   * Common timestamp format for legacy DB.
-   */
-  public static final String LEGACY_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
   private static final String INSERT_CLIENT_FULL =
       "INSERT INTO #SCHEMA#.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"
@@ -237,7 +231,7 @@ public class ReferralHistoryIndexerJob
 
   @Override
   public String getJdbcOrderBy() {
-    return ""; // sort manually cuz DB2 might not optimize the sort.
+    return ""; // sort manually since DB2 might not optimize the sort.
   }
 
   @Override
@@ -249,7 +243,7 @@ public class ReferralHistoryIndexerJob
   public String getInitialLoadQuery(String dbSchemaName) {
     // Roll your own SQL. Turn-around on DB2 objects from other teams takes too long.
 
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append(SELECT_REFERRAL.replaceAll("#SCHEMA#", dbSchemaName));
 
     if (!getOpts().isLoadSealedAndSensitive()) {
@@ -284,26 +278,6 @@ public class ReferralHistoryIndexerJob
       allocReferrals.set(new HashMap<>(99881)); // Prime
       allocClientReferralKeys.set(new ArrayList<>(12000));
     }
-  }
-
-  /**
-   * Stop the DB2 monitor and report stats.
-   * 
-   * @param monitor current monitor instance
-   * @throws SQLException on JDBC error
-   */
-  protected void monitorStopAndReport(final DB2SystemMonitor monitor) throws SQLException {
-    monitor.stop();
-    LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
-    LOGGER.info("Network I/O elapsed time (microseconds)=" + monitor.getNetworkIOTimeMicros());
-    LOGGER.info("Core driver elapsed time (microseconds)=" + monitor.getCoreDriverTimeMicros());
-    LOGGER.info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
-    LOGGER.info("monitor.moreData: 0: {}", monitor.moreData(0));
-    LOGGER.info("monitor.moreData: 1: {}", monitor.moreData(1));
-    LOGGER.info("monitor.moreData: 2: {}", monitor.moreData(2));
-
-    // C'mon IBM! Where are the constants for method DB2SystemMonitor.moreData()??
-    // LOGGER.info("NETWORK_TRIPS: {}", monitor.moreData(NUMBER_NETWORK_TRIPS));
   }
 
   protected void readClients(final PreparedStatement stmtInsClient,
@@ -366,29 +340,6 @@ public class ReferralHistoryIndexerJob
           "allegations");
       listAllegations.add(m);
     }
-  }
-
-  /**
-   * Get a DB2 monitor and start it for this transaction.
-   * 
-   * @param con database connection
-   * @return DB2 monitor
-   * @throws SQLException general database error
-   * @throws ClassNotFoundException wrong driver or connection pool
-   */
-  protected DB2SystemMonitor monitorStart(final Connection con)
-      throws SQLException, ClassNotFoundException {
-    final com.ibm.db2.jcc.t4.b nativeCon =
-        (com.ibm.db2.jcc.t4.b) ((com.mchange.v2.c3p0.impl.NewProxyConnection) con)
-            .unwrap(Class.forName("com.ibm.db2.jcc.t4.b"));
-    final DB2Connection db2Con = nativeCon;
-    LOGGER.info("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
-        nativeCon.enableRowsetSupport_);
-
-    final DB2SystemMonitor monitor = db2Con.getDB2SystemMonitor();
-    monitor.enable(true);
-    monitor.start(DB2SystemMonitor.RESET_TIMES);
-    return monitor;
   }
 
   protected int normalizeQueryResults(final Map<String, EsPersonReferral> mapReferrals,
@@ -478,9 +429,9 @@ public class ReferralHistoryIndexerJob
     try (final Connection con = getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      DB2JDBCUtils.enableParallelism(con);
+      NeutronDB2Utils.enableParallelism(con);
 
-      final DB2SystemMonitor monitor = monitorStart(con);
+      final DB2SystemMonitor monitor = NeutronDB2Utils.monitorStart(con);
       final String schema = getDBSchemaName();
 
       try (
@@ -495,7 +446,7 @@ public class ReferralHistoryIndexerJob
         readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
         readReferrals(stmtSelReferral, mapReferrals);
         readAllegations(stmtSelAllegation, listAllegations);
-        monitorStopAndReport(monitor);
+        NeutronDB2Utils.monitorStopAndReport(monitor);
         con.commit();
       } finally {
         // The statements and result sets close automatically.
@@ -534,6 +485,12 @@ public class ReferralHistoryIndexerJob
     return cntr;
   }
 
+  /**
+   * Calculate the number of reader threads to run from incoming job options and available
+   * processors.
+   * 
+   * @return number of reader threads to run
+   */
   protected int calcReaderThreads() {
     final int ret = getOpts().getThreadCount() != 0L ? (int) getOpts().getThreadCount()
         : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
@@ -590,11 +547,11 @@ public class ReferralHistoryIndexerJob
       public void execute(Connection con) throws SQLException {
         con.setSchema(getDBSchemaName());
         con.setAutoCommit(false);
-        DB2JDBCUtils.enableParallelism(con);
+        NeutronDB2Utils.enableParallelism(con);
 
         // The DB2 optimizer on z/OS treats timestamps in a JDBC prepared statements differently
         // from static SQL. For plan reliability build SQL and execute without a prepared statement.
-        // To quote our beloved president, "Sad!" :-)
+        // To quote our beloved president, "SAD!" :-)
         final StringBuilder buf = new StringBuilder();
         buf.append("TIMESTAMP('")
             .append(new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT).format(lastRunTime)).append("')");

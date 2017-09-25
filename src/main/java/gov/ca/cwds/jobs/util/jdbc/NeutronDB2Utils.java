@@ -9,12 +9,15 @@ import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ibm.db2.jcc.DB2Connection;
+import com.ibm.db2.jcc.DB2SystemMonitor;
+
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 
-public class DB2JDBCUtils {
+public class NeutronDB2Utils {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DB2JDBCUtils.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronDB2Utils.class);
 
   /**
    * Enable DB2 parallelism. Ignored for other databases.
@@ -88,6 +91,54 @@ public class DB2JDBCUtils {
     }
 
     return ret;
+  }
+
+  /**
+   * Stop the DB2 monitor and report stats.
+   * 
+   * @param monitor current monitor instance
+   * @throws SQLException on JDBC error
+   */
+  public static void monitorStopAndReport(final DB2SystemMonitor monitor) throws SQLException {
+    if (monitor != null) {
+      monitor.stop();
+      LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
+      LOGGER.info("Network I/O elapsed time (microseconds)=" + monitor.getNetworkIOTimeMicros());
+      LOGGER.info("Core driver elapsed time (microseconds)=" + monitor.getCoreDriverTimeMicros());
+      LOGGER.info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
+      LOGGER.info("monitor.moreData: 0: {}", monitor.moreData(0));
+      LOGGER.info("monitor.moreData: 1: {}", monitor.moreData(1));
+      LOGGER.info("monitor.moreData: 2: {}", monitor.moreData(2));
+
+      // C'mon IBM! Where are the constants for method DB2SystemMonitor.moreData()??
+      // LOGGER.info("NETWORK_TRIPS: {}", monitor.moreData(NUMBER_NETWORK_TRIPS));
+    }
+  }
+
+  /**
+   * Get a DB2 monitor and start it for this transaction.
+   * 
+   * @param con database connection
+   * @return DB2 monitor
+   */
+  public static DB2SystemMonitor monitorStart(final Connection con) {
+    try {
+      final com.ibm.db2.jcc.t4.b nativeCon =
+          (com.ibm.db2.jcc.t4.b) ((com.mchange.v2.c3p0.impl.NewProxyConnection) con)
+              .unwrap(Class.forName("com.ibm.db2.jcc.t4.b"));
+      final DB2Connection db2Con = nativeCon;
+      LOGGER.info("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
+          nativeCon.enableRowsetSupport_);
+
+      final DB2SystemMonitor monitor = db2Con.getDB2SystemMonitor();
+      monitor.enable(true);
+      monitor.start(DB2SystemMonitor.RESET_TIMES);
+      return monitor;
+    } catch (Exception e) {
+      LOGGER.warn("UNABLE TO GRAB DB2 MONITOR: {}", e.getMessage(), e);
+    }
+
+    return null;
   }
 
 }

@@ -1,14 +1,21 @@
 package gov.ca.cwds.jobs;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +33,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
@@ -38,6 +46,16 @@ public class RelationshipIndexerJob
     implements JobResultSetAware<EsRelationship> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipIndexerJob.class);
+
+  private static final String INSERT_CLIENT_LAST_CHG =
+      "INSERT INTO #SCHEMA#.GT_ID (IDENTIFIER)\n" + "SELECT clnr.IDENTIFIER\n"
+          + "FROM #SCHEMA#.CLN_RELT CLNR\n" + "WHERE CLNR.IBMSNAP_LOGMARKER > ##TIMESTAMP##\n"
+          + "UNION ALL\n" + "SELECT clnr.IDENTIFIER\n" + "FROM #SCHEMA#.CLN_RELT CLNR\n"
+          + "JOIN #SCHEMA#.CLIENT_T CLNS ON CLNR.FKCLIENT_T = CLNS.IDENTIFIER\n"
+          + "WHERE CLNS.IBMSNAP_LOGMARKER > ##TIMESTAMP##\n" + "UNION ALL\n"
+          + "SELECT clnr.IDENTIFIER\n" + "FROM #SCHEMA#.CLN_RELT CLNR\n"
+          + "JOIN #SCHEMA#.CLIENT_T CLNP ON CLNR.FKCLIENT_0 = CLNP.IDENTIFIER\n"
+          + "WHERE CLNP.IBMSNAP_LOGMARKER > ##TIMESTAMP##";
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -53,6 +71,38 @@ public class RelationshipIndexerJob
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  }
+
+  @Override
+  protected void prepHibernatePull(Session session, Transaction txn, final Date lastRunTime)
+      throws SQLException {
+    final Work work = new Work() {
+      @Override
+      public void execute(Connection con) throws SQLException {
+        con.setSchema(getDBSchemaName());
+        con.setAutoCommit(false);
+        NeutronDB2Utils.enableParallelism(con);
+
+        final StringBuilder buf = new StringBuilder();
+        buf.append("TIMESTAMP('")
+            .append(new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT).format(lastRunTime)).append("')");
+
+        final String sql = INSERT_CLIENT_LAST_CHG.replaceAll("#SCHEMA#", getDBSchemaName())
+            .replaceAll("##TIMESTAMP##", buf.toString());
+        LOGGER.info("Prep SQL: {}", sql);
+
+        try (final Statement stmt =
+            con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+          LOGGER.info("Find referrals new/changed since {}", lastRunTime);
+          final int cntInsClientReferral = stmt.executeUpdate(sql);
+          LOGGER.info("Total relationships new/changed: {}", cntInsClientReferral);
+        } finally {
+          // The statement closes automatically.
+        }
+
+      }
+    };
+    session.doWork(work);
   }
 
   @Override

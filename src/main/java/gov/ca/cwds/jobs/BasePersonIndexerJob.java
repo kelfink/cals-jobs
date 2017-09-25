@@ -75,8 +75,8 @@ import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
-import gov.ca.cwds.jobs.util.jdbc.DB2JDBCUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
@@ -109,7 +109,7 @@ import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends LastSuccessfulRunJob implements AutoCloseable, JobResultSetAware<M> {
 
-  static final Logger LOGGER = LoggerFactory.getLogger(BasePersonIndexerJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(BasePersonIndexerJob.class);
 
   private static final ESOptionalCollection[] KEEP_COLLECTIONS =
       new ESOptionalCollection[] {ESOptionalCollection.NONE};
@@ -125,6 +125,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int POLL_MILLIS = 3000;
 
   private static final int DEFAULT_FETCH_SIZE = BatchDaoImpl.DEFAULT_FETCH_SIZE;
+
+  /**
+   * Common timestamp format for legacy DB.
+   */
+  public static final String LEGACY_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
   /**
    * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it's
@@ -378,7 +383,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @return Elasticsearch BulkProcessor
    */
-  protected BulkProcessor buildBulkProcessor() {
+  public BulkProcessor buildBulkProcessor() {
     return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
@@ -533,8 +538,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   // ===================
 
   private void pushToBulkProcessor(BulkProcessor bp, DocWriteRequest<?> t) {
-    JobLogUtils.logEvery(recsSentToBulkProcessor.incrementAndGet(), "add to bulk processor",
-        "push doc");
+    JobLogUtils.logEvery(recsSentToBulkProcessor.incrementAndGet(), "add to es bulk", "push doc");
     bp.add(t);
   }
 
@@ -605,7 +609,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Prepare upsert JSON (update and insert). Child classes do not normally override this method.
+   * Prepare "upsert" JSON (update and insert). Child classes do not normally override this method.
    * 
    * @param esp ES document, already prepared by
    *        {@link #buildElasticSearchPersonDoc(ApiPersonAware)}
@@ -779,16 +783,16 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected void doInitialLoadJdbc() throws IOException {
     Thread.currentThread().setName("main");
     try {
-      Thread t3 = new Thread(this::threadIndex); // Index
-      t3.start();
+      final Thread threadIndexer = new Thread(this::threadIndex); // Index
+      threadIndexer.start();
 
       if (useTransformThread()) {
-        Thread t2 = new Thread(this::threadTransform); // Transform
-        t2.start();
+        final Thread threadTransformer = new Thread(this::threadTransform); // Transform
+        threadTransformer.start();
       }
 
-      Thread t1 = new Thread(this::threadExtractJdbc); // Extract
-      t1.start();
+      final Thread threadJdbc = new Thread(this::threadExtractJdbc); // Extract
+      threadJdbc.start();
 
       while (!(fatalError || (doneExtract && doneTransform && doneLoad))) {
         LOGGER.debug("runInitialLoad: sleep");
@@ -803,9 +807,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
       }
 
-      t1.join();
-      // t2.join();
-      t3.join();
+      threadJdbc.join();
+      threadIndexer.join();
 
       Thread.sleep(SLEEP_MILLIS);
       this.close();
@@ -832,9 +835,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Thread.currentThread().setName("extract");
     LOGGER.info("BEGIN: Stage #1: extract");
 
-    try {
-      Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
-          .getService(ConnectionProvider.class).getConnection();
+    try (final Connection con = jobDao.getSessionFactory().getSessionFactoryOptions()
+        .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
       con.setReadOnly(true); // WARNING: fails with Postgres.
@@ -847,7 +849,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       /**
        * Enable parallelism for underlying database
        */
-      DB2JDBCUtils.enableParallelism(con);
+      NeutronDB2Utils.enableParallelism(con);
 
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(15000); // faster
@@ -856,12 +858,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
 
         int cntr = 0;
-        while (!fatalError && rs.next()) {
+        while (!fatalError && rs.next() && (m = extract(rs)) != null) {
           // Hand the baton to the next runner ...
           JobLogUtils.logEvery(++cntr, "Retrieved", "recs");
-          if ((m = extract(rs)) != null) {
-            queueTransform.putLast(m);
-          }
+          queueTransform.putLast(m);
         }
 
         con.commit();
@@ -1157,9 +1157,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       getOpts().setIndexName(effectiveIndexName);
 
       final Date effectiveLastSuccessfulRunTime = calcLastRunDate(lastSuccessfulRunTime);
-      String documentType = esDao.getConfig().getElasticsearchDocType();
-      String peopleSettingsFile = "/elasticsearch/setting/people-index-settings.json";
-      String personMappingFile = "/elasticsearch/mapping/map_person_5x_snake.json";
+      final String documentType = esDao.getConfig().getElasticsearchDocType();
+      final String peopleSettingsFile = "/elasticsearch/setting/people-index-settings.json";
+      final String personMappingFile = "/elasticsearch/mapping/map_person_5x_snake.json";
 
       LOGGER.info("Effective index name: " + effectiveIndexName);
       LOGGER.info(
@@ -1298,9 +1298,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       namedQueryName = entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
     }
 
-    Session session = jobDao.getSessionFactory().getCurrentSession();
+    final Session session = jobDao.getSessionFactory().getCurrentSession();
+    final Transaction txn = session.beginTransaction();
     Object lastId = new Object();
-    Transaction txn = session.beginTransaction();
 
     try {
       prepHibernatePull(session, txn, lastRunTime);
@@ -1431,7 +1431,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       close();
       Thread.sleep(SLEEP_MILLIS); // NOSONAR
-
     } catch (InterruptedException e) {
       fatalError = true;
       Thread.currentThread().interrupt();
@@ -1677,7 +1676,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param args command line arguments
    */
   @SuppressWarnings("rawtypes")
-  public static void runStandalone(final Class<? extends BasePersonIndexerJob> klass, String... args) {
+  public static void runStandalone(final Class<? extends BasePersonIndexerJob> klass,
+      String... args) {
     LOGGER.info("Run job {}", klass.getName());
     try {
       JobRunner.runStandalone(klass, args);
@@ -1735,7 +1735,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return true if DB2 is running on a mainframe
    */
   public boolean isDB2OnZOS() {
-    return DB2JDBCUtils.isDB2OnZOS(jobDao);
+    return NeutronDB2Utils.isDB2OnZOS(jobDao);
   }
 
 }

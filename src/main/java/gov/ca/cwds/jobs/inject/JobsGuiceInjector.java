@@ -120,10 +120,9 @@ public class JobsGuiceInjector extends AbstractModule {
     this.opts = opts;
   }
 
-
   /**
-   * Build the Guice Injector once, which is used for all Job instances during the life of this
-   * batch JVM.
+   * Build the Guice Injector once and use it for all Job instances during the life of this batch
+   * JVM.
    * 
    * @param opts command line options
    * @return Guice Injector
@@ -150,8 +149,8 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   /**
-   * Prepare a batch job with all required dependencies in a <strong>continuous mode</strong> with
-   * the static injector.
+   * Prepare a batch job with all required dependencies for <strong>continuous mode</strong> with
+   * the shared injector.
    * 
    * @param klass batch job class
    * @param opts options for this job execution
@@ -159,7 +158,7 @@ public class JobsGuiceInjector extends AbstractModule {
    * @param <T> Person persistence type
    * @throws JobsException if unable to parse command line or load dependencies
    */
-  public static <T extends BasePersonIndexerJob<?, ?>> T newJobInstance(final Class<T> klass,
+  public static <T extends BasePersonIndexerJob<?, ?>> T newContinuousJob(final Class<T> klass,
       final JobOptions opts) throws JobsException {
     try {
       final T ret = injector.getInstance(klass);
@@ -187,8 +186,7 @@ public class JobsGuiceInjector extends AbstractModule {
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
-      throw JobLogUtils.buildException(JobRunner.LOGGER, e, "FAILED TO CREATE JOB!: {}",
-          e.getMessage());
+      throw JobLogUtils.buildException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
     }
   }
 
