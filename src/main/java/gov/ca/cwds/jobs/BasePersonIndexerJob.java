@@ -76,6 +76,7 @@ import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
@@ -125,11 +126,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final int POLL_MILLIS = 3000;
 
   private static final int DEFAULT_FETCH_SIZE = BatchDaoImpl.DEFAULT_FETCH_SIZE;
-
-  /**
-   * Common timestamp format for legacy DB.
-   */
-  public static final String LEGACY_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
   /**
    * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it's
@@ -537,7 +533,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   // COMMON JSON:
   // ===================
 
-  private void pushToBulkProcessor(BulkProcessor bp, DocWriteRequest<?> t) {
+  protected void pushToBulkProcessor(BulkProcessor bp, DocWriteRequest<?> t) {
     JobLogUtils.logEvery(recsSentToBulkProcessor.incrementAndGet(), "add to es bulk", "push doc");
     bp.add(t);
   }
@@ -904,7 +900,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
               && (t = normalizeSingle(grpRecs)) != null) {
             LOGGER.trace("queueIndex.putLast: id: {}", t.getPrimaryKey());
             queueIndex.putLast(t);
-
             grpRecs.clear(); // Single thread, re-use memory.
             Thread.yield();
           }
@@ -1303,7 +1298,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Object lastId = new Object();
 
     try {
-      prepHibernatePull(session, txn, lastRunTime);
+      prepHibernateLastChange(session, txn, lastRunTime);
 
       /**
        * Load records to index
@@ -1511,6 +1506,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return ret;
   }
 
+  protected String getPrepLastChangeSQL() {
+    return null;
+  }
+
   /**
    * Execute JDBC prior to calling method {@link #pullBucketRange(String, String)}.
    * 
@@ -1533,9 +1532,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param lastRunTime last successful run datetime
    * @throws SQLException on disconnect, invalid parameters, etc.
    */
-  protected void prepHibernatePull(final Session session, final Transaction txn,
+  protected void prepHibernateLastChange(final Session session, final Transaction txn,
       final Date lastRunTime) throws SQLException {
-    // Default is no-op.
+    if (StringUtils.isNotBlank(getPrepLastChangeSQL())) {
+      JobJdbcUtils.prepHibernateLastChange(session, txn, lastRunTime, getPrepLastChangeSQL());
+    }
   }
 
   /**

@@ -618,7 +618,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void prepHibernatePull_Args__Session__Transaction__Date() throws Exception {
-    target.prepHibernatePull(session, transaction, lastRunTime);
+    target.prepHibernateLastChange(session, transaction, lastRunTime);
   }
 
   @Test
@@ -674,7 +674,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void prepHibernatePull_Args__Session__Transaction__Date_T__SQLException()
       throws Exception {
     try {
-      target.prepHibernatePull(session, transaction, lastRunTime);
+      target.prepHibernateLastChange(session, transaction, lastRunTime);
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
     }

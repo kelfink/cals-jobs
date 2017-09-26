@@ -66,7 +66,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   // ====================
 
   ReplicatedPersonReferralsDao dao;
-  ReferralHistoryIndexerJob target;
+  TestReferralHistoryIndexerJob target;
 
   @Override
   @Before
@@ -74,8 +74,8 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
     super.setup();
 
     dao = new ReplicatedPersonReferralsDao(sessionFactory);
-    target =
-        new ReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+        sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
   }
 

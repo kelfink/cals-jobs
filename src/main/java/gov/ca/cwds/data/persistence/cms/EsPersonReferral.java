@@ -1,6 +1,10 @@
 package gov.ca.cwds.data.persistence.cms;
 
+import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
+
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
@@ -30,6 +34,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -229,6 +234,52 @@ public class EsPersonReferral extends ApiObjectIdentity
   @Column(name = "PERPETRATOR_SENSITIVITY_IND")
   private String perpetratorSensitivityIndicator;
 
+  public EsPersonReferral() {
+    // Default no-op.
+  }
+
+  public EsPersonReferral(final ResultSet rs) throws SQLException {
+    this.setReferralId(JobTransformUtils.ifNull(rs.getString("REFERRAL_ID")));
+    this.setStartDate(rs.getDate("START_DATE"));
+    this.setEndDate(rs.getDate("END_DATE"));
+    this.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
+    this.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
+    this.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
+    this.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
+    this.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
+    this.setReferralLastUpdated(rs.getTimestamp("REFERRAL_LAST_UPDATED"));
+
+    this.setAllegationId(ifNull(rs.getString("ALLEGATION_ID")));
+    this.setAllegationType(rs.getInt("ALLEGATION_TYPE"));
+    this.setAllegationDisposition(rs.getInt("ALLEGATION_DISPOSITION"));
+    this.setAllegationLastUpdated(rs.getTimestamp("ALLEGATION_LAST_UPDATED"));
+
+    this.setPerpetratorId(ifNull(rs.getString("PERPETRATOR_ID")));
+    this.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
+    this.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
+    this.setPerpetratorLastUpdated(rs.getTimestamp("PERPETRATOR_LAST_UPDATED"));
+    this.setPerpetratorSensitivityIndicator(rs.getString("PERPETRATOR_SENSITIVITY_IND"));
+
+    this.setReporterId(ifNull(rs.getString("REPORTER_ID")));
+    this.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
+    this.setReporterLastName(ifNull(rs.getString("REPORTER_LAST_NM")));
+    this.setReporterLastUpdated(rs.getTimestamp("REPORTER_LAST_UPDATED"));
+
+    this.setVictimId(ifNull(rs.getString("VICTIM_ID")));
+    this.setVictimFirstName(ifNull(rs.getString("VICTIM_FIRST_NM")));
+    this.setVictimLastName(ifNull(rs.getString("VICTIM_LAST_NM")));
+    this.setVictimLastUpdated(rs.getTimestamp("VICTIM_LAST_UPDATED"));
+    this.setVictimSensitivityIndicator(rs.getString("VICTIM_SENSITIVITY_IND"));
+
+    this.setWorkerId(ifNull(rs.getString("WORKER_ID")));
+    this.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
+    this.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
+    this.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
+
+    this.setCounty(rs.getInt("REFERRAL_COUNTY"));
+    this.setLastChange(rs.getDate("LAST_CHG"));
+  }
+
   @Override
   public Class<ReplicatedPersonReferrals> getNormalizationClass() {
     return ReplicatedPersonReferrals.class;
@@ -291,7 +342,7 @@ public class EsPersonReferral extends ApiObjectIdentity
           this.referralLastUpdated, LegacyTable.REFERRAL));
 
       //
-      // Reporter
+      // Reporter:
       //
       ElasticSearchPersonReporter reporter = new ElasticSearchPersonReporter();
       reporter.setId(this.reporterId);
@@ -303,7 +354,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setReporter(reporter);
 
       //
-      // Assigned Worker
+      // Assigned Worker:
       //
       ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
       assignedWorker.setId(this.workerId);
@@ -315,7 +366,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setAssignedSocialWorker(assignedWorker);
 
       //
-      // Access Limitation
+      // Access Limitation:
       //
       ElasticSearchAccessLimitation accessLimit = new ElasticSearchAccessLimitation();
       accessLimit.setLimitedAccessCode(this.limitedAccessCode);

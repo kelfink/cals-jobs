@@ -3,15 +3,12 @@ package gov.ca.cwds.jobs;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +25,6 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
-import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
@@ -70,9 +66,8 @@ public class RelationshipIndexerJob
   }
 
   @Override
-  protected void prepHibernatePull(Session session, Transaction txn, final Date lastRunTime)
-      throws SQLException {
-    JobJdbcUtils.prepHibernateLastChange(session, txn, lastRunTime, INSERT_CLIENT_LAST_CHG);
+  protected String getPrepLastChangeSQL() {
+    return INSERT_CLIENT_LAST_CHG;
   }
 
   @Override

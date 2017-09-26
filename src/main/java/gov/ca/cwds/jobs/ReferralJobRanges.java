@@ -16,6 +16,11 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 
+/**
+ * Get key ranges by platform and job size.
+ * 
+ * @author CWDS API Team
+ */
 public class ReferralJobRanges {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralJobRanges.class);
@@ -25,6 +30,12 @@ public class ReferralJobRanges {
     return Pair.of(pieces[0], pieces[1]);
   }
 
+  /**
+   * Get key ranges by platform and job size.
+   * 
+   * @param job referrals job
+   * @return key pairs
+   */
   public List<Pair<String, String>> getPartitionRanges(
       BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job) {
     List<Pair<String, String>> ret = new ArrayList<>();
@@ -50,7 +61,7 @@ public class ReferralJobRanges {
         final int start = ((int) opts.getStartBucket()) - 1;
         final int end = ((int) opts.getEndBucket()) - 1;
 
-        LOGGER.warn("KEY RANGES: {} to {}", opts.getStartBucket(), opts.getEndBucket());
+        LOGGER.warn("KEY RANGES: {} to {}", start + 1, end + 1);
         for (int i = start; i <= end; i++) {
           list.add(ret.get(i));
         }

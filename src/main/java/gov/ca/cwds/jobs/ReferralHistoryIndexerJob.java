@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +40,6 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
-import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
@@ -148,7 +144,7 @@ public class ReferralHistoryIndexerJob
       this.sensitivity = sensitivity;
     }
 
-    public static MinClientReferral extract(ResultSet rs) throws SQLException {
+    public static MinClientReferral extract(final ResultSet rs) throws SQLException {
       return new MinClientReferral(rs.getString("FKCLIENT_T"), rs.getString("FKREFERL_T"),
           rs.getString("SENSTV_IND"));
     }
@@ -298,9 +294,8 @@ public class ReferralHistoryIndexerJob
 
     LOGGER.info("pull client referral keys");
     final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
-    MinClientReferral mx;
-    while (!fatalError && rs.next() && (mx = MinClientReferral.extract(rs)) != null) {
-      listClientReferralKeys.add(mx);
+    while (!fatalError && rs.next()) {
+      listClientReferralKeys.add(MinClientReferral.extract(rs));
     }
   }
 
@@ -387,16 +382,6 @@ public class ReferralHistoryIndexerJob
 
     LOGGER.info("Normalize all: END");
     return cntr;
-  }
-
-  protected void releaseLocalMemory(final List<EsPersonReferral> listAllegations,
-      final Map<String, EsPersonReferral> mapReferrals,
-      final List<MinClientReferral> listClientReferralKeys,
-      final List<EsPersonReferral> listReadyToNorm) {
-    listAllegations.clear();
-    listClientReferralKeys.clear();
-    listReadyToNorm.clear();
-    mapReferrals.clear();
   }
 
   /**
@@ -538,14 +523,18 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  protected void prepHibernatePull(Session session, Transaction txn, final Date lastRunTime)
-      throws SQLException {
-    JobJdbcUtils.prepHibernateLastChange(session, txn, lastRunTime, INSERT_CLIENT_LAST_CHG);
+  protected boolean useTransformThread() {
+    return false;
   }
 
   @Override
-  protected boolean useTransformThread() {
-    return false;
+  protected String getPrepLastChangeSQL() {
+    return INSERT_CLIENT_LAST_CHG;
+  }
+
+  @Override
+  protected boolean isRangeSelfManaging() {
+    return true;
   }
 
   /**
@@ -604,7 +593,7 @@ public class ReferralHistoryIndexerJob
    * @return de-normalized record
    * @throws SQLException on DB error
    */
-  protected EsPersonReferral extractReferral(ResultSet rs) throws SQLException {
+  protected EsPersonReferral extractReferral(final ResultSet rs) throws SQLException {
     EsPersonReferral ret = new EsPersonReferral();
 
     int columnIndex = 0;
@@ -635,7 +624,7 @@ public class ReferralHistoryIndexerJob
     return ret;
   }
 
-  protected EsPersonReferral extractAllegation(ResultSet rs) throws SQLException {
+  protected EsPersonReferral extractAllegation(final ResultSet rs) throws SQLException {
     EsPersonReferral ret = new EsPersonReferral();
 
     int columnIndex = 0;
@@ -661,55 +650,18 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  public EsPersonReferral extract(ResultSet rs) throws SQLException {
-    EsPersonReferral ret = new EsPersonReferral();
-
-    ret.setReferralId(ifNull(rs.getString("REFERRAL_ID")));
-    ret.setStartDate(rs.getDate("START_DATE"));
-    ret.setEndDate(rs.getDate("END_DATE"));
-    ret.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
-    ret.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
-    ret.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
-    ret.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
-    ret.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
-    ret.setReferralLastUpdated(rs.getTimestamp("REFERRAL_LAST_UPDATED"));
-
-    ret.setAllegationId(ifNull(rs.getString("ALLEGATION_ID")));
-    ret.setAllegationType(rs.getInt("ALLEGATION_TYPE"));
-    ret.setAllegationDisposition(rs.getInt("ALLEGATION_DISPOSITION"));
-    ret.setAllegationLastUpdated(rs.getTimestamp("ALLEGATION_LAST_UPDATED"));
-
-    ret.setPerpetratorId(ifNull(rs.getString("PERPETRATOR_ID")));
-    ret.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
-    ret.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
-    ret.setPerpetratorLastUpdated(rs.getTimestamp("PERPETRATOR_LAST_UPDATED"));
-    ret.setPerpetratorSensitivityIndicator(rs.getString("PERPETRATOR_SENSITIVITY_IND"));
-
-    ret.setReporterId(ifNull(rs.getString("REPORTER_ID")));
-    ret.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
-    ret.setReporterLastName(ifNull(rs.getString("REPORTER_LAST_NM")));
-    ret.setReporterLastUpdated(rs.getTimestamp("REPORTER_LAST_UPDATED"));
-
-    ret.setVictimId(ifNull(rs.getString("VICTIM_ID")));
-    ret.setVictimFirstName(ifNull(rs.getString("VICTIM_FIRST_NM")));
-    ret.setVictimLastName(ifNull(rs.getString("VICTIM_LAST_NM")));
-    ret.setVictimLastUpdated(rs.getTimestamp("VICTIM_LAST_UPDATED"));
-    ret.setVictimSensitivityIndicator(rs.getString("VICTIM_SENSITIVITY_IND"));
-
-    ret.setWorkerId(ifNull(rs.getString("WORKER_ID")));
-    ret.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
-    ret.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
-    ret.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
-
-    ret.setCounty(rs.getInt("REFERRAL_COUNTY"));
-    ret.setLastChange(rs.getDate("LAST_CHG"));
-
-    return ret;
+  public EsPersonReferral extract(final ResultSet rs) throws SQLException {
+    return new EsPersonReferral(rs);
   }
 
-  @Override
-  protected boolean isRangeSelfManaging() {
-    return true;
+  private void releaseLocalMemory(final List<EsPersonReferral> listAllegations,
+      final Map<String, EsPersonReferral> mapReferrals,
+      final List<MinClientReferral> listClientReferralKeys,
+      final List<EsPersonReferral> listReadyToNorm) {
+    listAllegations.clear();
+    listClientReferralKeys.clear();
+    listReadyToNorm.clear();
+    mapReferrals.clear();
   }
 
   /**
@@ -720,5 +672,4 @@ public class ReferralHistoryIndexerJob
   public static void main(String... args) {
     runStandalone(ReferralHistoryIndexerJob.class, args);
   }
-
 }
