@@ -15,12 +15,12 @@ import org.slf4j.LoggerFactory;
 
 public class JobJdbcUtils {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(JobJdbcUtils.class);
+
   /**
    * Common timestamp format for legacy DB.
    */
   public static final String LEGACY_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobJdbcUtils.class);
 
   /**
    * @return default CMS schema name
@@ -48,9 +48,9 @@ public class JobJdbcUtils {
 
         try (final Statement stmt =
             con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
-          LOGGER.info("Find referrals new/changed since {}", lastRunTime);
-          final int cntInsClientReferral = stmt.executeUpdate(sql);
-          LOGGER.info("Total relationships new/changed: {}", cntInsClientReferral);
+          LOGGER.info("Find keys new/changed since {}", lastRunTime);
+          final int cntNewChanged = stmt.executeUpdate(sql);
+          LOGGER.info("Total keys new/changed: {}", cntNewChanged);
         } finally {
           // The statement closes automatically.
         }

@@ -5,8 +5,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,7 +23,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +42,9 @@ import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
-import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
@@ -542,36 +540,7 @@ public class ReferralHistoryIndexerJob
   @Override
   protected void prepHibernatePull(Session session, Transaction txn, final Date lastRunTime)
       throws SQLException {
-    final Work work = new Work() {
-      @Override
-      public void execute(Connection con) throws SQLException {
-        con.setSchema(getDBSchemaName());
-        con.setAutoCommit(false);
-        JobDB2Utils.enableParallelism(con);
-
-        // The DB2 optimizer on z/OS treats timestamps in a JDBC prepared statements differently
-        // from static SQL. For plan reliability build SQL and execute without a prepared statement.
-        // To quote our beloved president, "SAD!" :-)
-        final StringBuilder buf = new StringBuilder();
-        buf.append("TIMESTAMP('")
-            .append(new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT).format(lastRunTime)).append("')");
-
-        final String sql = INSERT_CLIENT_LAST_CHG.replaceAll("#SCHEMA#", getDBSchemaName())
-            .replaceAll("##TIMESTAMP##", buf.toString());
-        LOGGER.info("Prep SQL: {}", sql);
-
-        try (final Statement stmt =
-            con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
-          LOGGER.info("Find referrals new/changed since {}", lastRunTime);
-          final int cntInsClientReferral = stmt.executeUpdate(sql);
-          LOGGER.info("Total referrals new/changed: {}", cntInsClientReferral);
-        } finally {
-          // The statement closes automatically.
-        }
-
-      }
-    };
-    session.doWork(work);
+    JobJdbcUtils.prepHibernateLastChange(session, txn, lastRunTime, INSERT_CLIENT_LAST_CHG);
   }
 
   @Override
