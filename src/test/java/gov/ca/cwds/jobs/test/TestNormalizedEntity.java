@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -13,6 +14,7 @@ import gov.ca.cwds.data.ReadablePhone;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiAddressAware;
+import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiLanguageAware;
 import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
 import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
@@ -24,9 +26,9 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 @JsonPropertyOrder(alphabetic = true)
-public class TestNormalizedEntity extends ApiObjectIdentity
-    implements PersistentObject, ApiPersonAware, ApiTypedIdentifier<String>, ApiLegacyAware,
-    ApiMultiplePhonesAware, ApiMultipleAddressesAware, ApiMultipleLanguagesAware {
+public class TestNormalizedEntity extends ApiObjectIdentity implements PersistentObject,
+    ApiPersonAware, ApiTypedIdentifier<String>, ApiLegacyAware, ApiMultiplePhonesAware,
+    ApiMultipleAddressesAware, ApiMultipleLanguagesAware, ApiGroupNormalizer<PersistentObject> {
 
   private String id;
 
@@ -149,6 +151,21 @@ public class TestNormalizedEntity extends ApiObjectIdentity
     ApiLanguageAware[] languages = new ApiLanguageAware[1];
     languages[0] = new TestLanguage();
     return languages;
+  }
+
+  @Override
+  public Class<PersistentObject> getNormalizationClass() {
+    return null;
+  }
+
+  @Override
+  public Serializable getNormalizationGroupKey() {
+    return id;
+  }
+
+  @Override
+  public PersistentObject normalize(final Map<Object, PersistentObject> map) {
+    return null;
   }
 
 }

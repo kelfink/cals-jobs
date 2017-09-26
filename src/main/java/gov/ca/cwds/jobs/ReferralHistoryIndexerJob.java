@@ -40,6 +40,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
@@ -56,7 +57,7 @@ public class ReferralHistoryIndexerJob
     extends BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral>
     implements JobResultSetAware<EsPersonReferral> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
+  public static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
   private static final String INSERT_CLIENT_FULL =
       "INSERT INTO #SCHEMA#.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"
@@ -126,7 +127,7 @@ public class ReferralHistoryIndexerJob
       + "LEFT JOIN #SCHEMA#.REPTR_T      RPT  ON RPT.FKREFERL_T = RFL.IDENTIFIER \n"
       + "LEFT JOIN #SCHEMA#.STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER ";
 
-  private static final int FETCH_SIZE = 5000;
+  public static final int FETCH_SIZE = 5000;
 
   /**
    * Carrier bean for client referral keys.
@@ -426,11 +427,14 @@ public class ReferralHistoryIndexerJob
               con.prepareStatement(getInitialLoadQuery(schema));
           final PreparedStatement stmtSelAllegation =
               con.prepareStatement(SELECT_ALLEGATION.replaceAll("#SCHEMA#", schema))) {
+
         readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
         readReferrals(stmtSelReferral, mapReferrals);
         readAllegations(stmtSelAllegation, listAllegations);
+
         JobDB2Utils.monitorStopAndReport(monitor);
         con.commit();
+
       } finally {
         // The statements and result sets close automatically.
       }
@@ -469,26 +473,13 @@ public class ReferralHistoryIndexerJob
   }
 
   /**
-   * Calculate the number of reader threads to run from incoming job options and available
-   * processors.
-   * 
-   * @return number of reader threads to run
-   */
-  protected int calcReaderThreads() {
-    final int ret = getOpts().getThreadCount() != 0L ? (int) getOpts().getThreadCount()
-        : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
-    LOGGER.warn(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
-    return ret;
-  }
-
-  /**
    * The "extract" part of ETL. Parallel stream produces runs partition ranges in separate threads.
    */
   @Override
   protected void threadExtractJdbc() {
     Thread.currentThread().setName("read_main");
     LOGGER.info("BEGIN: main read thread");
-    EsPersonReferral.setOpts(getOpts());
+    EsPersonReferral.setOpts(getOpts()); // NOTE: ok for one-shot JVM but not ok in continuous mode
 
     try {
       // This job normalizes **without** the transform thread.
@@ -498,7 +489,7 @@ public class ReferralHistoryIndexerJob
       final List<Pair<String, String>> ranges = getPartitionRanges();
       LOGGER.warn(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
-      final ForkJoinPool threadPool = new ForkJoinPool(calcReaderThreads());
+      final ForkJoinPool threadPool = new ForkJoinPool(JobJdbcUtils.calcReaderThreads(getOpts()));
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {

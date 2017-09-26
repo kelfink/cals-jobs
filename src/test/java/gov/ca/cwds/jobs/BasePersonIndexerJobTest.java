@@ -49,10 +49,11 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 
-public class BasePersonIndexerJobTest extends PersonJobTester {
+public class BasePersonIndexerJobTest
+    extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
 
   TestNormalizedEntityDao dao;
-  TestIndexerJob target;
+  // TestIndexerJob target;
 
   @Override
   @Before
@@ -61,22 +62,6 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
     dao = new TestNormalizedEntityDao(sessionFactory);
     target = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     target.setOpts(opts);
-  }
-
-  protected void runKillThread() {
-    new Thread(() -> {
-      try {
-        Thread.sleep(1100); // NOSONAR
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      } finally {
-        target.doneExtract = true;
-        target.doneLoad = true;
-        target.doneTransform = true;
-        target.fatalError = true;
-      }
-
-    }).start();
   }
 
   @Test
@@ -202,6 +187,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
   public void normalizeSingle_Args__List() throws Exception {
     final List<TestDenormalizedEntity> recs = new ArrayList<>();
     recs.add(new TestDenormalizedEntity(DEFAULT_CLIENT_ID));
+
     final TestNormalizedEntity actual = target.normalizeSingle(recs);
     final TestNormalizedEntity expected = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     assertThat(actual, is(equalTo(expected)));
@@ -314,10 +300,10 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
     assertThat(actual, notNullValue());
   }
 
-  @Test
-  public void getDriverTable_Args__() throws Exception {
-    final String actual = target.getDriverTableNative();
-  }
+  // @Test
+  // public void getDriverTable_Args__() throws Exception {
+  // final String actual = target.getDriverTableNative();
+  // }
 
   @Test
   public void getPartitionRanges_Args__() throws Exception {

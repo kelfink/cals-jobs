@@ -1,6 +1,8 @@
 package gov.ca.cwds.jobs.test;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.SessionFactory;
 
@@ -14,7 +16,8 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
 public class TestIndexerJob
-    extends BasePersonIndexerJob<TestNormalizedEntity, TestDenormalizedEntity> {
+    extends BasePersonIndexerJob<TestNormalizedEntity, TestDenormalizedEntity>
+    implements ApiGroupNormalizer<TestDenormalizedEntity> {
 
   public TestIndexerJob(final TestNormalizedEntityDao mainDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
@@ -49,6 +52,21 @@ public class TestIndexerJob
   @Override
   public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
     return TestDenormalizedEntity.class;
+  }
+
+  @Override
+  public Class<TestDenormalizedEntity> getNormalizationClass() {
+    return TestDenormalizedEntity.class;
+  }
+
+  @Override
+  public Serializable getNormalizationGroupKey() {
+    return null;
+  }
+
+  @Override
+  public TestDenormalizedEntity normalize(Map<Object, TestDenormalizedEntity> map) {
+    return null;
   }
 
 }

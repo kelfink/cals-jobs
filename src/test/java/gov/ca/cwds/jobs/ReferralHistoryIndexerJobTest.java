@@ -37,6 +37,7 @@ import gov.ca.cwds.jobs.ReferralHistoryIndexerJob.MinClientReferral;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 
 public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
@@ -196,10 +197,6 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
   @Test
   public void testReadClients() throws Exception {
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory);
-    target.setOpts(JobOptionsTest.makeGeneric());
-
     PreparedStatement stmtInsClient = mock(PreparedStatement.class);
     PreparedStatement stmtSelClient = mock(PreparedStatement.class);
     when(stmtSelClient.executeQuery()).thenReturn(rs);
@@ -211,10 +208,6 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
   @Test
   public void testReadAllegations() throws Exception {
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory);
-    target.setOpts(JobOptionsTest.makeGeneric());
-
     final PreparedStatement stmtSelAllegation = mock(PreparedStatement.class);
     when(stmtSelAllegation.executeQuery()).thenReturn(rs);
     when(rs.next()).thenReturn(true).thenReturn(false);
@@ -225,26 +218,16 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
   @Test
   public void testMonitorStopAndReport() throws Exception {
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory);
-    target.setOpts(JobOptionsTest.makeGeneric());
     JobDB2Utils.monitorStopAndReport(new TestDB2SystemMonitor());
   }
 
   @Test
   public void testCalcThreads() throws Exception {
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory);
-    target.setOpts(JobOptionsTest.makeGeneric());
-    target.calcReaderThreads();
+    JobJdbcUtils.calcReaderThreads(target.getOpts());
   }
 
   @Test
   public void testReadReferrals() throws Exception {
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory);
-    target.setOpts(JobOptionsTest.makeGeneric());
-
     final PreparedStatement stmtSelReferral = mock(PreparedStatement.class);
     when(stmtSelReferral.executeQuery()).thenReturn(rs);
 
@@ -255,10 +238,6 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   @Test
   @Ignore
   public void pullRange_Args__Pair() throws Exception {
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory);
-    target.setOpts(JobOptionsTest.makeGeneric());
-
     final PreparedStatement stmtSelReferral = mock(PreparedStatement.class);
     when(stmtSelReferral.executeQuery()).thenReturn(rs);
 
@@ -267,7 +246,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  @Ignore
+  // @Ignore
   public void threadExtractJdbc_Args__() throws Exception {
     target.threadExtractJdbc();
   }

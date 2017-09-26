@@ -35,12 +35,14 @@ import com.ibm.db2.jcc.am.DatabaseMetaData;
 import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
-public class PersonJobTester {
+public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNormalizer<?>> {
 
   protected static final ObjectMapper MAPPER = ObjectMapperUtils.createObjectMapper();
 
@@ -54,6 +56,8 @@ public class PersonJobTester {
 
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
+
+  BasePersonIndexerJob<T, M> target;
 
   ElasticsearchConfiguration esConfig;
   ElasticsearchDao esDao;
@@ -149,6 +153,22 @@ public class PersonJobTester {
     opts = mock(JobOptions.class);
     when(opts.isLoadSealedAndSensitive()).thenReturn(false);
     when(opts.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
+  }
+
+  public void runKillThread() {
+    new Thread(() -> {
+      try {
+        Thread.sleep(1100); // NOSONAR
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      } finally {
+        target.doneExtract = true;
+        target.doneLoad = true;
+        target.doneTransform = true;
+        target.fatalError = true;
+      }
+
+    }).start();
   }
 
 }
