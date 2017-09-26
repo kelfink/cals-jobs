@@ -89,8 +89,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
               .setReadOnly(true).setCacheMode(CacheMode.IGNORE).setTimestamp("after", ts);
 
       // Iterate, process, flush.
-      final int fetchSize = 5000;
-      query.setFetchSize(fetchSize);
+      query.setFetchSize(DEFAULT_FETCH_SIZE);
       ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
       ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
       int cnt = 0;
@@ -99,7 +98,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
         Object[] row = results.get();
         ret.add((T) row[0]);
 
-        if (((++cnt) % fetchSize) == 0) {
+        if (((++cnt) % DEFAULT_FETCH_SIZE) == 0) {
           LOGGER.info("find updated after {}. recs read: {}", ts, cnt);
           session.flush();
         }
@@ -162,9 +161,9 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
   public List<T> partitionedBucketList(long bucketNum, long totalBuckets, String minId,
       String maxId) {
     final String namedQueryName = getEntityClass().getName() + ".findPartitionedBuckets";
+    final Session session = getSessionFactory().getCurrentSession();
+    final Transaction txn = session.beginTransaction();
 
-    Session session = getSessionFactory().getCurrentSession();
-    Transaction txn = session.beginTransaction();
     try {
       Query query = session.getNamedQuery(namedQueryName).setInteger("bucket_num", (int) bucketNum)
           .setInteger("total_buckets", (int) totalBuckets).setString("min_id", minId)
@@ -172,8 +171,8 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
           .setReadOnly(true).setCacheMode(CacheMode.IGNORE).setFetchSize(DEFAULT_FETCH_SIZE);
 
       // Iterate, process, flush.
-      ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
-      ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
+      final ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
+      final ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
       int cnt = 0;
 
       while (results.next()) {
@@ -243,8 +242,9 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
   @SuppressWarnings("unchecked")
   public List<T> bucketList(long bucketNum, long totalBuckets) {
     final String namedQueryName = constructNamedQueryName("findAllByBucket");
-    Session session = getSessionFactory().getCurrentSession();
-    Transaction txn = session.beginTransaction();
+    final Session session = getSessionFactory().getCurrentSession();
+    final Transaction txn = session.beginTransaction();
+
     try {
       Query query = session.getNamedQuery(namedQueryName).setCacheable(false)
           .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
@@ -252,8 +252,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
           .setInteger("total_buckets", (int) totalBuckets);
 
       // Iterate, process, flush.
-      final int fetchSize = 5000;
-      query.setFetchSize(fetchSize);
+      query.setFetchSize(DEFAULT_FETCH_SIZE);
       ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
       ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
       int cnt = 0;
@@ -262,7 +261,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
         Object[] row = results.get();
         ret.add((T) row[0]);
 
-        if (((++cnt) % fetchSize) == 0) {
+        if (((++cnt) % DEFAULT_FETCH_SIZE) == 0) {
           LOGGER.info("recs read: {}", cnt);
           session.flush();
         }

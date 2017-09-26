@@ -70,6 +70,7 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -156,10 +157,9 @@ public class JobsGuiceInjector extends AbstractModule {
    * @param opts options for this job execution
    * @return batch job, ready to run
    * @param <T> Person persistence type
-   * @throws JobsException if unable to parse command line or load dependencies
    */
   public static <T extends BasePersonIndexerJob<?, ?>> T newContinuousJob(final Class<T> klass,
-      final JobOptions opts) throws JobsException {
+      final JobOptions opts) {
     try {
       final T ret = injector.getInstance(klass);
       ret.setOpts(opts);
@@ -176,10 +176,9 @@ public class JobsGuiceInjector extends AbstractModule {
    * @param args command line arguments
    * @return batch job, ready to run
    * @param <T> Person persistence type
-   * @throws JobsException if unable to parse command line or load dependencies
    */
   public static <T extends BasePersonIndexerJob<?, ?>> T newStandaloneJob(final Class<T> klass,
-      String... args) throws JobsException {
+      String... args) {
     try {
       final JobOptions opts = JobOptions.parseCommandLine(args);
       final T ret = buildInjector(opts).getInstance(klass);
@@ -276,6 +275,20 @@ public class JobsGuiceInjector extends AbstractModule {
     return new CmsSystemCodeSerializer(systemCodeCache);
   }
 
+  private TransportClient makeTransportClient(final ElasticsearchConfiguration config,
+      boolean es55) {
+    TransportClient ret;
+    if (es55) {
+      Settings.Builder settings =
+          Settings.builder().put("cluster.name", config.getElasticsearchCluster());
+      ret = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
+    } else {
+      ret = new PreBuiltTransportClient(
+          Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build());
+    }
+    return ret;
+  }
+
   /**
    * Elasticsearch 5x. Instantiate the singleton ElasticSearch client on demand.
    * 
@@ -288,14 +301,7 @@ public class JobsGuiceInjector extends AbstractModule {
       LOGGER.warn("Create NEW ES client");
       try {
         final ElasticsearchConfiguration config = elasticSearchConfig();
-
-        // DRS: requires ES 5.5.x.
-        // Settings.Builder settings =
-        // Settings.builder().put("cluster.name", config.getElasticsearchCluster());
-        // client = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
-
-        client = new PreBuiltTransportClient(
-            Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build());
+        client = makeTransportClient(config, false);
         client.addTransportAddress(
             new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
                 Integer.parseInt(config.getElasticsearchPort())));

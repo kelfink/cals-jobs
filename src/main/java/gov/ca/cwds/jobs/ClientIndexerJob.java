@@ -40,6 +40,17 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientIndexerJob.class);
 
+  private static final String INSERT_CLIENT_LAST_CHG =
+      "INSERT INTO #SCHEMA#.GT_ID (IDENTIFIER)\n" + "SELECT CLT.IDENTIFIER "
+          + "FROM #SCHEMA#.CLIENT_T clt\n" + "WHERE CLT.IBMSNAP_LOGMARKER > ##TIMESTAMP##\n"
+          + "UNION\n" + "SELECT CLT.IDENTIFIER " + "FROM #SCHEMA#.CLIENT_T clt\n"
+          + "JOIN #SCHEMA#.CL_ADDRT cla ON clt.IDENTIFIER = cla.FKCLIENT_T \n"
+          + "WHERE CLA.IBMSNAP_LOGMARKER > ##TIMESTAMP##\n" + "UNION\n" + "SELECT CLT.IDENTIFIER "
+          + "FROM #SCHEMA#.CLIENT_T clt\n"
+          + "JOIN #SCHEMA#.CL_ADDRT cla ON clt.IDENTIFIER = cla.FKCLIENT_T\n"
+          + "JOIN #SCHEMA#.ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER\n"
+          + "WHERE ADR.IBMSNAP_LOGMARKER > ##TIMESTAMP##";
+
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   /**
@@ -56,6 +67,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory) {
     super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  }
+
+  @Override
+  protected String getPrepLastChangeSQL() {
+    return INSERT_CLIENT_LAST_CHG;
   }
 
   @Override
