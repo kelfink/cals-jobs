@@ -47,7 +47,7 @@ import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 
 public class BasePersonIndexerJobTest extends PersonJobTester {
 
@@ -644,7 +644,7 @@ public class BasePersonIndexerJobTest extends PersonJobTester {
 
   @Test
   public void enableParallelism_Args__Connection() throws Exception {
-    NeutronDB2Utils.enableParallelism(con);
+    JobDB2Utils.enableParallelism(con);
   }
 
   @Test

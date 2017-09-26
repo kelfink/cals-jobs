@@ -36,7 +36,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.ReferralHistoryIndexerJob.MinClientReferral;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 
 public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
@@ -228,7 +228,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
     target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
         sessionFactory);
     target.setOpts(JobOptionsTest.makeGeneric());
-    NeutronDB2Utils.monitorStopAndReport(new TestDB2SystemMonitor());
+    JobDB2Utils.monitorStopAndReport(new TestDB2SystemMonitor());
   }
 
   @Test

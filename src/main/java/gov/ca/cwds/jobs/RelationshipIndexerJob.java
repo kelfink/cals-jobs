@@ -33,7 +33,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
@@ -81,7 +81,7 @@ public class RelationshipIndexerJob
       public void execute(Connection con) throws SQLException {
         con.setSchema(getDBSchemaName());
         con.setAutoCommit(false);
-        NeutronDB2Utils.enableParallelism(con);
+        JobDB2Utils.enableParallelism(con);
 
         final StringBuilder buf = new StringBuilder();
         buf.append("TIMESTAMP('")
@@ -146,7 +146,6 @@ public class RelationshipIndexerJob
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedRelationships p)
       throws IOException {
 
-    // If at first you don't succeed, cheat. :-)
     final StringBuilder buf = new StringBuilder();
     buf.append("{\"relationships\":[");
 

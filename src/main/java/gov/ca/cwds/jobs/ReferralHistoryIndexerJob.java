@@ -46,7 +46,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
@@ -429,9 +429,9 @@ public class ReferralHistoryIndexerJob
     try (final Connection con = getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      NeutronDB2Utils.enableParallelism(con);
+      JobDB2Utils.enableParallelism(con);
 
-      final DB2SystemMonitor monitor = NeutronDB2Utils.monitorStart(con);
+      final DB2SystemMonitor monitor = JobDB2Utils.monitorStart(con);
       final String schema = getDBSchemaName();
 
       try (
@@ -446,7 +446,7 @@ public class ReferralHistoryIndexerJob
         readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
         readReferrals(stmtSelReferral, mapReferrals);
         readAllegations(stmtSelAllegation, listAllegations);
-        NeutronDB2Utils.monitorStopAndReport(monitor);
+        JobDB2Utils.monitorStopAndReport(monitor);
         con.commit();
       } finally {
         // The statements and result sets close automatically.
@@ -547,7 +547,7 @@ public class ReferralHistoryIndexerJob
       public void execute(Connection con) throws SQLException {
         con.setSchema(getDBSchemaName());
         con.setAutoCommit(false);
-        NeutronDB2Utils.enableParallelism(con);
+        JobDB2Utils.enableParallelism(con);
 
         // The DB2 optimizer on z/OS treats timestamps in a JDBC prepared statements differently
         // from static SQL. For plan reliability build SQL and execute without a prepared statement.

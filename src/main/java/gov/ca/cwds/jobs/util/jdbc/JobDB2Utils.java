@@ -15,9 +15,18 @@ import com.ibm.db2.jcc.DB2SystemMonitor;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 
-public class NeutronDB2Utils {
+/**
+ * Miscellaneous DB2 utilities for Neutron jobs.
+ * 
+ * @author CWDS API Team
+ */
+public class JobDB2Utils {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronDB2Utils.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(JobDB2Utils.class);
+
+  private JobDB2Utils() {
+    // Default no-op.
+  }
 
   /**
    * Enable DB2 parallelism. Ignored for other databases.
@@ -94,28 +103,6 @@ public class NeutronDB2Utils {
   }
 
   /**
-   * Stop the DB2 monitor and report stats.
-   * 
-   * @param monitor current monitor instance
-   * @throws SQLException on JDBC error
-   */
-  public static void monitorStopAndReport(final DB2SystemMonitor monitor) throws SQLException {
-    if (monitor != null) {
-      monitor.stop();
-      LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
-      LOGGER.info("Network I/O elapsed time (microseconds)=" + monitor.getNetworkIOTimeMicros());
-      LOGGER.info("Core driver elapsed time (microseconds)=" + monitor.getCoreDriverTimeMicros());
-      LOGGER.info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
-      LOGGER.info("monitor.moreData: 0: {}", monitor.moreData(0));
-      LOGGER.info("monitor.moreData: 1: {}", monitor.moreData(1));
-      LOGGER.info("monitor.moreData: 2: {}", monitor.moreData(2));
-
-      // C'mon IBM! Where are the constants for method DB2SystemMonitor.moreData()??
-      // LOGGER.info("NETWORK_TRIPS: {}", monitor.moreData(NUMBER_NETWORK_TRIPS));
-    }
-  }
-
-  /**
    * Get a DB2 monitor and start it for this transaction.
    * 
    * @param con database connection
@@ -139,6 +126,25 @@ public class NeutronDB2Utils {
     }
 
     return null;
+  }
+
+  /**
+   * Stop the DB2 monitor and report stats.
+   * 
+   * @param monitor current monitor instance
+   * @throws SQLException on JDBC error
+   */
+  public static void monitorStopAndReport(final DB2SystemMonitor monitor) throws SQLException {
+    if (monitor != null) {
+      monitor.stop();
+      LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
+      LOGGER.info("Network I/O elapsed time (microseconds)=" + monitor.getNetworkIOTimeMicros());
+      LOGGER.info("Core driver elapsed time (microseconds)=" + monitor.getCoreDriverTimeMicros());
+      LOGGER.info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
+      LOGGER.info("monitor.moreData: 0: {}", monitor.moreData(0));
+      LOGGER.info("monitor.moreData: 1: {}", monitor.moreData(1));
+      LOGGER.info("monitor.moreData: 2: {}", monitor.moreData(2));
+    }
   }
 
 }

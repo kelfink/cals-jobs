@@ -76,7 +76,7 @@ import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
@@ -849,7 +849,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       /**
        * Enable parallelism for underlying database
        */
-      NeutronDB2Utils.enableParallelism(con);
+      JobDB2Utils.enableParallelism(con);
 
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(15000); // faster
@@ -1735,7 +1735,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return true if DB2 is running on a mainframe
    */
   public boolean isDB2OnZOS() {
-    return NeutronDB2Utils.isDB2OnZOS(jobDao);
+    return JobDB2Utils.isDB2OnZOS(jobDao);
   }
 
 }
