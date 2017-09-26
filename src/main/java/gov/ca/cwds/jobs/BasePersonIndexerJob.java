@@ -75,8 +75,8 @@ import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
-import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
@@ -1690,7 +1690,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * @return default CMS schema name
    */
-  protected static String getDBSchemaName() {
+  public static String getDBSchemaName() {
     return System.getProperty("DB_CMS_SCHEMA");
   }
 
