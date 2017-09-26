@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 
@@ -63,8 +64,8 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
             + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
             + ") AND x.CLT_SENSTV_IND != 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
         resultClass = EsClientAddress.class, readOnly = true)})
-public class EsClientAddress extends ApiObjectIdentity
-    implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
+public class EsClientAddress extends ApiObjectIdentity implements PersistentObject,
+    ApiGroupNormalizer<ReplicatedClient>, Comparable<EsClientAddress>, Comparator<EsClientAddress> {
 
   /**
    * Default serialization.
@@ -1625,6 +1626,16 @@ public class EsClientAddress extends ApiObjectIdentity
 
   public void setLastChange(Date lastChange) {
     this.lastChange = lastChange;
+  }
+
+  @Override
+  public int compare(EsClientAddress o1, EsClientAddress o2) {
+    return o1.getCltId().compareTo(o2.getCltId());
+  }
+
+  @Override
+  public int compareTo(EsClientAddress o) {
+    return compare(this, o);
   }
 
 }

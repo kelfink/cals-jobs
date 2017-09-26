@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.SessionFactory;
@@ -116,22 +117,14 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    * 
    * @param grpRecs recs for same client id
    */
-  protected void handOff(final List<EsClientAddress> grpRecs) {
+  protected void normalizeAndQueueIndex(final List<EsClientAddress> grpRecs) {
     try {
-
-      try {
-        lock.writeLock().lock();
-        for (EsClientAddress cla : grpRecs) {
-          queueTransform.putLast(cla);
-        }
-      } finally {
-        lock.writeLock().unlock();
-      }
-
-    } catch (InterruptedException ie) { // NOSONAR
-      LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
-      fatalError = true;
-      Thread.currentThread().interrupt();
+      lock.writeLock().lock();
+      grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
+          .collect(Collectors.groupingBy(EsClientAddress::getCltId)).entrySet().stream()
+          .map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
+    } finally {
+      lock.writeLock().unlock();
     }
   }
 
@@ -173,7 +166,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
           JobLogUtils.logEvery(++cntr, "Retrieved", "recs");
           // NOTE: Assumes that records are sorted by group key.
           if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
-            handOff(grpRecs);
+            normalizeAndQueueIndex(grpRecs);
             grpRecs.clear(); // Single thread, re-use memory.
           }
 
@@ -205,25 +198,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     try {
       // CHALLENGE: parallel stream blocks the indexer thread somehow. Weird.
       // But one reader thread works fine. Go figure.
-
-      // final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 2);
-      // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
-      // String.valueOf(maxThreads));
-      // LOGGER.info("JDBC processors={}", maxThreads);
-
-      // ForkJoinPool pool = new ForkJoinPool(1);
-      // pool.submit(() -> getPartitionRanges().parallelStream().forEach(this::pullRange));
-
-      // final ForkJoinPool pool = new ForkJoinPool(1);
-      // for (Pair<String, String> pair : getPartitionRanges()) {
-      // LOGGER.warn("submit partition pair: {},{}", pair.getLeft(), pair.getRight());
-      // pool.submit(() -> pullRange(pair));
-      // }
-
-      // TODO: TOO SLOW!
       // Make parallel and normalize on your own.
       // Each partition range is self-contained.
-      getPartitionRanges().stream().sequential().forEach(this::pullRange);
+      getPartitionRanges().parallelStream().forEach(this::pullRange);
 
     } catch (Exception e) {
       fatalError = true;
@@ -277,6 +254,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     }
 
     return ret;
+  }
+
+  @Override
+  protected boolean useTransformThread() {
+    return false;
   }
 
   @Override

@@ -783,7 +783,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       threadIndexer.start();
 
       if (useTransformThread()) {
-        final Thread threadTransformer = new Thread(this::threadTransform); // Transform
+        Thread threadTransformer = new Thread(this::threadTransform); // Transform
         threadTransformer.start();
       }
 
@@ -804,6 +804,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       threadJdbc.join();
+      if (useTransformThread()) {
+        threadIndexer.join();
+      }
+
       threadIndexer.join();
 
       Thread.sleep(SLEEP_MILLIS);
