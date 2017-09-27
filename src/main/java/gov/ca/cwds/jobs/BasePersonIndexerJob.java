@@ -782,8 +782,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final Thread threadIndexer = new Thread(this::threadIndex); // Index
       threadIndexer.start();
 
+      Thread threadTransformer = null;
       if (useTransformThread()) {
-        Thread threadTransformer = new Thread(this::threadTransform); // Transform
+        threadTransformer = new Thread(this::threadTransform); // Transform
         threadTransformer.start();
       }
 
@@ -804,8 +805,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       threadJdbc.join();
-      if (useTransformThread()) {
-        threadIndexer.join();
+      if (useTransformThread() && threadTransformer != null) {
+        threadTransformer.join();
       }
 
       threadIndexer.join();

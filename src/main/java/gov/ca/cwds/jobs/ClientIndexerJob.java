@@ -72,8 +72,18 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
+  protected boolean useTransformThread() {
+    return false;
+  }
+
+  @Override
   protected String getPrepLastChangeSQL() {
     return INSERT_CLIENT_LAST_CHG;
+  }
+
+  @Override
+  protected boolean isRangeSelfManaging() {
+    return true;
   }
 
   @Override
@@ -114,18 +124,18 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   /**
-   * Hand off all recs for same client id at same time.
+   * Hand off all recs for same client id to the index queue.
    * 
    * @param grpRecs recs for same client id
    */
   protected void normalizeAndQueueIndex(final List<EsClientAddress> grpRecs) {
     try {
-      lock.writeLock().lock();
+      // lock.writeLock().lock();
       grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
           .collect(Collectors.groupingBy(EsClientAddress::getCltId)).entrySet().stream()
           .map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
     } finally {
-      lock.writeLock().unlock();
+      // lock.writeLock().unlock();
     }
   }
 
@@ -198,10 +208,15 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
     try {
       // CHALLENGE: parallel stream blocks the indexer thread somehow. Weird.
-      // But one reader thread works fine. Go figure.
+      // But one reader thread works fine, but it's too slow. Go figure.
       // Make parallel and normalize on your own.
       // Each partition range is self-contained.
-      JobJdbcUtils.calcReaderThreads(getOpts());
+
+      final int maxThreads = JobJdbcUtils.calcReaderThreads(getOpts());
+      System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+          String.valueOf(maxThreads));
+      LOGGER.info("JDBC processors={}", maxThreads);
+
       getPartitionRanges().parallelStream().forEach(this::pullRange);
 
     } catch (Exception e) {
@@ -256,11 +271,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     }
 
     return ret;
-  }
-
-  @Override
-  protected boolean useTransformThread() {
-    return false;
   }
 
   @Override
