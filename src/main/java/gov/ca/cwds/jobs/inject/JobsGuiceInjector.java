@@ -179,7 +179,7 @@ public class JobsGuiceInjector extends AbstractModule {
    * @return batch job, ready to run
    * @param <T> Person persistence type
    */
-  public static <T extends BasePersonIndexerJob<?, ?>> T newStandaloneJob(final Class<T> klass,
+  public static <T extends BasePersonIndexerJob<?, ?>> T newJob(final Class<T> klass,
       String... args) {
     try {
       final JobOptions opts = JobOptions.parseCommandLine(args);

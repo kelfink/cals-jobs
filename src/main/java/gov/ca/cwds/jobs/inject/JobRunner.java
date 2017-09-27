@@ -1,5 +1,8 @@
 package gov.ca.cwds.jobs.inject;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +25,8 @@ public class JobRunner {
 
   private static JobOptions startingOpts;
 
+  private static final Map<Class<?>, BasePersonIndexerJob<?, ?>> jobs = new ConcurrentHashMap<>();
+
   private JobRunner() {
     // Default, no-op
   }
@@ -42,7 +47,7 @@ public class JobRunner {
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
     int exitCode = 0;
-    try (final T job = JobsGuiceInjector.newStandaloneJob(klass, args)) {
+    try (final T job = JobsGuiceInjector.newJob(klass, args)) {
       job.run();
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
@@ -71,9 +76,11 @@ public class JobRunner {
    * @param <T> Person persistence type
    * @throws JobsException unexpected runtime error
    */
-  public static <T extends BasePersonIndexerJob<?, ?>> void startContinuous(final Class<T> klass,
+  public static <T extends BasePersonIndexerJob<?, ?>> void startContinuousJob(final Class<T> klass,
       String... args) {
     try {
+      final T job = JobsGuiceInjector.newJob(klass, args);
+      jobs.put(klass, job);
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception, for ClassNotFound or the like.
       throw JobLogUtils.buildException(LOGGER, e, "JOB FAILED!: {}", e.getMessage());

@@ -33,7 +33,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsSafetyAlert.findAllUpdatedAfter",
         query = "SELECT r.* FROM {h-schema}VW_LST_SAFETY_ALERT r WHERE r.CLIENT_ID IN ( "
             + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_SAFETY_ALERT r1 "
-            + "WHERE r1.LAST_CHANGED > CAST(:after AS TIMESTAMP) "
+            + "WHERE r1.LAST_CHANGED > :after "
             + ") ORDER BY CLIENT_ID, ALERT_ID FOR READ ONLY WITH UR ",
         resultClass = EsSafetyAlert.class, readOnly = true),
 
@@ -41,7 +41,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         name = "gov.ca.cwds.data.persistence.cms.EsSafetyAlert.findAllUpdatedAfterWithUnlimitedAccess",
         query = "SELECT r.* FROM {h-schema}VW_LST_SAFETY_ALERT r WHERE r.CLIENT_ID IN ( "
             + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_SAFETY_ALERT r1 "
-            + "WHERE r1.LAST_CHANGED > CAST(:after AS TIMESTAMP) "
+            + "WHERE r1.LAST_CHANGED > :after "
             + ") AND r.CLIENT_SENSITIVITY_IND = 'N' ORDER BY CLIENT_ID, ALERT_ID FOR READ ONLY WITH UR ",
         resultClass = EsSafetyAlert.class, readOnly = true),
 
@@ -49,7 +49,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         name = "gov.ca.cwds.data.persistence.cms.EsSafetyAlert.findAllUpdatedAfterWithLimitedAccess",
         query = "SELECT r.* FROM {h-schema}VW_LST_SAFETY_ALERT r WHERE r.CLIENT_ID IN ( "
             + "SELECT r1.CLIENT_ID FROM {h-schema}VW_LST_SAFETY_ALERT r1 "
-            + "WHERE r1.LAST_CHANGED > CAST(:after AS TIMESTAMP) "
+            + "WHERE r1.LAST_CHANGED > :after "
             + ") AND r.CLIENT_SENSITIVITY_IND != 'N' ORDER BY CLIENT_ID, ALERT_ID FOR READ ONLY WITH UR ",
         resultClass = EsSafetyAlert.class, readOnly = true)})
 

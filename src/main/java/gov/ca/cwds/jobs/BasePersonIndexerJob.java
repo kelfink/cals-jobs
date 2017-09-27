@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1269,8 +1268,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
        * Load records to index
        */
       final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
-      // q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
-      q.setString("after", JobJdbcUtils.makeTimestampString(lastRunTime));
+      q.setString("after", JobJdbcUtils.makeSimpleTimestampString(lastRunTime));
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<M> recs = q.list();
@@ -1305,7 +1303,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
             entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
         final NativeQuery<M> queryForDeletion =
             session.getNamedNativeQuery(namedQueryNameForDeletion);
-        queryForDeletion.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
+        queryForDeletion.setString("after", JobJdbcUtils.makeSimpleTimestampString(lastRunTime));
 
         final List<M> deletionRecs = queryForDeletion.list();
 

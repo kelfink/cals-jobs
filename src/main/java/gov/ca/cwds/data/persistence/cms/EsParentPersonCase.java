@@ -19,7 +19,7 @@ import org.hibernate.annotations.NamedNativeQuery;
     name = "gov.ca.cwds.data.persistence.cms.EsParentPersonCase.findAllUpdatedAfter",
     query = "SELECT c.* FROM {h-schema}VW_LST_PARENT_CASE_HIST c WHERE c.CASE_ID IN ("
         + " SELECT c1.CASE_ID FROM {h-schema}VW_LST_PARENT_CASE_HIST c1 "
-        + "WHERE c1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+        + "WHERE c1.LAST_CHG > :after "
         + ") ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsParentPersonCase.class, readOnly = true),
 
@@ -27,7 +27,7 @@ import org.hibernate.annotations.NamedNativeQuery;
         name = "gov.ca.cwds.data.persistence.cms.EsParentPersonCase.findAllUpdatedAfterWithUnlimitedAccess",
         query = "SELECT c.* FROM {h-schema}VW_LST_PARENT_CASE_HIST c WHERE c.CASE_ID IN ("
             + " SELECT c1.CASE_ID FROM {h-schema}VW_LST_PARENT_CASE_HIST c1 "
-            + "WHERE c1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + "WHERE c1.LAST_CHG > :after "
             + ") AND c.LIMITED_ACCESS_CODE = 'N' ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsParentPersonCase.class, readOnly = true),
 
@@ -35,7 +35,7 @@ import org.hibernate.annotations.NamedNativeQuery;
         name = "gov.ca.cwds.data.persistence.cms.EsParentPersonCase.findAllUpdatedAfterWithLimitedAccess",
         query = "SELECT c.* FROM {h-schema}VW_LST_PARENT_CASE_HIST c WHERE c.CASE_ID IN ("
             + " SELECT c1.CASE_ID FROM {h-schema}VW_LST_PARENT_CASE_HIST c1 "
-            + "WHERE c1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + "WHERE c1.LAST_CHG > :after "
             + ") AND c.LIMITED_ACCESS_CODE != 'N' ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsParentPersonCase.class, readOnly = true)})
 public class EsParentPersonCase extends EsPersonCase {

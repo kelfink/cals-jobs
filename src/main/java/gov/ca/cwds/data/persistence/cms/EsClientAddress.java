@@ -45,15 +45,14 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfter",
         query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
             + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
-            + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
-            + ") ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
+            + "WHERE x1.LAST_CHG > :after " + ") ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
         resultClass = EsClientAddress.class, readOnly = true),
 
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfterWithUnlimitedAccess",
         query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
             + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
-            + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + "WHERE x1.LAST_CHG > :after "
             + ") AND x.CLT_SENSTV_IND = 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR",
         resultClass = EsClientAddress.class, readOnly = true),
 
@@ -61,7 +60,7 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
         name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfterWithLimitedAccess",
         query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
             + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
-            + "WHERE x1.LAST_CHG > CAST(:after AS TIMESTAMP) "
+            + "WHERE x1.LAST_CHG > :after "
             + ") AND x.CLT_SENSTV_IND != 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
         resultClass = EsClientAddress.class, readOnly = true)})
 public class EsClientAddress extends ApiObjectIdentity implements PersistentObject,
