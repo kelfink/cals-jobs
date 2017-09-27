@@ -56,7 +56,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     EsChildPersonCase personCase = new EsChildPersonCase();
 
     //
-    // Case
+    // Case:
     //
     personCase.setCaseId(caseId);
     personCase.setStartDate(rs.getDate("START_DATE"));
@@ -66,7 +66,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setServiceComponent(rs.getInt("SERVICE_COMP"));
 
     //
-    // Child (client)
+    // Child (client):
     //
     personCase.setFocusChildId(focusChildId);
     personCase.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
@@ -75,7 +75,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setFocusChildSensitivityIndicator(rs.getString("FOCUS_CHILD_SENSITIVITY_IND"));
 
     //
-    // Parent
+    // Parent:
     //
     personCase.setParentId(ifNull(rs.getString("PARENT_ID")));
     personCase.setParentFirstName(ifNull(rs.getString("PARENT_FIRST_NM")));
@@ -86,7 +86,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setParentSensitivityIndicator(rs.getString("PARENT_SENSITIVITY_IND"));
 
     //
-    // Worker (staff)
+    // Worker (staff):
     //
     personCase.setWorkerId(ifNull(rs.getString("WORKER_ID")));
     personCase.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
@@ -94,7 +94,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
 
     //
-    // Access Limitation
+    // Access Limitation:
     //
     personCase.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
     personCase.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
