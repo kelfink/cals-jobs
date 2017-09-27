@@ -101,7 +101,6 @@ public class JobsGuiceInjector extends AbstractModule {
    * Default constructor.
    */
   public JobsGuiceInjector() {
-    // Default, no-op.
     this.opts = null;
   }
 

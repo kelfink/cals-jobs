@@ -33,8 +33,7 @@ public class JobJdbcUtils {
       JobDB2Utils.enableParallelism(con);
 
       final StringBuilder buf = new StringBuilder();
-      buf.append("TIMESTAMP('")
-          .append(new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT).format(lastRunTime)).append("')");
+      buf.append(makeTimestampString(lastRunTime));
 
       final String sql = sqlInsertLastChange.replaceAll("#SCHEMA#", getDBSchemaName())
           .replaceAll("##TIMESTAMP##", buf.toString());
@@ -57,6 +56,17 @@ public class JobJdbcUtils {
    * Common timestamp format for legacy DB.
    */
   public static final String LEGACY_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+
+  public static String makeTimestampString(final Date date) {
+    final StringBuilder buf = new StringBuilder();
+    buf.append("TIMESTAMP('").append(new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT).format(date))
+        .append("')");
+    return buf.toString();
+  }
+
+  public static String makeSimpleTimestampString(final Date date) {
+    return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT).format(date);
+  }
 
   /**
    * @return default CMS schema name

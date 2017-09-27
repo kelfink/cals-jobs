@@ -46,7 +46,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
     @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfter",
         query = "WITH driver as (\n"
             + " SELECT v1.THIS_LEGACY_ID, v1.RELATED_LEGACY_ID FROM {h-schema}VW_LST_BI_DIR_RELATION v1 \n"
-            + "where v1.LAST_CHG > CAST(:after AS TIMESTAMP) \n"
+            + "where v1.LAST_CHG > :after \n"
             + ") SELECT v.REVERSE_RELATIONSHIP, v.THIS_LEGACY_ID, v.THIS_SENSITIVITY_IND, \n"
             + "v.THIS_LEGACY_LAST_UPDATED, v.THIS_LEGACY_LAST_UPDATED_ID, v.THIS_FIRST_NAME, v.THIS_LAST_NAME, \n"
             + "v.REL_CODE, v.RELATED_LEGACY_ID, v.RELATED_SENSITIVITY_IND, \n"
@@ -62,7 +62,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfterWithUnlimitedAccess",
         query = "WITH driver as ( \n"
             + " SELECT v1.THIS_LEGACY_ID, v1.RELATED_LEGACY_ID FROM {h-schema}VW_LST_BI_DIR_RELATION v1 \n"
-            + "where v1.LAST_CHG > CAST(:after AS TIMESTAMP) \n"
+            + "where v1.LAST_CHG > :after \n"
             + ") SELECT v.REVERSE_RELATIONSHIP, v.THIS_LEGACY_ID, v.THIS_SENSITIVITY_IND, \n"
             + "v.THIS_LEGACY_LAST_UPDATED, v.THIS_LEGACY_LAST_UPDATED_ID, v.THIS_FIRST_NAME, v.THIS_LAST_NAME, \n"
             + "v.REL_CODE, v.RELATED_LEGACY_ID, v.RELATED_SENSITIVITY_IND, \n"

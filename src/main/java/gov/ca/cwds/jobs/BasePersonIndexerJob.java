@@ -1223,9 +1223,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
-      q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
+      q.setString("after", JobJdbcUtils.makeSimpleTimestampString(lastRunTime));
 
-      ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
+      final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
 
       LOGGER.warn("FOUND {} RECORDS", recs.size());
@@ -1269,7 +1269,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
        * Load records to index
        */
       final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
-      q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
+      // q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
+      q.setString("after", JobJdbcUtils.makeTimestampString(lastRunTime));
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<M> recs = q.list();

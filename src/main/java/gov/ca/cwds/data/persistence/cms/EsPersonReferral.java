@@ -53,21 +53,20 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 @NamedNativeQueries({@NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
     query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
-        + "WHERE (1=1 OR current timestamp < CAST(:after AS TIMESTAMP))"
-        + "ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
+        + "WHERE (1=1 OR current timestamp < :after)" + "ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsPersonReferral.class, readOnly = true),
 
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithUnlimitedAccess",
         query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
-            + "WHERE (1=1 OR current timestamp < CAST(:after AS TIMESTAMP))"
+            + "WHERE (1=1 OR current timestamp < :after)"
             + "AND r.LIMITED_ACCESS_CODE = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsPersonReferral.class, readOnly = true),
 
     @NamedNativeQuery(
         name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithLimitedAccess",
         query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
-            + "WHERE (1=1 OR current timestamp < CAST(:after AS TIMESTAMP))"
+            + "WHERE (1=1 OR current timestamp < :after)"
             + "AND r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
         resultClass = EsPersonReferral.class, readOnly = true)})
 public class EsPersonReferral extends ApiObjectIdentity
