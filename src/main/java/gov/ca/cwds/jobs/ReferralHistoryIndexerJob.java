@@ -666,4 +666,5 @@ public class ReferralHistoryIndexerJob
   public static void main(String... args) {
     runStandalone(ReferralHistoryIndexerJob.class, args);
   }
+
 }
