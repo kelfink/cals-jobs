@@ -246,7 +246,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  // @Ignore
+  @Ignore
   public void threadExtractJdbc_Args__() throws Exception {
     target.threadExtractJdbc();
   }

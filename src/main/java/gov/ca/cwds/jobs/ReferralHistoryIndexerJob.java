@@ -441,7 +441,8 @@ public class ReferralHistoryIndexerJob
 
     } catch (Exception e) {
       fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      JobLogUtils.raiseError(LOGGER, e, "ERROR HANDING RANGE {} - {}: {}", p.getLeft(),
+          p.getRight(), e.getMessage());
     }
 
     final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys.stream()
