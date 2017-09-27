@@ -263,6 +263,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     this.mapper = mapper;
     this.sessionFactory = sessionFactory;
 
+    JobElasticUtils.setMapper(mapper);
     lock = new ReentrantReadWriteLock(false);
   }
 
