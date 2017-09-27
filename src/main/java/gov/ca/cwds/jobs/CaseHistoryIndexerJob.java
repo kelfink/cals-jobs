@@ -36,6 +36,31 @@ public abstract class CaseHistoryIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CaseHistoryIndexerJob.class);
 
+  private static final String INSERT_CLIENT_LAST_CHG =
+      "INSERT INTO #SCHEMA#.GT_ID (IDENTIFIER)\n" + "\nSELECT CAS.IDENTIFIER "
+          + "\nFROM #SCHEMA#CASE_T CAS " + "\nWHERE CAS.IBMSNAP_LOGMARKER > ##TIMESTAMP## "
+          + "\nUNION " + "\nSELECT CAS.IDENTIFIER " + "\nFROM #SCHEMA#CASE_T CAS "
+          + "\nLEFT JOIN #SCHEMA#CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
+          + "\nLEFT JOIN #SCHEMA#CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T "
+          + "\nWHERE CCL.IBMSNAP_LOGMARKER > ##TIMESTAMP## " + "\nUNION "
+          + "\nSELECT CAS.IDENTIFIER " + "\nFROM #SCHEMA#CASE_T CAS "
+          + "\nLEFT JOIN #SCHEMA#CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
+          + "\nLEFT JOIN #SCHEMA#CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T "
+          + "\nWHERE CLC.IBMSNAP_LOGMARKER > ##TIMESTAMP## " + "\nUNION "
+          + "\nSELECT CAS.IDENTIFIER " + "\nFROM #SCHEMA#CASE_T CAS "
+          + "\nLEFT JOIN #SCHEMA#CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
+          + "\nLEFT JOIN #SCHEMA#CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T "
+          + "\nJOIN #SCHEMA#CLN_RELT CLR ON CLR.FKCLIENT_T = CCL.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
+          + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
+          + "\nWHERE CLR.IBMSNAP_LOGMARKER > ##TIMESTAMP## " + "\nUNION "
+          + "\nSELECT CAS.IDENTIFIER " + "\nFROM #SCHEMA#CASE_T CAS "
+          + "\nLEFT JOIN #SCHEMA#CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
+          + "\nLEFT JOIN #SCHEMA#CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T "
+          + "\nJOIN #SCHEMA#CLN_RELT CLR ON CLR.FKCLIENT_T = CCL.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
+          + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
+          + "\nJOIN #SCHEMA#CLIENT_T CLP ON CLP.IDENTIFIER = CLR.FKCLIENT_0 "
+          + "\nWHERE CLP.IBMSNAP_LOGMARKER > ##TIMESTAMP## ";
+
   /**
    * Construct batch job instance with all required dependencies.
    * 
@@ -50,6 +75,11 @@ public abstract class CaseHistoryIndexerJob
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
     super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  }
+
+  @Override
+  protected String getPrepLastChangeSQL() {
+    return INSERT_CLIENT_LAST_CHG;
   }
 
   @Override

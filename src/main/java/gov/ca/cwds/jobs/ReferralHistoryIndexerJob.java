@@ -57,7 +57,7 @@ public class ReferralHistoryIndexerJob
     extends BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral>
     implements JobResultSetAware<EsPersonReferral> {
 
-  public static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
   private static final String INSERT_CLIENT_FULL =
       "INSERT INTO #SCHEMA#.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"

@@ -13,7 +13,6 @@ import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.jobs.ReferralHistoryIndexerJob;
 import gov.ca.cwds.jobs.config.JobOptions;
 
 public class JobJdbcUtils {
@@ -82,7 +81,7 @@ public class JobJdbcUtils {
   public static int calcReaderThreads(final JobOptions opts) {
     final int ret = opts.getThreadCount() != 0L ? (int) opts.getThreadCount()
         : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
-    ReferralHistoryIndexerJob.LOGGER.warn(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
+    LOGGER.warn(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
     return ret;
   }
 
