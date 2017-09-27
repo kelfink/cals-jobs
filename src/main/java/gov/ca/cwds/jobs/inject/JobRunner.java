@@ -19,6 +19,10 @@ public class JobRunner {
 
   private static boolean continuousMode = false;
 
+  private JobRunner() {
+    // Default, no-op
+  }
+
   /**
    * Batch job entry point.
    * 
