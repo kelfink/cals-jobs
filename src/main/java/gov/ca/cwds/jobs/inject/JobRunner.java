@@ -47,13 +47,15 @@ public class JobRunner {
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
     int exitCode = 0;
+    setContinuousMode(false);
+
     try (final T job = JobsGuiceInjector.newJob(klass, args)) {
       job.run();
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
       exitCode = 1;
-      throw JobLogUtils.buildException(LOGGER, e, "JOB FAILED!: {}", e.getMessage());
+      throw JobLogUtils.buildException(LOGGER, e, "STANDALONE JOB FAILED!: {}", e.getMessage());
     } finally {
       // WARNING: kills the JVM in testing but may be needed to shutdown resources.
       if (!isTestMode() && !isContinuousMode()) {
@@ -64,26 +66,42 @@ public class JobRunner {
   }
 
   /**
-   * Batch job entry point.
-   * 
-   * <p>
-   * This method automatically closes the Hibernate session factory and ElasticSearch DAO and EXITs
-   * the JVM.
-   * </p>
+   * Register a continuously running job.
    * 
    * @param klass batch job class
    * @param args command line arguments
    * @param <T> Person persistence type
    * @throws JobsException unexpected runtime error
    */
-  public static <T extends BasePersonIndexerJob<?, ?>> void startContinuousJob(final Class<T> klass,
-      String... args) {
+  public static <T extends BasePersonIndexerJob<?, ?>> void registerContinuousJob(
+      final Class<T> klass, String... args) {
     try {
+      setContinuousMode(true);
       final T job = JobsGuiceInjector.newJob(klass, args);
+      setStartingOpts(job.getOpts());
       jobs.put(klass, job);
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception, for ClassNotFound or the like.
-      throw JobLogUtils.buildException(LOGGER, e, "JOB FAILED!: {}", e.getMessage());
+      throw JobLogUtils.buildException(LOGGER, e, "JOB REGISTRATION FAILED!: {}", e.getMessage());
+    }
+  }
+
+  /**
+   * Run a registered job.
+   * 
+   * @param klass batch job class
+   * @param args command line arguments
+   * @throws JobsException unexpected runtime error
+   */
+  public static void runRegisteredJob(final Class<?> klass, String... args) {
+    try {
+      final JobOptions opts = JobOptions.parseCommandLine(args);
+      final BasePersonIndexerJob<?, ?> job =
+          (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.buildInjector(opts).getInstance(klass);
+      job.setOpts(opts);
+      job.run();
+    } catch (Exception e) {
+      throw JobLogUtils.buildException(LOGGER, e, "REGISTERED JOB RUN FAILED!: {}", e.getMessage());
     }
   }
 
@@ -96,7 +114,7 @@ public class JobRunner {
     return continuousMode;
   }
 
-  public static void setContinuousMode(boolean mode) {
+  protected static void setContinuousMode(boolean mode) {
     continuousMode = mode;
   }
 
@@ -118,6 +136,16 @@ public class JobRunner {
    */
   public static void setTestMode(boolean mode) {
     testMode = mode;
+  }
+
+  public static JobOptions getStartingOpts() {
+    return startingOpts;
+  }
+
+  protected static synchronized void setStartingOpts(JobOptions startingOpts) {
+    if (JobRunner.startingOpts == null) {
+      JobRunner.startingOpts = startingOpts;
+    }
   }
 
 }

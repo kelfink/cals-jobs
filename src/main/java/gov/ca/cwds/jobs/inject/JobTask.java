@@ -33,6 +33,8 @@ public class JobTask<N extends PersistentObject, D extends ApiGroupNormalizer<?>
 
   private Date endTime;
 
+  private Thread thread;
+
   public JobTask(BasePersonIndexerJob<N, D> job, boolean continuousMode, JobOptions opts,
       String description) {
     this.job = job;
