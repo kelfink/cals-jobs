@@ -28,6 +28,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
@@ -200,6 +201,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       // But one reader thread works fine. Go figure.
       // Make parallel and normalize on your own.
       // Each partition range is self-contained.
+      JobJdbcUtils.calcReaderThreads(getOpts());
       getPartitionRanges().parallelStream().forEach(this::pullRange);
 
     } catch (Exception e) {
