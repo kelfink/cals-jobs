@@ -158,14 +158,6 @@ public class BasePersonIndexerJobTest
   }
 
   @Test
-  public void ifNull_Args__String() throws Exception {
-    String value = null;
-    String actual = target.ifNull(value);
-    String expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void getDenormalizedClass_Args__() throws Exception {
     Object actual = target.getDenormalizedClass();
     assertThat(actual, notNullValue());

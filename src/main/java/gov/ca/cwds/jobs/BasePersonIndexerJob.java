@@ -75,12 +75,12 @@ import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.elastic.JobElasticUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
-import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
 
 /**
  * Base person batch job to load clients from CMS into ElasticSearch.
@@ -131,6 +131,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it's
    * not too bad (table scan performance).
    * 
+   * @deprecated other options now
    * @see #doInitialLoadJdbc()
    */
   @Deprecated
@@ -417,18 +418,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @see #buildElasticSearchPerson(PersistentObject)
    */
   protected ElasticSearchPerson[] buildElasticSearchPersons(T p) throws JsonProcessingException {
-    ElasticSearchPerson[] ret;
-    if (p instanceof ApiMultiplePersonAware) {
-      final ApiPersonAware[] persons = ((ApiMultiplePersonAware) p).getPersons();
-      ret = new ElasticSearchPerson[persons.length];
-      int i = 0;
-      for (ApiPersonAware px : persons) {
-        ret[i++] = buildElasticSearchPersonDoc(px);
-      }
-    } else {
-      ret = new ElasticSearchPerson[] {buildElasticSearchPerson(p)};
-    }
-    return ret;
+    return JobElasticUtils.buildElasticSearchPersons(p);
   }
 
   /**
@@ -462,16 +452,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected String getIdColumn() {
     return "IDENTIFIER";
-  }
-
-  /**
-   * Trim a String.
-   * 
-   * @param value String to trim
-   * @return trimmed String or null
-   */
-  public String ifNull(String value) {
-    return JobTransformUtils.ifNull(value);
   }
 
   /**
@@ -796,7 +776,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         Thread.sleep(SLEEP_MILLIS);
 
         try {
-          this.jobDao.find("abc123"); // dummy call, keep connection pool alive.
+          this.jobDao.find("abc1234567"); // dummy call, keep connection pool alive.
         } catch (HibernateException he) { // NOSONAR
           LOGGER.trace("DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage());
         } catch (Exception e) { // NOSONAR
@@ -974,13 +954,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       // Just to be sure ...
       cntr = bulkPrepare(bp, cntr);
-
       LOGGER.info("Flush ES bulk processor ... recs processed: {}", cntr);
       bp.flush();
 
       Thread.sleep(SLEEP_MILLIS);
-
-      LOGGER.info("Flush ES bulk processor again ...");
       bp.flush();
 
       LOGGER.info("Waiting to close ES bulk processor ...");
@@ -992,9 +969,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       fatalError = true;
       Thread.currentThread().interrupt();
       JobLogUtils.raiseError(LOGGER, e, "Indexer: Interrupted! {}", e.getMessage());
-    } catch (JsonProcessingException e) {
-      fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "Indexer: JsonProcessingException {}", e.getMessage());
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "Indexer: fatal error {}", e.getMessage());
@@ -1120,7 +1094,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * @return true if the job provides its own ranges
+   * @return true if the job provides its own key ranges
    */
   protected boolean isRangeSelfManaging() {
     return false;
@@ -1143,11 +1117,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      // final int maxThreads = Math.min(Runtime.getRuntime().availableProcessors(), 4);
-      // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
-      // String.valueOf(maxThreads));
-      // LOGGER.info("Run settings: processors={}", maxThreads);
-
       /**
        * If index name is provided then use it, otherwise use alias from ES config.
        */
@@ -1284,19 +1253,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected List<T> extractLastRunRecsFromView(Date lastRunTime, Set<String> deletionResults) {
     LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
     final Class<?> entityClass = getDenormalizedClass(); // view entity class
-    String namedQueryName;
-
-    if (getOpts().isLoadSealedAndSensitive()) {
-      /**
-       * Load everything
-       */
-      namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
-    } else {
-      /**
-       * Load only unlimited access data
-       */
-      namedQueryName = entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
-    }
+    final String namedQueryName =
+        getOpts().isLoadSealedAndSensitive() ? entityClass.getName() + ".findAllUpdatedAfter"
+            : entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
 
     final Session session = jobDao.getSessionFactory().getCurrentSession();
     final Transaction txn = session.beginTransaction();
@@ -1311,8 +1270,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
       q.setTimestamp("after", new Timestamp(lastRunTime.getTime()));
 
-      ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
-      List<M> recs = q.list();
+      final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
+      final List<M> recs = q.list();
       LOGGER.warn("FOUND {} RECORDS", recs.size());
 
       // Convert de-normalized view rows to normalized persistence objects.
@@ -1340,7 +1299,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
        * Load records to delete.
        */
       if (mustDeleteLimitedAccessRecords()) {
-        String namedQueryNameForDeletion =
+        final String namedQueryNameForDeletion =
             entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
         final NativeQuery<M> queryForDeletion =
             session.getNamedNativeQuery(namedQueryNameForDeletion);
@@ -1701,44 +1660,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Character sets differ by operating system, which affect ORDER BY and WHERE clauses.
-   * 
-   * <p>
-   * SELECT statements using range partitions depend on sort order.
-   * </p>
-   * 
-   * <p>
-   * Database platforms and versions:
-   * </p>
-   * 
-   * <table summary="">
-   * <tr>
-   * <th align="justify">Platform</th>
-   * <th align="justify">Name</th>
-   * <th align="justify">Version</th>
-   * <th align="justify">Major</th>
-   * <th align="justify">Minor</th>
-   * <th align="justify">Catalog</th>
-   * </tr>
-   * <tr>
-   * <td align="justify">z/OS</td>
-   * <td align="justify">DB2</td>
-   * <td align="justify">DSN11010</td>
-   * <td align="justify">11</td>
-   * <td align="justify">1</td>
-   * <td align="justify">location</td>
-   * </tr>
-   * <tr>
-   * <td align="justify">Linux</td>
-   * <td align="justify">DB2/LINUXX8664</td>
-   * <td align="justify">SQL10057</td>
-   * <td align="justify">10</td>
-   * <td align="justify">5</td>
-   * <td align="justify">database</td>
-   * </tr>
-   * </table>
-   * 
-   * @return true if DB2 is running on a mainframe
+   * @see JobDB2Utils#isDB2OnZOS(BaseDaoImpl)
+   * @return true if DB2 on mainframe
    */
   public boolean isDB2OnZOS() {
     return JobDB2Utils.isDB2OnZOS(jobDao);
