@@ -441,7 +441,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   // ELASTICSEARCH:
   // ===================
 
-  protected void pushToBulkProcessor(BulkProcessor bp, DocWriteRequest<?> t) {
+  public void pushToBulkProcessor(BulkProcessor bp, DocWriteRequest<?> t) {
     JobLogUtils.logEvery(recsSentToBulkProcessor.incrementAndGet(), "add to es bulk", "push doc");
     bp.add(t);
   }
@@ -465,68 +465,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         .map(p -> prepareUpsertRequestNoChecked(p, t)).forEach(x -> { // NOSONAR
           pushToBulkProcessor(bp, x);
         });
-  }
-
-  /**
-   * Set optional ES person collections to null so that they are not overwritten by accident. Child
-   * classes do not normally override this method.
-   * 
-   * @param esp ES document, already prepared by
-   *        {@link #buildElasticSearchPersonDoc(ApiPersonAware)}
-   * @param t target ApiPersonAware instance
-   * @param elementName target ES element for update
-   * @param list list of ES child objects
-   * @param keep ES sections to keep
-   * @throws JsonProcessingException on JSON processing error
-   */
-  // protected void prepareInsertCollections(ElasticSearchPerson esp, T t, String elementName,
-  // List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-  // throws JsonProcessingException {
-  //
-  // // Null out optional collections for updates.
-  // esp.clearOptionalCollections(keep);
-  //
-  // // Child classes: Set optional collections before serializing the insert JSON.
-  // setInsertCollections(esp, t, list);
-  // }
-
-  /**
-   * Prepare "upsert" JSON (update and insert). Child classes do not normally override this method.
-   * 
-   * @param esp ES document, already prepared by
-   *        {@link #buildElasticSearchPersonDoc(ApiPersonAware)}
-   * @param t target ApiPersonAware instance
-   * @param elementName target ES element for update
-   * @param list list of ES child objects
-   * @param keep ES sections to keep
-   * @return Pair of JSON, left = update, right = insert
-   * @throws JsonProcessingException on JSON processing error
-   */
-  protected Pair<String, String> prepareUpsertJson(ElasticSearchPerson esp, T t, String elementName,
-      List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-      throws JsonProcessingException {
-    // // Child classes: Set optional collections before serializing the insert JSON.
-    // prepareInsertCollections(esp, t, elementName, list, keep);
-    // final String insertJson = mapper.writeValueAsString(esp);
-    //
-    // String updateJson;
-    // if (StringUtils.isNotBlank(elementName)) {
-    // StringBuilder buf = new StringBuilder();
-    // buf.append("{\"").append(elementName).append("\":[");
-    //
-    // if (list != null && !list.isEmpty()) {
-    // buf.append(list.stream().map(this::jsonify).sorted(String::compareTo)
-    // .collect(Collectors.joining(",")));
-    // }
-    //
-    // buf.append("]}");
-    // updateJson = buf.toString();
-    // } else {
-    // updateJson = insertJson;
-    // }
-    //
-    // return Pair.of(updateJson, insertJson);
-    return ElasticTransformer.prepareUpsertJson(this, esp, t, elementName, list, keep);
   }
 
   /**
@@ -602,8 +540,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     // Child classes may override these methods as needed.
     // left = update, right = insert.
-    final Pair<String, String> json = prepareUpsertJson(esp, t, getOptionalElementName(),
-        getOptionalCollection(esp, t), keepCollections());
+    final Pair<String, String> json = ElasticTransformer.prepareUpsertJson(this, esp, t,
+        getOptionalElementName(), getOptionalCollection(esp, t), keepCollections());
 
     final String alias = getOpts().getIndexName();
     final String docType = esDao.getConfig().getElasticsearchDocType();
