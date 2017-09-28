@@ -72,6 +72,7 @@ public class ElasticTransformer {
   /**
    * Prepare "upsert" JSON (update and insert). Child classes do not normally override this method.
    * 
+   * @param <T> normalized persistent type
    * @param docPrep optional handling to set collections before serializing JSON
    * @param esp ES document, already prepared by
    *        {@link ElasticTransformer#buildElasticSearchPersonDoc(ApiPersonAware)}
@@ -114,6 +115,7 @@ public class ElasticTransformer {
    * Set optional ES person collections to null so that they are not overwritten by accident. Child
    * classes do not normally override this method.
    * 
+   * @param <T> normalized persistent type
    * @param docPrep optional handling to set collections before serializing JSON
    * @param esp ES document, already prepared by
    *        {@link #buildElasticSearchPersonDoc(ApiPersonAware)}

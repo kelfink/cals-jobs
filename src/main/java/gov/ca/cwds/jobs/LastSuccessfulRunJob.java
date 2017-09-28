@@ -38,7 +38,7 @@ public abstract class LastSuccessfulRunJob implements Job {
   protected volatile boolean fatalError = false;
 
   /**
-   * Completion flag for <strong>Extract</strong> method {@link #threadExtractJdbc()}.
+   * Completion flag for data retrieval.
    * <p>
    * Volatile guarantees that changes to this flag become visible other threads (i.e., don't cache a
    * copy of the flag in thread memory).
@@ -47,12 +47,12 @@ public abstract class LastSuccessfulRunJob implements Job {
   protected volatile boolean doneExtract = false;
 
   /**
-   * Completion flag for <strong>Transform</strong> method {@link #threadTransform()}.
+   * Completion flag for normalization/transformation.
    */
   protected volatile boolean doneTransform = false;
 
   /**
-   * Completion flag for <strong>Load</strong> method {@link #threadIndex()}.
+   * Completion flag for document indexing.
    */
   protected volatile boolean doneLoad = false;
 
@@ -89,6 +89,7 @@ public abstract class LastSuccessfulRunJob implements Job {
    * lastSuccessfulRunTime.
    * 
    * @param lastSuccessfulRunTime last successful run
+   * @param opts command line job options
    * @return appropriate date to detect changes
    */
   protected Date calcLastRunDate(final Date lastSuccessfulRunTime, final JobOptions opts) {

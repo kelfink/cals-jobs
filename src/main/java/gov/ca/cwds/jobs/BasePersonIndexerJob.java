@@ -507,7 +507,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * </p>
    * 
    * @param esp ES document, already prepared by
-   *        {@link #buildElasticSearchPersonDoc(ApiPersonAware)}
+   *        {@link ElasticTransformer#buildElasticSearchPersonDoc(ApiPersonAware)}
    * @param t target ApiPersonAware instance
    * @return left = insert JSON, right = update JSON throws JsonProcessingException on JSON parse
    *         error
@@ -917,7 +917,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * @param lastSuccessfulRunTime last successful run
    * @return appropriate date to detect changes
-   * @see super{@link #calcLastRunDate(Date, JobOptions)}
+   * @see {@link LastSuccessfulRunJob#calcLastRunDate(Date, JobOptions)}
    */
   protected Date calcLastRunDate(final Date lastSuccessfulRunTime) {
     return calcLastRunDate(lastSuccessfulRunTime, getOpts());
