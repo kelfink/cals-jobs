@@ -233,7 +233,7 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  protected String getLegacySourceTable() {
+  public String getLegacySourceTable() {
     return "REFERL_T";
   }
 
@@ -444,8 +444,8 @@ public class ReferralHistoryIndexerJob
 
     } catch (Exception e) {
       fatalError = true;
-      JobLogs.raiseError(LOGGER, e, "ERROR HANDING RANGE {} - {}: {}", p.getLeft(),
-          p.getRight(), e.getMessage());
+      JobLogs.raiseError(LOGGER, e, "ERROR HANDING RANGE {} - {}: {}", p.getLeft(), p.getRight(),
+          e.getMessage());
     }
 
     final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys.stream()

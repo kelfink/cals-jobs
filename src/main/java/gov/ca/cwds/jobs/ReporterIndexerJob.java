@@ -46,7 +46,7 @@ public class ReporterIndexerJob
 
   @Override
   @Deprecated
-  protected String getLegacySourceTable() {
+  public String getLegacySourceTable() {
     return "REPTR_T";
   }
 

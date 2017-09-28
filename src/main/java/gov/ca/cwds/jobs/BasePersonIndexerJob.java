@@ -19,8 +19,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.persistence.Table;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.DocWriteRequest;
@@ -60,6 +58,7 @@ import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.JobFeatureCore;
 import gov.ca.cwds.jobs.component.JobFeatureHibernate;
 import gov.ca.cwds.jobs.component.JobFeatureInitialLoad;
+import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.JobRunner;
@@ -221,7 +220,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void addToIndexQueue(T norm) {
     try {
-      JobLogs.logEvery(track.trackSentToIndexQueue(), "add to index queue", "recs");
+      JobLogs.logEvery(track.trackQueuedToIndex(), "add to index queue", "recs");
       queueIndex.putLast(norm);
     } catch (InterruptedException e) {
       fatalError = true;
@@ -245,7 +244,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   @Override
   public void incrementNormalizeCount() {
-    JobLogs.logEvery(track.trackRowsNormalized(), "Normalize", "single");
+    JobLogs.logEvery(track.trackNormalized(), "Normalize", "single");
   }
 
   /**
@@ -546,17 +545,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     LOGGER.info("DONE: Indexer thread");
   }
 
-  // =================
-  // LAST RUN MODE:
-  // =================
-
   /**
-   * Prepare a document.
+   * Prepare a document and trap IOException.
    * 
    * @param bp bulk processor
    * @param ApiPersonAware object
    */
-  protected void prepLastRunDoc(BulkProcessor bp, T p) {
+  protected void prepareDocumentTrapIO(BulkProcessor bp, T p) {
     try {
       prepareDocument(bp, p);
     } catch (IOException e) {
@@ -592,7 +587,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       if (results != null && !results.isEmpty()) {
         LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
         results.stream().forEach(p -> { // NOSONAR
-          prepLastRunDoc(bp, p);
+          prepareDocumentTrapIO(bp, p);
         });
       }
 
@@ -600,11 +595,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       if (!deletionResults.isEmpty()) {
         LOGGER.warn(MessageFormat.format("Found {0} people to delete", deletionResults.size())
             + ", IDs: " + deletionResults);
-        final String alias = getOpts().getIndexName();
-        final String docType = esDao.getConfig().getElasticsearchDocType();
 
         for (String deletionId : deletionResults) {
-          bp.add(new DeleteRequest(alias, docType, deletionId));
+          bp.add(new DeleteRequest(getOpts().getIndexName(),
+              esDao.getConfig().getElasticsearchDocType(), deletionId));
         }
 
         track.getRecsBulkDeleted().getAndAdd(deletionResults.size());
@@ -646,19 +640,17 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       getOpts().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
 
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
-      final String documentType = esDao.getConfig().getElasticsearchDocType();
-
-      LOGGER.info("Effective index name: {}", effectiveIndexName);
       LOGGER.info("Last successsful run time: {}", lastRun.toString());
 
       // If the index is missing, create it.
       LOGGER.debug("Create index if missing, effectiveIndexName: " + effectiveIndexName);
+      final String documentType = esDao.getConfig().getElasticsearchDocType();
       esDao.createIndexIfNeeded(effectiveIndexName, documentType, ES_PEOPLE_INDEX_SETTINGS,
           ES_PERSON_MAPPING);
 
       // Smart/auto mode:
       final Calendar cal = Calendar.getInstance();
-      cal.add(Calendar.YEAR, -50);
+      cal.add(Calendar.YEAR, -25);
       final boolean autoMode = this.opts.isLastRunMode() && lastRun.before(cal.getTime());
 
       if (autoMode) {
@@ -687,11 +679,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
       }
 
-      LOGGER.info(
-          "STATS: \nRecs To Index:  {}\nRecs To Delete: {}\nrecsBulkBefore: {}\nrecsBulkAfter:  {}\nrecsBulkError:  {}",
-          track.getRecsBulkPrepared(), track.getRecsBulkDeleted(), track.getRecsBulkBefore(),
-          track.getRecsBulkAfter(), track.getRecsBulkError());
-
+      LOGGER.info(track.toString());
       LOGGER.info("Updating last successful run time to {}",
           new SimpleDateFormat(LAST_RUN_DATE_FORMAT).format(startTime));
       return new Date(this.startTime);
@@ -850,23 +838,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
   }
 
-  /**
-   * Get the table or view used to allocate bucket ranges. Called on full load only.
-   * 
-   * @return the table or view used to allocate bucket ranges
-   */
-  protected String getDriverTable() {
-    String ret = null;
-    final Table tbl = this.jobDao.getEntityClass().getDeclaredAnnotation(Table.class);
-    if (tbl != null) {
-      ret = tbl.name();
-    }
-
-    return ret;
-  }
-
   // ===================
-  // MANAGE RESOURCES:
+  // CLOSE RESOURCES:
   // ===================
 
   @Override
@@ -911,10 +884,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       throw JobLogs.buildException(LOGGER, ioe, "ERROR FINISHING JOB: {}", ioe.getMessage());
     }
   }
-
-  // ===========================
-  // DEPRECATED:
-  // ===========================
 
   /**
    * Build the bucket list at runtime.
@@ -975,40 +944,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final List<BatchBucket> buckets = buildBucketList(getDriverTable());
 
     for (BatchBucket b : buckets) {
-      LOGGER.warn("BUCKET RANGE: {} to {}", b.getMinId(), b.getMaxId());
+      LOGGER.info("BUCKET RANGE: {} to {}", b.getMinId(), b.getMaxId());
       ret.add(Pair.of(b.getMinId(), b.getMaxId()));
     }
 
     return ret;
-  }
-
-  /**
-   * Execute JDBC prior to calling method {@link #pullBucketRange(String, String)}.
-   * 
-   * <blockquote>
-   * 
-   * <pre>
-   * final Work work = new Work() {
-   *   &#64;Override
-   *   public void execute(Connection connection) throws SQLException {
-   *     // Run JDBC here.
-   *   }
-   * };
-   * session.doWork(work);
-   * </pre>
-   * 
-   * </blockquote>
-   * 
-   * @param session current Hibernate session
-   * @param txn current transaction
-   * @param lastRunTime last successful run datetime
-   * @throws SQLException on disconnect, invalid parameters, etc.
-   */
-  protected void prepHibernateLastChange(final Session session, final Transaction txn,
-      final Date lastRunTime) throws SQLException {
-    if (StringUtils.isNotBlank(getPrepLastChangeSQL())) {
-      JobJdbcUtils.prepHibernateLastChange(session, txn, lastRunTime, getPrepLastChangeSQL());
-    }
   }
 
   /**
@@ -1077,19 +1017,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final List<Pair<String, String>> buckets = getPartitionRanges();
 
     for (Pair<String, String> b : buckets) {
-      final String minId = b.getLeft();
-      final String maxId = b.getRight();
-      final List<T> results = pullBucketRange(minId, maxId);
+      final List<T> results = pullBucketRange(b.getLeft(), b.getRight());
 
       if (results != null && !results.isEmpty()) {
         final BulkProcessor bp = buildBulkProcessor();
-        results.stream().forEach(p -> {
-          try {
-            prepareDocument(bp, p);
-          } catch (IOException e) {
-            throw JobLogs.buildException(LOGGER, e, "IO ERROR: id: {}, {}", p.getPrimaryKey(),
-                e.getMessage());
-          }
+        results.stream().forEach(p -> { // NOSONAR
+          prepareDocumentTrapIO(bp, p);
         });
 
         try {
@@ -1104,21 +1037,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
 
     return track.getRecsBulkPrepared().get();
-  }
-
-  // ===========================
-  // ACCESSORS:
-  // ===========================
-
-  /**
-   * Get the legacy source table for this job, if any.
-   * 
-   * @return legacy source table
-   * @deprecated Logic moved to ApiLegacyAware implementation classes
-   */
-  @Deprecated
-  protected String getLegacySourceTable() {
-    return null;
   }
 
   /**
@@ -1152,6 +1070,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   public boolean isDB2OnZOS() {
     return JobDB2Utils.isDB2OnZOS(jobDao);
+  }
+
+  @Override
+  public BaseDaoImpl<T> getJobDao() {
+    return jobDao;
   }
 
 }

@@ -37,7 +37,7 @@ public class OtherAdultInPlacemtHomeIndexerJob extends
 
   @Override
   @Deprecated
-  protected String getLegacySourceTable() {
+  public String getLegacySourceTable() {
     return "OTH_ADLT";
   }
 

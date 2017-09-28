@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.JobProgressTrack;
 
 public class JobBulkProcessorBuilder implements ApiMarker {
 
@@ -39,10 +38,16 @@ public class JobBulkProcessorBuilder implements ApiMarker {
   /**
    * Instantiate one Elasticsearch BulkProcessor per working thread.
    * 
+   * <p>
+   * ES BulkProcessor is technically thread safe, but you can safely construct an instance per
+   * thread, if desired.
+   * </p>
+   * 
    * @return an ES bulk processor
    */
   public BulkProcessor buildBulkProcessor() {
     return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
+
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
         track.getRecsBulkBefore().getAndAdd(request.numberOfActions());
@@ -57,7 +62,7 @@ public class JobBulkProcessorBuilder implements ApiMarker {
 
       @Override
       public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-        track.getRecsBulkError().getAndIncrement();
+        track.trackBulkError();
         LOGGER.error("ERROR EXECUTING BULK", failure);
       }
     }).setBulkActions(JobFeatureHibernate.ES_BULK_SIZE)

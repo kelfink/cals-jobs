@@ -548,7 +548,7 @@ public class BasePersonIndexerJobTest
   public void prepLastRunDoc_Args__BulkProcessor__Object() throws Exception {
     BulkProcessor bp = mock(BulkProcessor.class);
     TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    target.prepLastRunDoc(bp, p);
+    target.prepareDocumentTrapIO(bp, p);
   }
 
   @Test

@@ -96,7 +96,7 @@ public class OtherClientNameIndexerJob
   }
 
   @Override
-  protected String getDriverTable() {
+  public String getDriverTable() {
     String ret = null;
     final Table tbl = this.denormDao.getEntityClass().getDeclaredAnnotation(Table.class);
     if (tbl != null) {
@@ -119,8 +119,7 @@ public class OtherClientNameIndexerJob
         buf.append(p.getAkas().stream().map(ElasticTransformer::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
-        JobLogs.raiseError(LOGGER, e, "ERROR SERIALIZING OTHER CLIENT NAMES! {}",
-            e.getMessage());
+        JobLogs.raiseError(LOGGER, e, "ERROR SERIALIZING OTHER CLIENT NAMES! {}", e.getMessage());
       }
     }
 
@@ -143,7 +142,7 @@ public class OtherClientNameIndexerJob
 
   @Override
   @Deprecated
-  protected String getLegacySourceTable() {
+  public String getLegacySourceTable() {
     return "OCL_NM_T";
   }
 

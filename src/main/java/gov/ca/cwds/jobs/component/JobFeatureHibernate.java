@@ -2,12 +2,21 @@ package gov.ca.cwds.jobs.component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Table;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
 import gov.ca.cwds.dao.cms.BatchDaoImpl;
+import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
@@ -24,6 +33,8 @@ public interface JobFeatureHibernate<T extends PersistentObject, M extends ApiGr
   static final int DEFAULT_FETCH_SIZE = BatchDaoImpl.DEFAULT_FETCH_SIZE;
 
   static final String SQL_COLUMN_AFTER = "after";
+
+  public BaseDaoImpl<T> getJobDao();
 
   /**
    * Return the job's entity class for its denormalized source view or materialized query table, if
@@ -46,6 +57,17 @@ public interface JobFeatureHibernate<T extends PersistentObject, M extends ApiGr
   }
 
   /**
+   * Get the legacy source table for this job, if any.
+   * 
+   * @return legacy source table
+   * @deprecated Logic moved to ApiLegacyAware implementation classes
+   */
+  @Deprecated
+  default String getLegacySourceTable() {
+    return null;
+  }
+
+  /**
    * Get the view or materialized query table name, if used. Any child classes relying on a
    * de-normalized view must define the name.
    * 
@@ -63,6 +85,21 @@ public interface JobFeatureHibernate<T extends PersistentObject, M extends ApiGr
    */
   default String getInitialLoadQuery(String dbSchemaName) {
     return null;
+  }
+
+  /**
+   * Get the table or view used to allocate bucket ranges. Called on full load only.
+   * 
+   * @return the table or view used to allocate bucket ranges
+   */
+  default String getDriverTable() {
+    String ret = null;
+    final Table tbl = getJobDao().getEntityClass().getDeclaredAnnotation(Table.class);
+    if (tbl != null) {
+      ret = tbl.name();
+    }
+
+    return ret;
   }
 
   /**
@@ -128,6 +165,35 @@ public interface JobFeatureHibernate<T extends PersistentObject, M extends ApiGr
     incrementNormalizeCount();
     final List<T> list = normalize(recs);
     return list != null && !list.isEmpty() ? list.get(0) : null;
+  }
+
+  /**
+   * Execute JDBC prior to calling method {@link #pullBucketRange(String, String)}.
+   * 
+   * <blockquote>
+   * 
+   * <pre>
+   * final Work work = new Work() {
+   *   &#64;Override
+   *   public void execute(Connection connection) throws SQLException {
+   *     // Run JDBC here.
+   *   }
+   * };
+   * session.doWork(work);
+   * </pre>
+   * 
+   * </blockquote>
+   * 
+   * @param session current Hibernate session
+   * @param txn current transaction
+   * @param lastRunTime last successful run datetime
+   * @throws SQLException on disconnect, invalid parameters, etc.
+   */
+  default void prepHibernateLastChange(final Session session, final Transaction txn,
+      final Date lastRunTime) throws SQLException {
+    if (StringUtils.isNotBlank(getPrepLastChangeSQL())) {
+      JobJdbcUtils.prepHibernateLastChange(session, txn, lastRunTime, getPrepLastChangeSQL());
+    }
   }
 
 }

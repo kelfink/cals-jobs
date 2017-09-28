@@ -75,7 +75,7 @@ public class SafetyAlertIndexerJob
   }
 
   @Override
-  protected String getLegacySourceTable() {
+  public String getLegacySourceTable() {
     return "SAF_ALRT";
   }
 

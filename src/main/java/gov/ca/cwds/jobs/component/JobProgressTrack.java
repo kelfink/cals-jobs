@@ -1,5 +1,6 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.component;
 
+import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import gov.ca.cwds.data.std.ApiObjectIdentity;
@@ -69,11 +70,11 @@ public class JobProgressTrack extends ApiObjectIdentity {
     return recsBulkError;
   }
 
-  public int trackSentToIndexQueue() {
+  public int trackQueuedToIndex() {
     return this.getRecsSentToIndexQueue().incrementAndGet();
   }
 
-  public int trackRowsNormalized() {
+  public int trackNormalized() {
     return this.getRowsNormalized().incrementAndGet();
   }
 
@@ -83,6 +84,18 @@ public class JobProgressTrack extends ApiObjectIdentity {
 
   public int trackBulkPrepared() {
     return this.getRecsBulkPrepared().getAndIncrement();
+  }
+
+  public int trackBulkError() {
+    return this.getRecsBulkError().getAndIncrement();
+  }
+
+  @Override
+  public String toString() {
+    return MessageFormat.format(
+        "STATS: \nRecs To Index:  {}\nRecs To Delete: {}\nrecsBulkBefore: {}\nrecsBulkAfter:  {}\nrecsBulkError:  {}",
+        getRecsBulkPrepared(), getRecsBulkDeleted(), getRecsBulkBefore(), getRecsBulkAfter(),
+        getRecsBulkError());
   }
 
 }

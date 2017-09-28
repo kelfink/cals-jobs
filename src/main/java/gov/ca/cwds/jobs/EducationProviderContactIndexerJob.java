@@ -42,7 +42,7 @@ public class EducationProviderContactIndexerJob extends
 
   @Override
   @Deprecated
-  protected String getLegacySourceTable() {
+  public String getLegacySourceTable() {
     return "EDPRVCNT";
   }
 

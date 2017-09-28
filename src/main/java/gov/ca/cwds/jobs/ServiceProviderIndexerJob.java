@@ -41,7 +41,7 @@ public class ServiceProviderIndexerJob
 
   @Override
   @Deprecated
-  protected String getLegacySourceTable() {
+  public String getLegacySourceTable() {
     return "SVC_PVRT";
   }
 

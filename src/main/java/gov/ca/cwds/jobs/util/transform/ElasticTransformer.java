@@ -42,7 +42,7 @@ import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
-import gov.ca.cwds.jobs.JobProgressTrack;
+import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -81,7 +81,7 @@ public class ElasticTransformer {
 
   public static void pushToBulkProcessor(final JobProgressTrack track, final BulkProcessor bp,
       final DocWriteRequest<?> t) {
-    JobLogs.logEvery(track.trackSentToIndexQueue(), "add to es bulk", "push doc");
+    JobLogs.logEvery(track.trackQueuedToIndex(), "add to es bulk", "push doc");
     bp.add(t);
   }
 

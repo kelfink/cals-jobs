@@ -11,5 +11,4 @@ public interface JobFeatureInitialLoad extends ApiMarker {
     return false;
   }
 
-
 }

@@ -37,7 +37,7 @@ public class AttorneyIndexerJob
 
   @Override
   @Deprecated
-  protected String getLegacySourceTable() {
+  public String getLegacySourceTable() {
     return "ATTRNY_T";
   }
 
