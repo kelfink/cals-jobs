@@ -682,7 +682,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void threadTransform() {
     Thread.currentThread().setName("transform");
-    LOGGER.info("BEGIN: Stage #2: Transform");
+    LOGGER.info("BEGIN: Transform thread");
 
     int cntr = 0;
     Object lastId = new Object();
@@ -728,7 +728,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }
 
-    LOGGER.info("DONE: Stage #2: Transform");
+    LOGGER.info("DONE: Transform thread");
   }
 
   /**
