@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
+import gov.ca.cwds.jobs.EducationProviderContactIndexerJob;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.util.JobLogUtils;
@@ -146,6 +147,18 @@ public class JobRunner {
     if (JobRunner.startingOpts == null) {
       JobRunner.startingOpts = startingOpts;
     }
+  }
+
+  public static void main(String[] args) {
+    LOGGER.info("START ON DEMAND JOBS");
+
+    try {
+      JobRunner.registerContinuousJob(EducationProviderContactIndexerJob.class, args);
+
+    } catch (Exception e) {
+      LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
+    }
+
   }
 
 }

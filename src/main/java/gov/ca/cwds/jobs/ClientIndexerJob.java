@@ -201,6 +201,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     Thread.currentThread().setName("extract_main");
     LOGGER.info("BEGIN: main extract thread");
 
+    // This job normalizes **without** the transform thread.
+    doneTransform = true;
+
     try {
       final int maxThreads = JobJdbcUtils.calcReaderThreads(getOpts());
       System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",

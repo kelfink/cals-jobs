@@ -56,20 +56,17 @@ public class EsIntakeScreeningDaoIT
     sessionFactory.close();
   }
 
-  // @Override
   @Before
   public void setup() {
     session = sessionFactory.getCurrentSession();
     session.beginTransaction();
   }
 
-  // @Override
   @After
   public void teardown() {
     session.getTransaction().rollback();
   }
 
-  // @Override
   @Test
   public void testFindAllNamedQueryExist() throws Exception {
     Query query = session
