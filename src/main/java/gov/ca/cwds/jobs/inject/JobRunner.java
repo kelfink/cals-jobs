@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.tools.jmx.Manager;
+
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.EducationProviderContactIndexerJob;
 import gov.ca.cwds.jobs.config.JobOptions;
@@ -153,7 +155,10 @@ public class JobRunner {
     LOGGER.info("START ON DEMAND JOBS");
 
     try {
+      // OPTION: configuration per job, just like Rundeck.
       JobRunner.registerContinuousJob(EducationProviderContactIndexerJob.class, args);
+
+      Manager.manage("neutron", JobsGuiceInjector.getInjector());
 
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);

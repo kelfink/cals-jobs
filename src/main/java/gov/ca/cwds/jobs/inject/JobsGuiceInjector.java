@@ -347,4 +347,8 @@ public class JobsGuiceInjector extends AbstractModule {
     this.opts = opts;
   }
 
+  public static Injector getInjector() {
+    return injector;
+  }
+
 }
