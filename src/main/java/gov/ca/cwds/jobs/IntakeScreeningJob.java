@@ -86,7 +86,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
   }
 
   @Override
-  protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
+  public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
     return EsIntakeScreening.class;
   }
 

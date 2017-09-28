@@ -40,7 +40,7 @@ public class ReporterIndexerJob
   }
 
   @Override
-  protected String getIdColumn() {
+  public String getIdColumn() {
     return "FKREFERL_T";
   }
 

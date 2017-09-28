@@ -72,7 +72,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  protected boolean useTransformThread() {
+  public boolean useTransformThread() {
     return false;
   }
 
@@ -92,7 +92,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
+  public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
     return EsClientAddress.class;
   }
 

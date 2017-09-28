@@ -66,8 +66,8 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.jobs.component.JobFeature;
-import gov.ca.cwds.jobs.component.JobHibernateSettings;
+import gov.ca.cwds.jobs.component.JobFeatureCore;
+import gov.ca.cwds.jobs.component.JobFeatureHibernate;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.JobRunner;
@@ -107,7 +107,7 @@ import gov.ca.cwds.jobs.util.transform.JobElasticPersonDocPrep;
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends LastSuccessfulRunJob implements AutoCloseable, JobResultSetAware<M>,
-    JobElasticPersonDocPrep<T>, JobHibernateSettings, JobFeature {
+    JobElasticPersonDocPrep<T>, JobFeatureHibernate, JobFeatureCore {
 
   /**
    * Default serialization.
@@ -206,73 +206,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Identifier column for this table. Defaults to "IDENTIFIER", the most common key name in legacy
-   * DB2.
-   * 
-   * @return Identifier column
-   */
-  protected String getIdColumn() {
-    return "IDENTIFIER";
-  }
-
-  /**
-   * Get the view or materialized query table name, if used. Any child classes relying on a
-   * de-normalized view must define the name.
-   * 
-   * @return name of view or materialized query table or null if none
-   */
-  public String getInitialLoadViewName() {
-    return null;
-  }
-
-  /**
-   * Get initial load SQL query.
-   * 
-   * @param dbSchemaName The DB schema name
-   * @return Initial load query
-   */
-  public String getInitialLoadQuery(String dbSchemaName) {
-    return null;
-  }
-
-  /**
-   * Optional method to customize JDBC ORDER BY clause on initial load.
-   * 
-   * @return custom ORDER BY clause for JDBC query
-   */
-  public String getJdbcOrderBy() {
-    return null;
-  }
-
-  /**
-   * Return the job's entity class for its denormalized source view or materialized query table, if
-   * any, or null if not using a denormalized source.
-   * 
-   * @return entity class of view or materialized query table
-   */
-  protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
-    return null;
-  }
-
-  /**
-   * True if the Job class reduces de-normalized results to normalized ones.
-   * 
-   * @return true if class overrides {@link #normalize(List)}
-   */
-  protected final boolean isViewNormalizer() {
-    return getDenormalizedClass() != null;
-  }
-
-  /**
-   * Determine if limited access records must be deleted from ES.
-   * 
-   * @return True if limited access records must be deleted from ES, false otherwise.
-   */
-  public boolean mustDeleteLimitedAccessRecords() {
-    return false;
-  }
-
-  /**
    * Mark a record for deletion. Intended for replicated records with deleted flag.
    * 
    * @param t bean to check
@@ -284,7 +217,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   @Override
-  public M extract(ResultSet rs) throws SQLException {
+  public M extract(final ResultSet rs) throws SQLException {
     return null;
   }
 

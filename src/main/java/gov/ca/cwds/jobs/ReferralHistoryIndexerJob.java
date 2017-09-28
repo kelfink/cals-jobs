@@ -216,8 +216,8 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
-    EsPersonReferral.setOpts(getOpts());
+  public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
+    EsPersonReferral.setOpts(getOpts()); // WARNING: change for continuous mode
     return EsPersonReferral.class;
   }
 
@@ -517,7 +517,7 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  protected boolean useTransformThread() {
+  public boolean useTransformThread() {
     return false;
   }
 

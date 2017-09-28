@@ -106,7 +106,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
   }
 
   @Override
-  protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
+  public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
     return EsChildPersonCase.class;
   }
 
