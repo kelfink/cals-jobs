@@ -155,10 +155,10 @@ public class JobRunner {
     LOGGER.info("START ON DEMAND JOBS");
 
     try {
-      // OPTION: configuration per job, just like Rundeck.
+      // OPTION: configure individual jobs, just like Rundeck.
       JobRunner.registerContinuousJob(EducationProviderContactIndexerJob.class, args);
 
-      Manager.manage("neutron", JobsGuiceInjector.getInjector());
+      Manager.manage("Neutron", JobsGuiceInjector.getInjector());
 
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);

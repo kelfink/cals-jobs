@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -20,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
 
 import javax.persistence.Table;
 
@@ -54,7 +54,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.ApiLegacyAware;
-import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.BatchDaoImpl;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
@@ -74,12 +73,12 @@ import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
-import gov.ca.cwds.jobs.util.elastic.JobElasticUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
+import gov.ca.cwds.jobs.util.transform.JobElasticPersonDocPrep;
 
 /**
  * Base person batch job to load clients from CMS into ElasticSearch.
@@ -107,7 +106,8 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
  * @see JobOptions
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends LastSuccessfulRunJob implements AutoCloseable, JobResultSetAware<M> {
+    extends LastSuccessfulRunJob
+    implements AutoCloseable, JobResultSetAware<M>, JobElasticPersonDocPrep<T> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BasePersonIndexerJob.class);
 
@@ -198,11 +198,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected AtomicInteger recsBulkError = new AtomicInteger(0);
 
   /**
-   * Official start time.
-   */
-  protected final long startTime = System.currentTimeMillis();
-
-  /**
    * Queue of raw, de-normalized records waiting to be normalized.
    * <p>
    * NOTE: some jobs normalize on their own, since the step is inexpensive.
@@ -214,25 +209,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Queue of normalized records waiting to publish to Elasticsearch.
    */
   protected volatile LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(250000);
-
-  /**
-   * Completion flag for <strong>Extract</strong> method {@link #threadExtractJdbc()}.
-   * <p>
-   * Volatile guarantees that changes to this flag become visible other threads (i.e., don't cache a
-   * copy of the flag in thread memory).
-   * </p>
-   */
-  protected volatile boolean doneExtract = false;
-
-  /**
-   * Completion flag for <strong>Transform</strong> method {@link #threadTransform()}.
-   */
-  protected volatile boolean doneTransform = false;
-
-  /**
-   * Completion flag for <strong>Load</strong> method {@link #threadIndex()}.
-   */
-  protected volatile boolean doneLoad = false;
 
   /**
    * Read/write lock for extract threads and sources, such as JDBC, Hibernate, or even flat files.
@@ -262,8 +238,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     this.mapper = mapper;
     this.sessionFactory = sessionFactory;
 
-    JobElasticUtils.setMapper(mapper);
+    ElasticTransformer.setMapper(mapper);
     lock = new ReentrantReadWriteLock(false);
+  }
+
+  /**
+   * Identifier column for this table. Defaults to "IDENTIFIER", the most common key name in legacy
+   * DB2.
+   * 
+   * @return Identifier column
+   */
+  protected String getIdColumn() {
+    return "IDENTIFIER";
   }
 
   /**
@@ -296,6 +282,34 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
+   * Transform (normalize) in the Job instead of relying on the transformation thread.
+   * 
+   * @return true if the transformer thread should run
+   */
+  protected boolean useTransformThread() {
+    return true;
+  }
+
+  /**
+   * Getter for the entity class of this job's view or materialized query table, if any, or null if
+   * none.
+   * 
+   * @return entity class of view or materialized query table
+   */
+  protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
+    return null;
+  }
+
+  /**
+   * True if the Job class reduces de-normalized results to normalized ones.
+   * 
+   * @return true if class overrides {@link #normalize(List)}
+   */
+  protected final boolean isViewNormalizer() {
+    return getDenormalizedClass() != null;
+  }
+
+  /**
    * Determine if limited access records must be deleted from ES.
    * 
    * @return True if limited access records must be deleted from ES, false otherwise.
@@ -315,6 +329,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         : false;
   }
 
+  @Override
+  public M extract(ResultSet rs) throws SQLException {
+    return null;
+  }
+
   /**
    * Build a delete request to remove the document from the index.
    * 
@@ -329,19 +348,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Serialize object to JSON.
-   * 
    * @param obj object to serialize
    * @return JSON for this screening
+   * @see ElasticTransformer#jsonify(Object)
    */
   public String jsonify(Object obj) {
-    String ret = "";
-    try {
-      ret = mapper.writeValueAsString(obj);
-    } catch (Exception e) { // NOSONAR
-      LOGGER.warn("ERROR SERIALIZING OBJECT {} TO JSON", obj);
-    }
-    return ret;
+    return ElasticTransformer.jsonify(obj);
   }
 
   /**
@@ -359,20 +371,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       Thread.currentThread().interrupt();
       JobLogUtils.raiseError(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
     }
-  }
-
-  /**
-   * Transform (normalize) in the Job instead of relying on the transformation thread.
-   * 
-   * @return true if the transformer thread should run
-   */
-  protected boolean useTransformThread() {
-    return true;
-  }
-
-  @Override
-  public M extract(ResultSet rs) throws SQLException {
-    return null;
   }
 
   /**
@@ -401,67 +399,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }).setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(14, ByteSizeUnit.MB))
         .setConcurrentRequests(1).setName("jobs_bp").build();
-  }
-
-  // ===================
-  // BUILD ES PERSON:
-  // ===================
-
-  /**
-   * Handle both {@link ApiMultiplePersonAware} and {@link ApiPersonAware} implementations of type
-   * T.
-   * 
-   * @param p instance of type T
-   * @return array of person documents
-   * @throws JsonProcessingException on parse error
-   * @see #buildElasticSearchPersonDoc(ApiPersonAware)
-   * @see #buildElasticSearchPerson(PersistentObject)
-   */
-  protected ElasticSearchPerson[] buildElasticSearchPersons(T p) throws JsonProcessingException {
-    return JobElasticUtils.buildElasticSearchPersons(p);
-  }
-
-  /**
-   * Produce an ElasticSearchPerson suitable as an Elasticsearch person document.
-   * 
-   * @param p ApiPersonAware persistence object
-   * @return populated ElasticSearchPerson
-   * @throws JsonProcessingException if unable to serialize JSON
-   */
-  protected ElasticSearchPerson buildElasticSearchPerson(T p) throws JsonProcessingException {
-    return buildElasticSearchPersonDoc((ApiPersonAware) p);
-  }
-
-  /**
-   * Produce an ElasticSearchPerson objects suitable for an Elasticsearch person document.
-   * 
-   * @param p ApiPersonAware persistence object
-   * @return populated ElasticSearchPerson
-   * @throws JsonProcessingException if unable to serialize JSON
-   */
-  protected ElasticSearchPerson buildElasticSearchPersonDoc(ApiPersonAware p)
-      throws JsonProcessingException {
-    return ElasticTransformer.buildElasticSearchPersonDoc(mapper, p);
-  }
-
-  /**
-   * Identifier column for this table. Defaults to "IDENTIFIER", the most common key name in legacy
-   * DB2.
-   * 
-   * @return Identifier column
-   */
-  protected String getIdColumn() {
-    return "IDENTIFIER";
-  }
-
-  /**
-   * Getter for the entity class of this job's view or materialized query table, if any, or null if
-   * none.
-   * 
-   * @return entity class of view or materialized query table
-   */
-  protected Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
-    return null;
   }
 
   /**
@@ -500,17 +437,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return DEFAULT_BUCKETS;
   }
 
-  /**
-   * True if the Job class reduces de-normalized results to normalized ones.
-   * 
-   * @return true if class overrides {@link #normalize(List)}
-   */
-  protected final boolean isViewNormalizer() {
-    return getDenormalizedClass() != null;
-  }
-
   // ===================
-  // COMMON JSON:
+  // ELASTICSEARCH:
   // ===================
 
   protected void pushToBulkProcessor(BulkProcessor bp, DocWriteRequest<?> t) {
@@ -533,32 +461,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @see #prepareUpsertRequest(ElasticSearchPerson, PersistentObject)
    */
   protected void prepareDocument(BulkProcessor bp, T t) throws IOException {
-    Arrays.stream(buildElasticSearchPersons(t)).map(p -> prepareUpsertRequestNoChecked(p, t))
-        .forEach(x -> { // NOSONAR
+    Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
+        .map(p -> prepareUpsertRequestNoChecked(p, t)).forEach(x -> { // NOSONAR
           pushToBulkProcessor(bp, x);
         });
-  }
-
-  /**
-   * Set optional ES person collections before serializing JSON for insert. Child classes which
-   * handle optional collections should override this method.
-   *
-   * <p>
-   * <strong>Example:</strong>
-   * </p>
-   * 
-   * <pre>
-   * {@code esp.setScreenings((List<ElasticSearchPerson.ElasticSearchPersonScreening>) col);}
-   * </pre>
-   * 
-   * @param esp ES document, already prepared by
-   *        {@link #buildElasticSearchPersonDoc(ApiPersonAware)}
-   * @param t target ApiPersonAware instance
-   * @param list list of ES child objects
-   */
-  protected void setInsertCollections(ElasticSearchPerson esp, T t,
-      List<? extends ApiTypedIdentifier<String>> list) {
-    // Default, no-op.
   }
 
   /**
@@ -573,16 +479,16 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param keep ES sections to keep
    * @throws JsonProcessingException on JSON processing error
    */
-  protected void prepareInsertCollections(ElasticSearchPerson esp, T t, String elementName,
-      List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-      throws JsonProcessingException {
-
-    // Null out optional collections for updates.
-    esp.clearOptionalCollections(keep);
-
-    // Child classes: Set optional collections before serializing the insert JSON.
-    setInsertCollections(esp, t, list);
-  }
+  // protected void prepareInsertCollections(ElasticSearchPerson esp, T t, String elementName,
+  // List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
+  // throws JsonProcessingException {
+  //
+  // // Null out optional collections for updates.
+  // esp.clearOptionalCollections(keep);
+  //
+  // // Child classes: Set optional collections before serializing the insert JSON.
+  // setInsertCollections(esp, t, list);
+  // }
 
   /**
    * Prepare "upsert" JSON (update and insert). Child classes do not normally override this method.
@@ -599,28 +505,28 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected Pair<String, String> prepareUpsertJson(ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
       throws JsonProcessingException {
-
-    // Child classes: Set optional collections before serializing the insert JSON.
-    prepareInsertCollections(esp, t, elementName, list, keep);
-    final String insertJson = mapper.writeValueAsString(esp);
-
-    String updateJson;
-    if (StringUtils.isNotBlank(elementName)) {
-      StringBuilder buf = new StringBuilder();
-      buf.append("{\"").append(elementName).append("\":[");
-
-      if (list != null && !list.isEmpty()) {
-        buf.append(list.stream().map(this::jsonify).sorted(String::compareTo)
-            .collect(Collectors.joining(",")));
-      }
-
-      buf.append("]}");
-      updateJson = buf.toString();
-    } else {
-      updateJson = insertJson;
-    }
-
-    return Pair.of(updateJson, insertJson);
+    // // Child classes: Set optional collections before serializing the insert JSON.
+    // prepareInsertCollections(esp, t, elementName, list, keep);
+    // final String insertJson = mapper.writeValueAsString(esp);
+    //
+    // String updateJson;
+    // if (StringUtils.isNotBlank(elementName)) {
+    // StringBuilder buf = new StringBuilder();
+    // buf.append("{\"").append(elementName).append("\":[");
+    //
+    // if (list != null && !list.isEmpty()) {
+    // buf.append(list.stream().map(this::jsonify).sorted(String::compareTo)
+    // .collect(Collectors.joining(",")));
+    // }
+    //
+    // buf.append("]}");
+    // updateJson = buf.toString();
+    // } else {
+    // updateJson = insertJson;
+    // }
+    //
+    // return Pair.of(updateJson, insertJson);
+    return ElasticTransformer.prepareUpsertJson(this, esp, t, elementName, list, keep);
   }
 
   /**
@@ -1071,26 +977,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   // ====================
 
   /**
-   * If last run time is provide in options then use it, otherwise use provided
-   * lastSuccessfulRunTime.
-   * 
    * @param lastSuccessfulRunTime last successful run
    * @return appropriate date to detect changes
+   * @see super{@link #calcLastRunDate(Date, JobOptions)}
    */
   protected Date calcLastRunDate(final Date lastSuccessfulRunTime) {
-    Date ret;
-    final Date lastSuccessfulRunTimeOverride = getOpts().getLastRunTime();
-
-    if (lastSuccessfulRunTimeOverride != null) {
-      ret = lastSuccessfulRunTimeOverride;
-    } else {
-      final Calendar cal = Calendar.getInstance();
-      cal.setTime(lastSuccessfulRunTime);
-      cal.add(Calendar.MINUTE, -25); // 25 minute window
-      ret = cal.getTime();
-    }
-
-    return ret;
+    return calcLastRunDate(lastSuccessfulRunTime, getOpts());
   }
 
   /**
@@ -1117,9 +1009,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      /**
-       * If index name is provided then use it, otherwise use alias from ES config.
-       */
+      // If index name is provided then use it, otherwise use alias from ES config.
       String indexNameOverride = getOpts().getIndexName();
       String effectiveIndexName = StringUtils.isBlank(indexNameOverride)
           ? esDao.getConfig().getElasticsearchAlias() : indexNameOverride;
@@ -1131,8 +1021,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final String personMappingFile = "/elasticsearch/mapping/map_person_5x_snake.json";
 
       LOGGER.info("Effective index name: " + effectiveIndexName);
-      LOGGER.info(
-          "Effective last successsful run time: " + effectiveLastSuccessfulRunTime.toString());
+      LOGGER.info("Last successsful run time: " + effectiveLastSuccessfulRunTime.toString());
 
       // If the index is missing, create it.
       LOGGER.debug("Create index if missing, effectiveIndexName: " + effectiveIndexName);
@@ -1147,23 +1036,24 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       if (autoMode) {
         LOGGER.warn("AUTO MODE!");
+        // WARNING: don't overwrite command line settings.
         getOpts().setStartBucket(1);
         getOpts().setEndBucket(1);
         getOpts().setTotalBuckets(getJobTotalBuckets());
 
         if (this.getDenormalizedClass() != null) {
-          LOGGER.warn("LOAD FROM VIEW USING JDBC!");
+          LOGGER.info("LOAD FROM VIEW USING JDBC!");
           doInitialLoadJdbc();
         } else {
-          LOGGER.warn("LOAD REPLICATED TABLE QUERY USING HIBERNATE!");
+          LOGGER.info("LOAD REPLICATED TABLE QUERY USING HIBERNATE!");
           extractHibernate();
         }
 
       } else if (this.opts == null || this.opts.isLastRunMode()) {
-        LOGGER.warn("LAST RUN MODE!");
+        LOGGER.info("LAST RUN MODE!");
         doLastRun(effectiveLastSuccessfulRunTime);
       } else {
-        LOGGER.warn("DIRECT BUCKET MODE!");
+        LOGGER.info("DIRECT BUCKET MODE!");
         if (isRangeSelfManaging()) {
           doInitialLoadJdbc();
         } else {
@@ -1172,11 +1062,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       // Result stats:
-      LOGGER.warn(
+      LOGGER.info(
           "STATS: \nRecs To Index:  {}\nRecs To Delete: {}\nrecsBulkBefore: {}\nrecsBulkAfter:  {}\nrecsBulkError:  {}",
           recsBulkPrepared, recsBulkDeleted, recsBulkBefore, recsBulkAfter, recsBulkError);
 
-      LOGGER.warn("Updating last successful run time to {}", jobDateFormat.format(startTime));
+      LOGGER.info("Updating last successful run time to {}",
+          new SimpleDateFormat(LAST_RUN_DATE_FORMAT).format(startTime));
       return new Date(this.startTime);
 
     } catch (Exception e) {

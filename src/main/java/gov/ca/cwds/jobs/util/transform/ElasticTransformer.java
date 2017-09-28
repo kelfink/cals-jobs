@@ -4,8 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,13 +15,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.ApiLegacyAware;
+import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
+import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonLanguage;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
+import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiLanguageAware;
@@ -41,8 +47,128 @@ public class ElasticTransformer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticTransformer.class);
 
-  private ElasticTransformer() {
+  private static ObjectMapper mapper;
+
+  protected ElasticTransformer() {
     // Static methods, don't instantiate.
+  }
+
+  /**
+   * Serialize object to JSON.
+   * 
+   * @param obj object to serialize
+   * @return JSON for this screening
+   */
+  public static String jsonify(Object obj) {
+    String ret = "";
+    try {
+      ret = mapper.writeValueAsString(obj);
+    } catch (Exception e) { // NOSONAR
+      LOGGER.warn("ERROR SERIALIZING OBJECT {} TO JSON", obj);
+    }
+    return ret;
+  }
+
+  /**
+   * Prepare "upsert" JSON (update and insert). Child classes do not normally override this method.
+   * 
+   * @param docPrep optional handling to set collections before serializing JSON
+   * @param esp ES document, already prepared by
+   *        {@link ElasticTransformer#buildElasticSearchPersonDoc(ApiPersonAware)}
+   * @param t target ApiPersonAware instance
+   * @param elementName target ES element for update
+   * @param list list of ES child objects
+   * @param keep ES sections to keep
+   * @return Pair of JSON, left = update, right = insert
+   * @throws JsonProcessingException on JSON processing error
+   */
+  public static <T extends PersistentObject> Pair<String, String> prepareUpsertJson(
+      JobElasticPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t, String elementName,
+      List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
+      throws JsonProcessingException {
+
+    // Child classes: Set optional collections before serializing the insert JSON.
+    prepareInsertCollections(docPrep, esp, t, elementName, list, keep);
+    final String insertJson = mapper.writeValueAsString(esp);
+
+    String updateJson;
+    if (StringUtils.isNotBlank(elementName)) {
+      StringBuilder buf = new StringBuilder();
+      buf.append("{\"").append(elementName).append("\":[");
+
+      if (list != null && !list.isEmpty()) {
+        buf.append(list.stream().map(ElasticTransformer::jsonify).sorted(String::compareTo)
+            .collect(Collectors.joining(",")));
+      }
+
+      buf.append("]}");
+      updateJson = buf.toString();
+    } else {
+      updateJson = insertJson;
+    }
+
+    return Pair.of(updateJson, insertJson);
+  }
+
+  /**
+   * Set optional ES person collections to null so that they are not overwritten by accident. Child
+   * classes do not normally override this method.
+   * 
+   * @param docPrep optional handling to set collections before serializing JSON
+   * @param esp ES document, already prepared by
+   *        {@link #buildElasticSearchPersonDoc(ApiPersonAware)}
+   * @param t target ApiPersonAware instance
+   * @param elementName target ES element for update
+   * @param list list of ES child objects
+   * @param keep ES sections to keep
+   * @throws JsonProcessingException on JSON processing error
+   */
+  public static <T extends PersistentObject> void prepareInsertCollections(
+      JobElasticPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t, String elementName,
+      List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
+      throws JsonProcessingException {
+
+    // Null out optional collections for updates.
+    esp.clearOptionalCollections(keep);
+
+    // Child classes: Set optional collections before serializing the insert JSON.
+    docPrep.setInsertCollections(esp, t, list);
+  }
+
+  /**
+   * Handle both {@link ApiMultiplePersonAware} and {@link ApiPersonAware} implementations of type
+   * T.
+   * 
+   * @param p instance of type T
+   * @return array of person documents
+   * @throws JsonProcessingException on parse error
+   */
+  public static ElasticSearchPerson[] buildElasticSearchPersons(final PersistentObject p)
+      throws JsonProcessingException {
+    ElasticSearchPerson[] ret;
+    if (p instanceof ApiMultiplePersonAware) {
+      final ApiPersonAware[] persons = ((ApiMultiplePersonAware) p).getPersons();
+      ret = new ElasticSearchPerson[persons.length];
+      int i = 0;
+      for (ApiPersonAware px : persons) {
+        ret[i++] = ElasticTransformer.buildElasticSearchPersonDoc(px);
+      }
+    } else {
+      ret = new ElasticSearchPerson[] {buildElasticSearchPerson((ApiPersonAware) p)};
+    }
+    return ret;
+  }
+
+  /**
+   * Produce an ElasticSearchPerson suitable as an Elasticsearch person document.
+   * 
+   * @param p ApiPersonAware persistence object
+   * @return populated ElasticSearchPerson
+   * @throws JsonProcessingException if unable to serialize JSON
+   */
+  public static ElasticSearchPerson buildElasticSearchPerson(ApiPersonAware p)
+      throws JsonProcessingException {
+    return ElasticTransformer.buildElasticSearchPersonDoc(p);
   }
 
   /**
@@ -168,6 +294,18 @@ public class ElasticTransformer {
   /**
    * Produce an ElasticSearchPerson objects suitable for an Elasticsearch person document.
    * 
+   * @param p ApiPersonAware persistence object
+   * @return populated ElasticSearchPerson
+   * @throws JsonProcessingException if unable to serialize JSON
+   */
+  public static ElasticSearchPerson buildElasticSearchPersonDoc(ApiPersonAware p)
+      throws JsonProcessingException {
+    return buildElasticSearchPersonDoc(mapper, p);
+  }
+
+  /**
+   * Produce an ElasticSearchPerson objects suitable for an Elasticsearch person document.
+   * 
    * @param mapper Jackson ObjectMapper
    * @param p ApiPersonAware persistence object
    * @return populated ElasticSearchPerson
@@ -204,6 +342,16 @@ public class ElasticTransformer {
     ret.setSensitivityIndicator(p.getSensitivityIndicator());
 
     return ret;
+  }
+
+  public static ObjectMapper getMapper() { // NOSONAR
+    return mapper;
+  }
+
+  public static synchronized void setMapper(final ObjectMapper mapper) {
+    if (ElasticTransformer.mapper == null) {
+      ElasticTransformer.mapper = mapper;
+    }
   }
 
 }

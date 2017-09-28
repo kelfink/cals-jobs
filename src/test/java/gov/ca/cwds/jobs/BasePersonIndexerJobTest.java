@@ -38,9 +38,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
-import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
-import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
@@ -105,50 +103,53 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  @Test
-  public void buildElasticSearchPersons_Args__Object() throws Exception {
-    final TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    ElasticSearchPerson[] actual = target.buildElasticSearchPersons(p);
-    assertThat(actual, is(notNullValue()));
-  }
+  // @Test
+  // public void buildElasticSearchPersons_Args__Object() throws Exception {
+  // final TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+  // ElasticSearchPerson[] actual = target.buildElasticSearchPersons(p);
+  // assertThat(actual, is(notNullValue()));
+  // }
 
-  @Test
-  public void buildElasticSearchPerson_Args__Object() throws Exception {
-    final String key = DEFAULT_CLIENT_ID;
-    TestNormalizedEntity p = new TestNormalizedEntity(key);
-    ElasticSearchPerson actual = target.buildElasticSearchPerson(p);
-    ElasticSearchPerson expected = new ElasticSearchPerson();
-    expected.setId(key);
-    // assertThat(actual, is(equalTo(expected)));
-    assertThat(actual, is(notNullValue()));
-  }
+  // @Test
+  // public void buildElasticSearchPerson_Args__Object() throws Exception {
+  // final String key = DEFAULT_CLIENT_ID;
+  // TestNormalizedEntity p = new TestNormalizedEntity(key);
+  // ElasticSearchPerson actual = target.buildElasticSearchPerson(p);
+  // ElasticSearchPerson expected = new ElasticSearchPerson();
+  // expected.setId(key);
+  // // assertThat(actual, is(equalTo(expected)));
+  // assertThat(actual, is(notNullValue()));
+  // }
 
-  @Test
-  public void buildElasticSearchPersonDoc_Args__ApiPersonAware() throws Exception {
-    ApiPersonAware p = new TestNormalizedEntity("abc123");
-    ElasticSearchPerson actual = target.buildElasticSearchPersonDoc(p);
-    final String json =
-        "{\"first_name\":null,\"middle_name\":null,\"last_name\":null,\"name_suffix\":null,"
-            + "\"date_of_birth\":null,\"gender\":null,\"ssn\":null,\"type\":\"gov.ca.cwds.jobs.BasePersonIndexerJobTest$TestNormalizedEntity\","
-            + "\"source\":\"{\\\"id\\\":\\\"abc123\\\",\\\"name\\\":null,\\\"middleName\\\":null,\\\"firstName\\\":null,\\\"ssn\\\":null,\\\"lastName\\\":null,"
-            + "\\\"gender\\\":null,\\\"birthDate\\\":null,\\\"nameSuffix\\\":null,\\\"primaryKey\\\":\\\"abc123\\\"}"
-            + "\",\"legacy_source_table\":null,\"legacy_id\":null,\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"screenings\":[],\"referrals\":[],\"relationships\":[],\"cases\":[],\"id\":\"abc123\"}";
-    ElasticSearchPerson expected = MAPPER.readValue(json, ElasticSearchPerson.class);
-    // assertThat(actual, is(equalTo(expected)));
-    assertThat(actual, notNullValue());
-  }
+  // @Test
+  // public void buildElasticSearchPersonDoc_Args__ApiPersonAware() throws Exception {
+  // ApiPersonAware p = new TestNormalizedEntity("abc123");
+  // ElasticSearchPerson actual = target.buildElasticSearchPersonDoc(p);
+  // final String json =
+  // "{\"first_name\":null,\"middle_name\":null,\"last_name\":null,\"name_suffix\":null,"
+  // +
+  // "\"date_of_birth\":null,\"gender\":null,\"ssn\":null,\"type\":\"gov.ca.cwds.jobs.BasePersonIndexerJobTest$TestNormalizedEntity\","
+  // +
+  // "\"source\":\"{\\\"id\\\":\\\"abc123\\\",\\\"name\\\":null,\\\"middleName\\\":null,\\\"firstName\\\":null,\\\"ssn\\\":null,\\\"lastName\\\":null,"
+  // +
+  // "\\\"gender\\\":null,\\\"birthDate\\\":null,\\\"nameSuffix\\\":null,\\\"primaryKey\\\":\\\"abc123\\\"}"
+  // +
+  // "\",\"legacy_source_table\":null,\"legacy_id\":null,\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"screenings\":[],\"referrals\":[],\"relationships\":[],\"cases\":[],\"id\":\"abc123\"}";
+  // ElasticSearchPerson expected = MAPPER.readValue(json, ElasticSearchPerson.class);
+  // // assertThat(actual, is(equalTo(expected)));
+  // assertThat(actual, notNullValue());
+  // }
 
-  @Test
-  public void buildElasticSearchPersonDoc_Args__ApiPersonAware_T__JsonProcessingException()
-      throws Exception {
-    ApiPersonAware p = mock(ApiPersonAware.class);
-    try {
-      target.buildElasticSearchPersonDoc(p);
-      fail("Expected exception was not thrown!");
-    } catch (JsonProcessingException e) {
-    }
-
-  }
+  // @Test
+  // public void buildElasticSearchPersonDoc_Args__ApiPersonAware_T__JsonProcessingException()
+  // throws Exception {
+  // ApiPersonAware p = mock(ApiPersonAware.class);
+  // try {
+  // target.buildElasticSearchPersonDoc(p);
+  // fail("Expected exception was not thrown!");
+  // } catch (JsonProcessingException e) {
+  // }
+  // }
 
   @Test
   public void getIdColumn_Args__() throws Exception {
@@ -213,15 +214,16 @@ public class BasePersonIndexerJobTest
     target.setInsertCollections(esp, t, list);
   }
 
-  @Test
-  public void prepareInsertCollections_Args__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray()
-      throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    String elementName = "slop";
-    List list = new ArrayList();
-    ESOptionalCollection[] keep = new ESOptionalCollection[] {};
-    target.prepareInsertCollections(esp, t, elementName, list, keep);
-  }
+  // @Test
+  // public void
+  // prepareInsertCollections_Args__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray()
+  // throws Exception {
+  // TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+  // String elementName = "slop";
+  // List list = new ArrayList();
+  // ESOptionalCollection[] keep = new ESOptionalCollection[] {};
+  // target.prepareInsertCollections(esp, t, elementName, list, keep);
+  // }
 
   @Test
   public void prepareUpsertJson_Args__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray()

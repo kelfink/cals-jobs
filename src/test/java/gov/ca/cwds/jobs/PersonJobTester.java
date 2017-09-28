@@ -40,6 +40,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNormalizer<?>> {
@@ -52,6 +53,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   public static void setupClass() {
     JobRunner.setTestMode(true);
     SimpleTestSystemCodeCache.init();
+    ElasticTransformer.setMapper(MAPPER);
   }
 
   @Rule

@@ -6,15 +6,16 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 
 /**
@@ -27,14 +28,38 @@ public abstract class LastSuccessfulRunJob implements Job {
   private static final Logger LOGGER = LoggerFactory.getLogger(LastSuccessfulRunJob.class);
 
   /**
-   * Last run file date format. NOT thread-safe!
+   * Date time format for last run date file.
    */
-  protected DateFormat jobDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  public static final String LAST_RUN_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
   /**
    * Completion flag for fatal errors.
    */
   protected volatile boolean fatalError = false;
+
+  /**
+   * Completion flag for <strong>Extract</strong> method {@link #threadExtractJdbc()}.
+   * <p>
+   * Volatile guarantees that changes to this flag become visible other threads (i.e., don't cache a
+   * copy of the flag in thread memory).
+   * </p>
+   */
+  protected volatile boolean doneExtract = false;
+
+  /**
+   * Completion flag for <strong>Transform</strong> method {@link #threadTransform()}.
+   */
+  protected volatile boolean doneTransform = false;
+
+  /**
+   * Completion flag for <strong>Load</strong> method {@link #threadIndex()}.
+   */
+  protected volatile boolean doneLoad = false;
+
+  /**
+   * Official start time.
+   */
+  protected final long startTime = System.currentTimeMillis();
 
   private String lastRunTimeFilename;
 
@@ -60,6 +85,29 @@ public abstract class LastSuccessfulRunJob implements Job {
   }
 
   /**
+   * If last run time is provide in options then use it, otherwise use provided
+   * lastSuccessfulRunTime.
+   * 
+   * @param lastSuccessfulRunTime last successful run
+   * @return appropriate date to detect changes
+   */
+  protected Date calcLastRunDate(final Date lastSuccessfulRunTime, final JobOptions opts) {
+    Date ret;
+    final Date lastSuccessfulRunTimeOverride = opts.getLastRunTime();
+
+    if (lastSuccessfulRunTimeOverride != null) {
+      ret = lastSuccessfulRunTimeOverride;
+    } else {
+      final Calendar cal = Calendar.getInstance();
+      cal.setTime(lastSuccessfulRunTime);
+      cal.add(Calendar.MINUTE, -25); // 25 minute window
+      ret = cal.getTime();
+    }
+
+    return ret;
+  }
+
+  /**
    * Reads the last run file and returns the last run date.
    * 
    * @return last successful run date/time as a Java Date.
@@ -69,7 +117,7 @@ public abstract class LastSuccessfulRunJob implements Job {
 
     if (!StringUtils.isBlank(this.lastRunTimeFilename)) {
       try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) {
-        ret = jobDateFormat.parse(br.readLine().trim());
+        ret = new SimpleDateFormat(LAST_RUN_DATE_FORMAT).parse(br.readLine().trim());
       } catch (FileNotFoundException e) {
         fatalError = true;
         JobLogUtils.raiseError(LOGGER, e, "Caught FileNotFoundException: {}", e.getMessage());
@@ -93,7 +141,7 @@ public abstract class LastSuccessfulRunJob implements Job {
   protected void writeLastSuccessfulRunTime(Date datetime) {
     if (datetime != null && !StringUtils.isBlank(this.lastRunTimeFilename) && !fatalError) {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) {
-        w.write(jobDateFormat.format(datetime));
+        w.write(new SimpleDateFormat(LAST_RUN_DATE_FORMAT).format(datetime));
       } catch (IOException e) {
         fatalError = true;
         JobLogUtils.raiseError(LOGGER, e, "Failed to write timestamp file: {}", e.getMessage());

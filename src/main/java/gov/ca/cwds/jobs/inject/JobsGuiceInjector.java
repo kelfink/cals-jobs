@@ -70,8 +70,8 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.util.JobLogUtils;
-import gov.ca.cwds.jobs.util.elastic.JobElasticUtils;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -140,7 +140,7 @@ public class JobsGuiceInjector extends AbstractModule {
          */
         injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
 
-        JobElasticUtils.setMapper(injector.getInstance(ObjectMapper.class));
+        ElasticTransformer.setMapper(injector.getInstance(ObjectMapper.class));
 
       } catch (CreationException e) {
         throw JobLogUtils.buildException(LOGGER, e, "FAILED TO BUILD INJECTOR!: {}",

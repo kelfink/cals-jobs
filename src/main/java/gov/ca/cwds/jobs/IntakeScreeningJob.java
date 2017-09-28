@@ -113,7 +113,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
 
   @SuppressWarnings("unchecked")
   @Override
-  protected void setInsertCollections(ElasticSearchPerson esp, IntakeParticipant t,
+  public void setInsertCollections(ElasticSearchPerson esp, IntakeParticipant t,
       List<? extends ApiTypedIdentifier<String>> list) {
     esp.setScreenings((List<ElasticSearchPersonScreening>) list);
   }
