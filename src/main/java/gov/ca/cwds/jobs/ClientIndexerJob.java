@@ -26,7 +26,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
-import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
@@ -82,7 +82,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  public boolean isRangeSelfManaging() {
+  public boolean providesInitialKeyRanges() {
     return true;
   }
 
@@ -169,7 +169,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
         while (!fatalError && rs.next() && (m = extract(rs)) != null) {
           // Hand the baton to the next runner ...
-          JobLogUtils.logEvery(++cntr, "Retrieved", "recs");
+          JobLogs.logEvery(++cntr, "Retrieved", "recs");
           // NOTE: Assumes that records are sorted by group key.
           if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
             normalizeAndQueueIndex(grpRecs);
@@ -187,7 +187,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
     } catch (Exception e) {
       fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     }
 
     LOGGER.warn("DONE: Extract thread " + i);
@@ -214,7 +214,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
     } catch (Exception e) {
       fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneExtract = true;
     }

@@ -9,7 +9,7 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.RowMapper;
 
 /**
@@ -43,7 +43,7 @@ public class FacilityRowMapper implements RowMapper<FacilityRow> {
         descriptor.getWriteMethod().invoke(object, value);
       }
     } catch (Exception e) {
-      JobLogUtils.raiseError(LOGGER, e, e.getMessage());
+      JobLogs.raiseError(LOGGER, e, e.getMessage());
     }
   }
 

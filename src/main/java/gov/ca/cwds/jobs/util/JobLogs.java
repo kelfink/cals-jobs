@@ -13,16 +13,16 @@ import gov.ca.cwds.jobs.exception.JobsException;
  * 
  * @author CWDS API Team
  */
-public final class JobLogUtils {
+public final class JobLogs {
 
   /**
    * Standard Logger.
    */
-  protected static final Logger LOGGER = LoggerFactory.getLogger(JobLogUtils.class);
+  protected static final Logger LOGGER = LoggerFactory.getLogger(JobLogs.class);
 
   private static final int DEFAULT_LOG_EVERY = 5000;
 
-  private JobLogUtils() {
+  private JobLogs() {
     // Static methods only, no class instantiation. Evil singleton, blah, blah, blah ... I can't
     // hear you!
   }

@@ -40,7 +40,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
-import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
@@ -314,8 +314,8 @@ public class ReferralHistoryIndexerJob
     LOGGER.info("pull referrals");
     final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
     while (!fatalError && rs.next() && (m = extractReferral(rs)) != null) {
-      JobLogUtils.logEvery(++cntr, "read", "bundle referral");
-      JobLogUtils.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
+      JobLogs.logEvery(++cntr, "read", "bundle referral");
+      JobLogs.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
           "referrals");
       mapReferrals.put(m.getReferralId(), m);
     }
@@ -332,8 +332,8 @@ public class ReferralHistoryIndexerJob
     LOGGER.info("pull allegations");
     final ResultSet rs = stmtSelAllegation.executeQuery(); // NOSONAR
     while (!fatalError && rs.next() && (m = extractAllegation(rs)) != null) {
-      JobLogUtils.logEvery(++cntr, "read", "bundle allegation");
-      JobLogUtils.logEvery(LOGGER, 15000, rowsReadAllegations.incrementAndGet(), "Total read",
+      JobLogs.logEvery(++cntr, "read", "bundle allegation");
+      JobLogs.logEvery(LOGGER, 15000, rowsReadAllegations.incrementAndGet(), "Total read",
           "allegations");
       listAllegations.add(m);
     }
@@ -444,7 +444,7 @@ public class ReferralHistoryIndexerJob
 
     } catch (Exception e) {
       fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "ERROR HANDING RANGE {} - {}: {}", p.getLeft(),
+      JobLogs.raiseError(LOGGER, e, "ERROR HANDING RANGE {} - {}: {}", p.getLeft(),
           p.getRight(), e.getMessage());
     }
 
@@ -509,7 +509,7 @@ public class ReferralHistoryIndexerJob
 
     } catch (Exception e) {
       fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneExtract = true;
     }
@@ -528,7 +528,7 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  public boolean isRangeSelfManaging() {
+  public boolean providesInitialKeyRanges() {
     return true;
   }
 
@@ -565,7 +565,7 @@ public class ReferralHistoryIndexerJob
         buf.append(esPersonReferrals.stream().map(ElasticTransformer::jsonify)
             .sorted(String::compareTo).collect(Collectors.joining(",")));
       } catch (Exception e) {
-        JobLogUtils.raiseError(LOGGER, e, "ERROR SERIALIZING REFERRALS! ", e.getMessage());
+        JobLogs.raiseError(LOGGER, e, "ERROR SERIALIZING REFERRALS! ", e.getMessage());
       }
     }
 

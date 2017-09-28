@@ -14,13 +14,6 @@ public interface JobFeatureCore extends ApiMarker {
   }
 
   /**
-   * @return true if the job provides its own key ranges
-   */
-  default boolean isRangeSelfManaging() {
-    return false;
-  }
-
-  /**
    * Determine if limited access records must be deleted from ES.
    * 
    * @return True if limited access records must be deleted from ES, false otherwise.
@@ -28,7 +21,5 @@ public interface JobFeatureCore extends ApiMarker {
   default boolean mustDeleteLimitedAccessRecords() {
     return false;
   }
-
-
 
 }

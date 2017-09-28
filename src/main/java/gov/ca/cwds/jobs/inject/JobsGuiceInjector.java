@@ -70,7 +70,7 @@ import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
@@ -142,7 +142,7 @@ public class JobsGuiceInjector extends AbstractModule {
         ElasticTransformer.setMapper(injector.getInstance(ObjectMapper.class));
 
       } catch (CreationException e) {
-        throw JobLogUtils.buildException(LOGGER, e, "FAILED TO BUILD INJECTOR! {}", e.getMessage());
+        throw JobLogs.buildException(LOGGER, e, "FAILED TO BUILD INJECTOR! {}", e.getMessage());
       }
     }
 
@@ -165,7 +165,7 @@ public class JobsGuiceInjector extends AbstractModule {
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
-      throw JobLogUtils.buildException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
+      throw JobLogs.buildException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
     }
   }
 
@@ -185,7 +185,7 @@ public class JobsGuiceInjector extends AbstractModule {
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
-      throw JobLogUtils.buildException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
+      throw JobLogs.buildException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
     }
   }
 

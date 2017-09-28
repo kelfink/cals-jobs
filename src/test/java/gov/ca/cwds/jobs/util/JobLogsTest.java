@@ -9,11 +9,11 @@ import org.slf4j.Logger;
 
 import gov.ca.cwds.jobs.exception.JobsException;
 
-public class JobLogUtilsTest {
+public class JobLogsTest {
 
   @Test
   public void type() throws Exception {
-    assertThat(JobLogUtils.class, notNullValue());
+    assertThat(JobLogs.class, notNullValue());
   }
 
   @Test
@@ -22,7 +22,7 @@ public class JobLogUtilsTest {
     int cntr = 0;
     String action = null;
     Object[] args = new String[] {};
-    JobLogUtils.logEvery(log, cntr, action, args);
+    JobLogs.logEvery(log, cntr, action, args);
   }
 
   @Test
@@ -30,7 +30,7 @@ public class JobLogUtilsTest {
     int cntr = 0;
     String action = null;
     Object[] args = new String[] {};
-    JobLogUtils.logEvery(cntr, action, args);
+    JobLogs.logEvery(cntr, action, args);
   }
 
   @Test(expected = JobsException.class)
@@ -39,7 +39,7 @@ public class JobLogUtilsTest {
     Throwable e = new IllegalStateException("hello world");
     String pattern = null;
     Object[] args = new Object[] {};
-    JobLogUtils.raiseError(log, e, pattern, args);
+    JobLogs.raiseError(log, e, pattern, args);
   }
 
   @Test(expected = JobsException.class)
@@ -47,13 +47,13 @@ public class JobLogUtilsTest {
     Logger log = mock(Logger.class);
     Throwable e = new IllegalStateException("error message");
     String message = "hello world";
-    JobLogUtils.raiseError(log, e, message);
+    JobLogs.raiseError(log, e, message);
   }
 
   @Test(expected = JobsException.class)
   public void logEvery_Args__Logger__int__String__ObjectArray1() throws Exception {
     Exception e = new Exception();
-    JobLogUtils.raiseError(JobLogUtils.LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+    JobLogs.raiseError(JobLogs.LOGGER, e, "BATCH ERROR! {}", e.getMessage());
   }
 
   @Test
@@ -61,7 +61,7 @@ public class JobLogUtilsTest {
     int cntr = 0;
     String action = null;
     Object[] args = new Object[] {};
-    JobLogUtils.logEvery(cntr, action, args);
+    JobLogs.logEvery(cntr, action, args);
   }
 
   @Test(expected = JobsException.class)
@@ -70,7 +70,7 @@ public class JobLogUtilsTest {
     Throwable e = null;
     String pattern = null;
     Object[] args = new Object[] {};
-    JobLogUtils.raiseError(log, e, pattern, args);
+    JobLogs.raiseError(log, e, pattern, args);
   }
 
   @Test(expected = JobsException.class)
@@ -78,7 +78,7 @@ public class JobLogUtilsTest {
     Logger log = mock(Logger.class);
     Throwable e = null;
     Object[] args = new Object[] {};
-    JobLogUtils.raiseError(log, e, args);
+    JobLogs.raiseError(log, e, args);
   }
 
 }

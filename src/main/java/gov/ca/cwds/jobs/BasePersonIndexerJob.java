@@ -59,11 +59,12 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.JobFeatureCore;
 import gov.ca.cwds.jobs.component.JobFeatureHibernate;
+import gov.ca.cwds.jobs.component.JobFeatureInitialLoad;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
-import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
@@ -96,7 +97,7 @@ import gov.ca.cwds.jobs.util.transform.JobElasticPersonDocPrep;
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends LastSuccessfulRunJob implements AutoCloseable, JobElasticPersonDocPrep<T>,
-    JobFeatureHibernate<T, M>, JobFeatureCore {
+    JobFeatureHibernate<T, M>, JobFeatureCore, JobFeatureInitialLoad {
 
   /**
    * Default serialization.
@@ -207,26 +208,25 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return bulk delete request
    * @throws JsonProcessingException unable to parse
    */
-  public DeleteRequest bulkDelete(String id) throws JsonProcessingException {
+  public DeleteRequest bulkDelete(final String id) throws JsonProcessingException {
     return new DeleteRequest(getOpts().getIndexName(), esDao.getConfig().getElasticsearchDocType(),
         id);
   }
 
   /**
-   * Just adds an object to the normalized index queue and traps InterruptedException. Suitable for
-   * streams and lambda.
+   * Adds an object to the index queue and trap InterruptedException. Suitable for streams and
+   * lambda.
    * 
-   * @param norm object to add to index queue
+   * @param normalized object to add to index queue
    */
   protected void addToIndexQueue(T norm) {
     try {
-      JobLogUtils.logEvery(track.getRecsSentToIndexQueue().incrementAndGet(),
-          "added to index queue", "recs");
+      JobLogs.logEvery(track.trackSentToIndexQueue(), "add to index queue", "recs");
       queueIndex.putLast(norm);
     } catch (InterruptedException e) {
       fatalError = true;
       Thread.currentThread().interrupt();
-      JobLogUtils.raiseError(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
+      JobLogs.raiseError(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
     }
   }
 
@@ -245,7 +245,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   @Override
   public void incrementNormalizeCount() {
-    JobLogUtils.logEvery(track.getRowsNormalized().incrementAndGet(), "Normalize", "single");
+    JobLogs.logEvery(track.trackRowsNormalized(), "Normalize", "single");
   }
 
   /**
@@ -283,14 +283,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       if (isDelete(t)) {
         ret = bulkDelete((String) t.getPrimaryKey());
-        track.getRecsBulkDeleted().getAndIncrement();
+        track.trackBulkDeleted();
       } else {
-        track.getRecsBulkPrepared().getAndIncrement();
         ret = prepareUpsertRequest(esp, t);
+        track.trackBulkPrepared();
       }
     } catch (Exception e) {
-      throw JobLogUtils.buildException(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}",
-          t.getPrimaryKey());
+      throw JobLogs.buildException(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
     }
 
     return ret;
@@ -346,7 +345,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       threadJdbc.start();
 
       while (!(fatalError || (doneExtract && doneTransform && doneLoad))) {
-        LOGGER.debug("runInitialLoad: sleep");
+        LOGGER.trace("runInitialLoad: sleep");
         Thread.sleep(SLEEP_MILLIS);
 
         try {
@@ -359,7 +358,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       threadJdbc.join();
-      if (useTransformThread() && threadTransformer != null) {
+      if (threadTransformer != null) {
         threadTransformer.join();
       }
 
@@ -368,8 +367,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       Thread.sleep(SLEEP_MILLIS);
       this.close();
       final long endTime = System.currentTimeMillis();
-      LOGGER.warn("TOTAL ELAPSED TIME: " + ((endTime - startTime) / 1000) + " SECONDS");
-      LOGGER.warn("DONE: doInitialLoadViaJdbc");
+      LOGGER.info("TOTAL ELAPSED TIME: " + ((endTime - startTime) / 1000) + " SECONDS");
+      LOGGER.info("DONE: doInitialLoadViaJdbc");
 
     } catch (InterruptedException ie) { // NOSONAR
       LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
@@ -377,7 +376,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       Thread.currentThread().interrupt();
     } catch (Exception e) {
       fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "GENERAL EXCEPTION: {}", e);
+      JobLogs.raiseError(LOGGER, e, "GENERAL EXCEPTION: {}", e);
     } finally {
       doneExtract = true;
     }
@@ -412,7 +411,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
         int cntr = 0;
         while (!fatalError && rs.next() && (m = extract(rs)) != null) {
-          JobLogUtils.logEvery(++cntr, "Retrieved", "recs");
+          JobLogs.logEvery(++cntr, "Retrieved", "recs");
           queueTransform.putLast(m);
         }
 
@@ -420,7 +419,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     } catch (Exception e) {
       fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneExtract = true;
     }
@@ -445,7 +444,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     while (!(fatalError || (doneExtract && queueTransform.isEmpty()))) {
       try {
         while ((m = queueTransform.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
-          JobLogUtils.logEvery(++cntr, "Transformed", "recs");
+          JobLogs.logEvery(++cntr, "Transformed", "recs");
 
           // NOTE: Assumes that records are sorted by group key.
           // End of group. Normalize these group recs.
@@ -474,7 +473,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         Thread.currentThread().interrupt();
       } catch (Exception e) {
         fatalError = true;
-        JobLogUtils.raiseError(LOGGER, e, "Transformer: fatal error {}", e.getMessage());
+        JobLogs.raiseError(LOGGER, e, "Transformer: fatal error {}", e.getMessage());
       } finally {
         doneTransform = true;
       }
@@ -499,7 +498,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     while ((t = queueIndex.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
       LOGGER.trace("queueIndex.pollFirst: id {}", t.getPrimaryKey());
-      JobLogUtils.logEvery(++i, "Indexed", "recs to ES");
+      JobLogs.logEvery(++i, "Indexed", "recs to ES");
       prepareDocument(bp, t);
     }
     return i;
@@ -536,10 +535,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.warn("Indexer interrupted!");
       fatalError = true;
       Thread.currentThread().interrupt();
-      JobLogUtils.raiseError(LOGGER, e, "Indexer: Interrupted! {}", e.getMessage());
+      JobLogs.raiseError(LOGGER, e, "Indexer: Interrupted! {}", e.getMessage());
     } catch (Exception e) {
       fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "Indexer: fatal error {}", e.getMessage());
+      JobLogs.raiseError(LOGGER, e, "Indexer: fatal error {}", e.getMessage());
     } finally {
       doneLoad = true;
     }
@@ -555,17 +554,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Prepare a document.
    * 
    * @param bp bulk processor
-   * @param p document object
+   * @param ApiPersonAware object
    */
   protected void prepLastRunDoc(BulkProcessor bp, T p) {
     try {
       prepareDocument(bp, p);
-    } catch (JsonProcessingException e) {
-      fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "ERROR WRITING JSON: {}", e.getMessage());
     } catch (IOException e) {
       fatalError = true;
-      JobLogUtils.raiseError(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
+      JobLogs.raiseError(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
     } finally {
       doneLoad = true;
     }
@@ -618,10 +614,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.info("Waiting on ElasticSearch to finish last batch ...");
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
       return new Date(this.startTime);
-
     } catch (Exception e) {
       fatalError = true;
-      throw JobLogUtils.buildException(LOGGER, e, "General Exception: {}", e.getMessage());
+      throw JobLogs.buildException(LOGGER, e, "General Exception: {}", e.getMessage());
     } finally {
       doneLoad = true;
     }
@@ -645,10 +640,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   public Date _run(Date lastSuccessfulRunTime) {
     try {
       // If index name is provided then use it, otherwise use alias from ES config.
-      String indexNameOverride = getOpts().getIndexName();
-      String effectiveIndexName = StringUtils.isBlank(indexNameOverride)
+      final String indexNameOverride = getOpts().getIndexName();
+      final String effectiveIndexName = StringUtils.isBlank(indexNameOverride)
           ? esDao.getConfig().getElasticsearchAlias() : indexNameOverride;
-      getOpts().setIndexName(effectiveIndexName);
+      getOpts().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
 
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
       final String documentType = esDao.getConfig().getElasticsearchDocType();
@@ -680,13 +675,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           LOGGER.info("LOAD REPLICATED TABLE QUERY USING HIBERNATE!");
           extractHibernate();
         }
-
       } else if (this.opts == null || this.opts.isLastRunMode()) {
         LOGGER.info("LAST RUN MODE!");
         doLastRun(lastRun);
       } else {
         LOGGER.info("DIRECT BUCKET MODE!");
-        if (isRangeSelfManaging()) {
+        if (providesInitialKeyRanges()) {
           doInitialLoadJdbc();
         } else {
           extractHibernate();
@@ -701,12 +695,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.info("Updating last successful run time to {}",
           new SimpleDateFormat(LAST_RUN_DATE_FORMAT).format(startTime));
       return new Date(this.startTime);
-
     } catch (Exception e) {
       fatalError = true;
-      throw JobLogUtils.buildException(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
+      throw JobLogs.buildException(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
     } finally {
-
       // Set ETL completion flags to done.
       doneExtract = true;
       doneTransform = true;
@@ -751,7 +743,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       LOGGER.info("FOUND {} RECORDS", recs.size());
       results.addAll(recs);
-
       session.clear();
       txn.commit();
       return results.build();
@@ -832,10 +823,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
         if (deletionRecs != null && !deletionRecs.isEmpty()) {
           for (M rec : deletionRecs) {
-            /**
-             * Assuming group key represents ID of client to delete. This is true for client,
-             * referral history, case history jobs.
-             */
+            // Assuming group key represents ID of client to delete. This is true for client,
+            // referral history, case history jobs.
             Object groupKey = rec.getNormalizationGroupKey();
             if (groupKey != null) {
               deletionResults.add(groupKey.toString());
@@ -851,11 +840,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (SQLException h) {
       fatalError = true;
       txn.rollback();
-      throw JobLogUtils.buildException(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
+      throw JobLogs.buildException(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
     } catch (HibernateException h) {
       fatalError = true;
       txn.rollback();
-      throw JobLogUtils.buildException(LOGGER, h, "EXTRACT ERROR!: {}", h.getMessage());
+      throw JobLogs.buildException(LOGGER, h, "EXTRACT ERROR!: {}", h.getMessage());
     } finally {
       doneExtract = true;
     }
@@ -916,10 +905,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (InterruptedException e) {
       fatalError = true;
       Thread.currentThread().interrupt();
-      throw JobLogUtils.buildException(LOGGER, e, "INTERRUPTED!: {}", e.getMessage());
+      throw JobLogs.buildException(LOGGER, e, "INTERRUPTED!: {}", e.getMessage());
     } catch (IOException ioe) {
       fatalError = true;
-      throw JobLogUtils.buildException(LOGGER, ioe, "ERROR FINISHING JOB: {}", ioe.getMessage());
+      throw JobLogs.buildException(LOGGER, ioe, "ERROR FINISHING JOB: {}", ioe.getMessage());
     }
   }
 
@@ -1098,7 +1087,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           try {
             prepareDocument(bp, p);
           } catch (IOException e) {
-            throw JobLogUtils.buildException(LOGGER, e, "IO ERROR: id: {}, {}", p.getPrimaryKey(),
+            throw JobLogs.buildException(LOGGER, e, "IO ERROR: id: {}, {}", p.getPrimaryKey(),
                 e.getMessage());
           }
         });

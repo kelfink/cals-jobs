@@ -69,4 +69,20 @@ public class JobProgressTrack extends ApiObjectIdentity {
     return recsBulkError;
   }
 
+  public int trackSentToIndexQueue() {
+    return this.getRecsSentToIndexQueue().incrementAndGet();
+  }
+
+  public int trackRowsNormalized() {
+    return this.getRowsNormalized().incrementAndGet();
+  }
+
+  public int trackBulkDeleted() {
+    return this.getRecsBulkDeleted().getAndIncrement();
+  }
+
+  public int trackBulkPrepared() {
+    return this.getRecsBulkPrepared().getAndIncrement();
+  }
+
 }

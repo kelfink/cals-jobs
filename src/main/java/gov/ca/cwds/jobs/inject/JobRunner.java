@@ -12,7 +12,7 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.EducationProviderContactIndexerJob;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.JobLogs;
 
 public class JobRunner {
 
@@ -58,7 +58,7 @@ public class JobRunner {
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
       exitCode = 1;
-      throw JobLogUtils.buildException(LOGGER, e, "STANDALONE JOB FAILED!: {}", e.getMessage());
+      throw JobLogs.buildException(LOGGER, e, "STANDALONE JOB FAILED!: {}", e.getMessage());
     } finally {
       // WARNING: kills the JVM in testing but may be needed to shutdown resources.
       if (!isTestMode() && !isContinuousMode()) {
@@ -85,7 +85,7 @@ public class JobRunner {
       jobs.put(klass, job);
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception, for ClassNotFound or the like.
-      throw JobLogUtils.buildException(LOGGER, e, "JOB REGISTRATION FAILED!: {}", e.getMessage());
+      throw JobLogs.buildException(LOGGER, e, "JOB REGISTRATION FAILED!: {}", e.getMessage());
     }
   }
 
@@ -104,7 +104,7 @@ public class JobRunner {
       job.setOpts(opts);
       job.run();
     } catch (Exception e) {
-      throw JobLogUtils.buildException(LOGGER, e, "REGISTERED JOB RUN FAILED!: {}", e.getMessage());
+      throw JobLogs.buildException(LOGGER, e, "REGISTERED JOB RUN FAILED!: {}", e.getMessage());
     }
   }
 

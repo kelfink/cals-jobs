@@ -304,7 +304,7 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
 
   @Test
   public void isRangeSelfManaging_Args__() throws Exception {
-    boolean actual = target.isRangeSelfManaging();
+    boolean actual = target.providesInitialKeyRanges();
     boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }

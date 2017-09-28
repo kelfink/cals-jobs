@@ -559,7 +559,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void isRangeSelfManaging_Args__() throws Exception {
-    final boolean actual = target.isRangeSelfManaging();
+    final boolean actual = target.providesInitialKeyRanges();
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }

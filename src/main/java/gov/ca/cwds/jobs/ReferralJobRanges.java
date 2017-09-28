@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.config.JobOptions;
-import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
  * Get key ranges by platform and job size.
@@ -79,7 +79,7 @@ public class ReferralJobRanges {
           IOUtils.readLines(this.getClass().getResourceAsStream("/referral_ranges.tsv")).stream()) {
         ret = lines.sequential().map(this::splitLine).collect(Collectors.toList());
       } catch (Exception e) {
-        JobLogUtils.raiseError(LOGGER, e, "Failed to load referral ranges!");
+        JobLogs.raiseError(LOGGER, e, "Failed to load referral ranges!");
       }
 
       limitRange(job, ret);

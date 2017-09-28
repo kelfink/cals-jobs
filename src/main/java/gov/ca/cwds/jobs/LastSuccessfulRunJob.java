@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.config.JobOptions;
-import gov.ca.cwds.jobs.util.JobLogUtils;
+import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
  * Abstract base class for all batch jobs based on last successful run time.
@@ -137,13 +137,13 @@ public abstract class LastSuccessfulRunJob implements Job {
         ret = new SimpleDateFormat(LAST_RUN_DATE_FORMAT).parse(br.readLine().trim());
       } catch (FileNotFoundException e) {
         fatalError = true;
-        JobLogUtils.raiseError(LOGGER, e, "Caught FileNotFoundException: {}", e.getMessage());
+        JobLogs.raiseError(LOGGER, e, "Caught FileNotFoundException: {}", e.getMessage());
       } catch (IOException e) {
         fatalError = true;
-        JobLogUtils.raiseError(LOGGER, e, "Caught IOException: {}", e.getMessage());
+        JobLogs.raiseError(LOGGER, e, "Caught IOException: {}", e.getMessage());
       } catch (ParseException e) {
         fatalError = true;
-        JobLogUtils.raiseError(LOGGER, e, "Caught ParseException: {}", e.getMessage());
+        JobLogs.raiseError(LOGGER, e, "Caught ParseException: {}", e.getMessage());
       }
     }
 
@@ -161,7 +161,7 @@ public abstract class LastSuccessfulRunJob implements Job {
         w.write(new SimpleDateFormat(LAST_RUN_DATE_FORMAT).format(datetime));
       } catch (IOException e) {
         fatalError = true;
-        JobLogUtils.raiseError(LOGGER, e, "Failed to write timestamp file: {}", e.getMessage());
+        JobLogs.raiseError(LOGGER, e, "Failed to write timestamp file: {}", e.getMessage());
       }
     }
   }
