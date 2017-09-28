@@ -102,12 +102,12 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    * @return array of optional collections to keep in insert JSON
    */
   @Override
-  protected ESOptionalCollection[] keepCollections() {
+  public ESOptionalCollection[] keepCollections() {
     return KEEP_COLLECTIONS;
   }
 
   @Override
-  protected String getOptionalElementName() {
+  public String getOptionalElementName() {
     return "screenings";
   }
 
@@ -127,8 +127,8 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    * @return List of ES person elements
    */
   @Override
-  protected List<? extends ApiTypedIdentifier<String>> getOptionalCollection(
-      ElasticSearchPerson esp, IntakeParticipant t) {
+  public List<? extends ApiTypedIdentifier<String>> getOptionalCollection(ElasticSearchPerson esp,
+      IntakeParticipant t) {
     return esp.getScreenings();
   }
 

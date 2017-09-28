@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import static gov.ca.cwds.data.persistence.cms.CmsPersistentObject.CMS_ID_LEN;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -30,7 +28,6 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
@@ -52,14 +49,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
-import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
@@ -117,12 +111,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final Logger LOGGER = LoggerFactory.getLogger(BasePersonIndexerJob.class);
 
   private static final String SQL_COLUMN_AFTER = "after";
-
-  private static final ESOptionalCollection[] KEEP_COLLECTIONS =
-      new ESOptionalCollection[] {ESOptionalCollection.NONE};
-
-  private static final List<? extends ApiTypedIdentifier<String>> EMPTY_OPTIONAL_LIST =
-      new ArrayList<>();
 
   /**
    * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it's
@@ -404,76 +392,48 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @throws IOException on Elasticsearch disconnect
    */
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T t) throws IOException {
-    String id = esp.getId();
-
-    // Set id and legacy id.
-    if (t instanceof ApiLegacyAware) {
-      ApiLegacyAware l = (ApiLegacyAware) t;
-      final boolean hasLegacyId =
-          StringUtils.isNotBlank(l.getLegacyId()) && l.getLegacyId().trim().length() == CMS_ID_LEN;
-
-      if (hasLegacyId) {
-        id = l.getLegacyId();
-        esp.setLegacyId(id);
-      } else {
-        id = esp.getId();
-      }
-    } else if (t instanceof CmsReplicatedEntity) {
-      esp.setLegacyId(t.getPrimaryKey().toString());
-    }
+    // String id = esp.getId();
+    //
+    // // Set id and legacy id.
+    // if (t instanceof ApiLegacyAware) {
+    // ApiLegacyAware l = (ApiLegacyAware) t;
+    // final boolean hasLegacyId =
+    // StringUtils.isNotBlank(l.getLegacyId()) && l.getLegacyId().trim().length() == CMS_ID_LEN;
+    //
+    // if (hasLegacyId) {
+    // id = l.getLegacyId();
+    // esp.setLegacyId(id);
+    // } else {
+    // id = esp.getId();
+    // }
+    // } else if (t instanceof CmsReplicatedEntity) {
+    // esp.setLegacyId(t.getPrimaryKey().toString());
+    // }
+    //
+    // // Set the legacy source table, if appropriate for this job.
+    // if (StringUtils.isNotBlank(getLegacySourceTable())) {
+    // esp.setLegacySourceTable(getLegacySourceTable());
+    // }
+    //
+    // // Child classes may override these methods as needed.
+    // // left = update, right = insert.
+    // final Pair<String, String> json = ElasticTransformer.prepareUpsertJson(this, esp, t,
+    // getOptionalElementName(), getOptionalCollection(esp, t), keepCollections());
+    //
+    // final String alias = getOpts().getIndexName();
+    // final String docType = esDao.getConfig().getElasticsearchDocType();
+    //
+    // // "Upsert": update if doc exists, insert if it does not.
+    // return new UpdateRequest(alias, docType, id).doc(json.getLeft())
+    // .upsert(new IndexRequest(alias, docType, id).source(json.getRight()));
 
     // Set the legacy source table, if appropriate for this job.
     if (StringUtils.isNotBlank(getLegacySourceTable())) {
       esp.setLegacySourceTable(getLegacySourceTable());
     }
 
-    // Child classes may override these methods as needed.
-    // left = update, right = insert.
-    final Pair<String, String> json = ElasticTransformer.prepareUpsertJson(this, esp, t,
-        getOptionalElementName(), getOptionalCollection(esp, t), keepCollections());
-
-    final String alias = getOpts().getIndexName();
-    final String docType = esDao.getConfig().getElasticsearchDocType();
-
-    // "Upsert": update if doc exists, insert if it does not.
-    return new UpdateRequest(alias, docType, id).doc(json.getLeft())
-        .upsert(new IndexRequest(alias, docType, id).source(json.getRight()));
-  }
-
-  // ===================
-  // OPTIONAL ELEMENTS:
-  // ===================
-
-  /**
-   * Which optional ES collections to retain for insert JSON. Child classes that populate optional
-   * collections should override this method.
-   * 
-   * @return array of optional collections to keep in insert JSON
-   */
-  protected ESOptionalCollection[] keepCollections() {
-    return KEEP_COLLECTIONS;
-  }
-
-  /**
-   * Get the optional element name populated by this job or null if none.
-   * 
-   * @return optional element name
-   */
-  protected String getOptionalElementName() {
-    return null;
-  }
-
-  /**
-   * Return the optional collection used to build the update JSON, if any. Child classes that
-   * populate optional collections should override this method.
-   * 
-   * @param esp ES person document object
-   * @param t normalized type
-   * @return List of ES person elements
-   */
-  protected List<? extends ApiTypedIdentifier<String>> getOptionalCollection(
-      ElasticSearchPerson esp, T t) {
-    return EMPTY_OPTIONAL_LIST;
+    return ElasticTransformer.<T>prepareUpsertRequest(this, getOpts().getIndexName(),
+        esDao.getConfig().getElasticsearchDocType(), esp, t);
   }
 
   // =================
@@ -547,7 +507,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void threadExtractJdbc() {
     Thread.currentThread().setName("extract");
-    LOGGER.info("BEGIN: Stage #1: extract");
+    LOGGER.info("BEGIN: extract thread");
 
     try (final Connection con = jobDao.getSessionFactory().getSessionFactoryOptions()
         .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
@@ -579,10 +539,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
 
         con.commit();
-      } finally {
-        // The statement closes automatically.
       }
-
     } catch (Exception e) {
       fatalError = true;
       JobLogUtils.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
@@ -590,7 +547,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       doneExtract = true;
     }
 
-    LOGGER.info("DONE: Stage #1: Extract");
+    LOGGER.info("DONE: extract thread");
   }
 
   /**
@@ -599,7 +556,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void threadTransform() {
     Thread.currentThread().setName("transform");
-    LOGGER.info("BEGIN: Transform thread");
+    LOGGER.info("BEGIN: transform thread");
 
     int cntr = 0;
     Object lastId = new Object();
@@ -645,7 +602,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }
 
-    LOGGER.info("DONE: Transform thread");
+    LOGGER.info("DONE: transform thread");
   }
 
   /**
@@ -796,13 +753,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * @return true if the job provides its own key ranges
-   */
-  protected boolean isRangeSelfManaging() {
-    return false;
-  }
-
-  /**
    * Lambda runs a number of threads up to max processor cores. Queued jobs wait until a worker
    * thread is available.
    * 
@@ -913,10 +863,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param lastRunTime last successful run time
    * @return List of normalized entities
    */
-  protected List<T> extractLastRunRecsFromTable(Date lastRunTime) {
+  protected List<T> extractLastRunRecsFromTable(final Date lastRunTime) {
     LOGGER.info("last successful run: {}", lastRunTime);
     final Class<?> entityClass = jobDao.getEntityClass();
-
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
     final Session session = jobDao.getSessionFactory().getCurrentSession();
     final Transaction txn = session.beginTransaction();
@@ -928,7 +877,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
 
-      LOGGER.warn("FOUND {} RECORDS", recs.size());
+      LOGGER.info("FOUND {} RECORDS", recs.size());
       results.addAll(recs);
 
       session.clear();
@@ -1276,9 +1225,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         results.stream().forEach(p -> {
           try {
             prepareDocument(bp, p);
-          } catch (JsonProcessingException e) {
-            throw JobLogUtils.buildException(LOGGER, e, "JSON ERROR: id: {}, {}", p.getPrimaryKey(),
-                e.getMessage());
           } catch (IOException e) {
             throw JobLogUtils.buildException(LOGGER, e, "IO ERROR: id: {}, {}", p.getPrimaryKey(),
                 e.getMessage());

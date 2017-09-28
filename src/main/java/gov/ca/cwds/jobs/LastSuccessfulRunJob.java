@@ -151,7 +151,7 @@ public abstract class LastSuccessfulRunJob implements Job {
   }
 
   /**
-   * Write the timestamp IF the job succeeded.
+   * Write the time stamp IF the job succeeded.
    * 
    * @param datetime date and time to store
    */

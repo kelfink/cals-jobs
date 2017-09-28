@@ -527,7 +527,7 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  protected boolean isRangeSelfManaging() {
+  public boolean isRangeSelfManaging() {
     return true;
   }
 

@@ -82,7 +82,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  protected boolean isRangeSelfManaging() {
+  public boolean isRangeSelfManaging() {
     return true;
   }
 

@@ -1,5 +1,8 @@
 package gov.ca.cwds.jobs.util.transform;
 
+import static gov.ca.cwds.data.persistence.cms.CmsPersistentObject.CMS_ID_LEN;
+
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,6 +11,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +32,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
+import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiLanguageAware;
 import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
@@ -67,6 +73,57 @@ public class ElasticTransformer {
       LOGGER.warn("ERROR SERIALIZING OBJECT {} TO JSON", obj);
     }
     return ret;
+  }
+
+  /**
+   * Prepare sections of a document for update. Elasticsearch automatically updates the provided
+   * sections. Some jobs should only write sub-documents, such as screenings or allegations, from a
+   * new data source, like Intake PostgreSQL, but should NOT overwrite document details from legacy.
+   * 
+   * <p>
+   * Default handler just serializes the whole ElasticSearchPerson instance to JSON and returns the
+   * same JSON for both insert and update. Child classes should override this method and null out
+   * any fields that should not be updated.
+   * </p>
+   * 
+   * @param esp ES document, already prepared by
+   *        {@link ElasticTransformer#buildElasticSearchPersonDoc(ApiPersonAware)}
+   * @param t target ApiPersonAware instance
+   * @return left = insert JSON, right = update JSON throws JsonProcessingException on JSON parse
+   *         error
+   * @throws JsonProcessingException on JSON parse error
+   * @throws IOException on Elasticsearch disconnect
+   */
+  public static <T extends PersistentObject> UpdateRequest prepareUpsertRequest(
+      JobElasticPersonDocPrep<T> docPrep, String alias, String docType, ElasticSearchPerson esp,
+      T t) throws IOException {
+    String id = esp.getId();
+
+    // Set id and legacy id.
+    if (t instanceof ApiLegacyAware) {
+      ApiLegacyAware l = (ApiLegacyAware) t;
+      final boolean hasLegacyId =
+          StringUtils.isNotBlank(l.getLegacyId()) && l.getLegacyId().trim().length() == CMS_ID_LEN;
+
+      if (hasLegacyId) {
+        id = l.getLegacyId();
+        esp.setLegacyId(id);
+      } else {
+        id = esp.getId();
+      }
+    } else if (t instanceof CmsReplicatedEntity) {
+      esp.setLegacyId(t.getPrimaryKey().toString());
+    }
+
+    // Child classes may override these methods as needed.
+    // left = update, right = insert.
+    final Pair<String, String> json =
+        ElasticTransformer.prepareUpsertJson(docPrep, esp, t, docPrep.getOptionalElementName(),
+            docPrep.getOptionalCollection(esp, t), docPrep.keepCollections());
+
+    // "Upsert": update if doc exists, insert if it does not.
+    return new UpdateRequest(alias, docType, id).doc(json.getLeft())
+        .upsert(new IndexRequest(alias, docType, id).source(json.getRight()));
   }
 
   /**
