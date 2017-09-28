@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -166,36 +165,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected JobOptions opts;
 
-  private AtomicInteger recsSentToIndexQueue = new AtomicInteger(0);
-
-  private AtomicInteger recsSentToBulkProcessor = new AtomicInteger(0);
-
-  private AtomicInteger rowsNormalized = new AtomicInteger(0);
-
-  /**
-   * Running count of records prepared for bulk indexing.
-   */
-  protected AtomicInteger recsBulkPrepared = new AtomicInteger(0);
-
-  /**
-   * Running count of records prepared for bulk deletion.
-   */
-  protected AtomicInteger recsBulkDeleted = new AtomicInteger(0);
-
-  /**
-   * Running count of records before bulk indexing.
-   */
-  protected AtomicInteger recsBulkBefore = new AtomicInteger(0);
-
-  /**
-   * Running count of records after bulk indexing.
-   */
-  protected AtomicInteger recsBulkAfter = new AtomicInteger(0);
-
-  /**
-   * Running count of errors during bulk indexing.
-   */
-  protected AtomicInteger recsBulkError = new AtomicInteger(0);
+  protected final JobProgressTrack track = new JobProgressTrack();
 
   /**
    * Queue of raw, de-normalized records waiting to be normalized.
@@ -364,7 +334,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void addToIndexQueue(T norm) {
     try {
-      JobLogUtils.logEvery(recsSentToIndexQueue.incrementAndGet(), "added to index queue", "recs");
+      JobLogUtils.logEvery(track.getRecsSentToIndexQueue().incrementAndGet(),
+          "added to index queue", "recs");
       queueIndex.putLast(norm);
     } catch (InterruptedException e) {
       fatalError = true;
@@ -382,19 +353,19 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
-        recsBulkBefore.getAndAdd(request.numberOfActions());
+        track.getRecsBulkBefore().getAndAdd(request.numberOfActions());
         LOGGER.debug("Ready to execute bulk of {} actions", request.numberOfActions());
       }
 
       @Override
       public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-        recsBulkAfter.getAndAdd(request.numberOfActions());
+        track.getRecsBulkAfter().getAndAdd(request.numberOfActions());
         LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
       }
 
       @Override
       public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-        recsBulkError.getAndIncrement();
+        track.getRecsBulkError().getAndIncrement();
         LOGGER.error("ERROR EXECUTING BULK", failure);
       }
     }).setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(14, ByteSizeUnit.MB))
@@ -423,7 +394,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return normalized entity bean instance
    */
   protected T normalizeSingle(List<M> recs) {
-    JobLogUtils.logEvery(rowsNormalized.incrementAndGet(), "Normalize", "single");
+    JobLogUtils.logEvery(track.getRowsNormalized().incrementAndGet(), "Normalize", "single");
     final List<T> list = normalize(recs);
     return list != null && !list.isEmpty() ? list.get(0) : null;
   }
@@ -442,7 +413,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   // ===================
 
   public void pushToBulkProcessor(BulkProcessor bp, DocWriteRequest<?> t) {
-    JobLogUtils.logEvery(recsSentToBulkProcessor.incrementAndGet(), "add to es bulk", "push doc");
+    JobLogUtils.logEvery(track.getRecsSentToBulkProcessor().incrementAndGet(), "add to es bulk",
+        "push doc");
     bp.add(t);
   }
 
@@ -482,9 +454,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       if (isDelete(t)) {
         ret = bulkDelete((String) t.getPrimaryKey());
-        recsBulkDeleted.getAndIncrement();
+        track.getRecsBulkDeleted().getAndIncrement();
       } else {
-        recsBulkPrepared.getAndIncrement();
+        track.getRecsBulkPrepared().getAndIncrement();
         ret = prepareUpsertRequest(esp, t);
       }
     } catch (Exception e) {
@@ -894,7 +866,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
 
         // Track counts.
-        recsBulkDeleted.getAndAdd(deletionResults.size());
+        track.getRecsBulkDeleted().getAndAdd(deletionResults.size());
       }
 
       // Give it time to finish the last batch.
@@ -997,10 +969,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
       }
 
-      // Result stats:
       LOGGER.info(
           "STATS: \nRecs To Index:  {}\nRecs To Delete: {}\nrecsBulkBefore: {}\nrecsBulkAfter:  {}\nrecsBulkError:  {}",
-          recsBulkPrepared, recsBulkDeleted, recsBulkBefore, recsBulkAfter, recsBulkError);
+          track.getRecsBulkPrepared(), track.getRecsBulkDeleted(), track.getRecsBulkBefore(),
+          track.getRecsBulkAfter(), track.getRecsBulkError());
 
       LOGGER.info("Updating last successful run time to {}",
           new SimpleDateFormat(LAST_RUN_DATE_FORMAT).format(startTime));
@@ -1425,7 +1397,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }
 
-    return recsBulkPrepared.get();
+    return track.getRecsBulkPrepared().get();
   }
 
   // ===========================
