@@ -97,6 +97,7 @@ public class ElasticTransformer {
    * any fields that should not be updated.
    * </p>
    * 
+   * @param <T> normalized persistent type
    * @param docPrep document handler
    * @param alias ES index alias
    * @param docType ES document type
