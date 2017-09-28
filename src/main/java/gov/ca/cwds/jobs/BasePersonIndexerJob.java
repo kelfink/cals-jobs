@@ -910,14 +910,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
   }
 
-  // ====================
-  // RUN MODE DECISION:
-  // ====================
-
   /**
+   * Calculate last successful run date/time, per
+   * {@link LastSuccessfulRunJob#calcLastRunDate(Date, JobOptions)}.
+   * 
    * @param lastSuccessfulRunTime last successful run
    * @return appropriate date to detect changes
-   * @see {@link LastSuccessfulRunJob#calcLastRunDate(Date, JobOptions)}
    */
   protected Date calcLastRunDate(final Date lastSuccessfulRunTime) {
     return calcLastRunDate(lastSuccessfulRunTime, getOpts());

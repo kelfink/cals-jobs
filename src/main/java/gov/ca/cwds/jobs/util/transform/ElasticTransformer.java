@@ -49,7 +49,7 @@ public class ElasticTransformer {
 
   private static ObjectMapper mapper;
 
-  protected ElasticTransformer() {
+  private ElasticTransformer() {
     // Static methods, don't instantiate.
   }
 

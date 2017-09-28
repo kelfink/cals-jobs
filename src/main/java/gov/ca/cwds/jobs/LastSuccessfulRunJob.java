@@ -166,7 +166,7 @@ public abstract class LastSuccessfulRunJob implements Job {
   /**
    * Getter for last job run time.
    * 
-   * @return last time the job ran successfully, in format {@link #jobDateFormat}
+   * @return last time the job ran successfully, in format {@link #LAST_RUN_DATE_FORMAT}
    */
   public String getLastJobRunTimeFilename() {
     return lastRunTimeFilename;
