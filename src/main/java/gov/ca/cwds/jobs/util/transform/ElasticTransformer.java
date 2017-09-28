@@ -201,7 +201,7 @@ public class ElasticTransformer {
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
       throws JsonProcessingException {
 
-    // Null out optional collections for updates.
+    // Clear out optional collections for updates.
     esp.clearOptionalCollections(keep);
 
     // Child classes: Set optional collections before serializing the insert JSON.
@@ -245,7 +245,12 @@ public class ElasticTransformer {
   }
 
   /**
-   * Create legacy descriptor
+   * Create legacy descriptor.
+   * 
+   * <p>
+   * Legacy ID should always be 10 characters long, otherwise we can not parse it to get UI ID. For
+   * LegacyTable.STFPERST it is usually 3 characters long.
+   * </p>
    * 
    * @param legacyId Legacy ID
    * @param legacyLastUpdated Legacy last updated time stamp
@@ -254,114 +259,110 @@ public class ElasticTransformer {
    */
   public static ElasticSearchLegacyDescriptor createLegacyDescriptor(String legacyId,
       Date legacyLastUpdated, LegacyTable legacyTable) {
-    ElasticSearchLegacyDescriptor legacyDesc = new ElasticSearchLegacyDescriptor();
+    final ElasticSearchLegacyDescriptor ret = new ElasticSearchLegacyDescriptor();
 
     if (!StringUtils.isBlank(legacyId)) {
-      legacyDesc.setLegacyId(legacyId.trim());
-      legacyDesc.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
+      ret.setLegacyId(legacyId.trim());
+      ret.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
 
-      /**
-       * Legacy ID should always be 10 characters long, otherwise we can not parse it to get UI ID.
-       * For LegacyTable.STFPERST it is usually 3 characters long.
-       */
       if (legacyId.trim().length() == 10) {
-        legacyDesc.setLegacyUiId(CmsKeyIdGenerator.getUIIdentifierFromKey(legacyId.trim()));
+        ret.setLegacyUiId(CmsKeyIdGenerator.getUIIdentifierFromKey(legacyId.trim()));
       } else {
-        legacyDesc.setLegacyUiId(legacyId.trim());
+        ret.setLegacyUiId(legacyId.trim());
       }
 
       if (legacyTable != null) {
-        legacyDesc.setLegacyTableName(legacyTable.getName());
-        legacyDesc.setLegacyTableDescription(legacyTable.getDescription());
+        ret.setLegacyTableName(legacyTable.getName());
+        ret.setLegacyTableDescription(legacyTable.getDescription());
       }
     }
 
-    return legacyDesc;
+    return ret;
   }
 
   protected static List<ElasticSearchPersonLanguage> handleLanguage(ApiPersonAware p) {
-    List<ElasticSearchPersonLanguage> languages = null;
+    List<ElasticSearchPersonLanguage> ret = null;
 
     if (p instanceof ApiMultipleLanguagesAware) {
       ApiMultipleLanguagesAware mlx = (ApiMultipleLanguagesAware) p;
-      languages = new ArrayList<>();
+      ret = new ArrayList<>();
       for (ApiLanguageAware lx : mlx.getLanguages()) {
         Integer languageId = lx.getLanguageSysId();
         ElasticSearchPersonLanguage lang = new ElasticSearchPersonLanguage(languageId.toString(),
             SystemCodeCache.global().getSystemCodeShortDescription(languageId), lx.getPrimary());
-        languages.add(lang);
+        ret.add(lang);
       }
     } else if (p instanceof ApiLanguageAware) {
-      languages = new ArrayList<>();
+      ret = new ArrayList<>();
       ApiLanguageAware lx = (ApiLanguageAware) p;
       Integer languageId = lx.getLanguageSysId();
       ElasticSearchPersonLanguage lang = new ElasticSearchPersonLanguage(languageId.toString(),
           SystemCodeCache.global().getSystemCodeShortDescription(languageId), lx.getPrimary());
-      languages.add(lang);
+      ret.add(lang);
     }
 
-    return languages;
+    return ret;
   }
 
   protected static List<ElasticSearchPersonPhone> handlePhone(ApiPersonAware p) {
-    List<ElasticSearchPersonPhone> phones = null;
+    List<ElasticSearchPersonPhone> ret = null;
     if (p instanceof ApiMultiplePhonesAware) {
-      phones = new ArrayList<>();
+      ret = new ArrayList<>();
       ApiMultiplePhonesAware mphx = (ApiMultiplePhonesAware) p;
       for (ApiPhoneAware phx : mphx.getPhones()) {
-        phones.add(new ElasticSearchPersonPhone(phx));
+        ret.add(new ElasticSearchPersonPhone(phx));
       }
     } else if (p instanceof ApiPhoneAware) {
-      phones = new ArrayList<>();
+      ret = new ArrayList<>();
       ApiPhoneAware phx = (ApiPhoneAware) p;
-      phones.add(new ElasticSearchPersonPhone(phx));
+      ret.add(new ElasticSearchPersonPhone(phx));
     }
 
-    return phones;
+    return ret;
   }
 
   protected static List<ElasticSearchPersonAddress> handleAddress(ApiPersonAware p) {
-    List<ElasticSearchPersonAddress> addresses = null;
+    List<ElasticSearchPersonAddress> ret = null;
 
     if (p instanceof ApiMultipleAddressesAware) {
-      addresses = new ArrayList<>();
+      ret = new ArrayList<>();
       ApiMultipleAddressesAware madrx = (ApiMultipleAddressesAware) p;
       for (ApiAddressAware adrx : madrx.getAddresses()) {
         ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress(adrx);
         if (adrx instanceof ApiLegacyAware) {
           esAddress.setLegacyDescriptor(((ApiLegacyAware) adrx).getLegacyDescriptor());
         }
-        addresses.add(esAddress);
+        ret.add(esAddress);
       }
     } else if (p instanceof ApiAddressAware) {
-      addresses = new ArrayList<>();
+      ret = new ArrayList<>();
       ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress((ApiAddressAware) p);
       if (p instanceof ApiLegacyAware) {
         esAddress.setLegacyDescriptor(((ApiLegacyAware) p).getLegacyDescriptor());
       }
-      addresses.add(esAddress);
+      ret.add(esAddress);
     }
 
-    return addresses;
+    return ret;
   }
 
   protected static List<ElasticSearchPersonScreening> handleScreening(ApiPersonAware p) {
-    List<ElasticSearchPersonScreening> screenings = null;
+    List<ElasticSearchPersonScreening> ret = null;
     if (p instanceof ApiScreeningAware) {
-      screenings = new ArrayList<>();
+      ret = new ArrayList<>();
       for (ElasticSearchPersonScreening scr : ((ApiScreeningAware) p).getEsScreenings()) {
-        screenings.add(scr);
+        ret.add(scr);
       }
     }
-    return screenings;
+    return ret;
   }
 
   protected static ElasticSearchLegacyDescriptor handleLegacyDescriptor(ApiPersonAware p) {
-    ElasticSearchLegacyDescriptor legacyDescriptor = null;
+    ElasticSearchLegacyDescriptor ret = null;
     if (p instanceof ApiLegacyAware) {
-      legacyDescriptor = ((ApiLegacyAware) p).getLegacyDescriptor();
+      ret = ((ApiLegacyAware) p).getLegacyDescriptor();
     }
-    return legacyDescriptor;
+    return ret;
   }
 
   /**

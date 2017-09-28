@@ -276,7 +276,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  protected List<ReplicatedClient> normalize(List<EsClientAddress> recs) {
+  public List<ReplicatedClient> normalize(List<EsClientAddress> recs) {
     return EntityNormalizer.<ReplicatedClient, EsClientAddress>normalizeList(recs);
   }
 

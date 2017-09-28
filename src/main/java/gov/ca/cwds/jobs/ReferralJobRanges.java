@@ -25,9 +25,37 @@ public class ReferralJobRanges {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralJobRanges.class);
 
+  /**
+   * Split tab delim line of key range, beginning and end.
+   * 
+   * @param line line to parse
+   * @return key pair
+   */
   private Pair<String, String> splitLine(String line) {
     final String[] pieces = line.split("\t");
     return Pair.of(pieces[0], pieces[1]);
+  }
+
+  private List<Pair<String, String>> limitRange(
+      BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job,
+      final List<Pair<String, String>> allKeyPairs) {
+    List<Pair<String, String>> ret = new ArrayList<>();
+    final JobOptions opts = job.getOpts();
+    if (opts != null && opts.isRangeGiven()) {
+      final List<Pair<String, String>> list = new ArrayList<>();
+
+      final int start = ((int) opts.getStartBucket()) - 1;
+      final int end = ((int) opts.getEndBucket()) - 1;
+
+      LOGGER.info("KEY RANGES: {} to {}", start + 1, end + 1);
+      for (int i = start; i <= end; i++) {
+        list.add(allKeyPairs.get(i));
+      }
+
+      ret = list;
+    }
+
+    return ret;
   }
 
   /**
@@ -39,9 +67,9 @@ public class ReferralJobRanges {
   public List<Pair<String, String>> getPartitionRanges(
       BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job) {
     List<Pair<String, String>> ret = new ArrayList<>();
-
     final boolean isMainframe = job.isDB2OnZOS();
     final String schema = BasePersonIndexerJob.getDBSchemaName().toUpperCase();
+
     if (isMainframe
         && (schema.endsWith("RSQ") || schema.endsWith("REP") || schema.endsWith("DSM"))) {
       LOGGER.warn("z/OS, LARGE data set, ORDER: a,z,A,Z,0,9");
@@ -54,21 +82,7 @@ public class ReferralJobRanges {
         JobLogUtils.raiseError(LOGGER, e, "Failed to load referral ranges!");
       }
 
-      final JobOptions opts = job.getOpts();
-      if (opts != null && opts.isRangeGiven()) {
-        final List<Pair<String, String>> list = new ArrayList<>();
-
-        final int start = ((int) opts.getStartBucket()) - 1;
-        final int end = ((int) opts.getEndBucket()) - 1;
-
-        LOGGER.warn("KEY RANGES: {} to {}", start + 1, end + 1);
-        for (int i = start; i <= end; i++) {
-          list.add(ret.get(i));
-        }
-
-        ret = list;
-      }
-
+      limitRange(job, ret);
     } else if (isMainframe) {
       LOGGER.warn("z/OS, small data set, ORDER: a,z,A,Z,0,9");
       ret.add(Pair.of("aaaaaaaaaa", "9999999999"));

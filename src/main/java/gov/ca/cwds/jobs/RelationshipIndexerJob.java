@@ -137,12 +137,12 @@ public class RelationshipIndexerJob
   }
 
   @Override
-  protected ReplicatedRelationships normalizeSingle(List<EsRelationship> recs) {
+  public ReplicatedRelationships normalizeSingle(List<EsRelationship> recs) {
     return !recs.isEmpty() ? normalize(recs).get(0) : null;
   }
 
   @Override
-  protected List<ReplicatedRelationships> normalize(List<EsRelationship> recs) {
+  public List<ReplicatedRelationships> normalize(List<EsRelationship> recs) {
     return EntityNormalizer.<ReplicatedRelationships, EsRelationship>normalizeList(recs);
   }
 

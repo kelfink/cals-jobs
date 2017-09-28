@@ -106,12 +106,12 @@ public class SafetyAlertIndexerJob
   }
 
   @Override
-  protected ReplicatedSafetyAlerts normalizeSingle(List<EsSafetyAlert> recs) {
+  public ReplicatedSafetyAlerts normalizeSingle(List<EsSafetyAlert> recs) {
     return recs != null && !recs.isEmpty() ? normalize(recs).get(0) : new ReplicatedSafetyAlerts();
   }
 
   @Override
-  protected List<ReplicatedSafetyAlerts> normalize(List<EsSafetyAlert> recs) {
+  public List<ReplicatedSafetyAlerts> normalize(List<EsSafetyAlert> recs) {
     return EntityNormalizer.<ReplicatedSafetyAlerts, EsSafetyAlert>normalizeList(recs);
   }
 

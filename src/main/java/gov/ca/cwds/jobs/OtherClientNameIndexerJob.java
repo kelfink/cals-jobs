@@ -86,12 +86,12 @@ public class OtherClientNameIndexerJob
   }
 
   @Override
-  protected ReplicatedAkas normalizeSingle(final List<ReplicatedOtherClientName> recs) {
+  public ReplicatedAkas normalizeSingle(final List<ReplicatedOtherClientName> recs) {
     return recs != null && !recs.isEmpty() ? normalize(recs).get(0) : null;
   }
 
   @Override
-  protected List<ReplicatedAkas> normalize(final List<ReplicatedOtherClientName> recs) {
+  public List<ReplicatedAkas> normalize(final List<ReplicatedOtherClientName> recs) {
     return EntityNormalizer.<ReplicatedAkas, ReplicatedOtherClientName>normalizeList(recs);
   }
 

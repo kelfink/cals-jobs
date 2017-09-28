@@ -25,12 +25,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.common.unit.ByteSizeUnit;
-import org.elasticsearch.common.unit.ByteSizeValue;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
@@ -60,6 +56,7 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.JobFeatureCore;
 import gov.ca.cwds.jobs.component.JobFeatureHibernate;
 import gov.ca.cwds.jobs.config.JobOptions;
@@ -70,7 +67,6 @@ import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 import gov.ca.cwds.jobs.util.transform.JobElasticPersonDocPrep;
 
 /**
@@ -129,6 +125,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected final ObjectMapper mapper;
 
+  protected final JobBulkProcessorBuilder jobBulkProcessorBuilder;
+
   /**
    * Main DAO for the supported persistence class.
    */
@@ -185,9 +183,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     this.esDao = esDao;
     this.mapper = mapper;
     this.sessionFactory = sessionFactory;
+    this.jobBulkProcessorBuilder = new JobBulkProcessorBuilder(esDao, track);
+    this.lock = new ReentrantReadWriteLock(false);
 
     ElasticTransformer.setMapper(mapper);
-    lock = new ReentrantReadWriteLock(false);
   }
 
   /**
@@ -209,9 +208,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @throws JsonProcessingException unable to parse
    */
   public DeleteRequest bulkDelete(String id) throws JsonProcessingException {
-    final String alias = getOpts().getIndexName();
-    final String docType = esDao.getConfig().getElasticsearchDocType();
-    return new DeleteRequest(alias, docType, id);
+    return new DeleteRequest(getOpts().getIndexName(), esDao.getConfig().getElasticsearchDocType(),
+        id);
   }
 
   /**
@@ -232,64 +230,23 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
   }
 
-  /**
-   * Instantiate one Elasticsearch BulkProcessor per working thread.
-   * 
-   * @return Elasticsearch BulkProcessor
-   */
-  public BulkProcessor buildBulkProcessor() {
-    return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
-      @Override
-      public void beforeBulk(long executionId, BulkRequest request) {
-        track.getRecsBulkBefore().getAndAdd(request.numberOfActions());
-        LOGGER.debug("Ready to execute bulk of {} actions", request.numberOfActions());
-      }
-
-      @Override
-      public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-        track.getRecsBulkAfter().getAndAdd(request.numberOfActions());
-        LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
-      }
-
-      @Override
-      public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-        track.getRecsBulkError().getAndIncrement();
-        LOGGER.error("ERROR EXECUTING BULK", failure);
-      }
-    }).setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(14, ByteSizeUnit.MB))
-        .setConcurrentRequests(1).setName("jobs_bp").build();
-  }
-
-  /**
-   * Default normalize method just returns the input. Child classes may customize this method to
-   * normalize de-normalized result sets (view records) to normalized entities (parent/child)
-   * records.
-   * 
-   * @param recs entity records
-   * @return unmodified entity records
-   * @see EntityNormalizer
-   */
-  @SuppressWarnings("unchecked")
-  protected List<T> normalize(List<M> recs) {
-    return (List<T>) recs;
-  }
-
-  /**
-   * Normalize view records for a single grouping (such as all the same client) into a normalized
-   * entity bean, consisting of a parent object and its child objects.
-   * 
-   * @param recs de-normalized view beans
-   * @return normalized entity bean instance
-   */
-  protected T normalizeSingle(List<M> recs) {
-    JobLogUtils.logEvery(track.getRowsNormalized().incrementAndGet(), "Normalize", "single");
-    final List<T> list = normalize(recs);
-    return list != null && !list.isEmpty() ? list.get(0) : null;
-  }
-
   // ===================
   // ELASTICSEARCH:
   // ===================
+
+  /**
+   * Instantiate one Elasticsearch BulkProcessor per working thread.
+   * 
+   * @return an ES bulk processor
+   */
+  public BulkProcessor buildBulkProcessor() {
+    return this.jobBulkProcessorBuilder.buildBulkProcessor();
+  }
+
+  @Override
+  public void incrementNormalizeCount() {
+    JobLogUtils.logEvery(track.getRowsNormalized().incrementAndGet(), "Normalize", "single");
+  }
 
   /**
    * Publish a Person record to Elasticsearch with a bulk processor.

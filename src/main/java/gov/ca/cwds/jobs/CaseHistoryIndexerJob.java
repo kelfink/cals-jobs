@@ -142,13 +142,12 @@ public abstract class CaseHistoryIndexerJob
   }
 
   @Override
-  protected ReplicatedPersonCases normalizeSingle(final List<EsPersonCase> recs) {
+  public ReplicatedPersonCases normalizeSingle(final List<EsPersonCase> recs) {
     return recs != null && !recs.isEmpty() ? normalize(recs).get(0) : null;
   }
 
   @Override
-  protected List<ReplicatedPersonCases> normalize(final List<EsPersonCase> recs) {
+  public List<ReplicatedPersonCases> normalize(final List<EsPersonCase> recs) {
     return EntityNormalizer.<ReplicatedPersonCases, EsPersonCase>normalizeList(recs);
   }
 }
-
