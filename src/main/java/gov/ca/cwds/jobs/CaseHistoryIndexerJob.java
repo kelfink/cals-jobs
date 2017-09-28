@@ -78,7 +78,7 @@ public abstract class CaseHistoryIndexerJob
   }
 
   @Override
-  protected String getPrepLastChangeSQL() {
+  public String getPrepLastChangeSQL() {
     return INSERT_CLIENT_LAST_CHG;
   }
 

@@ -1172,10 +1172,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return ret;
   }
 
-  protected String getPrepLastChangeSQL() {
-    return null;
-  }
-
   /**
    * Execute JDBC prior to calling method {@link #pullBucketRange(String, String)}.
    * 

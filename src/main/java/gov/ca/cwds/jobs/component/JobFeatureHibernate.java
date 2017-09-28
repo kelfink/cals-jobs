@@ -76,6 +76,10 @@ public interface JobFeatureHibernate extends ApiMarker {
     return getDenormalizedClass() != null;
   }
 
+  default String getPrepLastChangeSQL() {
+    return null;
+  }
+
 
 
 }
