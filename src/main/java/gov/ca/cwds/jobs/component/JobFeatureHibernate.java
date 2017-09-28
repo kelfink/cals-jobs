@@ -1,13 +1,17 @@
 package gov.ca.cwds.jobs.component;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import gov.ca.cwds.dao.cms.BatchDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 
-public interface JobFeatureHibernate extends ApiMarker {
+public interface JobFeatureHibernate<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
+    extends ApiMarker, JobResultSetAware<M> {
 
   static final int DEFAULT_BATCH_WAIT = 25;
   static final int DEFAULT_BUCKETS = 1;
@@ -17,6 +21,8 @@ public interface JobFeatureHibernate extends ApiMarker {
   static final int POLL_MILLIS = 3000;
 
   static final int DEFAULT_FETCH_SIZE = BatchDaoImpl.DEFAULT_FETCH_SIZE;
+
+  static final String SQL_COLUMN_AFTER = "after";
 
   /**
    * Return the job's entity class for its denormalized source view or materialized query table, if
@@ -80,6 +86,18 @@ public interface JobFeatureHibernate extends ApiMarker {
     return null;
   }
 
+  @Override
+  default M extract(final ResultSet rs) throws SQLException {
+    return null;
+  }
 
+  /**
+   * Override to customize the default number of buckets by job.
+   * 
+   * @return default total buckets
+   */
+  default int getJobTotalBuckets() {
+    return DEFAULT_BUCKETS;
+  }
 
 }

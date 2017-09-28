@@ -29,6 +29,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
@@ -115,7 +116,7 @@ public class OtherClientNameIndexerJob
 
     if (!p.getAkas().isEmpty()) {
       try {
-        buf.append(p.getAkas().stream().map(this::jsonify).sorted(String::compareTo)
+        buf.append(p.getAkas().stream().map(ElasticTransformer::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
         JobLogUtils.raiseError(LOGGER, e, "ERROR SERIALIZING OTHER CLIENT NAMES! {}",

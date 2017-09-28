@@ -44,6 +44,7 @@ import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
@@ -561,8 +562,8 @@ public class ReferralHistoryIndexerJob
 
     if (esPersonReferrals != null && !esPersonReferrals.isEmpty()) {
       try {
-        buf.append(esPersonReferrals.stream().map(this::jsonify).sorted(String::compareTo)
-            .collect(Collectors.joining(",")));
+        buf.append(esPersonReferrals.stream().map(ElasticTransformer::jsonify)
+            .sorted(String::compareTo).collect(Collectors.joining(",")));
       } catch (Exception e) {
         JobLogUtils.raiseError(LOGGER, e, "ERROR SERIALIZING REFERRALS! ", e.getMessage());
       }

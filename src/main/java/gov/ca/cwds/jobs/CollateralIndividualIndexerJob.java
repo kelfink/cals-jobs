@@ -40,7 +40,7 @@ public final class CollateralIndividualIndexerJob
   }
 
   @Override
-  protected int getJobTotalBuckets() {
+  public int getJobTotalBuckets() {
     return 12;
   }
 

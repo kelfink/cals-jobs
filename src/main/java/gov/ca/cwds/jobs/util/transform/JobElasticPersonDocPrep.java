@@ -12,6 +12,10 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 
 public interface JobElasticPersonDocPrep<T extends PersistentObject> extends ApiMarker {
 
+  static final String ES_PEOPLE_INDEX_SETTINGS =
+      "/elasticsearch/setting/people-index-settings.json";
+  static final String ES_PERSON_MAPPING = "/elasticsearch/mapping/map_person_5x_snake.json";
+
   static final ESOptionalCollection[] KEEP_COLLECTIONS =
       new ESOptionalCollection[] {ESOptionalCollection.NONE};
 

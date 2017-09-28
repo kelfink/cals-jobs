@@ -21,6 +21,7 @@ import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
@@ -135,16 +136,13 @@ public class JobsGuiceInjector extends AbstractModule {
         injector = Guice.createInjector(new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()),
             opts.getLastRunLoc(), opts.getAltInputFile()));
 
-        /**
-         * Initialize system code cache
-         */
+        // Initialize system code cache.
         injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
 
         ElasticTransformer.setMapper(injector.getInstance(ObjectMapper.class));
 
       } catch (CreationException e) {
-        throw JobLogUtils.buildException(LOGGER, e, "FAILED TO BUILD INJECTOR!: {}",
-            e.getMessage());
+        throw JobLogUtils.buildException(LOGGER, e, "FAILED TO BUILD INJECTOR! {}", e.getMessage());
       }
     }
 
@@ -253,6 +251,8 @@ public class JobsGuiceInjector extends AbstractModule {
 
     // Required for annotation injection.
     bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
+
+    // For alternative, file-based sources.
     bindConstant().annotatedWith(AltInputFile.class).to(this.altInputFilename);
 
     bind(SystemCodeDao.class);
@@ -273,6 +273,7 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   @Provides
+  @Singleton
   public CmsSystemCodeSerializer provideCmsSystemCodeSerializer(SystemCodeCache systemCodeCache) {
     return new CmsSystemCodeSerializer(systemCodeCache);
   }

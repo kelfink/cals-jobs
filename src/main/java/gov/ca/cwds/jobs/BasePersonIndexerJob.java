@@ -69,7 +69,6 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
-import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 import gov.ca.cwds.jobs.util.transform.JobElasticPersonDocPrep;
@@ -100,8 +99,8 @@ import gov.ca.cwds.jobs.util.transform.JobElasticPersonDocPrep;
  * @see JobOptions
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends LastSuccessfulRunJob implements AutoCloseable, JobResultSetAware<M>,
-    JobElasticPersonDocPrep<T>, JobFeatureHibernate, JobFeatureCore {
+    extends LastSuccessfulRunJob implements AutoCloseable, JobElasticPersonDocPrep<T>,
+    JobFeatureHibernate<T, M>, JobFeatureCore {
 
   /**
    * Default serialization.
@@ -109,8 +108,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BasePersonIndexerJob.class);
-
-  private static final String SQL_COLUMN_AFTER = "after";
 
   /**
    * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it's
@@ -204,11 +201,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         : false;
   }
 
-  @Override
-  public M extract(final ResultSet rs) throws SQLException {
-    return null;
-  }
-
   /**
    * Build a delete request to remove the document from the index.
    * 
@@ -220,15 +212,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final String alias = getOpts().getIndexName();
     final String docType = esDao.getConfig().getElasticsearchDocType();
     return new DeleteRequest(alias, docType, id);
-  }
-
-  /**
-   * @param obj object to serialize
-   * @return JSON for this screening
-   * @see ElasticTransformer#jsonify(Object)
-   */
-  public String jsonify(Object obj) {
-    return ElasticTransformer.jsonify(obj);
   }
 
   /**
@@ -304,24 +287,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return list != null && !list.isEmpty() ? list.get(0) : null;
   }
 
-  /**
-   * Override to customize the default number of buckets by job.
-   * 
-   * @return default total buckets
-   */
-  protected int getJobTotalBuckets() {
-    return DEFAULT_BUCKETS;
-  }
-
   // ===================
   // ELASTICSEARCH:
   // ===================
-
-  public void pushToBulkProcessor(BulkProcessor bp, DocWriteRequest<?> t) {
-    JobLogUtils.logEvery(track.getRecsSentToBulkProcessor().incrementAndGet(), "add to es bulk",
-        "push doc");
-    bp.add(t);
-  }
 
   /**
    * Publish a Person record to Elasticsearch with a bulk processor.
@@ -333,14 +301,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param bp {@link #buildBulkProcessor()} for this thread
    * @param t Person record to write
-   * @throws JsonProcessingException if unable to serialize JSON
    * @throws IOException if unable to prepare request
    * @see #prepareUpsertRequest(ElasticSearchPerson, PersistentObject)
    */
-  protected void prepareDocument(BulkProcessor bp, T t) throws IOException {
+  protected void prepareDocument(final BulkProcessor bp, T t) throws IOException {
     Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
         .map(p -> prepareUpsertRequestNoChecked(p, t)).forEach(x -> { // NOSONAR
-          pushToBulkProcessor(bp, x);
+          ElasticTransformer.pushToBulkProcessor(track, bp, x);
         });
   }
 
@@ -373,61 +340,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Prepare sections of a document for update. Elasticsearch automatically updates the provided
-   * sections. Some jobs should only write sub-documents, such as screenings or allegations, from a
-   * new data source, like Intake PostgreSQL, but should NOT overwrite document details from legacy.
-   * 
-   * <p>
-   * Default handler just serializes the whole ElasticSearchPerson instance to JSON and returns the
-   * same JSON for both insert and update. Child classes should override this method and null out
-   * any fields that should not be updated.
-   * </p>
+   * Prepare sections of a document for update.
    * 
    * @param esp ES document, already prepared by
    *        {@link ElasticTransformer#buildElasticSearchPersonDoc(ApiPersonAware)}
    * @param t target ApiPersonAware instance
    * @return left = insert JSON, right = update JSON throws JsonProcessingException on JSON parse
    *         error
-   * @throws JsonProcessingException on JSON parse error
    * @throws IOException on Elasticsearch disconnect
+   * @see ElasticTransformer#prepareUpsertRequest(JobElasticPersonDocPrep, String, String,
+   *      ElasticSearchPerson, PersistentObject)
    */
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T t) throws IOException {
-    // String id = esp.getId();
-    //
-    // // Set id and legacy id.
-    // if (t instanceof ApiLegacyAware) {
-    // ApiLegacyAware l = (ApiLegacyAware) t;
-    // final boolean hasLegacyId =
-    // StringUtils.isNotBlank(l.getLegacyId()) && l.getLegacyId().trim().length() == CMS_ID_LEN;
-    //
-    // if (hasLegacyId) {
-    // id = l.getLegacyId();
-    // esp.setLegacyId(id);
-    // } else {
-    // id = esp.getId();
-    // }
-    // } else if (t instanceof CmsReplicatedEntity) {
-    // esp.setLegacyId(t.getPrimaryKey().toString());
-    // }
-    //
-    // // Set the legacy source table, if appropriate for this job.
-    // if (StringUtils.isNotBlank(getLegacySourceTable())) {
-    // esp.setLegacySourceTable(getLegacySourceTable());
-    // }
-    //
-    // // Child classes may override these methods as needed.
-    // // left = update, right = insert.
-    // final Pair<String, String> json = ElasticTransformer.prepareUpsertJson(this, esp, t,
-    // getOptionalElementName(), getOptionalCollection(esp, t), keepCollections());
-    //
-    // final String alias = getOpts().getIndexName();
-    // final String docType = esDao.getConfig().getElasticsearchDocType();
-    //
-    // // "Upsert": update if doc exists, insert if it does not.
-    // return new UpdateRequest(alias, docType, id).doc(json.getLeft())
-    // .upsert(new IndexRequest(alias, docType, id).source(json.getRight()));
-
-    // Set the legacy source table, if appropriate for this job.
     if (StringUtils.isNotBlank(getLegacySourceTable())) {
       esp.setLegacySourceTable(getLegacySourceTable());
     }
@@ -520,12 +444,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final String query = getInitialLoadQuery(getDBSchemaName());
       M m;
 
-      /**
-       * Enable parallelism for underlying database
-       */
+      // Enable parallelism for underlying database.
       JobDB2Utils.enableParallelism(con);
 
-      try (Statement stmt = con.createStatement()) {
+      try (final Statement stmt = con.createStatement()) {
         stmt.setFetchSize(15000); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(100000);
@@ -533,7 +455,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
         int cntr = 0;
         while (!fatalError && rs.next() && (m = extract(rs)) != null) {
-          // Hand the baton to the next runner ...
           JobLogUtils.logEvery(++cntr, "Retrieved", "recs");
           queueTransform.putLast(m);
         }
@@ -681,7 +602,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void prepLastRunDoc(BulkProcessor bp, T p) {
     try {
-      // Write persistence object to Elasticsearch Person document.
       prepareDocument(bp, p);
     } catch (JsonProcessingException e) {
       fatalError = true;
@@ -710,10 +630,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected Date doLastRun(Date lastRunDt) {
     try {
-      // One bulk processor for "last run" operations. BulkProcessor itself is thread-safe.
       final BulkProcessor bp = buildBulkProcessor();
       final Set<String> deletionResults = new HashSet<>();
-
       final List<T> results =
           this.isViewNormalizer() ? extractLastRunRecsFromView(lastRunDt, deletionResults)
               : extractLastRunRecsFromTable(lastRunDt);
@@ -775,24 +693,21 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           ? esDao.getConfig().getElasticsearchAlias() : indexNameOverride;
       getOpts().setIndexName(effectiveIndexName);
 
-      final Date effectiveLastSuccessfulRunTime = calcLastRunDate(lastSuccessfulRunTime);
+      final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
       final String documentType = esDao.getConfig().getElasticsearchDocType();
-      final String peopleSettingsFile = "/elasticsearch/setting/people-index-settings.json";
-      final String personMappingFile = "/elasticsearch/mapping/map_person_5x_snake.json";
 
-      LOGGER.info("Effective index name: " + effectiveIndexName);
-      LOGGER.info("Last successsful run time: " + effectiveLastSuccessfulRunTime.toString());
+      LOGGER.info("Effective index name: {}", effectiveIndexName);
+      LOGGER.info("Last successsful run time: {}", lastRun.toString());
 
       // If the index is missing, create it.
       LOGGER.debug("Create index if missing, effectiveIndexName: " + effectiveIndexName);
-      esDao.createIndexIfNeeded(effectiveIndexName, documentType, peopleSettingsFile,
-          personMappingFile);
+      esDao.createIndexIfNeeded(effectiveIndexName, documentType, ES_PEOPLE_INDEX_SETTINGS,
+          ES_PERSON_MAPPING);
 
       // Smart/auto mode:
       final Calendar cal = Calendar.getInstance();
       cal.add(Calendar.YEAR, -50);
-      final boolean autoMode =
-          this.opts.isLastRunMode() && effectiveLastSuccessfulRunTime.before(cal.getTime());
+      final boolean autoMode = this.opts.isLastRunMode() && lastRun.before(cal.getTime());
 
       if (autoMode) {
         LOGGER.warn("AUTO MODE!");
@@ -811,7 +726,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       } else if (this.opts == null || this.opts.isLastRunMode()) {
         LOGGER.info("LAST RUN MODE!");
-        doLastRun(effectiveLastSuccessfulRunTime);
+        doLastRun(lastRun);
       } else {
         LOGGER.info("DIRECT BUCKET MODE!");
         if (isRangeSelfManaging()) {

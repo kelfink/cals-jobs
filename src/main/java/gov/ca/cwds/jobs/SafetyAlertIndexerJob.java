@@ -29,6 +29,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
@@ -125,8 +126,8 @@ public class SafetyAlertIndexerJob
 
     if (esSafetyAlerts != null && !esSafetyAlerts.isEmpty()) {
       try {
-        buf.append(esSafetyAlerts.stream().map(this::jsonify).sorted(String::compareTo)
-            .collect(Collectors.joining(",")));
+        buf.append(esSafetyAlerts.stream().map(ElasticTransformer::jsonify)
+            .sorted(String::compareTo).collect(Collectors.joining(",")));
       } catch (Exception e) {
         LOGGER.error("ERROR SERIALIZING SAFETY ALERTS", e);
         throw new JobsException(e);

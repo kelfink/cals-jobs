@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.elasticsearch.action.DocWriteRequest;
+import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.slf4j.Logger;
@@ -40,6 +42,8 @@ import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
+import gov.ca.cwds.jobs.JobProgressTrack;
+import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -75,6 +79,13 @@ public class ElasticTransformer {
     return ret;
   }
 
+  public static void pushToBulkProcessor(final JobProgressTrack track, final BulkProcessor bp,
+      final DocWriteRequest<?> t) {
+    JobLogUtils.logEvery(track.getRecsSentToBulkProcessor().incrementAndGet(), "add to es bulk",
+        "push doc");
+    bp.add(t);
+  }
+
   /**
    * Prepare sections of a document for update. Elasticsearch automatically updates the provided
    * sections. Some jobs should only write sub-documents, such as screenings or allegations, from a
@@ -86,6 +97,9 @@ public class ElasticTransformer {
    * any fields that should not be updated.
    * </p>
    * 
+   * @param docPrep document handler
+   * @param alias ES index alias
+   * @param docType ES document type
    * @param esp ES document, already prepared by
    *        {@link ElasticTransformer#buildElasticSearchPersonDoc(ApiPersonAware)}
    * @param t target ApiPersonAware instance

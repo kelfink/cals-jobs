@@ -26,6 +26,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
@@ -116,8 +117,8 @@ public class RelationshipIndexerJob
 
     if (!p.getRelations().isEmpty()) {
       try {
-        buf.append(p.getRelations().stream().map(this::jsonify).sorted(String::compareTo)
-            .collect(Collectors.joining(",")));
+        buf.append(p.getRelations().stream().map(ElasticTransformer::jsonify)
+            .sorted(String::compareTo).collect(Collectors.joining(",")));
       } catch (Exception e) {
         JobLogUtils.raiseError(LOGGER, e, "ERROR SERIALIZING RELATIONSHIPS! {}", e.getMessage());
       }

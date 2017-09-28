@@ -36,7 +36,7 @@ public class EducationProviderContactIndexerJob extends
   }
 
   @Override
-  protected int getJobTotalBuckets() {
+  public int getJobTotalBuckets() {
     return 12;
   }
 
