@@ -61,6 +61,11 @@ public abstract class LastSuccessfulRunJob implements Job {
    */
   protected final long startTime = System.currentTimeMillis();
 
+  /**
+   * Command line options for this job.
+   */
+  protected JobOptions opts;
+
   private String lastRunTimeFilename;
 
   /**
@@ -106,6 +111,17 @@ public abstract class LastSuccessfulRunJob implements Job {
     }
 
     return ret;
+  }
+
+  /**
+   * Calculate last successful run date/time, per
+   * {@link LastSuccessfulRunJob#calcLastRunDate(Date, JobOptions)}.
+   * 
+   * @param lastSuccessfulRunTime last successful run
+   * @return appropriate date to detect changes
+   */
+  protected Date calcLastRunDate(final Date lastSuccessfulRunTime) {
+    return calcLastRunDate(lastSuccessfulRunTime, getOpts());
   }
 
   /**
@@ -170,6 +186,24 @@ public abstract class LastSuccessfulRunJob implements Job {
    */
   public String getLastJobRunTimeFilename() {
     return lastRunTimeFilename;
+  }
+
+  /**
+   * Getter for this job's options.
+   * 
+   * @return this job's options
+   */
+  public JobOptions getOpts() {
+    return opts;
+  }
+
+  /**
+   * Setter for this job's options.
+   * 
+   * @param opts this job's options
+   */
+  public void setOpts(JobOptions opts) {
+    this.opts = opts;
   }
 
 }
