@@ -481,14 +481,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * The "load" part of ETL. Read from normalized record queue and push to ES.
    */
   protected void threadIndex() {
+    LOGGER.info("BEGIN: indexer thread");
     Thread.currentThread().setName("es_indexer");
     final BulkProcessor bp = buildBulkProcessor();
     int cntr = 0;
 
-    LOGGER.info("BEGIN: Indexer thread");
     try {
       while (!(isFailed() || (isRetrievalDone() && isTransformDone() && queueIndex.isEmpty()))) {
-        LOGGER.trace("Stage #3: Index: just *do* something ...");
         cntr = bulkPrepare(bp, cntr);
       }
 
@@ -496,27 +495,21 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       cntr = bulkPrepare(bp, cntr);
       LOGGER.info("Flush ES bulk processor ... recs processed: {}", cntr);
       bp.flush();
-
       Thread.sleep(SLEEP_MILLIS);
       bp.flush();
 
       LOGGER.info("Waiting to close ES bulk processor ...");
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
       LOGGER.info("Closed ES bulk processor");
-
-    } catch (InterruptedException e) { // NOSONAR
-      LOGGER.warn("Indexer interrupted!");
-      markFailed();
-      Thread.currentThread().interrupt();
-      JobLogs.raiseError(LOGGER, e, "Indexer: Interrupted! {}", e.getMessage());
     } catch (Exception e) {
       markFailed();
+      Thread.currentThread().interrupt();
       JobLogs.raiseError(LOGGER, e, "Indexer: fatal error {}", e.getMessage());
     } finally {
       markIndexDone();
     }
 
-    LOGGER.info("DONE: Indexer thread");
+    LOGGER.info("DONE: indexer thread");
   }
 
   /**
@@ -531,9 +524,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (IOException e) {
       markFailed();
       JobLogs.raiseError(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
-    } finally {
-      markIndexDone();
     }
+    // finally {
+    // markIndexDone();
+    // }
   }
 
   /**

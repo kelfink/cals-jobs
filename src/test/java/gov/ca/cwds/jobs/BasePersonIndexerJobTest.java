@@ -318,8 +318,8 @@ public class BasePersonIndexerJobTest
   public void close_Args___T__IOException() throws Exception {
     doThrow(new IOException()).when(esDao).close();
     try {
-      target.markFailed();
       target.close();
+      target.markFailed();
       fail("Expected exception was not thrown!");
     } catch (IOException e) {
     }

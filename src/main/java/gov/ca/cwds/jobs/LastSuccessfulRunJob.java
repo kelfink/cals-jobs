@@ -137,7 +137,7 @@ public abstract class LastSuccessfulRunJob implements Job {
     return doneTransform;
   }
 
-  public boolean isIndexingDone() {
+  public boolean isIndexDone() {
     return doneIndex;
   }
 
