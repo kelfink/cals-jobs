@@ -216,7 +216,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Adds an object to the index queue and trap InterruptedException. Suitable for streams and
    * lambda.
    * 
-   * @param normalized object to add to index queue
+   * @param norm normalized object to add to index queue
    */
   protected void addToIndexQueue(T norm) {
     try {
@@ -549,7 +549,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Prepare a document and trap IOException.
    * 
    * @param bp bulk processor
-   * @param ApiPersonAware object
+   * @param p ApiPersonAware object
    */
   protected void prepareDocumentTrapIO(BulkProcessor bp, T p) {
     try {

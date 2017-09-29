@@ -16,6 +16,7 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
@@ -168,7 +169,8 @@ public interface JobFeatureHibernate<T extends PersistentObject, M extends ApiGr
   }
 
   /**
-   * Execute JDBC prior to calling method {@link #pullBucketRange(String, String)}.
+   * Execute JDBC prior to calling method
+   * {@link BasePersonIndexerJob#pullBucketRange(String, String)}.
    * 
    * <blockquote>
    * 
