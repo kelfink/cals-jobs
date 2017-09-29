@@ -63,7 +63,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
   }
 
   @Override
-  protected void threadExtractJdbc() {
+  protected void threadRetrieveByJdbc() {
     Thread.currentThread().setName("extract");
     LOGGER.info("BEGIN: Stage #1: NS View Reader");
 

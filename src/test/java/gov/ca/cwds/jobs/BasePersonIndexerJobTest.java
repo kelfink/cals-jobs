@@ -273,7 +273,7 @@ public class BasePersonIndexerJobTest
   @Test
   public void threadTransform_Args__() throws Exception {
     runKillThread();
-    target.threadTransform();
+    target.threadNormalize();
   }
 
   @Test
@@ -416,7 +416,7 @@ public class BasePersonIndexerJobTest
   @Test
   public void threadExtractJdbc_Args__() throws Exception {
     runKillThread();
-    target.threadExtractJdbc();
+    target.threadRetrieveByJdbc();
   }
 
   @Test

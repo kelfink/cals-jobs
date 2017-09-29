@@ -186,7 +186,7 @@ public class ClientIndexerJobTest extends PersonJobTester {
 
   @Test
   public void threadExtractJdbc_Args__() throws Exception {
-    target.threadExtractJdbc();
+    target.threadRetrieveByJdbc();
   }
 
   @Test

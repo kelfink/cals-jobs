@@ -480,7 +480,7 @@ public class ReferralHistoryIndexerJob
    * The "extract" part of ETL. Parallel stream produces runs partition ranges in separate threads.
    */
   @Override
-  protected void threadExtractJdbc() {
+  protected void threadRetrieveByJdbc() {
     Thread.currentThread().setName("read_main");
     LOGGER.info("BEGIN: main read thread");
     EsPersonReferral.setOpts(getOpts()); // NOTE: ok for one-shot JVM but not ok in continuous mode

@@ -25,6 +25,11 @@ import gov.ca.cwds.jobs.util.JobLogs;
  */
 public abstract class LastSuccessfulRunJob implements Job {
 
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(LastSuccessfulRunJob.class);
 
   private static final int LOOKBACK_MINUTES = -25;
@@ -93,7 +98,7 @@ public abstract class LastSuccessfulRunJob implements Job {
       writeLastSuccessfulRunTime(curentTimeRunTime);
     }
 
-    finish(); // Close resources, notify listeners, or even close JVM.
+    finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
   }
 
   public void markJobDone() {
@@ -117,11 +122,11 @@ public abstract class LastSuccessfulRunJob implements Job {
 
   public void markFailed() {
     this.fatalError = true;
+    this.doneJob = true;
   }
 
   public boolean isRunning() {
-    // return fatalError || (doneExtracting && doneTransforming && doneIndexing);
-    return fatalError || doneJob;
+    return !doneJob;
   }
 
   public boolean isStillTransforming() {

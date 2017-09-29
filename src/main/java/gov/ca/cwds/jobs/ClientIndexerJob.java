@@ -197,7 +197,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    * The "extract" part of ETL. Single producer, chained consumers.
    */
   @Override
-  protected void threadExtractJdbc() {
+  protected void threadRetrieveByJdbc() {
     Thread.currentThread().setName("extract_main");
     LOGGER.info("BEGIN: main extract thread");
 

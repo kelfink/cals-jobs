@@ -297,18 +297,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         esDao.getConfig().getElasticsearchDocType(), esp, t);
   }
 
-  // =================
-  // RUN THREADS:
-  // =================
-
   /**
    * ENTRY POINT FOR INITIAL LOAD.
    * 
    * <p>
-   * Continue processing until
+   * Run threads to extract, transform, and index.
    * </p>
    * 
-   * @throws IOException on JDBC error or Elasticsearch disconnect
+   * @throws IOException on database error or Elasticsearch disconnect
    */
   protected void doInitialLoadJdbc() throws IOException {
     Thread.currentThread().setName("main");
@@ -319,11 +315,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       Thread threadTransformer = null;
       if (useTransformThread()) {
-        threadTransformer = new Thread(this::threadTransform); // Transform
+        threadTransformer = new Thread(this::threadNormalize); // Transform
         threadTransformer.start();
       }
 
-      final Thread threadJdbc = new Thread(this::threadExtractJdbc); // Extract
+      final Thread threadJdbc = new Thread(this::threadRetrieveByJdbc); // Extract
       threadJdbc.start();
 
       while (isRunning()) {
@@ -345,11 +341,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       threadIndexer.join();
-
       Thread.sleep(SLEEP_MILLIS);
-      this.close();
+
+      this.close(); // OK for initial load.
       final long endTime = System.currentTimeMillis();
-      LOGGER.info("TOTAL ELAPSED TIME: " + ((endTime - startTime) / 1000) + " SECONDS");
+      LOGGER.info("JDBC ELAPSED TIME: " + ((endTime - startTime) / 1000) + " SECONDS");
     } catch (Exception e) {
       markFailed();
       Thread.currentThread().interrupt();
@@ -358,15 +354,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       markRetrievalDone();
     }
 
-    LOGGER.info("DONE: doInitialLoadViaJdbc");
+    LOGGER.info("DONE: JDBC initial load");
   }
 
   /**
    * The "extract" part of ETL. Single producer, chained consumers.
    */
-  protected void threadExtractJdbc() {
-    Thread.currentThread().setName("extract");
-    LOGGER.info("BEGIN: extract thread");
+  protected void threadRetrieveByJdbc() {
+    Thread.currentThread().setName("jdbc");
+    LOGGER.info("BEGIN: jdbc thread");
 
     try (final Connection con = jobDao.getSessionFactory().getSessionFactoryOptions()
         .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
@@ -377,11 +373,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Either detect platform or force ORDER BY clause.
       final String query = getInitialLoadQuery(getDBSchemaName());
-      M m;
 
       // Enable parallelism for underlying database.
       JobDB2Utils.enableParallelism(con);
 
+      M m;
       try (final Statement stmt = con.createStatement()) {
         stmt.setFetchSize(15000); // faster
         stmt.setMaxRows(0);
@@ -403,57 +399,66 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       markRetrievalDone();
     }
 
-    LOGGER.info("DONE: extract thread");
+    LOGGER.info("DONE: jdbc thread");
+  }
+
+  private int normalizeLoop(final List<M> grpRecs, Object theLastId, int inCntr)
+      throws InterruptedException {
+    M m;
+    T t;
+    Object lastId = theLastId;
+    int cntr = inCntr;
+
+    while ((m = queueTransform.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
+      JobLogs.logEvery(++cntr, "Transformed", "recs");
+
+      // NOTE: Assumes that records are sorted by group key.
+      // End of group. Normalize these group recs.
+      if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1
+          && (t = normalizeSingle(grpRecs)) != null) {
+        LOGGER.trace("queueIndex.putLast: id: {}", t.getPrimaryKey());
+        queueIndex.putLast(t);
+        grpRecs.clear(); // Single thread, re-use memory.
+      }
+
+      grpRecs.add(m);
+      lastId = m.getNormalizationGroupKey();
+    }
+
+    // Last bundle.
+    if (!grpRecs.isEmpty() && (t = normalizeSingle(grpRecs)) != null) {
+      queueIndex.putLast(t);
+      grpRecs.clear(); // Single thread, re-use memory.
+    }
+
+    return cntr;
   }
 
   /**
-   * The "transform" part of ETL. Single thread consumer, second stage of initial load. Convert
-   * de-normalized view records to normalized ones and pass to the load queue.
+   * The "transform" part of ETL. Single-thread consumer, second stage of initial load. Convert
+   * de-normalized view records to normalized ones and pass to the index queue.
    */
-  protected void threadTransform() {
-    Thread.currentThread().setName("transform");
-    LOGGER.info("BEGIN: transform thread");
+  protected void threadNormalize() {
+    Thread.currentThread().setName("normalize");
+    LOGGER.info("BEGIN: normalize thread");
 
     int cntr = 0;
     Object lastId = new Object();
-    M m;
-    T t;
     final List<M> grpRecs = new ArrayList<>();
 
     try {
       while (isRunning()) {
-        while ((m = queueTransform.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
-          JobLogs.logEvery(++cntr, "Transformed", "recs");
-
-          // NOTE: Assumes that records are sorted by group key.
-          // End of group. Normalize these group recs.
-          if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1
-              && (t = normalizeSingle(grpRecs)) != null) {
-            LOGGER.trace("queueIndex.putLast: id: {}", t.getPrimaryKey());
-            queueIndex.putLast(t);
-            grpRecs.clear(); // Single thread, re-use memory.
-          }
-
-          grpRecs.add(m);
-          lastId = m.getNormalizationGroupKey();
-        }
-
-        // Last bundle.
-        if (!grpRecs.isEmpty() && (t = normalizeSingle(grpRecs)) != null) {
-          queueIndex.putLast(t);
-          grpRecs.clear(); // Single thread, re-use memory.
-        }
-
+        cntr = normalizeLoop(grpRecs, lastId, ++cntr);
       }
     } catch (Exception e) {
       markFailed();
       Thread.currentThread().interrupt();
       JobLogs.raiseError(LOGGER, e, "Transformer: FATAL ERROR: {}", e.getMessage());
     } finally {
-      doneTransforming = true;
+      markTransformDone();
     }
 
-    LOGGER.info("DONE: transform thread");
+    LOGGER.info("DONE: normalize thread");
   }
 
   /**
@@ -842,7 +847,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param table the driver table
    * @return batch buckets
-   * @deprecated use {@link #threadExtractJdbc()} or {@link #extractHibernate()} instead
+   * @deprecated use {@link #threadRetrieveByJdbc()} or {@link #extractHibernate()} instead
    */
   @Deprecated
   @SuppressWarnings("unchecked")
@@ -883,11 +888,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * Return partition keys for initial load. Supports native named query, "findPartitionedBuckets".
    * 
    * <p>
-   * Prefer methods {@link #threadExtractJdbc()} or {@link #extractHibernate()} over this one.
+   * Prefer methods {@link #threadRetrieveByJdbc()} or {@link #extractHibernate()} over this one.
    * </p>
    * 
    * @return list of partition key pairs
-   * @deprecated use {@link #threadExtractJdbc()} or {@link #extractHibernate()} instead
+   * @deprecated use {@link #threadRetrieveByJdbc()} or {@link #extractHibernate()} instead
    */
   @Deprecated
   protected List<Pair<String, String>> getPartitionRanges() {
@@ -904,7 +909,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Divide work into buckets: pull a unique range of identifiers so that no bucket results overlap.
    * <p>
-   * Where possible, prefer use {@link #threadExtractJdbc()} or {@link #extractHibernate()} instead.
+   * Where possible, prefer use {@link #threadRetrieveByJdbc()} or {@link #extractHibernate()}
+   * instead.
    * </p>
    * 
    * @param minId start of identifier range
