@@ -27,6 +27,8 @@ public abstract class LastSuccessfulRunJob implements Job {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LastSuccessfulRunJob.class);
 
+  private static final int LOOKBACK_MINUTES = -25;
+
   /**
    * Date time format for last run date file.
    */
@@ -44,17 +46,22 @@ public abstract class LastSuccessfulRunJob implements Job {
    * copy of the flag in thread memory).
    * </p>
    */
-  protected volatile boolean doneExtract = false;
+  protected volatile boolean doneExtracting = false;
 
   /**
    * Completion flag for normalization/transformation.
    */
-  protected volatile boolean doneTransform = false;
+  protected volatile boolean doneTransforming = false;
 
   /**
    * Completion flag for document indexing.
    */
-  protected volatile boolean doneLoad = false;
+  protected volatile boolean doneIndexing = false;
+
+  /**
+   * Completion flag for whole job.
+   */
+  protected volatile boolean doneJob = false;
 
   /**
    * Official start time.
@@ -89,6 +96,46 @@ public abstract class LastSuccessfulRunJob implements Job {
     finish(); // Close resources, notify listeners, or even close JVM.
   }
 
+  public void markJobDone() {
+    this.doneExtracting = true;
+    this.doneIndexing = true;
+    this.doneTransforming = true;
+    this.doneJob = true;
+  }
+
+  public void markIndexDone() {
+    this.doneIndexing = true;
+  }
+
+  public void markExtractDone() {
+    this.doneExtracting = true;
+  }
+
+  public void markTransformDone() {
+    this.doneTransforming = true;
+  }
+
+  public void markFailed() {
+    this.fatalError = true;
+  }
+
+  public boolean isRunning() {
+    // return fatalError || (doneExtracting && doneTransforming && doneIndexing);
+    return fatalError || doneJob;
+  }
+
+  public boolean stillTransforming() {
+    return !doneTransforming;
+  }
+
+  public boolean stillIndexing() {
+    return !doneIndexing;
+  }
+
+  public boolean stillExtracting() {
+    return !doneExtracting;
+  }
+
   /**
    * If last run time is provide in options then use it, otherwise use provided
    * lastSuccessfulRunTime.
@@ -106,7 +153,7 @@ public abstract class LastSuccessfulRunJob implements Job {
     } else {
       final Calendar cal = Calendar.getInstance();
       cal.setTime(lastSuccessfulRunTime);
-      cal.add(Calendar.MINUTE, -25); // 25 minute window
+      cal.add(Calendar.MINUTE, LOOKBACK_MINUTES);
       ret = cal.getTime();
     }
 
@@ -160,7 +207,7 @@ public abstract class LastSuccessfulRunJob implements Job {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) {
         w.write(new SimpleDateFormat(LAST_RUN_DATE_FORMAT).format(datetime));
       } catch (IOException e) {
-        fatalError = true;
+        markFailed();
         JobLogs.raiseError(LOGGER, e, "Failed to write timestamp file: {}", e.getMessage());
       }
     }

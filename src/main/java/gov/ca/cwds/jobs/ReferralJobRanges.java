@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
+import gov.ca.cwds.jobs.component.JobFeatureHibernate;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.util.JobLogs;
 
@@ -68,7 +69,7 @@ public class ReferralJobRanges {
       BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job) {
     List<Pair<String, String>> ret = new ArrayList<>();
     final boolean isMainframe = job.isDB2OnZOS();
-    final String schema = BasePersonIndexerJob.getDBSchemaName().toUpperCase();
+    final String schema = JobFeatureHibernate.databaseSchemaName().toUpperCase();
 
     if (isMainframe
         && (schema.endsWith("RSQ") || schema.endsWith("REP") || schema.endsWith("DSM"))) {

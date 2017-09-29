@@ -611,7 +611,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void getDBSchemaName_Args__() throws Exception {
-    final String actual = BasePersonIndexerJob.getDBSchemaName();
+    final String actual = target.getDBSchemaName();
     String expected = "CWSRS1";
     assertThat(actual, is(equalTo(expected)));
   }

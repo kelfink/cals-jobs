@@ -487,7 +487,7 @@ public class ReferralHistoryIndexerJob
 
     try {
       // This job normalizes **without** the transform thread.
-      doneTransform = true;
+      doneTransforming = true;
 
       // Init task list.
       final List<Pair<String, String>> ranges = getPartitionRanges();
@@ -511,7 +511,7 @@ public class ReferralHistoryIndexerJob
       fatalError = true;
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      doneExtract = true;
+      doneExtracting = true;
     }
 
     LOGGER.info("DONE: main read thread");

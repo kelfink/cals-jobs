@@ -202,7 +202,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     LOGGER.info("BEGIN: main extract thread");
 
     // This job normalizes **without** the transform thread.
-    doneTransform = true;
+    doneTransforming = true;
 
     try {
       final int maxThreads = JobJdbcUtils.calcReaderThreads(getOpts());
@@ -216,7 +216,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       fatalError = true;
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      doneExtract = true;
+      doneExtracting = true;
     }
 
     LOGGER.info("DONE: main extract thread");

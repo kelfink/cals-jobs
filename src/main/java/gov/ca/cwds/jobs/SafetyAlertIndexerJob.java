@@ -41,6 +41,11 @@ public class SafetyAlertIndexerJob
     extends BasePersonIndexerJob<ReplicatedSafetyAlerts, EsSafetyAlert>
     implements JobResultSetAware<EsSafetyAlert> {
 
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(SafetyAlertIndexerJob.class);
 
   /**
@@ -138,8 +143,6 @@ public class SafetyAlertIndexerJob
 
     final String updateJson = buf.toString();
     final String insertJson = mapper.writeValueAsString(esp);
-    LOGGER.trace("insertJson: {}", insertJson);
-    LOGGER.trace("updateJson: {}", updateJson);
 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();

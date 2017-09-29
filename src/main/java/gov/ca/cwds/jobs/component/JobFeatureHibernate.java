@@ -14,15 +14,17 @@ import org.hibernate.Transaction;
 import gov.ca.cwds.dao.cms.BatchDaoImpl;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
+import gov.ca.cwds.jobs.util.JobLogs;
+import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 public interface JobFeatureHibernate<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends ApiMarker, JobResultSetAware<M> {
+    extends JobShared, JobResultSetAware<M> {
 
   static final int DEFAULT_BATCH_WAIT = 25;
   static final int DEFAULT_BUCKETS = 1;
@@ -35,11 +37,39 @@ public interface JobFeatureHibernate<T extends PersistentObject, M extends ApiGr
 
   static final String SQL_COLUMN_AFTER = "after";
 
+  /**
+   * @return default CMS schema name
+   */
+  default String getDBSchemaName() {
+    return System.getProperty("DB_CMS_SCHEMA");
+  }
+
+  /**
+   * @return default CMS schema name
+   */
+  static String databaseSchemaName() {
+    return System.getProperty("DB_CMS_SCHEMA");
+  }
+
+  /**
+   * @return the job's main DAO
+   */
   public BaseDaoImpl<T> getJobDao();
 
   /**
-   * Return the job's entity class for its denormalized source view or materialized query table, if
-   * any, or null if not using a denormalized source.
+   * Mark a record for deletion. Intended for replicated records with deleted flag.
+   * 
+   * @param t bean to check
+   * @return true if marked for deletion
+   */
+  default boolean isDelete(T t) {
+    return t instanceof CmsReplicatedEntity ? CmsReplicatedEntity.isDelete((CmsReplicatedEntity) t)
+        : false;
+  }
+
+  /**
+   * Return the job's entity class for its de-normalized source view or materialized query table, if
+   * any, or null if not using a de-normalized source.
    * 
    * @return entity class of view or materialized query table
    */
@@ -112,6 +142,11 @@ public interface JobFeatureHibernate<T extends PersistentObject, M extends ApiGr
     return null;
   }
 
+  /**
+   * Return SQL to run before SELECTing from a last change view.
+   * 
+   * @return prep SQL
+   */
   default String getPrepLastChangeSQL() {
     return null;
   }
@@ -153,7 +188,9 @@ public interface JobFeatureHibernate<T extends PersistentObject, M extends ApiGr
     return (List<T>) recs;
   }
 
-  void incrementNormalizeCount();
+  default void incrementNormalizeCount() {
+    JobLogs.logEvery(getTrack().trackNormalized(), "Normalize", "single");
+  }
 
   /**
    * Normalize view records for a single grouping (such as all the same client) into a normalized
@@ -166,6 +203,14 @@ public interface JobFeatureHibernate<T extends PersistentObject, M extends ApiGr
     incrementNormalizeCount();
     final List<T> list = normalize(recs);
     return list != null && !list.isEmpty() ? list.get(0) : null;
+  }
+
+  /**
+   * @see JobDB2Utils#isDB2OnZOS(BaseDaoImpl)
+   * @return true if DB2 on mainframe
+   */
+  default boolean isDB2OnZOS() {
+    return JobDB2Utils.isDB2OnZOS(getJobDao());
   }
 
   /**
