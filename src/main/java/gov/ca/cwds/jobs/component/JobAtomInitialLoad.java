@@ -10,21 +10,18 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.JobOptions;
 
 public interface JobAtomInitialLoad<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends ApiMarker {
+    extends JobAtomShared {
 
   static final Logger LOGGER = LoggerFactory.getLogger(JobAtomInitialLoad.class);
 
   static final int DEFAULT_BUCKETS = 1;
 
-  default List<Pair<String, String>> limitRange(BasePersonIndexerJob<T, M> job,
-      final List<Pair<String, String>> allKeyPairs) {
+  default List<Pair<String, String>> limitRange(final List<Pair<String, String>> allKeyPairs) {
     List<Pair<String, String>> ret = new ArrayList<>();
-    final JobOptions opts = job.getOpts();
+    final JobOptions opts = getOpts();
     if (opts != null && opts.isRangeGiven()) {
       final List<Pair<String, String>> list = new ArrayList<>();
 
