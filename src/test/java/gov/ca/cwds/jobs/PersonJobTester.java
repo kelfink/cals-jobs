@@ -164,10 +164,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
       } finally {
-        target.doneExtracting = true;
-        target.doneIndexing = true;
-        target.doneTransforming = true;
-        target.fatalError = true;
+        target.markJobDone();
       }
 
     }).start();
