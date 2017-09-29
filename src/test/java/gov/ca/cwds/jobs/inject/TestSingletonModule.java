@@ -62,6 +62,7 @@ public class TestSingletonModule extends AbstractModule {
     public int getInstanceCounter() {
       return instanceCounter;
     }
+
   }
 
   public static void main(String[] args) {
