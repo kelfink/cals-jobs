@@ -36,15 +36,15 @@ public abstract class LastSuccessfulRunJob implements Job {
 
   /**
    * Completion flag for fatal errors.
+   * <p>
+   * Volatile guarantees that changes to this flag become visible other threads immediately. In
+   * other words, threads don't cache a copy of this variable in their local memory for performance.
+   * </p>
    */
   protected volatile boolean fatalError = false;
 
   /**
    * Completion flag for data retrieval.
-   * <p>
-   * Volatile guarantees that changes to this flag become visible other threads (i.e., don't cache a
-   * copy of the flag in thread memory).
-   * </p>
    */
   protected volatile boolean doneExtracting = false;
 
@@ -107,7 +107,7 @@ public abstract class LastSuccessfulRunJob implements Job {
     this.doneIndexing = true;
   }
 
-  public void markExtractDone() {
+  public void markRetrievalDone() {
     this.doneExtracting = true;
   }
 
@@ -124,15 +124,15 @@ public abstract class LastSuccessfulRunJob implements Job {
     return fatalError || doneJob;
   }
 
-  public boolean stillTransforming() {
+  public boolean isStillTransforming() {
     return !doneTransforming;
   }
 
-  public boolean stillIndexing() {
+  public boolean isStillIndexing() {
     return !doneIndexing;
   }
 
-  public boolean stillExtracting() {
+  public boolean isStillExtracting() {
     return !doneExtracting;
   }
 

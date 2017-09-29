@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.component;
 
-public enum NeutronJobStatus {
+public enum JobExecutionStatus {
 
   NOT_STARTED,
 

@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.component;
 
 import gov.ca.cwds.data.std.ApiMarker;
 
-public interface JobFeatureMisc extends ApiMarker {
+public interface JobAtomMisc extends ApiMarker {
 
   /**
    * Transform (normalize) in the Job instead of relying on the transformation thread.

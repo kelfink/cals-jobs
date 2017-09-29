@@ -13,6 +13,8 @@ import gov.ca.cwds.data.std.ApiMarker;
 
 public class JobBulkProcessorBuilder implements ApiMarker {
 
+  private static final int ES_BULK_SIZE = 5000;
+
   /**
    * Default serialization.
    */
@@ -65,9 +67,8 @@ public class JobBulkProcessorBuilder implements ApiMarker {
         track.trackBulkError();
         LOGGER.error("ERROR EXECUTING BULK", failure);
       }
-    }).setBulkActions(JobFeatureHibernate.ES_BULK_SIZE)
-        .setBulkSize(new ByteSizeValue(14, ByteSizeUnit.MB)).setConcurrentRequests(1)
-        .setName("jobs_bp").build();
+    }).setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(14, ByteSizeUnit.MB))
+        .setConcurrentRequests(1).setName("jobs_bp").build();
   }
 
 }

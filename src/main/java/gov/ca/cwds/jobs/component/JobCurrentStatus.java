@@ -12,6 +12,6 @@ public interface JobCurrentStatus {
 
   void doneTransforming();
 
-  NeutronJobStatus status();
+  JobExecutionStatus status();
 
 }

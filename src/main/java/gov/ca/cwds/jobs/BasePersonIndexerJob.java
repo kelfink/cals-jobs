@@ -52,10 +52,11 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.jobs.component.JobAtomHibernate;
+import gov.ca.cwds.jobs.component.JobAtomInitialLoad;
+import gov.ca.cwds.jobs.component.JobAtomMisc;
+import gov.ca.cwds.jobs.component.JobAtomTransformer;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
-import gov.ca.cwds.jobs.component.JobFeatureHibernate;
-import gov.ca.cwds.jobs.component.JobFeatureInitialLoad;
-import gov.ca.cwds.jobs.component.JobFeatureMisc;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
@@ -94,7 +95,7 @@ import gov.ca.cwds.jobs.util.transform.JobElasticPersonDocPrep;
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends LastSuccessfulRunJob implements AutoCloseable, JobElasticPersonDocPrep<T>,
-    JobFeatureHibernate<T, M>, JobFeatureMisc, JobFeatureInitialLoad {
+    JobAtomHibernate<T, M>, JobAtomTransformer<T, M>, JobAtomInitialLoad<T, M>, JobAtomMisc {
 
   /**
    * Default serialization.
@@ -311,6 +312,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void doInitialLoadJdbc() throws IOException {
     Thread.currentThread().setName("main");
+
     try {
       final Thread threadIndexer = new Thread(this::threadIndex); // Index
       threadIndexer.start();
@@ -324,7 +326,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final Thread threadJdbc = new Thread(this::threadExtractJdbc); // Extract
       threadJdbc.start();
 
-      while (!(fatalError || (doneExtracting && doneTransforming && doneIndexing))) {
+      while (isRunning()) {
         LOGGER.trace("runInitialLoad: sleep");
         Thread.sleep(SLEEP_MILLIS);
 
@@ -348,18 +350,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       this.close();
       final long endTime = System.currentTimeMillis();
       LOGGER.info("TOTAL ELAPSED TIME: " + ((endTime - startTime) / 1000) + " SECONDS");
-      LOGGER.info("DONE: doInitialLoadViaJdbc");
-
-    } catch (InterruptedException ie) { // NOSONAR
-      LOGGER.warn("interrupted: {}", ie.getMessage(), ie);
-      markFailed();
-      Thread.currentThread().interrupt();
     } catch (Exception e) {
       markFailed();
+      Thread.currentThread().interrupt();
       JobLogs.raiseError(LOGGER, e, "GENERAL EXCEPTION: {}", e);
     } finally {
-      doneExtracting = true;
+      markRetrievalDone();
     }
+
+    LOGGER.info("DONE: doInitialLoadViaJdbc");
   }
 
   /**
@@ -401,7 +400,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       markFailed();
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      doneExtracting = true;
+      markRetrievalDone();
     }
 
     LOGGER.info("DONE: extract thread");
@@ -421,8 +420,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     T t;
     final List<M> grpRecs = new ArrayList<>();
 
-    while (!(fatalError || (doneExtracting && queueTransform.isEmpty()))) {
-      try {
+    try {
+      while (isRunning()) {
         while ((m = queueTransform.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
           JobLogs.logEvery(++cntr, "Transformed", "recs");
 
@@ -433,12 +432,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
             LOGGER.trace("queueIndex.putLast: id: {}", t.getPrimaryKey());
             queueIndex.putLast(t);
             grpRecs.clear(); // Single thread, re-use memory.
-            Thread.yield();
           }
 
           grpRecs.add(m);
           lastId = m.getNormalizationGroupKey();
-          Thread.yield();
         }
 
         // Last bundle.
@@ -447,16 +444,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           grpRecs.clear(); // Single thread, re-use memory.
         }
 
-      } catch (InterruptedException e) { // NOSONAR
-        LOGGER.error("Transformer interrupted!");
-        markFailed();
-        Thread.currentThread().interrupt();
-      } catch (Exception e) {
-        markFailed();
-        JobLogs.raiseError(LOGGER, e, "Transformer: fatal error {}", e.getMessage());
-      } finally {
-        doneTransforming = true;
       }
+    } catch (Exception e) {
+      markFailed();
+      Thread.currentThread().interrupt();
+      JobLogs.raiseError(LOGGER, e, "Transformer: FATAL ERROR: {}", e.getMessage());
+    } finally {
+      doneTransforming = true;
     }
 
     LOGGER.info("DONE: transform thread");
@@ -520,7 +514,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       markFailed();
       JobLogs.raiseError(LOGGER, e, "Indexer: fatal error {}", e.getMessage());
     } finally {
-      doneIndexing = true;
+      markIndexDone();
     }
 
     LOGGER.info("DONE: Indexer thread");
@@ -539,7 +533,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       markFailed();
       JobLogs.raiseError(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
     } finally {
-      doneIndexing = true;
+      markIndexDone();
     }
   }
 
@@ -594,7 +588,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       markFailed();
       throw JobLogs.buildException(LOGGER, e, "General Exception: {}", e.getMessage());
     } finally {
-      doneIndexing = true;
+      markIndexDone();
     }
   }
 
@@ -668,10 +662,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       markFailed();
       throw JobLogs.buildException(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
     } finally {
-      // Set ETL completion flags to done.
-      doneExtracting = true;
-      doneTransforming = true;
-      doneIndexing = true;
+      markJobDone();
 
       try {
         this.close();
@@ -717,7 +708,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       txn.rollback();
       throw new DaoException(h);
     } finally {
-      doneExtracting = true;
+      markRetrievalDone();
     }
   }
 
@@ -809,7 +800,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       txn.rollback();
       throw JobLogs.buildException(LOGGER, h, "EXTRACT ERROR!: {}", h.getMessage());
     } finally {
-      markExtractDone();
+      markRetrievalDone();
     }
   }
 
@@ -1001,12 +992,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           markFailed();
           throw new JobsException("ERROR EXTRACTING VIA HIBERNATE!", e2);
         } finally {
-          doneExtracting = true;
+          markRetrievalDone();
         }
       }
     }
 
-    return track.getRecsBulkPrepared().get();
+    return getTrack().getRecsBulkPrepared().get();
   }
 
   /**
