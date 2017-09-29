@@ -9,6 +9,7 @@ import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
 /**
@@ -47,7 +48,7 @@ public class OtherAdultInPlacemtHomeIndexerJob extends
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runStandalone(OtherAdultInPlacemtHomeIndexerJob.class, args);
+    JobRunner.runStandalone(OtherAdultInPlacemtHomeIndexerJob.class, args);
   }
 
 }

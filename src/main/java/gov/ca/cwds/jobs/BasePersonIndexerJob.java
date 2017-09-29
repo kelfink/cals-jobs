@@ -60,7 +60,6 @@ import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
@@ -216,10 +215,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
   }
 
-  // ===================
-  // ELASTICSEARCH:
-  // ===================
-
   /**
    * Instantiate one Elasticsearch BulkProcessor per working thread.
    * 
@@ -264,10 +259,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       if (isDelete(t)) {
         ret = bulkDelete((String) t.getPrimaryKey());
-        track.trackBulkDeleted();
+        getTrack().trackBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);
-        track.trackBulkPrepared();
+        getTrack().trackBulkPrepared();
       }
     } catch (Exception e) {
       throw JobLogs.buildException(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
@@ -323,7 +318,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       threadJdbc.start();
 
       while (isRunning()) {
-        LOGGER.trace("runInitialLoad: sleep");
         Thread.sleep(SLEEP_MILLIS);
 
         try {
@@ -385,7 +379,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
 
         int cntr = 0;
-        while (!fatalError && rs.next() && (m = extract(rs)) != null) {
+        while (isRunning() && rs.next() && (m = extract(rs)) != null) {
           JobLogs.logEvery(++cntr, "Retrieved", "recs");
           queueTransform.putLast(m);
         }
@@ -667,12 +661,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       markFailed();
       throw JobLogs.buildException(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
     } finally {
-      markJobDone();
-
       try {
+        markJobDone();
         this.close();
       } catch (IOException io) {
-        LOGGER.warn("IOException on close! {}", io.getMessage(), io);
+        LOGGER.error("IOException on close! {}", io.getMessage(), io);
       }
     }
   }
@@ -759,7 +752,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Object lastId = new Object();
 
     try {
-      // Load records to index.
       prepHibernateLastChange(session, txn, lastRunTime);
       final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
       q.setString(SQL_COLUMN_AFTER, JobJdbcUtils.makeSimpleTimestampString(lastRunTime));
@@ -993,24 +985,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
 
     return getTrack().getRecsBulkPrepared().get();
-  }
-
-  /**
-   * Batch job entry point.
-   * 
-   * @param klass batch job class
-   * @param args command line arguments
-   */
-  @SuppressWarnings("rawtypes")
-  public static void runStandalone(final Class<? extends BasePersonIndexerJob> klass,
-      String... args) {
-    LOGGER.info("Run job {}", klass.getName());
-    try {
-      JobRunner.runStandalone(klass, args);
-    } catch (Exception e) {
-      LOGGER.error("STOPPING BATCH: " + e.getMessage(), e);
-      throw e;
-    }
   }
 
   @Override

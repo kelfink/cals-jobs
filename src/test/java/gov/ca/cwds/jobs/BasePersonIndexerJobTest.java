@@ -661,12 +661,4 @@ public class BasePersonIndexerJobTest
     }
   }
 
-  @Test
-  @Ignore
-  public void runMain_Args__Class__StringArray() throws Exception {
-    Class klass = null;
-    String[] args = new String[] {};
-    BasePersonIndexerJob.runStandalone(klass, args);
-  }
-
 }

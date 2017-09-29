@@ -9,4 +9,8 @@ public interface JobAtomShared extends ApiMarker {
 
   ElasticsearchDao getEsDao();
 
+  default void nameThread(String title) {
+    Thread.currentThread().setName(title);
+  }
+
 }

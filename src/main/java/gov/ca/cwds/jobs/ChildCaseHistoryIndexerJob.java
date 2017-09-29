@@ -18,6 +18,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
 /**
@@ -126,7 +127,6 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runStandalone(ChildCaseHistoryIndexerJob.class, args);
+    JobRunner.runStandalone(ChildCaseHistoryIndexerJob.class, args);
   }
 }
-

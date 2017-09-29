@@ -26,6 +26,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
@@ -179,7 +180,7 @@ public class OtherClientNameIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runStandalone(OtherClientNameIndexerJob.class, args);
+    JobRunner.runStandalone(OtherClientNameIndexerJob.class, args);
   }
 
 }

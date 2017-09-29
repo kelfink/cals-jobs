@@ -27,6 +27,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedSafetyAlerts;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
@@ -179,7 +180,7 @@ public class SafetyAlertIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runStandalone(SafetyAlertIndexerJob.class, args);
+    JobRunner.runStandalone(SafetyAlertIndexerJob.class, args);
   }
 
 }

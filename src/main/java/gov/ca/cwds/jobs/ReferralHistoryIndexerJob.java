@@ -39,6 +39,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
@@ -665,7 +666,7 @@ public class ReferralHistoryIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    runStandalone(ReferralHistoryIndexerJob.class, args);
+    JobRunner.runStandalone(ReferralHistoryIndexerJob.class, args);
   }
 
 }
