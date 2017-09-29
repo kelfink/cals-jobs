@@ -512,7 +512,7 @@ public class ReferralHistoryIndexerJob
       markFailed();
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      markRetrievalDone();
+      markRetrieveDone();
     }
 
     LOGGER.info("DONE: main read thread");

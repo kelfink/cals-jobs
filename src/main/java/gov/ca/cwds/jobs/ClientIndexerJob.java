@@ -41,6 +41,11 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsClientAddress>
     implements JobResultSetAware<EsClientAddress> {
 
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientIndexerJob.class);
 
   private static final String INSERT_CLIENT_LAST_CHG =
@@ -182,8 +187,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         }
 
         con.commit();
-      } finally {
-        // Statement and connection close automatically.
       }
 
     } catch (Exception e) {
@@ -218,7 +221,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       markFailed();
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      markRetrievalDone();
+      markRetrieveDone();
     }
 
     LOGGER.info("DONE: main extract thread");
@@ -251,6 +254,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       ret.add(Pair.of("4w3QDw136B", "6p9XaHC10S"));
       ret.add(Pair.of("6p9XaHC10S", "8jw5J580MQ"));
       ret.add(Pair.of("8jw5J580MQ", "9999999999"));
+
+      ret = limitRange(this, ret);
     } else if (isMainframe) {
       // ----------------------------
       // z/OS, small data set:

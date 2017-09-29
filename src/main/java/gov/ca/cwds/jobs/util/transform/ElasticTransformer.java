@@ -265,7 +265,7 @@ public class ElasticTransformer {
       ret.setLegacyId(legacyId.trim());
       ret.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
 
-      if (legacyId.trim().length() == 10) {
+      if (legacyId.trim().length() == CMS_ID_LEN) {
         ret.setLegacyUiId(CmsKeyIdGenerator.getUIIdentifierFromKey(legacyId.trim()));
       } else {
         ret.setLegacyUiId(legacyId.trim());

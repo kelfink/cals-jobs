@@ -2,7 +2,6 @@ package gov.ca.cwds.jobs;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -94,7 +93,7 @@ public abstract class LastSuccessfulRunJob implements Job {
     final Date lastRunTime = determineLastSuccessfulRunTime();
     final Date curentTimeRunTime = _run(lastRunTime);
 
-    if (!fatalError) {
+    if (!isFailed()) {
       writeLastSuccessfulRunTime(curentTimeRunTime);
     }
 
@@ -113,7 +112,7 @@ public abstract class LastSuccessfulRunJob implements Job {
     this.doneJob = true;
   }
 
-  public void markRetrievalDone() {
+  public void markRetrieveDone() {
     this.doneRetrieve = true;
   }
 
@@ -133,6 +132,10 @@ public abstract class LastSuccessfulRunJob implements Job {
     return fatalError;
   }
 
+  public boolean isRetrieveDone() {
+    return doneRetrieve;
+  }
+
   public boolean isTransformDone() {
     return doneTransform;
   }
@@ -140,11 +143,6 @@ public abstract class LastSuccessfulRunJob implements Job {
   public boolean isIndexDone() {
     return doneIndex;
   }
-
-  public boolean isRetrievalDone() {
-    return doneRetrieve;
-  }
-
 
   /**
    * If last run time is provide in options then use it, otherwise use provided
@@ -192,14 +190,11 @@ public abstract class LastSuccessfulRunJob implements Job {
     if (!StringUtils.isBlank(this.lastRunTimeFilename)) {
       try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) {
         ret = new SimpleDateFormat(LAST_RUN_DATE_FORMAT).parse(br.readLine().trim());
-      } catch (FileNotFoundException e) {
-        fatalError = true;
-        JobLogs.raiseError(LOGGER, e, "Caught FileNotFoundException: {}", e.getMessage());
       } catch (IOException e) {
-        fatalError = true;
+        markFailed();
         JobLogs.raiseError(LOGGER, e, "Caught IOException: {}", e.getMessage());
       } catch (ParseException e) {
-        fatalError = true;
+        markFailed();
         JobLogs.raiseError(LOGGER, e, "Caught ParseException: {}", e.getMessage());
       }
     }

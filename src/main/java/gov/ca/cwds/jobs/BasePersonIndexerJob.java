@@ -292,6 +292,17 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         esDao.getConfig().getElasticsearchDocType(), esp, t);
   }
 
+  private void keepConnectionAlive() throws InterruptedException {
+    while (isRunning()) {
+      try {
+        Thread.sleep(SLEEP_MILLIS);
+        this.jobDao.find("abc1234567"); // dummy call, keep connection pool alive.
+      } catch (HibernateException he) { // NOSONAR
+        LOGGER.trace("DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage());
+      }
+    }
+  }
+
   /**
    * ENTRY POINT FOR INITIAL LOAD.
    * 
@@ -316,18 +327,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       final Thread threadJdbc = new Thread(this::threadRetrieveByJdbc); // Extract
       threadJdbc.start();
-
-      while (isRunning()) {
-        Thread.sleep(SLEEP_MILLIS);
-
-        try {
-          this.jobDao.find("abc1234567"); // dummy call, keep connection pool alive.
-        } catch (HibernateException he) { // NOSONAR
-          LOGGER.trace("DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage());
-        } catch (Exception e) { // NOSONAR
-          LOGGER.warn("Hibernate keep-alive error: {}", e.getMessage());
-        }
-      }
+      keepConnectionAlive();
 
       threadJdbc.join();
       if (threadTransformer != null) {
@@ -390,7 +390,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       markFailed();
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      markRetrievalDone();
+      markRetrieveDone();
     }
 
     LOGGER.info("DONE: jdbc thread");
@@ -470,7 +470,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     T t;
 
     while ((t = queueIndex.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
-      LOGGER.trace("queueIndex.pollFirst: id {}", t.getPrimaryKey());
       JobLogs.logEvery(++i, "Indexed", "recs to ES");
       prepareDocument(bp, t);
     }
@@ -487,7 +486,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     int cntr = 0;
 
     try {
-      while (!(isFailed() || (isRetrievalDone() && isTransformDone() && queueIndex.isEmpty()))) {
+      while (!(isFailed() || (isRetrieveDone() && isTransformDone() && queueIndex.isEmpty()))) {
         cntr = bulkPrepare(bp, cntr);
       }
 
@@ -506,7 +505,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       Thread.currentThread().interrupt();
       JobLogs.raiseError(LOGGER, e, "Indexer: fatal error {}", e.getMessage());
     } finally {
-      markIndexDone();
+      markJobDone();
     }
 
     LOGGER.info("DONE: indexer thread");
@@ -525,9 +524,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       markFailed();
       JobLogs.raiseError(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
     }
-    // finally {
-    // markIndexDone();
-    // }
   }
 
   /**
@@ -576,12 +572,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Give it time to finish the last batch.
       LOGGER.info("Waiting on ElasticSearch to finish last batch ...");
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
+      markIndexDone();
+
       return new Date(this.startTime);
     } catch (Exception e) {
       markFailed();
       throw JobLogs.buildException(LOGGER, e, "General Exception: {}", e.getMessage());
     } finally {
-      markIndexDone();
+      markJobDone();
     }
   }
 
@@ -700,7 +698,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       txn.rollback();
       throw new DaoException(h);
     } finally {
-      markRetrievalDone();
+      markRetrieveDone();
     }
   }
 
@@ -791,7 +789,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       txn.rollback();
       throw JobLogs.buildException(LOGGER, h, "EXTRACT ERROR!: {}", h.getMessage());
     } finally {
-      markRetrievalDone();
+      markRetrieveDone();
     }
   }
 
@@ -938,7 +936,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       return ret.build();
     } catch (HibernateException e) {
       markFailed();
-      LOGGER.error("BATCH ERROR! {}", e.getMessage(), e);
+      LOGGER.error("ERROR PULLING BUCKET RANGE! {}-{}: {}", minId, maxId, e.getMessage(), e);
       txn.rollback();
       throw new DaoException(e);
     }
@@ -973,7 +971,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           markFailed();
           throw new JobsException("ERROR EXTRACTING VIA HIBERNATE!", e2);
         } finally {
-          markRetrievalDone();
+          markRetrieveDone();
         }
       }
     }

@@ -79,7 +79,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
       markFailed();
       throw new JobsException("ERROR READING PG VIEW", e);
     } finally {
-      markRetrievalDone();
+      markRetrieveDone();
     }
 
     LOGGER.info("DONE: Stage #1: NS View Reader");

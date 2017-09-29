@@ -141,6 +141,9 @@ public class OtherClientNameIndexerJob
     return "MQT_OTHER_CLIENT_NAME";
   }
 
+  /**
+   * @deprecated delete after old legacy_source_table attribute is removed from ES
+   */
   @Override
   @Deprecated
   public String getLegacySourceTable() {

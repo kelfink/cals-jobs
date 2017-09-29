@@ -1,14 +1,46 @@
 package gov.ca.cwds.jobs.component;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.BasePersonIndexerJob;
+import gov.ca.cwds.jobs.config.JobOptions;
 
 public interface JobAtomInitialLoad<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends ApiMarker {
 
+  static final Logger LOGGER = LoggerFactory.getLogger(JobAtomInitialLoad.class);
+
   static final int DEFAULT_BUCKETS = 1;
+
+  default List<Pair<String, String>> limitRange(BasePersonIndexerJob<T, M> job,
+      final List<Pair<String, String>> allKeyPairs) {
+    List<Pair<String, String>> ret = new ArrayList<>();
+    final JobOptions opts = job.getOpts();
+    if (opts != null && opts.isRangeGiven()) {
+      final List<Pair<String, String>> list = new ArrayList<>();
+
+      final int start = ((int) opts.getStartBucket()) - 1;
+      final int end = ((int) opts.getEndBucket()) - 1;
+
+      LOGGER.info("Limit key range to: {} to {}", start + 1, end + 1);
+      for (int i = start; i <= end; i++) {
+        list.add(allKeyPairs.get(i));
+      }
+
+      ret = list;
+    }
+
+    return ret;
+  }
 
   /**
    * @return true if the job provides its own key ranges
