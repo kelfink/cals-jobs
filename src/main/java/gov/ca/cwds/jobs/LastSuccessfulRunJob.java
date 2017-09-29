@@ -46,27 +46,27 @@ public abstract class LastSuccessfulRunJob implements Job {
    * other words, threads don't cache a copy of this variable in their local memory for performance.
    * </p>
    */
-  protected volatile boolean fatalError = false;
+  private volatile boolean fatalError = false;
 
   /**
    * Completion flag for data retrieval.
    */
-  protected volatile boolean doneExtracting = false;
+  private volatile boolean doneRetrieve = false;
 
   /**
    * Completion flag for normalization/transformation.
    */
-  protected volatile boolean doneTransforming = false;
+  private volatile boolean doneTransform = false;
 
   /**
    * Completion flag for document indexing.
    */
-  protected volatile boolean doneIndexing = false;
+  private volatile boolean doneIndex = false;
 
   /**
    * Completion flag for whole job.
    */
-  protected volatile boolean doneJob = false;
+  private volatile boolean doneJob = false;
 
   /**
    * Official start time.
@@ -102,22 +102,10 @@ public abstract class LastSuccessfulRunJob implements Job {
   }
 
   public void markJobDone() {
-    this.doneExtracting = true;
-    this.doneIndexing = true;
-    this.doneTransforming = true;
+    this.doneRetrieve = true;
+    this.doneIndex = true;
+    this.doneTransform = true;
     this.doneJob = true;
-  }
-
-  public void markIndexDone() {
-    this.doneIndexing = true;
-  }
-
-  public void markRetrievalDone() {
-    this.doneExtracting = true;
-  }
-
-  public void markTransformDone() {
-    this.doneTransforming = true;
   }
 
   public void markFailed() {
@@ -125,21 +113,38 @@ public abstract class LastSuccessfulRunJob implements Job {
     this.doneJob = true;
   }
 
+  public void markRetrievalDone() {
+    this.doneRetrieve = true;
+  }
+
+  public void markTransformDone() {
+    this.doneTransform = true;
+  }
+
+  public void markIndexDone() {
+    this.doneIndex = true;
+  }
+
   public boolean isRunning() {
     return !doneJob;
   }
 
-  public boolean isStillTransforming() {
-    return !doneTransforming;
+  public boolean isFailed() {
+    return fatalError;
   }
 
-  public boolean isStillIndexing() {
-    return !doneIndexing;
+  public boolean isTransformDone() {
+    return doneTransform;
   }
 
-  public boolean isStillExtracting() {
-    return !doneExtracting;
+  public boolean isIndexingDone() {
+    return doneIndex;
   }
+
+  public boolean isRetrievalDone() {
+    return doneRetrieve;
+  }
+
 
   /**
    * If last run time is provide in options then use it, otherwise use provided

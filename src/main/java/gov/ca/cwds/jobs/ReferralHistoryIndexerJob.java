@@ -299,7 +299,7 @@ public class ReferralHistoryIndexerJob
 
     LOGGER.info("pull client referral keys");
     final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
-    while (!fatalError && rs.next()) {
+    while (!isFailed() && rs.next()) {
       listClientReferralKeys.add(MinClientReferral.extract(rs));
     }
   }
@@ -314,7 +314,7 @@ public class ReferralHistoryIndexerJob
     EsPersonReferral m;
     LOGGER.info("pull referrals");
     final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
-    while (!fatalError && rs.next() && (m = extractReferral(rs)) != null) {
+    while (!isFailed() && rs.next() && (m = extractReferral(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "bundle referral");
       JobLogs.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
           "referrals");
@@ -332,7 +332,7 @@ public class ReferralHistoryIndexerJob
     EsPersonReferral m;
     LOGGER.info("pull allegations");
     final ResultSet rs = stmtSelAllegation.executeQuery(); // NOSONAR
-    while (!fatalError && rs.next() && (m = extractAllegation(rs)) != null) {
+    while (!isFailed() && rs.next() && (m = extractAllegation(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "bundle allegation");
       JobLogs.logEvery(LOGGER, 15000, rowsReadAllegations.incrementAndGet(), "Total read",
           "allegations");
@@ -444,7 +444,7 @@ public class ReferralHistoryIndexerJob
       }
 
     } catch (Exception e) {
-      fatalError = true;
+      markFailed();
       JobLogs.raiseError(LOGGER, e, "ERROR HANDING RANGE {} - {}: {}", p.getLeft(), p.getRight(),
           e.getMessage());
     }
@@ -488,7 +488,7 @@ public class ReferralHistoryIndexerJob
 
     try {
       // This job normalizes **without** the transform thread.
-      doneTransforming = true;
+      markTransformDone();
 
       // Init task list.
       final List<Pair<String, String>> ranges = getPartitionRanges();
@@ -509,10 +509,10 @@ public class ReferralHistoryIndexerJob
       LOGGER.info("read {} ES referral rows", this.rowsReadReferrals.get());
 
     } catch (Exception e) {
-      fatalError = true;
+      markFailed();
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      doneExtracting = true;
+      markRetrievalDone();
     }
 
     LOGGER.info("DONE: main read thread");

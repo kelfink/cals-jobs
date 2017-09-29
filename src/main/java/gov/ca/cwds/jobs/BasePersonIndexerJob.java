@@ -258,7 +258,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     DocWriteRequest<?> ret;
     try {
       if (isDelete(t)) {
-        ret = bulkDelete((String) t.getPrimaryKey());
+        ret = bulkDelete((String) t.getPrimaryKey()); // NOTE: cannot assume String PK.
         getTrack().trackBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);
@@ -487,7 +487,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     LOGGER.info("BEGIN: Indexer thread");
     try {
-      while (!(fatalError || (doneExtracting && doneTransforming && queueIndex.isEmpty()))) {
+      while (!(isFailed() || (isRetrievalDone() && isTransformDone() && queueIndex.isEmpty()))) {
         LOGGER.trace("Stage #3: Index: just *do* something ...");
         cntr = bulkPrepare(bp, cntr);
       }

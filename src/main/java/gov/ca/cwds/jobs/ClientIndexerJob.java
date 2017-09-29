@@ -168,7 +168,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
 
-        while (!fatalError && rs.next() && (m = extract(rs)) != null) {
+        while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
           // Hand the baton to the next runner ...
           JobLogs.logEvery(++cntr, "Retrieved", "recs");
           // NOTE: Assumes that records are sorted by group key.
@@ -187,8 +187,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       }
 
     } catch (Exception e) {
-      fatalError = true;
-      JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      markFailed();
+      JobLogs.raiseError(LOGGER, e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(), p.getRight(),
+          e.getMessage());
     }
 
     LOGGER.warn("DONE: Extract thread " + i);
@@ -203,7 +204,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     LOGGER.info("BEGIN: main extract thread");
 
     // This job normalizes **without** the transform thread.
-    doneTransforming = true;
+    markTransformDone();
 
     try {
       final int maxThreads = JobJdbcUtils.calcReaderThreads(getOpts());
@@ -214,10 +215,10 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       getPartitionRanges().parallelStream().forEach(this::pullRange);
 
     } catch (Exception e) {
-      fatalError = true;
+      markFailed();
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      doneExtracting = true;
+      markRetrievalDone();
     }
 
     LOGGER.info("DONE: main extract thread");
