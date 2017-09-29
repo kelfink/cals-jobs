@@ -11,6 +11,15 @@ public interface JobAtomTransformer<T extends PersistentObject, M extends ApiGro
     extends JobAtomShared {
 
   /**
+   * Transform (normalize) in the Job instead of relying on the transformation thread.
+   * 
+   * @return true if the transformer thread should run
+   */
+  default boolean useTransformThread() {
+    return true;
+  }
+
+  /**
    * Return the job's entity class for its de-normalized source view or materialized query table, if
    * any, or null if not using a de-normalized source.
    * 
@@ -59,6 +68,5 @@ public interface JobAtomTransformer<T extends PersistentObject, M extends ApiGro
     final List<T> list = normalize(recs);
     return list != null && !list.isEmpty() ? list.get(0) : null;
   }
-
 
 }

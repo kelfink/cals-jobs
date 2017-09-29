@@ -774,7 +774,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         groupRecs.add(m);
         lastId = m.getNormalizationGroupKey();
         if (lastId == null) {
-          // This could be due to data error (invalid data in db)
+          // Could be a data error (invalid data in db).
           LOGGER.warn("NULL Normalization Group Key: " + m);
           lastId = new Object();
         }
@@ -804,10 +804,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
   }
 
-  // ===================
-  // CLOSE RESOURCES:
-  // ===================
-
   @Override
   public synchronized void close() throws IOException {
     if (isRunning()) {
@@ -822,15 +818,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         LOGGER.warn("CLOSING SESSION FACTORY");
         this.sessionFactory.close();
       }
-
     } else {
       LOGGER.warn("CLOSE: FALSE ALARM");
     }
   }
 
-  /**
-   * Finish job and close resources.
-   */
   @Override
   protected synchronized void finish() {
     LOGGER.warn("FINISH JOB AND SHUTDOWN!");
@@ -838,13 +830,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       markJobDone();
       close();
       Thread.sleep(SLEEP_MILLIS); // NOSONAR
-    } catch (InterruptedException e) {
+    } catch (Exception e) {
       markFailed();
       Thread.currentThread().interrupt();
-      throw JobLogs.buildException(LOGGER, e, "INTERRUPTED!: {}", e.getMessage());
-    } catch (IOException ioe) {
-      markFailed();
-      throw JobLogs.buildException(LOGGER, ioe, "ERROR FINISHING JOB: {}", ioe.getMessage());
+      throw JobLogs.buildException(LOGGER, e, "ERROR FINISHING JOB: {}", e.getMessage());
     }
   }
 
@@ -914,9 +903,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   /**
    * Divide work into buckets: pull a unique range of identifiers so that no bucket results overlap.
-   * 
    * <p>
    * Where possible, prefer use {@link #threadExtractJdbc()} or {@link #extractHibernate()} instead.
+   * </p>
    * 
    * @param minId start of identifier range
    * @param maxId end of identifier range
@@ -926,7 +915,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected List<T> pullBucketRange(String minId, String maxId) {
     LOGGER.info("PULL BUCKET RANGE {} to {}", minId, maxId);
     final Class<?> entityClass =
-        getDenormalizedClass() != null ? getDenormalizedClass() : jobDao.getEntityClass();
+        getDenormalizedClass() != null ? getDenormalizedClass() : getJobDao().getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findBucketRange";
     final Session session = jobDao.getSessionFactory().getCurrentSession();
     final Transaction txn = session.beginTransaction();
@@ -1028,6 +1017,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return track;
   }
 
+  @Override
   public ElasticsearchDao getEsDao() {
     return esDao;
   }
