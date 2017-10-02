@@ -14,6 +14,7 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import gov.ca.cwds.data.es.ElasticSearchCounty;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 
@@ -48,8 +49,20 @@ public class EsSafetyAlertTest {
     EsSafetyAlert target = new EsSafetyAlert();
     Map<Object, ReplicatedSafetyAlerts> map = new HashMap<Object, ReplicatedSafetyAlerts>();
     ReplicatedSafetyAlerts actual = target.normalize(map);
+
     ReplicatedSafetyAlerts expected = new ReplicatedSafetyAlerts();
-    expected.addSafetyAlert(new ElasticSearchSafetyAlert());
+    ElasticSearchSafetyAlert esSafetyAlert = new ElasticSearchSafetyAlert();
+
+    ElasticSearchSafetyAlert.Activation activation = new ElasticSearchSafetyAlert.Activation();
+    esSafetyAlert.setActivation(activation);
+    activation.setActivationCounty(new ElasticSearchCounty());
+
+    ElasticSearchSafetyAlert.Deactivation deactivation =
+        new ElasticSearchSafetyAlert.Deactivation();
+    esSafetyAlert.setDeactivation(deactivation);
+    deactivation.setDeactivationCounty(new ElasticSearchCounty());
+    expected.addSafetyAlert(esSafetyAlert);
+
     assertThat(actual, is(equalTo(expected)));
   }
 
