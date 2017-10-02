@@ -113,9 +113,9 @@ public class SafetyAlertIndexerJobTest {
   @Test
   public void getInitialLoadQuery_Args__String() throws Exception {
     String dbSchemaName = "CWSINT";
-    String actual = target.getInitialLoadQuery(dbSchemaName).replaceAll("  ", " ");
+    String actual = target.getInitialLoadQuery(dbSchemaName).replaceAll("  ", " ").trim();
     String expected =
-        "SELECT x.* FROM CWSINT.VW_LST_SAFETY_ALERT x WHERE x.CLIENT_SENSITIVITY_IND = 'N' ORDER BY CLIENT_ID FOR READ ONLY";
+        "SELECT x.* FROM CWSINT.VW_LST_SAFETY_ALERT x WHERE x.CLIENT_SENSITIVITY_IND = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -123,9 +123,9 @@ public class SafetyAlertIndexerJobTest {
   public void getInitialLoadQuery_Args__sealed() throws Exception {
     when(opts.isLoadSealedAndSensitive()).thenReturn(true);
     String dbSchemaName = "CWSINT";
-    String actual = target.getInitialLoadQuery(dbSchemaName).replaceAll("  ", " ");
+    String actual = target.getInitialLoadQuery(dbSchemaName).replaceAll("  ", " ").trim();
     String expected =
-        "SELECT x.* FROM CWSINT.VW_LST_SAFETY_ALERT x ORDER BY CLIENT_ID FOR READ ONLY";
+        "SELECT x.* FROM CWSINT.VW_LST_SAFETY_ALERT x ORDER BY CLIENT_ID FOR READ ONLY WITH UR";
     assertThat(actual, is(equalTo(expected)));
   }
 
