@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.contains;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -59,7 +59,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  BasePersonIndexerJob<T, M> target;
+  // BasePersonIndexerJob<T, M> target;
 
   ElasticsearchConfiguration esConfig;
   ElasticsearchDao esDao;
@@ -159,7 +159,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     when(opts.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
   }
 
-  public void runKillThread() {
+  public void runKillThread(final BasePersonIndexerJob<T, M> target) {
     new Thread(() -> {
       try {
         Thread.sleep(1100); // NOSONAR

@@ -834,7 +834,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   @Deprecated
   @SuppressWarnings("unchecked")
-  protected List<BatchBucket> buildBucketList(String table) {
+  protected List<BatchBucket> buildBucketList(final String table) {
     List<BatchBucket> ret = new ArrayList<>();
     Transaction txn = null;
 
@@ -875,9 +875,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * </p>
    * 
    * @return list of partition key pairs
-   * @deprecated use {@link #threadRetrieveByJdbc()} or {@link #extractHibernate()} instead
    */
-  @Deprecated
   protected List<Pair<String, String>> getPartitionRanges() {
     final List<Pair<String, String>> ret = new ArrayList<>();
     final List<BatchBucket> buckets = buildBucketList(getDriverTable());

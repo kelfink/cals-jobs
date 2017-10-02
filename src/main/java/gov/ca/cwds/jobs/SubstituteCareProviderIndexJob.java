@@ -25,6 +25,11 @@ public class SubstituteCareProviderIndexJob extends
     BasePersonIndexerJob<ReplicatedSubstituteCareProvider, ReplicatedSubstituteCareProvider> {
 
   /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Construct batch job instance with all required dependencies.
    * 
    * @param dao main DAO

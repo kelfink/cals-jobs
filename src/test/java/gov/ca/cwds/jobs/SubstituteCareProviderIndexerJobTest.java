@@ -1,57 +1,37 @@
 package gov.ca.cwds.jobs;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.junit.After;
-import org.junit.AfterClass;
+import java.util.List;
+
 import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider;
 
 /**
  * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
-public class SubstituteCareProviderIndexerJobTest {
+public class SubstituteCareProviderIndexerJobTest
+    extends PersonJobTester<ReplicatedSubstituteCareProvider, ReplicatedSubstituteCareProvider> {
 
-  @SuppressWarnings("unused")
-  private static ReplicatedSubstituteCareProviderDao dao;
-  private static SessionFactory sessionFactory;
-  private Session session;
+  ReplicatedSubstituteCareProviderDao dao;
+  SubstituteCareProviderIndexJob target;
 
-  @BeforeClass
-  public static void beforeClass() {
-    sessionFactory =
-        new Configuration().configure("test-cms-hibernate.cfg.xml").buildSessionFactory();
-    dao = new ReplicatedSubstituteCareProviderDao(sessionFactory);
-  }
-
-  @AfterClass
-  public static void afterClass() {
-    sessionFactory.close();
-  }
-
+  @Override
   @Before
-  public void setup() {
-    session = sessionFactory.getCurrentSession();
-    session.beginTransaction();
-  }
-
-  @After
-  public void teardown() {
-    session.getTransaction().rollback();
+  public void setup() throws Exception {
+    super.setup();
+    dao = new ReplicatedSubstituteCareProviderDao(sessionFactory);
+    target = new SubstituteCareProviderIndexJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+        sessionFactory);
+    target.setOpts(opts);
   }
 
   @Test
@@ -61,30 +41,36 @@ public class SubstituteCareProviderIndexerJobTest {
 
   @Test
   public void testInstantiation() throws Exception {
-    ReplicatedSubstituteCareProviderDao substituteCareProviderDao = null;
-    ElasticsearchDao elasticsearchDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    SubstituteCareProviderIndexJob target =
-        new SubstituteCareProviderIndexJob(substituteCareProviderDao, elasticsearchDao,
-            lastJobRunTimeFilename, mapper, sessionFactory);
     assertThat(target, notNullValue());
   }
 
   @Test
-  public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-    Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider.findAllUpdatedAfter");
-    assertThat(query, is(notNullValue()));
+  public void getPartitionRanges_RSQ() throws Exception {
+    System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
+    final List actual = target.getPartitionRanges();
+    assertThat(actual.size(), is(equalTo(7)));
   }
 
   @Test
-  @Ignore
-  public void testFindAllByBucketNamedQueryExists() throws Exception {
-    Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider.findAllByBucket");
-    assertThat(query, is(notNullValue()));
+  public void getPartitionRanges_REP() throws Exception {
+    System.setProperty("DB_CMS_SCHEMA", "CWSREP");
+    final List actual = target.getPartitionRanges();
+    assertThat(actual.size(), is(equalTo(7)));
+  }
+
+  @Test
+  public void getPartitionRanges_RS1() throws Exception {
+    System.setProperty("DB_CMS_SCHEMA", "CWSRS1");
+    final List actual = target.getPartitionRanges();
+    assertThat(actual.size(), is(equalTo(1)));
+  }
+
+  @Test
+  public void getPartitionRanges_RS1_Linux() throws Exception {
+    System.setProperty("DB_CMS_SCHEMA", "CWSRS1");
+    when(meta.getDatabaseProductVersion()).thenReturn("LINUX");
+    final List actual = target.getPartitionRanges();
+    assertThat(actual.size(), is(equalTo(1)));
   }
 
 }

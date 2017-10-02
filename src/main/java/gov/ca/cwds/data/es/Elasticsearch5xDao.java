@@ -18,6 +18,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
+import gov.ca.cwds.data.std.ApiMarker;
+
 /**
  * A DAO for Elasticsearch.
  *
@@ -41,13 +43,13 @@ import com.google.inject.Inject;
  * @deprecated Use gov.ca.cwds.data.es.ElasticsearchDao instead
  */
 @Deprecated
-public class Elasticsearch5xDao implements Closeable {
+public class Elasticsearch5xDao implements Closeable, ApiMarker {
 
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Elasticsearch5xDao.class);
 
-  private static int NUMBER_OF_SHARDS = 5;
+  private static final int NUMBER_OF_SHARDS = 5;
 
-  private static int NUMBER_OF_REPLICAS = 1;
+  private static final int NUMBER_OF_REPLICAS = 1;
 
   /**
    * Client is thread safe.
@@ -99,7 +101,6 @@ public class Elasticsearch5xDao implements Closeable {
     getClient().admin().indices().create(indexRequest).actionGet();
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    // todo path to the mapping file has to be a part of configuration
     IOUtils.copy(
         this.getClass().getResourceAsStream("/elasticsearch/mapping/map_person_5x_snake.json"),
         out);

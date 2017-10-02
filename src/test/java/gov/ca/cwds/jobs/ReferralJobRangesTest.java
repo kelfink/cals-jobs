@@ -20,8 +20,7 @@ public class ReferralJobRangesTest extends PersonJobTester {
 
   ReferralJobRanges target = new ReferralJobRanges();
 
-  private void checkPartitionRanges(String schema, boolean isZOS, int expectedCnt)
-      throws Exception {
+  public void checkPartitionRanges(String schema, boolean isZOS, int expectedCnt) throws Exception {
     System.setProperty("DB_CMS_SCHEMA", schema);
     BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job =
         mock(BasePersonIndexerJob.class);

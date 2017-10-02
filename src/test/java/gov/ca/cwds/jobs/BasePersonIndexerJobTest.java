@@ -5,7 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,7 +50,7 @@ public class BasePersonIndexerJobTest
     extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
 
   TestNormalizedEntityDao dao;
-  // TestIndexerJob target;
+  TestIndexerJob target;
 
   @Override
   @Before
@@ -272,7 +272,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void threadTransform_Args__() throws Exception {
-    runKillThread();
+    runKillThread(target);
     target.threadNormalize();
   }
 
@@ -415,7 +415,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void threadExtractJdbc_Args__() throws Exception {
-    runKillThread();
+    runKillThread(target);
     target.threadRetrieveByJdbc();
   }
 
@@ -525,7 +525,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void doInitialLoadJdbc_Args__() throws Exception {
-    runKillThread();
+    runKillThread(target);
     target.doInitialLoadJdbc();
   }
 
@@ -540,7 +540,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void threadIndex_Args__() throws Exception {
-    runKillThread();
+    runKillThread(target);
     target.threadIndex();
   }
 

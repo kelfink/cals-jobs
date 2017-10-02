@@ -79,7 +79,7 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.+'
     testCompile group: 'com.h2database', name: 'h2', version: '1.4.195'
-    testCompile 'org.mockito:mockito-core:2.0.54-beta'
+	testCompile group: 'org.mockito', name: 'mockito-core', version: '2.10.0'
     testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
     testCompile('org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:2.23.2') {
         exclude group: 'javax.servlet', module: 'javax.servlet-api'

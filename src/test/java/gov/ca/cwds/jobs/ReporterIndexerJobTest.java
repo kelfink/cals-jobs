@@ -10,10 +10,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider;
 
 /**
  * Test for {@link ReporterIndexerJob}.
@@ -21,7 +21,8 @@ import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
  * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
-public class ReporterIndexerJobTest extends PersonJobTester {
+public class ReporterIndexerJobTest
+    extends PersonJobTester<ReplicatedSubstituteCareProvider, ReplicatedSubstituteCareProvider> {
 
   private ReplicatedReporterDao dao;
   private ReporterIndexerJob target;
@@ -67,13 +68,6 @@ public class ReporterIndexerJobTest extends PersonJobTester {
     final String actual = target.getLegacySourceTable();
     String expected = "REPTR_T";
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  @Ignore
-  public void main_Args__StringArray() throws Exception {
-    String[] args = new String[] {};
-    ReporterIndexerJob.main(args);
   }
 
   @Test
