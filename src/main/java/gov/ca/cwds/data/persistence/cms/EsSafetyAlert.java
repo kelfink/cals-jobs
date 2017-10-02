@@ -137,7 +137,7 @@ public class EsSafetyAlert extends ApiObjectIdentity
     ElasticSearchSafetyAlert.Activation activation = new ElasticSearchSafetyAlert.Activation();
     alert.setActivation(activation);
 
-    activation.setActivationReason(
+    activation.setActivationReasonDescription(
         SystemCodeCache.global().getSystemCodeShortDescription(this.activationReasonCode));
     activation.setActivationReasonId(
         this.activationReasonCode != null ? this.activationReasonCode.toString() : null);
