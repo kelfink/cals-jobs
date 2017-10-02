@@ -9,7 +9,7 @@ import gov.ca.cwds.jobs.config.JobOptions;
  * 
  * @author CWDS API Team
  */
-public interface JobAtomShared extends ApiMarker {
+public interface AtomShared extends ApiMarker {
 
   JobProgressTrack getTrack();
 

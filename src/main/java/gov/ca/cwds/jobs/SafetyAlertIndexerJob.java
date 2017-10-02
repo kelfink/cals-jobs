@@ -87,7 +87,7 @@ public class SafetyAlertIndexerJob
 
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append("SELECT x.* FROM ");
     buf.append(dbSchemaName);
     buf.append(".");
@@ -98,16 +98,16 @@ public class SafetyAlertIndexerJob
       buf.append(" WHERE x.CLIENT_SENSITIVITY_IND = 'N' ");
     }
 
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY");
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
   }
 
+  /**
+   * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
+   * sensitive flag must be deleted.
+   */
   @Override
   public boolean mustDeleteLimitedAccessRecords() {
-    /**
-     * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
-     * sensitive flag must be deleted.
-     */
     return !getOpts().isLoadSealedAndSensitive();
   }
 
@@ -124,7 +124,7 @@ public class SafetyAlertIndexerJob
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp,
       ReplicatedSafetyAlerts safetyAlerts) throws IOException {
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append("{\"safety_alerts\":[");
 
     final List<ElasticSearchSafetyAlert> esSafetyAlerts = safetyAlerts.getSafetyAlerts();
@@ -153,25 +153,25 @@ public class SafetyAlertIndexerJob
   }
 
   @Override
-  public EsSafetyAlert extract(ResultSet rs) throws SQLException {
-    EsSafetyAlert safetyAlert = new EsSafetyAlert();
+  public EsSafetyAlert extract(final ResultSet rs) throws SQLException {
+    final EsSafetyAlert ret = new EsSafetyAlert();
 
-    safetyAlert.setClientId(ifNull(rs.getString("CLIENT_ID")));
-    safetyAlert.setAlertId(ifNull(rs.getString("ALERT_ID")));
-    safetyAlert.setActivationCountyCode(rs.getInt("ACTIVATION_COUNTY_CD"));
-    safetyAlert.setActivationDate(rs.getDate("ACTIVATION_DATE"));
-    safetyAlert.setActivationExplanation(ifNull(rs.getString("ACTIVATION_EXPLANATION")));
-    safetyAlert.setActivationReasonCode(rs.getInt("ACTIVATION_REASON_CD"));
-    safetyAlert.setDeactivationCountyCode(rs.getInt("DEACTIVATION_COUNTY_CD"));
-    safetyAlert.setDeactivationDate(rs.getDate("DEACTIVATION_DATE"));
-    safetyAlert.setDeactivationExplanation(ifNull(rs.getString("DEACTIVATION_EXPLANATION")));
-    safetyAlert.setLastUpdatedId(ifNull(rs.getString("LAST_UPDATED_ID")));
-    safetyAlert.setLastUpdatedTimestamp(rs.getTimestamp("LAST_UPDATED_TS"));
-    safetyAlert.setLastUpdatedOperation(ifNull(rs.getString("ALERT_IBMSNAP_OPERATION")));
-    safetyAlert.setReplicationTimestamp(rs.getTimestamp("ALERT_IBMSNAP_LOGMARKER"));
-    safetyAlert.setLastChanged(rs.getTimestamp("LAST_CHANGED"));
+    ret.setClientId(ifNull(rs.getString("CLIENT_ID")));
+    ret.setAlertId(ifNull(rs.getString("ALERT_ID")));
+    ret.setActivationCountyCode(rs.getInt("ACTIVATION_COUNTY_CD"));
+    ret.setActivationDate(rs.getDate("ACTIVATION_DATE"));
+    ret.setActivationExplanation(ifNull(rs.getString("ACTIVATION_EXPLANATION")));
+    ret.setActivationReasonCode(rs.getInt("ACTIVATION_REASON_CD"));
+    ret.setDeactivationCountyCode(rs.getInt("DEACTIVATION_COUNTY_CD"));
+    ret.setDeactivationDate(rs.getDate("DEACTIVATION_DATE"));
+    ret.setDeactivationExplanation(ifNull(rs.getString("DEACTIVATION_EXPLANATION")));
+    ret.setLastUpdatedId(ifNull(rs.getString("LAST_UPDATED_ID")));
+    ret.setLastUpdatedTimestamp(rs.getTimestamp("LAST_UPDATED_TS"));
+    ret.setLastUpdatedOperation(ifNull(rs.getString("ALERT_IBMSNAP_OPERATION")));
+    ret.setReplicationTimestamp(rs.getTimestamp("ALERT_IBMSNAP_LOGMARKER"));
+    ret.setLastChanged(rs.getTimestamp("LAST_CHANGED"));
 
-    return safetyAlert;
+    return ret;
   }
 
   /**

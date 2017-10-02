@@ -21,6 +21,11 @@ public class JobProgressTrack extends ApiObjectIdentity {
    */
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Official start time.
+   */
+  private final long startTime = System.currentTimeMillis();
+
   private final AtomicInteger recsSentToIndexQueue = new AtomicInteger(0);
 
   private final AtomicInteger recsSentToBulkProcessor = new AtomicInteger(0);
@@ -106,10 +111,11 @@ public class JobProgressTrack extends ApiObjectIdentity {
 
   @Override
   public String toString() {
+    final long endTime = System.currentTimeMillis();
     return MessageFormat.format(
-        "STATS: \nindexed:  {0}\ndeleted: {1}\nbulk before: {2}\nbulk after:  {3}\nbulk error:  {4}",
+        "STATS: \nindexed:  {0}\ndeleted: {1}\nbulk before: {2}\nbulk after:  {3}\nbulk error:  {4}\nELAPSED TIME:  {5} SECONDS",
         getRecsBulkPrepared(), getRecsBulkDeleted(), getRecsBulkBefore(), getRecsBulkAfter(),
-        getRecsBulkError());
+        getRecsBulkError(), (((endTime - startTime) / 1000)));
   }
 
 }

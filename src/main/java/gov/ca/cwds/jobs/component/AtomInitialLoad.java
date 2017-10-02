@@ -20,10 +20,10 @@ import gov.ca.cwds.jobs.config.JobOptions;
  * @param <T> normalized type
  * @param <M> de-normalized type or same as normalized type if normalization not needed
  */
-public interface JobAtomInitialLoad<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends JobAtomShared {
+public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
+    extends AtomShared {
 
-  static final Logger LOGGER = LoggerFactory.getLogger(JobAtomInitialLoad.class);
+  static final Logger LOGGER = LoggerFactory.getLogger(AtomInitialLoad.class);
 
   static final int DEFAULT_BUCKETS = 1;
 

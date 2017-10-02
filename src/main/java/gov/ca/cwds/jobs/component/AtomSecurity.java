@@ -7,7 +7,7 @@ import gov.ca.cwds.data.std.ApiMarker;
  * 
  * @author CWDS API Team
  */
-public interface JobAtomSecurity extends ApiMarker {
+public interface AtomSecurity extends ApiMarker {
 
   /**
    * Determine if limited access records must be deleted from ES.

@@ -52,10 +52,10 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.jobs.component.JobAtomHibernate;
-import gov.ca.cwds.jobs.component.JobAtomInitialLoad;
-import gov.ca.cwds.jobs.component.JobAtomSecurity;
-import gov.ca.cwds.jobs.component.JobAtomTransformer;
+import gov.ca.cwds.jobs.component.AtomHibernate;
+import gov.ca.cwds.jobs.component.AtomInitialLoad;
+import gov.ca.cwds.jobs.component.AtomSecurity;
+import gov.ca.cwds.jobs.component.AtomTransformer;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
@@ -94,7 +94,7 @@ import gov.ca.cwds.jobs.util.transform.JobElasticPersonDocPrep;
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends LastSuccessfulRunJob implements AutoCloseable, JobElasticPersonDocPrep<T>,
-    JobAtomHibernate<T, M>, JobAtomTransformer<T, M>, JobAtomInitialLoad<T, M>, JobAtomSecurity {
+    AtomHibernate<T, M>, AtomTransformer<T, M>, AtomInitialLoad<T, M>, AtomSecurity {
 
   /**
    * Default serialization.
@@ -152,12 +152,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * inexpensive.
    * </p>
    */
-  protected volatile LinkedBlockingDeque<M> queueTransform = new LinkedBlockingDeque<>(100000);
+  protected LinkedBlockingDeque<M> queueNormalize = new LinkedBlockingDeque<>(100000);
 
   /**
    * Queue of normalized records waiting to publish to Elasticsearch.
    */
-  protected volatile LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(250000);
+  protected LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(250000);
 
   /**
    * Read/write lock for extract threads and sources, such as JDBC, Hibernate, or even flat files.
@@ -247,7 +247,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Prepare an "upsert" request without a checked exception. Throws runtime {@link JobsException}
    * on error. This method's signature is easier to use in functional lambda and stream calls than
-   * other method signatures.
+   * method signatures with checked exceptions.
    * 
    * @param esp person document object
    * @param t normalized entity
@@ -336,15 +336,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       threadIndexer.join();
       Thread.sleep(SLEEP_MILLIS);
-
-      this.close(); // OK for initial load.
-      final long endTime = System.currentTimeMillis();
-      LOGGER.info("JDBC ELAPSED TIME: " + ((endTime - startTime) / 1000) + " SECONDS");
+      LOGGER.info(this.getTrack().toString());
     } catch (Exception e) {
       markFailed();
       Thread.currentThread().interrupt();
       JobLogs.raiseError(LOGGER, e, "GENERAL EXCEPTION: {}", e);
     } finally {
+      this.finish(); // OK for initial load.
       markJobDone();
     }
 
@@ -362,7 +360,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      con.setReadOnly(true); // WARNING: fails with Postgres.
+      // con.setReadOnly(true); // WARNING: fails with Postgres.
 
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Either detect platform or force ORDER BY clause.
@@ -381,7 +379,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         int cntr = 0;
         while (isRunning() && rs.next() && (m = extract(rs)) != null) {
           JobLogs.logEvery(++cntr, "Retrieved", "recs");
-          queueTransform.putLast(m);
+          queueNormalize.putLast(m);
         }
 
         con.commit();
@@ -401,9 +399,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     M m;
     T t;
     Object lastId = theLastId;
-    int cntr = inCntr;
+    int cntr = ++inCntr;
 
-    while ((m = queueTransform.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
+    while ((m = queueNormalize.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
       JobLogs.logEvery(++cntr, "Transformed", "recs");
 
       // NOTE: Assumes that records are sorted by group key.
@@ -441,8 +439,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final List<M> grpRecs = new ArrayList<>();
 
     try {
-      while (isRunning()) {
-        cntr = normalizeLoop(grpRecs, lastId, ++cntr);
+      while (isRunning() && !(isRetrieveDone() && queueNormalize.isEmpty())) {
+        cntr = normalizeLoop(grpRecs, lastId, cntr);
       }
     } catch (Exception e) {
       markFailed();
@@ -572,7 +570,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Give it time to finish the last batch.
       LOGGER.info("Waiting on ElasticSearch to finish last batch ...");
       bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
-      markIndexDone();
+      markJobDone();
 
       return new Date(this.startTime);
     } catch (Exception e) {
@@ -722,6 +720,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
       }
     }
+
     LOGGER.warn("FOUND {} RECORDS FOR DELETION", deletionResults.size());
   }
 

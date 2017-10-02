@@ -14,8 +14,8 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
  * @param <T> normalized type
  * @param <M> de-normalized type
  */
-public interface JobAtomTransformer<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends JobAtomShared {
+public interface AtomTransformer<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
+    extends AtomShared {
 
   /**
    * Transform (normalize) in the Job instead of relying on the transformation thread.

@@ -76,7 +76,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
     try {
       final List<EsIntakeScreening> results = this.viewDao.findAll();
       for (EsIntakeScreening es : results) {
-        queueTransform.putLast(es);
+        queueNormalize.putLast(es);
       }
 
     } catch (Exception e) {

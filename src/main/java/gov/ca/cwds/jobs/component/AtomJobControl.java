@@ -8,7 +8,7 @@ import gov.ca.cwds.data.std.ApiMarker;
  * @author CWDS API Team
  * @see JobProgressTrack
  */
-public interface JobAtomControl extends ApiMarker {
+public interface AtomJobControl extends ApiMarker {
 
   boolean isFailed();
 
