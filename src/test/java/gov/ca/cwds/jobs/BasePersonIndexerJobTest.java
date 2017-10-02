@@ -338,8 +338,8 @@ public class BasePersonIndexerJobTest
     final List<BatchBucket> buckets = new ArrayList<>();
     final BatchBucket b = new BatchBucket();
     b.setBucket(1);
-    b.setBucketCount(2);
-    b.setMaxId("1");
+    b.setBucketCount(1);
+    b.setMinId("1");
     b.setMaxId("2");
     buckets.add(b);
     when(q.getResultList()).thenReturn(buckets);

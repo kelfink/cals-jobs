@@ -909,7 +909,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
-          .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
+          .setFlushMode(FlushMode.MANUAL).setCacheMode(CacheMode.IGNORE)
           .setFetchSize(DEFAULT_FETCH_SIZE);
 
       // No reduction/normalization. Iterate, process, flush.
