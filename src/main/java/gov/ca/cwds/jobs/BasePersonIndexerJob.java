@@ -327,7 +327,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       final Thread threadJdbc = new Thread(this::threadRetrieveByJdbc); // Extract
       threadJdbc.start();
-      keepConnectionAlive();
+      // keepConnectionAlive();
 
       threadJdbc.join();
       if (threadTransformer != null) {

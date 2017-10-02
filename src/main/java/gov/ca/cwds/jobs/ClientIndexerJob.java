@@ -164,19 +164,17 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       int cntr = 0;
       EsClientAddress m;
       Object lastId = new Object();
-      List<EsClientAddress> grpRecs = new ArrayList<>();
+      final List<EsClientAddress> grpRecs = new ArrayList<>();
 
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(5000); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
-
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
 
+        // NOTE: Assumes that records are sorted by group key.
         while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
-          // Hand the baton to the next runner ...
           JobLogs.logEvery(++cntr, "Retrieved", "recs");
-          // NOTE: Assumes that records are sorted by group key.
           if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
             normalizeAndQueueIndex(grpRecs);
             grpRecs.clear(); // Single thread, re-use memory.
@@ -214,9 +212,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
           String.valueOf(maxThreads));
       LOGGER.info("JDBC processors={}", maxThreads);
-
       getPartitionRanges().parallelStream().forEach(this::pullRange);
-
     } catch (Exception e) {
       markFailed();
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());

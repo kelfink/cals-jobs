@@ -123,7 +123,7 @@ public class ReferralHistoryIndexerJob
       + " TRIM(RFL.LMT_ACSDSC)  AS LIMITED_ACCESS_DESCRIPTION,\n"
       + " RFL.L_GVR_ENTC        AS LIMITED_ACCESS_GOVERNMENT_ENT,\n"
       + " RFL.LST_UPD_TS        AS REFERRAL_LAST_UPDATED,\n"
-      + " RPT.FKREFERL_T        AS REPORTER_ID,\n"
+      + " TRIM(RPT.FKREFERL_T)  AS REPORTER_ID,\n"
       + " TRIM(RPT.RPTR_FSTNM)  AS REPORTER_FIRST_NM,\n"
       + " TRIM(RPT.RPTR_LSTNM)  AS REPORTER_LAST_NM,\n"
       + " RPT.LST_UPD_TS        AS REPORTER_LAST_UPDATED,\n"
@@ -135,8 +135,6 @@ public class ReferralHistoryIndexerJob
       + "JOIN #SCHEMA#.REFERL_T          RFL  ON RFL.IDENTIFIER = RC.FKREFERL_T \n"
       + "LEFT JOIN #SCHEMA#.REPTR_T      RPT  ON RPT.FKREFERL_T = RFL.IDENTIFIER \n"
       + "LEFT JOIN #SCHEMA#.STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER ";
-
-  public static final int FETCH_SIZE = 5000;
 
   /**
    * Carrier bean for client referral keys.
@@ -300,7 +298,7 @@ public class ReferralHistoryIndexerJob
     // Prepare retrieval.
     stmtSelClient.setMaxRows(0);
     stmtSelClient.setQueryTimeout(0);
-    stmtSelClient.setFetchSize(FETCH_SIZE);
+    stmtSelClient.setFetchSize(DEFAULT_FETCH_SIZE);
 
     LOGGER.info("pull client referral keys");
     final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
@@ -313,7 +311,7 @@ public class ReferralHistoryIndexerJob
       final Map<String, EsPersonReferral> mapReferrals) throws SQLException {
     stmtSelReferral.setMaxRows(0);
     stmtSelReferral.setQueryTimeout(0);
-    stmtSelReferral.setFetchSize(FETCH_SIZE);
+    stmtSelReferral.setFetchSize(DEFAULT_FETCH_SIZE);
 
     int cntr = 0;
     EsPersonReferral m;
@@ -331,7 +329,7 @@ public class ReferralHistoryIndexerJob
       final List<EsPersonReferral> listAllegations) throws SQLException {
     stmtSelAllegation.setMaxRows(0);
     stmtSelAllegation.setQueryTimeout(0);
-    stmtSelAllegation.setFetchSize(FETCH_SIZE);
+    stmtSelAllegation.setFetchSize(DEFAULT_FETCH_SIZE);
 
     int cntr = 0;
     EsPersonReferral m;
