@@ -4,6 +4,11 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.config.JobOptions;
 
+/**
+ * Common features of all Elasticsearch indexing jobs.
+ * 
+ * @author CWDS API Team
+ */
 public interface JobAtomShared extends ApiMarker {
 
   JobProgressTrack getTrack();
@@ -17,7 +22,7 @@ public interface JobAtomShared extends ApiMarker {
    */
   JobOptions getOpts();
 
-  default void nameThread(String title) {
+  default void nameThread(final String title) {
     Thread.currentThread().setName(title);
   }
 

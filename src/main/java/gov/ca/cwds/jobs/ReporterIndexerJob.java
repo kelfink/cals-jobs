@@ -126,6 +126,8 @@ public class ReporterIndexerJob
       ret.add(Pair.of("8JpTu2j3K2", "9cRG3VmH6i"));
       ret.add(Pair.of("9cRHCIm6xC", "9GwwRzY7D3"));
       ret.add(Pair.of("9Gwxhdx41S", "9999999999"));
+
+      ret = limitRange(ret); // command line range restriction
     } else if (isMainframe) {
       // ----------------------------
       // z/OS, small data set:

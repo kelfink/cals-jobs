@@ -35,6 +35,11 @@ public abstract class CaseHistoryIndexerJob
     extends BasePersonIndexerJob<ReplicatedPersonCases, EsPersonCase>
     implements JobResultSetAware<EsPersonCase> {
 
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(CaseHistoryIndexerJob.class);
 
   private static final String INSERT_CLIENT_LAST_CHG =

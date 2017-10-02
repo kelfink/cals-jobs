@@ -31,13 +31,18 @@ import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
 /**
- * Job to load familial relationships from CMS into ElasticSearch.
+ * Job to load family relationships from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */
 public class RelationshipIndexerJob
     extends BasePersonIndexerJob<ReplicatedRelationships, EsRelationship>
     implements JobResultSetAware<EsRelationship> {
+
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipIndexerJob.class);
 

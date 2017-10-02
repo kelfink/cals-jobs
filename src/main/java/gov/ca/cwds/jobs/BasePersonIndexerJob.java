@@ -54,7 +54,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.component.JobAtomHibernate;
 import gov.ca.cwds.jobs.component.JobAtomInitialLoad;
-import gov.ca.cwds.jobs.component.JobAtomMisc;
+import gov.ca.cwds.jobs.component.JobAtomSecurity;
 import gov.ca.cwds.jobs.component.JobAtomTransformer;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
@@ -94,7 +94,7 @@ import gov.ca.cwds.jobs.util.transform.JobElasticPersonDocPrep;
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends LastSuccessfulRunJob implements AutoCloseable, JobElasticPersonDocPrep<T>,
-    JobAtomHibernate<T, M>, JobAtomTransformer<T, M>, JobAtomInitialLoad<T, M>, JobAtomMisc {
+    JobAtomHibernate<T, M>, JobAtomTransformer<T, M>, JobAtomInitialLoad<T, M>, JobAtomSecurity {
 
   /**
    * Default serialization.

@@ -1,11 +1,25 @@
 package gov.ca.cwds.jobs.component;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 
+/**
+ * Track job progress and record counts.
+ * 
+ * @author CWDS API Team
+ */
 public class JobProgressTrack extends ApiObjectIdentity {
+
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
 
   private final AtomicInteger recsSentToIndexQueue = new AtomicInteger(0);
 
@@ -38,16 +52,16 @@ public class JobProgressTrack extends ApiObjectIdentity {
    */
   private final AtomicInteger recsBulkError = new AtomicInteger(0);
 
+  private final List<Pair<String, String>> initialLoadRangesStarted = new ArrayList<>();
+
+  private final List<Pair<String, String>> initialLoadRangesCompleted = new ArrayList<>();
+
   public AtomicInteger getRecsSentToIndexQueue() {
     return recsSentToIndexQueue;
   }
 
   public AtomicInteger getRecsSentToBulkProcessor() {
     return recsSentToBulkProcessor;
-  }
-
-  public AtomicInteger getRowsNormalized() {
-    return rowsNormalized;
   }
 
   public AtomicInteger getRecsBulkPrepared() {
@@ -75,7 +89,7 @@ public class JobProgressTrack extends ApiObjectIdentity {
   }
 
   public int trackNormalized() {
-    return this.getRowsNormalized().incrementAndGet();
+    return this.rowsNormalized.incrementAndGet();
   }
 
   public int trackBulkDeleted() {

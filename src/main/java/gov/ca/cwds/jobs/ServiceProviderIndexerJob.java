@@ -109,6 +109,8 @@ public class ServiceProviderIndexerJob
       ret.add(Pair.of("8txpE9999a", "82pE99999a"));
       ret.add(Pair.of("82pE99999a", "9BhUE99989"));
       ret.add(Pair.of("9BhUE99989", "9999999988"));
+
+      ret = limitRange(ret); // command line range restriction
     } else if (isMainframe) {
       // ----------------------------
       // z/OS, small data set:

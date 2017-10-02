@@ -19,6 +19,14 @@ import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 
+/**
+ * Common functions and features for Hibernate calls.
+ * 
+ * @author CWDS API Team
+ *
+ * @param <T> normalized type
+ * @param <M> de-normalized type or same as normalized type if normalization not needed
+ */
 public interface JobAtomHibernate<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends JobAtomShared, JobResultSetAware<M> {
 

@@ -12,6 +12,14 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.JobOptions;
 
+/**
+ * Common functions and features for initial load.
+ * 
+ * @author CWDS API Team
+ *
+ * @param <T> normalized type
+ * @param <M> de-normalized type or same as normalized type if normalization not needed
+ */
 public interface JobAtomInitialLoad<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends JobAtomShared {
 

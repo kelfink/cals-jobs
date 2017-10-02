@@ -25,6 +25,11 @@ public final class CollateralIndividualIndexerJob
     extends BasePersonIndexerJob<ReplicatedCollateralIndividual, ReplicatedCollateralIndividual> {
 
   /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Construct batch job instance with all required dependencies.
    * 
    * @param mainDao collateral individual DAO

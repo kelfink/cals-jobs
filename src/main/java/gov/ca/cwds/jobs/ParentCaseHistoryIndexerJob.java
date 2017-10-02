@@ -28,6 +28,10 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  */
 public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
 
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
   private static final Logger LOGGER = LoggerFactory.getLogger(ParentCaseHistoryIndexerJob.class);
 
   /**
@@ -60,7 +64,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setParentPersonId(parentPersonId);
 
     //
-    // Case
+    // Case:
     //
     personCase.setCaseId(caseId);
     personCase.setStartDate(rs.getDate("START_DATE"));
@@ -70,7 +74,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setServiceComponent(rs.getInt("SERVICE_COMP"));
 
     //
-    // Child (client)
+    // Child (client):
     //
     personCase.setFocusChildId(rs.getString("FOCUS_CHILD_ID"));
     personCase.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
@@ -78,7 +82,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setFocusChildLastUpdated(rs.getDate("FOCUS_CHILD_LAST_UPDATED"));
 
     //
-    // Parent
+    // Parent:
     //
     personCase.setParentId(ifNull(rs.getString("PARENT_ID")));
     personCase.setParentFirstName(ifNull(rs.getString("PARENT_FIRST_NM")));
@@ -88,7 +92,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setParentSourceTable(rs.getString("PARENT_SOURCE_TABLE"));
 
     //
-    // Worker (staff)
+    // Worker (staff):
     //
     personCase.setWorkerId(ifNull(rs.getString("WORKER_ID")));
     personCase.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
@@ -96,7 +100,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     personCase.setWorkerLastUpdated(rs.getDate("WORKER_LAST_UPDATED"));
 
     //
-    // Access Limitation
+    // Access Limitation:
     //
     personCase.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
     personCase.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));

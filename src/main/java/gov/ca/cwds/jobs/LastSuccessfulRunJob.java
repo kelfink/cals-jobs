@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.ca.cwds.jobs.component.JobAtomControl;
 import gov.ca.cwds.jobs.component.JobAtomShared;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -23,7 +24,7 @@ import gov.ca.cwds.jobs.util.JobLogs;
  * 
  * @author CWDS API Team
  */
-public abstract class LastSuccessfulRunJob implements Job, JobAtomShared {
+public abstract class LastSuccessfulRunJob implements Job, JobAtomShared, JobAtomControl {
 
   /**
    * Default serialization.
@@ -246,6 +247,7 @@ public abstract class LastSuccessfulRunJob implements Job, JobAtomShared {
    * 
    * @return this job's options
    */
+  @Override
   public JobOptions getOpts() {
     return opts;
   }

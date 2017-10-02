@@ -42,6 +42,11 @@ public class OtherClientNameIndexerJob
     extends BasePersonIndexerJob<ReplicatedAkas, ReplicatedOtherClientName>
     implements JobResultSetAware<ReplicatedOtherClientName> {
 
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(OtherClientNameIndexerJob.class);
 
   private static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO #SCHEMA#.GT_ID (IDENTIFIER)\n"

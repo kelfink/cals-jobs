@@ -7,6 +7,13 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
+/**
+ * Normalization features for Elasticsearch indexing jobs.
+ * 
+ * @author CWDS API Team
+ * @param <T> normalized type
+ * @param <M> de-normalized type
+ */
 public interface JobAtomTransformer<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends JobAtomShared {
 

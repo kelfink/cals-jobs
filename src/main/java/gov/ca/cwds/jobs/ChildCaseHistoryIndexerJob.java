@@ -28,6 +28,10 @@ import gov.ca.cwds.jobs.inject.LastRunFile;
  */
 public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
 
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
   private static final Logger LOGGER = LoggerFactory.getLogger(ChildCaseHistoryIndexerJob.class);
 
   /**

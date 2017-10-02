@@ -11,9 +11,12 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
 
+/**
+ * Builds and executes Elasticsearch bulk processor for bulk loading.
+ * 
+ * @author CWDS API Team
+ */
 public class JobBulkProcessorBuilder implements ApiMarker {
-
-  private static final int ES_BULK_SIZE = 5000;
 
   /**
    * Default serialization.
@@ -21,6 +24,10 @@ public class JobBulkProcessorBuilder implements ApiMarker {
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobBulkProcessorBuilder.class);
+
+  private static final int ES_BULK_SIZE = 5000;
+
+  private static final int ES_BYTES_MB = 14;
 
   /**
    * Track job progress.
@@ -32,6 +39,12 @@ public class JobBulkProcessorBuilder implements ApiMarker {
    */
   protected final ElasticsearchDao esDao;
 
+  /**
+   * Constructor.
+   * 
+   * @param esDao ES DAO
+   * @param track progress tracker
+   */
   public JobBulkProcessorBuilder(final ElasticsearchDao esDao, final JobProgressTrack track) {
     this.esDao = esDao;
     this.track = track;
@@ -67,7 +80,7 @@ public class JobBulkProcessorBuilder implements ApiMarker {
         track.trackBulkError();
         LOGGER.error("ERROR EXECUTING BULK", failure);
       }
-    }).setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(14, ByteSizeUnit.MB))
+    }).setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(ES_BYTES_MB, ByteSizeUnit.MB))
         .setConcurrentRequests(1).setName("jobs_bp").build();
   }
 

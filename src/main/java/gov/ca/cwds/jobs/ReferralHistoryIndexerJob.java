@@ -61,6 +61,11 @@ public class ReferralHistoryIndexerJob
     extends BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral>
     implements JobResultSetAware<EsPersonReferral> {
 
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
   private static final String INSERT_CLIENT_FULL =
@@ -345,12 +350,6 @@ public class ReferralHistoryIndexerJob
       final Map<String, List<MinClientReferral>> mapReferralByClient,
       final Map<String, List<EsPersonReferral>> mapAllegationByReferral) {
     LOGGER.info("Normalize all: START");
-
-    // NOTE: convert to stream instead of nested for loops.
-    // unsorted.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
-    // listReferrals.stream().sorted().collect(Collectors.groupingBy(EsPersonReferral::getClientId))
-    // .entrySet().stream().map(e -> normalizeSingle(e.getValue()))
-    // .forEach(this::addToIndexQueue);
 
     int cntr = 0;
     for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {

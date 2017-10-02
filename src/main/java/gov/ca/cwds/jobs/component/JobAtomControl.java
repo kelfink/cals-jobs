@@ -2,7 +2,13 @@ package gov.ca.cwds.jobs.component;
 
 import gov.ca.cwds.data.std.ApiMarker;
 
-public interface JobCurrentStatus extends ApiMarker {
+/**
+ * Job control interface.
+ * 
+ * @author CWDS API Team
+ * @see JobProgressTrack
+ */
+public interface JobAtomControl extends ApiMarker {
 
   boolean isFailed();
 

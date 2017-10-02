@@ -58,6 +58,8 @@ public class SubstituteCareProviderIndexJob extends
       ret.add(Pair.of("1a6ExS95Ch", "4u0U0MECwr"));
       ret.add(Pair.of("4u0VaS8B5d", "7NYwtxJ7Lu"));
       ret.add(Pair.of("7NYwtxJ7Lu", "9999999999"));
+
+      ret = limitRange(ret); // command line range restriction
     } else if (isMainframe) {
       // ----------------------------
       // z/OS, small data set:
