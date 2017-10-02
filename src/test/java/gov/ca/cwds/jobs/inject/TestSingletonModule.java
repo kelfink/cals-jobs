@@ -26,9 +26,7 @@ public class TestSingletonModule extends AbstractModule {
 
   @FunctionalInterface
   public interface X {
-
     void spitItOutAlready();
-
   }
 
   // Without the @Singleton annotation, Guice doesn't recognize the singleton.
@@ -37,9 +35,9 @@ public class TestSingletonModule extends AbstractModule {
   public static class TestMessenger implements X {
 
     private static AtomicInteger factoryCounter = new AtomicInteger(0);
+    private final int instanceCounter;
 
     private String myMessage;
-    private final int instanceCounter;
 
     @Inject
     public TestMessenger(@Named(KEY_MSG) String test) {
