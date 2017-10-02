@@ -13,7 +13,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -24,25 +23,18 @@ import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.inject.JobRunner;
 
 /**
  * 
  * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
-public class ClientIndexerJobTest extends PersonJobTester {
+public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsClientAddress> {
 
   protected static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
 
   ReplicatedClientDao dao;
   ClientIndexerJob target;
-
-  @BeforeClass
-  public static void setupClass() {
-    JobRunner.setTestMode(true);
-    System.setProperty("DB_CMS_SCHEMA", "CWSRS1");
-  }
 
   @Override
   @Before

@@ -64,7 +64,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   ElasticsearchConfiguration esConfig;
   ElasticsearchDao esDao;
   Client client;
-  ElasticSearchPerson esp = new ElasticSearchPerson();
+  ElasticSearchPerson esp;
 
   JobOptions opts;
   File tempFile;
@@ -153,6 +153,8 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     // Job options:
     esConfileFile = tempFolder.newFile("es.yml");
     opts = mock(JobOptions.class);
+    esp = new ElasticSearchPerson();
+
     when(opts.isLoadSealedAndSensitive()).thenReturn(false);
     when(opts.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
   }

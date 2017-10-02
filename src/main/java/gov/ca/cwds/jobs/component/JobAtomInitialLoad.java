@@ -27,8 +27,14 @@ public interface JobAtomInitialLoad<T extends PersistentObject, M extends ApiGro
 
   static final int DEFAULT_BUCKETS = 1;
 
+  /**
+   * Restrict initial load key ranges from command line.
+   * 
+   * @param allKeyPairs all key ranges for this job
+   * @return list of key pairs to execute
+   */
   default List<Pair<String, String>> limitRange(final List<Pair<String, String>> allKeyPairs) {
-    List<Pair<String, String>> ret = new ArrayList<>();
+    List<Pair<String, String>> ret;
     final JobOptions opts = getOpts();
     if (opts != null && opts.isRangeGiven()) {
       final List<Pair<String, String>> list = new ArrayList<>();
@@ -42,6 +48,8 @@ public interface JobAtomInitialLoad<T extends PersistentObject, M extends ApiGro
       }
 
       ret = list;
+    } else {
+      ret = allKeyPairs;
     }
 
     return ret;
