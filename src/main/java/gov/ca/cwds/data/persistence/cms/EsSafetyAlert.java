@@ -13,6 +13,7 @@ import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
+import gov.ca.cwds.data.es.ElasticSearchCounty;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -133,24 +134,39 @@ public class EsSafetyAlert extends ApiObjectIdentity
     ElasticSearchSafetyAlert alert = new ElasticSearchSafetyAlert();
     alert.setId(this.alertId);
 
-    alert.setActivationReason(
+    ElasticSearchSafetyAlert.Activation activation = new ElasticSearchSafetyAlert.Activation();
+    alert.setActivation(activation);
+
+    activation.setActivationReason(
         SystemCodeCache.global().getSystemCodeShortDescription(this.activationReasonCode));
-    alert.setActivationReasonId(
+    activation.setActivationReasonId(
         this.activationReasonCode != null ? this.activationReasonCode.toString() : null);
 
-    alert.setActivationCounty(
-        SystemCodeCache.global().getSystemCodeShortDescription(this.activationCountyCode));
-    alert.setActivationCountyId(
-        this.activationCountyCode != null ? this.activationCountyCode.toString() : null);
-    alert.setActivationDate(DomainChef.cookDate(this.activationDate));
-    alert.setActivationExplanation(this.activationExplanation);
+    ElasticSearchCounty activationCounty = new ElasticSearchCounty();
+    activation.setActivationCounty(activationCounty);
+    activationCounty
+        .setName(SystemCodeCache.global().getSystemCodeShortDescription(this.activationCountyCode));
+    activationCounty
+        .setId(this.activationCountyCode != null ? this.activationCountyCode.toString() : null);
 
-    alert.setDeactivationCounty(
+    activation.setActivationDate(DomainChef.cookDate(this.activationDate));
+    activation.setActivationExplanation(this.activationExplanation);
+
+
+    ElasticSearchSafetyAlert.Deactivation deactivation =
+        new ElasticSearchSafetyAlert.Deactivation();
+    alert.setDeactivation(deactivation);
+
+    ElasticSearchCounty deactivationCounty = new ElasticSearchCounty();
+    deactivation.setDeactivationCounty(deactivationCounty);
+
+    deactivationCounty.setName(
         SystemCodeCache.global().getSystemCodeShortDescription(this.deactivationCountyCode));
-    alert.setDeactivationCountyId(
-        this.deactivationCountyCode != null ? this.deactivationCountyCode.toString() : null);
-    alert.setDeactivationDate(DomainChef.cookDate(this.deactivationDate));
-    alert.setDeactivationExplanation(this.deactivationExplanation);
+    deactivationCounty
+        .setId(this.deactivationCountyCode != null ? this.deactivationCountyCode.toString() : null);
+
+    deactivation.setDeactivationDate(DomainChef.cookDate(this.deactivationDate));
+    deactivation.setDeactivationExplanation(this.deactivationExplanation);
 
     alert.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.alertId,
         this.lastUpdatedTimestamp, LegacyTable.SAFETY_ALERT));
