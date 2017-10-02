@@ -292,17 +292,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         esDao.getConfig().getElasticsearchDocType(), esp, t);
   }
 
-  private void keepConnectionAlive() throws InterruptedException {
-    while (isRunning()) {
-      try {
-        Thread.sleep(SLEEP_MILLIS);
-        this.jobDao.find("abc1234567"); // dummy call, keep connection pool alive.
-      } catch (HibernateException he) { // NOSONAR
-        LOGGER.trace("DIRECT JDBC. IGNORE HIBERNATE ERROR: {}", he.getMessage());
-      }
-    }
-  }
-
   /**
    * ENTRY POINT FOR INITIAL LOAD.
    * 
@@ -327,7 +316,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       final Thread threadJdbc = new Thread(this::threadRetrieveByJdbc); // Extract
       threadJdbc.start();
-      // keepConnectionAlive();
 
       threadJdbc.join();
       if (threadTransformer != null) {

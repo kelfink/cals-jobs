@@ -313,6 +313,77 @@ public class EsPersonReferral extends ApiObjectIdentity
     this.workerLastUpdated = ref.workerLastUpdated;
   }
 
+  private ElasticSearchPersonReporter makeReporter() {
+    final ElasticSearchPersonReporter ret = new ElasticSearchPersonReporter();
+    ret.setId(this.reporterId);
+    ret.setLegacyClientId(this.reporterId);
+    ret.setFirstName(this.reporterFirstName);
+    ret.setLastName(this.reporterLastName);
+    ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.reporterId,
+        this.reporterLastUpdated, LegacyTable.REPORTER));
+    return ret;
+  }
+
+  private ElasticSearchPersonSocialWorker makeAssignedWorker() {
+    final ElasticSearchPersonSocialWorker ret = new ElasticSearchPersonSocialWorker();
+    ret.setId(this.workerId);
+    ret.setLegacyClientId(this.workerId);
+    ret.setFirstName(this.workerFirstName);
+    ret.setLastName(this.workerLastName);
+    ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
+        this.workerLastUpdated, LegacyTable.STAFF_PERSON));
+    return ret;
+  }
+
+  private ElasticSearchAccessLimitation makeAccessLimitation() {
+    ElasticSearchAccessLimitation ret = new ElasticSearchAccessLimitation();
+    ret.setLimitedAccessCode(this.limitedAccessCode);
+    ret.setLimitedAccessDate(DomainChef.cookDate(this.limitedAccessDate));
+    ret.setLimitedAccessDescription(this.limitedAccessDescription);
+    ret.setLimitedAccessGovernmentEntityId(this.limitedAccessGovernmentEntityId == null ? null
+        : this.limitedAccessGovernmentEntityId.toString());
+    ret.setLimitedAccessGovernmentEntityName(SystemCodeCache.global()
+        .getSystemCodeShortDescription(this.limitedAccessGovernmentEntityId));
+    return ret;
+  }
+
+  private ElasticSearchPersonAllegation makeAllegation() {
+    ElasticSearchPersonAllegation ret = new ElasticSearchPersonAllegation();
+    ret.setId(this.allegationId);
+    ret.setLegacyId(this.allegationId);
+    ret.setAllegationDescription(
+        SystemCodeCache.global().getSystemCodeShortDescription(this.allegationType));
+    ret.setDispositionId(
+        this.allegationDisposition == null ? null : this.allegationDisposition.toString());
+    ret.setDispositionDescription(
+        SystemCodeCache.global().getSystemCodeShortDescription(this.allegationDisposition));
+    ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.allegationId,
+        this.allegationLastUpdated, LegacyTable.ALLEGATION));
+    return ret;
+  }
+
+  private ElasticSearchPersonNestedPerson makePerpetrator() {
+    final ElasticSearchPersonNestedPerson perpetrator = new ElasticSearchPersonNestedPerson();
+    perpetrator.setId(this.perpetratorId);
+    perpetrator.setFirstName(this.perpetratorFirstName);
+    perpetrator.setLastName(this.perpetratorLastName);
+    perpetrator.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.perpetratorId,
+        this.perpetratorLastUpdated, LegacyTable.CLIENT));
+    perpetrator.setSensitivityIndicator(perpetratorSensitivityIndicator);
+    return perpetrator;
+  }
+
+  private ElasticSearchPersonNestedPerson makeVictim() {
+    ElasticSearchPersonNestedPerson victim = new ElasticSearchPersonNestedPerson();
+    victim.setId(this.victimId);
+    victim.setFirstName(this.victimFirstName);
+    victim.setLastName(this.victimLastName);
+    victim.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.victimId,
+        this.victimLastUpdated, LegacyTable.CLIENT));
+    victim.setSensitivityIndicator(victimSensitivityIndicator);
+    return victim;
+  }
+
   @Override
   public ReplicatedPersonReferrals normalize(Map<Object, ReplicatedPersonReferrals> map) {
     ReplicatedPersonReferrals ret = map.get(this.clientId);
@@ -340,97 +411,36 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.referralId,
           this.referralLastUpdated, LegacyTable.REFERRAL));
 
-      //
-      // Reporter:
-      //
-      ElasticSearchPersonReporter reporter = new ElasticSearchPersonReporter();
-      reporter.setId(this.reporterId);
-      reporter.setLegacyClientId(this.reporterId);
-      reporter.setFirstName(this.reporterFirstName);
-      reporter.setLastName(this.reporterLastName);
-      reporter.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.reporterId,
-          this.reporterLastUpdated, LegacyTable.REPORTER));
-      r.setReporter(reporter);
-
-      //
-      // Assigned Worker:
-      //
-      ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
-      assignedWorker.setId(this.workerId);
-      assignedWorker.setLegacyClientId(this.workerId);
-      assignedWorker.setFirstName(this.workerFirstName);
-      assignedWorker.setLastName(this.workerLastName);
-      assignedWorker.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
-          this.workerLastUpdated, LegacyTable.STAFF_PERSON));
-      r.setAssignedSocialWorker(assignedWorker);
-
-      //
-      // Access Limitation:
-      //
-      ElasticSearchAccessLimitation accessLimit = new ElasticSearchAccessLimitation();
-      accessLimit.setLimitedAccessCode(this.limitedAccessCode);
-      accessLimit.setLimitedAccessDate(DomainChef.cookDate(this.limitedAccessDate));
-      accessLimit.setLimitedAccessDescription(this.limitedAccessDescription);
-      accessLimit.setLimitedAccessGovernmentEntityId(this.limitedAccessGovernmentEntityId == null
-          ? null : this.limitedAccessGovernmentEntityId.toString());
-      accessLimit.setLimitedAccessGovernmentEntityName(SystemCodeCache.global()
-          .getSystemCodeShortDescription(this.limitedAccessGovernmentEntityId));
-      r.setAccessLimitation(accessLimit);
+      r.setReporter(makeReporter());
+      r.setAssignedSocialWorker(makeAssignedWorker());
+      r.setAccessLimitation(makeAccessLimitation());
     }
 
     //
     // A referral may have multiple allegations.
     //
-    ElasticSearchPersonAllegation allegation = new ElasticSearchPersonAllegation();
-    allegation.setId(this.allegationId);
-    allegation.setLegacyId(this.allegationId);
-    allegation.setAllegationDescription(
-        SystemCodeCache.global().getSystemCodeShortDescription(this.allegationType));
-    allegation.setDispositionId(
-        this.allegationDisposition == null ? null : this.allegationDisposition.toString());
-    allegation.setDispositionDescription(
-        SystemCodeCache.global().getSystemCodeShortDescription(this.allegationDisposition));
-    allegation.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.allegationId,
-        this.allegationLastUpdated, LegacyTable.ALLEGATION));
+    final ElasticSearchPersonAllegation allegation = makeAllegation();
 
     if (opts.isLoadSealedAndSensitive() || (perpetratorSensitivityIndicator == null
         || "N".equalsIgnoreCase(perpetratorSensitivityIndicator))) {
-      ElasticSearchPersonNestedPerson perpetrator = new ElasticSearchPersonNestedPerson();
-      perpetrator.setId(this.perpetratorId);
-      perpetrator.setFirstName(this.perpetratorFirstName);
-      perpetrator.setLastName(this.perpetratorLastName);
-      perpetrator.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.perpetratorId,
-          this.perpetratorLastUpdated, LegacyTable.CLIENT));
-      perpetrator.setSensitivityIndicator(perpetratorSensitivityIndicator);
-      allegation.setPerpetrator(perpetrator);
+      allegation.setPerpetrator(makePerpetrator());
 
       // TODO: #148091785: deprecated person fields.
       allegation.setPerpetratorId(this.perpetratorId);
       allegation.setPerpetratorLegacyClientId(this.perpetratorId);
       allegation.setPerpetratorFirstName(this.perpetratorFirstName);
       allegation.setPerpetratorLastName(this.perpetratorLastName);
-    } else {
-      LOGGER.trace("OMIT sealed or sensitive perpetrator: id={}", this.perpetratorId);
     }
 
     if (opts.isLoadSealedAndSensitive() || (victimSensitivityIndicator == null
         || "N".equalsIgnoreCase(victimSensitivityIndicator))) {
-      ElasticSearchPersonNestedPerson victim = new ElasticSearchPersonNestedPerson();
-      victim.setId(this.victimId);
-      victim.setFirstName(this.victimFirstName);
-      victim.setLastName(this.victimLastName);
-      victim.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.victimId,
-          this.victimLastUpdated, LegacyTable.CLIENT));
-      victim.setSensitivityIndicator(victimSensitivityIndicator);
-      allegation.setVictim(victim);
+      allegation.setVictim(makeVictim());
 
       // TODO: #148091785: deprecated person fields.
       allegation.setVictimId(this.victimId);
       allegation.setVictimLegacyClientId(this.victimId);
       allegation.setVictimFirstName(this.victimFirstName);
       allegation.setVictimLastName(this.victimLastName);
-    } else {
-      LOGGER.trace("OMIT sealed or sensitive victim: id={}", this.victimId);
     }
 
     ret.addReferral(r, allegation);
@@ -761,7 +771,7 @@ public class EsPersonReferral extends ApiObjectIdentity
   @Override
   public int hashCode() {
     int result = super.hashCode();
-    final int HASH_PRIME = 31;
+    final int HASH_PRIME = 31; // SonarQube contradicts Eclipse here.
     result = HASH_PRIME * result + ((clientId == null) ? 0 : clientId.hashCode());
     result = HASH_PRIME * result + ((referralId == null) ? 0 : referralId.hashCode());
     result = HASH_PRIME * result + ((allegationId == null) ? 0 : allegationId.hashCode());
@@ -774,7 +784,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       return true;
     if (!super.equals(obj))
       return false;
-    if (getClass() != obj.getClass())
+    if (getClass() != obj.getClass()) // Generated by Eclipse, yet SonarQube complains.
       return false;
     EsPersonReferral other = (EsPersonReferral) obj;
 

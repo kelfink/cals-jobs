@@ -41,6 +41,9 @@ public class AttorneyIndexerJob
     super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
+  /**
+   * @deprecated older attribute will be removed
+   */
   @Override
   @Deprecated
   public String getLegacySourceTable() {
