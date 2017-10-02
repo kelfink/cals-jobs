@@ -702,17 +702,25 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
         adr.setId(getAdrId());
         adr.setAddressDescription(getAdrAddressDescription());
         adr.setCity(getAdrCity());
-        adr.setEmergencyExtension(getAdrEmergencyExtension());
-        adr.setEmergencyNumber(getAdrEmergencyNumber());
+
         adr.setFrgAdrtB(getAdrFrgAdrtB());
         adr.setGovernmentEntityCd(getAdrGovernmentEntityCd());
         adr.setHeaderAddress(getAdrHeaderAddress());
-        adr.setMessageExtension(getAdrMessageExtension());
-        adr.setMessageNumber(getAdrMessageNumber());
+
         adr.setPostDirCd(getAdrPostDirCd());
         adr.setPreDirCd(getAdrPreDirCd());
+
+        // NOTE: no way to figure out phone type from "primary phone". Land line? Cell? dunno.
         adr.setPrimaryExtension(getAdrPrimaryExtension());
         adr.setPrimaryNumber(getAdrPrimaryNumber());
+
+        adr.setEmergencyExtension(getAdrEmergencyExtension());
+        adr.setEmergencyNumber(getAdrEmergencyNumber());
+
+        // This is *likely* a cell phone but not guaranteed.
+        adr.setMessageExtension(getAdrMessageExtension());
+        adr.setMessageNumber(getAdrMessageNumber());
+
         adr.setState(getAdrState());
         adr.setStateCd(getAdrState());
         adr.setStreetName(getAdrStreetName());

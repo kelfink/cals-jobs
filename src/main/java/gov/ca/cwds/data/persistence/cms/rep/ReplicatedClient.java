@@ -154,7 +154,6 @@ public class ReplicatedClient extends BaseClient
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
-    // STREAMS.
     return clientAddresses.stream().flatMap(ca -> ca.addresses.stream())
         .flatMap(adr -> Arrays.stream(adr.getPhones())).collect(Collectors.toList())
         .toArray(new ApiPhoneAware[0]);

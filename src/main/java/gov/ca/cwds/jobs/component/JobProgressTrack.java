@@ -107,7 +107,7 @@ public class JobProgressTrack extends ApiObjectIdentity {
   @Override
   public String toString() {
     return MessageFormat.format(
-        "STATS: \nRecs To Index:  {0}\nRecs To Delete: {1}\nrecsBulkBefore: {2}\nrecsBulkAfter:  {3}\nrecsBulkError:  {4}",
+        "STATS: \nindexed:  {0}\ndeleted: {1}\nbulk before: {2}\nbulk after:  {3}\nbulk error:  {4}",
         getRecsBulkPrepared(), getRecsBulkDeleted(), getRecsBulkBefore(), getRecsBulkAfter(),
         getRecsBulkError());
   }
