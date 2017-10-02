@@ -760,11 +760,11 @@ public class EsPersonReferral extends ApiObjectIdentity
 
   @Override
   public int hashCode() {
-    final int prime = 31;
     int result = super.hashCode();
-    result = prime * result + ((clientId == null) ? 0 : clientId.hashCode());
-    result = prime * result + ((referralId == null) ? 0 : referralId.hashCode());
-    result = prime * result + ((allegationId == null) ? 0 : allegationId.hashCode());
+    final int HASH_PRIME = 31;
+    result = HASH_PRIME * result + ((clientId == null) ? 0 : clientId.hashCode());
+    result = HASH_PRIME * result + ((referralId == null) ? 0 : referralId.hashCode());
+    result = HASH_PRIME * result + ((allegationId == null) ? 0 : allegationId.hashCode());
     return result;
   }
 
