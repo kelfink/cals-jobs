@@ -126,6 +126,8 @@ public final class CollateralIndividualIndexerJob
       ret.add(Pair.of("8JeC4AvNtB", "9cA1GT74tY"));
       ret.add(Pair.of("9cA1GT74tY", "9GnY4XWCG7"));
       ret.add(Pair.of("9GnY4XWCG7", "9999999999"));
+
+      ret = limitRange(ret); // command line range restriction
     } else if (isMainframe) {
       // ----------------------------
       // z/OS, small data set:

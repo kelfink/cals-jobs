@@ -37,6 +37,11 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, EsIntakeScreening>
     implements JobResultSetAware<EsIntakeScreening> {
 
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(IntakeScreeningJob.class);
 
   private static final ESOptionalCollection[] KEEP_COLLECTIONS =
@@ -71,7 +76,6 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
     try {
       final List<EsIntakeScreening> results = this.viewDao.findAll();
       for (EsIntakeScreening es : results) {
-        // Hand the baton to the next runner ...
         queueTransform.putLast(es);
       }
 

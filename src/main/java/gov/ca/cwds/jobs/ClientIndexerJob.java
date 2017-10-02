@@ -255,7 +255,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       ret.add(Pair.of("6p9XaHC10S", "8jw5J580MQ"));
       ret.add(Pair.of("8jw5J580MQ", "9999999999"));
 
-      ret = limitRange(ret);
+      ret = limitRange(ret); // command line range restriction
     } else if (isMainframe) {
       // ----------------------------
       // z/OS, small data set:

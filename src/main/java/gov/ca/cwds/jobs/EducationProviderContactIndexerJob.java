@@ -21,6 +21,11 @@ public class EducationProviderContactIndexerJob extends
     BasePersonIndexerJob<ReplicatedEducationProviderContact, ReplicatedEducationProviderContact> {
 
   /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Construct batch job instance with all required dependencies.
    * 
    * @param mainDao ServiceProvider DAO
