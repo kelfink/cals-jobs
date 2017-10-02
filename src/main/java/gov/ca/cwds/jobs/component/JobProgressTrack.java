@@ -115,7 +115,7 @@ public class JobProgressTrack extends ApiObjectIdentity {
     return MessageFormat.format(
         "STATS: \nindexed:  {0}\ndeleted: {1}\nbulk before: {2}\nbulk after:  {3}\nbulk error:  {4}\nELAPSED TIME:  {5} SECONDS",
         getRecsBulkPrepared(), getRecsBulkDeleted(), getRecsBulkBefore(), getRecsBulkAfter(),
-        getRecsBulkError(), (((endTime - startTime) / 1000)));
+        getRecsBulkError(), ((endTime - startTime) / 1000));
   }
 
 }
