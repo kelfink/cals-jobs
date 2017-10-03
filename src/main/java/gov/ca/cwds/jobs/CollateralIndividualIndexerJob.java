@@ -50,6 +50,9 @@ public final class CollateralIndividualIndexerJob
     return 12;
   }
 
+  /**
+   * @deprecated method scheduled for deletion
+   */
   @Override
   @Deprecated
   public String getLegacySourceTable() {

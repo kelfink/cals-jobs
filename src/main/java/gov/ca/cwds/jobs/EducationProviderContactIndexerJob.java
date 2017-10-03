@@ -46,6 +46,9 @@ public class EducationProviderContactIndexerJob extends
     return 12;
   }
 
+  /**
+   * @deprecated method scheduled for deletion
+   */
   @Override
   @Deprecated
   public String getLegacySourceTable() {

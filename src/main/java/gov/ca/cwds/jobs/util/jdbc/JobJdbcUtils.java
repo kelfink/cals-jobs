@@ -16,6 +16,11 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.jobs.component.AtomShared;
 import gov.ca.cwds.jobs.config.JobOptions;
 
+/**
+ * JDBC utilities for Neutron jobs.
+ * 
+ * @author CWDS API Team
+ */
 public class JobJdbcUtils {
 
   private static final class PrepWork implements Work {
@@ -45,8 +50,6 @@ public class JobJdbcUtils {
         LOGGER.info("Find keys new/changed since {}", lastRunTime);
         final int cntNewChanged = stmt.executeUpdate(sql);
         LOGGER.info("Total keys new/changed: {}", cntNewChanged);
-      } finally {
-        // The statement closes automatically.
       }
     }
   }
@@ -55,8 +58,8 @@ public class JobJdbcUtils {
 
   public static String makeTimestampString(final Date date) {
     final StringBuilder buf = new StringBuilder();
-    buf.append("TIMESTAMP('").append(new SimpleDateFormat(AtomShared.LEGACY_TIMESTAMP_FORMAT).format(date))
-        .append("')");
+    buf.append("TIMESTAMP('")
+        .append(new SimpleDateFormat(AtomShared.LEGACY_TIMESTAMP_FORMAT).format(date)).append("')");
     return buf.toString();
   }
 
