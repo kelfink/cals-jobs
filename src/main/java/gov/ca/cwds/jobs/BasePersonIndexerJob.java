@@ -55,6 +55,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.component.AtomHibernate;
 import gov.ca.cwds.jobs.component.AtomInitialLoad;
 import gov.ca.cwds.jobs.component.AtomSecurity;
+import gov.ca.cwds.jobs.component.AtomShared;
 import gov.ca.cwds.jobs.component.AtomTransformer;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
@@ -633,7 +634,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       LOGGER.info(track.toString());
       LOGGER.info("Updating last successful run time to {}",
-          new SimpleDateFormat(LAST_RUN_DATE_FORMAT).format(startTime));
+          new SimpleDateFormat(AtomShared.LAST_RUN_DATE_FORMAT).format(startTime));
       return new Date(this.startTime);
     } catch (Exception e) {
       markFailed();

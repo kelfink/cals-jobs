@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.jobs.component.AtomShared;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -87,7 +88,7 @@ public class LastSuccessfulRunJobTest
   public void determineLastSuccessfulRunTime_Args__() throws Exception {
     final Date actual = target.determineLastSuccessfulRunTime();
     final Date expected =
-        new SimpleDateFormat(LastSuccessfulRunJob.LAST_RUN_DATE_FORMAT).parse(FIXED_DATETIME);
+        new SimpleDateFormat(AtomShared.LAST_RUN_DATE_FORMAT).parse(FIXED_DATETIME);
     assertThat(actual, is(equalTo(expected)));
   }
 

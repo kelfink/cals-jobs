@@ -13,6 +13,7 @@ import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.ca.cwds.jobs.component.AtomShared;
 import gov.ca.cwds.jobs.config.JobOptions;
 
 public class JobJdbcUtils {
@@ -52,20 +53,15 @@ public class JobJdbcUtils {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobJdbcUtils.class);
 
-  /**
-   * Common timestamp format for legacy DB.
-   */
-  public static final String LEGACY_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-
   public static String makeTimestampString(final Date date) {
     final StringBuilder buf = new StringBuilder();
-    buf.append("TIMESTAMP('").append(new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT).format(date))
+    buf.append("TIMESTAMP('").append(new SimpleDateFormat(AtomShared.LEGACY_TIMESTAMP_FORMAT).format(date))
         .append("')");
     return buf.toString();
   }
 
   public static String makeSimpleTimestampString(final Date date) {
-    return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT).format(date);
+    return new SimpleDateFormat(AtomShared.LEGACY_TIMESTAMP_FORMAT).format(date);
   }
 
   /**

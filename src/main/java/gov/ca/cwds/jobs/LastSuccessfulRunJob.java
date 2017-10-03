@@ -36,11 +36,6 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
   private static final int LOOKBACK_MINUTES = -25;
 
   /**
-   * Date time format for last run date file.
-   */
-  public static final String LAST_RUN_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-
-  /**
    * Completion flag for fatal errors.
    * <p>
    * Volatile guarantees that changes to this flag become visible other threads immediately. In
@@ -191,7 +186,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
 
     if (!StringUtils.isBlank(this.lastRunTimeFilename)) {
       try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) {
-        ret = new SimpleDateFormat(LAST_RUN_DATE_FORMAT).parse(br.readLine().trim());
+        ret = new SimpleDateFormat(AtomShared.LAST_RUN_DATE_FORMAT).parse(br.readLine().trim());
       } catch (IOException e) {
         markFailed();
         JobLogs.raiseError(LOGGER, e, "Caught IOException: {}", e.getMessage());
@@ -212,7 +207,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
   protected void writeLastSuccessfulRunTime(Date datetime) {
     if (datetime != null && !StringUtils.isBlank(this.lastRunTimeFilename) && !isFailed()) {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) {
-        w.write(new SimpleDateFormat(LAST_RUN_DATE_FORMAT).format(datetime));
+        w.write(new SimpleDateFormat(AtomShared.LAST_RUN_DATE_FORMAT).format(datetime));
       } catch (IOException e) {
         markFailed();
         JobLogs.raiseError(LOGGER, e, "Failed to write timestamp file: {}", e.getMessage());
@@ -236,7 +231,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
   /**
    * Getter for last job run time.
    * 
-   * @return last time the job ran successfully, in format {@link #LAST_RUN_DATE_FORMAT}
+   * @return last time the job ran successfully, in format {@link AtomShared#LAST_RUN_DATE_FORMAT}
    */
   public String getLastJobRunTimeFilename() {
     return lastRunTimeFilename;

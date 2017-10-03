@@ -148,8 +148,9 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    */
   default void prepHibernateLastChange(final Session session, final Transaction txn,
       final Date lastRunTime) throws SQLException {
-    if (StringUtils.isNotBlank(getPrepLastChangeSQL())) {
-      JobJdbcUtils.prepHibernateLastChange(session, txn, lastRunTime, getPrepLastChangeSQL());
+    final String sql = getPrepLastChangeSQL();
+    if (StringUtils.isNotBlank(sql)) {
+      JobJdbcUtils.prepHibernateLastChange(session, txn, lastRunTime, sql);
     }
   }
 

@@ -137,10 +137,10 @@ public class JobDB2Utils {
   public static void monitorStopAndReport(final DB2SystemMonitor monitor) throws SQLException {
     if (monitor != null) {
       monitor.stop();
-      LOGGER.info("Server elapsed time (microseconds)=" + monitor.getServerTimeMicros());
-      LOGGER.info("Network I/O elapsed time (microseconds)=" + monitor.getNetworkIOTimeMicros());
-      LOGGER.info("Core driver elapsed time (microseconds)=" + monitor.getCoreDriverTimeMicros());
-      LOGGER.info("Application elapsed time (milliseconds)=" + monitor.getApplicationTimeMillis());
+      LOGGER.info("Server elapsed time (microseconds)={}", monitor.getServerTimeMicros());
+      LOGGER.info("Network I/O elapsed time (microseconds)={}", monitor.getNetworkIOTimeMicros());
+      LOGGER.info("Core driver elapsed time (microseconds)={}", monitor.getCoreDriverTimeMicros());
+      LOGGER.info("Application elapsed time (milliseconds)={}", monitor.getApplicationTimeMillis());
       LOGGER.info("monitor.moreData: 0: {}", monitor.moreData(0));
       LOGGER.info("monitor.moreData: 1: {}", monitor.moreData(1));
       LOGGER.info("monitor.moreData: 2: {}", monitor.moreData(2));
