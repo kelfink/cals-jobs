@@ -21,10 +21,12 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import gov.ca.cwds.dao.ApiClientCountyAware;
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.data.ApiTypedIdentifier;
+import gov.ca.cwds.data.es.ElasticSearchCounty;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
@@ -157,7 +159,7 @@ public class ElasticTransformer {
   public static <T extends PersistentObject> Pair<String, String> prepareUpsertJson(
       JobElasticPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-      throws JsonProcessingException {
+          throws JsonProcessingException {
 
     // Child classes: Set optional collections before serializing the insert JSON.
     prepareInsertCollections(docPrep, esp, t, elementName, list, keep);
@@ -199,7 +201,7 @@ public class ElasticTransformer {
   public static <T extends PersistentObject> void prepareInsertCollections(
       JobElasticPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-      throws JsonProcessingException {
+          throws JsonProcessingException {
 
     // Clear out optional collections for updates.
     esp.clearOptionalCollections(keep);
@@ -365,6 +367,18 @@ public class ElasticTransformer {
     return ret;
   }
 
+  protected static ElasticSearchCounty handleClientCountyC(ApiPersonAware p) {
+    ElasticSearchCounty esCounty = null;
+    if (p instanceof ApiClientCountyAware) {
+      ApiClientCountyAware countyAware = (ApiClientCountyAware) p;
+      esCounty = new ElasticSearchCounty();
+      esCounty.setId(countyAware.getClientCounty().toString());
+      esCounty.setName(
+          SystemCodeCache.global().getSystemCodeShortDescription(countyAware.getClientCounty()));
+    }
+    return esCounty;
+  }
+
   /**
    * Produce an ElasticSearchPerson objects suitable for an Elasticsearch person document.
    * 
@@ -414,6 +428,9 @@ public class ElasticTransformer {
 
     // Sealed and sensitive.
     ret.setSensitivityIndicator(p.getSensitivityIndicator());
+
+    // Set client county
+    ret.setClientCounty(handleClientCountyC(p));
 
     return ret;
   }

@@ -109,7 +109,7 @@ public class ReplicatedClientTest {
   public void hashCode_Args__() throws Exception {
     ReplicatedClient target = new ReplicatedClient();
     int actual = target.hashCode();
-    int expected = -73508643;
+    int expected = 1575147505;
     assertThat(actual, is(equalTo(expected)));
   }
 

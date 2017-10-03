@@ -242,7 +242,7 @@ public class EsClientAddressTest {
   public void hashCode_Args__() throws Exception {
     final EsClientAddress target = new EsClientAddress();
     final int actual = target.hashCode();
-    final int expected = 337958661;
+    final int expected = -380431431;
     assertThat(actual, is(equalTo(expected)));
   }
 

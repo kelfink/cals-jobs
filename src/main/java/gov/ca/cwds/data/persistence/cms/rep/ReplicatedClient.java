@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import gov.ca.cwds.dao.ApiClientCountyAware;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseClient;
@@ -75,7 +76,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReplicatedClient extends BaseClient
     implements ApiPersonAware, ApiMultipleLanguagesAware, ApiMultipleAddressesAware,
-    ApiMultiplePhonesAware, CmsReplicatedEntity {
+    ApiMultiplePhonesAware, CmsReplicatedEntity, ApiClientCountyAware {
 
   /**
    * Default serialization version. Increment by class version.
@@ -95,6 +96,8 @@ public class ReplicatedClient extends BaseClient
    */
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "fkClient")
   protected transient Set<ReplicatedClientAddress> clientAddresses = new LinkedHashSet<>();
+
+  private Short clinetCountyId;
 
   /**
    * Default, no-op constructor
@@ -134,6 +137,15 @@ public class ReplicatedClient extends BaseClient
     if (clientAddress != null) {
       this.clientAddresses.add(clientAddress);
     }
+  }
+
+  @Override
+  public Short getClientCounty() {
+    return clinetCountyId;
+  }
+
+  public void setClientCounty(Short clinetCountyId) {
+    this.clinetCountyId = clinetCountyId;
   }
 
   // ============================
