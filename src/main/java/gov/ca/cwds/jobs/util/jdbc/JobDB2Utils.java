@@ -112,7 +112,7 @@ public class JobDB2Utils {
     try {
       final com.ibm.db2.jcc.t4.b nativeCon =
           (com.ibm.db2.jcc.t4.b) ((com.mchange.v2.c3p0.impl.NewProxyConnection) con)
-              .unwrap(Class.forName("com.ibm.db2.jcc.t4.b"));
+              .unwrap(Class.forName("com.ibm.db2.jcc.t4.b")); // NOSONAR
       final DB2Connection db2Con = nativeCon;
       LOGGER.info("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
           nativeCon.enableRowsetSupport_);

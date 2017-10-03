@@ -78,9 +78,8 @@ public class JobRunner {
    */
   public static <T extends BasePersonIndexerJob<?, ?>> void registerContinuousJob(
       final Class<T> klass, String... args) {
-    try {
+    try (final T job = JobsGuiceInjector.newJob(klass, args);) {
       setContinuousMode(true);
-      final T job = JobsGuiceInjector.newJob(klass, args);
       setStartingOpts(job.getOpts());
       jobs.put(klass, job);
     } catch (Throwable e) { // NOSONAR
@@ -141,7 +140,7 @@ public class JobRunner {
     testMode = mode;
   }
 
-  public static JobOptions getStartingOpts() {
+  public static synchronized JobOptions getStartingOpts() {
     return startingOpts;
   }
 
