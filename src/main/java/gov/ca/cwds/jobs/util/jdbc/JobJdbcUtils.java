@@ -23,6 +23,12 @@ import gov.ca.cwds.jobs.config.JobOptions;
  */
 public class JobJdbcUtils {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(JobJdbcUtils.class);
+
+  private JobJdbcUtils() {
+    // Default, no-op. Static utility class.
+  }
+
   private static final class PrepWork implements Work {
     private final Date lastRunTime;
     private final String sqlInsertLastChange;
@@ -53,8 +59,6 @@ public class JobJdbcUtils {
       }
     }
   }
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobJdbcUtils.class);
 
   public static String makeTimestampString(final Date date) {
     final StringBuilder buf = new StringBuilder();

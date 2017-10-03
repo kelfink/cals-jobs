@@ -114,12 +114,10 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
-    StringBuilder buf = new StringBuilder();
-    buf.append("SELECT x.* FROM ");
-    buf.append(dbSchemaName);
-    buf.append(".");
-    buf.append(getInitialLoadViewName());
-    buf.append(" x WHERE x.clt_identifier > ':fromId' AND x.clt_identifier <= ':toId' ");
+    final StringBuilder buf = new StringBuilder();
+
+    buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
+        .append(" x WHERE x.clt_identifier > ':fromId' AND x.clt_identifier <= ':toId' ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
       buf.append(" AND x.CLT_SENSTV_IND = 'N' ");

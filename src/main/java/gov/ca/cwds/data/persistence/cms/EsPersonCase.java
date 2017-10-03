@@ -390,7 +390,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
     final ElasticSearchPersonCase esPersonCase = new ElasticSearchPersonCase();
 
     //
-    // Case
+    // Case:
     //
     esPersonCase.setId(this.caseId);
     esPersonCase.setLegacyId(this.caseId);
@@ -407,7 +407,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
         this.caseLastUpdated, LegacyTable.CASE));
 
     //
-    // Child
+    // Child:
     //
     final ElasticSearchPersonChild child = new ElasticSearchPersonChild();
     child.setId(this.focusChildId);
@@ -421,7 +421,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
     esPersonCase.setFocusChild(child);
 
     //
-    // Assigned Worker
+    // Assigned Worker:
     //
     final ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
     assignedWorker.setId(this.workerId);
@@ -434,7 +434,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
     esPersonCase.setAssignedSocialWorker(assignedWorker);
 
     //
-    // Access Limitation
+    // Access Limitation:
     //
     final ElasticSearchAccessLimitation accessLimit = new ElasticSearchAccessLimitation();
     accessLimit.setLimitedAccessCode(this.limitedAccessCode);
@@ -447,7 +447,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
     esPersonCase.setAccessLimitation(accessLimit);
 
     //
-    // A Case may have more than one parents
+    // A Case may have more than one parents:
     //
     final ElasticSearchPersonParent parent = new ElasticSearchPersonParent();
     parent.setId(this.parentId);

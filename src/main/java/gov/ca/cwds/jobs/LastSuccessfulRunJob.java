@@ -97,6 +97,10 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
     finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public void markJobDone() {
     this.doneRetrieve = true;
     this.doneIndex = true;
@@ -104,39 +108,75 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
     this.doneJob = true;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public void markFailed() {
     this.fatalError = true;
     this.doneJob = true;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public void markRetrieveDone() {
     this.doneRetrieve = true;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public void markTransformDone() {
     this.doneTransform = true;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public void markIndexDone() {
     this.doneIndex = true;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public boolean isRunning() {
     return !doneJob;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public boolean isFailed() {
     return fatalError;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public boolean isRetrieveDone() {
     return doneRetrieve;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public boolean isTransformDone() {
     return doneTransform;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public boolean isIndexDone() {
     return doneIndex;
   }

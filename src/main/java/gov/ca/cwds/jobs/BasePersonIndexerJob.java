@@ -57,6 +57,7 @@ import gov.ca.cwds.jobs.component.AtomSecurity;
 import gov.ca.cwds.jobs.component.AtomShared;
 import gov.ca.cwds.jobs.component.AtomTransformer;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
+import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
@@ -65,7 +66,6 @@ import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.JobElasticPersonDocPrep;
 
 /**
  * Base person batch job to load clients from CMS into ElasticSearch.
@@ -93,7 +93,7 @@ import gov.ca.cwds.jobs.util.transform.JobElasticPersonDocPrep;
  * @see JobOptions
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends LastSuccessfulRunJob implements AutoCloseable, JobElasticPersonDocPrep<T>,
+    extends LastSuccessfulRunJob implements AutoCloseable, AtomPersonDocPrep<T>,
     AtomHibernate<T, M>, AtomTransformer<T, M>, AtomInitialLoad<T, M>, AtomSecurity {
 
   /**
@@ -280,7 +280,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return left = insert JSON, right = update JSON throws JsonProcessingException on JSON parse
    *         error
    * @throws IOException on Elasticsearch disconnect
-   * @see ElasticTransformer#prepareUpsertRequest(JobElasticPersonDocPrep, String, String,
+   * @see ElasticTransformer#prepareUpsertRequest(AtomPersonDocPrep, String, String,
    *      ElasticSearchPerson, PersistentObject)
    */
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T t) throws IOException {

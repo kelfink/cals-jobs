@@ -52,8 +52,8 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
 
   @Override
   public EsChildPersonCase extract(ResultSet rs) throws SQLException {
+    final String caseId = rs.getString("CASE_ID");
     String focusChildId = rs.getString("FOCUS_CHILD_ID");
-    String caseId = rs.getString("CASE_ID");
 
     if (focusChildId == null) {
       LOGGER.warn("FOCUS_CHILD_ID is null for CASE_ID: {}", caseId.trim());

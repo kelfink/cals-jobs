@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.util.transform;
+package gov.ca.cwds.jobs.component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +9,9 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
-public interface JobElasticPersonDocPrep<T extends PersistentObject> extends ApiMarker {
+public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker {
 
   static final String ES_PEOPLE_INDEX_SETTINGS =
       "/elasticsearch/setting/people-index-settings.json";

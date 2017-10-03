@@ -90,12 +90,10 @@ public abstract class CaseHistoryIndexerJob
 
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
-    StringBuilder buf = new StringBuilder();
-    buf.append("SELECT x.* FROM ");
-    buf.append(dbSchemaName);
-    buf.append(".");
-    buf.append(getInitialLoadViewName());
-    buf.append(" x ");
+    final StringBuilder buf = new StringBuilder();
+
+    buf.append("SELECT x.* FROM ").append(dbSchemaName).append(".").append(getInitialLoadViewName())
+        .append(" x ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
       buf.append(" WHERE x.LIMITED_ACCESS_CODE = 'N' ");

@@ -44,6 +44,7 @@ import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
+import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.rest.api.domain.DomainChef;
@@ -111,7 +112,7 @@ public class ElasticTransformer {
    * @throws IOException on Elasticsearch disconnect
    */
   public static <T extends PersistentObject> UpdateRequest prepareUpsertRequest(
-      JobElasticPersonDocPrep<T> docPrep, String alias, String docType, ElasticSearchPerson esp,
+      AtomPersonDocPrep<T> docPrep, String alias, String docType, ElasticSearchPerson esp,
       T t) throws IOException {
     String id = esp.getId();
 
@@ -157,7 +158,7 @@ public class ElasticTransformer {
    * @throws JsonProcessingException on JSON processing error
    */
   public static <T extends PersistentObject> Pair<String, String> prepareUpsertJson(
-      JobElasticPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t, String elementName,
+      AtomPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
           throws JsonProcessingException {
 
@@ -199,7 +200,7 @@ public class ElasticTransformer {
    * @throws JsonProcessingException on JSON processing error
    */
   public static <T extends PersistentObject> void prepareInsertCollections(
-      JobElasticPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t, String elementName,
+      AtomPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
           throws JsonProcessingException {
 
