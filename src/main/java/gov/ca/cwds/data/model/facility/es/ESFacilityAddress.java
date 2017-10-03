@@ -15,9 +15,6 @@ public class ESFacilityAddress implements Serializable {
    */
   private static final long serialVersionUID = 1L;
 
-  // @JsonProperty("street_number") private String streetNumber;
-  // @JsonProperty("street_name") private String streetName;
-
   @JsonProperty("state_code_type")
   private String stateCodeType;
 

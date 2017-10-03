@@ -45,6 +45,11 @@ import gov.ca.cwds.data.std.ApiMarker;
 @Deprecated
 public class Elasticsearch5xDao implements Closeable, ApiMarker {
 
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Elasticsearch5xDao.class);
 
   private static final int NUMBER_OF_SHARDS = 5;

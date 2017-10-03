@@ -53,11 +53,11 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.component.AtomHibernate;
 import gov.ca.cwds.jobs.component.AtomInitialLoad;
+import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
 import gov.ca.cwds.jobs.component.AtomSecurity;
 import gov.ca.cwds.jobs.component.AtomShared;
 import gov.ca.cwds.jobs.component.AtomTransformer;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
-import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
@@ -128,12 +128,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Main DAO for the supported persistence class.
    */
-  protected final transient BaseDaoImpl<T> jobDao;
+  protected transient BaseDaoImpl<T> jobDao;
 
   /**
    * Elasticsearch client DAO.
    */
-  protected final transient ElasticsearchDao esDao;
+  protected transient ElasticsearchDao esDao;
 
   /**
    * Hibernate session factory.
@@ -749,7 +749,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         lastId = m.getNormalizationGroupKey();
         if (lastId == null) {
           // Could be a data error (invalid data in db).
-          LOGGER.warn("NULL Normalization Group Key: " + m);
+          LOGGER.warn("NULL Normalization Group Key: {}", m);
           lastId = new Object();
         }
       }

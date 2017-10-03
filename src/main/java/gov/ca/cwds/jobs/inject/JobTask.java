@@ -19,11 +19,13 @@ public class JobTask<N extends PersistentObject, D extends ApiGroupNormalizer<?>
 
   private static final AtomicInteger taskCounter = new AtomicInteger(0);
 
-  private final BasePersonIndexerJob<N, D> job;
+  private transient Thread thread;
 
-  private final boolean continuousMode;
+  private transient BasePersonIndexerJob<N, D> job;
 
   private final JobOptions opts;
+
+  private final boolean continuousMode;
 
   private final Date createTime = new Date();
 
@@ -32,8 +34,6 @@ public class JobTask<N extends PersistentObject, D extends ApiGroupNormalizer<?>
   private Date startTime;
 
   private Date endTime;
-
-  private Thread thread;
 
   public JobTask(BasePersonIndexerJob<N, D> job, boolean continuousMode, JobOptions opts,
       String description) {

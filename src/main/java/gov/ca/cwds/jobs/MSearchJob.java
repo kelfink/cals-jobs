@@ -41,16 +41,16 @@ public class MSearchJob extends
    * Construct batch job instance with all required dependencies.
    * 
    * @param dao OtherAdultInPlacemtHome DAO
-   * @param elasticsearchDao ElasticSearch DAO
+   * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public MSearchJob(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
-      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(dao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  public MSearchJob(final ReplicatedOtherAdultInPlacemtHomeDao dao, final ElasticsearchDao esDao,
+      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory) {
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   @Override
@@ -79,7 +79,6 @@ public class MSearchJob extends
         LOGGER.info("hit: {}",
             ToStringBuilder.reflectionToString(hit, ToStringStyle.DEFAULT_STYLE));
       }
-
     }
 
     LOGGER.info("hits: {}", nbHits);

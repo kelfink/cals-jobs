@@ -11,7 +11,7 @@ import com.google.inject.tools.jmx.Manager;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.EducationProviderContactIndexerJob;
 import gov.ca.cwds.jobs.config.JobOptions;
-import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 public class JobRunner {
@@ -45,7 +45,6 @@ public class JobRunner {
    * @param klass batch job class
    * @param args command line arguments
    * @param <T> Person persistence type
-   * @throws JobsException unexpected runtime error
    */
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
@@ -74,17 +73,18 @@ public class JobRunner {
    * @param klass batch job class
    * @param args command line arguments
    * @param <T> Person persistence type
-   * @throws JobsException unexpected runtime error
+   * @throws NeutronException unexpected runtime error
    */
   public static <T extends BasePersonIndexerJob<?, ?>> void registerContinuousJob(
-      final Class<T> klass, String... args) {
+      final Class<T> klass, String... args) throws NeutronException {
     try (final T job = JobsGuiceInjector.newJob(klass, args);) {
       setContinuousMode(true);
       setStartingOpts(job.getOpts());
       jobs.put(klass, job);
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception, for ClassNotFound or the like.
-      throw JobLogs.buildException(LOGGER, e, "JOB REGISTRATION FAILED!: {}", e.getMessage());
+      throw JobLogs.buildCheckedException(LOGGER, e, "JOB REGISTRATION FAILED!: {}",
+          e.getMessage());
     }
   }
 
@@ -93,9 +93,10 @@ public class JobRunner {
    * 
    * @param klass batch job class
    * @param args command line arguments
-   * @throws JobsException unexpected runtime error
+   * @throws NeutronException unexpected runtime error
    */
-  public static void runRegisteredJob(final Class<?> klass, String... args) {
+  public static void runRegisteredJob(final Class<?> klass, String... args)
+      throws NeutronException {
     try {
       final JobOptions opts = JobOptions.parseCommandLine(args);
       final BasePersonIndexerJob<?, ?> job =
@@ -103,7 +104,8 @@ public class JobRunner {
       job.setOpts(opts);
       job.run();
     } catch (Exception e) {
-      throw JobLogs.buildException(LOGGER, e, "REGISTERED JOB RUN FAILED!: {}", e.getMessage());
+      throw JobLogs.buildCheckedException(LOGGER, e, "REGISTERED JOB RUN FAILED!: {}",
+          e.getMessage());
     }
   }
 
@@ -152,17 +154,13 @@ public class JobRunner {
 
   public static void main(String[] args) {
     LOGGER.info("START ON DEMAND JOBS");
-
     try {
       // OPTION: configure individual jobs, just like Rundeck.
       JobRunner.registerContinuousJob(EducationProviderContactIndexerJob.class, args);
-
       Manager.manage("Neutron", JobsGuiceInjector.getInjector());
-
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
-
   }
 
 }

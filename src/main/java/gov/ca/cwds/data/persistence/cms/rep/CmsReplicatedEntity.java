@@ -3,13 +3,14 @@ package gov.ca.cwds.data.persistence.cms.rep;
 import java.util.Date;
 
 import gov.ca.cwds.dao.ApiLegacyAware;
+import gov.ca.cwds.data.persistence.PersistentObject;
 
 /**
  * Provides common CMS replication columns and checks for Hibernate CMS entity classes.
  * 
  * @author CWDS API Team
  */
-public interface CmsReplicatedEntity extends ApiLegacyAware {
+public interface CmsReplicatedEntity extends ApiLegacyAware, PersistentObject {
 
   /**
    * Determines whether record was deleted from companion transactional table.

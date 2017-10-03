@@ -88,6 +88,28 @@ public class ElasticTransformer {
     bp.add(t);
   }
 
+  protected static String determineId(final ApiLegacyAware l, final ElasticSearchPerson esp) {
+    String id;
+    final boolean hasLegacyId =
+        StringUtils.isNotBlank(l.getLegacyId()) && l.getLegacyId().trim().length() == CMS_ID_LEN;
+
+    if (hasLegacyId) {
+      id = l.getLegacyId();
+      esp.setLegacyId(id);
+    } else {
+      id = esp.getId();
+    }
+
+    return id;
+  }
+
+  protected static String determineId(CmsReplicatedEntity l, final ElasticSearchPerson esp) {
+    final String id = l.getPrimaryKey().toString();
+    esp.setLegacyId(id);
+    return id;
+  }
+
+
   /**
    * Prepare sections of a document for update. Elasticsearch automatically updates the provided
    * sections. Some jobs should only write sub-documents, such as screenings or allegations, from a
@@ -112,9 +134,11 @@ public class ElasticTransformer {
    * @throws IOException on Elasticsearch disconnect
    */
   public static <T extends PersistentObject> UpdateRequest prepareUpsertRequest(
-      AtomPersonDocPrep<T> docPrep, String alias, String docType, ElasticSearchPerson esp,
+      AtomPersonDocPrep<T> docPrep, String alias, String docType, final ElasticSearchPerson esp,
       T t) throws IOException {
     String id = esp.getId();
+
+    // doSomething(t, esp);
 
     // Set id and legacy id.
     if (t instanceof ApiLegacyAware) {
@@ -160,7 +184,7 @@ public class ElasticTransformer {
   public static <T extends PersistentObject> Pair<String, String> prepareUpsertJson(
       AtomPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-          throws JsonProcessingException {
+      throws JsonProcessingException {
 
     // Child classes: Set optional collections before serializing the insert JSON.
     prepareInsertCollections(docPrep, esp, t, elementName, list, keep);
@@ -202,7 +226,7 @@ public class ElasticTransformer {
   public static <T extends PersistentObject> void prepareInsertCollections(
       AtomPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t, String elementName,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-          throws JsonProcessingException {
+      throws JsonProcessingException {
 
     // Clear out optional collections for updates.
     esp.clearOptionalCollections(keep);

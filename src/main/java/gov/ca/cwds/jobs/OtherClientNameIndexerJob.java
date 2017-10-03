@@ -55,7 +55,7 @@ public class OtherClientNameIndexerJob
       + "WHERE ONM.IBMSNAP_LOGMARKER > ##TIMESTAMP##\n" + "UNION ALL\n" + "SELECT CLT.IDENTIFIER\n"
       + "FROM #SCHEMA#.CLIENT_T CLT WHERE CLT.IBMSNAP_LOGMARKER > ##TIMESTAMP##";
 
-  private ReplicatedOtherClientNameDao denormDao;
+  private transient ReplicatedOtherClientNameDao denormDao;
 
   /**
    * Construct batch job instance with all required dependencies.

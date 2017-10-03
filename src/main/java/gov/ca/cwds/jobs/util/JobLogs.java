@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 
 /**
  * Logging utilities for Neutron job classes.
@@ -87,6 +88,30 @@ public final class JobLogs {
 
     logger.error(msg, e);
     return new JobsException(msg, e);
+  }
+
+  /**
+   * Format message and return a runtime {@link JobsException}.
+   * 
+   * @param log class logger
+   * @param e any Throwable
+   * @param pattern MessageFormat pattern
+   * @param args error message, excluding throwable message
+   * @return JobsException runtime exception
+   */
+  public static NeutronException buildCheckedException(final Logger log, Throwable e,
+      String pattern, Object... args) {
+    final boolean hasArgs = args == null || args.length == 0;
+    final boolean hasPattern = !StringUtils.isEmpty(pattern);
+    final Logger logger = log != null ? log : LOGGER;
+
+    // Build message:
+    final Object[] objs = hasArgs ? new Object[0] : args;
+    final String pat = hasPattern ? pattern : StringUtils.join(objs, "{}");
+    final String msg = hasPattern && hasArgs ? MessageFormat.format(pat, objs) : "";
+
+    logger.error(msg, e);
+    return new NeutronException(msg, e);
   }
 
   /**

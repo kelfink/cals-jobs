@@ -59,8 +59,6 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  // BasePersonIndexerJob<T, M> target;
-
   ElasticsearchConfiguration esConfig;
   ElasticsearchDao esDao;
   Client client;
