@@ -13,13 +13,15 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
 
 /**
  * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
-public class CollateralIndividualIndexerJobTest extends PersonJobTester {
+public class CollateralIndividualIndexerJobTest
+    extends PersonJobTester<ReplicatedCollateralIndividual, ReplicatedCollateralIndividual> {
 
   ReplicatedCollateralIndividualDao dao;
   CollateralIndividualIndexerJob target;

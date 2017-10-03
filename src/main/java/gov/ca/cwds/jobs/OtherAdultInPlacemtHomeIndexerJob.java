@@ -41,6 +41,9 @@ public class OtherAdultInPlacemtHomeIndexerJob extends
     super(jobDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
+  /**
+   * @deprecated soon to be removed
+   */
   @Override
   @Deprecated
   public String getLegacySourceTable() {
