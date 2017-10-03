@@ -25,6 +25,11 @@ public class ReporterIndexerJob
     extends BasePersonIndexerJob<ReplicatedReporter, ReplicatedReporter> {
 
   /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Construct job with all required dependencies.
    * 
    * @param dao Client DAO
@@ -45,6 +50,9 @@ public class ReporterIndexerJob
     return "FKREFERL_T";
   }
 
+  /**
+   * @deprecated soon to be removed
+   */
   @Override
   @Deprecated
   public String getLegacySourceTable() {

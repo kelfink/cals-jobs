@@ -387,7 +387,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
       map.put(groupId, cases);
     }
 
-    ElasticSearchPersonCase esPersonCase = new ElasticSearchPersonCase();
+    final ElasticSearchPersonCase esPersonCase = new ElasticSearchPersonCase();
 
     //
     // Case
@@ -409,7 +409,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
     //
     // Child
     //
-    ElasticSearchPersonChild child = new ElasticSearchPersonChild();
+    final ElasticSearchPersonChild child = new ElasticSearchPersonChild();
     child.setId(this.focusChildId);
     child.setLegacyClientId(this.focusChildId);
     child.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.focusChildLastUpdated));
@@ -423,7 +423,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
     //
     // Assigned Worker
     //
-    ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
+    final ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
     assignedWorker.setId(this.workerId);
     assignedWorker.setLegacyClientId(this.workerId);
     assignedWorker.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.workerLastUpdated));
@@ -436,7 +436,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
     //
     // Access Limitation
     //
-    ElasticSearchAccessLimitation accessLimit = new ElasticSearchAccessLimitation();
+    final ElasticSearchAccessLimitation accessLimit = new ElasticSearchAccessLimitation();
     accessLimit.setLimitedAccessCode(this.limitedAccessCode);
     accessLimit.setLimitedAccessDate(DomainChef.cookDate(this.limitedAccessDate));
     accessLimit.setLimitedAccessDescription(this.limitedAccessDescription);
@@ -449,7 +449,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
     //
     // A Case may have more than one parents
     //
-    ElasticSearchPersonParent parent = new ElasticSearchPersonParent();
+    final ElasticSearchPersonParent parent = new ElasticSearchPersonParent();
     parent.setId(this.parentId);
     parent.setLegacyClientId(getParentId());
     parent.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.parentLastUpdated));

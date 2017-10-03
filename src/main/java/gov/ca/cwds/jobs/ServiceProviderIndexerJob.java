@@ -25,6 +25,11 @@ public class ServiceProviderIndexerJob
     extends BasePersonIndexerJob<ReplicatedServiceProvider, ReplicatedServiceProvider> {
 
   /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Construct batch job instance with all required dependencies.
    * 
    * @param dao ServiceProvider DAO
@@ -40,6 +45,9 @@ public class ServiceProviderIndexerJob
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
+  /**
+   * @deprecated soon to be removed.
+   */
   @Override
   @Deprecated
   public String getLegacySourceTable() {

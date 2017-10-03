@@ -54,12 +54,12 @@ public class Elasticsearch5xDao implements Closeable, ApiMarker {
   /**
    * Client is thread safe.
    */
-  private Client client;
+  private transient Client client;
 
   /**
    * Elasticsearch configuration
    */
-  private ElasticsearchConfiguration5x config;
+  private transient ElasticsearchConfiguration5x config;
 
   /**
    * Constructor.
