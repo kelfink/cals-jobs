@@ -416,9 +416,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       r.setAccessLimitation(makeAccessLimitation());
     }
 
-    //
     // A referral may have multiple allegations.
-    //
     final ElasticSearchPersonAllegation allegation = makeAllegation();
 
     if (opts.isLoadSealedAndSensitive() || (perpetratorSensitivityIndicator == null
