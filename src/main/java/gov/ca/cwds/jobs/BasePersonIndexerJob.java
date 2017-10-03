@@ -298,8 +298,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * <p>
    * Run threads to extract, transform, and index.
    * </p>
-   * 
-   * @throws IOException on database error or Elasticsearch disconnect
    */
   protected void doInitialLoadJdbc() {
     Thread.currentThread().setName("main");

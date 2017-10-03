@@ -5,21 +5,32 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.hibernate.SessionFactory;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
-import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
+import gov.ca.cwds.data.persistence.cms.EsPersonCase;
+import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 
-public class ChildCaseHistoryIndexerJobTest {
+public class ChildCaseHistoryIndexerJobTest
+    extends PersonJobTester<ReplicatedPersonCases, EsPersonCase> {
+
+  ReplicatedPersonCasesDao dao;
+  ChildCaseHistoryIndexerJob target;
+
+  @Override
+  @Before
+  public void setup() throws Exception {
+    super.setup();
+    dao = new ReplicatedPersonCasesDao(this.sessionFactory);
+    target =
+        new ChildCaseHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
+  }
 
   @Test
   public void type() throws Exception {
@@ -28,41 +39,18 @@ public class ChildCaseHistoryIndexerJobTest {
 
   @Test
   public void instantiation() throws Exception {
-    ReplicatedPersonCasesDao clientDao = null;
-    ElasticsearchDao elasticsearchDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ChildCaseHistoryIndexerJob target = new ChildCaseHistoryIndexerJob(clientDao, elasticsearchDao,
-        lastJobRunTimeFilename, mapper, sessionFactory);
     assertThat(target, notNullValue());
   }
 
   @Test
   public void extract_Args__ResultSet() throws Exception {
-    ReplicatedPersonCasesDao clientDao = null;
-    ElasticsearchDao elasticsearchDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ChildCaseHistoryIndexerJob target = new ChildCaseHistoryIndexerJob(clientDao, elasticsearchDao,
-        lastJobRunTimeFilename, mapper, sessionFactory);
-    ResultSet rs = mock(ResultSet.class);
     EsChildPersonCase actual = target.extract(rs);
-    EsChildPersonCase expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, notNullValue());
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void extract_Args__ResultSet_T__SQLException() throws Exception {
-    ReplicatedPersonCasesDao clientDao = null;
-    ElasticsearchDao elasticsearchDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ChildCaseHistoryIndexerJob target = new ChildCaseHistoryIndexerJob(clientDao, elasticsearchDao,
-        lastJobRunTimeFilename, mapper, sessionFactory);
-    ResultSet rs = mock(ResultSet.class);
     try {
       target.extract(rs);
       fail("Expected exception was not thrown!");
@@ -72,13 +60,6 @@ public class ChildCaseHistoryIndexerJobTest {
 
   @Test
   public void getDenormalizedClass_Args__() throws Exception {
-    ReplicatedPersonCasesDao clientDao = null;
-    ElasticsearchDao elasticsearchDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ChildCaseHistoryIndexerJob target = new ChildCaseHistoryIndexerJob(clientDao, elasticsearchDao,
-        lastJobRunTimeFilename, mapper, sessionFactory);
     Object actual = target.getDenormalizedClass();
     Object expected = EsChildPersonCase.class;
     assertThat(actual, is(equalTo(expected)));
@@ -86,13 +67,6 @@ public class ChildCaseHistoryIndexerJobTest {
 
   @Test
   public void getViewName_Args__() throws Exception {
-    ReplicatedPersonCasesDao clientDao = null;
-    ElasticsearchDao elasticsearchDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ChildCaseHistoryIndexerJob target = new ChildCaseHistoryIndexerJob(clientDao, elasticsearchDao,
-        lastJobRunTimeFilename, mapper, sessionFactory);
     String actual = target.getInitialLoadViewName();
     String expected = "MQT_CASE_HIST";
     assertThat(actual, is(equalTo(expected)));
@@ -100,19 +74,13 @@ public class ChildCaseHistoryIndexerJobTest {
 
   @Test
   public void getJdbcOrderBy_Args__() throws Exception {
-    ReplicatedPersonCasesDao clientDao = null;
-    ElasticsearchDao elasticsearchDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    ChildCaseHistoryIndexerJob target = new ChildCaseHistoryIndexerJob(clientDao, elasticsearchDao,
-        lastJobRunTimeFilename, mapper, sessionFactory);
     String actual = target.getJdbcOrderBy();
     String expected = " ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID ";
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
+  @Ignore
   public void main_Args__StringArray() throws Exception {
     String[] args = new String[] {};
     ChildCaseHistoryIndexerJob.main(args);
