@@ -109,6 +109,14 @@ public class JobProgressTrack extends ApiObjectIdentity {
     return this.getRecsBulkError().getAndIncrement();
   }
 
+  public void trackRangeStart(final Pair<String, String> pair) {
+    initialLoadRangesStarted.add(pair);
+  }
+
+  public void trackRangeComplete(final Pair<String, String> pair) {
+    initialLoadRangesCompleted.add(pair);
+  }
+
   @Override
   public String toString() {
     final long endTime = System.currentTimeMillis();
