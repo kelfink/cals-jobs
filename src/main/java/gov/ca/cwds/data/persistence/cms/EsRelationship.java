@@ -18,7 +18,6 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 import org.slf4j.Logger;
@@ -32,7 +31,8 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
- * Entity bean for Materialized Query Table (MQT), VW_BI_DIR_RELATION.
+ * Entity bean for Materialized Query Table (MQT), VW_BI_DIR_RELATION. By request of the Intake
+ * team, it only reads relationships from CLN_RELT, for now.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedRelationships}.
@@ -42,39 +42,38 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  */
 @Entity
 @Table(name = "VW_LST_BI_DIR_RELATION")
-@NamedNativeQueries({
-    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfter",
-        query = "WITH driver as (\n"
-            + " SELECT v1.THIS_LEGACY_ID, v1.RELATED_LEGACY_ID FROM {h-schema}VW_LST_BI_DIR_RELATION v1 \n"
-            + "where v1.LAST_CHG > :after \n"
-            + ") SELECT v.REVERSE_RELATIONSHIP, v.THIS_LEGACY_ID, v.THIS_SENSITIVITY_IND, \n"
-            + "v.THIS_LEGACY_LAST_UPDATED, v.THIS_LEGACY_LAST_UPDATED_ID, v.THIS_FIRST_NAME, v.THIS_LAST_NAME, \n"
-            + "v.REL_CODE, v.RELATED_LEGACY_ID, v.RELATED_SENSITIVITY_IND, \n"
-            + "v.RELATED_LEGACY_LAST_UPDATED, v.RELATED_LEGACY_LAST_UPDATED_ID, \n"
-            + "v.RELATED_FIRST_NAME, v.RELATED_LAST_NAME, v.THIS_IBMSNAP_LOGMARKER, v.THIS_IBMSNAP_OPERATION, \n"
-            + "v.RELATED_IBMSNAP_LOGMARKER, v.RELATED_IBMSNAP_OPERATION, v.LAST_CHG \n"
-            + "FROM {h-schema}VW_LST_BI_DIR_RELATION v \n"
-            + "WHERE v.THIS_LEGACY_ID IN (select d1.THIS_LEGACY_ID from driver d1) \n"
-            + "OR v.RELATED_LEGACY_ID IN (select d2.RELATED_LEGACY_ID from driver d2) \n"
-            + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY WITH UR ",
-        resultClass = EsRelationship.class, readOnly = true),
-    @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfterWithUnlimitedAccess",
-        query = "WITH driver as ( \n"
-            + " SELECT v1.THIS_LEGACY_ID, v1.RELATED_LEGACY_ID FROM {h-schema}VW_LST_BI_DIR_RELATION v1 \n"
-            + "where v1.LAST_CHG > :after \n"
-            + ") SELECT v.REVERSE_RELATIONSHIP, v.THIS_LEGACY_ID, v.THIS_SENSITIVITY_IND, \n"
-            + "v.THIS_LEGACY_LAST_UPDATED, v.THIS_LEGACY_LAST_UPDATED_ID, v.THIS_FIRST_NAME, v.THIS_LAST_NAME, \n"
-            + "v.REL_CODE, v.RELATED_LEGACY_ID, v.RELATED_SENSITIVITY_IND, \n"
-            + "v.RELATED_LEGACY_LAST_UPDATED, v.RELATED_LEGACY_LAST_UPDATED_ID, \n"
-            + "v.RELATED_FIRST_NAME, v.RELATED_LAST_NAME, v.THIS_IBMSNAP_LOGMARKER, v.THIS_IBMSNAP_OPERATION, \n"
-            + "v.RELATED_IBMSNAP_LOGMARKER, v.RELATED_IBMSNAP_OPERATION, v.LAST_CHG \n"
-            + "FROM {h-schema}VW_LST_BI_DIR_RELATION v \n"
-            + "WHERE (v.THIS_LEGACY_ID IN (select d1.THIS_LEGACY_ID from driver d1) \n"
-            + "OR v.RELATED_LEGACY_ID IN (select d2.RELATED_LEGACY_ID from driver d2)) \n"
-            + "AND (v.THIS_SENSITIVITY_IND = 'N' AND v.RELATED_SENSITIVITY_IND = 'N') \n"
-            + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY WITH UR ",
-        resultClass = EsRelationship.class, readOnly = true)})
+@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfter",
+    query = "WITH driver as (\n"
+        + " SELECT v1.THIS_LEGACY_ID, v1.RELATED_LEGACY_ID FROM {h-schema}VW_LST_BI_DIR_RELATION v1 \n"
+        + "where v1.LAST_CHG > :after \n"
+        + ") SELECT v.REVERSE_RELATIONSHIP, v.THIS_LEGACY_ID, v.THIS_SENSITIVITY_IND, \n"
+        + "v.THIS_LEGACY_LAST_UPDATED, v.THIS_LEGACY_LAST_UPDATED_ID, v.THIS_FIRST_NAME, v.THIS_LAST_NAME, \n"
+        + "v.REL_CODE, v.RELATED_LEGACY_ID, v.RELATED_SENSITIVITY_IND, \n"
+        + "v.RELATED_LEGACY_LAST_UPDATED, v.RELATED_LEGACY_LAST_UPDATED_ID, \n"
+        + "v.RELATED_FIRST_NAME, v.RELATED_LAST_NAME, v.THIS_IBMSNAP_LOGMARKER, v.THIS_IBMSNAP_OPERATION, \n"
+        + "v.RELATED_IBMSNAP_LOGMARKER, v.RELATED_IBMSNAP_OPERATION, v.LAST_CHG \n"
+        + "FROM {h-schema}VW_LST_BI_DIR_RELATION v \n"
+        + "WHERE v.THIS_LEGACY_ID IN (select d1.THIS_LEGACY_ID from driver d1) \n"
+        + "OR v.RELATED_LEGACY_ID IN (select d2.RELATED_LEGACY_ID from driver d2) \n"
+        + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY WITH UR ",
+    resultClass = EsRelationship.class, readOnly = true)
+@NamedNativeQuery(
+    name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfterWithUnlimitedAccess",
+    query = "WITH driver as ( \n"
+        + " SELECT v1.THIS_LEGACY_ID, v1.RELATED_LEGACY_ID FROM {h-schema}VW_LST_BI_DIR_RELATION v1 \n"
+        + "where v1.LAST_CHG > :after \n"
+        + ") SELECT v.REVERSE_RELATIONSHIP, v.THIS_LEGACY_ID, v.THIS_SENSITIVITY_IND, \n"
+        + "v.THIS_LEGACY_LAST_UPDATED, v.THIS_LEGACY_LAST_UPDATED_ID, v.THIS_FIRST_NAME, v.THIS_LAST_NAME, \n"
+        + "v.REL_CODE, v.RELATED_LEGACY_ID, v.RELATED_SENSITIVITY_IND, \n"
+        + "v.RELATED_LEGACY_LAST_UPDATED, v.RELATED_LEGACY_LAST_UPDATED_ID, \n"
+        + "v.RELATED_FIRST_NAME, v.RELATED_LAST_NAME, v.THIS_IBMSNAP_LOGMARKER, v.THIS_IBMSNAP_OPERATION, \n"
+        + "v.RELATED_IBMSNAP_LOGMARKER, v.RELATED_IBMSNAP_OPERATION, v.LAST_CHG \n"
+        + "FROM {h-schema}VW_LST_BI_DIR_RELATION v \n"
+        + "WHERE (v.THIS_LEGACY_ID IN (select d1.THIS_LEGACY_ID from driver d1) \n"
+        + "OR v.RELATED_LEGACY_ID IN (select d2.RELATED_LEGACY_ID from driver d2)) \n"
+        + "AND (v.THIS_SENSITIVITY_IND = 'N' AND v.RELATED_SENSITIVITY_IND = 'N') \n"
+        + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY WITH UR ",
+    resultClass = EsRelationship.class, readOnly = true)
 public class EsRelationship
     implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationships> {
 
@@ -87,15 +86,6 @@ public class EsRelationship
 
   private static final Pattern RGX_RELATIONSHIP =
       Pattern.compile("([A-Za-z0-9 _-]+)[/]?([A-Za-z0-9 _-]+)?\\s*(\\([A-Za-z0-9 _-]+\\))?");
-
-  // By request of the Intake team, only read relationships from CLN_RELT, for now.
-  // @Id
-  // @Column(name = "THIS_LEGACY_TABLE")
-  // private String thisLegacyTable;
-
-  // @Id
-  // @Column(name = "RELATED_LEGACY_TABLE")
-  // private String relatedLegacyTable;
 
   @Id
   @Type(type = "boolean")

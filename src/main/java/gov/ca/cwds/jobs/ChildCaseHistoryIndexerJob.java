@@ -56,58 +56,58 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     String caseId = rs.getString("CASE_ID");
 
     if (focusChildId == null) {
-      LOGGER.warn("FOCUS_CHILD_ID is null for CASE_ID: {}", caseId);
+      LOGGER.warn("FOCUS_CHILD_ID is null for CASE_ID: {}", caseId.trim());
       return null;
     }
 
-    EsChildPersonCase personCase = new EsChildPersonCase();
+    final EsChildPersonCase ret = new EsChildPersonCase();
 
     //
     // Case:
     //
-    personCase.setCaseId(caseId);
-    personCase.setStartDate(rs.getDate("START_DATE"));
-    personCase.setEndDate(rs.getDate("END_DATE"));
-    personCase.setCaseLastUpdated(rs.getTimestamp("CASE_LAST_UPDATED"));
-    personCase.setCounty(rs.getInt("COUNTY"));
-    personCase.setServiceComponent(rs.getInt("SERVICE_COMP"));
+    ret.setCaseId(caseId);
+    ret.setStartDate(rs.getDate("START_DATE"));
+    ret.setEndDate(rs.getDate("END_DATE"));
+    ret.setCaseLastUpdated(rs.getTimestamp("CASE_LAST_UPDATED"));
+    ret.setCounty(rs.getInt("COUNTY"));
+    ret.setServiceComponent(rs.getInt("SERVICE_COMP"));
 
     //
     // Child (client):
     //
-    personCase.setFocusChildId(focusChildId);
-    personCase.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
-    personCase.setFocusChildLastName(ifNull(rs.getString("FOCUS_CHLD_LAST_NM")));
-    personCase.setFocusChildLastUpdated(rs.getTimestamp("FOCUS_CHILD_LAST_UPDATED"));
-    personCase.setFocusChildSensitivityIndicator(rs.getString("FOCUS_CHILD_SENSITIVITY_IND"));
+    ret.setFocusChildId(focusChildId);
+    ret.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
+    ret.setFocusChildLastName(ifNull(rs.getString("FOCUS_CHLD_LAST_NM")));
+    ret.setFocusChildLastUpdated(rs.getTimestamp("FOCUS_CHILD_LAST_UPDATED"));
+    ret.setFocusChildSensitivityIndicator(rs.getString("FOCUS_CHILD_SENSITIVITY_IND"));
 
     //
     // Parent:
     //
-    personCase.setParentId(ifNull(rs.getString("PARENT_ID")));
-    personCase.setParentFirstName(ifNull(rs.getString("PARENT_FIRST_NM")));
-    personCase.setParentLastName(ifNull(rs.getString("PARENT_LAST_NM")));
-    personCase.setParentRelationship(rs.getInt("PARENT_RELATIONSHIP"));
-    personCase.setParentLastUpdated(rs.getTimestamp("PARENT_LAST_UPDATED"));
-    personCase.setParentSourceTable(rs.getString("PARENT_SOURCE_TABLE"));
-    personCase.setParentSensitivityIndicator(rs.getString("PARENT_SENSITIVITY_IND"));
+    ret.setParentId(ifNull(rs.getString("PARENT_ID")));
+    ret.setParentFirstName(ifNull(rs.getString("PARENT_FIRST_NM")));
+    ret.setParentLastName(ifNull(rs.getString("PARENT_LAST_NM")));
+    ret.setParentRelationship(rs.getInt("PARENT_RELATIONSHIP"));
+    ret.setParentLastUpdated(rs.getTimestamp("PARENT_LAST_UPDATED"));
+    ret.setParentSourceTable(rs.getString("PARENT_SOURCE_TABLE"));
+    ret.setParentSensitivityIndicator(rs.getString("PARENT_SENSITIVITY_IND"));
 
     //
     // Worker (staff):
     //
-    personCase.setWorkerId(ifNull(rs.getString("WORKER_ID")));
-    personCase.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
-    personCase.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
-    personCase.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
+    ret.setWorkerId(ifNull(rs.getString("WORKER_ID")));
+    ret.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
+    ret.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
+    ret.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
 
     //
     // Access Limitation:
     //
-    personCase.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
-    personCase.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
-    personCase.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
-    personCase.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
-    return personCase;
+    ret.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
+    ret.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
+    ret.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
+    ret.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
+    return ret;
   }
 
   @Override

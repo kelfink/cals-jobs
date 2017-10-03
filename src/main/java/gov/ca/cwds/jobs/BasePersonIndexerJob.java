@@ -5,7 +5,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,12 +128,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Main DAO for the supported persistence class.
    */
-  protected final BaseDaoImpl<T> jobDao;
+  protected final transient BaseDaoImpl<T> jobDao;
 
   /**
    * Elasticsearch client DAO.
    */
-  protected final ElasticsearchDao esDao;
+  protected final transient ElasticsearchDao esDao;
 
   /**
    * Hibernate session factory.
@@ -163,7 +162,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Read/write lock for extract threads and sources, such as JDBC, Hibernate, or even flat files.
    */
-  protected final ReadWriteLock lock;
+  protected final transient ReadWriteLock lock;
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -302,7 +301,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @throws IOException on database error or Elasticsearch disconnect
    */
-  protected void doInitialLoadJdbc() throws IOException {
+  protected void doInitialLoadJdbc() {
     Thread.currentThread().setName("main");
 
     try {
@@ -325,7 +324,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       threadIndexer.join();
       Thread.sleep(SLEEP_MILLIS);
-      LOGGER.info(this.getTrack().toString());
+      LOGGER.info("PROGRESS TRACK: {}", this.getTrack().toString());
     } catch (Exception e) {
       markFailed();
       Thread.currentThread().interrupt();
@@ -388,7 +387,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     M m;
     T t;
     Object lastId = theLastId;
-    int cntr = ++inCntr;
+    int cntr = inCntr;
+    ++cntr;
 
     while ((m = queueNormalize.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
       JobLogs.logEvery(++cntr, "Transformed", "recs");
@@ -537,7 +537,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
               : extractLastRunRecsFromTable(lastRunDt);
 
       if (results != null && !results.isEmpty()) {
-        LOGGER.info(MessageFormat.format("Found {0} people to index", results.size()));
+        LOGGER.info("Found {} people to index", results.size());
         results.stream().forEach(p -> { // NOSONAR
           prepareDocumentTrapIO(bp, p);
         });
@@ -545,8 +545,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       // Delete records identified for deletion...
       if (!deletionResults.isEmpty()) {
-        LOGGER.warn(MessageFormat.format("Found {0} people to delete", deletionResults.size())
-            + ", IDs: " + deletionResults);
+        LOGGER.warn("Found {} people to delete, IDs: {}", deletionResults.size(), deletionResults);
 
         for (String deletionId : deletionResults) {
           bp.add(new DeleteRequest(getOpts().getIndexName(),
@@ -597,7 +596,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.info("Last successsful run time: {}", lastRun.toString());
 
       // If the index is missing, create it.
-      LOGGER.debug("Create index if missing, effectiveIndexName: " + effectiveIndexName);
+      LOGGER.debug("Create index if missing, effectiveIndexName: {}", effectiveIndexName);
       final String documentType = esDao.getConfig().getElasticsearchDocType();
       esDao.createIndexIfNeeded(effectiveIndexName, documentType, ES_PEOPLE_INDEX_SETTINGS,
           ES_PERSON_MAPPING);

@@ -47,7 +47,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
   private static final ESOptionalCollection[] KEEP_COLLECTIONS =
       new ESOptionalCollection[] {ESOptionalCollection.SCREENING};
 
-  private EsIntakeScreeningDao viewDao;
+  private transient EsIntakeScreeningDao viewDao;
 
   /**
    * Construct batch job instance with all required dependencies.

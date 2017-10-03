@@ -190,19 +190,23 @@ public class ReferralHistoryIndexerJob
    * This Neutron job reuses threads for performance, since thread creation is expensive.
    * </p>
    */
-  private final ThreadLocal<List<EsPersonReferral>> allocAllegations = new ThreadLocal<>();
+  private final transient ThreadLocal<List<EsPersonReferral>> allocAllegations =
+      new ThreadLocal<>();
 
-  private final ThreadLocal<Map<String, EsPersonReferral>> allocReferrals = new ThreadLocal<>();
+  private final transient ThreadLocal<Map<String, EsPersonReferral>> allocReferrals =
+      new ThreadLocal<>();
 
-  private final ThreadLocal<List<MinClientReferral>> allocClientReferralKeys = new ThreadLocal<>();
+  private final transient ThreadLocal<List<MinClientReferral>> allocClientReferralKeys =
+      new ThreadLocal<>();
 
-  private final ThreadLocal<List<EsPersonReferral>> allocReadyToNorm = new ThreadLocal<>();
+  private final transient ThreadLocal<List<EsPersonReferral>> allocReadyToNorm =
+      new ThreadLocal<>();
 
-  private AtomicInteger rowsReadReferrals = new AtomicInteger(0);
+  private final AtomicInteger rowsReadReferrals = new AtomicInteger(0);
 
-  private AtomicInteger rowsReadAllegations = new AtomicInteger(0);
+  private final AtomicInteger rowsReadAllegations = new AtomicInteger(0);
 
-  private AtomicInteger nextThreadNum = new AtomicInteger(0);
+  private final AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   /**
    * Construct batch job instance with all required dependencies.

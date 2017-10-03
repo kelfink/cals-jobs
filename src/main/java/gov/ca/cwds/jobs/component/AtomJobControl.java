@@ -30,6 +30,4 @@ public interface AtomJobControl extends ApiMarker {
 
   void markTransformDone();
 
-  // JobExecutionStatus status();
-
 }
