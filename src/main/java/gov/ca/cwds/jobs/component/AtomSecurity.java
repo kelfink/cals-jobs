@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.component;
 
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.config.JobOptions;
 
 /**
  * Common security features for Elasticsearch indexing jobs, especially legacy CMS.
@@ -16,6 +17,18 @@ public interface AtomSecurity extends ApiMarker {
    */
   default boolean mustDeleteLimitedAccessRecords() {
     return false;
+  }
+
+  /**
+   * Determine whether to index a sealed or sensitive record.
+   * 
+   * @param opts options for current job
+   * @param indicator CMS client sensitivity or case/referral limited access indicator
+   * @return true if Job is not loading sealed/sensitive OR record is not restricted
+   */
+  static boolean isNotSealedSensitive(final JobOptions opts, final String indicator) {
+    return opts.isLoadSealedAndSensitive()
+        || (indicator == null || "N".equalsIgnoreCase(indicator));
   }
 
 }

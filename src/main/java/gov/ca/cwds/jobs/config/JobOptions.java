@@ -14,7 +14,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -367,16 +366,15 @@ public class JobOptions implements ApiMarker {
     String maxId = "9999999999";
 
     try {
-      Options options = buildCmdLineOptions();
-      CommandLineParser parser = new DefaultParser();
-      CommandLine cmd = parser.parse(options, args);
+      final Options options = buildCmdLineOptions();
+      final CommandLineParser parser = new DefaultParser();
+      final CommandLine cmd = parser.parse(options, args);
 
       // Java clincher: case statements only take constants. Even compile-time constants, like
       // enum members (evaluated at compile time), are not considered "constants."
       for (Option opt : cmd.getOptions()) {
         switch (opt.getArgName()) {
           case CMD_LINE_ES_CONFIG:
-            LOGGER.info("ES config file  = " + opt.getValue());
             esConfigLoc = opt.getValue().trim();
             break;
 
@@ -389,12 +387,10 @@ public class JobOptions implements ApiMarker {
             lastRunMode = true;
             String lastRunTimeStr = opt.getValue().trim();
             lastRunTime = createDate(lastRunTimeStr);
-            LOGGER.info("last run time = " + lastRunTimeStr);
             break;
 
           case CMD_LINE_ALT_INPUT_FILE:
             altInputLoc = opt.getValue().trim();
-            LOGGER.info("alternate input file = " + altInputLoc);
             break;
 
           case CMD_LINE_LAST_RUN_FILE:
@@ -436,15 +432,7 @@ public class JobOptions implements ApiMarker {
             break;
         }
       }
-    } catch (NumberFormatException e) {
-      printUsage();
-      LOGGER.error("Invalid numeric argument: {}", e.getMessage(), e);
-      throw new JobsException("Invalid numeric argument: " + e.getMessage(), e);
-    } catch (ParseException e) {
-      printUsage();
-      LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
-      throw new JobsException("Error parsing command line: " + e.getMessage(), e);
-    } catch (java.text.ParseException e) { // NOSONAR
+    } catch (Exception e) { // NOSONAR
       printUsage();
       LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
       throw new JobsException("Error parsing command line: " + e.getMessage(), e);

@@ -17,11 +17,8 @@ import javax.persistence.Transient;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.es.ElasticSearchAccessLimitation;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
@@ -32,9 +29,9 @@ import gov.ca.cwds.data.es.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
+import gov.ca.cwds.jobs.component.AtomSecurity;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.JobTransformUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -50,30 +47,25 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  */
 @Entity
 @Table(name = "VW_LST_REFERRAL_HIST")
-@NamedNativeQueries({@NamedNativeQuery(
-    name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
+@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
     query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
         + "WHERE (1=1 OR current timestamp < :after)" + "ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
-    resultClass = EsPersonReferral.class, readOnly = true),
-
-    @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithUnlimitedAccess",
-        query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
-            + "WHERE (1=1 OR current timestamp < :after)"
-            + "AND r.LIMITED_ACCESS_CODE = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
-        resultClass = EsPersonReferral.class, readOnly = true),
-
-    @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithLimitedAccess",
-        query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
-            + "WHERE (1=1 OR current timestamp < :after)"
-            + "AND r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
-        resultClass = EsPersonReferral.class, readOnly = true)})
+    resultClass = EsPersonReferral.class, readOnly = true)
+@NamedNativeQuery(
+    name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithUnlimitedAccess",
+    query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
+        + "WHERE (1=1 OR current timestamp < :after)"
+        + "AND r.LIMITED_ACCESS_CODE = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
+    resultClass = EsPersonReferral.class, readOnly = true)
+@NamedNativeQuery(
+    name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithLimitedAccess",
+    query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
+        + "WHERE (1=1 OR current timestamp < :after)"
+        + "AND r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
+    resultClass = EsPersonReferral.class, readOnly = true)
 public class EsPersonReferral extends ApiObjectIdentity
     implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals>,
     Comparable<EsPersonReferral>, Comparator<EsPersonReferral> {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(EsPersonReferral.class);
 
   private static final long serialVersionUID = -2265057057202257108L;
 
@@ -238,45 +230,45 @@ public class EsPersonReferral extends ApiObjectIdentity
   }
 
   public EsPersonReferral(final ResultSet rs) throws SQLException {
-    this.setReferralId(JobTransformUtils.ifNull(rs.getString("REFERRAL_ID")));
-    this.setStartDate(rs.getDate("START_DATE"));
-    this.setEndDate(rs.getDate("END_DATE"));
-    this.setReferralResponseType(rs.getInt("REFERRAL_RESPONSE_TYPE"));
-    this.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
-    this.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
-    this.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
-    this.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
-    this.setReferralLastUpdated(rs.getTimestamp("REFERRAL_LAST_UPDATED"));
+    this.referralId = ifNull(rs.getString("REFERRAL_ID"));
+    this.startDate = rs.getDate("START_DATE");
+    this.endDate = rs.getDate("END_DATE");
+    this.referralResponseType = rs.getInt("REFERRAL_RESPONSE_TYPE");
+    this.limitedAccessCode = ifNull(rs.getString("LIMITED_ACCESS_CODE"));
+    this.limitedAccessDate = rs.getDate("LIMITED_ACCESS_DATE");
+    this.limitedAccessDescription = ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION"));
+    this.limitedAccessGovernmentEntityId = rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT");
+    this.referralLastUpdated = rs.getTimestamp("REFERRAL_LAST_UPDATED");
 
-    this.setAllegationId(ifNull(rs.getString("ALLEGATION_ID")));
-    this.setAllegationType(rs.getInt("ALLEGATION_TYPE"));
-    this.setAllegationDisposition(rs.getInt("ALLEGATION_DISPOSITION"));
-    this.setAllegationLastUpdated(rs.getTimestamp("ALLEGATION_LAST_UPDATED"));
+    this.allegationId = ifNull(rs.getString("ALLEGATION_ID"));
+    this.allegationType = rs.getInt("ALLEGATION_TYPE");
+    this.allegationDisposition = rs.getInt("ALLEGATION_DISPOSITION");
+    this.allegationLastUpdated = rs.getTimestamp("ALLEGATION_LAST_UPDATED");
 
-    this.setPerpetratorId(ifNull(rs.getString("PERPETRATOR_ID")));
-    this.setPerpetratorFirstName(ifNull(rs.getString("PERPETRATOR_FIRST_NM")));
-    this.setPerpetratorLastName(ifNull(rs.getString("PERPETRATOR_LAST_NM")));
-    this.setPerpetratorLastUpdated(rs.getTimestamp("PERPETRATOR_LAST_UPDATED"));
-    this.setPerpetratorSensitivityIndicator(rs.getString("PERPETRATOR_SENSITIVITY_IND"));
+    this.perpetratorId = ifNull(rs.getString("PERPETRATOR_ID"));
+    this.perpetratorFirstName = ifNull(rs.getString("PERPETRATOR_FIRST_NM"));
+    this.perpetratorLastName = ifNull(rs.getString("PERPETRATOR_LAST_NM"));
+    this.perpetratorLastUpdated = rs.getTimestamp("PERPETRATOR_LAST_UPDATED");
+    this.perpetratorSensitivityIndicator = rs.getString("PERPETRATOR_SENSITIVITY_IND");
 
-    this.setReporterId(ifNull(rs.getString("REPORTER_ID")));
-    this.setReporterFirstName(ifNull(rs.getString("REPORTER_FIRST_NM")));
-    this.setReporterLastName(ifNull(rs.getString("REPORTER_LAST_NM")));
-    this.setReporterLastUpdated(rs.getTimestamp("REPORTER_LAST_UPDATED"));
+    this.reporterId = ifNull(rs.getString("REPORTER_ID"));
+    this.reporterFirstName = ifNull(rs.getString("REPORTER_FIRST_NM"));
+    this.reporterLastName = ifNull(rs.getString("REPORTER_LAST_NM"));
+    this.reporterLastUpdated = rs.getTimestamp("REPORTER_LAST_UPDATED");
 
-    this.setVictimId(ifNull(rs.getString("VICTIM_ID")));
-    this.setVictimFirstName(ifNull(rs.getString("VICTIM_FIRST_NM")));
-    this.setVictimLastName(ifNull(rs.getString("VICTIM_LAST_NM")));
-    this.setVictimLastUpdated(rs.getTimestamp("VICTIM_LAST_UPDATED"));
-    this.setVictimSensitivityIndicator(rs.getString("VICTIM_SENSITIVITY_IND"));
+    this.victimId = ifNull(rs.getString("VICTIM_ID"));
+    this.victimFirstName = ifNull(rs.getString("VICTIM_FIRST_NM"));
+    this.victimLastName = ifNull(rs.getString("VICTIM_LAST_NM"));
+    this.victimLastUpdated = rs.getTimestamp("VICTIM_LAST_UPDATED");
+    this.victimSensitivityIndicator = rs.getString("VICTIM_SENSITIVITY_IND");
 
-    this.setWorkerId(ifNull(rs.getString("WORKER_ID")));
-    this.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
-    this.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
-    this.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
+    this.workerId = ifNull(rs.getString("WORKER_ID"));
+    this.workerFirstName = ifNull(rs.getString("WORKER_FIRST_NM"));
+    this.workerLastName = ifNull(rs.getString("WORKER_LAST_NM"));
+    this.workerLastUpdated = rs.getTimestamp("WORKER_LAST_UPDATED");
 
-    this.setCounty(rs.getInt("REFERRAL_COUNTY"));
-    this.setLastChange(rs.getDate("LAST_CHG"));
+    this.county = rs.getInt("REFERRAL_COUNTY");
+    this.lastChange = rs.getDate("LAST_CHG");
   }
 
   @Override
@@ -419,8 +411,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     // A referral may have multiple allegations.
     final ElasticSearchPersonAllegation allegation = makeAllegation();
 
-    if (opts.isLoadSealedAndSensitive() || (perpetratorSensitivityIndicator == null
-        || "N".equalsIgnoreCase(perpetratorSensitivityIndicator))) {
+    if (AtomSecurity.isNotSealedSensitive(opts, perpetratorSensitivityIndicator)) {
       allegation.setPerpetrator(makePerpetrator());
 
       // TODO: #148091785: deprecated person fields.
@@ -430,8 +421,7 @@ public class EsPersonReferral extends ApiObjectIdentity
       allegation.setPerpetratorLastName(this.perpetratorLastName);
     }
 
-    if (opts.isLoadSealedAndSensitive() || (victimSensitivityIndicator == null
-        || "N".equalsIgnoreCase(victimSensitivityIndicator))) {
+    if (AtomSecurity.isNotSealedSensitive(opts, victimSensitivityIndicator)) {
       allegation.setVictim(makeVictim());
 
       // TODO: #148091785: deprecated person fields.
@@ -769,10 +759,10 @@ public class EsPersonReferral extends ApiObjectIdentity
   @Override
   public int hashCode() {
     int result = super.hashCode();
-    final int HASH_PRIME = 31; // SonarQube contradicts Eclipse here.
-    result = HASH_PRIME * result + ((clientId == null) ? 0 : clientId.hashCode());
-    result = HASH_PRIME * result + ((referralId == null) ? 0 : referralId.hashCode());
-    result = HASH_PRIME * result + ((allegationId == null) ? 0 : allegationId.hashCode());
+    final int prime = 31;
+    result = prime * result + ((clientId == null) ? 0 : clientId.hashCode());
+    result = prime * result + ((referralId == null) ? 0 : referralId.hashCode());
+    result = prime * result + ((allegationId == null) ? 0 : allegationId.hashCode());
     return result;
   }
 

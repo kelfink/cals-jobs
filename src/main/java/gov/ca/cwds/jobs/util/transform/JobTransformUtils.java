@@ -17,7 +17,7 @@ public final class JobTransformUtils {
    * @param value String to trim
    * @return trimmed String or null
    */
-  public static final String ifNull(String value) {
+  public static final String ifNull(final String value) {
     return value != null ? value.trim() : null;
   }
 

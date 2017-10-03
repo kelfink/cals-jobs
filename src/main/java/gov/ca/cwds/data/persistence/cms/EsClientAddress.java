@@ -460,130 +460,130 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
   private Short clientCounty;
 
   /**
-   * Build an EsClientAddress from an incoming ResultSet.
+   * Build an EsClientAddress from the incoming ResultSet.
    * 
    * @param rs incoming tuple
    * @return a populated EsClientAddress
    * @throws SQLException if unable to convert types or stream breaks, etc.
    */
-  public static EsClientAddress extract(ResultSet rs) throws SQLException {
-    EsClientAddress ret = new EsClientAddress();
-    ret.setCltSensitivityIndicator(rs.getString("CLT_SENSTV_IND"));
-    ret.setCltSoc158SealedClientIndicator(rs.getString("CLT_SOC158_IND"));
-    ret.setCltAdjudicatedDelinquentIndicator(rs.getString("CLT_ADJDEL_IND"));
-    ret.setCltAdoptionStatusCode(rs.getString("CLT_ADPTN_STCD"));
-    ret.setCltAlienRegistrationNumber(rs.getString("CLT_ALN_REG_NO"));
-    ret.setCltBirthCity(rs.getString("CLT_BIRTH_CITY"));
-    ret.setCltBirthCountryCodeType(rs.getShort("CLT_B_CNTRY_C"));
-    ret.setCltBirthDate(rs.getDate("CLT_BIRTH_DT"));
-    ret.setCltBirthFacilityName(rs.getString("CLT_BR_FAC_NM"));
-    ret.setCltBirthStateCodeType(rs.getShort("CLT_B_STATE_C"));
-    ret.setCltBirthplaceVerifiedIndicator(rs.getString("CLT_BP_VER_IND"));
-    ret.setCltChildClientIndicatorVar(rs.getString("CLT_CHLD_CLT_B"));
-    ret.setCltClientIndexNumber(rs.getString("CLT_CL_INDX_NO"));
-    ret.setCltCommentDescription(rs.getString("CLT_COMMNT_DSC"));
-    ret.setCltCommonFirstName(rs.getString("CLT_COM_FST_NM"));
-    ret.setCltCommonLastName(rs.getString("CLT_COM_LST_NM"));
-    ret.setCltCommonMiddleName(rs.getString("CLT_COM_MID_NM"));
-    ret.setCltConfidentialityActionDate(rs.getDate("CLT_CONF_ACTDT"));
-    ret.setCltConfidentialityInEffectIndicator(rs.getString("CLT_CONF_EFIND"));
-    ret.setCltCreationDate(rs.getDate("CLT_CREATN_DT"));
-    ret.setCltCurrCaChildrenServIndicator(rs.getString("CLT_CURRCA_IND"));
-    ret.setCltCurrentlyOtherDescription(rs.getString("CLT_COTH_DESC"));
-    ret.setCltCurrentlyRegionalCenterIndicator(rs.getString("CLT_CURREG_IND"));
-    ret.setCltDeathDate(rs.getDate("CLT_DEATH_DT"));
-    ret.setCltDeathDateVerifiedIndicator(rs.getString("CLT_DTH_DT_IND"));
-    ret.setCltDeathPlace(rs.getString("CLT_DEATH_PLC"));
-    ret.setCltDeathReasonText(rs.getString("CLT_DTH_RN_TXT"));
-    ret.setCltDriverLicenseNumber(rs.getString("CLT_DRV_LIC_NO"));
-    ret.setCltDriverLicenseStateCodeType(rs.getShort("CLT_D_STATE_C"));
-    ret.setCltEmailAddress(rs.getString("CLT_EMAIL_ADDR"));
-    ret.setCltEstimatedDobCode(rs.getString("CLT_EST_DOB_CD"));
-    ret.setCltEthUnableToDetReasonCode(rs.getString("CLT_ETH_UD_CD"));
-    ret.setCltFatherParentalRightTermDate(rs.getDate("CLT_FTERM_DT"));
-    ret.setCltGenderCode(rs.getString("CLT_GENDER_CD"));
-    ret.setCltHealthSummaryText(rs.getString("CLT_HEALTH_TXT"));
-    ret.setCltHispUnableToDetReasonCode(rs.getString("CLT_HISP_UD_CD"));
-    ret.setCltHispanicOriginCode(rs.getString("CLT_HISP_CD"));
-    ret.setCltId(rs.getString("CLT_IDENTIFIER"));
-    ret.setCltImmigrationCountryCodeType(rs.getShort("CLT_I_CNTRY_C"));
-    ret.setCltImmigrationStatusType(rs.getShort("CLT_IMGT_STC"));
-    ret.setCltIncapacitatedParentCode(rs.getString("CLT_INCAPC_CD"));
-    ret.setCltIndividualHealthCarePlanIndicator(rs.getString("CLT_HCARE_IND"));
-    ret.setCltLimitationOnScpHealthIndicator(rs.getString("CLT_LIMIT_IND"));
-    ret.setCltLiterateCode(rs.getString("CLT_LITRATE_CD"));
-    ret.setCltMaritalCohabitatnHstryIndicatorVar(rs.getString("CLT_MAR_HIST_B"));
-    ret.setCltMaritalStatusType(rs.getShort("CLT_MRTL_STC"));
-    ret.setCltMilitaryStatusCode(rs.getString("CLT_MILT_STACD"));
-    ret.setCltMotherParentalRightTermDate(rs.getDate("CLT_MTERM_DT"));
-    ret.setCltNamePrefixDescription(rs.getString("CLT_NMPRFX_DSC"));
-    ret.setCltNameType(rs.getShort("CLT_NAME_TPC"));
-    ret.setCltOutstandingWarrantIndicator(rs.getString("CLT_OUTWRT_IND"));
-    ret.setCltPrevCaChildrenServIndicator(rs.getString("CLT_PREVCA_IND"));
-    ret.setCltPrevOtherDescription(rs.getString("CLT_POTH_DESC"));
-    ret.setCltPrevRegionalCenterIndicator(rs.getString("CLT_PREREG_IND"));
-    ret.setCltPrimaryEthnicityType(rs.getShort("CLT_P_ETHNCTYC"));
+  public static EsClientAddress extract(final ResultSet rs) throws SQLException {
+    final EsClientAddress ret = new EsClientAddress();
+    ret.cltSensitivityIndicator = rs.getString("CLT_SENSTV_IND");
+    ret.cltSoc158SealedClientIndicator = rs.getString("CLT_SOC158_IND");
+    ret.cltAdjudicatedDelinquentIndicator = rs.getString("CLT_ADJDEL_IND");
+    ret.cltAdoptionStatusCode = rs.getString("CLT_ADPTN_STCD");
+    ret.cltAlienRegistrationNumber = rs.getString("CLT_ALN_REG_NO");
+    ret.cltBirthCity = rs.getString("CLT_BIRTH_CITY");
+    ret.cltBirthCountryCodeType = rs.getShort("CLT_B_CNTRY_C");
+    ret.cltBirthDate = rs.getDate("CLT_BIRTH_DT");
+    ret.cltBirthFacilityName = rs.getString("CLT_BR_FAC_NM");
+    ret.cltBirthStateCodeType = rs.getShort("CLT_B_STATE_C");
+    ret.cltBirthplaceVerifiedIndicator = rs.getString("CLT_BP_VER_IND");
+    ret.cltChildClientIndicatorVar = rs.getString("CLT_CHLD_CLT_B");
+    ret.cltClientIndexNumber = rs.getString("CLT_CL_INDX_NO");
+    ret.cltCommentDescription = rs.getString("CLT_COMMNT_DSC");
+    ret.cltCommonFirstName = rs.getString("CLT_COM_FST_NM");
+    ret.cltCommonLastName = rs.getString("CLT_COM_LST_NM");
+    ret.cltCommonMiddleName = rs.getString("CLT_COM_MID_NM");
+    ret.cltConfidentialityActionDate = rs.getDate("CLT_CONF_ACTDT");
+    ret.cltConfidentialityInEffectIndicator = rs.getString("CLT_CONF_EFIND");
+    ret.cltCreationDate = rs.getDate("CLT_CREATN_DT");
+    ret.cltCurrCaChildrenServIndicator = rs.getString("CLT_CURRCA_IND");
+    ret.cltCurrentlyOtherDescription = rs.getString("CLT_COTH_DESC");
+    ret.cltCurrentlyRegionalCenterIndicator = rs.getString("CLT_CURREG_IND");
+    ret.cltDeathDate = rs.getDate("CLT_DEATH_DT");
+    ret.cltDeathDateVerifiedIndicator = rs.getString("CLT_DTH_DT_IND");
+    ret.cltDeathPlace = rs.getString("CLT_DEATH_PLC");
+    ret.cltDeathReasonText = rs.getString("CLT_DTH_RN_TXT");
+    ret.cltDriverLicenseNumber = rs.getString("CLT_DRV_LIC_NO");
+    ret.cltDriverLicenseStateCodeType = rs.getShort("CLT_D_STATE_C");
+    ret.cltEmailAddress = rs.getString("CLT_EMAIL_ADDR");
+    ret.cltEstimatedDobCode = rs.getString("CLT_EST_DOB_CD");
+    ret.cltEthUnableToDetReasonCode = rs.getString("CLT_ETH_UD_CD");
+    ret.cltFatherParentalRightTermDate = rs.getDate("CLT_FTERM_DT");
+    ret.cltGenderCode = rs.getString("CLT_GENDER_CD");
+    ret.cltHealthSummaryText = rs.getString("CLT_HEALTH_TXT");
+    ret.cltHispUnableToDetReasonCode = rs.getString("CLT_HISP_UD_CD");
+    ret.cltHispanicOriginCode = rs.getString("CLT_HISP_CD");
+    ret.cltId = rs.getString("CLT_IDENTIFIER");
+    ret.cltImmigrationCountryCodeType = rs.getShort("CLT_I_CNTRY_C");
+    ret.cltImmigrationStatusType = rs.getShort("CLT_IMGT_STC");
+    ret.cltIncapacitatedParentCode = rs.getString("CLT_INCAPC_CD");
+    ret.cltIndividualHealthCarePlanIndicator = rs.getString("CLT_HCARE_IND");
+    ret.cltLimitationOnScpHealthIndicator = rs.getString("CLT_LIMIT_IND");
+    ret.cltLiterateCode = rs.getString("CLT_LITRATE_CD");
+    ret.cltMaritalCohabitatnHstryIndicatorVar = rs.getString("CLT_MAR_HIST_B");
+    ret.cltMaritalStatusType = rs.getShort("CLT_MRTL_STC");
+    ret.cltMilitaryStatusCode = rs.getString("CLT_MILT_STACD");
+    ret.cltMotherParentalRightTermDate = rs.getDate("CLT_MTERM_DT");
+    ret.cltNamePrefixDescription = rs.getString("CLT_NMPRFX_DSC");
+    ret.cltNameType = rs.getShort("CLT_NAME_TPC");
+    ret.cltOutstandingWarrantIndicator = rs.getString("CLT_OUTWRT_IND");
+    ret.cltPrevCaChildrenServIndicator = rs.getString("CLT_PREVCA_IND");
+    ret.cltPrevOtherDescription = rs.getString("CLT_POTH_DESC");
+    ret.cltPrevRegionalCenterIndicator = rs.getString("CLT_PREREG_IND");
+    ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
     ret.setClientCounty(rs.getShort("CLC_GVR_ENTC"));
 
     // Languages
-    ret.setCltPrimaryLanguageType(rs.getShort("CLT_P_LANG_TPC"));
-    ret.setCltSecondaryLanguageType(rs.getShort("CLT_S_LANG_TC"));
+    ret.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
+    ret.cltSecondaryLanguageType = rs.getShort("CLT_S_LANG_TC");
 
-    ret.setCltReligionType(rs.getShort("CLT_RLGN_TPC"));
-    ret.setCltSensitiveHlthInfoOnFileIndicator(rs.getString("CLT_SNTV_HLIND"));
-    ret.setCltSoc158PlacementCode(rs.getString("CLT_SOCPLC_CD"));
-    ret.setCltSocialSecurityNumChangedCode(rs.getString("CLT_SSN_CHG_CD"));
-    ret.setCltSocialSecurityNumber(rs.getString("CLT_SS_NO"));
-    ret.setCltSuffixTitleDescription(rs.getString("CLT_SUFX_TLDSC"));
-    ret.setCltTribalAncestryClientIndicatorVar(rs.getString("CLT_TRBA_CLT_B"));
-    ret.setCltTribalMembrshpVerifctnIndicatorVar(rs.getString("CLT_TR_MBVRT_B"));
-    ret.setCltUnemployedParentCode(rs.getString("CLT_UNEMPLY_CD"));
-    ret.setCltZippyCreatedIndicator(rs.getString("CLT_ZIPPY_IND"));
-    ret.setCltLastUpdatedId(rs.getString("CLT_LST_UPD_ID"));
-    ret.setCltLastUpdatedTime(rs.getTimestamp("CLT_LST_UPD_TS"));
+    ret.cltReligionType = rs.getShort("CLT_RLGN_TPC");
+    ret.cltSensitiveHlthInfoOnFileIndicator = rs.getString("CLT_SNTV_HLIND");
+    ret.cltSoc158PlacementCode = rs.getString("CLT_SOCPLC_CD");
+    ret.cltSocialSecurityNumChangedCode = rs.getString("CLT_SSN_CHG_CD");
+    ret.cltSocialSecurityNumber = rs.getString("CLT_SS_NO");
+    ret.cltSuffixTitleDescription = rs.getString("CLT_SUFX_TLDSC");
+    ret.cltTribalAncestryClientIndicatorVar = rs.getString("CLT_TRBA_CLT_B");
+    ret.cltTribalMembrshpVerifctnIndicatorVar = rs.getString("CLT_TR_MBVRT_B");
+    ret.cltUnemployedParentCode = rs.getString("CLT_UNEMPLY_CD");
+    ret.cltZippyCreatedIndicator = rs.getString("CLT_ZIPPY_IND");
+    ret.cltLastUpdatedId = rs.getString("CLT_LST_UPD_ID");
+    ret.cltLastUpdatedTime = rs.getTimestamp("CLT_LST_UPD_TS");
 
     ret.setCltReplicationOperation(
         CmsReplicationOperation.strToRepOp(rs.getString("CLT_IBMSNAP_OPERATION")));
     ret.setCltReplicationDate(rs.getDate("CLT_IBMSNAP_LOGMARKER"));
 
-    ret.setClaLastUpdatedId(rs.getString("CLA_LST_UPD_ID"));
-    ret.setClaLastUpdatedTime(rs.getTimestamp("CLA_LST_UPD_TS"));
-    ret.setClaId(rs.getString("CLA_IDENTIFIER"));
-    ret.setClaFkAddress(rs.getString("CLA_FKADDRS_T"));
-    ret.setClaFkClient(rs.getString("CLA_FKCLIENT_T"));
-    ret.setClaFkReferral(rs.getString("CLA_FKREFERL_T"));
-    ret.setClaAddressType(rs.getShort("CLA_ADDR_TPC"));
-    ret.setClaHomelessInd(rs.getString("CLA_HOMLES_IND"));
-    ret.setClaBkInmtId(rs.getString("CLA_BK_INMT_ID"));
-    ret.setClaEffectiveEndDate(rs.getDate("CLA_EFF_END_DT"));
-    ret.setClaEffectiveStartDate(rs.getDate("CLA_EFF_STRTDT"));
+    ret.claLastUpdatedId = rs.getString("CLA_LST_UPD_ID");
+    ret.claLastUpdatedTime = rs.getTimestamp("CLA_LST_UPD_TS");
+    ret.claId = rs.getString("CLA_IDENTIFIER");
+    ret.claFkAddress = rs.getString("CLA_FKADDRS_T");
+    ret.claFkClient = rs.getString("CLA_FKCLIENT_T");
+    ret.claFkReferral = rs.getString("CLA_FKREFERL_T");
+    ret.claAddressType = rs.getShort("CLA_ADDR_TPC");
+    ret.claHomelessInd = rs.getString("CLA_HOMLES_IND");
+    ret.claBkInmtId = rs.getString("CLA_BK_INMT_ID");
+    ret.claEffectiveEndDate = rs.getDate("CLA_EFF_END_DT");
+    ret.claEffectiveStartDate = rs.getDate("CLA_EFF_STRTDT");
 
     ret.setClaReplicationOperation(
         CmsReplicationOperation.strToRepOp(rs.getString("CLA_IBMSNAP_OPERATION")));
     ret.setClaReplicationDate(rs.getDate("CLA_IBMSNAP_LOGMARKER"));
 
-    ret.setAdrId(rs.getString("ADR_IDENTIFIER"));
-    ret.setAdrCity(rs.getString("ADR_CITY_NM"));
-    ret.setAdrEmergencyNumber(rs.getBigDecimal("ADR_EMRG_TELNO"));
-    ret.setAdrEmergencyExtension(rs.getInt("ADR_EMRG_EXTNO"));
-    ret.setAdrFrgAdrtB(rs.getString("ADR_FRG_ADRT_B"));
-    ret.setAdrGovernmentEntityCd(rs.getShort("ADR_GVR_ENTC"));
-    ret.setAdrMessageNumber(rs.getBigDecimal("ADR_MSG_TEL_NO"));
-    ret.setAdrMessageExtension(rs.getInt("ADR_MSG_EXT_NO"));
-    ret.setAdrHeaderAddress(rs.getString("ADR_HEADER_ADR"));
-    ret.setAdrPrimaryNumber(rs.getBigDecimal("ADR_PRM_TEL_NO"));
-    ret.setAdrPrimaryExtension(rs.getInt("ADR_PRM_EXT_NO"));
-    ret.setAdrState(rs.getShort("ADR_STATE_C"));
-    ret.setAdrStreetName(rs.getString("ADR_STREET_NM"));
-    ret.setAdrStreetNumber(rs.getString("ADR_STREET_NO"));
-    ret.setAdrZip(rs.getString("ADR_ZIP_NO"));
-    ret.setAdrAddressDescription(rs.getString("ADR_ADDR_DSC"));
-    ret.setAdrZip4(rs.getShort("ADR_ZIP_SFX_NO"));
-    ret.setAdrPostDirCd(rs.getString("ADR_POSTDIR_CD"));
-    ret.setAdrPreDirCd(rs.getString("ADR_PREDIR_CD"));
-    ret.setAdrStreetSuffixCd(rs.getShort("ADR_ST_SFX_C"));
-    ret.setAdrUnitDesignationCd(rs.getShort("ADR_UNT_DSGC"));
-    ret.setAdrUnitNumber(rs.getString("ADR_UNIT_NO"));
+    ret.adrId = rs.getString("ADR_IDENTIFIER");
+    ret.adrCity = rs.getString("ADR_CITY_NM");
+    ret.adrEmergencyNumber = rs.getBigDecimal("ADR_EMRG_TELNO");
+    ret.adrEmergencyExtension = rs.getInt("ADR_EMRG_EXTNO");
+    ret.adrFrgAdrtB = rs.getString("ADR_FRG_ADRT_B");
+    ret.adrGovernmentEntityCd = rs.getShort("ADR_GVR_ENTC");
+    ret.adrMessageNumber = rs.getBigDecimal("ADR_MSG_TEL_NO");
+    ret.adrMessageExtension = rs.getInt("ADR_MSG_EXT_NO");
+    ret.adrHeaderAddress = rs.getString("ADR_HEADER_ADR");
+    ret.adrPrimaryNumber = rs.getBigDecimal("ADR_PRM_TEL_NO");
+    ret.adrPrimaryExtension = rs.getInt("ADR_PRM_EXT_NO");
+    ret.adrState = rs.getShort("ADR_STATE_C");
+    ret.adrStreetName = rs.getString("ADR_STREET_NM");
+    ret.adrStreetNumber = rs.getString("ADR_STREET_NO");
+    ret.adrZip = rs.getString("ADR_ZIP_NO");
+    ret.adrAddressDescription = rs.getString("ADR_ADDR_DSC");
+    ret.adrZip4 = rs.getShort("ADR_ZIP_SFX_NO");
+    ret.adrPostDirCd = rs.getString("ADR_POSTDIR_CD");
+    ret.adrPreDirCd = rs.getString("ADR_PREDIR_CD");
+    ret.adrStreetSuffixCd = rs.getShort("ADR_ST_SFX_C");
+    ret.adrUnitDesignationCd = rs.getShort("ADR_UNT_DSGC");
+    ret.adrUnitNumber = rs.getString("ADR_UNIT_NO");
 
     ret.setAdrReplicationOperation(
         CmsReplicationOperation.strToRepOp(rs.getString("ADR_IBMSNAP_OPERATION")));
@@ -688,7 +688,7 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
 
     // Client Address:
     if (StringUtils.isNotBlank(getClaId())
-        && !CmsReplicationOperation.D.equals(getClaReplicationOperation())) {
+        && CmsReplicationOperation.D != getClaReplicationOperation()) {
       ReplicatedClientAddress rca = new ReplicatedClientAddress();
       rca.setId(getClaId());
       rca.setAddressType(getClaAddressType());
@@ -708,7 +708,7 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
 
       // Address proper:
       if (StringUtils.isNotBlank(getAdrId())
-          && !CmsReplicationOperation.D.equals(getAdrReplicationOperation())) {
+          && CmsReplicationOperation.D != getAdrReplicationOperation()) {
         ReplicatedAddress adr = new ReplicatedAddress();
         adr.setId(getAdrId());
         adr.setAddressDescription(getAdrAddressDescription());
