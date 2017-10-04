@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.component.AtomJobControl;
 import gov.ca.cwds.jobs.component.AtomShared;
+import gov.ca.cwds.jobs.component.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.util.JobLogs;
 
@@ -226,7 +227,8 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
 
     if (!StringUtils.isBlank(this.lastRunTimeFilename)) {
       try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) {
-        ret = new SimpleDateFormat(AtomShared.LAST_RUN_DATE_FORMAT).parse(br.readLine().trim());
+        ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
+            .parse(br.readLine().trim());
       } catch (IOException e) {
         markFailed();
         JobLogs.raiseError(LOGGER, e, "Caught IOException: {}", e.getMessage());
@@ -247,7 +249,8 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
   protected void writeLastSuccessfulRunTime(Date datetime) {
     if (datetime != null && !StringUtils.isBlank(this.lastRunTimeFilename) && !isFailed()) {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) {
-        w.write(new SimpleDateFormat(AtomShared.LAST_RUN_DATE_FORMAT).format(datetime));
+        w.write(new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
+            .format(datetime));
       } catch (IOException e) {
         markFailed();
         JobLogs.raiseError(LOGGER, e, "Failed to write timestamp file: {}", e.getMessage());

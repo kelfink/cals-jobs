@@ -16,7 +16,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.ColumnTransformer;
-import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 import org.slf4j.Logger;
@@ -39,39 +38,37 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
  */
 @Entity
 @Table(name = "VW_SCREENING_HISTORY")
-@NamedNativeQueries({
-    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAll",
-        query = "SELECT p.\"id\" AS ns_partc_id, p.legacy_id AS cms_legacy_id, vw.* "
-            + "FROM {h-schema}VW_SCREENING_HISTORY vw "
-            + "JOIN participants p ON p.screening_id = vw.screening_id "
-            + "WHERE p.legacy_id IS NOT NULL AND vw.indexable = true "
-            + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
-            + "FOR READ ONLY",
-        resultClass = EsIntakeScreening.class, readOnly = true),
+@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAll",
+    query = "SELECT p.\"id\" AS ns_partc_id, p.legacy_id AS cms_legacy_id, vw.* "
+        + "FROM {h-schema}VW_SCREENING_HISTORY vw "
+        + "JOIN participants p ON p.screening_id = vw.screening_id "
+        + "WHERE p.legacy_id IS NOT NULL AND vw.indexable = true "
+        + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
+        + "FOR READ ONLY",
+    resultClass = EsIntakeScreening.class, readOnly = true)
 
-    @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter",
-        query = "SELECT p.\"id\" AS ns_partc_id, p.legacy_id AS cms_legacy_id, vw.* "
-            + "FROM {h-schema}VW_SCREENING_HISTORY vw "
-            + "JOIN PARTICIPANTS p ON p.screening_id = vw.screening_id "
-            + "WHERE vw.participant_id IN ( SELECT DISTINCT vw1.participant_id "
-            + " FROM {h-schema}VW_SCREENING_HISTORY vw1 WHERE vw1.last_chg > CAST(:after AS TIMESTAMP) "
-            + ") AND p.legacy_id IS NOT NULL AND vw.indexable = true "
-            + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
-            + "FOR READ ONLY",
-        resultClass = EsIntakeScreening.class, readOnly = true),
+@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfter",
+    query = "SELECT p.\"id\" AS ns_partc_id, p.legacy_id AS cms_legacy_id, vw.* "
+        + "FROM {h-schema}VW_SCREENING_HISTORY vw "
+        + "JOIN PARTICIPANTS p ON p.screening_id = vw.screening_id "
+        + "WHERE vw.participant_id IN ( SELECT DISTINCT vw1.participant_id "
+        + " FROM {h-schema}VW_SCREENING_HISTORY vw1 WHERE vw1.last_chg > CAST(:after AS TIMESTAMP) "
+        + ") AND p.legacy_id IS NOT NULL AND vw.indexable = true "
+        + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
+        + "FOR READ ONLY",
+    resultClass = EsIntakeScreening.class, readOnly = true)
 
-    @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfterWithUnlimitedAccess",
-        query = "SELECT p.\"id\" AS ns_partc_id, p.legacy_id AS cms_legacy_id, vw.* "
-            + "FROM {h-schema}VW_SCREENING_HISTORY vw "
-            + "JOIN PARTICIPANTS p ON p.screening_id = vw.screening_id "
-            + "WHERE vw.participant_id IN ( SELECT DISTINCT vw1.participant_id "
-            + " FROM {h-schema}VW_SCREENING_HISTORY vw1 WHERE vw1.last_chg > CAST(:after AS TIMESTAMP) "
-            + ") AND p.legacy_id IS NOT NULL AND vw.indexable = true "
-            + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
-            + "FOR READ ONLY",
-        resultClass = EsIntakeScreening.class, readOnly = true)})
+@NamedNativeQuery(
+    name = "gov.ca.cwds.data.persistence.ns.EsIntakeScreening.findAllUpdatedAfterWithUnlimitedAccess",
+    query = "SELECT p.\"id\" AS ns_partc_id, p.legacy_id AS cms_legacy_id, vw.* "
+        + "FROM {h-schema}VW_SCREENING_HISTORY vw "
+        + "JOIN PARTICIPANTS p ON p.screening_id = vw.screening_id "
+        + "WHERE vw.participant_id IN ( SELECT DISTINCT vw1.participant_id "
+        + " FROM {h-schema}VW_SCREENING_HISTORY vw1 WHERE vw1.last_chg > CAST(:after AS TIMESTAMP) "
+        + ") AND p.legacy_id IS NOT NULL AND vw.indexable = true "
+        + "ORDER BY cms_legacy_id, screening_id, ns_partc_id, person_legacy_id, participant_id "
+        + "FOR READ ONLY",
+    resultClass = EsIntakeScreening.class, readOnly = true)
 
 public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<IntakeParticipant> {
 
@@ -303,7 +300,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
    * @return populated screening object
    */
   protected IntakeScreening fillScreening(IntakeScreening s) {
-    IntakeScreening ret = s == null ? new IntakeScreening() : s;
+    final IntakeScreening ret = s == null ? new IntakeScreening() : s;
 
     ret.setId(screeningId);
     ret.setReferralId(referralId);
@@ -337,6 +334,10 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     return fillScreening(null);
   }
 
+  public void normalizeAllegation() {
+
+  }
+
   /**
    * Iterate screenings from the perspective of "this" participant. Separate "this" participant from
    * "other" participant. This job stores person documents in ES, not disconnected or independent
@@ -361,7 +362,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
 
       if (!mapScreenings.containsKey(screeningId)) {
         s = fillScreening();
-        mapScreenings.put(s.getId(), s); // iterating screenings for *this* participant.
+        mapScreenings.put(s.getId(), s); // iterate screenings for *this* participant.
 
         final IntakeParticipant worker = s.getSocialWorker();
         worker.setLastName(assignee);

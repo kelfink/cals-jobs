@@ -13,7 +13,7 @@ import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.jobs.component.AtomShared;
+import gov.ca.cwds.jobs.component.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.config.JobOptions;
 
 /**
@@ -63,12 +63,14 @@ public class JobJdbcUtils {
   public static String makeTimestampString(final Date date) {
     final StringBuilder buf = new StringBuilder();
     buf.append("TIMESTAMP('")
-        .append(new SimpleDateFormat(AtomShared.LEGACY_TIMESTAMP_FORMAT).format(date)).append("')");
+        .append(
+            new SimpleDateFormat(NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT.getFormat()).format(date))
+        .append("')");
     return buf.toString();
   }
 
   public static String makeSimpleTimestampString(final Date date) {
-    return new SimpleDateFormat(AtomShared.LEGACY_TIMESTAMP_FORMAT).format(date);
+    return new SimpleDateFormat(NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT.getFormat()).format(date);
   }
 
   /**

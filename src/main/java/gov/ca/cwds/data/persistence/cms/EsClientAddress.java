@@ -456,9 +456,9 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
   // ================
 
   // WARNING: not yet in RSQ.
-  @Type(type = "short")
-  @Column(name = "CLC_GVR_ENTC")
-  private Short clientCounty;
+  // @Type(type = "short")
+  // @Column(name = "CLC_GVR_ENTC")
+  // private Short clientCounty;
 
   /**
    * Build an EsClientAddress from the incoming ResultSet.
@@ -526,7 +526,7 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
     // WARNING: not yet in RSQ.
-    ret.setClientCounty(rs.getShort("CLC_GVR_ENTC"));
+    // ret.setClientCounty(rs.getShort("CLC_GVR_ENTC"));
 
     // Languages
     ret.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
@@ -1609,11 +1609,12 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
   }
 
   public Short getClientCounty() {
-    return clientCounty;
+    // return clientCounty;
+    return (short) 0;
   }
 
   public void setClientCounty(Short clientCounty) {
-    this.clientCounty = clientCounty;
+    // this.clientCounty = clientCounty;
   }
 
   public CmsReplicationOperation getAdrReplicationOperation() {

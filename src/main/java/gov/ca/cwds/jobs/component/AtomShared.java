@@ -11,16 +11,6 @@ import gov.ca.cwds.jobs.config.JobOptions;
  */
 public interface AtomShared extends ApiMarker {
 
-  /**
-   * Date time format for last run date file.
-   */
-  static String LAST_RUN_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-
-  /**
-   * Common timestamp format for legacy DB.
-   */
-  static String LEGACY_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-
   JobProgressTrack getTrack();
 
   ElasticsearchDao getEsDao();
