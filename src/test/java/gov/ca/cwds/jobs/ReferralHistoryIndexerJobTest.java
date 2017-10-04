@@ -5,7 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,13 +33,13 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
-import gov.ca.cwds.jobs.ReferralHistoryIndexerJob.MinClientReferral;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 
-public class ReferralHistoryIndexerJobTest extends PersonJobTester {
+public class ReferralHistoryIndexerJobTest
+    extends PersonJobTester<ReplicatedPersonReferrals, EsPersonReferral> {
 
   private static class TestReferralHistoryIndexerJob extends ReferralHistoryIndexerJob {
 
@@ -193,6 +193,38 @@ public class ReferralHistoryIndexerJobTest extends PersonJobTester {
     String dbSchemaName = "CWSRS1";
     String actual = target.getInitialLoadQuery(dbSchemaName);
     assertThat(actual, notNullValue());
+  }
+
+  @Test
+  public void testNormalizeQueryResults() throws Exception {
+    final Map<String, EsPersonReferral> mapReferrals = new HashMap<>();
+    final List<EsPersonReferral> listReadyToNorm = new ArrayList<>();
+    final Map<String, List<MinClientReferral>> mapReferralByClient = new HashMap<>();
+    final Map<String, List<EsPersonReferral>> mapAllegationByReferral = new HashMap<>();
+
+    List<EsPersonReferral> allegations = new ArrayList<>();
+    List<MinClientReferral> minClientReferrals = new ArrayList<>();
+
+    EsPersonReferral ref = new EsPersonReferral();
+    ref.setClientId(DEFAULT_CLIENT_ID);
+    ref.setReferralId("ref1234567");
+    ref.setAllegationId("alg1111111");
+    ref.setAllegationType(4);
+    listReadyToNorm.add(ref);
+    allegations.add(ref);
+    mapAllegationByReferral.put(ref.getClientId(), allegations);
+
+    ref = new EsPersonReferral();
+    ref.setClientId(DEFAULT_CLIENT_ID);
+    ref.setReferralId("ref1234567");
+    ref.setAllegationId("alg2222222");
+    ref.setAllegationType(3);
+    listReadyToNorm.add(ref);
+    allegations.add(ref);
+    mapAllegationByReferral.put(ref.getClientId(), allegations);
+
+    target.normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
+        mapAllegationByReferral);
   }
 
   @Test
