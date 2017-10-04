@@ -529,6 +529,7 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
     ret.cltPrevRegionalCenterIndicator = rs.getString("CLT_PREREG_IND");
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
+
     // WARNING: not yet available in RSQ.
     ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
 
