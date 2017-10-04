@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,12 +57,12 @@ public class ReferralHistoryIndexerJobTest
       return new TestDB2SystemMonitor();
     }
 
-    @Override
-    public void readClients(final PreparedStatement stmtInsClient,
-        final PreparedStatement stmtSelClient, final List<MinClientReferral> listClientReferralKeys,
-        final Pair<String, String> p) throws SQLException {
-      super.readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
-    }
+    // @Override
+    // public void readClients(final PreparedStatement stmtInsClient,
+    // final PreparedStatement stmtSelClient, final List<MinClientReferral> listClientReferralKeys,
+    // final Pair<String, String> p) throws SQLException {
+    // super.readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
+    // }
 
     @Override
     protected int pullRange(Pair<String, String> p) {
@@ -282,12 +283,44 @@ public class ReferralHistoryIndexerJobTest
   }
 
   @Test
-  @Ignore
   public void pullRange_Args__Pair() throws Exception {
+    final String schema = target.getDBSchemaName();
+
+    final PreparedStatement stmtInsClient = mock(PreparedStatement.class);
+    final PreparedStatement stmtSelClient = mock(PreparedStatement.class);
     final PreparedStatement stmtSelReferral = mock(PreparedStatement.class);
-    when(stmtSelReferral.executeQuery()).thenReturn(rs);
+    final PreparedStatement stmtSelAllegation = mock(PreparedStatement.class);
+
+    final ResultSet rsInsClient = mock(ResultSet.class);
+    final ResultSet rsSelClient = mock(ResultSet.class);
+    final ResultSet rsSelReferral = mock(ResultSet.class);
+    final ResultSet rsSelAllegation = mock(ResultSet.class);
+
+    final String sqlInsClient =
+        target.INSERT_CLIENT_FULL.replaceAll("#SCHEMA#", schema).replaceAll("\\s+", " ").trim();
+    final String sqlSelClient =
+        target.SELECT_CLIENT.replaceAll("#SCHEMA#", schema).replaceAll("\\s+", " ").trim();
+    final String sqlSelReferral = target.getInitialLoadQuery(schema).replaceAll("\\s+", " ").trim();
+    final String selAllegation =
+        target.SELECT_ALLEGATION.replaceAll("#SCHEMA#", schema).replaceAll("\\s+", " ").trim();
+
+    when(con.prepareStatement(sqlInsClient)).thenReturn(stmtInsClient);
+    when(con.prepareStatement(sqlSelClient)).thenReturn(stmtSelClient);
+    when(con.prepareStatement(sqlSelReferral)).thenReturn(stmtSelReferral);
+    when(con.prepareStatement(selAllegation)).thenReturn(stmtSelAllegation);
+
+    when(stmtInsClient.executeQuery()).thenReturn(rsInsClient);
+    when(stmtSelClient.executeQuery()).thenReturn(rsSelClient);
+    when(stmtSelReferral.executeQuery()).thenReturn(rsSelReferral);
+    when(stmtSelAllegation.executeQuery()).thenReturn(rsSelAllegation);
+
+    when(rsInsClient.next()).thenReturn(true).thenReturn(false);
+    when(rsSelClient.next()).thenReturn(true).thenReturn(false);
+    when(rsSelReferral.next()).thenReturn(false);
+    when(rsSelAllegation.next()).thenReturn(false);
 
     final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
+    target.fakePull = false;
     target.pullRange(p);
   }
 

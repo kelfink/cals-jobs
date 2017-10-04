@@ -68,13 +68,13 @@ public class ReferralHistoryIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
-  private static final String INSERT_CLIENT_FULL =
+  protected static final String INSERT_CLIENT_FULL =
       "INSERT INTO #SCHEMA#.GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"
           + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM #SCHEMA#.REFR_CLT rc\n"
           + "\nJOIN #SCHEMA#.CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T\n"
           + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
 
-  private static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO #SCHEMA#.GT_ID (IDENTIFIER)\n"
+  protected static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO #SCHEMA#.GT_ID (IDENTIFIER)\n"
       + "WITH step1 AS (\nSELECT ALG.FKREFERL_T AS REFERRAL_ID\n"
       + " FROM #SCHEMA#.ALLGTN_T ALG  WHERE ALG.IBMSNAP_LOGMARKER > ##TIMESTAMP##), step2 AS (\n"
       + " SELECT ALG.FKREFERL_T AS REFERRAL_ID FROM #SCHEMA#.CLIENT_T C \n"
@@ -92,10 +92,10 @@ public class ReferralHistoryIndexerJob
       + " SELECT s4.REFERRAL_ID FROM STEP4 s4 UNION ALL\n"
       + " SELECT s5.REFERRAL_ID FROM STEP5 s5 )\n" + "SELECT DISTINCT g.REFERRAL_ID from hoard g ";
 
-  private static final String SELECT_CLIENT =
+  protected static final String SELECT_CLIENT =
       "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM #SCHEMA#.GT_REFR_CLT RC";
 
-  private static final String SELECT_ALLEGATION = "SELECT \n"
+  protected static final String SELECT_ALLEGATION = "SELECT \n"
       + " RC.FKREFERL_T         AS REFERRAL_ID," + " ALG.IDENTIFIER        AS ALLEGATION_ID,\n"
       + " ALG.ALG_DSPC          AS ALLEGATION_DISPOSITION,\n"
       + " ALG.ALG_TPC           AS ALLEGATION_TYPE,\n"
@@ -115,7 +115,7 @@ public class ReferralHistoryIndexerJob
       + "LEFT JOIN #SCHEMA#.CLIENT_T  CLP  ON CLP.IDENTIFIER = ALG.FKCLIENT_0 \n"
       + " FOR READ ONLY WITH UR ";
 
-  private static final String SELECT_REFERRAL = "SELECT RFL.IDENTIFIER        AS REFERRAL_ID,\n"
+  protected static final String SELECT_REFERRAL = "SELECT RFL.IDENTIFIER        AS REFERRAL_ID,\n"
       + " RFL.REF_RCV_DT        AS START_DATE," + " RFL.REFCLSR_DT        AS END_DATE,\n"
       + " RFL.RFR_RSPC          AS REFERRAL_RESPONSE_TYPE,\n"
       + " RFL.LMT_ACSSCD        AS LIMITED_ACCESS_CODE,\n"
@@ -144,14 +144,15 @@ public class ReferralHistoryIndexerJob
    * This Neutron job reuses threads for performance, since thread creation is expensive.
    * </p>
    */
-  private transient ThreadLocal<List<EsPersonReferral>> allocAllegations = new ThreadLocal<>();
+  protected transient ThreadLocal<List<EsPersonReferral>> allocAllegations = new ThreadLocal<>();
 
-  private transient ThreadLocal<Map<String, EsPersonReferral>> allocReferrals = new ThreadLocal<>();
-
-  private transient ThreadLocal<List<MinClientReferral>> allocClientReferralKeys =
+  protected transient ThreadLocal<Map<String, EsPersonReferral>> allocReferrals =
       new ThreadLocal<>();
 
-  private transient ThreadLocal<List<EsPersonReferral>> allocReadyToNorm = new ThreadLocal<>();
+  protected transient ThreadLocal<List<MinClientReferral>> allocClientReferralKeys =
+      new ThreadLocal<>();
+
+  protected transient ThreadLocal<List<EsPersonReferral>> allocReadyToNorm = new ThreadLocal<>();
 
   private final AtomicInteger rowsReadReferrals = new AtomicInteger(0);
 
@@ -379,14 +380,14 @@ public class ReferralHistoryIndexerJob
       final String schema = getDBSchemaName();
 
       try (
-          final PreparedStatement stmtInsClient =
-              con.prepareStatement(INSERT_CLIENT_FULL.replaceAll("#SCHEMA#", schema));
-          final PreparedStatement stmtSelClient =
-              con.prepareStatement(SELECT_CLIENT.replaceAll("#SCHEMA#", schema));
+          final PreparedStatement stmtInsClient = con.prepareStatement(
+              INSERT_CLIENT_FULL.replaceAll("#SCHEMA#", schema).replaceAll("\\s+", " ").trim());
+          final PreparedStatement stmtSelClient = con.prepareStatement(
+              SELECT_CLIENT.replaceAll("#SCHEMA#", schema).replaceAll("\\s+", " ").trim());
           final PreparedStatement stmtSelReferral =
-              con.prepareStatement(getInitialLoadQuery(schema));
-          final PreparedStatement stmtSelAllegation =
-              con.prepareStatement(SELECT_ALLEGATION.replaceAll("#SCHEMA#", schema))) {
+              con.prepareStatement(getInitialLoadQuery(schema).replaceAll("\\s+", " ").trim());
+          final PreparedStatement stmtSelAllegation = con.prepareStatement(
+              SELECT_ALLEGATION.replaceAll("#SCHEMA#", schema).replaceAll("\\s+", " ").trim())) {
 
         readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
         readReferrals(stmtSelReferral, mapReferrals);
@@ -405,29 +406,33 @@ public class ReferralHistoryIndexerJob
           e.getMessage());
     }
 
-    final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys.stream()
-        .sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
-        .collect(Collectors.groupingBy(MinClientReferral::getClientId));
-    listClientReferralKeys.clear();
+    int cntr = 0;
+    try {
+      final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys
+          .stream().sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
+          .collect(Collectors.groupingBy(MinClientReferral::getClientId));
+      listClientReferralKeys.clear();
 
-    final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
-        .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
-        .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
-    listAllegations.clear();
+      final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
+          .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
+          .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
+      listAllegations.clear();
 
-    // For each client:
-    int cntr = normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
-        mapAllegationByReferral);
+      // For each client group:
+      cntr = normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
+          mapAllegationByReferral);
+    } finally {
+      // Release heap objects early and often.
+      releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
 
-    // Release heap objects early and often.
-    releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
+      // Good time to *request* garbage collection, not *demand* it. GC runs in another thread.
+      // SonarQube disagrees.
+      // The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
+      // memory is exhausted. Yes, this is a good place to drop a hint to GC that it *might* want to
+      // clean up memory.
+      System.gc(); // NOSONAR
+    }
 
-    // Good time to *request* garbage collection, not *demand* it. GC runs in another thread anyway.
-    // SonarQube disagrees.
-    // The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
-    // memory is exhausted. Yes, this is a good place to drop a hint to GC that it *might* want to
-    // clean up memory.
-    System.gc(); // NOSONAR
     LOGGER.info("DONE");
 
     return cntr;
@@ -537,8 +542,8 @@ public class ReferralHistoryIndexerJob
   /**
    * IBM strongly recommends retrieving column results by position, not by column name.
    * 
-   * @param rs result set
-   * @return de-normalized record
+   * @param rs referral result set
+   * @return parent referral element
    * @throws SQLException on DB error
    */
   protected EsPersonReferral extractReferral(final ResultSet rs) throws SQLException {
@@ -572,6 +577,11 @@ public class ReferralHistoryIndexerJob
     return ret;
   }
 
+  /**
+   * @param rs allegation result set
+   * @return allegation side of referral
+   * @throws SQLException database error
+   */
   protected EsPersonReferral extractAllegation(final ResultSet rs) throws SQLException {
     EsPersonReferral ret = new EsPersonReferral();
 
