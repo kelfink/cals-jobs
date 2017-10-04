@@ -20,6 +20,8 @@ import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
@@ -70,6 +72,8 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
    * Default serialization.
    */
   private static final long serialVersionUID = 1L;
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(EsClientAddress.class);
 
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)
@@ -526,7 +530,8 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
     // WARNING: not yet available in RSQ.
-    ret.setClientCounty(rs.getShort("CLC_GVR_ENTC"));
+    ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
+    LOGGER.warn("Client ID = " + ret.cltId + ", Client County = " + ret.clientCounty);
 
     // Languages
     ret.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
@@ -1614,7 +1619,7 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
   }
 
   public void setClientCounty(Short clientCounty) {
-    // this.clientCounty = clientCounty;
+    this.clientCounty = clientCounty;
   }
 
   public CmsReplicationOperation getAdrReplicationOperation() {
