@@ -235,7 +235,7 @@ public class ReferralHistoryIndexerJobTest
     ref.setAllegationType(3);
     listReadyToNorm.add(ref);
     allegations.add(ref);
-    mapAllegationByReferral.put(ref.getClientId(), allegations);
+    mapAllegationByReferral.put(ref.getReferralId(), allegations);
 
     target.normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
         mapAllegationByReferral);
