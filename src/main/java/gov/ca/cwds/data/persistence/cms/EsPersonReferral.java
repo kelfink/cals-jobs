@@ -414,7 +414,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     if (AtomSecurity.isNotSealedSensitive(opts, perpetratorSensitivityIndicator)) {
       allegation.setPerpetrator(makePerpetrator());
 
-      // TODO: #148091785: deprecated person fields.
+      // NOTE: #148091785: deprecated person fields.
       allegation.setPerpetratorId(this.perpetratorId);
       allegation.setPerpetratorLegacyClientId(this.perpetratorId);
       allegation.setPerpetratorFirstName(this.perpetratorFirstName);
@@ -424,7 +424,7 @@ public class EsPersonReferral extends ApiObjectIdentity
     if (AtomSecurity.isNotSealedSensitive(opts, victimSensitivityIndicator)) {
       allegation.setVictim(makeVictim());
 
-      // TODO: #148091785: deprecated person fields.
+      // NOTE: #148091785: deprecated person fields.
       allegation.setVictimId(this.victimId);
       allegation.setVictimLegacyClientId(this.victimId);
       allegation.setVictimFirstName(this.victimFirstName);
