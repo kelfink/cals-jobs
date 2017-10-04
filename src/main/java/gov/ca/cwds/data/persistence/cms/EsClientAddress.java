@@ -531,7 +531,6 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
 
     // WARNING: not yet available in RSQ.
     ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
-    LOGGER.warn("Client ID = " + ret.cltId + ", Client County = " + ret.clientCounty);
 
     // Languages
     ret.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
