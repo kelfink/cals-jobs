@@ -59,6 +59,7 @@ import gov.ca.cwds.jobs.component.AtomTransformer;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.component.NeutronDateTimeFormat;
+import gov.ca.cwds.jobs.component.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.LastRunFile;
@@ -321,7 +322,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       threadIndexer.join();
-      Thread.sleep(SLEEP_MILLIS);
+      Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue());
       LOGGER.info("PROGRESS TRACK: {}", this.getTrack().toString());
     } catch (Exception e) {
       markFailed();
@@ -388,7 +389,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     int cntr = inCntr;
     ++cntr;
 
-    while ((m = queueNormalize.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
+    while ((m = queueNormalize.pollFirst(NeutronIntegerDefaults.POLL_MILLIS.getValue(),
+        TimeUnit.MILLISECONDS)) != null) {
       JobLogs.logEvery(++cntr, "Transformed", "recs");
 
       // NOTE: Assumes that records are sorted by group key.
@@ -454,7 +456,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     int i = cntr;
     T t;
 
-    while ((t = queueIndex.pollFirst(POLL_MILLIS, TimeUnit.MILLISECONDS)) != null) {
+    while ((t = queueIndex.pollFirst(NeutronIntegerDefaults.POLL_MILLIS.getValue(),
+        TimeUnit.MILLISECONDS)) != null) {
       JobLogs.logEvery(++i, "Indexed", "recs to ES");
       prepareDocument(bp, t);
     }
@@ -479,11 +482,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       cntr = bulkPrepare(bp, cntr);
       LOGGER.info("Flush ES bulk processor ... recs processed: {}", cntr);
       bp.flush();
-      Thread.sleep(SLEEP_MILLIS);
+      Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue());
       bp.flush();
 
       LOGGER.info("Waiting to close ES bulk processor ...");
-      bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
+      bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
       LOGGER.info("Closed ES bulk processor");
     } catch (Exception e) {
       markFailed();
@@ -555,7 +558,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       // Give it time to finish the last batch.
       LOGGER.info("Waiting on ElasticSearch to finish last batch ...");
-      bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
+      bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
       markJobDone();
 
       return new Date(this.startTime);
@@ -631,7 +634,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       LOGGER.info(track.toString());
       LOGGER.info("Updating last successful run time to {}",
-          new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat()).format(startTime));
+          new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
+              .format(startTime));
       return new Date(this.startTime);
     } catch (Exception e) {
       markFailed();
@@ -803,7 +807,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       markJobDone();
       close();
-      Thread.sleep(SLEEP_MILLIS); // NOSONAR
+      Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
     } catch (Exception e) {
       markFailed();
       Thread.currentThread().interrupt();
@@ -896,7 +900,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
           .setFlushMode(FlushMode.MANUAL).setCacheMode(CacheMode.IGNORE)
-          .setFetchSize(DEFAULT_FETCH_SIZE);
+          .setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
 
       // No reduction/normalization. Iterate, process, flush.
       final ScrollableResults results = q.scroll(ScrollMode.FORWARD_ONLY);
@@ -907,7 +911,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         Object[] row = results.get();
         ret.add((T) row[0]);
 
-        if (((++cnt) % DEFAULT_FETCH_SIZE) == 0) {
+        if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
           LOGGER.info("recs read: {}", cnt);
           session.flush();
         }
@@ -949,7 +953,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         });
 
         try {
-          bp.awaitClose(DEFAULT_BATCH_WAIT, TimeUnit.SECONDS);
+          bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
         } catch (Exception e2) {
           markFailed();
           throw new JobsException("ERROR EXTRACTING VIA HIBERNATE!", e2);

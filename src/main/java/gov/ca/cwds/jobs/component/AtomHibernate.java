@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import gov.ca.cwds.dao.cms.BatchDaoImpl;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -29,11 +28,6 @@ import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
  */
 public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends AtomShared, JobResultSetAware<M> {
-
-  static final int DEFAULT_BATCH_WAIT = 25;
-  static final int SLEEP_MILLIS = 2500;
-  static final int POLL_MILLIS = 1000;
-  static final int DEFAULT_FETCH_SIZE = BatchDaoImpl.DEFAULT_FETCH_SIZE;
 
   static final String SQL_COLUMN_AFTER = "after";
 

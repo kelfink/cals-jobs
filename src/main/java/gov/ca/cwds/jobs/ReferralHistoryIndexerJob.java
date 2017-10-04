@@ -39,6 +39,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.component.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -303,7 +304,7 @@ public class ReferralHistoryIndexerJob
     // Prepare retrieval.
     stmtSelClient.setMaxRows(0);
     stmtSelClient.setQueryTimeout(0);
-    stmtSelClient.setFetchSize(DEFAULT_FETCH_SIZE);
+    stmtSelClient.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
 
     LOGGER.info("pull client referral keys");
     final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
@@ -316,7 +317,7 @@ public class ReferralHistoryIndexerJob
       final Map<String, EsPersonReferral> mapReferrals) throws SQLException {
     stmtSelReferral.setMaxRows(0);
     stmtSelReferral.setQueryTimeout(0);
-    stmtSelReferral.setFetchSize(DEFAULT_FETCH_SIZE);
+    stmtSelReferral.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
 
     int cntr = 0;
     EsPersonReferral m;
@@ -334,7 +335,7 @@ public class ReferralHistoryIndexerJob
       final List<EsPersonReferral> listAllegations) throws SQLException {
     stmtSelAllegation.setMaxRows(0);
     stmtSelAllegation.setQueryTimeout(0);
-    stmtSelAllegation.setFetchSize(DEFAULT_FETCH_SIZE);
+    stmtSelAllegation.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
 
     int cntr = 0;
     EsPersonReferral m;
