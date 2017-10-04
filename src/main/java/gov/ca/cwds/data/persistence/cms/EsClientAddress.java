@@ -455,7 +455,7 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
   // CLIENT_CNTY:
   // ================
 
-  // WARNING: not yet in RSQ.
+  // WARNING: not yet available in RSQ.
   @Type(type = "short")
   @Column(name = "CLC_GVR_ENTC")
   private Short clientCounty;
@@ -525,7 +525,7 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
     ret.cltPrevRegionalCenterIndicator = rs.getString("CLT_PREREG_IND");
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
-    // WARNING: not yet in RSQ.
+    // WARNING: not yet available in RSQ.
     ret.setClientCounty(rs.getShort("CLC_GVR_ENTC"));
 
     // Languages
