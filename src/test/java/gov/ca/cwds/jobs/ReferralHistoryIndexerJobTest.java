@@ -29,6 +29,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
+import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
+import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
@@ -69,6 +71,8 @@ public class ReferralHistoryIndexerJobTest
   }
 
   public static final String DEFAULT_REFERRAL_ID = "ref1234567";
+
+  public static final String DEFAULT_ALLEGATION_ID = "alg1234567";
 
   // ====================
   // TEST MEMBERS:
@@ -147,7 +151,15 @@ public class ReferralHistoryIndexerJobTest
   @Test
   public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedPersonReferrals()
       throws Exception {
-    ReplicatedPersonReferrals referrals = new ReplicatedPersonReferrals();
+    final ReplicatedPersonReferrals referrals = new ReplicatedPersonReferrals(DEFAULT_CLIENT_ID);
+
+    final ElasticSearchPersonReferral ref = new ElasticSearchPersonReferral();
+    ref.setId(DEFAULT_CLIENT_ID);
+
+    final ElasticSearchPersonAllegation allegation = new ElasticSearchPersonAllegation();
+    allegation.setId(DEFAULT_ALLEGATION_ID);
+
+    referrals.addReferral(ref, allegation);
     UpdateRequest actual = target.prepareUpsertRequest(esp, referrals);
     assertThat(actual, notNullValue());
   }
@@ -155,7 +167,7 @@ public class ReferralHistoryIndexerJobTest
   @Test
   public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedPersonReferrals_T__Exception()
       throws Exception {
-    ReplicatedPersonReferrals referrals = new ReplicatedPersonReferrals();
+    final ReplicatedPersonReferrals referrals = new ReplicatedPersonReferrals(DEFAULT_CLIENT_ID);
     when(esDao.getConfig().getElasticsearchAlias()).thenThrow(new JobsException("test"));
     try {
       target.prepareUpsertRequest(esp, referrals);
@@ -166,7 +178,7 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void extract_Args__ResultSet() throws Exception {
-    EsPersonReferral actual = target.extract(rs);
+    final EsPersonReferral actual = target.extract(rs);
     assertThat(actual, notNullValue());
   }
 

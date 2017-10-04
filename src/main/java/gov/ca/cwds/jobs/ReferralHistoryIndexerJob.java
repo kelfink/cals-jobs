@@ -511,19 +511,15 @@ public class ReferralHistoryIndexerJob
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp,
       ReplicatedPersonReferrals referrals) throws IOException {
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append("{\"referrals\":[");
 
     final List<ElasticSearchPersonReferral> esPersonReferrals = referrals.getReferrals();
     esp.setReferrals(esPersonReferrals);
 
     if (esPersonReferrals != null && !esPersonReferrals.isEmpty()) {
-      try {
-        buf.append(esPersonReferrals.stream().map(ElasticTransformer::jsonify)
-            .sorted(String::compareTo).collect(Collectors.joining(",")));
-      } catch (Exception e) {
-        JobLogs.raiseError(LOGGER, e, "ERROR SERIALIZING REFERRALS! ", e.getMessage());
-      }
+      buf.append(esPersonReferrals.stream().map(ElasticTransformer::jsonify)
+          .sorted(String::compareTo).collect(Collectors.joining(",")));
     }
 
     buf.append("]}");
