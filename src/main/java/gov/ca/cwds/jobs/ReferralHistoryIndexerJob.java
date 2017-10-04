@@ -237,7 +237,11 @@ public class ReferralHistoryIndexerJob
     return ""; // sort manually since DB2 might not optimize the sort.
   }
 
+  /**
+   * @deprecated soon to be removed
+   */
   @Override
+  @Deprecated
   public String getLegacySourceTable() {
     return "REFERL_T";
   }

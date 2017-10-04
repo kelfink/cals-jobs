@@ -69,7 +69,7 @@ public class MSearchJob extends
         .multiMatchQuery("N6dhOan15A", "cases.focus_child.legacy_descriptor.legacy_id")).setSize(1);
     final MultiSearchResponse sr = client.prepareMultiSearch().add(srb1).add(srb2).get();
 
-    // Fetch all individual responses from MultiSearchResponse#getResponses().
+    // Fetch **ALL** individual responses from MultiSearchResponse#getResponses().
     long totalHits = 0;
     for (MultiSearchResponse.Item item : sr.getResponses()) {
       final SearchResponse response = item.getResponse();
@@ -85,11 +85,7 @@ public class MSearchJob extends
     return (int) totalHits;
   }
 
-  /**
-   * @deprecated soon to be removed
-   */
   @Override
-  @Deprecated
   public String getLegacySourceTable() {
     return "OTH_ADLT";
   }
