@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -77,15 +79,61 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 public class EsRelationship
     implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationships> {
 
+  private static final Pattern RGX_RELATIONSHIP = Pattern
+      .compile("^\\s*([A-Za-z0-9 _-]+)[/]?([A-Za-z0-9 _-]+)?\\s*(\\([A-Za-z0-9 _-]+\\))?\\s*$");
+
+  public static final class CmsRelationship implements ApiMarker {
+
+    private static final long serialVersionUID = 1L;
+
+    private short sysCodeId;
+    private String primaryRel = "";
+    private String secondaryRel = "";
+    private String relContext = "";
+
+    public CmsRelationship(final Short relCode) {
+      sysCodeId = relCode.shortValue();
+      final gov.ca.cwds.rest.api.domain.cms.SystemCode code =
+          SystemCodeCache.global().getSystemCode(relCode);
+      final String wholeRel = ifNull(code.getShortDescription());
+
+      final Matcher m = RGX_RELATIONSHIP.matcher(wholeRel);
+      if (m.matches()) {
+        for (int i = 0; i <= m.groupCount(); i++) {
+          final String s = m.group(i);
+          switch (i) {
+            case 1:
+              primaryRel = s.trim();
+              break;
+
+            case 2:
+              secondaryRel = s.trim();
+              break;
+
+            case 3:
+              relContext = StringUtils.isNotBlank(s)
+                  ? s.replaceAll("\\(", "").replaceAll("\\)", "").trim() : "";
+              break;
+
+            default:
+              break;
+          }
+        }
+      } else {
+        LOGGER.trace("NO MATCH!! rel={}", wholeRel);
+      }
+    }
+
+  }
+
+  private static final Map<Short, CmsRelationship> mapRelationCodes = new ConcurrentHashMap<>();
+
   /**
    * Default serialization.
    */
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(EsRelationship.class);
-
-  private static final Pattern RGX_RELATIONSHIP =
-      Pattern.compile("([A-Za-z0-9 _-]+)[/]?([A-Za-z0-9 _-]+)?\\s*(\\([A-Za-z0-9 _-]+\\))?");
 
   @Id
   @Type(type = "boolean")
@@ -125,7 +173,7 @@ public class EsRelationship
   @Type(type = "date")
   private Date relatedLegacyLastUpdated;
 
-  // TODO: add replication columns when available.
+  // NOTE: add replication columns when available.
   // Needed to delete ES documents.
 
   // @Enumerated(EnumType.STRING)
@@ -144,11 +192,7 @@ public class EsRelationship
    * @throws SQLException if unable to convert types or stream breaks, etc.
    */
   public static EsRelationship mapRow(ResultSet rs) throws SQLException {
-    EsRelationship ret = new EsRelationship();
-
-    // Only reading from CLN_RELT, for the moment.
-    // ret.setThisLegacyTable(ifNull(rs.getString("THIS_LEGACY_TABLE")));
-    // ret.setRelatedLegacyTable(ifNull(rs.getString("RELATED_LEGACY_TABLE")));
+    final EsRelationship ret = new EsRelationship();
 
     ret.setReverseRelationship(rs.getBoolean("REVERSE_RELATIONSHIP"));
     ret.setThisLegacyId(ifNull(rs.getString("THIS_LEGACY_ID")));
@@ -176,61 +220,26 @@ public class EsRelationship
    */
   protected void parseBiDirectionalRelationship(final ElasticSearchPersonRelationship rel) {
     if (this.relCode != null && this.relCode.intValue() != 0) {
-      final gov.ca.cwds.rest.api.domain.cms.SystemCode code =
-          SystemCodeCache.global().getSystemCode(this.relCode);
-      final String wholeRel = ifNull(code.getShortDescription());
-      String primaryRel = "";
-      String secondaryRel = "";
-      String relContext = "";
 
-      final Matcher m = RGX_RELATIONSHIP.matcher(wholeRel);
-      if (m.matches()) {
-        for (int i = 0; i <= m.groupCount(); i++) {
-          final String s = m.group(i);
-          switch (i) {
-            case 1:
-              primaryRel = s.trim();
-              break;
-
-            case 2:
-              secondaryRel = s.trim();
-              break;
-
-            case 3:
-              relContext = StringUtils.isNotBlank(s)
-                  ? s.replaceAll("\\(", "").replaceAll("\\)", "").trim() : "";
-              break;
-
-            default:
-              break;
-          }
-        }
-
-        // Reverse relationship direction.
-        if (getReverseRelationship() == null || getReverseRelationship().booleanValue()) {
-          rel.setIndexedPersonRelationship(secondaryRel);
-          rel.setRelatedPersonRelationship(primaryRel);
-        } else {
-          rel.setIndexedPersonRelationship(primaryRel);
-          rel.setRelatedPersonRelationship(secondaryRel);
-        }
-
-        // Context remains the same.
-        rel.setRelationshipContext(relContext);
-
-        // Java lambda requires variables to be "effectively" final.
-        // For example, primaryRel is assignable and therefore cannot be used in lambda.
-        final String priRel = primaryRel;
-        final String secRel = secondaryRel;
-
-        // Log **only if** trace is enabled.
-        LOGGER.trace("primaryRel={}, secondaryRel={}", priRel, secRel);
-
+      CmsRelationship relationship;
+      if (mapRelationCodes.containsKey(relCode)) {
+        relationship = mapRelationCodes.get(relCode);
       } else {
-        // Java lambda requires variables to be "effectively" final.
-        // Variable wholeRel is not assignable and therefore can be used in lambda.
-        LOGGER.trace("NO MATCH!! rel={}", wholeRel);
+        relationship = new CmsRelationship(relCode);
+        mapRelationCodes.put(relCode, relationship);
       }
+
+      // Reverse relationship direction.
+      if (getReverseRelationship() == null || getReverseRelationship().booleanValue()) {
+        rel.setIndexedPersonRelationship(relationship.secondaryRel);
+        rel.setRelatedPersonRelationship(relationship.primaryRel);
+      } else {
+        rel.setIndexedPersonRelationship(relationship.primaryRel);
+        rel.setRelatedPersonRelationship(relationship.secondaryRel);
+      }
+
+      // Context remains the same.
+      rel.setRelationshipContext(relationship.relContext);
     }
   }
 
