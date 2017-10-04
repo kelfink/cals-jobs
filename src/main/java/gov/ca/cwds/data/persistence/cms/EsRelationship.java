@@ -8,8 +8,6 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,16 +19,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
-import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
  * Entity bean for Materialized Query Table (MQT), VW_BI_DIR_RELATION. By request of the Intake
@@ -79,61 +73,12 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 public class EsRelationship
     implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationships> {
 
-  private static final Pattern RGX_RELATIONSHIP = Pattern
-      .compile("^\\s*([A-Za-z0-9 _-]+)[/]?([A-Za-z0-9 _-]+)?\\s*(\\([A-Za-z0-9 _-]+\\))?\\s*$");
-
-  public static final class CmsRelationship implements ApiMarker {
-
-    private static final long serialVersionUID = 1L;
-
-    private short sysCodeId;
-    private String primaryRel = "";
-    private String secondaryRel = "";
-    private String relContext = "";
-
-    public CmsRelationship(final Short relCode) {
-      sysCodeId = relCode.shortValue();
-      final gov.ca.cwds.rest.api.domain.cms.SystemCode code =
-          SystemCodeCache.global().getSystemCode(relCode);
-      final String wholeRel = ifNull(code.getShortDescription());
-
-      final Matcher m = RGX_RELATIONSHIP.matcher(wholeRel);
-      if (m.matches()) {
-        for (int i = 0; i <= m.groupCount(); i++) {
-          final String s = m.group(i);
-          switch (i) {
-            case 1:
-              primaryRel = s.trim();
-              break;
-
-            case 2:
-              secondaryRel = s.trim();
-              break;
-
-            case 3:
-              relContext = StringUtils.isNotBlank(s)
-                  ? s.replaceAll("\\(", "").replaceAll("\\)", "").trim() : "";
-              break;
-
-            default:
-              break;
-          }
-        }
-      } else {
-        LOGGER.trace("NO MATCH!! rel={}", wholeRel);
-      }
-    }
-
-  }
-
   private static final Map<Short, CmsRelationship> mapRelationCodes = new ConcurrentHashMap<>();
 
   /**
    * Default serialization.
    */
   private static final long serialVersionUID = 1L;
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(EsRelationship.class);
 
   @Id
   @Type(type = "boolean")
