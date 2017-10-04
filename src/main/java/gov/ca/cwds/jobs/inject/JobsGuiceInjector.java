@@ -278,14 +278,16 @@ public class JobsGuiceInjector extends AbstractModule {
     return new CmsSystemCodeSerializer(systemCodeCache);
   }
 
-  private TransportClient makeTransportClient(final ElasticsearchConfiguration config,
+  protected TransportClient makeTransportClient(final ElasticsearchConfiguration config,
       boolean es55) {
     TransportClient ret;
     if (es55) {
-      Settings.Builder settings =
+      LOGGER.info("ENABLE X-PACK");
+      final Settings.Builder settings =
           Settings.builder().put("cluster.name", config.getElasticsearchCluster());
       ret = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
     } else {
+      LOGGER.info("DISABLE X-PACK");
       ret = new PreBuiltTransportClient(
           Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build());
     }
@@ -304,7 +306,9 @@ public class JobsGuiceInjector extends AbstractModule {
       LOGGER.warn("Create NEW ES client");
       try {
         final ElasticsearchConfiguration config = elasticSearchConfig();
-        client = makeTransportClient(config, false);
+        // X-Pack security
+        client = makeTransportClient(config, StringUtils.isNotBlank(config.getUser())
+            && StringUtils.isNotBlank(config.getPassword()));
         client.addTransportAddress(
             new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
                 Integer.parseInt(config.getElasticsearchPort())));
