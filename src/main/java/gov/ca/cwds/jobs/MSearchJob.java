@@ -85,6 +85,10 @@ public class MSearchJob extends
     return (int) totalHits;
   }
 
+  /**
+   * @deprecated scheduled for removal
+   */
+  @Deprecated
   @Override
   public String getLegacySourceTable() {
     return "OTH_ADLT";

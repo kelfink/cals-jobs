@@ -56,7 +56,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     final String caseId = rs.getString("CASE_ID");
 
     if (parentPersonId == null) {
-      LOGGER.warn("PARENT_PERSON_ID is null for CASE_ID: {}", caseId.trim());
+      LOGGER.warn("PARENT_PERSON_ID is null for CASE_ID: {}", caseId.trim()); // NOSONAR
       return null;
     }
 

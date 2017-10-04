@@ -456,7 +456,7 @@ public class ElasticTransformer {
 
     // WARNING: not yet in RSQ.
     // Set client county
-    // ret.setClientCounty(handleClientCountyC(p));
+    ret.setClientCounty(handleClientCountyC(p));
 
     return ret;
   }
