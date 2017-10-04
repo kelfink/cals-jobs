@@ -65,15 +65,15 @@ public class MSearchJob extends
 
     final SearchRequestBuilder srb1 =
         client.prepareSearch().setQuery(QueryBuilders.idsQuery().addIds("JRRwMqs06Q")).setSize(1);
-    final SearchRequestBuilder srb2 =
-        client.prepareSearch().setQuery(QueryBuilders.matchQuery("name", "kimchy")).setSize(1);
+    final SearchRequestBuilder srb2 = client.prepareSearch().setQuery(QueryBuilders
+        .multiMatchQuery("N6dhOan15A", "cases.focus_child.legacy_descriptor.legacy_id")).setSize(1);
     final MultiSearchResponse sr = client.prepareMultiSearch().add(srb1).add(srb2).get();
 
     // Fetch all individual responses from MultiSearchResponse#getResponses().
-    long nbHits = 0;
+    long totalHits = 0;
     for (MultiSearchResponse.Item item : sr.getResponses()) {
       final SearchResponse response = item.getResponse();
-      nbHits += response.getHits().getTotalHits();
+      totalHits += response.getHits().getTotalHits();
 
       for (SearchHit hit : response.getHits().getHits()) {
         LOGGER.info("hit: {}",
@@ -81,8 +81,8 @@ public class MSearchJob extends
       }
     }
 
-    LOGGER.info("hits: {}", nbHits);
-    return (int) nbHits;
+    LOGGER.info("hits: {}", totalHits);
+    return (int) totalHits;
   }
 
   /**

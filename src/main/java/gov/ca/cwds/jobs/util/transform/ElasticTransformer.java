@@ -454,8 +454,9 @@ public class ElasticTransformer {
     // Sealed and sensitive.
     ret.setSensitivityIndicator(p.getSensitivityIndicator());
 
+    // WARNING: not yet in RSQ.
     // Set client county
-    ret.setClientCounty(handleClientCountyC(p));
+    // ret.setClientCounty(handleClientCountyC(p));
 
     return ret;
   }
