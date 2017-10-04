@@ -29,7 +29,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
-import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
@@ -62,6 +61,8 @@ public class ReferralHistoryIndexerJobTest
 
   }
 
+  public static final String DEFAULT_REFERRAL_ID = "ref1234567";
+
   // ====================
   // TEST MEMBERS:
   // ====================
@@ -73,7 +74,6 @@ public class ReferralHistoryIndexerJobTest
   @Before
   public void setup() throws Exception {
     super.setup();
-
     dao = new ReplicatedPersonReferralsDao(sessionFactory);
     target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
         sessionFactory);
@@ -140,7 +140,6 @@ public class ReferralHistoryIndexerJobTest
   @Test
   public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedPersonReferrals()
       throws Exception {
-    ElasticSearchPerson esp = new ElasticSearchPerson();
     ReplicatedPersonReferrals referrals = new ReplicatedPersonReferrals();
     UpdateRequest actual = target.prepareUpsertRequest(esp, referrals);
     assertThat(actual, notNullValue());
@@ -149,7 +148,6 @@ public class ReferralHistoryIndexerJobTest
   @Test
   public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedPersonReferrals_T__Exception()
       throws Exception {
-    ElasticSearchPerson esp = new ElasticSearchPerson();
     ReplicatedPersonReferrals referrals = new ReplicatedPersonReferrals();
     when(esDao.getConfig().getElasticsearchAlias()).thenThrow(new JobsException("test"));
     try {
@@ -176,13 +174,6 @@ public class ReferralHistoryIndexerJobTest
   }
 
   @Test
-  @Ignore
-  public void main_Args__StringArray() throws Exception {
-    String[] args = new String[] {};
-    ReferralHistoryIndexerJob.main(args);
-  }
-
-  @Test
   public void getInitialLoadViewName_Args__() throws Exception {
     String actual = target.getInitialLoadViewName();
     assertThat(actual, notNullValue());
@@ -205,9 +196,13 @@ public class ReferralHistoryIndexerJobTest
     List<EsPersonReferral> allegations = new ArrayList<>();
     List<MinClientReferral> minClientReferrals = new ArrayList<>();
 
+    MinClientReferral minClRef = new MinClientReferral(DEFAULT_CLIENT_ID, DEFAULT_REFERRAL_ID, "N");
+    minClientReferrals.add(minClRef);
+    mapReferralByClient.put(DEFAULT_CLIENT_ID, minClientReferrals);
+
     EsPersonReferral ref = new EsPersonReferral();
     ref.setClientId(DEFAULT_CLIENT_ID);
-    ref.setReferralId("ref1234567");
+    ref.setReferralId(DEFAULT_REFERRAL_ID);
     ref.setAllegationId("alg1111111");
     ref.setAllegationType(4);
     listReadyToNorm.add(ref);
@@ -216,7 +211,7 @@ public class ReferralHistoryIndexerJobTest
 
     ref = new EsPersonReferral();
     ref.setClientId(DEFAULT_CLIENT_ID);
-    ref.setReferralId("ref1234567");
+    ref.setReferralId(DEFAULT_REFERRAL_ID);
     ref.setAllegationId("alg2222222");
     ref.setAllegationType(3);
     listReadyToNorm.add(ref);
@@ -370,6 +365,13 @@ public class ReferralHistoryIndexerJobTest
   @Test
   public void allocateThreadMemory_Args__() throws Exception {
     target.allocateThreadMemory();
+  }
+
+  @Test
+  @Ignore
+  public void main_Args__StringArray() throws Exception {
+    String[] args = new String[] {};
+    ReferralHistoryIndexerJob.main(args);
   }
 
 }

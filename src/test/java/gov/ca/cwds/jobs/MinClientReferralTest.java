@@ -12,11 +12,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
+import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 
 public class MinClientReferralTest
-    extends PersonJobTester<PersistentObject, ApiGroupNormalizer<?>> {
+    extends PersonJobTester<ReplicatedPersonReferrals, EsPersonReferral> {
 
   String clientId = DEFAULT_CLIENT_ID;
   String referralId = "ref1234567";
@@ -50,6 +50,7 @@ public class MinClientReferralTest
   @Ignore
   public void extract_Args__ResultSet_T__SQLException() throws Exception {
     try {
+      // when(rs.close())
       MinClientReferral.extract(rs);
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
