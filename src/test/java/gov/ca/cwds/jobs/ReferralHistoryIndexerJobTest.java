@@ -226,7 +226,7 @@ public class ReferralHistoryIndexerJobTest
     ref.setAllegationType(4);
     listReadyToNorm.add(ref);
     allegations.add(ref);
-    mapAllegationByReferral.put(ref.getClientId(), allegations);
+    mapAllegationByReferral.put(ref.getReferralId(), allegations);
 
     ref = new EsPersonReferral();
     ref.setClientId(DEFAULT_CLIENT_ID);
@@ -389,6 +389,12 @@ public class ReferralHistoryIndexerJobTest
   public void main_Args__StringArray() throws Exception {
     String[] args = new String[] {};
     ReferralHistoryIndexerJob.main(args);
+  }
+
+  @Test
+  public void getPrepLastChangeSQL_Args__() throws Exception {
+    String actual = target.getPrepLastChangeSQL();
+    assertThat(actual, notNullValue());
   }
 
 }
