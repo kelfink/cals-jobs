@@ -244,11 +244,16 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void testReadClients() throws Exception {
-    PreparedStatement stmtInsClient = mock(PreparedStatement.class);
-    PreparedStatement stmtSelClient = mock(PreparedStatement.class);
+    final PreparedStatement stmtInsClient = mock(PreparedStatement.class);
+    final PreparedStatement stmtSelClient = mock(PreparedStatement.class);
     when(stmtSelClient.executeQuery()).thenReturn(rs);
 
     final List<MinClientReferral> listClientReferralKeys = new ArrayList<>();
+
+    when(rs.getString("FKCLIENT_T")).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString("FKREFERL_T")).thenReturn(DEFAULT_REFERRAL_ID);
+    when(rs.getString("SENSTV_IND")).thenReturn("N");
+
     final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
     target.readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
   }
@@ -318,6 +323,10 @@ public class ReferralHistoryIndexerJobTest
     when(rsSelClient.next()).thenReturn(true).thenReturn(false);
     when(rsSelReferral.next()).thenReturn(false);
     when(rsSelAllegation.next()).thenReturn(false);
+
+    when(rsSelClient.getString("FKCLIENT_T")).thenReturn(DEFAULT_CLIENT_ID);
+    when(rsSelClient.getString("FKREFERL_T")).thenReturn(DEFAULT_REFERRAL_ID);
+    when(rsSelClient.getString("SENSTV_IND")).thenReturn("N");
 
     final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
     target.fakePull = false;
