@@ -24,13 +24,18 @@ public final class CmsRelationship implements ApiMarker {
   private static final Logger LOGGER = LoggerFactory.getLogger(CmsRelationship.class);
 
   private static final Pattern RGX_RELATIONSHIP = Pattern
-      .compile("^\\s*([A-Za-z0-9 _-]+)[/]?([A-Za-z0-9 _-]+)?\\s*(\\([A-Za-z0-9 _-]+\\))?\\s*$");
+      .compile("^\\s*([A-Za-z0-9 _-]+)[/]?([A-Za-z0-9 _-]+)?\\s*(\\([A-Za-z0-9 _-]+\\))?\\s*$"); // NOSONAR
 
-  private short sysCodeId;
+  short sysCodeId;
   String primaryRel = "";
   String secondaryRel = "";
   String relContext = "";
 
+  /**
+   * Construct a relationship parser from a syscodeid.
+   * 
+   * @param relCode legacy syscodeid
+   */
   public CmsRelationship(final Short relCode) {
     sysCodeId = relCode.shortValue();
     final gov.ca.cwds.rest.api.domain.cms.SystemCode code =

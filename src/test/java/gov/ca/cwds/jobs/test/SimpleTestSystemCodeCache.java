@@ -16,7 +16,6 @@ public class SimpleTestSystemCodeCache implements SystemCodeCache {
     if (instance == null) {
       instance = new SimpleTestSystemCodeCache();
     }
-
   }
 
   public SimpleTestSystemCodeCache() {
