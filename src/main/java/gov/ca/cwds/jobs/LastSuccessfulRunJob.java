@@ -274,7 +274,8 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
   /**
    * Getter for last job run time.
    * 
-   * @return last time the job ran successfully, in format {@link AtomShared#LAST_RUN_DATE_FORMAT}
+   * @return last time the job ran successfully, in format
+   *         {@link NeutronDateTimeFormat#LAST_RUN_DATE_FORMAT}
    */
   public String getLastJobRunTimeFilename() {
     return lastRunTimeFilename;
