@@ -42,6 +42,8 @@ public class ReferralHistoryIndexerJobTest
 
   private static class TestReferralHistoryIndexerJob extends ReferralHistoryIndexerJob {
 
+    private boolean fakePull = true;
+
     public TestReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao,
         ElasticsearchDao esDao, String lastJobRunTimeFilename, ObjectMapper mapper,
         SessionFactory sessionFactory) {
@@ -57,6 +59,11 @@ public class ReferralHistoryIndexerJobTest
         final PreparedStatement stmtSelClient, final List<MinClientReferral> listClientReferralKeys,
         final Pair<String, String> p) throws SQLException {
       super.readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
+    }
+
+    @Override
+    protected int pullRange(Pair<String, String> p) {
+      return fakePull ? 0 : super.pullRange(p);
     }
 
   }
@@ -273,7 +280,6 @@ public class ReferralHistoryIndexerJobTest
   }
 
   @Test
-  @Ignore
   public void threadExtractJdbc_Args__() throws Exception {
     target.threadRetrieveByJdbc();
   }
@@ -301,7 +307,6 @@ public class ReferralHistoryIndexerJobTest
   @Test
   public void extractReferral_Args__ResultSet() throws Exception {
     EsPersonReferral actual = target.extractReferral(rs);
-    EsPersonReferral expected = null;
     assertThat(actual, notNullValue());
   }
 
