@@ -434,7 +434,6 @@ public class ReferralHistoryIndexerJob
     }
 
     LOGGER.info("DONE");
-
     return cntr;
   }
 
