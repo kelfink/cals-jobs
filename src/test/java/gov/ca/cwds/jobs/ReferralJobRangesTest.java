@@ -24,7 +24,10 @@ public class ReferralJobRangesTest extends PersonJobTester {
     System.setProperty("DB_CMS_SCHEMA", schema);
     BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job =
         mock(BasePersonIndexerJob.class);
+
     when(job.isDB2OnZOS()).thenReturn(isZOS);
+    when(job.getOpts()).thenReturn(opts);
+
     final List<Pair<String, String>> actual = target.getPartitionRanges(job);
     final int cntActual = actual.size();
     assertThat(cntActual, is(equalTo(expectedCnt)));
@@ -45,11 +48,17 @@ public class ReferralJobRangesTest extends PersonJobTester {
 
   @Test
   public void getPartitionRanges_RSQ() throws Exception {
+    when(opts.isRangeGiven()).thenReturn(true);
+    when(opts.getStartBucket()).thenReturn(1L);
+    when(opts.getEndBucket()).thenReturn(4L);
     checkPartitionRanges("CWSRSQ", true, 3562);
   }
 
   @Test
   public void getPartitionRanges_REP() throws Exception {
+    when(opts.isRangeGiven()).thenReturn(true);
+    when(opts.getStartBucket()).thenReturn(1L);
+    when(opts.getEndBucket()).thenReturn(4L);
     checkPartitionRanges("CWSREP", true, 3562);
   }
 
@@ -67,8 +76,11 @@ public class ReferralJobRangesTest extends PersonJobTester {
   public void getPartitionRanges_Args__BasePersonIndexerJob() throws Exception {
     BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job =
         mock(BasePersonIndexerJob.class);
-    job.setOpts(opts);
-    when(opts.isRangeGiven()).thenReturn(true);
+
+    when(job.getOpts()).thenReturn(opts);
+    when(opts.isRangeGiven()).thenReturn(false);
+    when(opts.getStartBucket()).thenReturn(1L);
+    when(opts.getEndBucket()).thenReturn(1L);
 
     final List actual = target.getPartitionRanges(job);
     final List expected = new ArrayList<>();

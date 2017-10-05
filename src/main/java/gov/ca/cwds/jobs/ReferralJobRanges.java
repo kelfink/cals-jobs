@@ -42,7 +42,7 @@ public class ReferralJobRanges {
       final List<Pair<String, String>> allKeyPairs) {
     List<Pair<String, String>> ret = new ArrayList<>();
     final JobOptions opts = job.getOpts();
-    if (opts != null && opts.isRangeGiven()) {
+    if (opts.isRangeGiven()) {
       final List<Pair<String, String>> list = new ArrayList<>();
 
       final int start = ((int) opts.getStartBucket()) - 1;

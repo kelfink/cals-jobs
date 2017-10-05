@@ -43,7 +43,7 @@ import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 public class ReferralHistoryIndexerJobTest
     extends PersonJobTester<ReplicatedPersonReferrals, EsPersonReferral> {
 
-  private static class TestReferralHistoryIndexerJob extends ReferralHistoryIndexerJob {
+  public static class TestReferralHistoryIndexerJob extends ReferralHistoryIndexerJob {
 
     private boolean fakePull = true;
     private boolean throwOnRanges = false;
