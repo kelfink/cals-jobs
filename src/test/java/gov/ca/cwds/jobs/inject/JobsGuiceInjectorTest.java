@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.elasticsearch.client.Client;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.inject.Guice;
@@ -30,6 +31,7 @@ public class JobsGuiceInjectorTest {
   }
 
   @Test
+  @Ignore
   public void configure_Args__() throws Exception {
     final Path path = Paths.get(this.getClass().getResource("/es-test.yaml").getFile());
     final Injector injector =
