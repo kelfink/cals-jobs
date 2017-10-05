@@ -333,6 +333,16 @@ public class ReferralHistoryIndexerJobTest
     target.pullRange(p);
   }
 
+  @Test(expected = JobsException.class)
+  public void pullRange_Args__Pair_throw() throws Exception {
+    final String schema = target.getDBSchemaName();
+    when(con.prepareStatement(any())).thenThrow(JobsException.class);
+
+    final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
+    target.fakePull = false;
+    target.pullRange(p);
+  }
+
   @Test
   public void threadExtractJdbc_Args__() throws Exception {
     target.threadRetrieveByJdbc();
