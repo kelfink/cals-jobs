@@ -209,6 +209,14 @@ public class ReferralHistoryIndexerJobTest
   }
 
   @Test
+  public void getInitialLoadQuery_Args__no_sealed() throws Exception {
+    String dbSchemaName = "CWSRS1";
+    target.getOpts().setLoadSealedAndSensitive(false);
+    String actual = target.getInitialLoadQuery(dbSchemaName);
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
   public void testNormalizeQueryResults() throws Exception {
     final Map<String, EsPersonReferral> mapReferrals = new HashMap<>();
     final List<EsPersonReferral> listReadyToNorm = new ArrayList<>();

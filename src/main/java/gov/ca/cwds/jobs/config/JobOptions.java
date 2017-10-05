@@ -117,9 +117,9 @@ public class JobOptions implements ApiMarker {
   /**
    * If true then load sealed and sensitive data.
    */
-  private final boolean loadSealedAndSensitive;
+  private boolean loadSealedAndSensitive;
 
-  private final boolean rangeGiven;
+  private boolean rangeGiven;
 
   /**
    * Construct from all settings.
@@ -487,6 +487,14 @@ public class JobOptions implements ApiMarker {
 
   public boolean isRangeGiven() {
     return rangeGiven;
+  }
+
+  public void setLoadSealedAndSensitive(boolean loadSealedAndSensitive) {
+    this.loadSealedAndSensitive = loadSealedAndSensitive;
+  }
+
+  public void setRangeGiven(boolean rangeGiven) {
+    this.rangeGiven = rangeGiven;
   }
 
 }
