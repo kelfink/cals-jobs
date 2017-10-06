@@ -629,6 +629,27 @@ public class BasePersonIndexerJobTest
   }
 
   @Test
+  public void testGetEsDao() {
+    assertThat(target.getEsDao(), notNullValue());
+  }
+
+  @Test
+  public void testLoadRecsForDeletion() {
+
+    final List<TestNormalizedEntity> deletionRecs = new ArrayList<>();
+    TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    deletionRecs.add(entity);
+
+    NativeQuery<TestNormalizedEntity> nq = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any())).thenReturn(nq);
+    when(nq.list()).thenReturn(deletionRecs);
+
+    final Set<String> deletionSet = new HashSet<>();
+    deletionSet.add(DEFAULT_CLIENT_ID);
+    target.loadRecsForDeletion(TestNormalizedEntity.class, session, lastRunTime, deletionSet);
+  }
+
+  @Test
   public void pullBucketRange_Args__String__String() throws Exception {
     JobRunner.setTestMode(true);
 

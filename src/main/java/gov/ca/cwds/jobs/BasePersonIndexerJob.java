@@ -690,8 +690,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
   }
 
-  private void loadRecsForDeletion(final Class<?> entityClass, final Session session,
-      Date lastRunTime, Set<String> deletionResults) {
+  protected void loadRecsForDeletion(final Class<?> entityClass, final Session session,
+      final Date lastRunTime, Set<String> deletionResults) {
     final String namedQueryNameForDeletion =
         entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
     final NativeQuery<M> queryForDeletion = session.getNamedNativeQuery(namedQueryNameForDeletion);
