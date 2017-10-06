@@ -70,16 +70,16 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   String lastJobRunTimeFilename;
   java.util.Date lastRunTime = new java.util.Date();
 
-  SessionFactory sessionFactory;
-  Session session;
-  EntityManager em;
-  SessionFactoryOptions sfo;
-  Transaction transaction;
+  protected SessionFactory sessionFactory;
+  protected Session session;
+  protected EntityManager em;
+  protected SessionFactoryOptions sfo;
+  protected Transaction transaction;
   StandardServiceRegistry reg;
   ConnectionProvider cp;
-  Connection con;
-  Statement stmt;
-  ResultSet rs;
+  protected Connection con;
+  protected Statement stmt;
+  protected ResultSet rs;
   DatabaseMetaData meta;
 
   @Before
