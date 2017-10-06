@@ -1,9 +1,6 @@
 package gov.ca.cwds.jobs.util.jdbc;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -23,41 +20,10 @@ import gov.ca.cwds.jobs.config.JobOptions;
  */
 public class JobJdbcUtils {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobJdbcUtils.class);
+  static final Logger LOGGER = LoggerFactory.getLogger(JobJdbcUtils.class);
 
   private JobJdbcUtils() {
     // Default, no-op. Static utility class.
-  }
-
-  private static final class PrepWork implements Work {
-    private final Date lastRunTime;
-    private final String sqlInsertLastChange;
-
-    private PrepWork(Date lastRunTime, String sqlInsertLastChange) {
-      this.lastRunTime = lastRunTime;
-      this.sqlInsertLastChange = sqlInsertLastChange;
-    }
-
-    @Override
-    public void execute(Connection con) throws SQLException {
-      con.setSchema(getDBSchemaName());
-      con.setAutoCommit(false);
-      JobDB2Utils.enableParallelism(con);
-
-      final StringBuilder buf = new StringBuilder();
-      buf.append(makeTimestampString(lastRunTime));
-
-      final String sql = sqlInsertLastChange.replaceAll("#SCHEMA#", getDBSchemaName())
-          .replaceAll("##TIMESTAMP##", buf.toString());
-      LOGGER.info("Prep SQL: {}", sql);
-
-      try (final Statement stmt =
-          con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
-        LOGGER.info("Find keys new/changed since {}", lastRunTime);
-        final int cntNewChanged = stmt.executeUpdate(sql);
-        LOGGER.info("Total keys new/changed: {}", cntNewChanged);
-      }
-    }
   }
 
   public static String makeTimestampString(final Date date) {
@@ -82,7 +48,7 @@ public class JobJdbcUtils {
 
   public static void prepHibernateLastChange(final Session session, final Transaction txn,
       final Date lastRunTime, final String sqlInsertLastChange) throws SQLException {
-    final Work work = new PrepWork(lastRunTime, sqlInsertLastChange);
+    final Work work = new PrepSQLWork(lastRunTime, sqlInsertLastChange);
     session.doWork(work);
   }
 
