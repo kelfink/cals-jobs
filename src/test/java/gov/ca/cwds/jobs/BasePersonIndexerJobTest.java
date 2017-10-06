@@ -355,9 +355,17 @@ public class BasePersonIndexerJobTest
 
     final ScrollableResults results = mock(ScrollableResults.class);
     when(nq.scroll(any(ScrollMode.class))).thenReturn(results);
+    when(results.next()).thenReturn(true).thenReturn(false);
+
+    final TestNormalizedEntity[] entities = new TestNormalizedEntity[1];
+    TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    entity.setFirstName("Fred");
+    entity.setLastName("Meyer");
+    entities[0] = entity;
+    when(results.get()).thenReturn(entities);
 
     int actual = target.extractHibernate();
-    int expected = 0;
+    int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 
