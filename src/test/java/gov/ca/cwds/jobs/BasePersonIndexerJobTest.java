@@ -289,6 +289,15 @@ public class BasePersonIndexerJobTest
   }
 
   @Test
+  public void extractLastRunRecsFromTable_Args__Date__error() throws Exception {
+    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any())).thenReturn(q);
+
+    final List<TestNormalizedEntity> actual = target.extractLastRunRecsFromTable(lastRunTime);
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
   public void extractLastRunRecsFromView_Args__Date() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(qn);
