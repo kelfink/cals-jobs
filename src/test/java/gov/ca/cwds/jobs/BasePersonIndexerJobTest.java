@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -37,8 +38,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
+import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
@@ -398,6 +401,18 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
+  @Test(expected = DaoException.class)
+  public void buildBucketList_Args__String__error() throws Exception {
+    when(sessionFactory.getCurrentSession()).thenThrow(DaoException.class);
+
+    final javax.persistence.Query q = mock(javax.persistence.Query.class);
+    when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+
+    final String table = "SOMETBL";
+    final List<BatchBucket> actual = target.buildBucketList(table);
+    assertThat(actual, notNullValue());
+  }
+
   @Test
   public void doLastRun_Args__Date() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
@@ -422,6 +437,22 @@ public class BasePersonIndexerJobTest
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
 
     opts.setLastRunMode(true);
+
+    final Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.YEAR, -50);
+    lastRunTime = cal.getTime();
+
+    final Date actual = target._run(lastRunTime);
+    assertThat(actual, notNullValue());
+  }
+
+  @Test(expected = JobsException.class)
+  public void _run_Args__Date__error() throws Exception {
+    final javax.persistence.Query q = mock(javax.persistence.Query.class);
+    when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+
+    when(esDao.getConfig()).thenThrow(JobsException.class);
+
     final Date actual = target._run(lastRunTime);
     assertThat(actual, notNullValue());
   }
