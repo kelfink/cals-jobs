@@ -695,9 +695,13 @@ public class BasePersonIndexerJobTest
   @Test
   public void testNormalizeLoop() throws Exception {
     final List<TestDenormalizedEntity> grpRecs = new ArrayList<>();
-
     int cntr = 0;
-    Object lastId = DEFAULT_CLIENT_ID;
+    Object lastId = new Object();
+    TestDenormalizedEntity x = new TestDenormalizedEntity("xyz9876543");
+    grpRecs.add(x);
+
+    TestDenormalizedEntity entity = new TestDenormalizedEntity(DEFAULT_CLIENT_ID);
+    target.queueNormalize.add(entity);
     target.normalizeLoop(grpRecs, lastId, cntr);
   }
 
