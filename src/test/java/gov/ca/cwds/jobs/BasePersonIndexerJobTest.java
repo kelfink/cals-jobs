@@ -435,8 +435,7 @@ public class BasePersonIndexerJobTest
   public void _run_Args__Date__auto() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
-
-    opts.setLastRunMode(true);
+    when(opts.isLastRunMode()).thenReturn(true);
 
     final Calendar cal = Calendar.getInstance();
     cal.add(Calendar.YEAR, -50);
@@ -569,6 +568,12 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void doInitialLoadJdbc_Args__() throws Exception {
+    runKillThread(target);
+    target.doInitialLoadJdbc();
+  }
+
+  @Test
+  public void doInitialLoadJdbc_Args__error() throws Exception {
     runKillThread(target);
     target.doInitialLoadJdbc();
   }

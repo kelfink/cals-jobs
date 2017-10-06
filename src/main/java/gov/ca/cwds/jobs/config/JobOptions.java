@@ -189,7 +189,7 @@ public class JobOptions implements ApiMarker {
    * 
    * @return location of last run file
    */
-  public final String getLastRunLoc() {
+  public String getLastRunLoc() {
     return lastRunLoc;
   }
 
@@ -198,7 +198,7 @@ public class JobOptions implements ApiMarker {
    * 
    * @return last run mode
    */
-  public final boolean isLastRunMode() {
+  public boolean isLastRunMode() {
     return lastRunMode;
   }
 
