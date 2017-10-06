@@ -76,7 +76,7 @@ public class JobOptions implements ApiMarker {
   /**
    * Whether to run in periodic "last run" mode or "initial" mode. Defaults to true.
    */
-  final boolean lastRunMode;
+  boolean lastRunMode;
 
   /**
    * When running in "initial load" mode, specifies the starting bucket of records to be processed
@@ -495,6 +495,10 @@ public class JobOptions implements ApiMarker {
 
   public void setRangeGiven(boolean rangeGiven) {
     this.rangeGiven = rangeGiven;
+  }
+
+  public void setLastRunMode(boolean flag) {
+    this.lastRunMode = flag;
   }
 
 }

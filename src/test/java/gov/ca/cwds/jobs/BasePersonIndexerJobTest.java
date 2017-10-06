@@ -295,11 +295,6 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  // @Test
-  // public void getDriverTable_Args__() throws Exception {
-  // final String actual = target.getDriverTableNative();
-  // }
-
   @Test
   public void getPartitionRanges_Args__() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
@@ -417,6 +412,16 @@ public class BasePersonIndexerJobTest
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
 
+    final Date actual = target._run(lastRunTime);
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
+  public void _run_Args__Date__auto() throws Exception {
+    final javax.persistence.Query q = mock(javax.persistence.Query.class);
+    when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+
+    opts.setLastRunMode(true);
     final Date actual = target._run(lastRunTime);
     assertThat(actual, notNullValue());
   }
@@ -685,6 +690,15 @@ public class BasePersonIndexerJobTest
     final String maxId = "2";
     final List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
     assertThat(actual, notNullValue());
+  }
+
+  @Test
+  public void testNormalizeLoop() throws Exception {
+    final List<TestDenormalizedEntity> grpRecs = new ArrayList<>();
+
+    int cntr = 0;
+    Object lastId = DEFAULT_CLIENT_ID;
+    target.normalizeLoop(grpRecs, lastId, cntr);
   }
 
   @Test

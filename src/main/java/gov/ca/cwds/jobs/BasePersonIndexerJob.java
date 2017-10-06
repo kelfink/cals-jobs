@@ -381,7 +381,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     LOGGER.info("DONE: jdbc thread");
   }
 
-  private int normalizeLoop(final List<M> grpRecs, Object theLastId, int inCntr)
+  protected int normalizeLoop(final List<M> grpRecs, Object theLastId, int inCntr)
       throws InterruptedException {
     M m;
     T t;
