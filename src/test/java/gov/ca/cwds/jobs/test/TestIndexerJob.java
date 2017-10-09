@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import org.elasticsearch.action.bulk.BulkProcessor;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +22,7 @@ public class TestIndexerJob
     implements ApiGroupNormalizer<TestDenormalizedEntity> {
 
   private boolean fakeMarkDone;
+  private boolean fakeFinish = true;
 
   public TestIndexerJob(final TestNormalizedEntityDao mainDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
@@ -72,14 +74,6 @@ public class TestIndexerJob
     return null;
   }
 
-  public boolean isFakeMarkDone() {
-    return fakeMarkDone;
-  }
-
-  public void setFakeMarkDone(boolean fakeMarkDone) {
-    this.fakeMarkDone = fakeMarkDone;
-  }
-
   @Override
   public void markJobDone() {
     if (isFakeMarkDone()) {
@@ -87,6 +81,34 @@ public class TestIndexerJob
     }
 
     super.markJobDone();
+  }
+
+  @Override
+  protected void awaitBulkProcessorClose(BulkProcessor bp) {
+    // Do nothing.
+  }
+
+  @Override
+  public synchronized void finish() {
+    if (!fakeFinish) {
+      super.finish();
+    }
+  }
+
+  public boolean isFakeFinish() {
+    return fakeFinish;
+  }
+
+  public void setFakeFinish(boolean fakeFinish) {
+    this.fakeFinish = fakeFinish;
+  }
+
+  public boolean isFakeMarkDone() {
+    return fakeMarkDone;
+  }
+
+  public void setFakeMarkDone(boolean fakeMarkDone) {
+    this.fakeMarkDone = fakeMarkDone;
   }
 
 }

@@ -6,7 +6,7 @@ public enum NeutronIntegerDefaults {
 
   DEFAULT_BATCH_WAIT(25),
 
-  SLEEP_MILLIS(2500),
+  SLEEP_MILLIS(2000),
 
   POLL_MILLIS(1000),
 

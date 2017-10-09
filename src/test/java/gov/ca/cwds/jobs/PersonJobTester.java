@@ -37,6 +37,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.jobs.component.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
@@ -171,11 +172,11 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   }
 
   public void sleepItOff() {
-    // try {
-    // Thread.yield();
-    // Thread.sleep(1500); // NOSONAR
-    // } catch (Exception e) {
-    // }
+    try {
+      Thread.yield();
+      Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
+    } catch (Exception e) {
+    }
   }
 
 }

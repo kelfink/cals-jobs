@@ -364,12 +364,12 @@ public class BasePersonIndexerJobTest
   public void finish_Args__error() throws Exception {
     target.reset();
     target.setFakeMarkDone(true);
+    target.setFakeFinish(false);
     Mockito.doThrow(new JobsException("whatever")).when(esDao).close();
     target.finish();
   }
 
   @Test
-  @Ignore
   public void extractHibernate_Args__() throws Exception {
     final Query q = mock(Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
@@ -454,7 +454,8 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  @Test(expected = JobsException.class)
+  // @Test(expected = JobsException.class)
+  @Test
   public void doLastRun_Args__Date() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(qn);
@@ -615,19 +616,20 @@ public class BasePersonIndexerJobTest
     sleepItOff();
   }
 
-  @Test
+  @Test(expected = JobsException.class)
   public void doInitialLoadJdbc_Args__error() throws Exception {
     runKillThread(target);
     target.doInitialLoadJdbc();
     sleepItOff();
   }
 
-  @Test
+  @Test(expected = InterruptedException.class)
   public void bulkPrepare_Args__BulkProcessor__int() throws Exception {
     BulkProcessor bp = mock(BulkProcessor.class);
     int cntr = 0;
     int actual = target.bulkPrepare(bp, cntr);
     int expected = 0;
+    sleepItOff();
     assertThat(actual, is(equalTo(expected)));
   }
 

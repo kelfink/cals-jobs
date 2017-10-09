@@ -556,11 +556,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         track.getRecsBulkDeleted().getAndAdd(deletionResults.size());
       }
 
-      // Give it time to finish the last batch.
-      LOGGER.info("Waiting on ElasticSearch to finish last batch ...");
-      bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
-      markJobDone();
-
+      awaitBulkProcessorClose(bp);
       return new Date(this.startTime);
     } catch (Exception e) {
       markFailed();
@@ -929,6 +925,17 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
   }
 
+  protected void awaitBulkProcessorClose(final BulkProcessor bp) {
+    try {
+      bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
+    } catch (Exception e2) {
+      markFailed();
+      throw new JobsException("ERROR EXTRACTING VIA HIBERNATE!", e2);
+    } finally {
+      markRetrieveDone();
+    }
+  }
+
   /**
    * Pull replicated records from named query "findBucketRange".
    * 
@@ -952,14 +959,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           prepareDocumentTrapIO(bp, p);
         });
 
-        try {
-          bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
-        } catch (Exception e2) {
-          markFailed();
-          throw new JobsException("ERROR EXTRACTING VIA HIBERNATE!", e2);
-        } finally {
-          markRetrieveDone();
-        }
+        awaitBulkProcessorClose(bp);
       }
     }
 
