@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 
 /**
  * Common functions and features for initial load.

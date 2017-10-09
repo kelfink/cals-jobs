@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.jobs.defaults;
 
 public enum NeutronIntegerDefaults {
 

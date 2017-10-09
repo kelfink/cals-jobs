@@ -22,7 +22,7 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.BatchBucketDao;
-import gov.ca.cwds.jobs.component.NeutronIntegerDefaults;
+import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 
 /**
  * Base class for DAO with some common methods.

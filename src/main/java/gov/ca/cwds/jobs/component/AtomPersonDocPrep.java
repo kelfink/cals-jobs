@@ -13,10 +13,6 @@ import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker {
 
-  static final String ES_PEOPLE_INDEX_SETTINGS =
-      "/elasticsearch/setting/people-index-settings.json";
-  static final String ES_PERSON_MAPPING = "/elasticsearch/mapping/map_person_5x_snake.json";
-
   static final ESOptionalCollection[] KEEP_COLLECTIONS =
       new ESOptionalCollection[] {ESOptionalCollection.NONE};
 

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.jobs.defaults;
 
 public enum NeutronDateTimeFormat {
 
@@ -8,7 +8,7 @@ public enum NeutronDateTimeFormat {
   LAST_RUN_DATE_FORMAT("yyyy-MM-dd HH:mm:ss"),
 
   /**
-   * Common timestamp format for legacy DB.
+   * Timestamp format for legacy DB2.
    */
   LEGACY_TIMESTAMP_FORMAT("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -18,6 +18,7 @@ public enum NeutronDateTimeFormat {
     this.format = format;
   }
 
+  @SuppressWarnings("javadoc")
   public String getFormat() {
     return format;
   }

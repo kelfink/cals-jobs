@@ -58,9 +58,10 @@ import gov.ca.cwds.jobs.component.AtomSecurity;
 import gov.ca.cwds.jobs.component.AtomTransformer;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
-import gov.ca.cwds.jobs.component.NeutronDateTimeFormat;
-import gov.ca.cwds.jobs.component.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
+import gov.ca.cwds.jobs.defaults.NeutronElasticsearchDefaults;
+import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -596,8 +597,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // If the index is missing, create it.
       LOGGER.debug("Create index if missing, effectiveIndexName: {}", effectiveIndexName);
       final String documentType = esDao.getConfig().getElasticsearchDocType();
-      esDao.createIndexIfNeeded(effectiveIndexName, documentType, ES_PEOPLE_INDEX_SETTINGS,
-          ES_PERSON_MAPPING);
+      esDao.createIndexIfNeeded(effectiveIndexName, documentType,
+          NeutronElasticsearchDefaults.ES_PEOPLE_INDEX_SETTINGS.getValue(),
+          NeutronElasticsearchDefaults.ES_PERSON_MAPPING.getValue());
 
       // Smart/auto mode:
       final Calendar cal = Calendar.getInstance();
