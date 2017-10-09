@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.jdbc.Work;
 
 /**
@@ -38,11 +39,13 @@ public class PrepSQLWork implements Work {
     final StringBuilder buf = new StringBuilder();
     buf.append(JobJdbcUtils.makeTimestampString(lastRunTime));
 
-    final String sql = sqlInsertLastChange.replaceAll("#SCHEMA#", JobJdbcUtils.getDBSchemaName())
-        .replaceAll("##TIMESTAMP##", buf.toString());
-    JobJdbcUtils.LOGGER.info("Prep SQL: {}", sql);
+    final String strLastRunTime = JobJdbcUtils.makeSimpleTimestampString(lastRunTime);
 
-    try (final PreparedStatement stmt = con.prepareStatement(sql)) {
+    try (final PreparedStatement stmt = con.prepareStatement(sqlInsertLastChange)) {
+      for (int i = 1; i <= StringUtils.countMatches(sqlInsertLastChange, "?"); i++) {
+        stmt.setString(i, strLastRunTime);
+      }
+
       JobJdbcUtils.LOGGER.info("Find keys new/changed since {}", lastRunTime);
       final int cntNewChanged = stmt.executeUpdate();
       JobJdbcUtils.LOGGER.info("Total keys new/changed: {}", cntNewChanged);

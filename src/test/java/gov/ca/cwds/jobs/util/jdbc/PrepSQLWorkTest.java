@@ -57,6 +57,15 @@ public class PrepSQLWorkTest extends PersonJobTester<ReplicatedPersonCases, EsPe
     target.execute(con);
   }
 
+  @Test
+  public void execute_Args__Connection2() throws Exception {
+    final Date lastRunTime = new Date();
+    final String sqlInsertLastChange = "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > :ts";
+
+    target = new PrepSQLWork(lastRunTime, sqlInsertLastChange);
+    target.execute(con);
+  }
+
   @Test(expected = SQLException.class)
   public void execute_Args__Connection_T__SQLException() throws Exception {
     final Date lastRunTime = new Date();
