@@ -138,4 +138,12 @@ public class JobProgressTrack implements ApiMarker {
     return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
+  public List<Pair<String, String>> getInitialLoadRangesStarted() {
+    return initialLoadRangesStarted;
+  }
+
+  public List<Pair<String, String>> getInitialLoadRangesCompleted() {
+    return initialLoadRangesCompleted;
+  }
+
 }

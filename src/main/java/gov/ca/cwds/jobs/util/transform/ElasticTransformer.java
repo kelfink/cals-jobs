@@ -219,12 +219,10 @@ public class ElasticTransformer {
    * @param elementName target ES element for update
    * @param list list of ES child objects
    * @param keep ES sections to keep
-   * @throws JsonProcessingException on JSON processing error
    */
   public static <T extends PersistentObject> void prepareInsertCollections(
       AtomPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t, String elementName,
-      List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep)
-      throws JsonProcessingException {
+      List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep) {
 
     // Clear out optional collections for updates.
     esp.clearOptionalCollections(keep);

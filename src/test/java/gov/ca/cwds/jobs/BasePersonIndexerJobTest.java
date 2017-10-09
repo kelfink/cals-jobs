@@ -457,7 +457,6 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  // @Test(expected = JobsException.class)
   @Test
   public void doLastRun_Args__Date() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
@@ -469,8 +468,12 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void _run_Args__Date() throws Exception {
+    final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any(String.class))).thenReturn(qn);
+
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+    when(opts.isLastRunMode()).thenReturn(true);
 
     final Date actual = target._run(lastRunTime);
     assertThat(actual, notNullValue());
@@ -494,7 +497,6 @@ public class BasePersonIndexerJobTest
   public void _run_Args__Date__error() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
-
     when(esDao.getConfig()).thenThrow(JobsException.class);
 
     final Date actual = target._run(lastRunTime);
