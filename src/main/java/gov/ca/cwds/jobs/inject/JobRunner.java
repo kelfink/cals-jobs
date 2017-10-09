@@ -121,6 +121,11 @@ public class JobRunner {
     return continuousMode;
   }
 
+  /**
+   * Set continuous run flag.
+   * 
+   * @param mode true to run in continuous mode
+   */
   protected static void setContinuousMode(boolean mode) {
     continuousMode = mode;
   }

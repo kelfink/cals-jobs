@@ -86,11 +86,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  public boolean providesInitialKeyRanges() {
-    return true;
-  }
-
-  @Override
   public EsClientAddress extract(ResultSet rs) throws SQLException {
     return EsClientAddress.extract(rs);
   }
@@ -189,18 +184,17 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
           e.getMessage());
     }
 
-    LOGGER.warn("DONE: Extract thread " + i);
+    LOGGER.warn("DONE: Extract thread {}", i);
   }
 
   /**
-   * The "extract" part of ETL. Single producer, chained consumers.
+   * The "extract" part of ETL. Single producer, chained consumers. This job normalizes **without**
+   * the transform thread.
    */
   @Override
   protected void threadRetrieveByJdbc() {
     Thread.currentThread().setName("extract_main");
     LOGGER.info("BEGIN: main extract thread");
-
-    // This job normalizes **without** the transform thread.
     markTransformDone();
 
     try {
@@ -220,8 +214,13 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
+  public boolean providesInitialKeyRanges() {
+    return true;
+  }
+
+  @Override
   protected List<Pair<String, String>> getPartitionRanges() {
-    List<Pair<String, String>> ret = new ArrayList<>();
+    List<Pair<String, String>> ret = new ArrayList<>(16);
 
     final boolean isMainframe = isDB2OnZOS();
     if (isMainframe && (getDBSchemaName().toUpperCase().endsWith("RSQ")
@@ -265,12 +264,12 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     return ret;
   }
 
+  /**
+   * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
+   * sensitive flag must be deleted.
+   */
   @Override
   public boolean mustDeleteLimitedAccessRecords() {
-    /**
-     * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
-     * sensitive flag must be deleted.
-     */
     return !getOpts().isLoadSealedAndSensitive();
   }
 

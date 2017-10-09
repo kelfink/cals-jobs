@@ -15,6 +15,7 @@ import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +110,6 @@ public class ElasticTransformer {
     return id;
   }
 
-
   /**
    * Prepare sections of a document for update. Elasticsearch automatically updates the provided
    * sections. Some jobs should only write sub-documents, such as screenings or allegations, from a
@@ -161,8 +161,8 @@ public class ElasticTransformer {
             docPrep.getOptionalCollection(esp, t), docPrep.keepCollections());
 
     // "Upsert": update if doc exists, insert if it does not.
-    return new UpdateRequest(alias, docType, id).doc(json.getLeft())
-        .upsert(new IndexRequest(alias, docType, id).source(json.getRight()));
+    return new UpdateRequest(alias, docType, id).doc(json.getLeft(), XContentType.JSON)
+        .upsert(new IndexRequest(alias, docType, id).source(json.getRight(), XContentType.JSON));
   }
 
   /**

@@ -109,7 +109,7 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
   }
 
   @Override
-  public ReplicatedOtherClientName mapRow(ResultSet rs) throws SQLException {
+  public ReplicatedOtherClientName mapRow(final ResultSet rs) throws SQLException {
     return ReplicatedOtherClientName.mapRowToBean(rs);
   }
 
@@ -120,12 +120,12 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
 
   @Override
   public Date getReplicationDate() {
-    return replicationDate;
+    return replicationDate != null ? new Date(replicationDate.getTime()) : null;
   }
 
   @Override
   public void setReplicationDate(Date replicationDate) {
-    this.replicationDate = replicationDate;
+    this.replicationDate = replicationDate != null ? new Date(replicationDate.getTime()) : null;
   }
 
   // =======================

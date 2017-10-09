@@ -3,13 +3,16 @@ package gov.ca.cwds.jobs;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,7 +120,7 @@ public class OtherClientNameIndexerJob
       throws IOException {
 
     // If at first you don't succeed, cheat. :-)
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append("{\"akas\":[");
 
     if (!p.getAkas().isEmpty()) {
@@ -137,8 +140,8 @@ public class OtherClientNameIndexerJob
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
 
-    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson)
-        .upsert(new IndexRequest(alias, docType, esp.getId()).source(insertJson));
+    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON).upsert(
+        new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
   }
 
   @Override
@@ -166,13 +169,61 @@ public class OtherClientNameIndexerJob
   }
 
   @Override
+  public boolean providesInitialKeyRanges() {
+    return true;
+  }
+
+  @Override
+  protected List<Pair<String, String>> getPartitionRanges() {
+    List<Pair<String, String>> ret = new ArrayList<>(16);
+
+    final boolean isMainframe = isDB2OnZOS();
+    if (isMainframe && (getDBSchemaName().toUpperCase().endsWith("RSQ")
+        || getDBSchemaName().toUpperCase().endsWith("REP"))) {
+      // ----------------------------
+      // z/OS, large data set:
+      // ORDER: a,z,A,Z,0,9
+      // ----------------------------
+      ret.add(Pair.of("aaaaaaaaaa", "B3bMRWu8NV"));
+      ret.add(Pair.of("B3bMRWu8NV", "DW5GzxJ30A"));
+      ret.add(Pair.of("DW5GzxJ30A", "FNOBbaG6qq"));
+      ret.add(Pair.of("FNOBbaG6qq", "HJf1EJe25X"));
+      ret.add(Pair.of("HJf1EJe25X", "JCoyq0Iz36"));
+      ret.add(Pair.of("JCoyq0Iz36", "LvijYcj01S"));
+      ret.add(Pair.of("LvijYcj01S", "Npf4LcB3Lr"));
+      ret.add(Pair.of("Npf4LcB3Lr", "PiJ6a0H49S"));
+      ret.add(Pair.of("PiJ6a0H49S", "RbL4aAL34A"));
+      ret.add(Pair.of("RbL4aAL34A", "S3qiIdg0BN"));
+      ret.add(Pair.of("S3qiIdg0BN", "0Ltok9y5Co"));
+      ret.add(Pair.of("0Ltok9y5Co", "2CFeyJd49S"));
+      ret.add(Pair.of("2CFeyJd49S", "4w3QDw136B"));
+      ret.add(Pair.of("4w3QDw136B", "6p9XaHC10S"));
+      ret.add(Pair.of("6p9XaHC10S", "8jw5J580MQ"));
+      ret.add(Pair.of("8jw5J580MQ", "9999999999"));
+
+      ret = limitRange(ret); // command line range restriction
+    } else if (isMainframe) {
+      // ----------------------------
+      // z/OS, small data set:
+      // ORDER: a,z,A,Z,0,9
+      // ----------------------------
+      ret.add(Pair.of("aaaaaaaaaa", "9999999999"));
+    } else {
+      // ----------------------------
+      // Linux:
+      // ORDER: 0,9,a,A,z,Z
+      // ----------------------------
+      ret.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
+    }
+
+    return ret;
+  }
+
+  @Override
   public String getInitialLoadQuery(String dbSchemaName) {
-    StringBuilder buf = new StringBuilder();
-    buf.append("SELECT x.* FROM ");
-    buf.append(dbSchemaName);
-    buf.append(".");
-    buf.append(getInitialLoadViewName());
-    buf.append(" x ");
+    final StringBuilder buf = new StringBuilder();
+    buf.append("SELECT x.* FROM ").append(dbSchemaName).append(".").append(getInitialLoadViewName())
+        .append(" x ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
       buf.append(" WHERE x.CLIENT_SENSITIVITY_IND = 'N' ");

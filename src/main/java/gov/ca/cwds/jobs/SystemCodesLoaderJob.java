@@ -66,7 +66,7 @@ public class SystemCodesLoaderJob {
   }
 
   /**
-   * Load system codes into new system
+   * Delete and load system codes into new system.
    * 
    * @return Map of newly loaded system codes.
    */
@@ -74,10 +74,10 @@ public class SystemCodesLoaderJob {
     Map<Integer, NsSystemCode> loadedSystemCodes = new HashMap<>();
 
     Set<SystemMeta> allSystemMetas = SystemCodeCache.global().getAllSystemMetas();
-    LOGGER.info("Found total " + allSystemMetas.size() + " system metas in legacy");
+    LOGGER.info("Found total {} system metas in legacy", allSystemMetas.size());
 
     Set<SystemCode> allSystemCodes = SystemCodeCache.global().getAllSystemCodes();
-    LOGGER.info("Found total " + allSystemCodes.size() + " system codes in legacy");
+    LOGGER.info("Found total {} system codes in legacy", allSystemCodes.size());
 
     Map<String, SystemMeta> systemMetaMap = new HashMap<>();
     for (SystemMeta systemMeta : allSystemMetas) {
@@ -93,7 +93,6 @@ public class SystemCodesLoaderJob {
     final Transaction tx = session.beginTransaction();
 
     try {
-      // Delete all existing system codes from new system.
       session.doWork(new Work() {
         @Override
         public void execute(Connection connection) throws SQLException {
@@ -118,8 +117,8 @@ public class SystemCodesLoaderJob {
           if (systemMeta != null) {
             nsc.setCategoryDescription(StringUtils.trim(systemMeta.getShortDescriptionName()));
           } else {
-            LOGGER.warn("Missing system meta for category " + categoryId + " for system code "
-                + systemCode.getSystemId());
+            LOGGER.warn("Missing system meta for category {} for system code {}", categoryId,
+                systemCode.getSystemId());
           }
 
           Short subCategoryId = systemCode.getCategoryId();
@@ -130,8 +129,8 @@ public class SystemCodesLoaderJob {
               nsc.setSubCategoryDescription(
                   StringUtils.trim(subCategoySystemCode.getShortDescription()));
             } else {
-              LOGGER.warn("Missing system code for sub-category ID " + subCategoryId
-                  + " for system code " + systemCode.getSystemId());
+              LOGGER.warn("Missing system code for sub-category ID {} for system code {}",
+                  subCategoryId, systemCode.getSystemId());
             }
           }
 
@@ -139,7 +138,7 @@ public class SystemCodesLoaderJob {
           if (!StringUtils.isBlank(logicalId)) {
             nsc.setLogicalId(logicalId);
           } else {
-            LOGGER.warn("Missing logical ID for system code " + systemCode.getSystemId());
+            LOGGER.warn("Missing logical ID for system code {}", systemCode.getSystemId());
           }
 
           systemCodeDao.createOrUpdate(nsc);
@@ -153,23 +152,19 @@ public class SystemCodesLoaderJob {
     }
 
     tx.commit();
-    LOGGER.info("Loaded total " + loadedSystemCodes.size()
-        + " active system codes from legacy into new system");
+    LOGGER.info("Loaded total {} active system codes from legacy into new system",
+        loadedSystemCodes.size());
     return loadedSystemCodes;
   }
 
   private void deleteNsSystemCodes(Connection conn) throws SQLException {
-    Statement stmt = null;
-    try {
+    try (Statement stmt = conn.createStatement()) {
       LOGGER.info("Deleting system codes from new system...");
       final String query = "DELETE FROM SYSTEM_CODES";
-      stmt = conn.createStatement();
       stmt.execute(query);
       LOGGER.info("Deleting system codes from new system");
     } finally {
-      if (stmt != null) {
-        stmt.close();
-      }
+      // Close statement.
     }
   }
 
