@@ -1305,7 +1305,8 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
   }
 
   public void setCltReplicationDate(Date cltReplicationDate) {
-    this.cltReplicationDate = new Date(cltReplicationDate.getTime());
+    this.cltReplicationDate =
+        cltReplicationDate != null ? new Date(cltReplicationDate.getTime()) : null;
   }
 
   public String getCltLastUpdatedId() {

@@ -44,11 +44,9 @@ public class EsClientAddressTest {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
     target = new EsClientAddress();
-
     when(rs.first()).thenReturn(true);
 
     final Short shortZero = Short.valueOf((short) 0);
-
     when(rs.getShort("ADR_GVR_ENTC")).thenReturn(shortZero);
     when(rs.getShort("ADR_ST_SFX_C")).thenReturn(shortZero);
     when(rs.getShort("ADR_STATE_C")).thenReturn(shortZero);
