@@ -49,15 +49,13 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientIndexerJob.class);
 
   private static final String INSERT_CLIENT_LAST_CHG =
-      "INSERT INTO #SCHEMA#.GT_ID (IDENTIFIER)\n" + "SELECT CLT.IDENTIFIER "
-          + "FROM #SCHEMA#.CLIENT_T clt\n" + "WHERE CLT.IBMSNAP_LOGMARKER > ##TIMESTAMP##\n"
-          + "UNION\n" + "SELECT CLT.IDENTIFIER " + "FROM #SCHEMA#.CLIENT_T clt\n"
-          + "JOIN #SCHEMA#.CL_ADDRT cla ON clt.IDENTIFIER = cla.FKCLIENT_T \n"
-          + "WHERE CLA.IBMSNAP_LOGMARKER > ##TIMESTAMP##\n" + "UNION\n" + "SELECT CLT.IDENTIFIER "
-          + "FROM #SCHEMA#.CLIENT_T clt\n"
-          + "JOIN #SCHEMA#.CL_ADDRT cla ON clt.IDENTIFIER = cla.FKCLIENT_T\n"
-          + "JOIN #SCHEMA#.ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER\n"
-          + "WHERE ADR.IBMSNAP_LOGMARKER > ##TIMESTAMP##";
+      "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT CLT.IDENTIFIER \nFROM CLIENT_T clt\n"
+          + "WHERE CLT.IBMSNAP_LOGMARKER > ?\n" + "UNION\n" + "SELECT CLT.IDENTIFIER "
+          + "FROM CLIENT_T clt\n" + "JOIN CL_ADDRT cla ON clt.IDENTIFIER = cla.FKCLIENT_T \n"
+          + "WHERE CLA.IBMSNAP_LOGMARKER > ?\n" + "UNION\n" + "SELECT CLT.IDENTIFIER "
+          + "FROM CLIENT_T clt\n" + "JOIN CL_ADDRT cla ON clt.IDENTIFIER = cla.FKCLIENT_T\n"
+          + "JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER\n"
+          + "WHERE ADR.IBMSNAP_LOGMARKER > ?";
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 

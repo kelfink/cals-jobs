@@ -49,11 +49,11 @@ public class OtherClientNameIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OtherClientNameIndexerJob.class);
 
-  private static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO #SCHEMA#.GT_ID (IDENTIFIER)\n"
-      + "SELECT CLT.IDENTIFIER AS CLIENT_ID\n" + "FROM #SCHEMA#.OCL_NM_T ONM\n"
-      + "JOIN #SCHEMA#.CLIENT_T CLT ON CLT.IDENTIFIER = ONM.FKCLIENT_T\n"
-      + "WHERE ONM.IBMSNAP_LOGMARKER > ##TIMESTAMP##\n" + "UNION ALL\n" + "SELECT CLT.IDENTIFIER\n"
-      + "FROM #SCHEMA#.CLIENT_T CLT WHERE CLT.IBMSNAP_LOGMARKER > ##TIMESTAMP##";
+  private static final String INSERT_CLIENT_LAST_CHG =
+      "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT CLT.IDENTIFIER AS CLIENT_ID\n"
+          + "FROM OCL_NM_T ONM\n" + "JOIN CLIENT_T CLT ON CLT.IDENTIFIER = ONM.FKCLIENT_T\n"
+          + "WHERE ONM.IBMSNAP_LOGMARKER > ?\n" + "UNION ALL\n" + "SELECT CLT.IDENTIFIER\n"
+          + "FROM CLIENT_T CLT WHERE CLT.IBMSNAP_LOGMARKER > ?";
 
   private transient ReplicatedOtherClientNameDao denormDao;
 

@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.inject;
 
 import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,10 @@ public class JobRunner {
 
   private static JobOptions startingOpts;
 
-  private static final Map<Class<?>, BasePersonIndexerJob<?, ?>> jobs = new WeakHashMap<>();
+  /**
+   * Job definitions. Clone as needed.
+   */
+  private static final Map<Class<?>, BasePersonIndexerJob<?, ?>> jobs = new ConcurrentHashMap<>();
 
   private JobRunner() {
     // Default, no-op

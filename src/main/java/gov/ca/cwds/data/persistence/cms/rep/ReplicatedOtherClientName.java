@@ -15,7 +15,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
@@ -38,20 +37,19 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * 
  * @author CWDS API Team
  */
-@NamedNativeQueries({
-    @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findAllUpdatedAfter",
-        query = "SELECT r.* FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r WHERE r.THIRD_ID IN ( "
-            + "SELECT r1.THIRD_ID FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r1 "
-            + "WHERE r1.LAST_CHG > :after " + ") ORDER BY FKCLIENT_T FOR READ ONLY WITH UR ",
-        resultClass = ReplicatedOtherClientName.class),
-    @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findAllUpdatedAfterWithUnlimitedAccess",
-        query = "SELECT r.* FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r WHERE r.THIRD_ID IN ( "
-            + "SELECT r1.THIRD_ID FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r1 "
-            + "WHERE r1.LAST_CHG > :after "
-            + ") AND r.CLIENT_SENSITIVITY_IND = 'N' ORDER BY FKCLIENT_T FOR READ ONLY WITH UR ",
-        resultClass = ReplicatedOtherClientName.class)})
+@NamedNativeQuery(
+    name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findAllUpdatedAfter",
+    query = "SELECT r.* FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r WHERE r.THIRD_ID IN ( "
+        + "SELECT r1.THIRD_ID FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r1 "
+        + "WHERE r1.LAST_CHG > :after " + ") ORDER BY FKCLIENT_T FOR READ ONLY WITH UR ",
+    resultClass = ReplicatedOtherClientName.class)
+@NamedNativeQuery(
+    name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findAllUpdatedAfterWithUnlimitedAccess",
+    query = "SELECT r.* FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r WHERE r.THIRD_ID IN ( "
+        + "SELECT r1.THIRD_ID FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r1 "
+        + "WHERE r1.LAST_CHG > :after "
+        + ") AND r.CLIENT_SENSITIVITY_IND = 'N' ORDER BY FKCLIENT_T FOR READ ONLY WITH UR ",
+    resultClass = ReplicatedOtherClientName.class)
 @Entity
 @Table(name = "VW_LST_OTHER_CLIENT_NAME")
 @JsonPropertyOrder(alphabetic = true)

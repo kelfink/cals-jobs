@@ -47,14 +47,12 @@ public class RelationshipIndexerJob
   private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipIndexerJob.class);
 
   private static final String INSERT_CLIENT_LAST_CHG =
-      "INSERT INTO #SCHEMA#.GT_ID (IDENTIFIER)\n" + "SELECT clnr.IDENTIFIER\n"
-          + "FROM #SCHEMA#.CLN_RELT CLNR\n" + "WHERE CLNR.IBMSNAP_LOGMARKER > ##TIMESTAMP##\n"
-          + "UNION ALL\n" + "SELECT clnr.IDENTIFIER\n" + "FROM #SCHEMA#.CLN_RELT CLNR\n"
-          + "JOIN #SCHEMA#.CLIENT_T CLNS ON CLNR.FKCLIENT_T = CLNS.IDENTIFIER\n"
-          + "WHERE CLNS.IBMSNAP_LOGMARKER > ##TIMESTAMP##\n" + "UNION ALL\n"
-          + "SELECT clnr.IDENTIFIER\n" + "FROM #SCHEMA#.CLN_RELT CLNR\n"
-          + "JOIN #SCHEMA#.CLIENT_T CLNP ON CLNR.FKCLIENT_0 = CLNP.IDENTIFIER\n"
-          + "WHERE CLNP.IBMSNAP_LOGMARKER > ##TIMESTAMP##";
+      "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT clnr.IDENTIFIER\n" + "FROM CLN_RELT CLNR\n"
+          + "WHERE CLNR.IBMSNAP_LOGMARKER > ?\n" + "UNION ALL\n" + "SELECT clnr.IDENTIFIER\n"
+          + "FROM CLN_RELT CLNR\n" + "JOIN CLIENT_T CLNS ON CLNR.FKCLIENT_T = CLNS.IDENTIFIER\n"
+          + "WHERE CLNS.IBMSNAP_LOGMARKER > ?\n" + "UNION ALL\n" + "SELECT clnr.IDENTIFIER\n"
+          + "FROM CLN_RELT CLNR\n" + "JOIN CLIENT_T CLNP ON CLNR.FKCLIENT_0 = CLNP.IDENTIFIER\n"
+          + "WHERE CLNP.IBMSNAP_LOGMARKER > ?";
 
   /**
    * Construct batch job instance with all required dependencies.
