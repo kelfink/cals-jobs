@@ -28,6 +28,11 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
   private Statement statement;
   private String query;
 
+  /**
+   * @param sessionFactory Hibernate session factor
+   * @param rowMapper row mapper
+   * @param query SQL query
+   */
   public JdbcJobReader(SessionFactory sessionFactory, RowMapper<T> rowMapper, String query) {
     this.sessionFactory = sessionFactory;
     this.rowMapper = rowMapper;
@@ -41,7 +46,6 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
           .getService(ConnectionProvider.class).getConnection();
       connection.setAutoCommit(false);
       connection.setReadOnly(true);
-
 
       statement = connection.createStatement();
       statement.setFetchSize(5000);

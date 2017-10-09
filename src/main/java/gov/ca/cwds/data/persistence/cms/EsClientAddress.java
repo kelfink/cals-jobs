@@ -16,12 +16,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.ColumnTransformer;
-import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
@@ -42,29 +41,28 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
  */
 @Entity
 @Table(name = "VW_LST_CLIENT_ADDRESS")
-@NamedNativeQueries({
-    // #145240149: find ALL client/address recs affected by changes.
-    @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfter",
-        query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
-            + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
-            + "WHERE x1.LAST_CHG > :after " + ") ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
-        resultClass = EsClientAddress.class, readOnly = true),
+// #145240149: find ALL client/address recs affected by changes.
+@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfter",
+    query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
+        + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
+        + "WHERE x1.LAST_CHG > :after " + ") ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
+    resultClass = EsClientAddress.class, readOnly = true)
 
-    @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfterWithUnlimitedAccess",
-        query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
-            + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
-            + "WHERE x1.LAST_CHG > :after "
-            + ") AND x.CLT_SENSTV_IND = 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR",
-        resultClass = EsClientAddress.class, readOnly = true),
+@NamedNativeQuery(
+    name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfterWithUnlimitedAccess",
+    query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
+        + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
+        + "WHERE x1.LAST_CHG > :after "
+        + ") AND x.CLT_SENSTV_IND = 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR",
+    resultClass = EsClientAddress.class, readOnly = true)
 
-    @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfterWithLimitedAccess",
-        query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
-            + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
-            + "WHERE x1.LAST_CHG > :after "
-            + ") AND x.CLT_SENSTV_IND != 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
-        resultClass = EsClientAddress.class, readOnly = true)})
+@NamedNativeQuery(
+    name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfterWithLimitedAccess",
+    query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
+        + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
+        + "WHERE x1.LAST_CHG > :after "
+        + ") AND x.CLT_SENSTV_IND != 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
+    resultClass = EsClientAddress.class, readOnly = true)
 public class EsClientAddress extends ApiObjectIdentity implements PersistentObject,
     ApiGroupNormalizer<ReplicatedClient>, Comparable<EsClientAddress>, Comparator<EsClientAddress> {
 
@@ -72,8 +70,6 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
    * Default serialization.
    */
   private static final long serialVersionUID = 1L;
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(EsClientAddress.class);
 
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)
@@ -529,10 +525,8 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
     ret.cltPrevRegionalCenterIndicator = rs.getString("CLT_PREREG_IND");
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
-
     // WARNING: not yet available in RSQ.
     ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
-    // LOGGER.warn("Client=" + ret.cltId + ", County=" + ret.clientCounty);
 
     // Languages
     ret.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
@@ -1672,6 +1666,16 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
   @Override
   public int compareTo(EsClientAddress o) {
     return compare(this, o);
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }
