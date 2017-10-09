@@ -52,7 +52,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
   @SuppressWarnings("unchecked")
   @Override
   public List<T> findAll() {
-    final String namedQueryName = constructNamedQueryName("findAll");
+    final String namedQueryName = constructNamedQueryWithSuffix("findAll");
     Session session = getSessionFactory().getCurrentSession();
 
     Transaction txn = session.beginTransaction();
@@ -76,7 +76,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
   @SuppressWarnings("unchecked")
   @Override
   public List<T> findAllUpdatedAfter(Date datetime) {
-    final String namedQueryName = constructNamedQueryName("findAllUpdatedAfter");
+    final String namedQueryName = constructNamedQueryWithSuffix("findAllUpdatedAfter");
     Session session = getSessionFactory().getCurrentSession();
 
     Transaction txn = session.beginTransaction();
@@ -95,7 +95,9 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
 
       while (results.next()) {
         Object[] row = results.get();
-        ret.add((T) row[0]);
+        for (Object obj : row) {
+          ret.add((T) obj);
+        }
 
         if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
           LOGGER.info("find updated after {}. recs read: {}", ts, cnt);
@@ -177,7 +179,9 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
 
       while (results.next()) {
         Object[] row = results.get();
-        ret.add((T) row[0]);
+        for (Object obj : row) {
+          ret.add((T) obj);
+        }
 
         if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
           LOGGER.info("recs read: {}", cnt);
@@ -241,7 +245,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
   @Override
   @SuppressWarnings("unchecked")
   public List<T> bucketList(long bucketNum, long totalBuckets) {
-    final String namedQueryName = constructNamedQueryName("findAllByBucket");
+    final String namedQueryName = constructNamedQueryWithSuffix("findAllByBucket");
     final Session session = getSessionFactory().getCurrentSession();
     final Transaction txn = session.beginTransaction();
 
@@ -259,7 +263,9 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
 
       while (results.next()) {
         Object[] row = results.get();
-        ret.add((T) row[0]);
+        for (Object obj : row) {
+          ret.add((T) obj);
+        }
 
         if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
           LOGGER.info("recs read: {}", cnt);
@@ -284,7 +290,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
    * @param suffix suffix of the named query
    * @return named query for lookup
    */
-  private String constructNamedQueryName(String suffix) {
+  private String constructNamedQueryWithSuffix(String suffix) {
     return getEntityClass().getName() + "." + suffix;
   }
 

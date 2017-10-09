@@ -8,6 +8,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,9 +74,10 @@ public class MSearchJob extends
     long totalHits = 0;
     for (MultiSearchResponse.Item item : sr.getResponses()) {
       final SearchResponse response = item.getResponse();
-      totalHits += response.getHits().getTotalHits();
+      final SearchHits hits = response.getHits();
+      totalHits += hits.getTotalHits();
 
-      for (SearchHit hit : response.getHits().getHits()) {
+      for (SearchHit hit : hits.getHits()) {
         LOGGER.info("hit: {}",
             ToStringBuilder.reflectionToString(hit, ToStringStyle.DEFAULT_STYLE)); // NOSONAR
       }

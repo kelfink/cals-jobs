@@ -65,14 +65,16 @@ public class JobBulkProcessorBuilder implements ApiMarker {
 
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
-        track.getRecsBulkBefore().getAndAdd(request.numberOfActions());
-        LOGGER.debug("Ready to execute bulk of {} actions", request.numberOfActions());
+        final int numActions = request.numberOfActions();
+        track.getRecsBulkBefore().getAndAdd(numActions);
+        LOGGER.debug("Ready to execute bulk of {} actions", numActions);
       }
 
       @Override
       public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-        track.getRecsBulkAfter().getAndAdd(request.numberOfActions());
-        LOGGER.info("Executed bulk of {} actions", request.numberOfActions());
+        final int numActions = request.numberOfActions();
+        track.getRecsBulkAfter().getAndAdd(numActions);
+        LOGGER.info("Executed bulk of {} actions", numActions);
       }
 
       @Override
@@ -80,6 +82,7 @@ public class JobBulkProcessorBuilder implements ApiMarker {
         track.trackBulkError();
         LOGGER.error("ERROR EXECUTING BULK", failure);
       }
+
     }).setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(ES_BYTES_MB, ByteSizeUnit.MB))
         .setConcurrentRequests(1).setName("jobs_bp").build();
   }
