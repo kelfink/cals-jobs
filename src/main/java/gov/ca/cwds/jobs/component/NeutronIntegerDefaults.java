@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs.component;
 
-import gov.ca.cwds.dao.cms.BatchDaoImpl;
-
 public enum NeutronIntegerDefaults {
 
   DEFAULT_BATCH_WAIT(25),
@@ -10,7 +8,9 @@ public enum NeutronIntegerDefaults {
 
   POLL_MILLIS(1000),
 
-  DEFAULT_FETCH_SIZE(BatchDaoImpl.DEFAULT_FETCH_SIZE);
+  DEFAULT_BUCKETS(1),
+
+  DEFAULT_FETCH_SIZE(5000);
 
   private final int value;
 

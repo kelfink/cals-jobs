@@ -33,6 +33,8 @@ public class EsClientAddressTest {
   @Mock
   private ResultSet rs;
 
+  EsClientAddress target = new EsClientAddress();
+
   @BeforeClass
   public static void setupClass() throws Exception {
     emptyTarget = EsClientAddress.extract(Mockito.mock(ResultSet.class));
@@ -41,6 +43,8 @@ public class EsClientAddressTest {
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
+    target = new EsClientAddress();
+
     when(rs.first()).thenReturn(true);
 
     final Short shortZero = Short.valueOf((short) 0);
@@ -1883,11 +1887,11 @@ public class EsClientAddressTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void setLastChange_Args__Date() throws Exception {
-    EsClientAddress target = new EsClientAddress();
-    Date lastChange = mock(Date.class);
-    target.setLastChange(lastChange);
-  }
+  // @Test
+  // public void setLastChange_Args__Date() throws Exception {
+  // EsClientAddress target = new EsClientAddress();
+  // Date lastChange = mock(Date.class);
+  // target.setLastChange(lastChange);
+  // }
 
 }

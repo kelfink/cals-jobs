@@ -334,10 +334,6 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     return fillScreening(null);
   }
 
-  public void normalizeAllegation() {
-
-  }
-
   /**
    * Iterate screenings from the perspective of "this" participant. Separate "this" participant from
    * "other" participant. This job stores person documents in ES, not disconnected or independent

@@ -22,6 +22,7 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.BatchBucketDao;
+import gov.ca.cwds.jobs.component.NeutronIntegerDefaults;
 
 /**
  * Base class for DAO with some common methods.
@@ -33,8 +34,6 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
     implements BaseDao<T>, BatchBucketDao<T> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BatchDaoImpl.class);
-
-  public static final int DEFAULT_FETCH_SIZE = 5000;
 
   /**
    * Constructor
@@ -58,7 +57,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
 
     Transaction txn = session.beginTransaction();
     try {
-      Query query = session.getNamedQuery(namedQueryName);
+      final Query query = session.getNamedQuery(namedQueryName);
       ImmutableList.Builder<T> entities = new ImmutableList.Builder<>();
       entities.addAll(query.list());
       txn.commit();
@@ -84,21 +83,21 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
     final java.sql.Timestamp ts = new java.sql.Timestamp(datetime.getTime());
     try {
       // Cross platform DB2 (both z/OS and Linux).
-      Query query =
+      final Query query =
           session.getNamedQuery(namedQueryName).setCacheable(false).setFlushMode(FlushMode.MANUAL)
               .setReadOnly(true).setCacheMode(CacheMode.IGNORE).setTimestamp("after", ts);
 
       // Iterate, process, flush.
-      query.setFetchSize(DEFAULT_FETCH_SIZE);
-      ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
-      ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
+      query.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
+      final ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
+      final ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
       int cnt = 0;
 
       while (results.next()) {
         Object[] row = results.get();
         ret.add((T) row[0]);
 
-        if (((++cnt) % DEFAULT_FETCH_SIZE) == 0) {
+        if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
           LOGGER.info("find updated after {}. recs read: {}", ts, cnt);
           session.flush();
         }
@@ -165,10 +164,11 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
     final Transaction txn = session.beginTransaction();
 
     try {
-      Query query = session.getNamedQuery(namedQueryName).setInteger("bucket_num", (int) bucketNum)
-          .setInteger("total_buckets", (int) totalBuckets).setString("min_id", minId)
-          .setString("max_id", maxId).setCacheable(false).setFlushMode(FlushMode.MANUAL)
-          .setReadOnly(true).setCacheMode(CacheMode.IGNORE).setFetchSize(DEFAULT_FETCH_SIZE);
+      final Query query = session.getNamedQuery(namedQueryName)
+          .setInteger("bucket_num", (int) bucketNum).setInteger("total_buckets", (int) totalBuckets)
+          .setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
+          .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
+          .setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
 
       // Iterate, process, flush.
       final ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
@@ -179,7 +179,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
         Object[] row = results.get();
         ret.add((T) row[0]);
 
-        if (((++cnt) % DEFAULT_FETCH_SIZE) == 0) {
+        if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
           LOGGER.info("recs read: {}", cnt);
           session.flush();
         }
@@ -246,14 +246,14 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
     final Transaction txn = session.beginTransaction();
 
     try {
-      Query query = session.getNamedQuery(namedQueryName).setCacheable(false)
+      final Query query = session.getNamedQuery(namedQueryName).setCacheable(false)
           .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
           .setInteger("bucket_num", (int) bucketNum)
           .setInteger("total_buckets", (int) totalBuckets);
 
       // Iterate, process, flush.
-      query.setFetchSize(DEFAULT_FETCH_SIZE);
-      ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
+      query.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
+      final ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
       ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
       int cnt = 0;
 
@@ -261,7 +261,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
         Object[] row = results.get();
         ret.add((T) row[0]);
 
-        if (((++cnt) % DEFAULT_FETCH_SIZE) == 0) {
+        if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
           LOGGER.info("recs read: {}", cnt);
           session.flush();
         }

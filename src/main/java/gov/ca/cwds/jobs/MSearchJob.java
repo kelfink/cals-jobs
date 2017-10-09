@@ -77,7 +77,7 @@ public class MSearchJob extends
 
       for (SearchHit hit : response.getHits().getHits()) {
         LOGGER.info("hit: {}",
-            ToStringBuilder.reflectionToString(hit, ToStringStyle.DEFAULT_STYLE));
+            ToStringBuilder.reflectionToString(hit, ToStringStyle.DEFAULT_STYLE)); // NOSONAR
       }
     }
 

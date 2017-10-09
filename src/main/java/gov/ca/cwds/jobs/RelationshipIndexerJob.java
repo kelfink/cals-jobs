@@ -100,11 +100,8 @@ public class RelationshipIndexerJob
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
-    buf.append("SELECT x.* FROM ");
-    buf.append(dbSchemaName);
-    buf.append(".");
-    buf.append(getInitialLoadViewName());
-    buf.append(" x ");
+    buf.append("SELECT x.* FROM ").append(dbSchemaName).append(".").append(getInitialLoadViewName())
+        .append(" x ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
       buf.append(" WHERE x.THIS_SENSITIVITY_IND = 'N' AND x.RELATED_SENSITIVITY_IND = 'N' ");
@@ -117,7 +114,6 @@ public class RelationshipIndexerJob
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedRelationships p)
       throws IOException {
-
     final StringBuilder buf = new StringBuilder();
     buf.append("{\"relationships\":[");
 

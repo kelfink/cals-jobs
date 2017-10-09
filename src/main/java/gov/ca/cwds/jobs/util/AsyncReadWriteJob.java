@@ -12,6 +12,11 @@ import gov.ca.cwds.jobs.exception.JobsException;
 @SuppressWarnings("unchecked")
 public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobComponent {
 
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
+
   private transient JobReader reader;
   private transient JobProcessor processor;
   private transient JobWriter writer;

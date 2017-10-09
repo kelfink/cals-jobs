@@ -591,7 +591,7 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
     ret.setAdrReplicationOperation(
         CmsReplicationOperation.strToRepOp(rs.getString("ADR_IBMSNAP_OPERATION")));
     ret.setAdrReplicationDate(rs.getDate("ADR_IBMSNAP_LOGMARKER"));
-    ret.setLastChange(rs.getTimestamp("LAST_CHG"));
+    ret.lastChange = rs.getTimestamp("LAST_CHG");
 
     return ret;
   }
@@ -638,7 +638,7 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
       ret.setEmailAddress(getCltEmailAddress());
       ret.setEstimatedDobCode(getCltEstimatedDobCode());
       ret.setEthUnableToDetReasonCode(getCltEthUnableToDetReasonCode());
-      ret.setFatherParentalRightTermDate(getCltFatherParentalRightTermDate());
+      ret.setFatherParentalRightTermDate(cltFatherParentalRightTermDate);
       ret.setCommonFirstName(getCltCommonFirstName());
       ret.setGenderCode(getCltGenderCode());
       ret.setHealthSummaryText(getCltHealthSummaryText());
@@ -998,10 +998,6 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
     this.cltEthUnableToDetReasonCode = cltEthUnableToDetReasonCode;
   }
 
-  public Date getCltFatherParentalRightTermDate() {
-    return cltFatherParentalRightTermDate;
-  }
-
   public void setCltFatherParentalRightTermDate(Date cltFatherParentalRightTermDate) {
     this.cltFatherParentalRightTermDate = cltFatherParentalRightTermDate;
   }
@@ -1309,7 +1305,7 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
   }
 
   public void setCltReplicationDate(Date cltReplicationDate) {
-    this.cltReplicationDate = cltReplicationDate;
+    this.cltReplicationDate = new Date(cltReplicationDate.getTime());
   }
 
   public String getCltLastUpdatedId() {
@@ -1654,9 +1650,9 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
     return lastChange;
   }
 
-  public void setLastChange(Date lastChange) {
-    this.lastChange = lastChange;
-  }
+  // public void setLastChange(Date lastChange) {
+  // this.lastChange = lastChange;
+  // }
 
   @Override
   public int compare(EsClientAddress o1, EsClientAddress o2) {
@@ -1676,6 +1672,10 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
   @Override
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
+  public Date getCltFatherParentalRightTermDate() {
+    return cltFatherParentalRightTermDate;
   }
 
 }

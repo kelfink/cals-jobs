@@ -90,11 +90,11 @@ public class ElasticTransformer {
 
   protected static String determineId(final ApiLegacyAware l, final ElasticSearchPerson esp) {
     String id;
-    final boolean hasLegacyId =
-        StringUtils.isNotBlank(l.getLegacyId()) && l.getLegacyId().trim().length() == CMS_ID_LEN;
+    final String legacyId = StringUtils.isNotBlank(l.getLegacyId()) ? l.getLegacyId().trim() : "";
+    final boolean hasLegacyId = legacyId.length() == CMS_ID_LEN;
 
     if (hasLegacyId) {
-      id = l.getLegacyId();
+      id = legacyId;
       esp.setLegacyId(id);
     } else {
       id = esp.getId();
@@ -137,8 +137,6 @@ public class ElasticTransformer {
       AtomPersonDocPrep<T> docPrep, String alias, String docType, final ElasticSearchPerson esp,
       T t) throws IOException {
     String id = esp.getId();
-
-    // doSomething(t, esp);
 
     // Set id and legacy id.
     if (t instanceof ApiLegacyAware) {
@@ -292,10 +290,11 @@ public class ElasticTransformer {
       ret.setLegacyId(legacyId.trim());
       ret.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
 
-      if (legacyId.trim().length() == CMS_ID_LEN) {
-        ret.setLegacyUiId(CmsKeyIdGenerator.getUIIdentifierFromKey(legacyId.trim()));
+      final String cleanLegacyId = legacyId.trim();
+      if (cleanLegacyId.length() == CMS_ID_LEN) {
+        ret.setLegacyUiId(CmsKeyIdGenerator.getUIIdentifierFromKey(cleanLegacyId));
       } else {
-        ret.setLegacyUiId(legacyId.trim());
+        ret.setLegacyUiId(cleanLegacyId);
       }
 
       if (legacyTable != null) {

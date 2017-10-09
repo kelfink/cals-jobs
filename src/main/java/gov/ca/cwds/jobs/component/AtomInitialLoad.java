@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
-import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.JobOptions;
 
 /**
@@ -18,14 +17,10 @@ import gov.ca.cwds.jobs.config.JobOptions;
  * @author CWDS API Team
  *
  * @param <T> normalized type
- * @param <M> de-normalized type or same as normalized type if normalization not needed
  */
-public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends AtomShared {
+public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared {
 
   static final Logger LOGGER = LoggerFactory.getLogger(AtomInitialLoad.class);
-
-  static final int DEFAULT_BUCKETS = 1;
 
   /**
    * Restrict initial load key ranges from command line.
@@ -88,7 +83,7 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
    * @return default total buckets
    */
   default int getJobTotalBuckets() {
-    return DEFAULT_BUCKETS;
+    return NeutronIntegerDefaults.DEFAULT_BUCKETS.getValue();
   }
 
   /**

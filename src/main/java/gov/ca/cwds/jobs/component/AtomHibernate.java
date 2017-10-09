@@ -27,7 +27,7 @@ import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
  * @param <M> de-normalized type or same as normalized type if normalization not needed
  */
 public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends AtomShared, JobResultSetAware<M> {
+    extends AtomShared, AtomInitialLoad<T>, JobResultSetAware<M> {
 
   static final String SQL_COLUMN_AFTER = "after";
 

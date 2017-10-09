@@ -56,7 +56,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     String focusChildId = rs.getString("FOCUS_CHILD_ID");
 
     if (focusChildId == null) {
-      LOGGER.warn("FOCUS_CHILD_ID is null for CASE_ID: {}", caseId.trim());
+      LOGGER.warn("FOCUS_CHILD_ID is null for CASE_ID: {}", caseId);
       return null;
     }
 

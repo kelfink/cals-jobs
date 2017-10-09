@@ -34,10 +34,10 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.query.NativeQuery;
+import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -95,7 +95,7 @@ import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends LastSuccessfulRunJob implements AutoCloseable, AtomPersonDocPrep<T>,
-    AtomHibernate<T, M>, AtomTransformer<T, M>, AtomInitialLoad<T, M>, AtomSecurity {
+    AtomHibernate<T, M>, AtomTransformer<T, M>, AtomInitialLoad<T>, AtomSecurity {
 
   /**
    * Default serialization.
@@ -163,7 +163,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Read/write lock for extract threads and sources, such as JDBC, Hibernate, or even flat files.
    */
-  protected final transient ReadWriteLock lock;
+  protected transient ReadWriteLock lock;
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -192,9 +192,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param id primary key
    * @return bulk delete request
-   * @throws JsonProcessingException unable to parse
    */
-  public DeleteRequest bulkDelete(final String id) throws JsonProcessingException {
+  public DeleteRequest bulkDelete(final String id) {
     return new DeleteRequest(getOpts().getIndexName(), esDao.getConfig().getElasticsearchDocType(),
         id);
   }
@@ -266,7 +265,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         getTrack().trackBulkPrepared();
       }
     } catch (Exception e) {
-      throw JobLogs.buildException(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
+      throw JobLogs.buildException(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey()); // NOSONAR
     }
 
     return ret;
@@ -323,7 +322,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       threadIndexer.join();
       Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue());
-      LOGGER.info("PROGRESS TRACK: {}", this.getTrack().toString());
+
+      // SLF4J does not yet support conditional invocation.
+      LOGGER.info("PROGRESS TRACK: {}", this.getTrack().toString()); // NOSONAR
     } catch (Exception e) {
       markFailed();
       Thread.currentThread().interrupt();
@@ -373,7 +374,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     } catch (Exception e) {
       markFailed();
-      JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      throw JobLogs.buildException(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       markRetrieveDone();
     }
@@ -590,7 +591,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       getOpts().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
 
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
-      LOGGER.info("Last successsful run time: {}", lastRun.toString());
+      LOGGER.info("Last successsful run time: {}", lastRun.toString()); // NOSONAR
 
       // If the index is missing, create it.
       LOGGER.debug("Create index if missing, effectiveIndexName: {}", effectiveIndexName);
@@ -628,10 +629,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         }
       }
 
-      LOGGER.info(track.toString());
+      // SLF4J does not yet support conditional invocation.
+      LOGGER.info(track.toString()); // NOSONAR
       LOGGER.info("Updating last successful run time to {}",
           new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
-              .format(startTime));
+              .format(startTime)); // NOSONAR
       return new Date(this.startTime);
     } catch (Exception e) {
       markFailed();
@@ -666,7 +668,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
-      q.setString(SQL_COLUMN_AFTER, JobJdbcUtils.makeSimpleTimestampString(lastRunTime));
+      q.setParameter(SQL_COLUMN_AFTER, JobJdbcUtils.makeSimpleTimestampString(lastRunTime),
+          StringType.INSTANCE);
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
@@ -690,11 +693,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final Date lastRunTime, Set<String> deletionResults) {
     final String namedQueryNameForDeletion =
         entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
-    final NativeQuery<M> queryForDeletion = session.getNamedNativeQuery(namedQueryNameForDeletion);
-    queryForDeletion.setString(SQL_COLUMN_AFTER,
-        JobJdbcUtils.makeSimpleTimestampString(lastRunTime));
+    final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
+    q.setParameter(SQL_COLUMN_AFTER, JobJdbcUtils.makeSimpleTimestampString(lastRunTime),
+        StringType.INSTANCE);
 
-    final List<M> deletionRecs = queryForDeletion.list();
+    final List<M> deletionRecs = q.list();
 
     if (deletionRecs != null && !deletionRecs.isEmpty()) {
       for (M rec : deletionRecs) {
@@ -731,7 +734,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       prepHibernateLastChange(session, txn, lastRunTime);
       final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
-      q.setString(SQL_COLUMN_AFTER, JobJdbcUtils.makeSimpleTimestampString(lastRunTime));
+      q.setParameter(SQL_COLUMN_AFTER, JobJdbcUtils.makeSimpleTimestampString(lastRunTime),
+          StringType.INSTANCE);
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<M> recs = q.list();
@@ -821,7 +825,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Deprecated
   @SuppressWarnings("unchecked")
   protected List<BatchBucket> buildBucketList(final String table) {
-    List<BatchBucket> ret = new ArrayList<>();
+    List<BatchBucket> ret;
     Transaction txn = null;
 
     try {
@@ -894,7 +898,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final Transaction txn = session.beginTransaction();
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
-      q.setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
+      q.setParameter("min_id", minId, StringType.INSTANCE)
+          .setParameter("max_id", maxId, StringType.INSTANCE).setCacheable(false)
           .setFlushMode(FlushMode.MANUAL).setCacheMode(CacheMode.IGNORE)
           .setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
 
@@ -904,8 +909,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       int cnt = 0;
 
       while (results.next()) {
-        Object[] row = results.get();
-        ret.add((T) row[0]);
+        final Object[] row = results.get();
+        for (Object obj : row) {
+          ret.add((T) obj);
+        }
 
         if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
           LOGGER.info("recs read: {}", cnt);
@@ -930,7 +937,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
     } catch (Exception e2) {
       markFailed();
-      throw new JobsException("ERROR EXTRACTING VIA HIBERNATE!", e2);
+      throw new JobsException("ERROR AWAITING BULK PROCESSOR CLOSE!", e2);
     } finally {
       markRetrieveDone();
     }

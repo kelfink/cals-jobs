@@ -31,6 +31,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.NativeQuery;
+import org.hibernate.type.StringType;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -386,6 +387,8 @@ public class BasePersonIndexerJobTest
     final NativeQuery<TestDenormalizedEntity> nq = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(nq);
     when(nq.setString(any(String.class), any(String.class))).thenReturn(nq);
+    when(nq.setParameter(any(String.class), any(String.class), any(StringType.class)))
+        .thenReturn(nq);
     when(nq.setFlushMode(any(FlushMode.class))).thenReturn(nq);
     when(nq.setReadOnly(any(Boolean.class))).thenReturn(nq);
     when(nq.setCacheMode(any(CacheMode.class))).thenReturn(nq);
@@ -547,15 +550,12 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  @Test
+  @Test(expected = JsonProcessingException.class)
   @Ignore
   public void bulkDelete_Args__String_T__JsonProcessingException() throws Exception {
     String id = DEFAULT_CLIENT_ID;
-    try {
-      target.bulkDelete(id);
-      fail("Expected exception was not thrown!");
-    } catch (JsonProcessingException e) {
-    }
+    target.bulkDelete(id);
+    fail("Expected exception was not thrown!");
   }
 
   @Test
@@ -752,6 +752,7 @@ public class BasePersonIndexerJobTest
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
     when(q.setString(any(String.class), any(String.class))).thenReturn(q);
+    when(q.setParameter(any(String.class), any(String.class), any(StringType.class))).thenReturn(q);
     when(q.setFlushMode(any(FlushMode.class))).thenReturn(q);
     when(q.setReadOnly(any(Boolean.class))).thenReturn(q);
     when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
