@@ -329,8 +329,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       Thread.currentThread().interrupt();
       JobLogs.raiseError(LOGGER, e, "GENERAL EXCEPTION: {}", e);
     } finally {
-      this.finish(); // OK for initial load.
       markJobDone();
+      this.finish(); // OK for initial load.
     }
 
     LOGGER.info("DONE: JDBC initial load");

@@ -27,12 +27,14 @@ import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
+import org.hibernate.HibernateException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.NativeQuery;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -277,6 +279,7 @@ public class BasePersonIndexerJobTest
   public void threadTransform_Args__() throws Exception {
     runKillThread(target);
     target.threadNormalize();
+    sleepItOff();
   }
 
   @Test
@@ -305,6 +308,26 @@ public class BasePersonIndexerJobTest
     final List<TestNormalizedEntity> actual =
         target.extractLastRunRecsFromView(lastRunTime, new HashSet<String>());
     assertThat(actual, notNullValue());
+  }
+
+  @Test(expected = SQLException.class)
+  public void extractLastRunRecsFromView_Args__Date__SQLException() throws Exception {
+    final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any())).thenReturn(qn);
+    when(session.beginTransaction()).thenThrow(SQLException.class);
+
+    final List<TestNormalizedEntity> actual =
+        target.extractLastRunRecsFromView(lastRunTime, new HashSet<String>());
+  }
+
+  @Test(expected = HibernateException.class)
+  public void extractLastRunRecsFromView_Args__Date__HibernateException() throws Exception {
+    final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any())).thenReturn(qn);
+    when(session.beginTransaction()).thenThrow(HibernateException.class);
+
+    final List<TestNormalizedEntity> actual =
+        target.extractLastRunRecsFromView(lastRunTime, new HashSet<String>());
   }
 
   @Test
@@ -337,7 +360,16 @@ public class BasePersonIndexerJobTest
     target.finish();
   }
 
+  @Test(expected = JobsException.class)
+  public void finish_Args__error() throws Exception {
+    target.reset();
+    target.setFakeMarkDone(true);
+    Mockito.doThrow(new JobsException("whatever")).when(esDao).close();
+    target.finish();
+  }
+
   @Test
+  @Ignore
   public void extractHibernate_Args__() throws Exception {
     final Query q = mock(Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
@@ -422,7 +454,7 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  @Test
+  @Test(expected = JobsException.class)
   public void doLastRun_Args__Date() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(qn);
@@ -469,6 +501,7 @@ public class BasePersonIndexerJobTest
   public void threadExtractJdbc_Args__() throws Exception {
     runKillThread(target);
     target.threadRetrieveByJdbc();
+    sleepItOff();
   }
 
   @Test
@@ -579,12 +612,14 @@ public class BasePersonIndexerJobTest
   public void doInitialLoadJdbc_Args__() throws Exception {
     runKillThread(target);
     target.doInitialLoadJdbc();
+    sleepItOff();
   }
 
   @Test
   public void doInitialLoadJdbc_Args__error() throws Exception {
     runKillThread(target);
     target.doInitialLoadJdbc();
+    sleepItOff();
   }
 
   @Test
@@ -600,6 +635,7 @@ public class BasePersonIndexerJobTest
   public void threadIndex_Args__() throws Exception {
     runKillThread(target);
     target.threadIndex();
+    sleepItOff();
   }
 
   @Test
@@ -638,11 +674,11 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  @Test(expected = SQLException.class)
-  @Ignore
+  @Test(expected = JobsException.class)
   public void extractLastRunRecsFromView_Args__sql_error() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
-    when(session.getNamedNativeQuery(any())).thenReturn(qn);
+    // when(session.getNamedNativeQuery(any())).thenReturn(qn);
+    when(session.getNamedNativeQuery(any())).thenThrow(SQLException.class);
 
     final List<TestDenormalizedEntity> denorms = new ArrayList<>();
     TestDenormalizedEntity m = new TestDenormalizedEntity(DEFAULT_CLIENT_ID);

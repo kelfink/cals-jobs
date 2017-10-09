@@ -109,6 +109,14 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
     this.doneJob = true;
   }
 
+  public void reset() {
+    this.doneRetrieve = false;
+    this.doneIndex = false;
+    this.doneTransform = false;
+    this.doneJob = false;
+    this.fatalError = false;
+  }
+
   /**
    * {@inheritDoc}
    */

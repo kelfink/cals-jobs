@@ -13,11 +13,14 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
+import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 
 public class TestIndexerJob
     extends BasePersonIndexerJob<TestNormalizedEntity, TestDenormalizedEntity>
     implements ApiGroupNormalizer<TestDenormalizedEntity> {
+
+  private boolean fakeMarkDone;
 
   public TestIndexerJob(final TestNormalizedEntityDao mainDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
@@ -67,6 +70,23 @@ public class TestIndexerJob
   @Override
   public TestDenormalizedEntity normalize(Map<Object, TestDenormalizedEntity> map) {
     return null;
+  }
+
+  public boolean isFakeMarkDone() {
+    return fakeMarkDone;
+  }
+
+  public void setFakeMarkDone(boolean fakeMarkDone) {
+    this.fakeMarkDone = fakeMarkDone;
+  }
+
+  @Override
+  public void markJobDone() {
+    if (isFakeMarkDone()) {
+      throw new JobsException("fake error");
+    }
+
+    super.markJobDone();
   }
 
 }
