@@ -131,9 +131,10 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    * @return List of ES person elements
    */
   @Override
-  public List<? extends ApiTypedIdentifier<String>> getOptionalCollection(ElasticSearchPerson esp,
+  public List<ApiTypedIdentifier<String>> getOptionalCollection(ElasticSearchPerson esp,
       IntakeParticipant t) {
-    return esp.getScreenings();
+    final List<? extends ApiTypedIdentifier<String>> ret = esp.getScreenings();
+    return (List<ApiTypedIdentifier<String>>) ret;
   }
 
   @Override

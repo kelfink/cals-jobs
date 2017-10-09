@@ -28,7 +28,6 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.data.std.ApiObjectIdentity;
 
 /**
  * Entity bean for view VW_LST_CLIENT_ADDRESS.
@@ -63,8 +62,8 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
         + "WHERE x1.LAST_CHG > :after "
         + ") AND x.CLT_SENSTV_IND != 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
     resultClass = EsClientAddress.class, readOnly = true)
-public class EsClientAddress extends ApiObjectIdentity implements PersistentObject,
-    ApiGroupNormalizer<ReplicatedClient>, Comparable<EsClientAddress>, Comparator<EsClientAddress> {
+public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<ReplicatedClient>,
+    Comparable<EsClientAddress>, Comparator<EsClientAddress> {
 
   /**
    * Default serialization.
@@ -1650,10 +1649,6 @@ public class EsClientAddress extends ApiObjectIdentity implements PersistentObje
   public Date getLastChange() {
     return lastChange;
   }
-
-  // public void setLastChange(Date lastChange) {
-  // this.lastChange = lastChange;
-  // }
 
   @Override
   public int compare(EsClientAddress o1, EsClientAddress o2) {

@@ -20,7 +20,7 @@ public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker
   static final ESOptionalCollection[] KEEP_COLLECTIONS =
       new ESOptionalCollection[] {ESOptionalCollection.NONE};
 
-  static final List<? extends ApiTypedIdentifier<String>> EMPTY_OPTIONAL_LIST = new ArrayList<>();
+  static final List<ApiTypedIdentifier<String>> EMPTY_OPTIONAL_LIST = new ArrayList<>();
 
   /**
    * Set optional ES person collections before serializing JSON for insert. Child classes which
@@ -71,8 +71,7 @@ public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker
    * @param t normalized type
    * @return List of ES person elements
    */
-  default List<? extends ApiTypedIdentifier<String>> getOptionalCollection(ElasticSearchPerson esp,
-      T t) {
+  default List<ApiTypedIdentifier<String>> getOptionalCollection(ElasticSearchPerson esp, T t) {
     return EMPTY_OPTIONAL_LIST;
   }
 

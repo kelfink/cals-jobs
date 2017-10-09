@@ -32,7 +32,7 @@ public class JobBulkProcessorBuilder implements ApiMarker {
   /**
    * Track job progress.
    */
-  protected transient JobProgressTrack track;
+  protected final JobProgressTrack track;
 
   /**
    * Elasticsearch client DAO.

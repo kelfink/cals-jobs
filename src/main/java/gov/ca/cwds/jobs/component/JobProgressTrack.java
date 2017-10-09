@@ -9,14 +9,14 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 
-import gov.ca.cwds.data.std.ApiObjectIdentity;
+import gov.ca.cwds.data.std.ApiMarker;
 
 /**
  * Track job progress and record counts.
  * 
  * @author CWDS API Team
  */
-public class JobProgressTrack extends ApiObjectIdentity {
+public class JobProgressTrack implements ApiMarker {
 
   /**
    * Default serialization.
@@ -137,4 +137,5 @@ public class JobProgressTrack extends ApiObjectIdentity {
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
   }
+
 }
