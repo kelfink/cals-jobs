@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,11 +48,11 @@ public class RelationshipIndexerJob
   private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipIndexerJob.class);
 
   private static final String INSERT_CLIENT_LAST_CHG =
-      "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT clnr.IDENTIFIER\n" + "FROM CLN_RELT CLNR\n"
-          + "WHERE CLNR.IBMSNAP_LOGMARKER > ?\n" + "UNION ALL\n" + "SELECT clnr.IDENTIFIER\n"
-          + "FROM CLN_RELT CLNR\n" + "JOIN CLIENT_T CLNS ON CLNR.FKCLIENT_T = CLNS.IDENTIFIER\n"
-          + "WHERE CLNS.IBMSNAP_LOGMARKER > ?\n" + "UNION ALL\n" + "SELECT clnr.IDENTIFIER\n"
-          + "FROM CLN_RELT CLNR\n" + "JOIN CLIENT_T CLNP ON CLNR.FKCLIENT_0 = CLNP.IDENTIFIER\n"
+      "INSERT INTO GT_ID (IDENTIFIER)\nSELECT clnr.IDENTIFIER\nFROM CLN_RELT CLNR\n"
+          + "WHERE CLNR.IBMSNAP_LOGMARKER > ?\nUNION ALL\nSELECT clnr.IDENTIFIER\n"
+          + "FROM CLN_RELT CLNR\nJOIN CLIENT_T CLNS ON CLNR.FKCLIENT_T = CLNS.IDENTIFIER\n"
+          + "WHERE CLNS.IBMSNAP_LOGMARKER > ?\nUNION ALL\nSELECT clnr.IDENTIFIER\n"
+          + "FROM CLN_RELT CLNR\nJOIN CLIENT_T CLNP ON CLNR.FKCLIENT_0 = CLNP.IDENTIFIER\n"
           + "WHERE CLNP.IBMSNAP_LOGMARKER > ?";
 
   /**
@@ -110,6 +111,11 @@ public class RelationshipIndexerJob
   }
 
   @Override
+  public String getOptionalElementName() {
+    return "relationships";
+  }
+
+  @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedRelationships p)
       throws IOException {
     final StringBuilder buf = new StringBuilder();
@@ -132,8 +138,8 @@ public class RelationshipIndexerJob
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
 
-    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson)
-        .upsert(new IndexRequest(alias, docType, esp.getId()).source(insertJson));
+    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON).upsert(
+        new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
   }
 
   @Override

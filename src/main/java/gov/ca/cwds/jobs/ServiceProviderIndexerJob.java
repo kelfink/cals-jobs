@@ -56,67 +56,79 @@ public class ServiceProviderIndexerJob
 
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
-    List<Pair<String, String>> ret = new ArrayList<>();
+    List<Pair<String, String>> ret = new ArrayList<>(64);
 
     final boolean isMainframe = isDB2OnZOS();
     if (isMainframe && (getDBSchemaName().toUpperCase().endsWith("RSQ")
         || getDBSchemaName().toUpperCase().endsWith("REP"))) {
-      ret.add(Pair.of("aaaaaaaaaa", "AI2pE99999"));
-      ret.add(Pair.of("AI2pE99999", "BhUE999998"));
-      ret.add(Pair.of("BhUE999998", "BQMUE99997"));
-      ret.add(Pair.of("BQMUE99997", "CpE9999996"));
-      ret.add(Pair.of("CpE9999996", "CYxpE99995"));
-      ret.add(Pair.of("CYxpE99995", "DxpE999994"));
-      ret.add(Pair.of("DxpE999994", "D6hUE99993"));
-      ret.add(Pair.of("D6hUE99993", "EE99999992"));
-      ret.add(Pair.of("EE99999992", "Fd2pE99991"));
-      ret.add(Pair.of("Fd2pE99991", "FMUE999990"));
-      ret.add(Pair.of("FMUE999990", "GlMUE9999Z"));
-      ret.add(Pair.of("GlMUE9999Z", "GUE999999Y"));
-      ret.add(Pair.of("GUE999999Y", "HtxpE9999X"));
-      ret.add(Pair.of("HtxpE9999X", "H2pE99999W"));
-      ret.add(Pair.of("H2pE99999W", "IBhUE9999V"));
-      ret.add(Pair.of("IBhUE9999V", "I99999999U"));
-      ret.add(Pair.of("I99999999U", "JI2pE9999T"));
-      ret.add(Pair.of("JI2pE9999T", "KhUE99999S"));
-      ret.add(Pair.of("KhUE99999S", "KQMUE9999R"));
-      ret.add(Pair.of("KQMUE9999R", "LpE999999Q"));
-      ret.add(Pair.of("LpE999999Q", "LYxpE9999P"));
-      ret.add(Pair.of("LYxpE9999P", "MxpE99999O"));
-      ret.add(Pair.of("MxpE99999O", "M6hUE9999N"));
-      ret.add(Pair.of("M6hUE9999N", "NE9999999M"));
-      ret.add(Pair.of("NE9999999M", "Od2pE9999L"));
-      ret.add(Pair.of("Od2pE9999L", "OMUE99999K"));
-      ret.add(Pair.of("OMUE99999K", "PlMUE9999J"));
-      ret.add(Pair.of("PlMUE9999J", "PUE999999I"));
-      ret.add(Pair.of("PUE999999I", "QtxpE9999H"));
-      ret.add(Pair.of("QtxpE9999H", "Q2pE99999G"));
-      ret.add(Pair.of("Q2pE99999G", "RBhUE9999F"));
-      ret.add(Pair.of("RBhUE9999F", "R99999999E"));
-      ret.add(Pair.of("R99999999E", "SI2pE9999D"));
-      ret.add(Pair.of("SI2pE9999D", "ThUE99999C"));
-      ret.add(Pair.of("ThUE99999C", "TQMUE9999B"));
-      ret.add(Pair.of("TQMUE9999B", "UpE999999A"));
-      ret.add(Pair.of("UpE999999A", "UYxpE9999z"));
-      ret.add(Pair.of("UYxpE9999z", "VxpE99999y"));
-      ret.add(Pair.of("VxpE99999y", "0BhUE9999p"));
-      ret.add(Pair.of("0BhUE9999p", "099999999o"));
-      ret.add(Pair.of("099999999o", "1I2pE9999n"));
-      ret.add(Pair.of("1I2pE9999n", "2hUE99999m"));
-      ret.add(Pair.of("2hUE99999m", "2QMUE9999l"));
-      ret.add(Pair.of("2QMUE9999l", "3pE999999k"));
-      ret.add(Pair.of("3pE999999k", "3YxpE9999j"));
-      ret.add(Pair.of("3YxpE9999j", "4xpE99999i"));
-      ret.add(Pair.of("4xpE99999i", "46hUE9999h"));
-      ret.add(Pair.of("46hUE9999h", "5E9999999g"));
-      ret.add(Pair.of("5E9999999g", "6d2pE9999f"));
-      ret.add(Pair.of("6d2pE9999f", "6MUE99999e"));
-      ret.add(Pair.of("6MUE99999e", "7lMUE9999d"));
-      ret.add(Pair.of("7lMUE9999d", "7UE999999c"));
-      ret.add(Pair.of("7UE999999c", "8txpE9999a"));
-      ret.add(Pair.of("8txpE9999a", "82pE99999a"));
-      ret.add(Pair.of("82pE99999a", "9BhUE99989"));
-      ret.add(Pair.of("9BhUE99989", "9999999988"));
+      // ----------------------------
+      // z/OS, large data set:
+      // ORDER: a,z,A,Z,0,9
+      // ----------------------------
+      ret.add(Pair.of("aaaaaaaaaa", "ACZAVXC2PZ"));
+      ret.add(Pair.of("ACZA5MZAR1", "A6y48OH3Ut"));
+      ret.add(Pair.of("A6y49C3046", "BzaK4AmDfS"));
+      ret.add(Pair.of("BzaLz7EAXU", "B26CwOn9qX"));
+      ret.add(Pair.of("B26CABM7D3", "CvIYhuyCJt"));
+      ret.add(Pair.of("CvIYnyi046", "CY8r2uwEBI"));
+      ret.add(Pair.of("CY8skTZK8I", "DsNAQ1W4l6"));
+      ret.add(Pair.of("DsNAT5Q5Cn", "DWQGOmFAzi"));
+      ret.add(Pair.of("DWQJMNtBVn", "EpKrO9a9xb"));
+      ret.add(Pair.of("EpKsibQGUs", "ESH4wdQ02u"));
+      ret.add(Pair.of("ESH6xJD5Dg", "Fmy2cMI0kW"));
+      ret.add(Pair.of("Fmy2xT72L9", "FN4JbQ0BFV"));
+      ret.add(Pair.of("FN4JHu74n3", "GjekFiPEuJ"));
+      ret.add(Pair.of("GjekNyLCtT", "GMSl4aH4wm"));
+      ret.add(Pair.of("GMSmdt6EcW", "HfvKXzA7rJ"));
+      ret.add(Pair.of("HfvLp2RBFX", "HJtGK9J07S"));
+      ret.add(Pair.of("HJtMdwiJ9x", "IbMKNtL5Dk"));
+      ret.add(Pair.of("IbML33BCKo", "IEwHjr9FXO"));
+      ret.add(Pair.of("IEwHwyZBMb", "I6RlOno3qC"));
+      ret.add(Pair.of("I6Rytb53Lr", "JBHjcBU74E"));
+      ret.add(Pair.of("JBHjhuiGmy", "J5p3IOTEaC"));
+      ret.add(Pair.of("J5p3PS5AUp", "Kybpi693es"));
+      ret.add(Pair.of("KybpkUu83S", "K1KqHJ7AUR"));
+      ret.add(Pair.of("K1KqNIk5Ds", "LuIBpq0Ftl"));
+      ret.add(Pair.of("LuIBA4v07S", "LXN8vc87GE"));
+      ret.add(Pair.of("LXN9PW15O4", "Mq5VGFd5Tk"));
+      ret.add(Pair.of("Mq5V2Gk046", "MUOYtgq2Mq"));
+      ret.add(Pair.of("MUOYVNp6fK", "NnZWsz1AzZ"));
+      ret.add(Pair.of("NnZWZbP8tp", "NRQqLqM5xF"));
+      ret.add(Pair.of("NRQqN6xCPl", "OjJmdJW5Dm"));
+      ret.add(Pair.of("OjJmrdICcq", "ONwCecl5DQ"));
+      ret.add(Pair.of("ONwCl195Dl", "Pf5jLGj9UX"));
+      ret.add(Pair.of("Pf5jRzm6V1", "PI0rahL9yH"));
+      ret.add(Pair.of("PI0rfcq0KD", "Qd7xBSt3sQ"));
+      ret.add(Pair.of("Qd7xIBy9yH", "QG0okqi0AR"));
+      ret.add(Pair.of("QG0oFocA17", "RaKSN5wCaR"));
+      ret.add(Pair.of("RaKTbwy1CN", "REwFaZn4iv"));
+      ret.add(Pair.of("REwFbVrFj8", "R62gv73C4Z"));
+      ret.add(Pair.of("R62gHYM9Nb", "SzBubpb5sR"));
+      ret.add(Pair.of("SzBuWRC722", "S2pw19Q2Br"));
+      ret.add(Pair.of("S2pyMvq7NP", "Txj1LpTFgm"));
+      ret.add(Pair.of("Txj3EIxBeO", "T0eZIQpDjK"));
+      ret.add(Pair.of("T0eZ92P37S", "0fXmBiY5Ch"));
+      ret.add(Pair.of("0fXnkHf9q0", "0JGoWelDYN"));
+      ret.add(Pair.of("0JGoYmm06Q", "1a6ExS95Ch"));
+      ret.add(Pair.of("1a6EK1pCPy", "1Fbwaaw3b4"));
+      ret.add(Pair.of("1Fbwe7q9Ma", "17PbXTH73o"));
+      ret.add(Pair.of("17Pb3di8fe", "2AzE4ua8rX"));
+      ret.add(Pair.of("2AzE86j5Dn", "23rHzlZ30A"));
+      ret.add(Pair.of("23rIcb6MUf", "3yq0BFP7Nw"));
+      ret.add(Pair.of("3yq0XgrAR1", "32qlKK2ICi"));
+      ret.add(Pair.of("32qlKSGF39", "4u0U0MECwr"));
+      ret.add(Pair.of("4u0VaS8B5d", "4YRF9Dd70O"));
+      ret.add(Pair.of("4YRGE555th", "5rOfwNO3gC"));
+      ret.add(Pair.of("5rOfCtA4bm", "5T7PS2j37S"));
+      ret.add(Pair.of("5T7P0oDEyI", "6oipPRSKDX"));
+      ret.add(Pair.of("6oip1GXBEM", "6R6kaia0SL"));
+      ret.add(Pair.of("6R6kaRt33A", "7ki4MYoAzi"));
+      ret.add(Pair.of("7ki5lfa996", "7NYwtxJ7Lu"));
+      ret.add(Pair.of("7NYwQaO8SW", "8guC2hG4ak"));
+      ret.add(Pair.of("8guDdze6Z2", "8JpJrxB37S"));
+      ret.add(Pair.of("8JpTu2j3K2", "9cRG3VmH6i"));
+      ret.add(Pair.of("9cRHCIm6xC", "9GwwRzY7D3"));
+      ret.add(Pair.of("9Gwxhdx41S", "9999999999"));
 
       ret = limitRange(ret); // command line range restriction
     } else if (isMainframe) {
