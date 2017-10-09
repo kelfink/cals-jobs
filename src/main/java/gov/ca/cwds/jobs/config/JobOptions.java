@@ -74,9 +74,9 @@ public class JobOptions implements ApiMarker {
   String altInputFile = "junk";
 
   /**
-   * Whether to run in periodic "last run" mode or "initial" mode. Defaults to true.
+   * Whether to run in periodic "last run" mode or "initial" mode.
    */
-  boolean lastRunMode;
+  boolean lastRunMode = true;
 
   /**
    * When running in "initial load" mode, specifies the starting bucket of records to be processed
@@ -85,7 +85,7 @@ public class JobOptions implements ApiMarker {
    * Required for "initial load" mode.
    * </p>
    */
-  private long startBucket;
+  private long startBucket = 1L;
 
   /**
    * When running in "initial load" mode, specifies the ending bucket of records to be processed by
@@ -94,7 +94,7 @@ public class JobOptions implements ApiMarker {
    * Required for "initial load" mode.
    * </p>
    */
-  private long endBucket;
+  private long endBucket = 1L;
 
   /**
    * When running in "initial load" mode, specifies the total number buckets for all related batch
@@ -103,7 +103,7 @@ public class JobOptions implements ApiMarker {
    * Required for "initial load" mode.
    * </p>
    */
-  private long totalBuckets;
+  private long totalBuckets = 1L;
 
   /**
    * Total threads to allocate to this batch run. Defaults to all available cores.

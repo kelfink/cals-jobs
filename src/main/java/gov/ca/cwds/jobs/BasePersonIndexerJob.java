@@ -585,7 +585,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
-      // If index name is provided then use it, otherwise use alias from ES config.
+      // If index name is provided, use it, else take alias from ES config.
       final String indexNameOverride = getOpts().getIndexName();
       final String effectiveIndexName = StringUtils.isBlank(indexNameOverride)
           ? esDao.getConfig().getElasticsearchAlias() : indexNameOverride;
@@ -604,31 +604,24 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Smart/auto mode:
       final Calendar cal = Calendar.getInstance();
       cal.add(Calendar.YEAR, -25);
-      final boolean autoMode = this.opts.isLastRunMode() && lastRun.before(cal.getTime());
+      final boolean autoInitialLoad = lastRun.before(cal.getTime());
 
-      if (autoMode) {
+      if (autoInitialLoad) {
         LOGGER.warn("AUTO MODE!");
         // WARNING: don't overwrite command line settings.
         getOpts().setStartBucket(1);
         getOpts().setEndBucket(1);
         getOpts().setTotalBuckets(getJobTotalBuckets());
 
-        if (this.getDenormalizedClass() != null) {
+        if (providesInitialKeyRanges()) {
           LOGGER.info("LOAD FROM VIEW WITH JDBC!");
           doInitialLoadJdbc();
         } else {
           LOGGER.info("LOAD REPLICATED QUERY WITH HIBERNATE!");
           extractHibernate();
         }
-      } else if (this.opts == null || this.opts.isLastRunMode()) {
-        doLastRun(lastRun);
       } else {
-        LOGGER.info("DIRECT BUCKET MODE!");
-        if (providesInitialKeyRanges()) {
-          doInitialLoadJdbc();
-        } else {
-          extractHibernate();
-        }
+        doLastRun(lastRun);
       }
 
       // SLF4J does not yet support conditional invocation.
