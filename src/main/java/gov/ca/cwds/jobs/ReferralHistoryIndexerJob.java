@@ -363,6 +363,7 @@ public class ReferralHistoryIndexerJob
     final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
     LOGGER.info("BEGIN");
+    getTrack().trackRangeStart(p);
 
     allocateThreadMemory(); // allocate thread locals, if not done prior.
     final List<EsPersonReferral> listAllegations = allocAllegations.get();
@@ -435,6 +436,7 @@ public class ReferralHistoryIndexerJob
       System.gc(); // NOSONAR
     }
 
+    getTrack().trackRangeComplete(p);
     LOGGER.info("DONE");
     return cntr;
   }
@@ -451,7 +453,7 @@ public class ReferralHistoryIndexerJob
     Thread.currentThread().setName("read_main");
     LOGGER.info("BEGIN: main read thread");
 
-    // NOTE: static setter questionable for one-shot JVM but NOT permitted in continuous mode.
+    // WARNING: static setter is OK in standalone job but NOT permitted in continuous mode.
     EsPersonReferral.setOpts(getOpts());
     markTransformDone(); // normalize in place **without** the transform thread
 

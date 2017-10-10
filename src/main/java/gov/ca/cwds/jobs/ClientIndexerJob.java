@@ -143,6 +143,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
     LOGGER.warn("BEGIN: extract thread {}", threadName);
+    getTrack().trackRangeStart(p);
 
     try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection()) {
@@ -186,6 +187,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
           e.getMessage());
     }
 
+    getTrack().trackRangeComplete(p);
     LOGGER.warn("DONE: Extract thread {}", i);
   }
 
