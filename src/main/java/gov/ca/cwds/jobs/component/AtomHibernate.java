@@ -17,6 +17,7 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
+import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
@@ -121,7 +122,13 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   }
 
   default Function<Connection, PreparedStatement> getPreparedStatementMaker() throws SQLException {
-    return null;
+    return c -> {
+      try {
+        return c.prepareStatement(getPrepLastChangeSQL());
+      } catch (SQLException e) {
+        throw JobLogs.buildException(getLogger(), e, "FAILED TO PREPARE STATEMENT", e.getMessage());
+      }
+    };
   }
 
   /**

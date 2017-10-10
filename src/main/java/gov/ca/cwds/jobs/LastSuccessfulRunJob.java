@@ -308,4 +308,9 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
     this.opts = opts;
   }
 
+  @Override
+  public Logger getLogger() {
+    return LOGGER;
+  }
+
 }

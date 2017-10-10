@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs.component;
 
+import org.slf4j.Logger;
+
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.config.JobOptions;
@@ -14,6 +16,8 @@ public interface AtomShared extends ApiMarker {
   JobProgressTrack getTrack();
 
   ElasticsearchDao getEsDao();
+
+  Logger getLogger();
 
   /**
    * Getter for the job's command line options.

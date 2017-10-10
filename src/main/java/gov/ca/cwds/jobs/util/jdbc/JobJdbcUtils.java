@@ -76,7 +76,7 @@ public class JobJdbcUtils {
   }
 
   public static List<Pair<String, String>> getCommonPartitionRanges(AtomHibernate initialLoad) {
-    List<Pair<String, String>> ret = new ArrayList<>();
+    List<Pair<String, String>> ret = new ArrayList<>(16);
 
     final boolean isMainframe = initialLoad.isDB2OnZOS();
     if (isMainframe && (getDBSchemaName().toUpperCase().endsWith("RSQ")
