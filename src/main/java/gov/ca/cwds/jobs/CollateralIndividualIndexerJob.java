@@ -61,7 +61,7 @@ public final class CollateralIndividualIndexerJob
 
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
-    List<Pair<String, String>> ret = new ArrayList<>();
+    List<Pair<String, String>> ret = new ArrayList<>(64);
 
     final boolean isMainframe = isDB2OnZOS();
     if (isMainframe && (getDBSchemaName().toUpperCase().endsWith("RSQ")

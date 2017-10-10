@@ -33,8 +33,6 @@ import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends AtomShared, AtomInitialLoad<T>, JobResultSetAware<M> {
 
-  static final String SQL_COLUMN_AFTER = "after";
-
   /**
    * @return default CMS schema name
    */
@@ -121,6 +119,13 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
     return JobDB2Utils.isDB2OnZOS(getJobDao());
   }
 
+  /**
+   * Return Function that creates a prepared statement for last change preprocessing, such as
+   * inserting identifiers into a global temporary table.
+   * 
+   * @return prepared statement for last change preprocessing
+   * @throws SQLException on database error
+   */
   default Function<Connection, PreparedStatement> getPreparedStatementMaker() throws SQLException {
     return c -> {
       try {
