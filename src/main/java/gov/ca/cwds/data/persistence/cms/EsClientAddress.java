@@ -70,6 +70,8 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
    */
   private static final long serialVersionUID = 1L;
 
+  private static boolean useCounty;
+
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)
   private Date lastChange;
@@ -525,7 +527,9 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
     // WARNING: not yet available in RSQ.
-    ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
+    if (EsClientAddress.isUseCounty()) {
+      ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
+    }
 
     // Languages
     ret.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
@@ -686,7 +690,9 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
       ret.setLastUpdatedTime(getCltLastUpdatedTime());
 
       // WARNING: not yet in RSQ.
-      ret.setClientCounty(getClientCounty());
+      if (EsClientAddress.isUseCounty()) {
+        ret.setClientCounty(getClientCounty());
+      }
     }
 
     // Client Address:
@@ -1672,6 +1678,14 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
 
   public Date getCltFatherParentalRightTermDate() {
     return cltFatherParentalRightTermDate;
+  }
+
+  public static boolean isUseCounty() {
+    return useCounty;
+  }
+
+  public static void setUseCounty(boolean useCounty) {
+    EsClientAddress.useCounty = useCounty;
   }
 
 }

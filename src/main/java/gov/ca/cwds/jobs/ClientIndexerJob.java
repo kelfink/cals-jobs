@@ -220,6 +220,10 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
+    final boolean isInitialLoad = isDB2OnZOS() && (getDBSchemaName().toUpperCase().endsWith("RSQ")
+        || getDBSchemaName().toUpperCase().endsWith("REP"));
+    EsClientAddress.setUseCounty(isInitialLoad);
+
     return JobJdbcUtils.getCommonPartitionRanges16(this);
   }
 
