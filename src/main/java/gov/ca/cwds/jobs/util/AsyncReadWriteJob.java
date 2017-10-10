@@ -21,7 +21,7 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
   private transient JobProcessor processor;
   private transient JobWriter writer;
 
-  private List chunk = new LinkedList<>();
+  private transient List chunk = new LinkedList<>();
 
   private int chunkSize = 100;
 

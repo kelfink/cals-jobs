@@ -160,8 +160,7 @@ public class SystemCodesLoaderJob {
   private void deleteNsSystemCodes(Connection conn) throws SQLException {
     try (Statement stmt = conn.createStatement()) {
       LOGGER.info("Deleting system codes from new system...");
-      final String query = "DELETE FROM SYSTEM_CODES";
-      stmt.execute(query);
+      stmt.execute("DELETE FROM SYSTEM_CODES");
       LOGGER.info("Deleting system codes from new system");
     } finally {
       // Close statement.
