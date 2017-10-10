@@ -609,10 +609,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       if (autoInitialLoad) {
         LOGGER.warn("AUTO MODE!");
-        // WARNING: don't overwrite command line settings.
-        getOpts().setStartBucket(1);
-        getOpts().setEndBucket(1);
-        getOpts().setTotalBuckets(getJobTotalBuckets());
 
         if (providesInitialKeyRanges()) {
           LOGGER.info("LOAD FROM VIEW WITH JDBC!");

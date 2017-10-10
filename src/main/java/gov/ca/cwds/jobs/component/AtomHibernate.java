@@ -119,6 +119,11 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
     return JobDB2Utils.isDB2OnZOS(getJobDao());
   }
 
+  default boolean isLargeDataSet() {
+    return isDB2OnZOS() && (getDBSchemaName().toUpperCase().endsWith("RSQ")
+        || getDBSchemaName().toUpperCase().endsWith("REP"));
+  }
+
   /**
    * Return Function that creates a prepared statement for last change preprocessing, such as
    * inserting identifiers into a global temporary table.
