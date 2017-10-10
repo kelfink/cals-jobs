@@ -1,12 +1,14 @@
 package gov.ca.cwds.jobs;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -50,9 +52,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
   private static final String INSERT_CLIENT_LAST_CHG =
       "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT CLT.IDENTIFIER \nFROM CLIENT_T clt\n"
-          + "WHERE CLT.IBMSNAP_LOGMARKER > ?\n" + "UNION\n" + "SELECT CLT.IDENTIFIER "
+          + "WHERE CLT.IBMSNAP_LOGMARKER > ?\nUNION\n" + "SELECT CLT.IDENTIFIER "
           + "FROM CLIENT_T clt\n" + "JOIN CL_ADDRT cla ON clt.IDENTIFIER = cla.FKCLIENT_T \n"
-          + "WHERE CLA.IBMSNAP_LOGMARKER > ?\n" + "UNION\n" + "SELECT CLT.IDENTIFIER "
+          + "WHERE CLA.IBMSNAP_LOGMARKER > ?\nUNION\n" + "SELECT CLT.IDENTIFIER "
           + "FROM CLIENT_T clt\n" + "JOIN CL_ADDRT cla ON clt.IDENTIFIER = cla.FKCLIENT_T\n"
           + "JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER\n"
           + "WHERE ADR.IBMSNAP_LOGMARKER > ?";
@@ -73,6 +75,17 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory) {
     super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  }
+
+  @Override
+  public Function<Connection, PreparedStatement> getPreparedStatementMaker() throws SQLException {
+    return c -> {
+      try {
+        return c.prepareStatement(INSERT_CLIENT_LAST_CHG);
+      } catch (SQLException e) {
+        throw JobLogs.buildException(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
+      }
+    };
   }
 
   @Override

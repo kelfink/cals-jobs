@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.config;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
  * Represents batch job options from the command line.
@@ -181,7 +181,7 @@ public class JobOptions implements ApiMarker {
    * @return Last run time
    */
   public Date getLastRunTime() {
-    return lastRunTime;
+    return lastRunTime != null ? new Date(lastRunTime.getTime()) : null;
   }
 
   /**
@@ -329,15 +329,13 @@ public class JobOptions implements ApiMarker {
    */
   protected static void printUsage() {
     try (final StringWriter sw = new StringWriter()) {
+      final String PADDING = StringUtils.leftPad("", 90, '=');
       new HelpFormatter().printHelp(new PrintWriter(sw), 100, "Batch loader",
-          StringUtils.leftPad("", 90, '=') + "\nUSAGE: java <job class> ...\n"
-              + StringUtils.leftPad("", 90, '='),
-          buildCmdLineOptions(), 4, 8, StringUtils.leftPad("", 90, '='), true);
+          PADDING + "\nUSAGE: java <job class> ...\n" + PADDING, buildCmdLineOptions(), 4, 8,
+          PADDING, true);
       LOGGER.error(sw.toString());
     } catch (IOException e) {
-      final String msg = "ERROR PRINTING HELP! How ironic. :-)";
-      LOGGER.error(msg, e);
-      throw new JobsException(msg, e);
+      throw JobLogs.buildException(LOGGER, e, "INCORRECT USAGE!: {}", e.getMessage());
     }
   }
 
@@ -380,7 +378,7 @@ public class JobOptions implements ApiMarker {
 
           case CMD_LINE_INDEX_NAME:
             indexName = opt.getValue().trim();
-            LOGGER.info("index name = " + indexName);
+            LOGGER.info("index name = {}", indexName);
             break;
 
           case CMD_LINE_LAST_RUN_TIME:
@@ -389,20 +387,10 @@ public class JobOptions implements ApiMarker {
             lastRunTime = createDate(lastRunTimeStr);
             break;
 
-          case CMD_LINE_ALT_INPUT_FILE:
-            altInputLoc = opt.getValue().trim();
-            break;
-
           case CMD_LINE_LAST_RUN_FILE:
             lastRunMode = true;
             lastRunLoc = opt.getValue().trim();
-            LOGGER.info("last run file = " + lastRunLoc);
-            break;
-
-          case CMD_LINE_BUCKET_TOTAL:
-            LOGGER.info("INITIAL LOAD!");
-            lastRunMode = false;
-            totalBuckets = Long.parseLong(opt.getValue());
+            LOGGER.info("last run file = {}", lastRunLoc);
             break;
 
           case CMD_LINE_BUCKET_RANGE:
@@ -434,8 +422,7 @@ public class JobOptions implements ApiMarker {
       }
     } catch (Exception e) { // NOSONAR
       printUsage();
-      LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
-      throw new JobsException("Error parsing command line: " + e.getMessage(), e);
+      throw JobLogs.buildException(LOGGER, e, "Error parsing command line: {}", e.getMessage());
     }
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode, startBucket,
@@ -479,8 +466,7 @@ public class JobOptions implements ApiMarker {
     Date date = null;
     String trimTimestamp = StringUtils.trim(timestamp);
     if (StringUtils.isNotEmpty(trimTimestamp)) {
-      DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      date = df.parse(trimTimestamp);
+      date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(trimTimestamp);
     }
     return date;
   }

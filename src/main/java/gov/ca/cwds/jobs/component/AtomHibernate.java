@@ -1,8 +1,11 @@
 package gov.ca.cwds.jobs.component;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.function.Function;
 
 import javax.persistence.Table;
 
@@ -117,6 +120,10 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
     return JobDB2Utils.isDB2OnZOS(getJobDao());
   }
 
+  default Function<Connection, PreparedStatement> getPreparedStatementMaker() throws SQLException {
+    return null;
+  }
+
   /**
    * Execute JDBC prior to calling method
    * {@link BasePersonIndexerJob#pullBucketRange(String, String)}.
@@ -144,7 +151,8 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
       final Date lastRunTime) throws SQLException {
     final String sql = getPrepLastChangeSQL();
     if (StringUtils.isNotBlank(sql)) {
-      JobJdbcUtils.prepHibernateLastChange(session, txn, lastRunTime, sql);
+      JobJdbcUtils.prepHibernateLastChange(session, txn, lastRunTime, sql,
+          getPreparedStatementMaker());
     }
   }
 

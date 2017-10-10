@@ -1,9 +1,12 @@
 package gov.ca.cwds.jobs.util.jdbc;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.HibernateException;
@@ -52,8 +55,9 @@ public class JobJdbcUtils {
   }
 
   public static void prepHibernateLastChange(final Session session, final Transaction txn,
-      final Date lastRunTime, final String sqlInsertLastChange) throws HibernateException {
-    final Work work = new PrepSQLWork(lastRunTime, sqlInsertLastChange);
+      final Date lastRunTime, final String sqlInsertLastChange,
+      final Function<Connection, PreparedStatement> func) throws HibernateException {
+    final Work work = new PrepSQLWork(lastRunTime, sqlInsertLastChange, func);
     session.doWork(work);
   }
 

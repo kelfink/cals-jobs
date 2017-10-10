@@ -41,40 +41,38 @@ public class PrepSQLWorkTest extends PersonJobTester<ReplicatedPersonCases, EsPe
   @Test
   public void instantiation() throws Exception {
     Date lastRunTime = new Date();
-    String sqlInsertLastChange = null;
+    String sql = null;
 
-    target = new PrepSQLWork(lastRunTime, sqlInsertLastChange);
+    target = new PrepSQLWork(lastRunTime, sql, null);
     assertThat(target, notNullValue());
   }
 
   @Test
   public void execute_Args__Connection() throws Exception {
     final Date lastRunTime = new Date();
-    final String sqlInsertLastChange =
-        "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > '2017-08-28 11:54:40'";
+    final String sql = "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > '2017-08-28 11:54:40'";
 
-    target = new PrepSQLWork(lastRunTime, sqlInsertLastChange);
+    target = new PrepSQLWork(lastRunTime, sql, null);
     target.execute(con);
   }
 
   @Test
   public void execute_Args__Connection2() throws Exception {
     final Date lastRunTime = new Date();
-    final String sqlInsertLastChange = "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > :ts";
+    final String sql = "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > :ts";
 
-    target = new PrepSQLWork(lastRunTime, sqlInsertLastChange);
+    target = new PrepSQLWork(lastRunTime, sql, null);
     target.execute(con);
   }
 
   @Test(expected = SQLException.class)
   public void execute_Args__Connection_T__SQLException() throws Exception {
     final Date lastRunTime = new Date();
-    final String sqlInsertLastChange =
-        "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > '2017-08-28 11:54:40'";
+    final String sql = "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > '2017-08-28 11:54:40'";
 
     when(prepStmt.executeUpdate()).thenThrow(SQLException.class);
 
-    target = new PrepSQLWork(lastRunTime, sqlInsertLastChange);
+    target = new PrepSQLWork(lastRunTime, sql, null);
     target.execute(con);
     fail("Expected exception was not thrown!");
   }

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.jdbc.Work;
@@ -17,17 +18,26 @@ import org.hibernate.jdbc.Work;
 public class PrepSQLWork implements Work {
 
   private final Date lastRunTime;
-  private final String sqlInsertLastChange;
+  private final String sql;
+  private final Function<Connection, PreparedStatement> prepStmtMaker;
 
   /**
    * Constructor.
    * 
    * @param lastRunTime last successful run time
-   * @param sqlInsertLastChange SQL to run
+   * @param sql SQL to run
+   * @param prepStmtMaker Function to produce prepared statement
    */
-  public PrepSQLWork(Date lastRunTime, String sqlInsertLastChange) {
+  public PrepSQLWork(Date lastRunTime, String sql,
+      final Function<Connection, PreparedStatement> prepStmtMaker) {
     this.lastRunTime = lastRunTime != null ? new Date(lastRunTime.getTime()) : null;
-    this.sqlInsertLastChange = sqlInsertLastChange;
+    this.sql = sql;
+    this.prepStmtMaker = prepStmtMaker;
+  }
+
+  private PreparedStatement createPreparedStatement(Connection con, String sql)
+      throws SQLException {
+    return prepStmtMaker != null ? prepStmtMaker.apply(con) : con.prepareStatement(sql);
   }
 
   @Override
@@ -36,13 +46,10 @@ public class PrepSQLWork implements Work {
     con.setAutoCommit(false);
     JobDB2Utils.enableParallelism(con);
 
-    final StringBuilder buf = new StringBuilder();
-    buf.append(JobJdbcUtils.makeTimestampString(lastRunTime));
-
     final String strLastRunTime = JobJdbcUtils.makeSimpleTimestampString(lastRunTime);
 
-    try (final PreparedStatement stmt = con.prepareStatement(sqlInsertLastChange)) {
-      for (int i = 1; i <= StringUtils.countMatches(sqlInsertLastChange, "?"); i++) {
+    try (final PreparedStatement stmt = createPreparedStatement(con, this.sql)) {
+      for (int i = 1; i <= StringUtils.countMatches(sql, "?"); i++) {
         stmt.setString(i, strLastRunTime);
       }
 
