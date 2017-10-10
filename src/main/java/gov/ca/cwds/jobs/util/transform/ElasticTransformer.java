@@ -27,7 +27,6 @@ import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.data.ApiTypedIdentifier;
-import gov.ca.cwds.data.es.ElasticSearchCounty;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
@@ -35,6 +34,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonLanguage;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
+import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
@@ -389,11 +389,11 @@ public class ElasticTransformer {
     return ret;
   }
 
-  protected static ElasticSearchCounty handleClientCountyC(ApiPersonAware p) {
-    ElasticSearchCounty esCounty = null;
+  protected static ElasticSearchSystemCode handleClientCountyC(ApiPersonAware p) {
+    ElasticSearchSystemCode esCounty = null;
     if (p instanceof ApiClientCountyAware) {
       ApiClientCountyAware countyAware = (ApiClientCountyAware) p;
-      esCounty = new ElasticSearchCounty();
+      esCounty = new ElasticSearchSystemCode();
       esCounty.setId(countyAware.getClientCounty().toString());
       esCounty.setName(
           SystemCodeCache.global().getSystemCodeShortDescription(countyAware.getClientCounty()));

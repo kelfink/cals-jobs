@@ -13,8 +13,8 @@ import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
-import gov.ca.cwds.data.es.ElasticSearchCounty;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
+import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
@@ -142,7 +142,7 @@ public class EsSafetyAlert extends ApiObjectIdentity
     activation.setActivationReasonId(
         this.activationReasonCode != null ? this.activationReasonCode.toString() : null);
 
-    ElasticSearchCounty activationCounty = new ElasticSearchCounty();
+    ElasticSearchSystemCode activationCounty = new ElasticSearchSystemCode();
     activation.setActivationCounty(activationCounty);
     activationCounty
         .setName(SystemCodeCache.global().getSystemCodeShortDescription(this.activationCountyCode));
@@ -157,7 +157,7 @@ public class EsSafetyAlert extends ApiObjectIdentity
         new ElasticSearchSafetyAlert.Deactivation();
     alert.setDeactivation(deactivation);
 
-    ElasticSearchCounty deactivationCounty = new ElasticSearchCounty();
+    ElasticSearchSystemCode deactivationCounty = new ElasticSearchSystemCode();
     deactivation.setDeactivationCounty(deactivationCounty);
 
     deactivationCounty.setName(
