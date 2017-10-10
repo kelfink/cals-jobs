@@ -71,7 +71,7 @@ public class JobJdbcUtils {
   public static int calcReaderThreads(final JobOptions opts) {
     final int ret = opts.getThreadCount() != 0L ? (int) opts.getThreadCount()
         : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
-    LOGGER.warn(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
+    LOGGER.info(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
     return ret;
   }
 
@@ -165,20 +165,18 @@ public class JobJdbcUtils {
     return ret;
   }
 
-  private static List<Pair<String, String>> getCommonPartitionRanges(AtomHibernate initialLoad,
-      int numPartitions) {
+  @SuppressWarnings("unchecked")
+  private static List<Pair<String, String>> getCommonPartitionRanges(
+      @SuppressWarnings("rawtypes") AtomHibernate initialLoad, int numPartitions) {
     List<Pair<String, String>> ret = new ArrayList<>(numPartitions);
-
-    final boolean isMainframe = initialLoad.isDB2OnZOS();
-    if (isMainframe && (getDBSchemaName().toUpperCase().endsWith("RSQ")
-        || getDBSchemaName().toUpperCase().endsWith("REP"))) {
+    if (initialLoad.isLargeDataSet()) {
       // ----------------------------
       // z/OS, large data set:
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
       ret = initialLoad
           .limitRange(numPartitions == 64 ? getPartitionRanges64() : getPartitionRanges16());
-    } else if (isMainframe) {
+    } else if (initialLoad.isDB2OnZOS()) {
       // ----------------------------
       // z/OS, small data set:
       // ORDER: a,z,A,Z,0,9
@@ -195,11 +193,13 @@ public class JobJdbcUtils {
     return ret;
   }
 
-  public static List<Pair<String, String>> getCommonPartitionRanges16(AtomHibernate initialLoad) {
+  public static List<Pair<String, String>> getCommonPartitionRanges16(
+      @SuppressWarnings("rawtypes") AtomHibernate initialLoad) {
     return getCommonPartitionRanges(initialLoad, 16);
   }
 
-  public static List<Pair<String, String>> getCommonPartitionRanges64(AtomHibernate initialLoad) {
+  public static List<Pair<String, String>> getCommonPartitionRanges64(
+      @SuppressWarnings("rawtypes") AtomHibernate initialLoad) {
     return getCommonPartitionRanges(initialLoad, 64);
   }
 
