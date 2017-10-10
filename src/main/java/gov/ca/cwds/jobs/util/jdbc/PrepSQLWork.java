@@ -35,9 +35,8 @@ public class PrepSQLWork implements Work {
     this.prepStmtMaker = prepStmtMaker;
   }
 
-  private PreparedStatement createPreparedStatement(Connection con, String sql)
-      throws SQLException {
-    return prepStmtMaker != null ? prepStmtMaker.apply(con) : con.prepareStatement(sql);
+  private PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+    return prepStmtMaker.apply(con);
   }
 
   @Override
@@ -48,7 +47,7 @@ public class PrepSQLWork implements Work {
 
     final String strLastRunTime = JobJdbcUtils.makeSimpleTimestampString(lastRunTime);
 
-    try (final PreparedStatement stmt = createPreparedStatement(con, this.sql)) {
+    try (final PreparedStatement stmt = createPreparedStatement(con)) {
       for (int i = 1; i <= StringUtils.countMatches(sql, "?"); i++) {
         stmt.setString(i, strLastRunTime);
       }
