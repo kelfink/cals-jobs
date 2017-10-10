@@ -72,6 +72,7 @@ public class CollateralIndividualIndexerJobTest
   }
 
   @Test
+  @Ignore
   public void getJobTotalBuckets_Args__() throws Exception {
     final int actual = target.getJobTotalBuckets();
     final int expected = 12;

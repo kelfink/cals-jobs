@@ -804,11 +804,11 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getCltBirthDate() {
-    return cltBirthDate;
+    return cltBirthDate != null ? new Date(cltBirthDate.getTime()) : null;
   }
 
   public void setCltBirthDate(Date cltBirthDate) {
-    this.cltBirthDate = cltBirthDate;
+    this.cltBirthDate = cltBirthDate != null ? new Date(cltBirthDate.getTime()) : null;
   }
 
   public String getCltBirthFacilityName() {
