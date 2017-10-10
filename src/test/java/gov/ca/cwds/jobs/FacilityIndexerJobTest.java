@@ -5,10 +5,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
 import org.hibernate.SessionFactory;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -25,6 +28,20 @@ import gov.ca.cwds.jobs.util.JobWriter;
 
 public class FacilityIndexerJobTest {
 
+  private static class TestFacilityIndexerJob extends FacilityIndexerJob {
+
+    public TestFacilityIndexerJob(File config) {
+      super(config);
+    }
+
+    @Override
+    protected TransportClient produceTransportClient(Settings settings) {
+      TransportClient client = mock(TransportClient.class);
+      return client;
+    }
+
+  }
+
   @Test
   public void type() throws Exception {
     assertThat(FacilityIndexerJob.class, notNullValue());
@@ -33,7 +50,7 @@ public class FacilityIndexerJobTest {
   @Test
   public void instantiation() throws Exception {
     File config = null;
-    FacilityIndexerJob target = new FacilityIndexerJob(config);
+    TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
     assertThat(target, notNullValue());
   }
 
@@ -48,25 +65,29 @@ public class FacilityIndexerJobTest {
   @Ignore
   public void configure_Args__() throws Exception {
     File config = null;
-    FacilityIndexerJob target = new FacilityIndexerJob(config);
+    TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
     target.configure();
   }
 
   @Test
   public void elasticsearchClient_Args__JobConfiguration() throws Exception {
     File config = null;
-    FacilityIndexerJob target = new FacilityIndexerJob(config);
+    TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
+
     JobConfiguration config_ = mock(JobConfiguration.class);
+    when(config_.getElasticsearchCluster()).thenReturn("elasticsearch");
+    when(config_.getElasticsearchHost()).thenReturn("localhost");
+    when(config_.getElasticsearchPort()).thenReturn("9200");
+
     Client actual = target.elasticsearchClient(config_);
-    Client expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, notNullValue());
   }
 
   @Test
   @Ignore
   public void elasticsearchDao_Args__Client__JobConfiguration() throws Exception {
     File config = null;
-    FacilityIndexerJob target = new FacilityIndexerJob(config);
+    TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
     Client client = mock(Client.class);
     JobConfiguration configuration = mock(JobConfiguration.class);
     Elasticsearch5xDao actual = target.elasticsearchDao(client, configuration);
@@ -77,7 +98,7 @@ public class FacilityIndexerJobTest {
   @Test
   public void config_Args__() throws Exception {
     File config = null;
-    FacilityIndexerJob target = new FacilityIndexerJob(config);
+    TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
     JobConfiguration actual = target.config();
     JobConfiguration expected = null;
     assertThat(actual, is(equalTo(expected)));
@@ -88,7 +109,7 @@ public class FacilityIndexerJobTest {
   public void lisItemReader_Args__JobConfiguration__FacilityRowMapper__SessionFactory()
       throws Exception {
     File config = null;
-    FacilityIndexerJob target = new FacilityIndexerJob(config);
+    TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
     JobConfiguration jobConfiguration = mock(JobConfiguration.class);
     FacilityRowMapper facilityRowMapper = mock(FacilityRowMapper.class);
     SessionFactory sessionFactory = mock(SessionFactory.class);
@@ -100,7 +121,7 @@ public class FacilityIndexerJobTest {
   @Test
   public void lisItemProcessor_Args__() throws Exception {
     File config = null;
-    FacilityIndexerJob target = new FacilityIndexerJob(config);
+    TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
     JobProcessor actual = target.lisItemProcessor();
     JobProcessor expected = new FacilityProcessor();
     assertThat(actual.getClass(), is(equalTo(expected.getClass())));
@@ -110,7 +131,7 @@ public class FacilityIndexerJobTest {
   @Ignore
   public void lisItemWriter_Args__Elasticsearch5xDao__ObjectMapper() throws Exception {
     File config = null;
-    FacilityIndexerJob target = new FacilityIndexerJob(config);
+    TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
     Elasticsearch5xDao elasticsearchDao = mock(Elasticsearch5xDao.class);
     ObjectMapper objectMapper = mock(ObjectMapper.class);
     JobWriter actual = target.lisItemWriter(elasticsearchDao, objectMapper);
@@ -122,7 +143,7 @@ public class FacilityIndexerJobTest {
   @Ignore
   public void lisItemWriter_Args__JobReader__JobProcessor__JobWriter() throws Exception {
     File config = null;
-    FacilityIndexerJob target = new FacilityIndexerJob(config);
+    TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
     JobReader jobReader = mock(JobReader.class);
     JobProcessor jobProcessor = mock(JobProcessor.class);
     JobWriter jobWriter = mock(JobWriter.class);

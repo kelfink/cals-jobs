@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
@@ -20,8 +18,6 @@ import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
  * @param <T> normalized type
  */
 public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared {
-
-  static final Logger LOGGER = LoggerFactory.getLogger(AtomInitialLoad.class);
 
   /**
    * Restrict initial load key ranges from command line.
@@ -38,7 +34,6 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
       final int start = ((int) opts.getStartBucket()) - 1;
       final int end = ((int) opts.getEndBucket()) - 1;
 
-      LOGGER.info("Limit key range to: {} to {}", start + 1, end + 1);
       for (int i = start; i <= end; i++) {
         list.add(allKeyPairs.get(i));
       }

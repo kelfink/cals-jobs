@@ -81,13 +81,22 @@ public class JobJdbcUtils {
       // z/OS, large data set:
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
-      ret.add(Pair.of("aaaaaaaaaa", "J5p3IOTEaC"));
-      ret.add(Pair.of("J5p3IOTEaC", "QG0okqi0AR"));
-      ret.add(Pair.of("QG0okqi0AR", "0JGoWelDYN"));
-      ret.add(Pair.of("0JGoYmm06Q", "1a6ExS95Ch"));
-      ret.add(Pair.of("1a6ExS95Ch", "4u0U0MECwr"));
-      ret.add(Pair.of("4u0VaS8B5d", "7NYwtxJ7Lu"));
-      ret.add(Pair.of("7NYwtxJ7Lu", "9999999999"));
+      ret.add(Pair.of("aaaaaaaaaa", "B3bMRWu8NV"));
+      ret.add(Pair.of("B3bMRWu8NV", "DW5GzxJ30A"));
+      ret.add(Pair.of("DW5GzxJ30A", "FNOBbaG6qq"));
+      ret.add(Pair.of("FNOBbaG6qq", "HJf1EJe25X"));
+      ret.add(Pair.of("HJf1EJe25X", "JCoyq0Iz36"));
+      ret.add(Pair.of("JCoyq0Iz36", "LvijYcj01S"));
+      ret.add(Pair.of("LvijYcj01S", "Npf4LcB3Lr"));
+      ret.add(Pair.of("Npf4LcB3Lr", "PiJ6a0H49S"));
+      ret.add(Pair.of("PiJ6a0H49S", "RbL4aAL34A"));
+      ret.add(Pair.of("RbL4aAL34A", "S3qiIdg0BN"));
+      ret.add(Pair.of("S3qiIdg0BN", "0Ltok9y5Co"));
+      ret.add(Pair.of("0Ltok9y5Co", "2CFeyJd49S"));
+      ret.add(Pair.of("2CFeyJd49S", "4w3QDw136B"));
+      ret.add(Pair.of("4w3QDw136B", "6p9XaHC10S"));
+      ret.add(Pair.of("6p9XaHC10S", "8jw5J580MQ"));
+      ret.add(Pair.of("8jw5J580MQ", "9999999999"));
 
       ret = initialLoad.limitRange(ret); // command line range restriction
     } else if (isMainframe) {

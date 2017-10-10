@@ -55,6 +55,11 @@ public class ServiceProviderIndexerJob
   }
 
   @Override
+  public boolean providesInitialKeyRanges() {
+    return true;
+  }
+
+  @Override
   protected List<Pair<String, String>> getPartitionRanges() {
     List<Pair<String, String>> ret = new ArrayList<>(64);
 

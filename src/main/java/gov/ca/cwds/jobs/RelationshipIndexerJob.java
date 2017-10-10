@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -27,6 +28,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogs;
+import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
@@ -99,7 +101,7 @@ public class RelationshipIndexerJob
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
-    buf.append("SELECT x.* FROM ").append(dbSchemaName).append(".").append(getInitialLoadViewName())
+    buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
         .append(" x ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
@@ -108,6 +110,16 @@ public class RelationshipIndexerJob
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
+  }
+
+  @Override
+  public boolean providesInitialKeyRanges() {
+    return true;
+  }
+
+  @Override
+  protected List<Pair<String, String>> getPartitionRanges() {
+    return JobJdbcUtils.getCommonPartitionRanges(this);
   }
 
   @Override

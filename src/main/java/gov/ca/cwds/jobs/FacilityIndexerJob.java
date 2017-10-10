@@ -1,9 +1,13 @@
 package gov.ca.cwds.jobs;
 
 import java.io.File;
+import java.net.InetAddress;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.slf4j.Logger;
@@ -87,6 +91,16 @@ public class FacilityIndexerJob extends AbstractModule {
     bind(RowMapper.class).to(FacilityRowMapper.class);
   }
 
+  /**
+   * Only used to facilitate code coverage.
+   * 
+   * @param settings ES settings
+   * @return ES transport client
+   */
+  protected TransportClient produceTransportClient(final Settings settings) {
+    return new PreBuiltTransportClient(settings);
+  }
+
   @Provides
   @Inject
   public Client elasticsearchClient(JobConfiguration config) {
@@ -94,14 +108,13 @@ public class FacilityIndexerJob extends AbstractModule {
     if (config != null) {
       LOGGER.warn("Create NEW ES client");
       try {
-        // Settings settings =
-        // Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build();
+        final Settings settings =
+            Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build();
 
-        // DRS: Incompatible with ES 2.3.5. Won't connect.
-        // client = new PreBuiltTransportClient(settings);
-        // client.addTransportAddress(
-        // new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
-        // Integer.parseInt(config.getElasticsearchPort())));
+        client = produceTransportClient(settings);
+        client.addTransportAddress(
+            new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
+                Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {
         LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
         throw new JobsException("Error initializing Elasticsearch client: " + e.getMessage(), e);
@@ -164,4 +177,5 @@ public class FacilityIndexerJob extends AbstractModule {
       @Named("facility-writer") JobWriter jobWriter) {
     return new AsyncReadWriteJob(jobReader, jobProcessor, jobWriter);
   }
+
 }

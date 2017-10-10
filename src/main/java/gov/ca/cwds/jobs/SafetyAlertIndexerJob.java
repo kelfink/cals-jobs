@@ -91,7 +91,7 @@ public class SafetyAlertIndexerJob
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
-    buf.append("SELECT x.* FROM ").append(dbSchemaName).append(".").append(getInitialLoadViewName())
+    buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
         .append(" x ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
