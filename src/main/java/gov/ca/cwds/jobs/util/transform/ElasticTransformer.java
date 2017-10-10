@@ -37,6 +37,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
+import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiLanguageAware;
@@ -453,7 +454,9 @@ public class ElasticTransformer {
 
     // WARNING: not yet in RSQ.
     // Set client county
-    ret.setClientCounty(handleClientCountyC(p));
+    if (!EsClientAddress.isUseCounty()) {
+      ret.setClientCounty(handleClientCountyC(p));
+    }
 
     return ret;
   }

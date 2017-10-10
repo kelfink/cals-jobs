@@ -527,7 +527,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
     // WARNING: not yet available in RSQ.
-    if (EsClientAddress.isUseCounty()) {
+    if (!EsClientAddress.isUseCounty()) {
       ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
     }
 
@@ -690,7 +690,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
       ret.setLastUpdatedTime(getCltLastUpdatedTime());
 
       // WARNING: not yet in RSQ.
-      if (EsClientAddress.isUseCounty()) {
+      if (!EsClientAddress.isUseCounty()) {
         ret.setClientCounty(getClientCounty());
       }
     }
