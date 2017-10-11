@@ -1,10 +1,12 @@
 package gov.ca.cwds.jobs.inject;
 
+import java.lang.management.ManagementFactory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.weakref.jmx.MBeanExporter;
 import org.weakref.jmx.Managed;
 
 import com.google.inject.tools.jmx.Manager;
@@ -154,7 +156,7 @@ public class JobRunner {
   }
 
   public static void main(String[] args) {
-    LOGGER.info("START ON DEMAND JOBS");
+    LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
     try {
       // OPTION: configure individual jobs, just like Rundeck.
       // Best to load a configuration file.
@@ -163,6 +165,11 @@ public class JobRunner {
       JobRunner.continuousMode = true;
       JobRunner.registerContinuousJob(EducationProviderContactIndexerJob.class, args);
       Manager.manage("Neutron", JobsGuiceInjector.getInjector());
+
+      final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
+      exporter.export("neutron:runner=X", new JobRunner());
+      // exporter.unexport("neutron:runner=X");
+      LOGGER.info("ON-DEMAND JOBS SERVER STARTED");
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
