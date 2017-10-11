@@ -40,6 +40,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.SystemCode;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
@@ -88,6 +89,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
    * Default serialization version. Increment by class version.
    */
   private static final long serialVersionUID = 1L;
+
+  private static final String HISPANIC_CODE_OTHER_ID = "02";
 
   @Enumerated(EnumType.STRING)
   @Column(name = "IBMSNAP_OPERATION", updatable = false)
@@ -244,26 +247,43 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     racesEthnicity.setUnableToDetermineCode(getEthUnableToDetReasonCode());
 
     List<ElasticSearchSystemCode> raceCodes = new ArrayList<>();
-    racesEthnicity.setRaces(raceCodes);
+    racesEthnicity.setRaceCodes(raceCodes);
+
+    List<ElasticSearchSystemCode> hispanicCodes = new ArrayList<>();
+    racesEthnicity.setHispanicCodes(hispanicCodes);
 
     // Add primary race
-    addElasticSearchSystemCode(this.primaryEthnicityType, raceCodes);
+    addRaceAndEthnicity(this.primaryEthnicityType, raceCodes, hispanicCodes);
 
     // Add other races
     for (Short raceCode : this.clientRaces) {
-      addElasticSearchSystemCode(raceCode, raceCodes);
+      addRaceAndEthnicity(raceCode, raceCodes, hispanicCodes);
     }
 
     return racesEthnicity;
   }
 
-  private static void addElasticSearchSystemCode(Short codeId,
-      List<ElasticSearchSystemCode> codes) {
+  private static void addRaceAndEthnicity(Short codeId, List<ElasticSearchSystemCode> raceCodes,
+      List<ElasticSearchSystemCode> hispanicCodes) {
     if (codeId != null && codeId != 0) {
+      String description = null;
+      boolean isHispanicCode = false;
+
+      SystemCode systemCode = SystemCodeCache.global().getSystemCode(codeId);
+      if (systemCode != null) {
+        description = systemCode.getShortDescription();
+        isHispanicCode = HISPANIC_CODE_OTHER_ID.equals(systemCode.getOtherCd());
+      }
+
       ElasticSearchSystemCode esCode = new ElasticSearchSystemCode();
       esCode.setId(codeId.toString());
-      esCode.setDescription(SystemCodeCache.global().getSystemCodeShortDescription(codeId));
-      codes.add(esCode);
+      esCode.setDescription(description);
+
+      if (isHispanicCode) {
+        hispanicCodes.add(esCode);
+      } else {
+        raceCodes.add(esCode);
+      }
     }
   }
 }
