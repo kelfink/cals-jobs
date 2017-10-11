@@ -112,7 +112,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     final StringBuilder buf = new StringBuilder();
 
     buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
-        .append(" x WHERE x.clt_identifier > ':fromId' AND x.clt_identifier <= ':toId' ");
+        .append(" x WHERE x.clt_identifier BETWEEN ':fromId' AND ':toId' ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
       buf.append(" AND x.CLT_SENSTV_IND = 'N' ");

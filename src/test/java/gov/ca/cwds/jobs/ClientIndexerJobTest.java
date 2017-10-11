@@ -95,8 +95,8 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     // expected.setCltBirthStateCodeType(s);
     // expected.setCltDriverLicenseStateCodeType(s);
     expected.setCltImmigrationCountryCodeType(s);
-    expected.setCltMaritalStatusType(s);
-    expected.setCltNameType(s);
+    // expected.setCltMaritalStatusType(s);
+    // expected.setCltNameType(s);
     expected.setCltPrimaryEthnicityType(s);
     expected.setCltPrimaryLanguageType(s);
     expected.setCltSecondaryLanguageType(s);

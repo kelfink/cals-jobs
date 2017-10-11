@@ -29,9 +29,9 @@ public class JobRunner {
   private static JobOptions startingOpts;
 
   /**
-   * Job definitions. Clone as needed.
+   * Job options by job type.
    */
-  private static final Map<Class<?>, BasePersonIndexerJob<?, ?>> jobs = new ConcurrentHashMap<>();
+  private static final Map<Class<?>, JobOptions> jobOptions = new ConcurrentHashMap<>();
 
   private JobRunner() {
     // Default, no-op
@@ -82,8 +82,7 @@ public class JobRunner {
       final Class<T> klass, String... args) throws NeutronException {
     try (final T job = JobsGuiceInjector.newJob(klass, args);) {
       setContinuousMode(true);
-      setStartingOpts(job.getOpts());
-      jobs.put(klass, job);
+      jobOptions.put(klass, job.getOpts());
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception, for ClassNotFound or the like.
       throw JobLogs.buildCheckedException(LOGGER, e, "JOB REGISTRATION FAILED!: {}",
@@ -101,9 +100,10 @@ public class JobRunner {
   public static void runRegisteredJob(final Class<?> klass, String... args)
       throws NeutronException {
     try {
-      final JobOptions opts = JobOptions.parseCommandLine(args);
+      final JobOptions opts =
+          args != null && args.length > 1 ? JobOptions.parseCommandLine(args) : getStartingOpts();
       final BasePersonIndexerJob<?, ?> job =
-          (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.buildInjector(opts).getInstance(klass);
+          (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
       job.setOpts(opts);
       job.run();
     } catch (Exception e) {
@@ -164,6 +164,9 @@ public class JobRunner {
     LOGGER.info("START ON DEMAND JOBS");
     try {
       // OPTION: configure individual jobs, just like Rundeck.
+      JobRunner.startingOpts =
+          args != null && args.length > 1 ? JobOptions.parseCommandLine(args) : getStartingOpts();
+
       JobRunner.registerContinuousJob(EducationProviderContactIndexerJob.class, args);
       Manager.manage("Neutron", JobsGuiceInjector.getInjector());
     } catch (Exception e) {

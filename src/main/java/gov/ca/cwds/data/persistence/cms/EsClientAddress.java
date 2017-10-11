@@ -966,113 +966,56 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     return cltImmigrationStatusType;
   }
 
-  public void setCltImmigrationStatusType(Short cltImmigrationStatusType) {
-    this.cltImmigrationStatusType = cltImmigrationStatusType;
-  }
-
   public String getCltIncapacitatedParentCode() {
     return cltIncapacitatedParentCode;
-  }
-
-  public void setCltIncapacitatedParentCode(String cltIncapacitatedParentCode) {
-    this.cltIncapacitatedParentCode = cltIncapacitatedParentCode;
   }
 
   public String getCltIndividualHealthCarePlanIndicator() {
     return cltIndividualHealthCarePlanIndicator;
   }
 
-  public void setCltIndividualHealthCarePlanIndicator(String cltIndividualHealthCarePlanIndicator) {
-    this.cltIndividualHealthCarePlanIndicator = cltIndividualHealthCarePlanIndicator;
-  }
-
   public String getCltLimitationOnScpHealthIndicator() {
     return cltLimitationOnScpHealthIndicator;
-  }
-
-  public void setCltLimitationOnScpHealthIndicator(String cltLimitationOnScpHealthIndicator) {
-    this.cltLimitationOnScpHealthIndicator = cltLimitationOnScpHealthIndicator;
   }
 
   public String getCltLiterateCode() {
     return cltLiterateCode;
   }
 
-  public void setCltLiterateCode(String cltLiterateCode) {
-    this.cltLiterateCode = cltLiterateCode;
-  }
-
   public String getCltMaritalCohabitatnHstryIndicatorVar() {
     return cltMaritalCohabitatnHstryIndicatorVar;
-  }
-
-  public void setCltMaritalCohabitatnHstryIndicatorVar(
-      String cltMaritalCohabitatnHstryIndicatorVar) {
-    this.cltMaritalCohabitatnHstryIndicatorVar = cltMaritalCohabitatnHstryIndicatorVar;
   }
 
   public Short getCltMaritalStatusType() {
     return cltMaritalStatusType;
   }
 
-  public void setCltMaritalStatusType(Short cltMaritalStatusType) {
-    this.cltMaritalStatusType = cltMaritalStatusType;
-  }
-
   public String getCltMilitaryStatusCode() {
     return cltMilitaryStatusCode;
-  }
-
-  public void setCltMilitaryStatusCode(String cltMilitaryStatusCode) {
-    this.cltMilitaryStatusCode = cltMilitaryStatusCode;
   }
 
   public Date getCltMotherParentalRightTermDate() {
     return cltMotherParentalRightTermDate;
   }
 
-  public void setCltMotherParentalRightTermDate(Date cltMotherParentalRightTermDate) {
-    this.cltMotherParentalRightTermDate = cltMotherParentalRightTermDate;
-  }
-
   public String getCltNamePrefixDescription() {
     return cltNamePrefixDescription;
-  }
-
-  public void setCltNamePrefixDescription(String cltNamePrefixDescription) {
-    this.cltNamePrefixDescription = cltNamePrefixDescription;
   }
 
   public Short getCltNameType() {
     return cltNameType;
   }
 
-  public void setCltNameType(Short cltNameType) {
-    this.cltNameType = cltNameType;
-  }
-
   public String getCltOutstandingWarrantIndicator() {
     return cltOutstandingWarrantIndicator;
-  }
-
-  public void setCltOutstandingWarrantIndicator(String cltOutstandingWarrantIndicator) {
-    this.cltOutstandingWarrantIndicator = cltOutstandingWarrantIndicator;
   }
 
   public String getCltPrevCaChildrenServIndicator() {
     return cltPrevCaChildrenServIndicator;
   }
 
-  public void setCltPrevCaChildrenServIndicator(String cltPrevCaChildrenServIndicator) {
-    this.cltPrevCaChildrenServIndicator = cltPrevCaChildrenServIndicator;
-  }
-
   public String getCltPrevOtherDescription() {
     return cltPrevOtherDescription;
-  }
-
-  public void setCltPrevOtherDescription(String cltPrevOtherDescription) {
-    this.cltPrevOtherDescription = cltPrevOtherDescription;
   }
 
   public String getCltPrevRegionalCenterIndicator() {

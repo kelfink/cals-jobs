@@ -112,7 +112,7 @@ public class RelationshipIndexerJob
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
     buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
-        .append(" x WHERE x.THIS_LEGACY_ID > ':fromId' AND x.THIS_LEGACY_ID <= ':toId' ");
+        .append(" x WHERE x.THIS_LEGACY_ID BETWEEN ':fromId' AND ':toId' ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
       buf.append(" AND x.THIS_SENSITIVITY_IND = 'N' AND x.RELATED_SENSITIVITY_IND = 'N' ");

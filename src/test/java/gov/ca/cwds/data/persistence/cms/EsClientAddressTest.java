@@ -150,9 +150,9 @@ public class EsClientAddressTest {
     // ret.setCltBirthStateCodeType(sz);
     // ret.setCltDriverLicenseStateCodeType(sz);
     ret.setCltImmigrationCountryCodeType(sz);
-    ret.setCltImmigrationStatusType(sz);
-    ret.setCltMaritalStatusType(sz);
-    ret.setCltNameType(sz);
+    // ret.setCltImmigrationStatusType(sz);
+    // ret.setCltMaritalStatusType(sz);
+    // ret.setCltNameType(sz);
     ret.setCltPrimaryEthnicityType(sz);
     ret.setCltPrimaryLanguageType(sz);
     ret.setCltReligionType(sz);
@@ -571,22 +571,10 @@ public class EsClientAddressTest {
   }
 
   @Test
-  public void setCltImmigrationStatusType_Args__Short() throws Exception {
-    Short cltImmigrationStatusType = null;
-    target.setCltImmigrationStatusType(cltImmigrationStatusType);
-  }
-
-  @Test
   public void getCltIncapacitatedParentCode_Args__() throws Exception {
     String actual = target.getCltIncapacitatedParentCode();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void setCltIncapacitatedParentCode_Args__String() throws Exception {
-    String cltIncapacitatedParentCode = null;
-    target.setCltIncapacitatedParentCode(cltIncapacitatedParentCode);
   }
 
   @Test
@@ -597,22 +585,10 @@ public class EsClientAddressTest {
   }
 
   @Test
-  public void setCltIndividualHealthCarePlanIndicator_Args__String() throws Exception {
-    String cltIndividualHealthCarePlanIndicator = null;
-    target.setCltIndividualHealthCarePlanIndicator(cltIndividualHealthCarePlanIndicator);
-  }
-
-  @Test
   public void getCltLimitationOnScpHealthIndicator_Args__() throws Exception {
     String actual = target.getCltLimitationOnScpHealthIndicator();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void setCltLimitationOnScpHealthIndicator_Args__String() throws Exception {
-    String cltLimitationOnScpHealthIndicator = null;
-    target.setCltLimitationOnScpHealthIndicator(cltLimitationOnScpHealthIndicator);
   }
 
   @Test
@@ -623,22 +599,10 @@ public class EsClientAddressTest {
   }
 
   @Test
-  public void setCltLiterateCode_Args__String() throws Exception {
-    String cltLiterateCode = null;
-    target.setCltLiterateCode(cltLiterateCode);
-  }
-
-  @Test
   public void getCltMaritalCohabitatnHstryIndicatorVar_Args__() throws Exception {
     String actual = target.getCltMaritalCohabitatnHstryIndicatorVar();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void setCltMaritalCohabitatnHstryIndicatorVar_Args__String() throws Exception {
-    String cltMaritalCohabitatnHstryIndicatorVar = null;
-    target.setCltMaritalCohabitatnHstryIndicatorVar(cltMaritalCohabitatnHstryIndicatorVar);
   }
 
   @Test
@@ -649,22 +613,10 @@ public class EsClientAddressTest {
   }
 
   @Test
-  public void setCltMaritalStatusType_Args__Short() throws Exception {
-    Short cltMaritalStatusType = null;
-    target.setCltMaritalStatusType(cltMaritalStatusType);
-  }
-
-  @Test
   public void getCltMilitaryStatusCode_Args__() throws Exception {
     String actual = target.getCltMilitaryStatusCode();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void setCltMilitaryStatusCode_Args__String() throws Exception {
-    String cltMilitaryStatusCode = null;
-    target.setCltMilitaryStatusCode(cltMilitaryStatusCode);
   }
 
   @Test
@@ -675,22 +627,10 @@ public class EsClientAddressTest {
   }
 
   @Test
-  public void setCltMotherParentalRightTermDate_Args__Date() throws Exception {
-    Date cltMotherParentalRightTermDate = mock(Date.class);
-    target.setCltMotherParentalRightTermDate(cltMotherParentalRightTermDate);
-  }
-
-  @Test
   public void getCltNamePrefixDescription_Args__() throws Exception {
     String actual = target.getCltNamePrefixDescription();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void setCltNamePrefixDescription_Args__String() throws Exception {
-    String cltNamePrefixDescription = null;
-    target.setCltNamePrefixDescription(cltNamePrefixDescription);
   }
 
   @Test
@@ -701,22 +641,10 @@ public class EsClientAddressTest {
   }
 
   @Test
-  public void setCltNameType_Args__Short() throws Exception {
-    Short cltNameType = null;
-    target.setCltNameType(cltNameType);
-  }
-
-  @Test
   public void getCltOutstandingWarrantIndicator_Args__() throws Exception {
     String actual = target.getCltOutstandingWarrantIndicator();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void setCltOutstandingWarrantIndicator_Args__String() throws Exception {
-    String cltOutstandingWarrantIndicator = null;
-    target.setCltOutstandingWarrantIndicator(cltOutstandingWarrantIndicator);
   }
 
   @Test
@@ -727,22 +655,10 @@ public class EsClientAddressTest {
   }
 
   @Test
-  public void setCltPrevCaChildrenServIndicator_Args__String() throws Exception {
-    String cltPrevCaChildrenServIndicator = null;
-    target.setCltPrevCaChildrenServIndicator(cltPrevCaChildrenServIndicator);
-  }
-
-  @Test
   public void getCltPrevOtherDescription_Args__() throws Exception {
     String actual = target.getCltPrevOtherDescription();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void setCltPrevOtherDescription_Args__String() throws Exception {
-    String cltPrevOtherDescription = null;
-    target.setCltPrevOtherDescription(cltPrevOtherDescription);
   }
 
   @Test
