@@ -74,12 +74,12 @@ public class FacilityIndexerJob extends AbstractModule {
           "usage: java -cp jobs.jar gov.ca.cwds.jobs.FacilityIndexerJob path/to/config/file.yaml");
     }
     try {
-      File configFile = new File(args[0]);
+      File configFile = new File(args[0]); // NOSONAR
       Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile));
       Job job = injector.getInstance(Key.get(Job.class, Names.named("facility-job")));
       job.run();
     } catch (Exception e) {
-      LOGGER.error("ERROR: ", e.getMessage(), e);
+      LOGGER.error("ERROR: {}", e.getMessage(), e);
     }
   }
 

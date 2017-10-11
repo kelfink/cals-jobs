@@ -14,21 +14,7 @@ import org.weakref.jmx.Managed;
 import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.ChildCaseHistoryIndexerJob;
-import gov.ca.cwds.jobs.ClientIndexerJob;
-import gov.ca.cwds.jobs.CollateralIndividualIndexerJob;
-import gov.ca.cwds.jobs.EducationProviderContactIndexerJob;
-import gov.ca.cwds.jobs.IntakeScreeningJob;
-import gov.ca.cwds.jobs.OtherAdultInPlacemtHomeIndexerJob;
-import gov.ca.cwds.jobs.OtherChildInPlacemtHomeIndexerJob;
-import gov.ca.cwds.jobs.OtherClientNameIndexerJob;
-import gov.ca.cwds.jobs.ParentCaseHistoryIndexerJob;
-import gov.ca.cwds.jobs.ReferralHistoryIndexerJob;
-import gov.ca.cwds.jobs.RelationshipIndexerJob;
-import gov.ca.cwds.jobs.ReporterIndexerJob;
-import gov.ca.cwds.jobs.SafetyAlertIndexerJob;
-import gov.ca.cwds.jobs.ServiceProviderIndexerJob;
-import gov.ca.cwds.jobs.SubstituteCareProviderIndexJob;
+import gov.ca.cwds.jobs.NeutronJobInventory;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -146,7 +132,7 @@ public class JobRunner {
       job.setOpts(opts);
       job.run();
     } catch (Exception e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "REGISTERED JOB RUN FAILED!: {}",
+      throw JobLogs.buildCheckedException(LOGGER, e, "ON-DEMAND JOB RUN FAILED!: {}",
           e.getMessage());
     }
   }
@@ -164,7 +150,7 @@ public class JobRunner {
       job.setOpts(opts);
       job.run();
     } catch (Exception e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "REGISTERED JOB RUN FAILED!: {}",
+      throw JobLogs.buildCheckedException(LOGGER, e, "ON-DEMAND JOB RUN FAILED!: {}",
           e.getMessage());
     }
   }
@@ -198,6 +184,7 @@ public class JobRunner {
     testMode = mode;
   }
 
+  @SuppressWarnings("unchecked")
   public static void main(String[] args) {
     LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
     try {
@@ -206,30 +193,14 @@ public class JobRunner {
       JobRunner.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
           : JobRunner.startingOpts;
       JobRunner.continuousMode = true;
-
-      JobRunner.registerContinuousJob(ClientIndexerJob.class, args);
-      JobRunner.registerContinuousJob(CollateralIndividualIndexerJob.class, args);
-      JobRunner.registerContinuousJob(ReporterIndexerJob.class, args);
-      JobRunner.registerContinuousJob(ServiceProviderIndexerJob.class, args);
-      JobRunner.registerContinuousJob(SubstituteCareProviderIndexJob.class, args);
-      JobRunner.registerContinuousJob(OtherAdultInPlacemtHomeIndexerJob.class, args);
-      JobRunner.registerContinuousJob(OtherChildInPlacemtHomeIndexerJob.class, args);
-      JobRunner.registerContinuousJob(EducationProviderContactIndexerJob.class, args);
-      JobRunner.registerContinuousJob(ChildCaseHistoryIndexerJob.class, args);
-      JobRunner.registerContinuousJob(ParentCaseHistoryIndexerJob.class, args);
-      JobRunner.registerContinuousJob(RelationshipIndexerJob.class, args);
-      JobRunner.registerContinuousJob(OtherClientNameIndexerJob.class, args);
-      JobRunner.registerContinuousJob(ReferralHistoryIndexerJob.class, args);
-      JobRunner.registerContinuousJob(SafetyAlertIndexerJob.class, args);
-      JobRunner.registerContinuousJob(IntakeScreeningJob.class, args);
-
-      Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
 
-      for (final Class<?> klass : jobOptions.keySet()) {
+      for (final Class<?> klass : NeutronJobInventory.inventory) {
+        JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, args);
         exporter.export("Neutron:last_run_jobs=" + klass.getName(), new JmxStubOperation(klass));
       }
 
+      Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
       LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
