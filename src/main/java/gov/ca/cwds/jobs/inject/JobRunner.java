@@ -1,9 +1,11 @@
 package gov.ca.cwds.jobs.inject;
 
+import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weakref.jmx.MBeanExporter;
@@ -12,7 +14,21 @@ import org.weakref.jmx.Managed;
 import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
+import gov.ca.cwds.jobs.ChildCaseHistoryIndexerJob;
+import gov.ca.cwds.jobs.ClientIndexerJob;
+import gov.ca.cwds.jobs.CollateralIndividualIndexerJob;
 import gov.ca.cwds.jobs.EducationProviderContactIndexerJob;
+import gov.ca.cwds.jobs.IntakeScreeningJob;
+import gov.ca.cwds.jobs.OtherAdultInPlacemtHomeIndexerJob;
+import gov.ca.cwds.jobs.OtherChildInPlacemtHomeIndexerJob;
+import gov.ca.cwds.jobs.OtherClientNameIndexerJob;
+import gov.ca.cwds.jobs.ParentCaseHistoryIndexerJob;
+import gov.ca.cwds.jobs.ReferralHistoryIndexerJob;
+import gov.ca.cwds.jobs.RelationshipIndexerJob;
+import gov.ca.cwds.jobs.ReporterIndexerJob;
+import gov.ca.cwds.jobs.SafetyAlertIndexerJob;
+import gov.ca.cwds.jobs.ServiceProviderIndexerJob;
+import gov.ca.cwds.jobs.SubstituteCareProviderIndexJob;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -23,6 +39,20 @@ import gov.ca.cwds.jobs.util.JobLogs;
  * @author CWDS API Team
  */
 public class JobRunner {
+
+  public static final class JmxStubOperation implements Serializable {
+    private final Class<?> klass;
+
+    public JmxStubOperation(final Class<?> klass) {
+      this.klass = klass;
+    }
+
+    @Managed
+    public void runJob(String bigArg) throws NeutronException {
+      LOGGER.info("RUN JOB: {}", klass.getName());
+      JobRunner.runRegisteredJob(klass, StringUtils.isBlank(bigArg) ? null : bigArg.split("\\s+"));
+    }
+  }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
 
@@ -168,25 +198,39 @@ public class JobRunner {
     testMode = mode;
   }
 
-  protected static JobOptions getStartingOpts() {
-    return startingOpts;
-  }
-
   public static void main(String[] args) {
     LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
     try {
-      // OPTION: configure individual jobs, just like Rundeck.
-      // Best to load a configuration file.
-      JobRunner.startingOpts =
-          args != null && args.length > 1 ? JobOptions.parseCommandLine(args) : getStartingOpts();
+      // OPTION: configure individual jobs, like Rundeck.
+      // Best to load a configuration file with settings per job.
+      JobRunner.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
+          : JobRunner.startingOpts;
       JobRunner.continuousMode = true;
-      JobRunner.registerContinuousJob(EducationProviderContactIndexerJob.class, args);
-      Manager.manage("Neutron", JobsGuiceInjector.getInjector());
 
+      JobRunner.registerContinuousJob(ClientIndexerJob.class, args);
+      JobRunner.registerContinuousJob(CollateralIndividualIndexerJob.class, args);
+      JobRunner.registerContinuousJob(ReporterIndexerJob.class, args);
+      JobRunner.registerContinuousJob(ServiceProviderIndexerJob.class, args);
+      JobRunner.registerContinuousJob(SubstituteCareProviderIndexJob.class, args);
+      JobRunner.registerContinuousJob(OtherAdultInPlacemtHomeIndexerJob.class, args);
+      JobRunner.registerContinuousJob(OtherChildInPlacemtHomeIndexerJob.class, args);
+      JobRunner.registerContinuousJob(EducationProviderContactIndexerJob.class, args);
+      JobRunner.registerContinuousJob(ChildCaseHistoryIndexerJob.class, args);
+      JobRunner.registerContinuousJob(ParentCaseHistoryIndexerJob.class, args);
+      JobRunner.registerContinuousJob(RelationshipIndexerJob.class, args);
+      JobRunner.registerContinuousJob(OtherClientNameIndexerJob.class, args);
+      JobRunner.registerContinuousJob(ReferralHistoryIndexerJob.class, args);
+      JobRunner.registerContinuousJob(SafetyAlertIndexerJob.class, args);
+      JobRunner.registerContinuousJob(IntakeScreeningJob.class, args);
+
+      Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-      exporter.export("neutron:runner=run_job_args", new JobRunner());
-      // exporter.unexport("neutron:runner=X");
-      LOGGER.info("ON-DEMAND JOBS SERVER STARTED");
+
+      for (final Class<?> klass : jobOptions.keySet()) {
+        exporter.export("Neutron:last_run_jobs=" + klass.getName(), new JmxStubOperation(klass));
+      }
+
+      LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
