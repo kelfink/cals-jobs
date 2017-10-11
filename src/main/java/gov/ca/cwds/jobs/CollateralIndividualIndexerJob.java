@@ -55,11 +55,6 @@ public final class CollateralIndividualIndexerJob
   }
 
   @Override
-  public boolean providesInitialKeyRanges() {
-    return true;
-  }
-
-  @Override
   protected List<Pair<String, String>> getPartitionRanges() {
     return JobJdbcUtils.getCommonPartitionRanges64(this);
   }
