@@ -355,6 +355,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Either detect platform or force ORDER BY clause.
       final String query = getInitialLoadQuery(getDBSchemaName());
+      LOGGER.info("query: {}", query);
 
       // Enable parallelism for underlying database.
       JobDB2Utils.enableParallelism(con);

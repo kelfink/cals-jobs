@@ -1,9 +1,15 @@
 package gov.ca.cwds.jobs;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -11,6 +17,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.hibernate.SessionFactory;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +35,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogs;
+import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
@@ -56,6 +64,8 @@ public class RelationshipIndexerJob
           + "WHERE CLNS.IBMSNAP_LOGMARKER > ?\nUNION ALL\nSELECT clnr.IDENTIFIER\n"
           + "FROM CLN_RELT CLNR\nJOIN CLIENT_T CLNP ON CLNR.FKCLIENT_0 = CLNP.IDENTIFIER\n"
           + "WHERE CLNP.IBMSNAP_LOGMARKER > ?";
+
+  private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -102,19 +112,134 @@ public class RelationshipIndexerJob
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
     buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
-        .append(" x ");
+        .append(" x WHERE x.THIS_LEGACY_ID > ':fromId' AND x.THIS_LEGACY_ID <= ':toId' ");
 
     if (!getOpts().isLoadSealedAndSensitive()) {
-      buf.append(" WHERE x.THIS_SENSITIVITY_IND = 'N' AND x.RELATED_SENSITIVITY_IND = 'N' ");
+      buf.append(" AND x.THIS_SENSITIVITY_IND = 'N' AND x.RELATED_SENSITIVITY_IND = 'N' ");
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
   }
 
+  /**
+   * Send all recs for same client id to the index queue.
+   * 
+   * @param grpRecs recs for same client id
+   */
+  protected void normalizeAndQueueIndex(final List<EsRelationship> grpRecs) {
+    grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
+        .collect(Collectors.groupingBy(EsRelationship::getThisLegacyId)).entrySet().stream()
+        .map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
+  }
+
+  /**
+   * Read recs from a single partition.
+   * 
+   * @param p partition range to read
+   */
+  protected void pullRange(final Pair<String, String> p) {
+    final int i = nextThreadNum.incrementAndGet();
+    final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
+    Thread.currentThread().setName(threadName);
+    LOGGER.warn("BEGIN: extract thread {}", threadName);
+    getTrack().trackRangeStart(p);
+
+    try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
+        .getService(ConnectionProvider.class).getConnection()) {
+      con.setSchema(getDBSchemaName());
+      con.setAutoCommit(false);
+
+      final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
+          .replaceAll(":toId", p.getRight());
+      LOGGER.info("query: {}", query);
+      JobDB2Utils.enableParallelism(con);
+
+      int cntr = 0;
+      EsRelationship m;
+      Object lastId = new Object();
+      final List<EsRelationship> grpRecs = new ArrayList<>();
+
+      try (Statement stmt = con.createStatement()) {
+        stmt.setFetchSize(5000); // faster
+        stmt.setMaxRows(0);
+        stmt.setQueryTimeout(0);
+        final ResultSet rs = stmt.executeQuery(query); // NOSONAR
+
+        // NOTE: Assumes that records are sorted by group key.
+        while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
+          JobLogs.logEvery(++cntr, "Retrieved", "recs");
+          if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
+            normalizeAndQueueIndex(grpRecs);
+            grpRecs.clear(); // Single thread, re-use memory.
+          }
+
+          grpRecs.add(m);
+          lastId = m.getNormalizationGroupKey();
+        }
+
+        con.commit();
+      }
+
+    } catch (Exception e) {
+      markFailed();
+      JobLogs.raiseError(LOGGER, e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(), p.getRight(),
+          e.getMessage());
+    }
+
+    getTrack().trackRangeComplete(p);
+    LOGGER.warn("DONE: Extract thread {}", i);
+  }
+
+  /**
+   * The "extract" part of ETL. Single producer, chained consumers. This job normalizes **without**
+   * the transform thread.
+   */
+  @Override
+  protected void threadRetrieveByJdbc() {
+    Thread.currentThread().setName("extract_main");
+    LOGGER.info("BEGIN: main extract thread");
+    markTransformDone();
+
+    try {
+      final List<Pair<String, String>> ranges = getPartitionRanges();
+      LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
+      final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
+      final ForkJoinPool threadPool = new ForkJoinPool(JobJdbcUtils.calcReaderThreads(getOpts()));
+
+      // Queue execution.
+      for (Pair<String, String> p : ranges) {
+        tasks.add(threadPool.submit(() -> pullRange(p)));
+      }
+
+      // Join threads. Don't return from method until they complete.
+      for (ForkJoinTask<?> task : tasks) {
+        task.get();
+      }
+
+    } catch (Exception e) {
+      markFailed();
+      JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+    } finally {
+      markRetrieveDone();
+    }
+
+    LOGGER.info("DONE: main extract thread");
+  }
+
+  @Override
+  public boolean useTransformThread() {
+    return false;
+  }
+
+  @Override
+  public boolean providesInitialKeyRanges() {
+    return true;
+  }
+
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
-    return JobJdbcUtils.getCommonPartitionRanges16(this);
+    return JobJdbcUtils.getCommonPartitionRanges64(this);
   }
 
   @Override

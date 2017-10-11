@@ -35,7 +35,7 @@ public class PrepSQLWork implements Work {
     this.prepStmtMaker = prepStmtMaker;
   }
 
-  private PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+  private PreparedStatement createPreparedStatement(Connection con) {
     return prepStmtMaker.apply(con);
   }
 

@@ -288,10 +288,10 @@ public class ElasticTransformer {
     final ElasticSearchLegacyDescriptor ret = new ElasticSearchLegacyDescriptor();
 
     if (!StringUtils.isBlank(legacyId)) {
-      ret.setLegacyId(legacyId.trim());
+      final String cleanLegacyId = legacyId.trim();
+      ret.setLegacyId(cleanLegacyId);
       ret.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
 
-      final String cleanLegacyId = legacyId.trim();
       if (cleanLegacyId.length() == CMS_ID_LEN) {
         ret.setLegacyUiId(CmsKeyIdGenerator.getUIIdentifierFromKey(cleanLegacyId));
       } else {

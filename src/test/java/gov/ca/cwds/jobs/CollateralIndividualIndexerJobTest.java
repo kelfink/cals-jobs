@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
@@ -72,25 +71,10 @@ public class CollateralIndividualIndexerJobTest
   }
 
   @Test
-  @Ignore
-  public void getJobTotalBuckets_Args__() throws Exception {
-    final int actual = target.getJobTotalBuckets();
-    final int expected = 12;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void getLegacySourceTable_Args__() throws Exception {
     final String actual = target.getLegacySourceTable();
     String expected = "COLTRL_T";
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  @Ignore
-  public void main_Args__StringArray() throws Exception {
-    String[] args = new String[] {};
-    CollateralIndividualIndexerJob.main(args);
   }
 
   @Test

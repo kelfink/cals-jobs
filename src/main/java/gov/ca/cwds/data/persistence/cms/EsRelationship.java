@@ -5,6 +5,7 @@ import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,7 +72,8 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
         + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY WITH UR ",
     resultClass = EsRelationship.class, readOnly = true)
 public class EsRelationship
-    implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationships> {
+    implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationships>,
+    Comparable<EsRelationship>, Comparator<EsRelationship> {
 
   private static final Map<Short, CmsRelationship> mapRelationCodes = new ConcurrentHashMap<>();
 
@@ -334,4 +336,15 @@ public class EsRelationship
   public void setRelatedLegacyLastUpdated(Date relatedLegacyLastUpdated) {
     this.relatedLegacyLastUpdated = relatedLegacyLastUpdated;
   }
+
+  @Override
+  public int compare(EsRelationship o1, EsRelationship o2) {
+    return o1.getThisLegacyId().compareTo(o2.getThisLegacyId());
+  }
+
+  @Override
+  public int compareTo(EsRelationship o) {
+    return compare(this, o);
+  }
+
 }

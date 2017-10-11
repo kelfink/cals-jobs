@@ -76,6 +76,7 @@ public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T
       bulkProcessor.awaitClose(3000, TimeUnit.MILLISECONDS);
       esDao.close();
     } catch (InterruptedException e) {
+      Thread.interrupted();
       throw new JobsException(e);
     } catch (IOException e) {
       throw new JobsException(e);

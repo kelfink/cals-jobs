@@ -60,14 +60,13 @@ public class DocumentMetadataDaoImpl implements DocumentMetadataDao {
   @SuppressWarnings({"unchecked"})
   @Override
   public List<DocumentMetadata> findByLastJobRunTimeMinusOneMinute(Date lastJobRunTime) {
-    // TODO - abstract out transaction management.
-    // See story #134542407.
     final Session session = sessionFactory.getCurrentSession();
     Transaction txn = session.beginTransaction();
     try {
-      Query query = session.getNamedQuery("findByLastJobRunTimeMinusOneMinute")
+      final Query query = session.getNamedQuery("findByLastJobRunTimeMinusOneMinute")
           .setString("lastJobRunTime", dateFormat.format(lastJobRunTime));
-      ImmutableList.Builder<DocumentMetadata> documentMetadatas = new ImmutableList.Builder<>();
+      final ImmutableList.Builder<DocumentMetadata> documentMetadatas =
+          new ImmutableList.Builder<>();
       documentMetadatas.addAll(query.list());
       txn.commit();
       return documentMetadatas.build();
