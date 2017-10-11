@@ -883,11 +883,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @SuppressWarnings("unchecked")
   protected List<T> pullBucketRange(String minId, String maxId) {
     LOGGER.info("PULL BUCKET RANGE {} to {}", minId, maxId);
+    final Pair<String, String> p = Pair.of(minId, maxId);
+    getTrack().trackRangeStart(p);
+
     final Class<?> entityClass =
         getDenormalizedClass() != null ? getDenormalizedClass() : getJobDao().getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findBucketRange";
     final Session session = jobDao.getSessionFactory().getCurrentSession();
     final Transaction txn = session.beginTransaction();
+
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setParameter("min_id", minId, StringType.INSTANCE)
@@ -915,6 +919,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       session.flush();
       results.close();
       txn.commit();
+      getTrack().trackRangeComplete(p);
       return ret.build();
     } catch (HibernateException e) {
       markFailed();

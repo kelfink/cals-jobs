@@ -1,5 +1,8 @@
 package gov.ca.cwds.jobs;
 
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +14,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherChildInPlacemtHome;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 
 /**
  * Job to load Other Child In Placement Home from CMS into ElasticSearch.
@@ -45,6 +49,11 @@ public class OtherChildInPlacemtHomeIndexerJob extends
   @Deprecated
   public String getLegacySourceTable() {
     return "OTH_KIDT";
+  }
+
+  @Override
+  protected List<Pair<String, String>> getPartitionRanges() {
+    return JobJdbcUtils.getCommonPartitionRanges4(this);
   }
 
   /**

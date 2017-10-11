@@ -29,6 +29,9 @@ public class JobJdbcUtils {
 
   static final Logger LOGGER = LoggerFactory.getLogger(JobJdbcUtils.class);
 
+  private static final String Z_OS_START = "aaaaaaaaaa";
+  private static final String Z_OS_END = "9999999999";
+
   private JobJdbcUtils() {
     // Default, no-op. Static utility class.
   }
@@ -77,7 +80,7 @@ public class JobJdbcUtils {
 
   public static List<Pair<String, String>> getPartitionRanges64() {
     final List<Pair<String, String>> ret = new ArrayList<>(64);
-    ret.add(Pair.of("aaaaaaaaaa", "ACZAVXC2PZ"));
+    ret.add(Pair.of(Z_OS_START, "ACZAVXC2PZ"));
     ret.add(Pair.of("ACZA5MZAR1", "A6y48OH3Ut"));
     ret.add(Pair.of("A6y49C3046", "BzaK4AmDfS"));
     ret.add(Pair.of("BzaLz7EAXU", "B26CwOn9qX"));
@@ -140,13 +143,13 @@ public class JobJdbcUtils {
     ret.add(Pair.of("8guDdze6Z2", "8JpJrxB37S"));
     ret.add(Pair.of("8JpTu2j3K2", "9cRG3VmH6i"));
     ret.add(Pair.of("9cRHCIm6xC", "9GwwRzY7D3"));
-    ret.add(Pair.of("9Gwxhdx41S", "9999999999"));
+    ret.add(Pair.of("9Gwxhdx41S", Z_OS_END));
     return ret;
   }
 
   public static List<Pair<String, String>> getPartitionRanges16() {
     final List<Pair<String, String>> ret = new ArrayList<>(16);
-    ret.add(Pair.of("aaaaaaaaaa", "B3bMRWu8NV"));
+    ret.add(Pair.of(Z_OS_START, "B3bMRWu8NV"));
     ret.add(Pair.of("B3bMRWu8NV", "DW5GzxJ30A"));
     ret.add(Pair.of("DW5GzxJ30A", "FNOBbaG6qq"));
     ret.add(Pair.of("FNOBbaG6qq", "HJf1EJe25X"));
@@ -161,16 +164,16 @@ public class JobJdbcUtils {
     ret.add(Pair.of("2CFeyJd49S", "4w3QDw136B"));
     ret.add(Pair.of("4w3QDw136B", "6p9XaHC10S"));
     ret.add(Pair.of("6p9XaHC10S", "8jw5J580MQ"));
-    ret.add(Pair.of("8jw5J580MQ", "9999999999"));
+    ret.add(Pair.of("8jw5J580MQ", Z_OS_END));
     return ret;
   }
 
   public static List<Pair<String, String>> getPartitionRanges4() {
     final List<Pair<String, String>> ret = new ArrayList<>(4);
-    ret.add(Pair.of("aaaaaaaaaa", "JCoyq0Iz36"));
+    ret.add(Pair.of(Z_OS_START, "JCoyq0Iz36"));
     ret.add(Pair.of("JCoyq0Iz36", "RbL4aAL34A"));
     ret.add(Pair.of("RbL4aAL34A", "4w3QDw136B"));
-    ret.add(Pair.of("4w3QDw136B", "9999999999"));
+    ret.add(Pair.of("4w3QDw136B", Z_OS_END));
     return ret;
   }
 
@@ -205,7 +208,7 @@ public class JobJdbcUtils {
       // z/OS, small data set:
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
-      ret.add(Pair.of("aaaaaaaaaa", "9999999999"));
+      ret.add(Pair.of(Z_OS_START, Z_OS_END));
     } else {
       // ----------------------------
       // Linux or small data set:

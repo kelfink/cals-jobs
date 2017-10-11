@@ -113,11 +113,6 @@ public class RelationshipIndexerJob
   }
 
   @Override
-  public boolean providesInitialKeyRanges() {
-    return true;
-  }
-
-  @Override
   protected List<Pair<String, String>> getPartitionRanges() {
     return JobJdbcUtils.getCommonPartitionRanges16(this);
   }
