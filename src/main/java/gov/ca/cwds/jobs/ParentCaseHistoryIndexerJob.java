@@ -32,22 +32,23 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
    * Default serialization.
    */
   private static final long serialVersionUID = 1L;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(ParentCaseHistoryIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
    * 
    * @param dao Case history view DAO
-   * @param elasticsearchDao ElasticSearch DAO
+   * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
   public ParentCaseHistoryIndexerJob(final ReplicatedPersonCasesDao dao,
-      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
+      final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(dao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   @Override
@@ -133,4 +134,5 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
   public static void main(String... args) {
     JobRunner.runStandalone(ParentCaseHistoryIndexerJob.class, args);
   }
+
 }

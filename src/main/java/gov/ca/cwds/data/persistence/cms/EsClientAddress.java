@@ -70,6 +70,8 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
    */
   private static final long serialVersionUID = 1L;
 
+  private static boolean useCounty;
+
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)
   private Date lastChange;
@@ -530,8 +532,12 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     ret.cltPrevOtherDescription = rs.getString("CLT_POTH_DESC");
     ret.cltPrevRegionalCenterIndicator = rs.getString("CLT_PREREG_IND");
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
-    ret.clientEthnicityCode = rs.getShort("ETHNICITY_CODE");
-    ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
+
+    // WARNING: not yet available in RSQ.
+    if (!EsClientAddress.isUseCounty()) {
+      ret.clientEthnicityCode = rs.getShort("ETHNICITY_CODE");
+      ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
+    }
 
     // Languages
     ret.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
@@ -691,7 +697,10 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
       ret.setReplicationOperation(getCltReplicationOperation());
       ret.setLastUpdatedTime(getCltLastUpdatedTime());
 
-      ret.setClientCounty(getClientCounty());
+      // WARNING: not yet in RSQ.
+      if (!EsClientAddress.isUseCounty()) {
+        ret.setClientCounty(getClientCounty());
+      }
     }
 
     // Client Address:
@@ -758,8 +767,11 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
       }
     }
 
-    // Client races
-    ret.addClientRace(this.clientEthnicityCode);
+    // WARNING: not yet in RSQ.
+    if (!EsClientAddress.isUseCounty()) {
+      // Client races
+      ret.addClientRace(this.clientEthnicityCode);
+    }
 
     map.put(ret.getId(), ret);
     return ret;
@@ -806,11 +818,11 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getCltBirthDate() {
-    return cltBirthDate;
+    return cltBirthDate != null ? new Date(cltBirthDate.getTime()) : null;
   }
 
   public void setCltBirthDate(Date cltBirthDate) {
-    this.cltBirthDate = cltBirthDate;
+    this.cltBirthDate = cltBirthDate != null ? new Date(cltBirthDate.getTime()) : null;
   }
 
   public String getCltBirthFacilityName() {
@@ -1680,6 +1692,14 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
 
   public Date getCltFatherParentalRightTermDate() {
     return cltFatherParentalRightTermDate;
+  }
+
+  public static boolean isUseCounty() {
+    return useCounty;
+  }
+
+  public static void setUseCounty(boolean useCounty) {
+    EsClientAddress.useCounty = useCounty;
   }
 
 }

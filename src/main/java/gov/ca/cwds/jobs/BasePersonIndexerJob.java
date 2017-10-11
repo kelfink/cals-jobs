@@ -59,6 +59,7 @@ import gov.ca.cwds.jobs.component.AtomTransformer;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.defaults.NeutronColumnDefaults;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.defaults.NeutronElasticsearchDefaults;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
@@ -608,10 +609,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       if (autoInitialLoad) {
         LOGGER.warn("AUTO MODE!");
-        // WARNING: don't overwrite command line settings.
-        getOpts().setStartBucket(1);
-        getOpts().setEndBucket(1);
-        getOpts().setTotalBuckets(getJobTotalBuckets());
 
         if (providesInitialKeyRanges()) {
           LOGGER.info("LOAD FROM VIEW WITH JDBC!");
@@ -663,8 +660,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
-      q.setParameter(SQL_COLUMN_AFTER, JobJdbcUtils.makeSimpleTimestampString(lastRunTime),
-          StringType.INSTANCE);
+      q.setParameter(NeutronColumnDefaults.SQL_COLUMN_AFTER.getValue(),
+          JobJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
@@ -689,8 +686,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final String namedQueryNameForDeletion =
         entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
     final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
-    q.setParameter(SQL_COLUMN_AFTER, JobJdbcUtils.makeSimpleTimestampString(lastRunTime),
-        StringType.INSTANCE);
+    q.setParameter(NeutronColumnDefaults.SQL_COLUMN_AFTER.getValue(),
+        JobJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
     final List<M> deletionRecs = q.list();
 
@@ -729,14 +726,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       prepHibernateLastChange(session, txn, lastRunTime);
       final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
-      q.setParameter(SQL_COLUMN_AFTER, JobJdbcUtils.makeSimpleTimestampString(lastRunTime),
-          StringType.INSTANCE);
+      q.setParameter(NeutronColumnDefaults.SQL_COLUMN_AFTER.getValue(),
+          JobJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<M> recs = q.list();
       LOGGER.warn("FOUND {} RECORDS", recs.size());
 
-      // Convert de-normalized view rows to normalized persistence objects.
+      // Convert de-normalized rows to normalized persistence objects.
       final List<M> groupRecs = new ArrayList<>();
       for (M m : recs) {
         if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {

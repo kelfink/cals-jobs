@@ -13,11 +13,6 @@ import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker {
 
-  static final ESOptionalCollection[] KEEP_COLLECTIONS =
-      new ESOptionalCollection[] {ESOptionalCollection.NONE};
-
-  static final List<ApiTypedIdentifier<String>> EMPTY_OPTIONAL_LIST = new ArrayList<>();
-
   /**
    * Set optional ES person collections before serializing JSON for insert. Child classes which
    * handle optional collections should override this method.
@@ -56,7 +51,7 @@ public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker
    * @return array of optional collections to keep in insert JSON
    */
   default ESOptionalCollection[] keepCollections() {
-    return KEEP_COLLECTIONS;
+    return new ESOptionalCollection[] {ESOptionalCollection.NONE};
   }
 
   /**
@@ -68,7 +63,7 @@ public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker
    * @return List of ES person elements
    */
   default List<ApiTypedIdentifier<String>> getOptionalCollection(ElasticSearchPerson esp, T t) {
-    return EMPTY_OPTIONAL_LIST;
+    return new ArrayList<>();
   }
 
 }

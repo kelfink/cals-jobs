@@ -47,7 +47,7 @@ public class SubstituteCareProviderIndexJob extends
 
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
-    return JobJdbcUtils.getCommonPartitionRanges(this);
+    return JobJdbcUtils.getCommonPartitionRanges16(this);
   }
 
   /**

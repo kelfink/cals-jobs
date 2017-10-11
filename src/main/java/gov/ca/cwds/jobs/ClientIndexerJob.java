@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -141,6 +143,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
     LOGGER.warn("BEGIN: extract thread {}", threadName);
+    getTrack().trackRangeStart(p);
 
     try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection()) {
@@ -184,6 +187,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
           e.getMessage());
     }
 
+    getTrack().trackRangeComplete(p);
     LOGGER.warn("DONE: Extract thread {}", i);
   }
 
@@ -198,11 +202,21 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     markTransformDone();
 
     try {
-      final int maxThreads = JobJdbcUtils.calcReaderThreads(getOpts());
-      System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
-          String.valueOf(maxThreads));
-      LOGGER.info("JDBC processors={}", maxThreads);
-      getPartitionRanges().parallelStream().forEach(this::pullRange);
+      final List<Pair<String, String>> ranges = getPartitionRanges();
+      LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
+      final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
+      final ForkJoinPool threadPool = new ForkJoinPool(JobJdbcUtils.calcReaderThreads(getOpts()));
+
+      // Queue execution.
+      for (Pair<String, String> p : ranges) {
+        tasks.add(threadPool.submit(() -> pullRange(p)));
+      }
+
+      // Join threads. Don't return from method until they complete.
+      for (ForkJoinTask<?> task : tasks) {
+        task.get();
+      }
+
     } catch (Exception e) {
       markFailed();
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
@@ -220,7 +234,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
-    return JobJdbcUtils.getCommonPartitionRanges(this);
+    // WARNING: short-term fix for county table in Perf and Prod.
+    EsClientAddress.setUseCounty(isLargeDataSet());
+    return JobJdbcUtils.getCommonPartitionRanges16(this);
   }
 
   /**
