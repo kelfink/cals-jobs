@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.ApiClientCountyAware;
+import gov.ca.cwds.dao.ApiClientRaceAndEthnicityAware;
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
@@ -34,6 +35,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonLanguage;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
+import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
@@ -389,13 +391,22 @@ public class ElasticTransformer {
     return ret;
   }
 
+  protected static ElasticSearchRaceAndEthnicity handleRaceEthnicity(ApiPersonAware p) {
+    ElasticSearchRaceAndEthnicity esRace = null;
+    if (p instanceof ApiClientRaceAndEthnicityAware) {
+      ApiClientRaceAndEthnicityAware raceAware = (ApiClientRaceAndEthnicityAware) p;
+      esRace = raceAware.getRaceAndEthnicity();
+    }
+    return esRace;
+  }
+
   protected static ElasticSearchSystemCode handleClientCountyC(ApiPersonAware p) {
     ElasticSearchSystemCode esCounty = null;
     if (p instanceof ApiClientCountyAware) {
       ApiClientCountyAware countyAware = (ApiClientCountyAware) p;
       esCounty = new ElasticSearchSystemCode();
       esCounty.setId(countyAware.getClientCounty().toString());
-      esCounty.setName(
+      esCounty.setDescription(
           SystemCodeCache.global().getSystemCodeShortDescription(countyAware.getClientCounty()));
     }
     return esCounty;
@@ -451,9 +462,11 @@ public class ElasticTransformer {
     // Sealed and sensitive.
     ret.setSensitivityIndicator(p.getSensitivityIndicator());
 
-    // WARNING: not yet in RSQ.
     // Set client county
     ret.setClientCounty(handleClientCountyC(p));
+
+    // Set race/ethnicity
+    ret.setCleintRace(handleRaceEthnicity(p));
 
     return ret;
   }

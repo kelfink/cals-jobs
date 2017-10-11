@@ -144,8 +144,8 @@ public class EsSafetyAlert extends ApiObjectIdentity
 
     ElasticSearchSystemCode activationCounty = new ElasticSearchSystemCode();
     activation.setActivationCounty(activationCounty);
-    activationCounty
-        .setName(SystemCodeCache.global().getSystemCodeShortDescription(this.activationCountyCode));
+    activationCounty.setDescription(
+        SystemCodeCache.global().getSystemCodeShortDescription(this.activationCountyCode));
     activationCounty
         .setId(this.activationCountyCode != null ? this.activationCountyCode.toString() : null);
 
@@ -160,7 +160,7 @@ public class EsSafetyAlert extends ApiObjectIdentity
     ElasticSearchSystemCode deactivationCounty = new ElasticSearchSystemCode();
     deactivation.setDeactivationCounty(deactivationCounty);
 
-    deactivationCounty.setName(
+    deactivationCounty.setDescription(
         SystemCodeCache.global().getSystemCodeShortDescription(this.deactivationCountyCode));
     deactivationCounty
         .setId(this.deactivationCountyCode != null ? this.deactivationCountyCode.toString() : null);

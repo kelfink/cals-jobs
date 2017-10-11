@@ -1,8 +1,10 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,7 +25,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import gov.ca.cwds.dao.ApiClientCountyAware;
+import gov.ca.cwds.dao.ApiClientRaceAndEthnicityAware;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
+import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseClient;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
@@ -35,6 +40,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
  * {@link PersistentObject} representing a Client a {@link CmsReplicatedEntity} in the replicated
@@ -74,9 +80,9 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 @Table(name = "CLIENT_T")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ReplicatedClient extends BaseClient
-    implements ApiPersonAware, ApiMultipleLanguagesAware, ApiMultipleAddressesAware,
-    ApiMultiplePhonesAware, CmsReplicatedEntity, ApiClientCountyAware {
+public class ReplicatedClient extends BaseClient implements ApiPersonAware,
+    ApiMultipleLanguagesAware, ApiMultipleAddressesAware, ApiMultiplePhonesAware,
+    CmsReplicatedEntity, ApiClientCountyAware, ApiClientRaceAndEthnicityAware {
 
   /**
    * Default serialization version. Increment by class version.
@@ -96,6 +102,8 @@ public class ReplicatedClient extends BaseClient
    */
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "fkClient")
   protected transient Set<ReplicatedClientAddress> clientAddresses = new LinkedHashSet<>();
+
+  private List<Short> clientRaces = new ArrayList<>();
 
   private Short clinetCountyId;
 
@@ -146,6 +154,20 @@ public class ReplicatedClient extends BaseClient
 
   public void setClientCounty(Short clinetCountyId) {
     this.clinetCountyId = clinetCountyId;
+  }
+
+  public List<Short> getClientRaces() {
+    return clientRaces;
+  }
+
+  public void setClientRaces(List<Short> clientRaces) {
+    this.clientRaces = clientRaces;
+  }
+
+  public void addClientRace(Short clientRace) {
+    if (clientRace != null) {
+      this.clientRaces.add(clientRace);
+    }
   }
 
   // ============================
@@ -208,5 +230,40 @@ public class ReplicatedClient extends BaseClient
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getLastUpdatedTime(),
         LegacyTable.CLIENT);
+  }
+
+  // =======================
+  // ApiClientRaceAndEthnicityAware:
+  // =======================
+
+  @Override
+  public ElasticSearchRaceAndEthnicity getRaceAndEthnicity() {
+    ElasticSearchRaceAndEthnicity racesEthnicity = new ElasticSearchRaceAndEthnicity();
+    racesEthnicity.setHispanicOriginCode(getHispanicOriginCode());
+    racesEthnicity.setHispanicUnableToDetermineCode(getHispUnableToDetReasonCode());
+    racesEthnicity.setUnableToDetermineCode(getEthUnableToDetReasonCode());
+
+    List<ElasticSearchSystemCode> raceCodes = new ArrayList<>();
+    racesEthnicity.setRaces(raceCodes);
+
+    // Add primary race
+    addElasticSearchSystemCode(this.primaryEthnicityType, raceCodes);
+
+    // Add other races
+    for (Short raceCode : this.clientRaces) {
+      addElasticSearchSystemCode(raceCode, raceCodes);
+    }
+
+    return racesEthnicity;
+  }
+
+  private static void addElasticSearchSystemCode(Short codeId,
+      List<ElasticSearchSystemCode> codes) {
+    if (codeId != null) {
+      ElasticSearchSystemCode esCode = new ElasticSearchSystemCode();
+      esCode.setId(codeId.toString());
+      esCode.setDescription(SystemCodeCache.global().getSystemCodeShortDescription(codeId));
+      codes.add(esCode);
+    }
   }
 }

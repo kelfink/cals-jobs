@@ -454,10 +454,17 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   // CLIENT_CNTY:
   // ================
 
-  // WARNING: not yet available in RSQ.
   @Type(type = "short")
   @Column(name = "CLC_GVR_ENTC")
   private Short clientCounty;
+
+  // ================
+  // CLSCP_ET:
+  // ================
+
+  @Type(type = "short")
+  @Column(name = "ETHNICITY_CODE")
+  private Short clientEthnicityCode;
 
   /**
    * Build an EsClientAddress from the incoming ResultSet.
@@ -523,8 +530,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     ret.cltPrevOtherDescription = rs.getString("CLT_POTH_DESC");
     ret.cltPrevRegionalCenterIndicator = rs.getString("CLT_PREREG_IND");
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
-
-    // WARNING: not yet available in RSQ.
+    ret.clientEthnicityCode = rs.getShort("ETHNICITY_CODE");
     ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
 
     // Languages
@@ -685,7 +691,6 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
       ret.setReplicationOperation(getCltReplicationOperation());
       ret.setLastUpdatedTime(getCltLastUpdatedTime());
 
-      // WARNING: not yet in RSQ.
       ret.setClientCounty(getClientCounty());
     }
 
@@ -752,6 +757,9 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
         rca.addAddress(adr);
       }
     }
+
+    // Client races
+    ret.addClientRace(this.clientEthnicityCode);
 
     map.put(ret.getId(), ret);
     return ret;
