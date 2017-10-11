@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.weakref.jmx.MBeanExporter;
 import org.weakref.jmx.Managed;
 
@@ -28,9 +27,9 @@ import gov.ca.cwds.jobs.util.JobLogs;
 public class JobRunner {
 
   public static final class JmxStubOperation implements Serializable {
-    private Logger opLog = LoggerFactory.getLogger(JmxStubOperation.class);
+    // private Logger opLog = LoggerFactory.getLogger(JmxStubOperation.class);
 
-    private Map<String, String> contextMap = MDC.getCopyOfContextMap();
+    // private Map<String, String> contextMap = MDC.getCopyOfContextMap();
 
     private final Class<?> klass;
 
@@ -40,8 +39,8 @@ public class JobRunner {
 
     @Managed
     public void run(String bigArg) throws NeutronException {
-      MDC.setContextMap(contextMap);
-      opLog.info("RUN JOB: {}", klass.getName());
+      // MDC.setContextMap(contextMap);
+      LOGGER.info("RUN JOB: {}", klass.getName());
       JobRunner.runRegisteredJob(klass, StringUtils.isBlank(bigArg) ? null : bigArg.split("\\s+"));
     }
   }
