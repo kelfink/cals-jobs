@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.weakref.jmx.Managed;
 
 import com.google.inject.tools.jmx.Manager;
 
@@ -14,6 +15,11 @@ import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 
+/**
+ * Run standalone jobs or serve up jobs in "continuous" mode.
+ * 
+ * @author CWDS API Team
+ */
 public class JobRunner {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
@@ -52,7 +58,7 @@ public class JobRunner {
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
     int exitCode = 0;
-    setContinuousMode(false);
+    JobRunner.continuousMode = false;
 
     try (final T job = JobsGuiceInjector.newJob(klass, args)) {
       job.run();
@@ -80,8 +86,8 @@ public class JobRunner {
    */
   public static <T extends BasePersonIndexerJob<?, ?>> void registerContinuousJob(
       final Class<T> klass, String... args) throws NeutronException {
-    try (final T job = JobsGuiceInjector.newJob(klass, args);) {
-      setContinuousMode(true);
+    LOGGER.info("Register job: {}", klass.getName());
+    try (final T job = JobsGuiceInjector.newJob(klass, args)) {
       jobOptions.put(klass, job.getOpts());
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception, for ClassNotFound or the like.
@@ -97,11 +103,13 @@ public class JobRunner {
    * @param args command line arguments
    * @throws NeutronException unexpected runtime error
    */
+  @Managed
   public static void runRegisteredJob(final Class<?> klass, String... args)
       throws NeutronException {
     try {
-      final JobOptions opts =
-          args != null && args.length > 1 ? JobOptions.parseCommandLine(args) : getStartingOpts();
+      LOGGER.info("Run registered job: {}", klass.getName());
+      final JobOptions opts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
+          : jobOptions.get(klass);
       final BasePersonIndexerJob<?, ?> job =
           (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
       job.setOpts(opts);
@@ -119,15 +127,6 @@ public class JobRunner {
    */
   public static boolean isContinuousMode() {
     return continuousMode;
-  }
-
-  /**
-   * Set continuous run flag.
-   * 
-   * @param mode true to run in continuous mode
-   */
-  protected static void setContinuousMode(boolean mode) {
-    continuousMode = mode;
   }
 
   /**
@@ -150,23 +149,18 @@ public class JobRunner {
     testMode = mode;
   }
 
-  public static synchronized JobOptions getStartingOpts() {
+  protected static JobOptions getStartingOpts() {
     return startingOpts;
-  }
-
-  protected static synchronized void setStartingOpts(JobOptions startingOpts) {
-    if (JobRunner.startingOpts == null) {
-      JobRunner.startingOpts = startingOpts;
-    }
   }
 
   public static void main(String[] args) {
     LOGGER.info("START ON DEMAND JOBS");
     try {
       // OPTION: configure individual jobs, just like Rundeck.
+      // Best to load a configuration file.
       JobRunner.startingOpts =
           args != null && args.length > 1 ? JobOptions.parseCommandLine(args) : getStartingOpts();
-
+      JobRunner.continuousMode = true;
       JobRunner.registerContinuousJob(EducationProviderContactIndexerJob.class, args);
       Manager.manage("Neutron", JobsGuiceInjector.getInjector());
     } catch (Exception e) {

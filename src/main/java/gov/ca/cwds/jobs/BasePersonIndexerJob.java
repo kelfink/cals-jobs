@@ -64,6 +64,7 @@ import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.defaults.NeutronElasticsearchDefaults;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
@@ -777,7 +778,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   @Override
   public synchronized void close() throws IOException {
-    if (isRunning()) {
+    if (isRunning() && !JobRunner.isContinuousMode()) {
       LOGGER.warn("CLOSING CONNECTIONS!!");
 
       if (this.esDao != null) {

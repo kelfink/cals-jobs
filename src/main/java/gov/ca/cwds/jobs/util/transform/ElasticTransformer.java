@@ -439,7 +439,7 @@ public class ElasticTransformer {
     Serializable primaryKey = p.getPrimaryKey();
 
     if (primaryKey == null) {
-      LOGGER.debug("NULL PRIMARY KEY: " + p);
+      LOGGER.debug("NULL PRIMARY KEY: {}", p);
       primaryKey = "MISSING_ID";
     }
 
