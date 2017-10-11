@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
-import gov.ca.cwds.jobs.component.AtomHibernate;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.util.JobLogs;
 
@@ -68,12 +67,9 @@ public class ReferralJobRanges {
   public List<Pair<String, String>> getPartitionRanges(
       BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job) {
     List<Pair<String, String>> ret = new ArrayList<>();
-    final boolean isMainframe = job.isDB2OnZOS();
-    final String schema = AtomHibernate.databaseSchemaName().toUpperCase();
 
-    if (isMainframe
-        && (schema.endsWith("RSQ") || schema.endsWith("REP") || schema.endsWith("DSM"))) {
-      LOGGER.warn("z/OS, LARGE data set, ORDER: a,z,A,Z,0,9");
+    if (job.isLargeDataSet()) {
+      LOGGER.info("z/OS, LARGE data set, ORDER: a,z,A,Z,0,9");
 
       try (@SuppressWarnings("unchecked")
       final Stream<String> lines =
@@ -84,11 +80,11 @@ public class ReferralJobRanges {
       }
 
       limitRange(job, ret);
-    } else if (isMainframe) {
-      LOGGER.warn("z/OS, small data set, ORDER: a,z,A,Z,0,9");
+    } else if (job.isDB2OnZOS()) {
+      LOGGER.info("z/OS, small data set, ORDER: a,z,A,Z,0,9");
       ret.add(Pair.of("aaaaaaaaaa", "9999999999"));
     } else {
-      LOGGER.warn("Linux, ORDER: 0,9,a,A,z,Z");
+      LOGGER.info("Linux, ORDER: 0,9,a,A,z,Z");
       ret.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
     }
 
