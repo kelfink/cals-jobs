@@ -9,7 +9,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
@@ -29,23 +28,22 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
  * 
  * @author CWDS API Team
  */
-@NamedNativeQueries({
-    @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome.findBucketRange",
-        query = "SELECT z.IDENTIFIER, z.BIRTH_DT, z.END_DT, z.GENDER_CD, trim(z.OTH_ADLTNM) OTH_ADLTNM, "
-            + "z.START_DT, z.LST_UPD_ID, z.LST_UPD_TS, z.FKPLC_HM_T, trim(z.COMNT_DSC) COMNT_DSC, "
-            + "z.OTH_ADL_CD, z.IDENTFD_DT, z.RESOST_IND, z.PASSBC_CD "
-            + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER FROM {h-schema}OTH_ADLT z "
-            + "WHERE z.IDENTIFIER < :min_id AND z.IDENTIFIER <= :max_id ORDER BY z.IDENTIFIER FOR READ ONLY WITH UR",
-        resultClass = ReplicatedOtherAdultInPlacemtHome.class, readOnly = true),
-    @NamedNativeQuery(
-        name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome.findAllUpdatedAfter",
-        query = "SELECT z.IDENTIFIER, z.BIRTH_DT, z.END_DT, z.GENDER_CD, trim(z.OTH_ADLTNM) OTH_ADLTNM, "
-            + "z.START_DT, z.LST_UPD_ID, z.LST_UPD_TS, z.FKPLC_HM_T, trim(z.COMNT_DSC) COMNT_DSC, "
-            + "z.OTH_ADL_CD, z.IDENTFD_DT, z.RESOST_IND, z.PASSBC_CD "
-            + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
-            + "FROM {h-schema}OTH_ADLT z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR ",
-        resultClass = ReplicatedOtherAdultInPlacemtHome.class, readOnly = true)})
+@NamedNativeQuery(
+    name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome.findBucketRange",
+    query = "SELECT z.IDENTIFIER, z.BIRTH_DT, z.END_DT, z.GENDER_CD, trim(z.OTH_ADLTNM) OTH_ADLTNM, "
+        + "z.START_DT, z.LST_UPD_ID, z.LST_UPD_TS, z.FKPLC_HM_T, trim(z.COMNT_DSC) COMNT_DSC, "
+        + "z.OTH_ADL_CD, z.IDENTFD_DT, z.RESOST_IND, z.PASSBC_CD "
+        + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER FROM {h-schema}OTH_ADLT z "
+        + "WHERE z.IDENTIFIER < :min_id AND z.IDENTIFIER <= :max_id ORDER BY z.IDENTIFIER FOR READ ONLY WITH UR",
+    resultClass = ReplicatedOtherAdultInPlacemtHome.class, readOnly = true)
+@NamedNativeQuery(
+    name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome.findAllUpdatedAfter",
+    query = "SELECT z.IDENTIFIER, z.BIRTH_DT, z.END_DT, z.GENDER_CD, trim(z.OTH_ADLTNM) OTH_ADLTNM, "
+        + "z.START_DT, z.LST_UPD_ID, z.LST_UPD_TS, z.FKPLC_HM_T, trim(z.COMNT_DSC) COMNT_DSC, "
+        + "z.OTH_ADL_CD, z.IDENTFD_DT, z.RESOST_IND, z.PASSBC_CD "
+        + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
+        + "FROM {h-schema}OTH_ADLT z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR ",
+    resultClass = ReplicatedOtherAdultInPlacemtHome.class, readOnly = true)
 @Entity
 @Table(name = "OTH_ADLT")
 @JsonPropertyOrder(alphabetic = true)

@@ -20,6 +20,7 @@ import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseReporter;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -91,12 +92,12 @@ public class ReplicatedReporter extends BaseReporter
 
   @Override
   public Date getReplicationDate() {
-    return replicationDate;
+    return JobDateUtil.freshDate(replicationDate);
   }
 
   @Override
   public void setReplicationDate(Date replicationDate) {
-    this.replicationDate = replicationDate;
+    this.replicationDate = JobDateUtil.freshDate(replicationDate);
   }
 
   // =======================

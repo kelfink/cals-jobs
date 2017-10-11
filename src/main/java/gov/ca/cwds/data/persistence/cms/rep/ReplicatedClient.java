@@ -16,7 +16,6 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
@@ -55,7 +54,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * 
  * @author CWDS API Team
  */
-@NamedNativeQueries({@NamedNativeQuery(
+@NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient.findAllUpdatedAfter",
     query = "select z.IDENTIFIER, z.ADPTN_STCD, trim(z.ALN_REG_NO) ALN_REG_NO, z.BIRTH_DT, "
         + "trim(z.BR_FAC_NM) BR_FAC_NM, z.B_STATE_C, z.B_CNTRY_C, z.CHLD_CLT_B, "
@@ -76,7 +75,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         + "trim(z.EMAIL_ADDR) EMAIL_ADDR, z.ADJDEL_IND, z.ETH_UD_CD, "
         + "z.HISP_UD_CD, z.SOCPLC_CD, z.CL_INDX_NO, z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
         + "from {h-schema}CLIENT_T z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR",
-    resultClass = ReplicatedClient.class)})
+    resultClass = ReplicatedClient.class)
 @Entity
 @Table(name = "CLIENT_T")
 @JsonPropertyOrder(alphabetic = true)
@@ -108,7 +107,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   private transient List<Short> clientRaces = new ArrayList<>();
 
-  private Short clinetCountyId;
+  private Short clientCountyId;
 
   /**
    * Default, no-op constructor
@@ -152,11 +151,11 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   @Override
   public Short getClientCounty() {
-    return clinetCountyId;
+    return clientCountyId;
   }
 
   public void setClientCounty(Short clinetCountyId) {
-    this.clinetCountyId = clinetCountyId;
+    this.clientCountyId = clinetCountyId;
   }
 
   public List<Short> getClientRaces() {

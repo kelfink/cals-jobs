@@ -1,5 +1,8 @@
 package gov.ca.cwds.jobs;
 
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +14,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedEducationProviderContact;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.inject.JobRunner;
 import gov.ca.cwds.jobs.inject.LastRunFile;
+import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 
 /**
  * Job to load Education Provider Contact from CMS into ElasticSearch.
@@ -41,11 +45,6 @@ public class EducationProviderContactIndexerJob extends
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
-  @Override
-  public int getJobTotalBuckets() {
-    return 12;
-  }
-
   /**
    * @deprecated method scheduled for deletion
    */
@@ -53,6 +52,11 @@ public class EducationProviderContactIndexerJob extends
   @Deprecated
   public String getLegacySourceTable() {
     return "EDPRVCNT";
+  }
+
+  @Override
+  protected List<Pair<String, String>> getPartitionRanges() {
+    return JobJdbcUtils.getCommonPartitionRanges4(this);
   }
 
   /**

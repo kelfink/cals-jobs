@@ -55,13 +55,8 @@ public class ServiceProviderIndexerJob
   }
 
   @Override
-  public boolean providesInitialKeyRanges() {
-    return true;
-  }
-
-  @Override
   protected List<Pair<String, String>> getPartitionRanges() {
-    return JobJdbcUtils.getCommonPartitionRanges64(this);
+    return JobJdbcUtils.getCommonPartitionRanges4(this);
   }
 
   /**

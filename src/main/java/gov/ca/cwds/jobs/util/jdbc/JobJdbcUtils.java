@@ -165,6 +165,15 @@ public class JobJdbcUtils {
     return ret;
   }
 
+  public static List<Pair<String, String>> getPartitionRanges4() {
+    final List<Pair<String, String>> ret = new ArrayList<>(4);
+    ret.add(Pair.of("aaaaaaaaaa", "JCoyq0Iz36"));
+    ret.add(Pair.of("JCoyq0Iz36", "RbL4aAL34A"));
+    ret.add(Pair.of("RbL4aAL34A", "4w3QDw136B"));
+    ret.add(Pair.of("4w3QDw136B", "9999999999"));
+    return ret;
+  }
+
   @SuppressWarnings("unchecked")
   private static List<Pair<String, String>> getCommonPartitionRanges(
       @SuppressWarnings("rawtypes") AtomHibernate initialLoad, int numPartitions) {
@@ -174,8 +183,23 @@ public class JobJdbcUtils {
       // z/OS, large data set:
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
-      ret = initialLoad
-          .limitRange(numPartitions == 64 ? getPartitionRanges64() : getPartitionRanges16());
+      switch (numPartitions) {
+        case 64:
+          ret = getPartitionRanges64();
+          break;
+
+        case 16:
+          ret = getPartitionRanges16();
+          break;
+
+        case 4:
+          ret = getPartitionRanges4();
+          break;
+
+        default:
+          break;
+      }
+      ret = initialLoad.limitRange(ret);
     } else if (initialLoad.isDB2OnZOS()) {
       // ----------------------------
       // z/OS, small data set:
@@ -191,6 +215,11 @@ public class JobJdbcUtils {
     }
 
     return ret;
+  }
+
+  public static List<Pair<String, String>> getCommonPartitionRanges4(
+      @SuppressWarnings("rawtypes") AtomHibernate initialLoad) {
+    return getCommonPartitionRanges(initialLoad, 4);
   }
 
   public static List<Pair<String, String>> getCommonPartitionRanges16(
