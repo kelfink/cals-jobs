@@ -103,7 +103,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "fkClient")
   protected transient Set<ReplicatedClientAddress> clientAddresses = new LinkedHashSet<>();
 
-  private List<Short> clientRaces = new ArrayList<>();
+  private transient List<Short> clientRaces = new ArrayList<>();
 
   private Short clinetCountyId;
 
@@ -259,7 +259,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   private static void addElasticSearchSystemCode(Short codeId,
       List<ElasticSearchSystemCode> codes) {
-    if (codeId != null) {
+    if (codeId != null && codeId != 0) {
       ElasticSearchSystemCode esCode = new ElasticSearchSystemCode();
       esCode.setId(codeId.toString());
       esCode.setDescription(SystemCodeCache.global().getSystemCodeShortDescription(codeId));
