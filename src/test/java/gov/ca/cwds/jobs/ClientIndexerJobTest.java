@@ -91,9 +91,9 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     final EsClientAddress expected = new EsClientAddress();
 
     final short s = (short) 0;
-    expected.setCltBirthCountryCodeType(s);
-    expected.setCltBirthStateCodeType(s);
-    expected.setCltDriverLicenseStateCodeType(s);
+    // expected.setCltBirthCountryCodeType(s);
+    // expected.setCltBirthStateCodeType(s);
+    // expected.setCltDriverLicenseStateCodeType(s);
     expected.setCltImmigrationCountryCodeType(s);
     expected.setCltMaritalStatusType(s);
     expected.setCltNameType(s);
@@ -105,10 +105,10 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     expected.setClaAddressType(s);
     expected.setClaAddressType(s);
     expected.setAdrEmergencyExtension(0);
-    expected.setAdrPrimaryExtension(0);
-    expected.setAdrState(s);
-    expected.setAdrZip4(s);
-    expected.setAdrUnitDesignationCd(s);
+    // expected.setAdrPrimaryExtension(0);
+    // expected.setAdrState(s);
+    // expected.setAdrZip4(s);
+    // expected.setAdrUnitDesignationCd(s);
     // expected.setAdrPostDirCd(0);
 
     // assertThat(actual, is(equalTo(expected)));

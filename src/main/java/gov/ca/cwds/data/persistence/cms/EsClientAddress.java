@@ -28,6 +28,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.jobs.util.JobDateUtil;
 
 /**
  * Entity bean for view VW_LST_CLIENT_ADDRESS.
@@ -599,9 +600,9 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     ret.adrUnitDesignationCd = rs.getShort("ADR_UNT_DSGC");
     ret.adrUnitNumber = rs.getString("ADR_UNIT_NO");
 
-    ret.setAdrReplicationOperation(
-        CmsReplicationOperation.strToRepOp(rs.getString("ADR_IBMSNAP_OPERATION")));
-    ret.setAdrReplicationDate(rs.getDate("ADR_IBMSNAP_LOGMARKER"));
+    ret.adrReplicationOperation =
+        CmsReplicationOperation.strToRepOp(rs.getString("ADR_IBMSNAP_OPERATION"));
+    ret.adrReplicationDate = rs.getDate("ADR_IBMSNAP_LOGMARKER");
     ret.lastChange = rs.getTimestamp("LAST_CHG");
 
     return ret;
@@ -619,79 +620,79 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
 
     if (!isClientAdded) {
       // Populate core client attributes.
-      ret.setAdjudicatedDelinquentIndicator(getCltAdjudicatedDelinquentIndicator());
-      ret.setAdoptionStatusCode(getCltAdoptionStatusCode());
-      ret.setAlienRegistrationNumber(getCltAlienRegistrationNumber());
-      ret.setBirthCity(getCltBirthCity());
-      ret.setBirthCountryCodeType(getCltBirthCountryCodeType());
-      ret.setBirthDate(getCltBirthDate());
-      ret.setBirthFacilityName(getCltBirthFacilityName());
-      ret.setBirthplaceVerifiedIndicator(getCltBirthplaceVerifiedIndicator());
-      ret.setBirthStateCodeType(getCltBirthStateCodeType());
-      ret.setChildClientIndicatorVar(getCltChildClientIndicatorVar());
-      ret.setClientIndexNumber(getCltClientIndexNumber());
-      ret.setCommentDescription(getCltCommentDescription());
-      ret.setCommonFirstName(getCltCommonFirstName());
-      ret.setCommonLastName(getCltCommonLastName());
-      ret.setCommonMiddleName(getCltCommonMiddleName());
-      ret.setConfidentialityActionDate(getCltConfidentialityActionDate());
-      ret.setConfidentialityInEffectIndicator(getCltConfidentialityInEffectIndicator());
-      ret.setCreationDate(getCltCreationDate());
-      ret.setCurrCaChildrenServIndicator(getCltCurrCaChildrenServIndicator());
-      ret.setCurrentlyOtherDescription(getCltCurrentlyOtherDescription());
-      ret.setCurrentlyRegionalCenterIndicator(getCltCurrentlyRegionalCenterIndicator());
-      ret.setDeathDate(getCltDeathDate());
-      ret.setDeathDateVerifiedIndicator(getCltDeathDateVerifiedIndicator());
-      ret.setDeathPlace(getCltDeathPlace());
-      ret.setDeathReasonText(getCltDeathReasonText());
-      ret.setDriverLicenseNumber(getCltDriverLicenseNumber());
-      ret.setDriverLicenseStateCodeType(getCltDriverLicenseStateCodeType());
-      ret.setEmailAddress(getCltEmailAddress());
-      ret.setEstimatedDobCode(getCltEstimatedDobCode());
-      ret.setEthUnableToDetReasonCode(getCltEthUnableToDetReasonCode());
-      ret.setFatherParentalRightTermDate(cltFatherParentalRightTermDate);
-      ret.setCommonFirstName(getCltCommonFirstName());
-      ret.setGenderCode(getCltGenderCode());
-      ret.setHealthSummaryText(getCltHealthSummaryText());
-      ret.setHispanicOriginCode(getCltHispanicOriginCode());
-      ret.setHispUnableToDetReasonCode(getCltHispUnableToDetReasonCode());
-      ret.setId(getCltId());
-      ret.setImmigrationCountryCodeType(getCltImmigrationCountryCodeType());
-      ret.setImmigrationStatusType(getCltImmigrationStatusType());
-      ret.setIncapacitatedParentCode(getCltIncapacitatedParentCode());
-      ret.setIndividualHealthCarePlanIndicator(getCltIndividualHealthCarePlanIndicator());
-      ret.setCommonLastName(getCltCommonLastName());
-      ret.setLimitationOnScpHealthIndicator(getCltLimitationOnScpHealthIndicator());
-      ret.setLiterateCode(getCltLiterateCode());
-      ret.setMaritalCohabitatnHstryIndicatorVar(getCltMaritalCohabitatnHstryIndicatorVar());
-      ret.setMaritalStatusType(getCltMaritalStatusType());
-      ret.setCommonMiddleName(getCltCommonMiddleName());
-      ret.setMilitaryStatusCode(getCltMilitaryStatusCode());
-      ret.setMotherParentalRightTermDate(getCltMotherParentalRightTermDate());
-      ret.setNamePrefixDescription(getCltNamePrefixDescription());
-      ret.setNameType(getCltNameType());
-      ret.setOutstandingWarrantIndicator(getCltOutstandingWarrantIndicator());
-      ret.setPrevCaChildrenServIndicator(getCltPrevCaChildrenServIndicator());
-      ret.setPrevOtherDescription(getCltPrevOtherDescription());
-      ret.setPrevRegionalCenterIndicator(getCltPrevRegionalCenterIndicator());
-      ret.setPrimaryEthnicityType(getCltPrimaryEthnicityType());
+      ret.adjudicatedDelinquentIndicator = getCltAdjudicatedDelinquentIndicator();
+      ret.adoptionStatusCode = getCltAdoptionStatusCode();
+      ret.alienRegistrationNumber = getCltAlienRegistrationNumber();
+      ret.birthCity = getCltBirthCity();
+      ret.birthCountryCodeType = getCltBirthCountryCodeType();
+      ret.birthDate = getCltBirthDate();
+      ret.birthFacilityName = getCltBirthFacilityName();
+      ret.birthplaceVerifiedIndicator = getCltBirthplaceVerifiedIndicator();
+      ret.birthStateCodeType = getCltBirthStateCodeType();
+      ret.childClientIndicatorVar = getCltChildClientIndicatorVar();
+      ret.clientIndexNumber = getCltClientIndexNumber();
+      ret.commentDescription = getCltCommentDescription();
+      ret.commonFirstName = getCltCommonFirstName();
+      ret.commonLastName = getCltCommonLastName();
+      ret.commonMiddleName = getCltCommonMiddleName();
+      ret.confidentialityActionDate = getCltConfidentialityActionDate();
+      ret.confidentialityInEffectIndicator = getCltConfidentialityInEffectIndicator();
+      ret.creationDate = getCltCreationDate();
+      ret.currCaChildrenServIndicator = getCltCurrCaChildrenServIndicator();
+      ret.currentlyOtherDescription = getCltCurrentlyOtherDescription();
+      ret.currentlyRegionalCenterIndicator = getCltCurrentlyRegionalCenterIndicator();
+      ret.deathDate = getCltDeathDate();
+      ret.deathDateVerifiedIndicator = getCltDeathDateVerifiedIndicator();
+      ret.deathPlace = getCltDeathPlace();
+      ret.deathReasonText = getCltDeathReasonText();
+      ret.driverLicenseNumber = getCltDriverLicenseNumber();
+      ret.driverLicenseStateCodeType = getCltDriverLicenseStateCodeType();
+      ret.emailAddress = getCltEmailAddress();
+      ret.estimatedDobCode = getCltEstimatedDobCode();
+      ret.ethUnableToDetReasonCode = getCltEthUnableToDetReasonCode();
+      ret.fatherParentalRightTermDate = cltFatherParentalRightTermDate;
+      ret.commonFirstName = getCltCommonFirstName();
+      ret.genderCode = getCltGenderCode();
+      ret.healthSummaryText = getCltHealthSummaryText();
+      ret.hispanicOriginCode = getCltHispanicOriginCode();
+      ret.hispUnableToDetReasonCode = getCltHispUnableToDetReasonCode();
+      ret.id = getCltId();
+      ret.immigrationCountryCodeType = getCltImmigrationCountryCodeType();
+      ret.immigrationStatusType = getCltImmigrationStatusType();
+      ret.incapacitatedParentCode = getCltIncapacitatedParentCode();
+      ret.individualHealthCarePlanIndicator = getCltIndividualHealthCarePlanIndicator();
+      ret.commonLastName = getCltCommonLastName();
+      ret.limitationOnScpHealthIndicator = getCltLimitationOnScpHealthIndicator();
+      ret.literateCode = getCltLiterateCode();
+      ret.maritalCohabitatnHstryIndicatorVar = getCltMaritalCohabitatnHstryIndicatorVar();
+      ret.maritalStatusType = getCltMaritalStatusType();
+      ret.commonMiddleName = getCltCommonMiddleName();
+      ret.militaryStatusCode = getCltMilitaryStatusCode();
+      ret.motherParentalRightTermDate = getCltMotherParentalRightTermDate();
+      ret.namePrefixDescription = getCltNamePrefixDescription();
+      ret.nameType = getCltNameType();
+      ret.outstandingWarrantIndicator = getCltOutstandingWarrantIndicator();
+      ret.prevCaChildrenServIndicator = getCltPrevCaChildrenServIndicator();
+      ret.prevOtherDescription = getCltPrevOtherDescription();
+      ret.prevRegionalCenterIndicator = getCltPrevRegionalCenterIndicator();
+      ret.primaryEthnicityType = getCltPrimaryEthnicityType();
 
       // Languages
-      ret.setPrimaryLanguageType(getCltPrimaryLanguageType());
-      ret.setSecondaryLanguageType(getCltSecondaryLanguageType());
+      ret.primaryLanguageType = getCltPrimaryLanguageType();
+      ret.secondaryLanguageType = getCltSecondaryLanguageType();
 
-      ret.setReligionType(getCltReligionType());
-      ret.setSensitiveHlthInfoOnFileIndicator(getCltSensitiveHlthInfoOnFileIndicator());
-      ret.setSensitivityIndicator(getCltSensitivityIndicator());
-      ret.setSoc158PlacementCode(getCltSoc158PlacementCode());
-      ret.setSoc158SealedClientIndicator(getCltSoc158SealedClientIndicator());
-      ret.setSocialSecurityNumber(getCltSocialSecurityNumber());
-      ret.setSocialSecurityNumChangedCode(getCltSocialSecurityNumChangedCode());
-      ret.setSuffixTitleDescription(getCltSuffixTitleDescription());
-      ret.setTribalAncestryClientIndicatorVar(getCltTribalAncestryClientIndicatorVar());
-      ret.setTribalMembrshpVerifctnIndicatorVar(getCltTribalMembrshpVerifctnIndicatorVar());
-      ret.setUnemployedParentCode(getCltUnemployedParentCode());
-      ret.setZippyCreatedIndicator(getCltZippyCreatedIndicator());
+      ret.religionType = getCltReligionType();
+      ret.sensitiveHlthInfoOnFileIndicator = getCltSensitiveHlthInfoOnFileIndicator();
+      ret.sensitivityIndicator = getCltSensitivityIndicator();
+      ret.soc158PlacementCode = getCltSoc158PlacementCode();
+      ret.soc158SealedClientIndicator = getCltSoc158SealedClientIndicator();
+      ret.socialSecurityNumber = getCltSocialSecurityNumber();
+      ret.socialSecurityNumChangedCode = getCltSocialSecurityNumChangedCode();
+      ret.suffixTitleDescription = getCltSuffixTitleDescription();
+      ret.tribalAncestryClientIndicatorVar = getCltTribalAncestryClientIndicatorVar();
+      ret.tribalMembrshpVerifctnIndicatorVar = getCltTribalMembrshpVerifctnIndicatorVar();
+      ret.unemployedParentCode = getCltUnemployedParentCode();
+      ret.zippyCreatedIndicator = getCltZippyCreatedIndicator();
 
       ret.setReplicationDate(getCltReplicationDate());
       ret.setReplicationOperation(getCltReplicationOperation());
@@ -781,64 +782,32 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     return cltAdjudicatedDelinquentIndicator;
   }
 
-  public void setCltAdjudicatedDelinquentIndicator(String cltAdjudicatedDelinquentIndicator) {
-    this.cltAdjudicatedDelinquentIndicator = cltAdjudicatedDelinquentIndicator;
-  }
-
   public String getCltAdoptionStatusCode() {
     return cltAdoptionStatusCode;
-  }
-
-  public void setCltAdoptionStatusCode(String cltAdoptionStatusCode) {
-    this.cltAdoptionStatusCode = cltAdoptionStatusCode;
   }
 
   public String getCltAlienRegistrationNumber() {
     return cltAlienRegistrationNumber;
   }
 
-  public void setCltAlienRegistrationNumber(String cltAlienRegistrationNumber) {
-    this.cltAlienRegistrationNumber = cltAlienRegistrationNumber;
-  }
-
   public String getCltBirthCity() {
     return cltBirthCity;
-  }
-
-  public void setCltBirthCity(String cltBirthCity) {
-    this.cltBirthCity = cltBirthCity;
   }
 
   public Short getCltBirthCountryCodeType() {
     return cltBirthCountryCodeType;
   }
 
-  public void setCltBirthCountryCodeType(Short cltBirthCountryCodeType) {
-    this.cltBirthCountryCodeType = cltBirthCountryCodeType;
-  }
-
   public Date getCltBirthDate() {
     return cltBirthDate != null ? new Date(cltBirthDate.getTime()) : null;
-  }
-
-  public void setCltBirthDate(Date cltBirthDate) {
-    this.cltBirthDate = cltBirthDate != null ? new Date(cltBirthDate.getTime()) : null;
   }
 
   public String getCltBirthFacilityName() {
     return cltBirthFacilityName;
   }
 
-  public void setCltBirthFacilityName(String cltBirthFacilityName) {
-    this.cltBirthFacilityName = cltBirthFacilityName;
-  }
-
   public Short getCltBirthStateCodeType() {
     return cltBirthStateCodeType;
-  }
-
-  public void setCltBirthStateCodeType(Short cltBirthStateCodeType) {
-    this.cltBirthStateCodeType = cltBirthStateCodeType;
   }
 
   public String getCltBirthplaceVerifiedIndicator() {
@@ -853,48 +822,24 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     return cltChildClientIndicatorVar;
   }
 
-  public void setCltChildClientIndicatorVar(String cltChildClientIndicatorVar) {
-    this.cltChildClientIndicatorVar = cltChildClientIndicatorVar;
-  }
-
   public String getCltClientIndexNumber() {
     return cltClientIndexNumber;
-  }
-
-  public void setCltClientIndexNumber(String cltClientIndexNumber) {
-    this.cltClientIndexNumber = cltClientIndexNumber;
   }
 
   public String getCltCommentDescription() {
     return cltCommentDescription;
   }
 
-  public void setCltCommentDescription(String cltCommentDescription) {
-    this.cltCommentDescription = cltCommentDescription;
-  }
-
   public String getCltCommonFirstName() {
     return cltCommonFirstName;
-  }
-
-  public void setCltCommonFirstName(String cltCommonFirstName) {
-    this.cltCommonFirstName = cltCommonFirstName;
   }
 
   public String getCltCommonLastName() {
     return cltCommonLastName;
   }
 
-  public void setCltCommonLastName(String cltCommonLastName) {
-    this.cltCommonLastName = cltCommonLastName;
-  }
-
   public String getCltCommonMiddleName() {
     return cltCommonMiddleName;
-  }
-
-  public void setCltCommonMiddleName(String cltCommonMiddleName) {
-    this.cltCommonMiddleName = cltCommonMiddleName;
   }
 
   public Date getCltConfidentialityActionDate() {
@@ -933,100 +878,48 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     return cltCurrentlyOtherDescription;
   }
 
-  public void setCltCurrentlyOtherDescription(String cltCurrentlyOtherDescription) {
-    this.cltCurrentlyOtherDescription = cltCurrentlyOtherDescription;
-  }
-
   public String getCltCurrentlyRegionalCenterIndicator() {
     return cltCurrentlyRegionalCenterIndicator;
-  }
-
-  public void setCltCurrentlyRegionalCenterIndicator(String cltCurrentlyRegionalCenterIndicator) {
-    this.cltCurrentlyRegionalCenterIndicator = cltCurrentlyRegionalCenterIndicator;
   }
 
   public Date getCltDeathDate() {
     return cltDeathDate;
   }
 
-  public void setCltDeathDate(Date cltDeathDate) {
-    this.cltDeathDate = cltDeathDate;
-  }
-
   public String getCltDeathDateVerifiedIndicator() {
     return cltDeathDateVerifiedIndicator;
-  }
-
-  public void setCltDeathDateVerifiedIndicator(String cltDeathDateVerifiedIndicator) {
-    this.cltDeathDateVerifiedIndicator = cltDeathDateVerifiedIndicator;
   }
 
   public String getCltDeathPlace() {
     return cltDeathPlace;
   }
 
-  public void setCltDeathPlace(String cltDeathPlace) {
-    this.cltDeathPlace = cltDeathPlace;
-  }
-
   public String getCltDeathReasonText() {
     return cltDeathReasonText;
-  }
-
-  public void setCltDeathReasonText(String cltDeathReasonText) {
-    this.cltDeathReasonText = cltDeathReasonText;
   }
 
   public String getCltDriverLicenseNumber() {
     return cltDriverLicenseNumber;
   }
 
-  public void setCltDriverLicenseNumber(String cltDriverLicenseNumber) {
-    this.cltDriverLicenseNumber = cltDriverLicenseNumber;
-  }
-
   public Short getCltDriverLicenseStateCodeType() {
     return cltDriverLicenseStateCodeType;
-  }
-
-  public void setCltDriverLicenseStateCodeType(Short cltDriverLicenseStateCodeType) {
-    this.cltDriverLicenseStateCodeType = cltDriverLicenseStateCodeType;
   }
 
   public String getCltEmailAddress() {
     return cltEmailAddress;
   }
 
-  public void setCltEmailAddress(String cltEmailAddress) {
-    this.cltEmailAddress = cltEmailAddress;
-  }
-
   public String getCltEstimatedDobCode() {
     return cltEstimatedDobCode;
-  }
-
-  public void setCltEstimatedDobCode(String cltEstimatedDobCode) {
-    this.cltEstimatedDobCode = cltEstimatedDobCode;
   }
 
   public String getCltEthUnableToDetReasonCode() {
     return cltEthUnableToDetReasonCode;
   }
 
-  public void setCltEthUnableToDetReasonCode(String cltEthUnableToDetReasonCode) {
-    this.cltEthUnableToDetReasonCode = cltEthUnableToDetReasonCode;
-  }
-
-  public void setCltFatherParentalRightTermDate(Date cltFatherParentalRightTermDate) {
-    this.cltFatherParentalRightTermDate = cltFatherParentalRightTermDate;
-  }
-
   public String getCltGenderCode() {
     return cltGenderCode;
-  }
-
-  public void setCltGenderCode(String cltGenderCode) {
-    this.cltGenderCode = cltGenderCode;
   }
 
   public String getCltHealthSummaryText() {
@@ -1524,40 +1417,20 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     return adrPrimaryExtension;
   }
 
-  public void setAdrPrimaryExtension(Integer adrPrimaryExtension) {
-    this.adrPrimaryExtension = adrPrimaryExtension;
-  }
-
   public Short getAdrState() {
     return adrState;
-  }
-
-  public void setAdrState(Short adrState) {
-    this.adrState = adrState;
   }
 
   public String getAdrStreetName() {
     return adrStreetName;
   }
 
-  public void setAdrStreetName(String adrStreetName) {
-    this.adrStreetName = adrStreetName;
-  }
-
   public String getAdrStreetNumber() {
     return adrStreetNumber;
   }
 
-  public void setAdrStreetNumber(String adrStreetNumber) {
-    this.adrStreetNumber = adrStreetNumber;
-  }
-
   public String getAdrZip() {
     return adrZip;
-  }
-
-  public void setAdrZip(String adrZip) {
-    this.adrZip = adrZip;
   }
 
   public String getAdrAddressDescription() {
@@ -1572,56 +1445,28 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     return adrZip4;
   }
 
-  public void setAdrZip4(Short adrZip4) {
-    this.adrZip4 = adrZip4;
-  }
-
   public String getAdrPostDirCd() {
     return adrPostDirCd;
-  }
-
-  public void setAdrPostDirCd(String adrPostDirCd) {
-    this.adrPostDirCd = adrPostDirCd;
   }
 
   public String getAdrPreDirCd() {
     return adrPreDirCd;
   }
 
-  public void setAdrPreDirCd(String adrPreDirCd) {
-    this.adrPreDirCd = adrPreDirCd;
-  }
-
   public Short getAdrStreetSuffixCd() {
     return adrStreetSuffixCd;
-  }
-
-  public void setAdrStreetSuffixCd(Short adrStreetSuffixCd) {
-    this.adrStreetSuffixCd = adrStreetSuffixCd;
   }
 
   public Short getAdrUnitDesignationCd() {
     return adrUnitDesignationCd;
   }
 
-  public void setAdrUnitDesignationCd(Short adrUnitDesignationCd) {
-    this.adrUnitDesignationCd = adrUnitDesignationCd;
-  }
-
   public String getAdrUnitNumber() {
     return adrUnitNumber;
   }
 
-  public void setAdrUnitNumber(String adrUnitNumber) {
-    this.adrUnitNumber = adrUnitNumber;
-  }
-
   public String getClaId() {
     return claId;
-  }
-
-  public void setClaId(String claId) {
-    this.claId = claId;
   }
 
   public Short getClientCounty() {
@@ -1636,16 +1481,12 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     return adrReplicationOperation;
   }
 
-  public void setAdrReplicationOperation(CmsReplicationOperation adrReplicationOperation) {
-    this.adrReplicationOperation = adrReplicationOperation;
-  }
-
   public Date getAdrReplicationDate() {
     return adrReplicationDate;
   }
 
-  public void setAdrReplicationDate(Date adrReplicationDate) {
-    this.adrReplicationDate = adrReplicationDate;
+  public Date getLastChange() {
+    return JobDateUtil.freshDate(lastChange);
   }
 
   @Override
@@ -1664,10 +1505,6 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   @Override
   public Serializable getPrimaryKey() {
     return null;
-  }
-
-  public Date getLastChange() {
-    return lastChange;
   }
 
   @Override
