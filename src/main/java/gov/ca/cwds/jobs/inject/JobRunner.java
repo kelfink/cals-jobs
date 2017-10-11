@@ -105,10 +105,27 @@ public class JobRunner {
    * @param args command line arguments
    * @throws NeutronException unexpected runtime error
    */
-  @Managed
   public static void runRegisteredJob(final Class<?> klass, String... args)
       throws NeutronException {
     try {
+      LOGGER.info("Run registered job: {}", klass.getName());
+      final JobOptions opts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
+          : jobOptions.get(klass);
+      final BasePersonIndexerJob<?, ?> job =
+          (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
+      job.setOpts(opts);
+      job.run();
+    } catch (Exception e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "REGISTERED JOB RUN FAILED!: {}",
+          e.getMessage());
+    }
+  }
+
+  @Managed
+  public static void runRegisteredJob(final String jobName, String... args)
+      throws NeutronException {
+    try {
+      final Class<?> klass = Class.forName("gov.ca.cwds.jobs." + jobName);
       LOGGER.info("Run registered job: {}", klass.getName());
       final JobOptions opts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
           : jobOptions.get(klass);
@@ -167,7 +184,7 @@ public class JobRunner {
       Manager.manage("Neutron", JobsGuiceInjector.getInjector());
 
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-      exporter.export("neutron:runner=X", new JobRunner());
+      exporter.export("neutron:runner=run_job_args", new JobRunner());
       // exporter.unexport("neutron:runner=X");
       LOGGER.info("ON-DEMAND JOBS SERVER STARTED");
     } catch (Exception e) {
