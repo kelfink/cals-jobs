@@ -15,6 +15,7 @@ import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.NeutronJobInventory;
+import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -35,9 +36,11 @@ public class JobRunner {
     }
 
     @Managed
-    public void run(String bigArg) throws NeutronException {
+    public String run(String bigArg) throws NeutronException {
       LOGGER.info("RUN JOB: {}", klass.getName());
-      JobRunner.runRegisteredJob(klass, StringUtils.isBlank(bigArg) ? null : bigArg.split("\\s+"));
+      final JobProgressTrack track = JobRunner.runRegisteredJob(klass,
+          StringUtils.isBlank(bigArg) ? null : bigArg.split("\\s+"));
+      return track.toString();
     }
   }
 
@@ -122,7 +125,7 @@ public class JobRunner {
    * @param args command line arguments
    * @throws NeutronException unexpected runtime error
    */
-  public static void runRegisteredJob(final Class<?> klass, String... args)
+  public static JobProgressTrack runRegisteredJob(final Class<?> klass, String... args)
       throws NeutronException {
     try {
       LOGGER.info("Run registered job: {}", klass.getName());
@@ -132,13 +135,14 @@ public class JobRunner {
           (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
       job.setOpts(opts);
       job.run();
+      return job.getTrack();
     } catch (Exception e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "ON-DEMAND JOB RUN FAILED!: {}",
           e.getMessage());
     }
   }
 
-  public static void runRegisteredJob(final String jobName, String... args)
+  public static JobProgressTrack runRegisteredJob(final String jobName, String... args)
       throws NeutronException {
     try {
       final Class<?> klass = Class.forName("gov.ca.cwds.jobs." + jobName);
@@ -149,6 +153,7 @@ public class JobRunner {
           (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
       job.setOpts(opts);
       job.run();
+      return job.getTrack();
     } catch (Exception e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "ON-DEMAND JOB RUN FAILED!: {}",
           e.getMessage());
@@ -193,6 +198,7 @@ public class JobRunner {
       JobRunner.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
           : JobRunner.startingOpts;
       JobRunner.continuousMode = true;
+
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
 
       for (NeutronJobInventory nji : NeutronJobInventory.values()) {
