@@ -1,11 +1,22 @@
 package gov.ca.cwds.jobs.inject;
 
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
+
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weakref.jmx.MBeanExporter;
@@ -14,7 +25,7 @@ import org.weakref.jmx.Managed;
 import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.NeutronJobInventory;
+import gov.ca.cwds.jobs.NeutronJobSchedule;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -27,30 +38,62 @@ import gov.ca.cwds.jobs.util.JobLogs;
  */
 public class JobRunner {
 
-  public static final class JmxStubOperation implements Serializable {
+  public static final class NeutronJmxJob implements Serializable {
 
-    private final Class<?> klass;
+    private static final String GROUP_LAST_CHG = "last_chg";
 
-    public JmxStubOperation(final Class<?> klass) {
-      this.klass = klass;
+    private final NeutronJobSchedule jobSchedule;
+    private final String scheduleJobName;
+    private final String scheduleTriggerName;
+
+    public NeutronJmxJob(NeutronJobSchedule nji) {
+      this.jobSchedule = nji;
+      this.scheduleJobName = "job_" + jobSchedule.getName();
+      this.scheduleTriggerName = "trg_" + jobSchedule.getName();
     }
 
     @Managed
-    public String run(String bigArg) throws NeutronException {
+    public String runSync(boolean async, String cmdLineArgs) throws NeutronException {
       try {
-        LOGGER.info("RUN JOB: {}", klass.getName());
-        final JobProgressTrack track = JobRunner.runRegisteredJob(klass,
-            StringUtils.isBlank(bigArg) ? null : bigArg.split("\\s+"));
+        LOGGER.info("RUN JOB: {}", jobSchedule.getName());
+        final JobProgressTrack track = JobRunner.runRegisteredJob(jobSchedule.getKlazz(),
+            StringUtils.isBlank(cmdLineArgs) ? null : cmdLineArgs.split("\\s+"));
         return track.toString();
       } catch (Exception e) {
         LOGGER.error(e.getMessage(), e);
-        return "Something went wrong. Checks the logs.";
+        return "Job failed. Check the logs!";
       }
     }
 
-    @Managed(description = "do the operation")
-    public void funMethod(String strArg, boolean bArg, int iArg, String lastRunTime) {
+    @Managed(description = "Schedule job on repeat")
+    public void schedule() throws SchedulerException {
+      final JobDetail job =
+          newJob(NeutronScheduledJob.class).withIdentity(scheduleJobName, GROUP_LAST_CHG).build();
+      final Trigger trigger =
+          newTrigger().withIdentity(scheduleTriggerName, GROUP_LAST_CHG).startNow()
+              .withSchedule(simpleSchedule().withIntervalInSeconds(40).repeatForever()).build();
+      scheduler.scheduleJob(job, trigger);
+    }
 
+    @Managed(description = "Unschedule job")
+    public void unschedule() {
+
+    }
+
+    @Managed(description = "Stop running job")
+    public void stop() {
+
+    }
+
+  }
+
+  public static class NeutronScheduledJob implements org.quartz.Job {
+
+    public NeutronScheduledJob() {}
+
+    @Override
+    public void execute(JobExecutionContext context) throws JobExecutionException {
+      System.err.println("Hello World! MyJob is executing.");
     }
 
   }
@@ -70,6 +113,8 @@ public class JobRunner {
 
   private static JobOptions startingOpts;
 
+  private static Scheduler scheduler;
+
   /**
    * Job options by job type.
    */
@@ -79,8 +124,25 @@ public class JobRunner {
     // Default, no-op
   }
 
+  protected static void init(String[] args) throws Exception {
+    // Expose job execution operations through JMX.
+    final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
+    for (NeutronJobSchedule nji : NeutronJobSchedule.values()) {
+      final Class<?> klass = nji.getKlazz();
+      JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, args);
+      exporter.export("Neutron:last_run_jobs=" + nji.getName(), new NeutronJmxJob(nji));
+    }
+
+    // Expose Guice bean attributes through JMX.
+    Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
+
+    // Quartz scheduling:
+    scheduler = StdSchedulerFactory.getDefaultScheduler();
+    scheduler.start();
+  }
+
   /**
-   * Entry point for standalone batch jobs, typically for initial load.
+   * Entry point for standalone batch jobs, typically for initial load. Not used in continuous mode.
    * 
    * <p>
    * This method automatically closes the Hibernate session factory and ElasticSearch DAO and EXITs
@@ -133,6 +195,30 @@ public class JobRunner {
   }
 
   /**
+   * Build a registered job.
+   * 
+   * @param klass batch job class
+   * @param args command line arguments
+   * @return the job
+   * @throws NeutronException unexpected runtime error
+   */
+  public static BasePersonIndexerJob createJob(final Class<?> klass, String... args)
+      throws NeutronException {
+    try {
+      LOGGER.info("Create registered job: {}", klass.getName());
+      final JobOptions opts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
+          : jobOptions.get(klass);
+      final BasePersonIndexerJob<?, ?> job =
+          (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
+      job.setOpts(opts);
+      return job;
+    } catch (Exception e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!: {}",
+          e.getMessage());
+    }
+  }
+
+  /**
    * Run a registered job.
    * 
    * @param klass batch job class
@@ -144,11 +230,7 @@ public class JobRunner {
       throws NeutronException {
     try {
       LOGGER.info("Run registered job: {}", klass.getName());
-      final JobOptions opts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
-          : jobOptions.get(klass);
-      final BasePersonIndexerJob<?, ?> job =
-          (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
-      job.setOpts(opts);
+      final BasePersonIndexerJob<?, ?> job = createJob(klass, args);
       job.run();
       return job.getTrack();
     } catch (Exception e) {
@@ -161,14 +243,7 @@ public class JobRunner {
       throws NeutronException {
     try {
       final Class<?> klass = Class.forName("gov.ca.cwds.jobs." + jobName);
-      LOGGER.info("Run registered job: {}", klass.getName());
-      final JobOptions opts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
-          : jobOptions.get(klass);
-      final BasePersonIndexerJob<?, ?> job =
-          (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
-      job.setOpts(opts);
-      job.run();
-      return job.getTrack();
+      return runRegisteredJob(klass, args);
     } catch (Exception e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "ON-DEMAND JOB RUN FAILED!: {}",
           e.getMessage());
@@ -213,16 +288,8 @@ public class JobRunner {
       JobRunner.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
           : JobRunner.startingOpts;
       JobRunner.continuousMode = true;
+      JobRunner.init(args);
 
-      final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-
-      for (NeutronJobInventory nji : NeutronJobInventory.values()) {
-        final Class<?> klass = nji.getKlazz();
-        JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, args);
-        exporter.export("Neutron:last_run_jobs=" + nji.getName(), new JmxStubOperation(klass));
-      }
-
-      Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
       LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);

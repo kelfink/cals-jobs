@@ -1,6 +1,10 @@
 package gov.ca.cwds.jobs;
 
-public enum NeutronJobInventory {
+public enum NeutronJobSchedule {
+
+  //
+  // Person document roots.
+  //
 
   CLIENT(ClientIndexerJob.class, true, "client", 0L, 30L, 1, null),
 
@@ -23,7 +27,9 @@ public enum NeutronJobInventory {
   OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, true, "other_child", 10L, 30L, 8,
       null),
 
+  //
   // JSON elements inside ES document.
+  //
 
   /**
    * Client name aliases.
@@ -58,7 +64,7 @@ public enum NeutronJobInventory {
 
   private final String jsonElement;
 
-  private NeutronJobInventory(Class<?> klazz, boolean newDocument, String name,
+  private NeutronJobSchedule(Class<?> klazz, boolean newDocument, String name,
       long startDelaySeconds, long periodSeconds, int loadOrder, String jsonElement) {
     this.klazz = klazz;
     this.newDocument = newDocument;
