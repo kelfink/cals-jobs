@@ -2,6 +2,7 @@ package gov.ca.cwds.data.persistence.cms.rep;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -97,20 +98,18 @@ public class ReplicatedClientTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
+  @Test
   public void toString_Args__() throws Exception {
     ReplicatedClient target = new ReplicatedClient();
     String actual = target.toString();
-    String expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void hashCode_Args__() throws Exception {
     ReplicatedClient target = new ReplicatedClient();
     int actual = target.hashCode();
-    int expected = 1575147505;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(not(0)));
   }
 
   @Test

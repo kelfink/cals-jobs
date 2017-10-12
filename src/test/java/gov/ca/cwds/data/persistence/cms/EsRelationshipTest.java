@@ -2,6 +2,7 @@ package gov.ca.cwds.data.persistence.cms;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -51,15 +52,12 @@ public class EsRelationshipTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void mapRow_Args__ResultSet_T__SQLException() throws Exception {
     ResultSet rs = mock(ResultSet.class);
     doThrow(new SQLException()).when(rs).getString(any());
-    try {
-      EsRelationship.mapRow(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    EsRelationship.mapRow(rs);
+    fail("Expected exception was not thrown!");
   }
 
   @Test
@@ -111,7 +109,7 @@ public class EsRelationshipTest {
   public void hashCode_Args__() throws Exception {
     int actual = target.hashCode();
     int expected = -2120005431;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, not(equalTo(expected)));
   }
 
   @Test

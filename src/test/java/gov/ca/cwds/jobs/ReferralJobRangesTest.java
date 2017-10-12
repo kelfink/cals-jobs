@@ -20,12 +20,14 @@ public class ReferralJobRangesTest extends PersonJobTester {
 
   ReferralJobRanges target = new ReferralJobRanges();
 
-  public void checkPartitionRanges(String schema, boolean isZOS, int expectedCnt) throws Exception {
+  public void checkPartitionRanges(String schema, boolean isZOS, int expectedCnt, boolean isLarge)
+      throws Exception {
     System.setProperty("DB_CMS_SCHEMA", schema);
     BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job =
         mock(BasePersonIndexerJob.class);
 
     when(job.isDB2OnZOS()).thenReturn(isZOS);
+    when(job.isLargeDataSet()).thenReturn(isLarge);
     when(job.getOpts()).thenReturn(opts);
 
     final List<Pair<String, String>> actual = target.getPartitionRanges(job);
@@ -51,7 +53,7 @@ public class ReferralJobRangesTest extends PersonJobTester {
     when(opts.isRangeGiven()).thenReturn(true);
     when(opts.getStartBucket()).thenReturn(1L);
     when(opts.getEndBucket()).thenReturn(4L);
-    checkPartitionRanges("CWSRSQ", true, 3562);
+    checkPartitionRanges("CWSRSQ", true, 3562, true);
   }
 
   @Test
@@ -59,17 +61,17 @@ public class ReferralJobRangesTest extends PersonJobTester {
     when(opts.isRangeGiven()).thenReturn(true);
     when(opts.getStartBucket()).thenReturn(1L);
     when(opts.getEndBucket()).thenReturn(4L);
-    checkPartitionRanges("CWSREP", true, 3562);
+    checkPartitionRanges("CWSREP", true, 3562, true);
   }
 
   @Test
   public void getPartitionRanges_RS1() throws Exception {
-    checkPartitionRanges("CWSRS1", true, 1);
+    checkPartitionRanges("CWSRS1", true, 1, false);
   }
 
   @Test
   public void getPartitionRanges_RS1_Linux() throws Exception {
-    checkPartitionRanges("CWSRS1", false, 1);
+    checkPartitionRanges("CWSRS1", false, 1, false);
   }
 
   @Test

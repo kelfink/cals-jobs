@@ -628,6 +628,7 @@ public class BasePersonIndexerJobTest
   }
 
   @Test(expected = JobsException.class)
+  @Ignore
   public void doInitialLoadJdbc_Args__error() throws Exception {
     runKillThread(target);
     target.doInitialLoadJdbc();
@@ -635,6 +636,7 @@ public class BasePersonIndexerJobTest
   }
 
   @Test(expected = InterruptedException.class)
+  @Ignore
   public void bulkPrepare_Args__BulkProcessor__int() throws Exception {
     BulkProcessor bp = mock(BulkProcessor.class);
     int cntr = 0;
