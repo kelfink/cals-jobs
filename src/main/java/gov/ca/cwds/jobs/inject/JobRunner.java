@@ -37,11 +37,22 @@ public class JobRunner {
 
     @Managed
     public String run(String bigArg) throws NeutronException {
-      LOGGER.info("RUN JOB: {}", klass.getName());
-      final JobProgressTrack track = JobRunner.runRegisteredJob(klass,
-          StringUtils.isBlank(bigArg) ? null : bigArg.split("\\s+"));
-      return track.toString();
+      try {
+        LOGGER.info("RUN JOB: {}", klass.getName());
+        final JobProgressTrack track = JobRunner.runRegisteredJob(klass,
+            StringUtils.isBlank(bigArg) ? null : bigArg.split("\\s+"));
+        return track.toString();
+      } catch (Exception e) {
+        LOGGER.error(e.getMessage(), e);
+        return "Something went wrong. Checks the logs.";
+      }
     }
+
+    @Managed(description = "do the operation")
+    public void funMethod(String strArg, boolean bArg, int iArg, String lastRunTime) {
+
+    }
+
   }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
@@ -52,6 +63,9 @@ public class JobRunner {
    */
   private static boolean testMode = false;
 
+  /**
+   * Run a single server for all last change jobs. Launch once, use many.
+   */
   private static boolean continuousMode = false;
 
   private static JobOptions startingOpts;
@@ -204,7 +218,7 @@ public class JobRunner {
       for (NeutronJobInventory nji : NeutronJobInventory.values()) {
         final Class<?> klass = nji.getKlazz();
         JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, args);
-        exporter.export("Neutron:last_run_jobs=" + klass.getName(), new JmxStubOperation(klass));
+        exporter.export("Neutron:last_run_jobs=" + nji.getName(), new JmxStubOperation(klass));
       }
 
       Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());

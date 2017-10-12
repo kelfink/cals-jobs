@@ -23,8 +23,10 @@ public enum NeutronJobInventory {
   OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, true, "other_child", 10L, 30L, 8,
       null),
 
+  // JSON elements inside ES document.
+
   /**
-   * JSON element inside document.
+   * Client name aliases.
    */
   OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 120L, 60L, 25, "akas"),
 
