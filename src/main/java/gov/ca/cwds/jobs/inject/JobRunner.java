@@ -53,7 +53,7 @@ public class JobRunner {
     }
 
     @Managed(description = "Run job now, show results immediately")
-    public String runSync(boolean async, String cmdLineArgs) throws NeutronException {
+    public String run(String cmdLineArgs) throws NeutronException {
       try {
         LOGGER.info("RUN JOB: {}", jobSchedule.getName());
         final JobProgressTrack track = JobRunner.runRegisteredJob(jobSchedule.getKlazz(),
@@ -101,8 +101,14 @@ public class JobRunner {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
       final String className = context.getJobDetail().getJobDataMap().getString("job_class");
-      // final JobOptions opts = (JobOptions) context.getJobDetail().getJobDataMap().get("options");
+      final String cmdLine = context.getJobDetail().getJobDataMap().getString("cmd_line");
       LOGGER.info("Executing {}", className);
+      try {
+        final JobProgressTrack track = JobRunner.runRegisteredJob(className,
+            StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
+      } catch (Exception e) {
+        throw new JobExecutionException("SCHEDULED JOB FAILED!", e);
+      }
     }
 
   }
