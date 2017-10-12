@@ -25,7 +25,7 @@ import org.weakref.jmx.Managed;
 import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.NeutronJobSchedule;
+import gov.ca.cwds.jobs.NeutronDefaultJobSchedule;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -42,17 +42,17 @@ public class JobRunner {
 
     private static final String GROUP_LAST_CHG = "last_chg";
 
-    private final NeutronJobSchedule jobSchedule;
+    private final NeutronDefaultJobSchedule jobSchedule;
     private final String scheduleJobName;
     private final String scheduleTriggerName;
 
-    public NeutronJmxJob(NeutronJobSchedule nji) {
+    public NeutronJmxJob(NeutronDefaultJobSchedule nji) {
       this.jobSchedule = nji;
       this.scheduleJobName = "job_" + jobSchedule.getName();
       this.scheduleTriggerName = "trg_" + jobSchedule.getName();
     }
 
-    @Managed
+    @Managed(description = "Run job now, show results immediately")
     public String runSync(boolean async, String cmdLineArgs) throws NeutronException {
       try {
         LOGGER.info("RUN JOB: {}", jobSchedule.getName());
@@ -67,16 +67,23 @@ public class JobRunner {
 
     @Managed(description = "Schedule job on repeat")
     public void schedule() throws SchedulerException {
-      final JobDetail job =
-          newJob(NeutronScheduledJob.class).withIdentity(scheduleJobName, GROUP_LAST_CHG).build();
-      final Trigger trigger =
-          newTrigger().withIdentity(scheduleTriggerName, GROUP_LAST_CHG).startNow()
-              .withSchedule(simpleSchedule().withIntervalInSeconds(40).repeatForever()).build();
-      scheduler.scheduleJob(job, trigger);
+      final JobDetail jobDetail =
+          newJob(NeutronScheduledJob.class).withIdentity(scheduleJobName, GROUP_LAST_CHG)
+              .usingJobData("job_class", jobSchedule.getKlazz().getName()).build();
+      final Trigger trigger = newTrigger().withIdentity(scheduleTriggerName, GROUP_LAST_CHG)
+          .startNow().withSchedule(simpleSchedule()
+              .withIntervalInSeconds(jobSchedule.getPeriodSeconds()).repeatForever())
+          .build();
+      scheduler.scheduleJob(jobDetail, trigger);
     }
 
     @Managed(description = "Unschedule job")
     public void unschedule() {
+
+    }
+
+    @Managed(description = "Show job status")
+    public void status() {
 
     }
 
@@ -93,7 +100,9 @@ public class JobRunner {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-      System.err.println("Hello World! MyJob is executing.");
+      final String className = context.getJobDetail().getJobDataMap().getString("job_class");
+      // final JobOptions opts = (JobOptions) context.getJobDetail().getJobDataMap().get("options");
+      LOGGER.info("Executing {}", className);
     }
 
   }
@@ -127,7 +136,7 @@ public class JobRunner {
   protected static void init(String[] args) throws Exception {
     // Expose job execution operations through JMX.
     final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-    for (NeutronJobSchedule nji : NeutronJobSchedule.values()) {
+    for (NeutronDefaultJobSchedule nji : NeutronDefaultJobSchedule.values()) {
       final Class<?> klass = nji.getKlazz();
       JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, args);
       exporter.export("Neutron:last_run_jobs=" + nji.getName(), new NeutronJmxJob(nji));
@@ -139,39 +148,6 @@ public class JobRunner {
     // Quartz scheduling:
     scheduler = StdSchedulerFactory.getDefaultScheduler();
     scheduler.start();
-  }
-
-  /**
-   * Entry point for standalone batch jobs, typically for initial load. Not used in continuous mode.
-   * 
-   * <p>
-   * This method automatically closes the Hibernate session factory and ElasticSearch DAO and EXITs
-   * the JVM.
-   * </p>
-   * 
-   * @param klass batch job class
-   * @param args command line arguments
-   * @param <T> Person persistence type
-   */
-  public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
-      String... args) {
-    int exitCode = 0;
-    JobRunner.continuousMode = false;
-
-    try (final T job = JobsGuiceInjector.newJob(klass, args)) {
-      job.run();
-    } catch (Throwable e) { // NOSONAR
-      // Intentionally catch a Throwable, not an Exception.
-      // Close orphaned resources forcibly, if necessary, by system exit.
-      exitCode = 1;
-      throw JobLogs.buildException(LOGGER, e, "STANDALONE JOB FAILED!: {}", e.getMessage());
-    } finally {
-      // WARNING: kills the JVM in testing but may be needed to shutdown resources.
-      if (!isTestMode() && !isContinuousMode()) {
-        // Shutdown all remaining resources, even those not attached to this job.
-        Runtime.getRuntime().exit(exitCode); // NOSONAR
-      }
-    }
   }
 
   /**
@@ -277,6 +253,39 @@ public class JobRunner {
    */
   public static void setTestMode(boolean mode) {
     testMode = mode;
+  }
+
+  /**
+   * Entry point for standalone batch jobs, typically for initial load. Not used in continuous mode.
+   * 
+   * <p>
+   * This method automatically closes the Hibernate session factory and ElasticSearch DAO and EXITs
+   * the JVM.
+   * </p>
+   * 
+   * @param klass batch job class
+   * @param args command line arguments
+   * @param <T> Person persistence type
+   */
+  public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
+      String... args) {
+    int exitCode = 0;
+    JobRunner.continuousMode = false;
+
+    try (final T job = JobsGuiceInjector.newJob(klass, args)) {
+      job.run();
+    } catch (Throwable e) { // NOSONAR
+      // Intentionally catch a Throwable, not an Exception.
+      // Close orphaned resources forcibly, if necessary, by system exit.
+      exitCode = 1;
+      throw JobLogs.buildException(LOGGER, e, "STANDALONE JOB FAILED!: {}", e.getMessage());
+    } finally {
+      // WARNING: kills the JVM in testing but may be needed to shutdown resources.
+      if (!isTestMode() && !isContinuousMode()) {
+        // Shutdown all remaining resources, even those not attached to this job.
+        Runtime.getRuntime().exit(exitCode); // NOSONAR
+      }
+    }
   }
 
   @SuppressWarnings("unchecked")
