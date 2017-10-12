@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 
@@ -327,6 +326,8 @@ public class JobOptions implements ApiMarker {
 
   /**
    * Print usage.
+   * 
+   * @throws NeutronException on IO exception
    */
   protected static void printUsage() throws NeutronException {
     try (final StringWriter sw = new StringWriter()) {
@@ -344,7 +345,7 @@ public class JobOptions implements ApiMarker {
    * 
    * @param args command line to parse
    * @return JobOptions defining this job
-   * @throws JobsException if unable to parse command line
+   * @throws NeutronException if unable to parse command line
    */
   public static JobOptions parseCommandLine(String[] args) throws NeutronException {
     String esConfigLoc = null;

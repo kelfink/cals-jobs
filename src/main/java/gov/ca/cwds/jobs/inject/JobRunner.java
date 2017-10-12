@@ -137,6 +137,7 @@ public class JobRunner {
    * 
    * @param klass batch job class
    * @param args command line arguments
+   * @return job progress
    * @throws NeutronException unexpected runtime error
    */
   public static JobProgressTrack runRegisteredJob(final Class<?> klass, String... args)
