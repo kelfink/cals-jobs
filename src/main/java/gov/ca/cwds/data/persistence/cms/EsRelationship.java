@@ -12,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -23,6 +25,7 @@ import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -123,13 +126,21 @@ public class EsRelationship
   // NOTE: add replication columns when available.
   // Needed to delete ES documents.
 
-  // @Enumerated(EnumType.STRING)
-  // @Column(name = "CLT_IBMSNAP_OPERATION", updatable = false)
-  // private CmsReplicationOperation cltReplicationOperation;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "THIS_IBMSNAP_OPERATION", updatable = false)
+  private CmsReplicationOperation thisReplicationOperation;
 
-  // @Type(type = "timestamp")
-  // @Column(name = "CLT_IBMSNAP_LOGMARKER", updatable = false)
-  // private Date cltReplicationDate;
+  @Type(type = "timestamp")
+  @Column(name = "THIS_IBMSNAP_LOGMARKER", updatable = false)
+  private Date thisReplicationDate;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "RELATED_IBMSNAP_OPERATION", updatable = false)
+  private CmsReplicationOperation relatedReplicationOperation;
+
+  @Type(type = "timestamp")
+  @Column(name = "RELATED_IBMSNAP_LOGMARKER", updatable = false)
+  private Date relatedReplicationDate;
 
   /**
    * Build an EsRelationship from an incoming ResultSet.

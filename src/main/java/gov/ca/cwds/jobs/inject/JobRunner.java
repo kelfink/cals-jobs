@@ -27,9 +27,6 @@ import gov.ca.cwds.jobs.util.JobLogs;
 public class JobRunner {
 
   public static final class JmxStubOperation implements Serializable {
-    // private Logger opLog = LoggerFactory.getLogger(JmxStubOperation.class);
-
-    // private Map<String, String> contextMap = MDC.getCopyOfContextMap();
 
     private final Class<?> klass;
 
@@ -39,7 +36,6 @@ public class JobRunner {
 
     @Managed
     public void run(String bigArg) throws NeutronException {
-      // MDC.setContextMap(contextMap);
       LOGGER.info("RUN JOB: {}", klass.getName());
       JobRunner.runRegisteredJob(klass, StringUtils.isBlank(bigArg) ? null : bigArg.split("\\s+"));
     }

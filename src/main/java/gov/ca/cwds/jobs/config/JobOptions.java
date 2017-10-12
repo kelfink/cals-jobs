@@ -378,7 +378,6 @@ public class JobOptions implements ApiMarker {
 
           case CMD_LINE_INDEX_NAME:
             indexName = opt.getValue().trim();
-            LOGGER.info("index name = {}", indexName);
             break;
 
           case CMD_LINE_LAST_RUN_TIME:
@@ -390,7 +389,6 @@ public class JobOptions implements ApiMarker {
           case CMD_LINE_LAST_RUN_FILE:
             lastRunMode = true;
             lastRunLoc = opt.getValue().trim();
-            LOGGER.info("last run file = {}", lastRunLoc);
             break;
 
           case CMD_LINE_BUCKET_RANGE:

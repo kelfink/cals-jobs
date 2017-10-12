@@ -790,6 +790,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         LOGGER.warn("CLOSING SESSION FACTORY");
         this.sessionFactory.close();
       }
+
+      try {
+        Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        LOGGER.warn("INTERRUPTED!");
+      }
     } else {
       LOGGER.warn("CLOSE: FALSE ALARM");
     }
@@ -801,10 +808,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       markJobDone();
       close();
-      Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
     } catch (Exception e) {
       markFailed();
-      Thread.currentThread().interrupt();
       throw JobLogs.buildException(LOGGER, e, "ERROR FINISHING JOB: {}", e.getMessage());
     }
   }
