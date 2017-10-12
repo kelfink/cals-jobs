@@ -24,21 +24,21 @@ public enum NeutronJobInventory {
   /**
    * JSON element inside document.
    */
-  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 10L, 30L, 1),
+  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 120L, 60L, 25),
 
-  CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 60L, 60L, 1),
+  CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 60L, 30L, 20),
 
-  PARENT_CASE(ParentCaseHistoryIndexerJob.class, false, "parent_case", 60L, 60L, 1),
+  PARENT_CASE(ParentCaseHistoryIndexerJob.class, false, "parent_case", 60L, 30L, 22),
 
-  REFERRAL(ReferralHistoryIndexerJob.class, false, "referral", 10L, 30L, 1),
+  REFERRAL(ReferralHistoryIndexerJob.class, false, "referral", 60L, 30L, 10),
 
-  RELATIONSHIP(RelationshipIndexerJob.class, false, "relationship", 10L, 30L, 1),
+  RELATIONSHIP(RelationshipIndexerJob.class, false, "relationship", 60L, 30L, 30),
 
-  SAFETY_ALERT(SafetyAlertIndexerJob.class, false, "safety_alert", 10L, 30L, 1),
+  SAFETY_ALERT(SafetyAlertIndexerJob.class, false, "safety_alert", 120L, 60L, 40),
 
-  INTAKE_SCREENING(IntakeScreeningJob.class, false, "intake_screening", 10L, 30L, 1),
+  INTAKE_SCREENING(IntakeScreeningJob.class, false, "intake_screening", 90L, 30L, 18)
 
-  SYSTEM_CODES_LOADER(SystemCodesLoaderJob.class, false, "system_codes_loader", 10L, 30L, 5)
+  // SYSTEM_CODES_LOADER(SystemCodesLoaderJob.class, false, "system_codes_loader", 10L, 30L, 5)
 
   ;
 
