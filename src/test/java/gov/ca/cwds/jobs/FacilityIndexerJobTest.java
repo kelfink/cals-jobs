@@ -19,6 +19,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.es.Elasticsearch5xDao;
+import gov.ca.cwds.jobs.component.Job;
 import gov.ca.cwds.jobs.config.JobConfiguration;
 import gov.ca.cwds.jobs.facility.FacilityProcessor;
 import gov.ca.cwds.jobs.facility.FacilityRowMapper;

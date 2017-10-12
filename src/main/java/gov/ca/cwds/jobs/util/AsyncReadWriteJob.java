@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.util;
 import java.util.LinkedList;
 import java.util.List;
 
-import gov.ca.cwds.jobs.Job;
+import gov.ca.cwds.jobs.component.Job;
 import gov.ca.cwds.jobs.exception.JobsException;
 
 /**

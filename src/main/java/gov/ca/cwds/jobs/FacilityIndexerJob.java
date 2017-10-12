@@ -27,6 +27,7 @@ import com.google.inject.name.Names;
 
 import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.model.facility.es.ESFacility;
+import gov.ca.cwds.jobs.component.Job;
 import gov.ca.cwds.jobs.config.JobConfiguration;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.facility.FacilityProcessor;

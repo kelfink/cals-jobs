@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.component.AtomJobControl;
 import gov.ca.cwds.jobs.component.AtomShared;
+import gov.ca.cwds.jobs.component.Job;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.util.JobLogs;
