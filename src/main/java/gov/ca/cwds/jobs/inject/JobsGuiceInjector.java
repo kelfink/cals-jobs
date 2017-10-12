@@ -70,6 +70,7 @@ import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
@@ -176,9 +177,10 @@ public class JobsGuiceInjector extends AbstractModule {
    * @param args command line arguments
    * @return batch job, ready to run
    * @param <T> Person persistence type
+   * @throws NeutronException checked exception
    */
   public static <T extends BasePersonIndexerJob<?, ?>> T newJob(final Class<T> klass,
-      String... args) {
+      String... args) throws NeutronException {
     try {
       final JobOptions opts = JobOptions.parseCommandLine(args);
       final T ret = buildInjector(opts).getInstance(klass);

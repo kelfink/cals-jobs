@@ -2,6 +2,8 @@ package gov.ca.cwds.data.model.facility.es;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -83,7 +85,7 @@ public class ESFacilityAddress implements Serializable {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
+    final int prime = 31; // NOSONAR
     int result = 1;
     result = prime * result + ((city == null) ? 0 : city.hashCode());
     result = prime * result + ((county == null) ? 0 : county.hashCode());
@@ -96,43 +98,7 @@ public class ESFacilityAddress implements Serializable {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    ESFacilityAddress other = (ESFacilityAddress) obj;
-    if (city == null) {
-      if (other.city != null)
-        return false;
-    } else if (!city.equals(other.city))
-      return false;
-    if (county == null) {
-      if (other.county != null)
-        return false;
-    } else if (!county.equals(other.county))
-      return false;
-    if (stateCodeType == null) {
-      if (other.stateCodeType != null)
-        return false;
-    } else if (!stateCodeType.equals(other.stateCodeType))
-      return false;
-    if (streetAddress == null) {
-      if (other.streetAddress != null)
-        return false;
-    } else if (!streetAddress.equals(other.streetAddress))
-      return false;
-    if (zipCode == null) {
-      if (other.zipCode != null)
-        return false;
-    } else if (!zipCode.equals(other.zipCode))
-      return false;
-    if (zipSuffixCode == null) {
-      if (other.zipSuffixCode != null)
-        return false;
-    } else if (!zipSuffixCode.equals(other.zipSuffixCode))
-      return false;
-    return true;
+    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 }
+

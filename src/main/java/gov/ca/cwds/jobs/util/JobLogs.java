@@ -97,7 +97,7 @@ public final class JobLogs {
    * @param e any Throwable
    * @param pattern MessageFormat pattern
    * @param args error message, excluding throwable message
-   * @return JobsException runtime exception
+   * @return NeutronException checked exception
    */
   public static NeutronException buildCheckedException(final Logger log, Throwable e,
       String pattern, Object... args) {

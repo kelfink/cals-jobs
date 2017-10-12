@@ -25,7 +25,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 public class EsPersonReferralTest {
 
   @BeforeClass
-  public static void setupTests() {
+  public static void setupTests() throws Exception {
     SimpleTestSystemCodeCache.init();
     final String[] args = {"-c", "config/local.yaml", "-l",
         "/Users/CWS-NS3/client_indexer_time.txt", "--thread-num=4", "-r", "1-20"};

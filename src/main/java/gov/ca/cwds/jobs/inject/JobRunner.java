@@ -138,7 +138,6 @@ public class JobRunner {
     }
   }
 
-  @Managed
   public static void runRegisteredJob(final String jobName, String... args)
       throws NeutronException {
     try {
@@ -196,7 +195,8 @@ public class JobRunner {
       JobRunner.continuousMode = true;
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
 
-      for (final Class<?> klass : NeutronJobInventory.inventory) {
+      for (NeutronJobInventory nji : NeutronJobInventory.values()) {
+        final Class<?> klass = nji.getKlazz();
         JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, args);
         exporter.export("Neutron:last_run_jobs=" + klass.getName(), new JmxStubOperation(klass));
       }

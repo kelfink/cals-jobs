@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
@@ -327,15 +328,14 @@ public class JobOptions implements ApiMarker {
   /**
    * Print usage.
    */
-  protected static void printUsage() {
+  protected static void printUsage() throws NeutronException {
     try (final StringWriter sw = new StringWriter()) {
-      final String PADDING = StringUtils.leftPad("", 90, '=');
+      final String pad = StringUtils.leftPad("", 90, '=');
       new HelpFormatter().printHelp(new PrintWriter(sw), 100, "Batch loader",
-          PADDING + "\nUSAGE: java <job class> ...\n" + PADDING, buildCmdLineOptions(), 4, 8,
-          PADDING, true);
-      LOGGER.error(sw.toString());
+          pad + "\nUSAGE: java <job class> ...\n" + pad, buildCmdLineOptions(), 4, 8, pad, true);
+      LOGGER.error(sw.toString()); // NOSONAR
     } catch (IOException e) {
-      throw JobLogs.buildException(LOGGER, e, "INCORRECT USAGE!: {}", e.getMessage());
+      throw JobLogs.buildCheckedException(LOGGER, e, "INCORRECT USAGE!: {}", e.getMessage());
     }
   }
 
@@ -346,7 +346,7 @@ public class JobOptions implements ApiMarker {
    * @return JobOptions defining this job
    * @throws JobsException if unable to parse command line
    */
-  public static JobOptions parseCommandLine(String[] args) throws JobsException {
+  public static JobOptions parseCommandLine(String[] args) throws NeutronException {
     String esConfigLoc = null;
     String indexName = null;
     Date lastRunTime = null;
@@ -420,7 +420,7 @@ public class JobOptions implements ApiMarker {
       }
     } catch (Exception e) { // NOSONAR
       printUsage();
-      throw JobLogs.buildException(LOGGER, e, "Error parsing command line: {}", e.getMessage());
+      // throw JobLogs.buildException(LOGGER, e, "Error parsing command line: {}", e.getMessage());
     }
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode, startBucket,

@@ -16,6 +16,8 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
@@ -179,7 +181,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @JsonIgnore
   @Override
   public ApiAddressAware[] getAddresses() {
-    return clientAddresses.stream().flatMap(ca -> ca.addresses.stream())
+    return clientAddresses.stream().flatMap(ca -> ca.getAddresses().stream())
         .collect(Collectors.toList()).toArray(new ApiAddressAware[0]);
   }
 
@@ -190,7 +192,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
-    return clientAddresses.stream().flatMap(ca -> ca.addresses.stream())
+    return clientAddresses.stream().flatMap(ca -> ca.getAddresses().stream())
         .flatMap(adr -> Arrays.stream(adr.getPhones())).collect(Collectors.toList())
         .toArray(new ApiPhoneAware[0]);
   }
@@ -285,4 +287,15 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
       }
     }
   }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
 }
