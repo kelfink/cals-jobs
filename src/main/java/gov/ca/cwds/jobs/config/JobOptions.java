@@ -349,6 +349,7 @@ public class JobOptions implements ApiMarker {
     OptionGroup group = new OptionGroup();
     group.setRequired(true);
     group.addOption(JobCmdLineOption.LAST_RUN_FILE.getOpt());
+    group.addOption(JobCmdLineOption.BASE_DIRECTORY.getOpt());
     group.addOption(JobCmdLineOption.BUCKET_TOTAL.getOpt());
     ret.addOptionGroup(group);
 
@@ -458,7 +459,6 @@ public class JobOptions implements ApiMarker {
       }
     } catch (Exception e) { // NOSONAR
       printUsage();
-      // throw JobLogs.buildException(LOGGER, e, "Error parsing command line: {}", e.getMessage());
     }
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode, startBucket,

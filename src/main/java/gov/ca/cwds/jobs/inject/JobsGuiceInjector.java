@@ -174,6 +174,26 @@ public class JobsGuiceInjector extends AbstractModule {
    * Prepare a batch job with all required dependencies.
    * 
    * @param klass batch job class
+   * @param opts command line options
+   * @return batch job, ready to run
+   * @param <T> Person persistence type
+   * @throws NeutronException checked exception
+   */
+  public static <T extends BasePersonIndexerJob<?, ?>> T newJob(final Class<T> klass,
+      final JobOptions opts) throws NeutronException {
+    try {
+      final T ret = buildInjector(opts).getInstance(klass);
+      ret.setOpts(opts);
+      return ret;
+    } catch (CreationException e) {
+      throw JobLogs.buildException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
+    }
+  }
+
+  /**
+   * Prepare a batch job with all required dependencies.
+   * 
+   * @param klass batch job class
    * @param args command line arguments
    * @return batch job, ready to run
    * @param <T> Person persistence type
@@ -181,14 +201,8 @@ public class JobsGuiceInjector extends AbstractModule {
    */
   public static <T extends BasePersonIndexerJob<?, ?>> T newJob(final Class<T> klass,
       String... args) throws NeutronException {
-    try {
-      final JobOptions opts = JobOptions.parseCommandLine(args);
-      final T ret = buildInjector(opts).getInstance(klass);
-      ret.setOpts(opts);
-      return ret;
-    } catch (CreationException e) {
-      throw JobLogs.buildException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
-    }
+    final JobOptions opts = JobOptions.parseCommandLine(args);
+    return newJob(klass, opts);
   }
 
   /**

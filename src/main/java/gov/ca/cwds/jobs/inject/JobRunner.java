@@ -4,12 +4,17 @@ import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.quartz.JobDetail;
@@ -30,6 +35,7 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.NeutronDefaultJobSchedule;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 
@@ -150,11 +156,28 @@ public class JobRunner {
   protected static void init(String[] args) throws Exception {
     // Expose job execution operations through JMX.
     final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-    for (NeutronDefaultJobSchedule nji : NeutronDefaultJobSchedule.values()) {
-      final Class<?> klass = nji.getKlazz();
-      JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, args);
-      final NeutronJmxJob nj = new NeutronJmxJob(nji);
-      exporter.export("Neutron:last_run_jobs=" + nji.getName(), nj);
+    final DateFormat fmt =
+        new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
+    final Date now = new Date();
+
+    for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
+      final Class<?> klass = sched.getKlazz();
+      final JobOptions opts = new JobOptions(startingOpts);
+
+      final StringBuilder buf = new StringBuilder();
+      buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
+          .append(".time");
+      opts.setLastRunLoc(buf.toString());
+
+      final File f = new File(opts.getLastRunLoc());
+      if (!f.exists()) {
+        FileUtils.writeStringToFile(f, fmt.format(now));
+      }
+
+      JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
+
+      final NeutronJmxJob nj = new NeutronJmxJob(sched);
+      exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
       scheduleRegistry.put(klass, nj);
     }
 
@@ -185,9 +208,9 @@ public class JobRunner {
    * @throws NeutronException unexpected runtime error
    */
   public static <T extends BasePersonIndexerJob<?, ?>> void registerContinuousJob(
-      final Class<T> klass, String... args) throws NeutronException {
+      final Class<T> klass, final JobOptions opts) throws NeutronException {
     LOGGER.info("Register job: {}", klass.getName());
-    try (final T job = JobsGuiceInjector.newJob(klass, args)) {
+    try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
       optionsRegistry.put(klass, job.getOpts());
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception, for ClassNotFound or the like.
@@ -323,6 +346,7 @@ public class JobRunner {
       // Best to load a configuration file with settings per job.
 
       // -c config/local.yaml -l /Users/CWS-NS3/client_indexer_time.txt
+
 
       JobRunner.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
           : JobRunner.startingOpts;

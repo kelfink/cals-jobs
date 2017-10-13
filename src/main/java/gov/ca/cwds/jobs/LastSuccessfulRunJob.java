@@ -110,6 +110,9 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
     this.doneJob = true;
   }
 
+  /**
+   * Reset the job's state and start over.
+   */
   public void reset() {
     this.doneRetrieve = false;
     this.doneIndex = false;

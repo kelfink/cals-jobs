@@ -5,10 +5,11 @@ import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.WeakHashMap;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -78,7 +79,8 @@ public class EsRelationship
     implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationships>,
     Comparable<EsRelationship>, Comparator<EsRelationship> {
 
-  private static final Map<Short, CmsRelationship> mapRelationCodes = new ConcurrentHashMap<>();
+  private static final Map<Short, CmsRelationship> mapRelationCodes =
+      Collections.synchronizedMap(new WeakHashMap<>());
 
   /**
    * Default serialization.
@@ -356,6 +358,38 @@ public class EsRelationship
   @Override
   public int compareTo(EsRelationship o) {
     return compare(this, o);
+  }
+
+  public CmsReplicationOperation getThisReplicationOperation() {
+    return thisReplicationOperation;
+  }
+
+  public void setThisReplicationOperation(CmsReplicationOperation thisReplicationOperation) {
+    this.thisReplicationOperation = thisReplicationOperation;
+  }
+
+  public Date getThisReplicationDate() {
+    return thisReplicationDate;
+  }
+
+  public void setThisReplicationDate(Date thisReplicationDate) {
+    this.thisReplicationDate = thisReplicationDate;
+  }
+
+  public CmsReplicationOperation getRelatedReplicationOperation() {
+    return relatedReplicationOperation;
+  }
+
+  public void setRelatedReplicationOperation(CmsReplicationOperation relatedReplicationOperation) {
+    this.relatedReplicationOperation = relatedReplicationOperation;
+  }
+
+  public Date getRelatedReplicationDate() {
+    return relatedReplicationDate;
+  }
+
+  public void setRelatedReplicationDate(Date relatedReplicationDate) {
+    this.relatedReplicationDate = relatedReplicationDate;
   }
 
 }
