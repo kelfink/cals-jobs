@@ -158,7 +158,7 @@ public class JobRunner {
     final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
     final DateFormat fmt =
         new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
-    final Date now = new Date();
+    final Date now = new DateTime().minusHours(8).toDate(); // past window
 
     for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
       final Class<?> klass = sched.getKlazz();
@@ -171,7 +171,11 @@ public class JobRunner {
 
       final File f = new File(opts.getLastRunLoc());
       if (!f.exists()) {
-        FileUtils.writeStringToFile(f, fmt.format(now));
+        if (opts.getLastRunTime() == null) {
+          FileUtils.writeStringToFile(f, fmt.format(now));
+        } else {
+          FileUtils.
+        }
       }
 
       JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
