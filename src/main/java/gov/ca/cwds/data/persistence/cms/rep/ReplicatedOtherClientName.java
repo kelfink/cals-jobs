@@ -229,4 +229,12 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
     this.suffixTitleDescription = suffixTitleDescription;
   }
 
+  public String getClientSensitivityIndicator() {
+    return clientSensitivityIndicator;
+  }
+
+  public void setClientSensitivityIndicator(String clientSensitivityIndicator) {
+    this.clientSensitivityIndicator = clientSensitivityIndicator;
+  }
+
 }

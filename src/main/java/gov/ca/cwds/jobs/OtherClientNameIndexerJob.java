@@ -169,7 +169,7 @@ public class OtherClientNameIndexerJob
   }
 
   @Override
-  public boolean providesInitialKeyRanges() {
+  public boolean initialLoadJdbc() {
     return true;
   }
 

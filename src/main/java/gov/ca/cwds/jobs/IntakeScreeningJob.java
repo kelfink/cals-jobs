@@ -69,9 +69,27 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
   }
 
   @Override
+  public String getInitialLoadViewName() {
+    return getDenormalizedClass().getDeclaredAnnotation(Table.class).name();
+  }
+
+  @Override
+  public String getInitialLoadQuery(String dbSchemaName) {
+    final StringBuilder buf = new StringBuilder();
+    buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
+        .append(" x FOR READ ONLY WITH UR ");
+    return buf.toString();
+  }
+
+  @Override
+  public boolean initialLoadJdbc() {
+    return true;
+  }
+
+  @Override
   protected void threadRetrieveByJdbc() {
-    Thread.currentThread().setName("extract");
-    LOGGER.info("BEGIN: Stage #1: NS View Reader");
+    Thread.currentThread().setName("retrieval");
+    LOGGER.info("BEGIN: retrieval: NS View Reader");
 
     try {
       final List<EsIntakeScreening> results = this.viewDao.findAll();
@@ -86,17 +104,12 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
       markRetrieveDone();
     }
 
-    LOGGER.info("DONE: Stage #1: NS View Reader");
+    LOGGER.info("DONE: retrieval: NS View Reader");
   }
 
   @Override
   public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
     return EsIntakeScreening.class;
-  }
-
-  @Override
-  public String getInitialLoadViewName() {
-    return getDenormalizedClass().getDeclaredAnnotation(Table.class).name();
   }
 
   /**
@@ -130,6 +143,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    * @param t normalized type
    * @return List of ES person elements
    */
+  @SuppressWarnings("unchecked")
   @Override
   public List<ApiTypedIdentifier<String>> getOptionalCollection(ElasticSearchPerson esp,
       IntakeParticipant t) {

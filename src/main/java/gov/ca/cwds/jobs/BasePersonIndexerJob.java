@@ -614,7 +614,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       if (autoInitialLoad) {
         LOGGER.warn("AUTO MODE!");
 
-        if (providesInitialKeyRanges()) {
+        if (initialLoadJdbc()) {
           LOGGER.info("LOAD FROM VIEW WITH JDBC!");
           doInitialLoadJdbc();
         } else {
@@ -655,6 +655,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param lastRunTime last successful run date/time
    * @return List of normalized entities
    */
+  @SuppressWarnings("unchecked")
   protected List<T> extractLastRunRecsFromTable(final Date lastRunTime) {
     LOGGER.info("last successful run: {}", lastRunTime);
     final Class<?> entityClass = jobDao.getEntityClass();
@@ -706,7 +707,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }
 
-    LOGGER.warn("FOUND {} RECORDS FOR DELETION", deletionResults.size());
+    if (!deletionResults.isEmpty()) {
+      LOGGER.warn("FOUND {} RECORDS FOR DELETION", deletionResults.size());
+    }
   }
 
   /**

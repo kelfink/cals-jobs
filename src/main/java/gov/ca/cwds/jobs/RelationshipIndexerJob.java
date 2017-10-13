@@ -233,7 +233,7 @@ public class RelationshipIndexerJob
   }
 
   @Override
-  public boolean providesInitialKeyRanges() {
+  public boolean initialLoadJdbc() {
     return true;
   }
 

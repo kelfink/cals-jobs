@@ -45,15 +45,6 @@ public class ServiceProviderIndexerJob
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
-  /**
-   * @deprecated soon to be removed.
-   */
-  @Override
-  @Deprecated
-  public String getLegacySourceTable() {
-    return "SVC_PVRT";
-  }
-
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
     return JobJdbcUtils.getCommonPartitionRanges16(this);

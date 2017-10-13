@@ -149,7 +149,7 @@ public abstract class CaseHistoryIndexerJob
   }
 
   @Override
-  public boolean providesInitialKeyRanges() {
+  public boolean initialLoadJdbc() {
     return true;
   }
 

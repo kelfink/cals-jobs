@@ -64,17 +64,17 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param clientDao Client DAO
+   * @param dao Client DAO
    * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public ClientIndexerJob(final ReplicatedClientDao clientDao, final ElasticsearchDao esDao,
+  public ClientIndexerJob(final ReplicatedClientDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory) {
-    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   @Override
@@ -228,7 +228,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
-  public boolean providesInitialKeyRanges() {
+  public boolean initialLoadJdbc() {
     return true;
   }
 

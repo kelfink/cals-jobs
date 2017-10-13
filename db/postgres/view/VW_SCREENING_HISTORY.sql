@@ -68,4 +68,5 @@ CREATE VIEW VW_SCREENING_HISTORY AS
      LEFT JOIN participant_addresses pa ON (((pa.participant_id)::text = (p.id)::text)))
      LEFT JOIN addresses adr ON ((((adr.id)::text = (pa.address_id)::text) AND (COALESCE(adr.street_address, adr.city, adr.zip) IS NOT NULL))))
      LEFT JOIN participant_phone_numbers ppn ON (((ppn.participant_id)::text = (p.id)::text)))
-     LEFT JOIN phone_numbers ph ON (((ph.id)::text = (ppn.phone_number_id)::text)));
+     LEFT JOIN phone_numbers ph ON (((ph.id)::text = (ppn.phone_number_id)::text))
+);

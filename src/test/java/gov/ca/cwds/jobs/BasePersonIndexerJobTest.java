@@ -668,7 +668,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void isRangeSelfManaging_Args__() throws Exception {
-    final boolean actual = target.providesInitialKeyRanges();
+    final boolean actual = target.initialLoadJdbc();
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
