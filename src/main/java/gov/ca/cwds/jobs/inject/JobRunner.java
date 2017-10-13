@@ -7,9 +7,11 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -71,9 +73,11 @@ public class JobRunner {
           newJob(NeutronScheduledJob.class).withIdentity(scheduleJobName, GROUP_LAST_CHG)
               .usingJobData("job_class", jobSchedule.getKlazz().getName()).build();
       final Trigger trigger = newTrigger().withIdentity(scheduleTriggerName, GROUP_LAST_CHG)
-          .startNow().withSchedule(simpleSchedule()
-              .withIntervalInSeconds(jobSchedule.getPeriodSeconds()).repeatForever())
-          .build();
+          .startNow()
+          .withSchedule(simpleSchedule().withIntervalInSeconds(jobSchedule.getPeriodSeconds())
+              .repeatForever())
+          .startAt(DateTime.now().plusSeconds(jobSchedule.getStartDelaySeconds()).toDate()).build();
+
       scheduler.scheduleJob(jobDetail, trigger);
     }
 
@@ -157,9 +161,16 @@ public class JobRunner {
     Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
 
     // Quartz scheduling:
-    scheduler = StdSchedulerFactory.getDefaultScheduler();
+    Properties p = new Properties();
+    p.put("org.quartz.scheduler.instanceName", "Scheduler_test");
+    p.put("org.quartz.threadPool.threadCount", "4");
+    StdSchedulerFactory factory = new StdSchedulerFactory(p);
+
+    scheduler = factory.getScheduler();
+    // scheduler = StdSchedulerFactory.getDefaultScheduler();
     scheduler.start();
 
+    // Start last change jobs.
     for (NeutronJmxJob j : registry.values()) {
       j.schedule();
     }
@@ -193,6 +204,7 @@ public class JobRunner {
    * @return the job
    * @throws NeutronException unexpected runtime error
    */
+  @SuppressWarnings("rawtypes")
   public static BasePersonIndexerJob createJob(final Class<?> klass, String... args)
       throws NeutronException {
     try {

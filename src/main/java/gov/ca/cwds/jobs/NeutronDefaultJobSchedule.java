@@ -6,17 +6,17 @@ public enum NeutronDefaultJobSchedule {
   // Person document roots.
   //
 
-  CLIENT(ClientIndexerJob.class, true, "client", 0, 30, 1, null),
+  CLIENT(ClientIndexerJob.class, true, "client", 5, 30, 1, null),
 
   REPORTER(ReporterIndexerJob.class, true, "reporter", 10, 30, 2, null),
 
-  COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, true, "collateral_individual", 60, 30,
+  COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, true, "collateral_individual", 20, 30,
       3, null),
 
-  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, true, "service_provider", 10, 30, 4, null),
+  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, true, "service_provider", 30, 30, 4, null),
 
   SUBSTITUTE_CARE_PROVIDER(SubstituteCareProviderIndexJob.class, true, "substitute_care_provider",
-      10, 30, 5, null),
+      40, 30, 5, null),
 
   EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, true, "education_provider", 120, 120,
       6, null),
@@ -24,11 +24,11 @@ public enum NeutronDefaultJobSchedule {
   OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, true, "other_adult", 60, 30, 7,
       null),
 
-  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, true, "other_child", 10, 30, 8,
+  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, true, "other_child", 90, 30, 8,
       null),
 
   //
-  // JSON elements inside ES document.
+  // JSON elements inside document.
   //
 
   /**
@@ -36,7 +36,7 @@ public enum NeutronDefaultJobSchedule {
    */
   OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 120, 60, 25, "akas"),
 
-  CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 60, 30, 20, "cases"),
+  CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 90, 30, 20, "cases"),
 
   PARENT_CASE(ParentCaseHistoryIndexerJob.class, false, "parent_case", 60, 30, 22, "cases"),
 
