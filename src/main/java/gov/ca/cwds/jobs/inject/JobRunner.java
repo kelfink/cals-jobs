@@ -164,11 +164,13 @@ public class JobRunner {
       final Class<?> klass = sched.getKlazz();
       final JobOptions opts = new JobOptions(startingOpts);
 
+      // Job's time file under base directory:
       final StringBuilder buf = new StringBuilder();
       buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
           .append(".time");
       opts.setLastRunLoc(buf.toString());
 
+      // If timestamp file doesn't exist, create it.
       final File f = new File(opts.getLastRunLoc());
       if (!f.exists()) {
         if (opts.getLastRunTime() == null) {

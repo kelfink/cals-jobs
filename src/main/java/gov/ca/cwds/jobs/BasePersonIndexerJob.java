@@ -588,6 +588,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public Date _run(Date lastSuccessfulRunTime) {
     try {
+      LOGGER.info("RUNNING JOB: {}", getClass().getName());
+
       // If index name is provided, use it, else take alias from ES config.
       final String indexNameOverride = getOpts().getIndexName();
       final String effectiveIndexName = StringUtils.isBlank(indexNameOverride)
