@@ -174,7 +174,7 @@ public class JobRunner {
         if (opts.getLastRunTime() == null) {
           FileUtils.writeStringToFile(f, fmt.format(now));
         } else {
-          FileUtils.
+          FileUtils.writeStringToFile(f, fmt.format(opts.getLastRunTime()));
         }
       }
 
