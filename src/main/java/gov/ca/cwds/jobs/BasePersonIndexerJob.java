@@ -793,14 +793,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         Thread.currentThread().interrupt();
         LOGGER.warn("INTERRUPTED!");
       }
-    } else {
-      LOGGER.warn("CLOSE: FALSE ALARM");
     }
   }
 
   @Override
   protected synchronized void finish() {
-    LOGGER.warn("FINISH JOB AND SHUTDOWN!");
+    LOGGER.info("FINISH JOB!");
     try {
       markJobDone();
       close();
@@ -808,6 +806,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       markFailed();
       throw JobLogs.buildException(LOGGER, e, "ERROR FINISHING JOB: {}", e.getMessage());
     }
+    LOGGER.info("JOB FINISHED!");
   }
 
   /**

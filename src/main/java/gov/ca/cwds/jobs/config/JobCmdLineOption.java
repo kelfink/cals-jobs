@@ -35,6 +35,11 @@ public enum JobCmdLineOption {
   ALT_INPUT_FILE(JobOptions.makeOpt("f", JobOptions.CMD_LINE_ALT_INPUT_FILE, "Alternate input file", false, 1, String.class, ',')),
 
   /**
+   * Alternate input file
+   */
+  BASE_DIRECTORY(JobOptions.makeOpt("b", JobOptions.CMD_LINE_BASE_DIRECTORY, "base directory", false, 1, String.class, ',')),
+
+  /**
    * Bucket range (-r 20-24).
    */
   BUCKET_RANGE(JobOptions.makeOpt("r", JobOptions.CMD_LINE_BUCKET_RANGE, "bucket range (-r 20-24)", false, 2, Integer.class, '-')),
@@ -42,7 +47,7 @@ public enum JobCmdLineOption {
   /**
    * Total buckets.
    */
-  BUCKET_TOTAL(JobOptions.makeOpt("b", JobOptions.CMD_LINE_BUCKET_TOTAL, "total buckets", false, 1, Integer.class, ',')),
+  BUCKET_TOTAL(JobOptions.makeOpt("B", JobOptions.CMD_LINE_BUCKET_TOTAL, "total buckets", false, 1, Integer.class, ',')),
 
   /**
    * Number of threads (optional).

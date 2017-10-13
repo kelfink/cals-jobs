@@ -138,14 +138,15 @@ public class JobRunner {
   /**
    * Job options by job type.
    */
-  private static final Map<Class<?>, JobOptions> jobOptions = new ConcurrentHashMap<>();
+  private static final Map<Class<?>, JobOptions> optionsRegistry = new ConcurrentHashMap<>();
 
-  private static final Map<Class<?>, NeutronJmxJob> registry = new ConcurrentHashMap<>();
+  private static final Map<Class<?>, NeutronJmxJob> scheduleRegistry = new ConcurrentHashMap<>();
 
   private JobRunner() {
     // Default, no-op
   }
 
+  @SuppressWarnings("unchecked")
   protected static void init(String[] args) throws Exception {
     // Expose job execution operations through JMX.
     final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
@@ -154,24 +155,23 @@ public class JobRunner {
       JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, args);
       final NeutronJmxJob nj = new NeutronJmxJob(nji);
       exporter.export("Neutron:last_run_jobs=" + nji.getName(), nj);
-      registry.put(klass, nj);
+      scheduleRegistry.put(klass, nj);
     }
 
     // Expose Guice bean attributes through JMX.
     Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
 
     // Quartz scheduling:
-    Properties p = new Properties();
-    p.put("org.quartz.scheduler.instanceName", "Scheduler_test");
-    p.put("org.quartz.threadPool.threadCount", "4");
-    StdSchedulerFactory factory = new StdSchedulerFactory(p);
+    final Properties p = new Properties();
+    p.put("org.quartz.scheduler.instanceName", "neutron");
+    p.put("org.quartz.threadPool.threadCount", "4"); // NOTE: make configurable
+    final StdSchedulerFactory factory = new StdSchedulerFactory(p);
 
     scheduler = factory.getScheduler();
-    // scheduler = StdSchedulerFactory.getDefaultScheduler();
     scheduler.start();
 
     // Start last change jobs.
-    for (NeutronJmxJob j : registry.values()) {
+    for (NeutronJmxJob j : scheduleRegistry.values()) {
       j.schedule();
     }
   }
@@ -188,7 +188,7 @@ public class JobRunner {
       final Class<T> klass, String... args) throws NeutronException {
     LOGGER.info("Register job: {}", klass.getName());
     try (final T job = JobsGuiceInjector.newJob(klass, args)) {
-      jobOptions.put(klass, job.getOpts());
+      optionsRegistry.put(klass, job.getOpts());
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception, for ClassNotFound or the like.
       throw JobLogs.buildCheckedException(LOGGER, e, "JOB REGISTRATION FAILED!: {}",
@@ -210,7 +210,7 @@ public class JobRunner {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
       final JobOptions opts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
-          : jobOptions.get(klass);
+          : optionsRegistry.get(klass);
       final BasePersonIndexerJob<?, ?> job =
           (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
       job.setOpts(opts);
@@ -321,6 +321,9 @@ public class JobRunner {
     try {
       // OPTION: configure individual jobs, like Rundeck.
       // Best to load a configuration file with settings per job.
+
+      // -c config/local.yaml -l /Users/CWS-NS3/client_indexer_time.txt
+
       JobRunner.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
           : JobRunner.startingOpts;
       JobRunner.continuousMode = true;

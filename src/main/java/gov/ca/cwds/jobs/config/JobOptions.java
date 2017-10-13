@@ -40,6 +40,7 @@ public class JobOptions implements ApiMarker {
   public static final String CMD_LINE_LAST_RUN_TIME = "last-run-time";
   public static final String CMD_LINE_LAST_RUN_FILE = "last-run-file";
   public static final String CMD_LINE_ALT_INPUT_FILE = "alt-input-file";
+  public static final String CMD_LINE_BASE_DIRECTORY = "base-directory";
   public static final String CMD_LINE_BUCKET_RANGE = "bucket-range";
   public static final String CMD_LINE_BUCKET_TOTAL = "total-buckets";
   public static final String CMD_LINE_THREADS = "thread-num";
@@ -66,7 +67,7 @@ public class JobOptions implements ApiMarker {
   /**
    * Location of last run file.
    */
-  final String lastRunLoc;
+  private String lastRunLoc;
 
   /**
    * Location of alternate input file.
@@ -121,6 +122,8 @@ public class JobOptions implements ApiMarker {
 
   private boolean rangeGiven;
 
+  private String baseDirectory;
+
   /**
    * Construct from all settings.
    * 
@@ -139,7 +142,7 @@ public class JobOptions implements ApiMarker {
   JobOptions(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
       boolean lastRunMode, long startBucket, long endBucket, long totalBuckets, long threadCount,
       String minId, String maxId, boolean loadSealedAndSensitive, String altInputFile,
-      boolean rangeGiven) {
+      boolean rangeGiven, String baseDirectory) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
     this.lastRunTime = lastRunTime;
@@ -154,6 +157,30 @@ public class JobOptions implements ApiMarker {
     this.loadSealedAndSensitive = loadSealedAndSensitive;
     this.altInputFile = altInputFile;
     this.rangeGiven = rangeGiven;
+    this.baseDirectory = baseDirectory;
+  }
+
+  /**
+   * Copy constructor
+   * 
+   * @param opts other job options
+   */
+  public JobOptions(final JobOptions opts) {
+    this.esConfigLoc = opts.esConfigLoc;
+    this.indexName = StringUtils.isBlank(opts.indexName) ? null : opts.indexName;
+    this.lastRunTime = opts.lastRunTime;
+    this.lastRunLoc = opts.lastRunLoc;
+    this.lastRunMode = opts.lastRunMode;
+    this.startBucket = opts.startBucket;
+    this.endBucket = opts.endBucket;
+    this.totalBuckets = opts.totalBuckets;
+    this.threadCount = opts.threadCount;
+    this.minId = opts.minId;
+    this.maxId = opts.maxId;
+    this.loadSealedAndSensitive = opts.loadSealedAndSensitive;
+    this.altInputFile = opts.altInputFile;
+    this.rangeGiven = opts.rangeGiven;
+    this.baseDirectory = opts.baseDirectory;
   }
 
   /**
@@ -191,6 +218,10 @@ public class JobOptions implements ApiMarker {
    */
   public String getLastRunLoc() {
     return lastRunLoc;
+  }
+
+  public void setLastRunLoc(String lastRunLoc) {
+    this.lastRunLoc = lastRunLoc;
   }
 
   /**
@@ -360,6 +391,7 @@ public class JobOptions implements ApiMarker {
     long threadCount = 0L;
     boolean loadSealedAndSensitive = false;
     boolean rangeGiven = false;
+    String baseDirectory = null;
 
     String minId = " ";
     String maxId = "9999999999";
@@ -390,6 +422,11 @@ public class JobOptions implements ApiMarker {
           case CMD_LINE_LAST_RUN_FILE:
             lastRunMode = true;
             lastRunLoc = opt.getValue().trim();
+            break;
+
+          case CMD_LINE_BASE_DIRECTORY:
+            lastRunMode = true;
+            baseDirectory = opt.getValue().trim();
             break;
 
           case CMD_LINE_BUCKET_RANGE:
@@ -426,7 +463,7 @@ public class JobOptions implements ApiMarker {
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode, startBucket,
         endBucket, totalBuckets, threadCount, minId, maxId, loadSealedAndSensitive, altInputLoc,
-        rangeGiven);
+        rangeGiven, baseDirectory);
   }
 
   public void setStartBucket(long startBucket) {
@@ -484,6 +521,14 @@ public class JobOptions implements ApiMarker {
 
   public void setLastRunMode(boolean flag) {
     this.lastRunMode = flag;
+  }
+
+  public String getBaseDirectory() {
+    return baseDirectory;
+  }
+
+  public void setBaseDirectory(String baseDirectory) {
+    this.baseDirectory = baseDirectory;
   }
 
 }
