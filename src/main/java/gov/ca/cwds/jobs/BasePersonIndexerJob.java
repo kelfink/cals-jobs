@@ -483,7 +483,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         cntr = bulkPrepare(bp, cntr);
       }
 
-      // Just to be sure ...
+      // Catch stragglers.
       cntr = bulkPrepare(bp, cntr);
       LOGGER.info("Flush ES bulk processor ... recs processed: {}", cntr);
       bp.flush();
@@ -763,14 +763,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       session.clear();
       txn.commit();
       return results.build();
-    } catch (SQLException h) {
+    } catch (SQLException | HibernateException h) {
       markFailed();
       txn.rollback();
       throw JobLogs.buildException(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
-    } catch (HibernateException h) {
-      markFailed();
-      txn.rollback();
-      throw JobLogs.buildException(LOGGER, h, "EXTRACT ERROR!: {}", h.getMessage());
     } finally {
       markRetrieveDone();
     }
@@ -903,7 +899,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setParameter("min_id", minId, StringType.INSTANCE)
           .setParameter("max_id", maxId, StringType.INSTANCE).setCacheable(false)
-          .setFlushMode(FlushMode.MANUAL).setCacheMode(CacheMode.IGNORE)
+          .setHibernateFlushMode(FlushMode.MANUAL).setCacheMode(CacheMode.IGNORE)
           .setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
 
       // No reduction/normalization. Iterate, process, flush.
@@ -941,7 +937,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
     } catch (Exception e2) {
       markFailed();
-      throw new JobsException("ERROR AWAITING BULK PROCESSOR CLOSE!", e2);
+      throw new JobsException("ERROR CLOSING BULK PROCESSOR!", e2);
     } finally {
       markRetrieveDone();
     }

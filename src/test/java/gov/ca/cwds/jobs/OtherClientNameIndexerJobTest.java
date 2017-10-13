@@ -4,7 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -98,7 +98,7 @@ public class OtherClientNameIndexerJobTest extends PersonJobTester {
     final NativeQuery<ReplicatedOtherClientName> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(qn);
     when(qn.setString(any(String.class), any(String.class))).thenReturn(qn);
-    when(qn.setFlushMode(any(FlushMode.class))).thenReturn(qn);
+    when(qn.setHibernateFlushMode(any(FlushMode.class))).thenReturn(qn);
     when(qn.setReadOnly(any(Boolean.class))).thenReturn(qn);
     when(qn.setCacheMode(any(CacheMode.class))).thenReturn(qn);
     when(qn.setFetchSize(any(Integer.class))).thenReturn(qn);

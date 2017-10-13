@@ -13,8 +13,14 @@ import gov.ca.cwds.jobs.config.JobOptions;
  */
 public interface AtomShared extends ApiMarker {
 
+  /**
+   * @return job's progress tracker
+   */
   JobProgressTrack getTrack();
 
+  /**
+   * @return Elasticsearch DAO
+   */
   ElasticsearchDao getEsDao();
 
   Logger getLogger();

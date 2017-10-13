@@ -106,6 +106,7 @@ public class JobRunner {
       try {
         final JobProgressTrack track = JobRunner.runRegisteredJob(className,
             StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
+        context.setResult(track);
       } catch (Exception e) {
         throw new JobExecutionException("SCHEDULED JOB FAILED!", e);
       }
@@ -135,6 +136,8 @@ public class JobRunner {
    */
   private static final Map<Class<?>, JobOptions> jobOptions = new ConcurrentHashMap<>();
 
+  private static final Map<Class<?>, NeutronJmxJob> registry = new ConcurrentHashMap<>();
+
   private JobRunner() {
     // Default, no-op
   }
@@ -145,7 +148,9 @@ public class JobRunner {
     for (NeutronDefaultJobSchedule nji : NeutronDefaultJobSchedule.values()) {
       final Class<?> klass = nji.getKlazz();
       JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, args);
-      exporter.export("Neutron:last_run_jobs=" + nji.getName(), new NeutronJmxJob(nji));
+      final NeutronJmxJob nj = new NeutronJmxJob(nji);
+      exporter.export("Neutron:last_run_jobs=" + nji.getName(), nj);
+      registry.put(klass, nj);
     }
 
     // Expose Guice bean attributes through JMX.
@@ -154,6 +159,10 @@ public class JobRunner {
     // Quartz scheduling:
     scheduler = StdSchedulerFactory.getDefaultScheduler();
     scheduler.start();
+
+    for (NeutronJmxJob j : registry.values()) {
+      j.schedule();
+    }
   }
 
   /**
@@ -224,7 +233,7 @@ public class JobRunner {
   public static JobProgressTrack runRegisteredJob(final String jobName, String... args)
       throws NeutronException {
     try {
-      final Class<?> klass = Class.forName("gov.ca.cwds.jobs." + jobName);
+      final Class<?> klass = Class.forName(jobName);
       return runRegisteredJob(klass, args);
     } catch (Exception e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "ON-DEMAND JOB RUN FAILED!: {}",

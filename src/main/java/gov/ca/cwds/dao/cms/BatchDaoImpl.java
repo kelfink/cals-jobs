@@ -1,5 +1,6 @@
 package gov.ca.cwds.dao.cms;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -83,9 +84,9 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
     final java.sql.Timestamp ts = new java.sql.Timestamp(datetime.getTime());
     try {
       // Cross platform DB2 (both z/OS and Linux).
-      final Query query =
-          session.getNamedQuery(namedQueryName).setCacheable(false).setFlushMode(FlushMode.MANUAL)
-              .setReadOnly(true).setCacheMode(CacheMode.IGNORE).setTimestamp("after", ts);
+      final Query query = session.getNamedQuery(namedQueryName).setCacheable(false)
+          .setHibernateFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
+          .setTimestamp("after", ts);
 
       // Iterate, process, flush.
       query.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
@@ -156,47 +157,50 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
    * @param minId minimum key value, inclusive
    * @param maxId maximum key value, exclusive
    * @return ordered list of referral/client document records
+   * @deprecated DB2 on z/OS does not optimize this query.
    */
+  @Deprecated
   @Override
   @SuppressWarnings("unchecked")
   public List<T> partitionedBucketList(long bucketNum, long totalBuckets, String minId,
       String maxId) {
-    final String namedQueryName = getEntityClass().getName() + ".findPartitionedBuckets";
-    final Session session = getSessionFactory().getCurrentSession();
-    final Transaction txn = session.beginTransaction();
-
-    try {
-      final Query query = session.getNamedQuery(namedQueryName)
-          .setInteger("bucket_num", (int) bucketNum).setInteger("total_buckets", (int) totalBuckets)
-          .setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
-          .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
-          .setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
-
-      // Iterate, process, flush.
-      final ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
-      final ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
-      int cnt = 0;
-
-      while (results.next()) {
-        Object[] row = results.get();
-        for (Object obj : row) {
-          ret.add((T) obj);
-        }
-
-        if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
-          LOGGER.info("recs read: {}", cnt);
-          session.flush();
-        }
-      }
-
-      session.flush();
-      results.close();
-      txn.commit();
-      return ret.build();
-    } catch (HibernateException h) {
-      txn.rollback();
-      throw new DaoException(h);
-    }
+    // final String namedQueryName = getEntityClass().getName() + ".findPartitionedBuckets";
+    // final Session session = getSessionFactory().getCurrentSession();
+    // final Transaction txn = session.beginTransaction();
+    //
+    // try {
+    // final Query query = session.getNamedQuery(namedQueryName)
+    // .setInteger("bucket_num", (int) bucketNum).setInteger("total_buckets", (int) totalBuckets)
+    // .setString("min_id", minId).setString("max_id", maxId).setCacheable(false)
+    // .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
+    // .setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
+    //
+    // // Iterate, process, flush.
+    // final ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
+    // final ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
+    // int cnt = 0;
+    //
+    // while (results.next()) {
+    // Object[] row = results.get();
+    // for (Object obj : row) {
+    // ret.add((T) obj);
+    // }
+    //
+    // if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
+    // LOGGER.info("recs read: {}", cnt);
+    // session.flush();
+    // }
+    // }
+    //
+    // session.flush();
+    // results.close();
+    // txn.commit();
+    // return ret.build();
+    // } catch (HibernateException h) {
+    // txn.rollback();
+    // throw new DaoException(h);
+    // }
+    return new ArrayList<>();
   }
 
   /**
@@ -241,47 +245,50 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
    * @param bucketNum current bucket for this batch
    * @param totalBuckets total buckets in batch run
    * @return ordered list of referral/client document records
+   * @deprecated DB2 on z/OS does not optimize this query.
    */
+  @Deprecated
   @Override
   @SuppressWarnings("unchecked")
   public List<T> bucketList(long bucketNum, long totalBuckets) {
-    final String namedQueryName = constructNamedQueryWithSuffix("findAllByBucket");
-    final Session session = getSessionFactory().getCurrentSession();
-    final Transaction txn = session.beginTransaction();
-
-    try {
-      final Query query = session.getNamedQuery(namedQueryName).setCacheable(false)
-          .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
-          .setInteger("bucket_num", (int) bucketNum)
-          .setInteger("total_buckets", (int) totalBuckets);
-
-      // Iterate, process, flush.
-      query.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
-      final ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
-      ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
-      int cnt = 0;
-
-      while (results.next()) {
-        Object[] row = results.get();
-        for (Object obj : row) {
-          ret.add((T) obj);
-        }
-
-        if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
-          LOGGER.info("recs read: {}", cnt);
-          session.flush();
-        }
-      }
-
-      session.flush();
-      results.close();
-      txn.commit();
-      return ret.build();
-
-    } catch (HibernateException h) {
-      txn.rollback();
-      throw new DaoException(h);
-    }
+    // final String namedQueryName = constructNamedQueryWithSuffix("findAllByBucket");
+    // final Session session = getSessionFactory().getCurrentSession();
+    // final Transaction txn = session.beginTransaction();
+    //
+    // try {
+    // final Query query = session.getNamedQuery(namedQueryName).setCacheable(false)
+    // .setFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
+    // .setInteger("bucket_num", (int) bucketNum)
+    // .setInteger("total_buckets", (int) totalBuckets);
+    //
+    // // Iterate, process, flush.
+    // query.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
+    // final ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
+    // ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
+    // int cnt = 0;
+    //
+    // while (results.next()) {
+    // Object[] row = results.get();
+    // for (Object obj : row) {
+    // ret.add((T) obj);
+    // }
+    //
+    // if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
+    // LOGGER.info("recs read: {}", cnt);
+    // session.flush();
+    // }
+    // }
+    //
+    // session.flush();
+    // results.close();
+    // txn.commit();
+    // return ret.build();
+    //
+    // } catch (HibernateException h) {
+    // txn.rollback();
+    // throw new DaoException(h);
+    // }
+    return new ArrayList<>();
   }
 
   /**
