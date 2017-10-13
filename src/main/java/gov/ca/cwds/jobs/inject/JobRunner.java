@@ -209,7 +209,7 @@ public class JobRunner {
    * Register a continuously running job.
    * 
    * @param klass batch job class
-   * @param args command line arguments
+   * @param opts command line arguments
    * @param <T> Person persistence type
    * @throws NeutronException unexpected runtime error
    */
