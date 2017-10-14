@@ -163,6 +163,14 @@ public class JobRunner {
       this.cmdLine = cmdLine;
     }
 
+    public JobProgressTrack getTrack() {
+      return track;
+    }
+
+    public void setTrack(JobProgressTrack track) {
+      this.track = track;
+    }
+
   }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
@@ -245,6 +253,7 @@ public class JobRunner {
     final StdSchedulerFactory factory = new StdSchedulerFactory(p);
 
     scheduler = factory.getScheduler();
+    scheduler.getListenerManager().addSchedulerListener(new NeutronSchedulerListener());
     scheduler.start();
 
     // Start last change jobs.
