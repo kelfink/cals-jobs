@@ -117,7 +117,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Deprecated
   private static final String QUERY_BUCKET_LIST =
       "SELECT z.bucket, MIN(z.THE_ID_COL) AS minId, MAX(z.THE_ID_COL) AS maxId, COUNT(*) AS bucketCount "
-          + "FROM (SELECT (y.rn / (total_cnt/THE_TOTAL_BUCKETS)) + 1 AS bucket, y.rn, y.THE_ID_COL FROM ( "
+          + "FROM (SELECT (y.rn / (total_cnt/:total_buckets)) + 1 AS bucket, y.rn, y.THE_ID_COL FROM ( "
           + "SELECT c.THE_ID_COL, ROW_NUMBER() OVER (ORDER BY 1) AS rn, COUNT(*) OVER (ORDER BY 1) AS total_cnt "
           + "FROM {h-schema}THE_TABLE c ORDER BY c.THE_ID_COL) y ORDER BY y.rn "
           + ") z GROUP BY z.bucket FOR READ ONLY WITH UR ";
@@ -156,12 +156,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * inexpensive.
    * </p>
    */
-  protected LinkedBlockingDeque<M> queueNormalize = new LinkedBlockingDeque<>(100000);
+  protected LinkedBlockingDeque<M> queueNormalize = new LinkedBlockingDeque<>(50000);
 
   /**
    * Queue of normalized records waiting to publish to Elasticsearch.
    */
-  protected LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(250000);
+  protected LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(125000);
 
   /**
    * Read/write lock for extract threads and sources, such as JDBC, Hibernate, or even flat files.
@@ -597,7 +597,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       getOpts().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
 
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
-      LOGGER.info("Last successsful run time: {}", lastRun.toString()); // NOSONAR
+      LOGGER.info("Last successsful run time: {}", lastRun); // NOSONAR
 
       // If the index is missing, create it.
       LOGGER.debug("Create index if missing, effectiveIndexName: {}", effectiveIndexName);
@@ -610,6 +610,15 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final Calendar cal = Calendar.getInstance();
       cal.add(Calendar.YEAR, -25);
       final boolean autoInitialLoad = lastRun.before(cal.getTime());
+
+      // Configure queue sizes for last run or initial load.
+      if ((autoInitialLoad || opts.getLastRunTime() != null) && !opts.isRangeGiven()) {
+        queueNormalize = new LinkedBlockingDeque<>(2000);
+        queueIndex = new LinkedBlockingDeque<>(5000);
+      } else {
+        queueNormalize = new LinkedBlockingDeque<>(50000);
+        queueIndex = new LinkedBlockingDeque<>(125000);
+      }
 
       if (autoInitialLoad) {
         LOGGER.warn("AUTO MODE!");
@@ -835,9 +844,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           : opts.getTotalBuckets();
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_ID_COL", getIdColumn()).replaceAll("THE_TOTAL_BUCKETS",
-                  String.valueOf(totalBuckets)),
-              BatchBucket.class);
+              .replaceAll("THE_ID_COL", getIdColumn()), BatchBucket.class)
+          .setParameter("total_buckets", String.valueOf(totalBuckets));;
 
       ret = q.getResultList();
       session.clear();

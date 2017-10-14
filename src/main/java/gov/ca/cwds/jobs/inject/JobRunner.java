@@ -91,14 +91,17 @@ public class JobRunner {
 
     @Managed(description = "Unschedule job")
     public void unschedule() throws SchedulerException {
-      LOGGER.warn("unschedule");
+      LOGGER.warn("unschedule job");
       final TriggerKey triggerKey = new TriggerKey(scheduleTriggerName, GROUP_LAST_CHG);
       scheduler.pauseTrigger(triggerKey);
     }
 
     @Managed(description = "Show job status")
-    public void status() {
-      LOGGER.debug("in progress 2");
+    public void status() throws SchedulerException {
+      LOGGER.debug("Show job status");
+      final JobKey jobKey = new JobKey(scheduleJobName, GROUP_LAST_CHG);
+      final JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+      // jobDetail.g
     }
 
     @Managed(description = "Stop running job")
