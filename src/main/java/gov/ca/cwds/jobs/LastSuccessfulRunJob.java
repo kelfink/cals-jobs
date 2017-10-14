@@ -240,7 +240,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
     if (!StringUtils.isBlank(this.lastRunTimeFilename)) {
       try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) {
         ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
-            .parse(br.readLine().trim());
+            .parse(br.readLine().trim()); // NOSONAR
       } catch (IOException e) {
         markFailed();
         JobLogs.raiseError(LOGGER, e, "Caught IOException: {}", e.getMessage());

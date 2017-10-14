@@ -622,12 +622,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       if (autoInitialLoad) {
         LOGGER.warn("AUTO MODE!");
-
         if (initialLoadJdbc()) {
-          LOGGER.info("LOAD FROM VIEW WITH JDBC!");
+          LOGGER.info("INITIAL LOAD WITH JDBC!");
           doInitialLoadJdbc();
         } else {
-          LOGGER.info("LOAD REPLICATED QUERY WITH HIBERNATE!");
+          LOGGER.info("INITIAL LOAD WITH HIBERNATE!");
           extractHibernate();
         }
       } else {

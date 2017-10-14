@@ -17,6 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.InterruptableJob;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -25,6 +27,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
+import org.quartz.UnableToInterruptJobException;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +84,6 @@ public class JobRunner {
           newJob(NeutronScheduledJob.class).withIdentity(scheduleJobName, GROUP_LAST_CHG)
               .usingJobData("job_class", jobSchedule.getKlazz().getName()).build();
       final Trigger trigger = newTrigger().withIdentity(scheduleTriggerName, GROUP_LAST_CHG)
-          .startNow()
           .withSchedule(simpleSchedule().withIntervalInSeconds(jobSchedule.getPeriodSeconds())
               .repeatForever())
           .startAt(DateTime.now().plusSeconds(jobSchedule.getStartDelaySeconds()).toDate()).build();
@@ -101,7 +103,6 @@ public class JobRunner {
       LOGGER.debug("Show job status");
       final JobKey jobKey = new JobKey(scheduleJobName, GROUP_LAST_CHG);
       final JobDetail jobDetail = scheduler.getJobDetail(jobKey);
-      // jobDetail.g
     }
 
     @Managed(description = "Stop running job")
@@ -115,27 +116,58 @@ public class JobRunner {
 
   }
 
-  public static class NeutronScheduledJob implements org.quartz.Job {
+  @DisallowConcurrentExecution
+  public static class NeutronScheduledJob implements InterruptableJob {
+
+    private String className;
+    private String cmdLine;
+    private JobProgressTrack track;
 
     public NeutronScheduledJob() {}
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-      final String className = context.getJobDetail().getJobDataMap().getString("job_class");
-      final String cmdLine = context.getJobDetail().getJobDataMap().getString("cmd_line");
+      className = context.getJobDetail().getJobDataMap().getString("job_class");
+      cmdLine = context.getJobDetail().getJobDataMap().getString("cmd_line");
+
       LOGGER.info("Executing {}", className);
       try {
-        final JobProgressTrack track = JobRunner.runRegisteredJob(className,
+        final BasePersonIndexerJob neutronJob = JobRunner.createJob(className,
             StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
+        track = neutronJob.getTrack();
         context.setResult(track);
+        neutronJob.run();
       } catch (Exception e) {
         throw new JobExecutionException("SCHEDULED JOB FAILED!", e);
       }
     }
 
+    @Override
+    public void interrupt() throws UnableToInterruptJobException {
+      LOGGER.warn("INTERRUPT RUNNING JOB!");
+    }
+
+    public String getClassName() {
+      return className;
+    }
+
+    public void setClassName(String className) {
+      this.className = className;
+    }
+
+    public String getCmdLine() {
+      return cmdLine;
+    }
+
+    public void setCmdLine(String cmdLine) {
+      this.cmdLine = cmdLine;
+    }
+
   }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
+
+  private static JobRunner instance;
 
   /**
    * For unit tests where resources either may not close properly or where expensive resources
@@ -163,13 +195,18 @@ public class JobRunner {
     // Default, no-op
   }
 
+  /**
+   * Expose job execution operations through JMX.
+   * 
+   * @param args job runner arguments
+   * @throws Exception configuration error
+   */
   @SuppressWarnings("unchecked")
   protected static void init(String[] args) throws Exception {
-    // Expose job execution operations through JMX.
     final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
     final DateFormat fmt =
         new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
-    final Date now = new DateTime().minusHours(8).toDate(); // past window
+    final Date now = new DateTime().minusHours(2).toDate(); // NOTE: make configurable
 
     for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
       final Class<?> klass = sched.getKlazz();
@@ -262,6 +299,26 @@ public class JobRunner {
   }
 
   /**
+   * Build a registered job.
+   * 
+   * @param jobName batch job class
+   * @param args command line arguments
+   * @return the job
+   * @throws NeutronException unexpected runtime error
+   */
+  @SuppressWarnings("rawtypes")
+  public static BasePersonIndexerJob createJob(final String jobName, String... args)
+      throws NeutronException {
+    try {
+      final Class<?> klass = Class.forName(jobName);
+      return createJob(klass, args);
+    } catch (Exception e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!!: {}",
+          e.getMessage());
+    }
+  }
+
+  /**
    * Run a registered job.
    * 
    * @param klass batch job class
@@ -282,6 +339,14 @@ public class JobRunner {
     }
   }
 
+  /**
+   * Run a registered job.
+   * 
+   * @param jobName batch job class
+   * @param args command line arguments
+   * @return job progress
+   * @throws NeutronException unexpected runtime error
+   */
   public static JobProgressTrack runRegisteredJob(final String jobName, String... args)
       throws NeutronException {
     try {
@@ -355,16 +420,17 @@ public class JobRunner {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  /**
+   * OPTION: configure individual jobs, like Rundeck.
+   * <p>
+   * Best to load a configuration file with settings per job.
+   * </p>
+   * 
+   * @param args command line
+   */
   public static void main(String[] args) {
     LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
     try {
-      // OPTION: configure individual jobs, like Rundeck.
-      // Best to load a configuration file with settings per job.
-
-      // -c config/local.yaml -l /Users/CWS-NS3/client_indexer_time.txt
-
-
       JobRunner.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
           : JobRunner.startingOpts;
       JobRunner.continuousMode = true;
