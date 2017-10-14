@@ -16,6 +16,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.NamedNativeQuery;
@@ -31,6 +32,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.component.AtomSecurity;
 import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -452,7 +454,7 @@ public class EsPersonReferral
    * @return last change date
    */
   public Date getLastChange() {
-    return lastChange;
+    return JobDateUtil.freshDate(lastChange);
   }
 
   /**
@@ -490,7 +492,7 @@ public class EsPersonReferral
   }
 
   public Date getEndDate() {
-    return endDate;
+    return JobDateUtil.freshDate(endDate);
   }
 
   public void setEndDate(Date endDate) {
@@ -642,7 +644,7 @@ public class EsPersonReferral
   }
 
   public Date getLimitedAccessDate() {
-    return limitedAccessDate;
+    return JobDateUtil.freshDate(limitedAccessDate);
   }
 
   public void setLimitedAccessDate(Date limitedAccessDate) {
@@ -666,7 +668,7 @@ public class EsPersonReferral
   }
 
   public Date getReferralLastUpdated() {
-    return referralLastUpdated;
+    return JobDateUtil.freshDate(referralLastUpdated);
   }
 
   public void setReferralLastUpdated(Date referralLastUpdated) {
@@ -674,7 +676,7 @@ public class EsPersonReferral
   }
 
   public Date getReporterLastUpdated() {
-    return reporterLastUpdated;
+    return JobDateUtil.freshDate(reporterLastUpdated);
   }
 
   public void setReporterLastUpdated(Date reporterLastUpdated) {
@@ -682,7 +684,7 @@ public class EsPersonReferral
   }
 
   public Date getWorkerLastUpdated() {
-    return workerLastUpdated;
+    return JobDateUtil.freshDate(workerLastUpdated);
   }
 
   public void setWorkerLastUpdated(Date workerLastUpdated) {
@@ -690,7 +692,7 @@ public class EsPersonReferral
   }
 
   public Date getAllegationLastUpdated() {
-    return allegationLastUpdated;
+    return JobDateUtil.freshDate(allegationLastUpdated);
   }
 
   public void setAllegationLastUpdated(Date allegationLastUpdated) {
@@ -698,7 +700,7 @@ public class EsPersonReferral
   }
 
   public Date getVictimLastUpdated() {
-    return victimLastUpdated;
+    return JobDateUtil.freshDate(victimLastUpdated);
   }
 
   public void setVictimLastUpdated(Date victimLastUpdated) {
@@ -706,7 +708,7 @@ public class EsPersonReferral
   }
 
   public Date getPerpetratorLastUpdated() {
-    return perpetratorLastUpdated;
+    return JobDateUtil.freshDate(perpetratorLastUpdated);
   }
 
   public void setPerpetratorLastUpdated(Date perpetratorLastUpdated) {
@@ -758,12 +760,7 @@ public class EsPersonReferral
 
   @Override
   public int hashCode() {
-    int result = super.hashCode();
-    final int prime = 31;
-    result = prime * result + ((clientId == null) ? 0 : clientId.hashCode());
-    result = prime * result + ((referralId == null) ? 0 : referralId.hashCode());
-    result = prime * result + ((allegationId == null) ? 0 : allegationId.hashCode());
-    return result;
+    return HashCodeBuilder.reflectionHashCode(this, false);
   }
 
   @Override

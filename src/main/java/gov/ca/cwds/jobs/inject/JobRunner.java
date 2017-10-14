@@ -20,9 +20,11 @@ import org.joda.time.DateTime;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,8 +56,8 @@ public class JobRunner {
     private final String scheduleJobName;
     private final String scheduleTriggerName;
 
-    public NeutronJmxJob(NeutronDefaultJobSchedule nji) {
-      this.jobSchedule = nji;
+    public NeutronJmxJob(NeutronDefaultJobSchedule sched) {
+      this.jobSchedule = sched;
       this.scheduleJobName = "job_" + jobSchedule.getName();
       this.scheduleTriggerName = "trg_" + jobSchedule.getName();
     }
@@ -88,18 +90,24 @@ public class JobRunner {
     }
 
     @Managed(description = "Unschedule job")
-    public void unschedule() {
-
+    public void unschedule() throws SchedulerException {
+      LOGGER.warn("unschedule");
+      final TriggerKey triggerKey = new TriggerKey(scheduleTriggerName, GROUP_LAST_CHG);
+      scheduler.pauseTrigger(triggerKey);
     }
 
     @Managed(description = "Show job status")
     public void status() {
-
+      LOGGER.debug("in progress 2");
     }
 
     @Managed(description = "Stop running job")
-    public void stop() {
+    public void stop() throws SchedulerException {
+      LOGGER.warn("Stop running job");
+      unschedule();
 
+      final JobKey key = new JobKey(scheduleJobName, GROUP_LAST_CHG);
+      scheduler.interrupt(key);
     }
 
   }
