@@ -1,6 +1,5 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
-import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Entity;
@@ -65,26 +64,6 @@ public class ReplicatedReporter extends BaseReporter implements CmsReplicatedEnt
   // =======================
   // CmsReplicatedEntity:
   // =======================
-
-  @Override
-  public CmsReplicationOperation getReplicationOperation() {
-    return replicatedEntity.getReplicationOperation();
-  }
-
-  @Override
-  public void setReplicationOperation(CmsReplicationOperation replicationOperation) {
-    replicatedEntity.setReplicationOperation(replicationOperation);
-  }
-
-  @Override
-  public Date getReplicationDate() {
-    return replicatedEntity.getReplicationDate();
-  }
-
-  @Override
-  public void setReplicationDate(Date replicationDate) {
-    replicatedEntity.setReplicationDate(replicationDate);
-  }
 
   @Override
   public EmbeddableCmsReplicatedEntity getReplicatedEntity() {

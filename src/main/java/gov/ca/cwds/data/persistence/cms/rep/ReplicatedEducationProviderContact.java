@@ -1,16 +1,11 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
-import java.util.Date;
 import java.util.Map;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.NamedNativeQuery;
-import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -63,37 +58,7 @@ public class ReplicatedEducationProviderContact extends BaseEducationProviderCon
    */
   private static final long serialVersionUID = 1L;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "IBMSNAP_OPERATION", updatable = false)
-  private CmsReplicationOperation replicationOperation;
-
-  @Type(type = "timestamp")
-  @Column(name = "IBMSNAP_LOGMARKER", updatable = false)
-  private Date replicationDate;
-
-  // =======================
-  // CmsReplicatedEntity:
-  // =======================
-
-  @Override
-  public CmsReplicationOperation getReplicationOperation() {
-    return replicationOperation;
-  }
-
-  @Override
-  public void setReplicationOperation(CmsReplicationOperation replicationOperation) {
-    this.replicationOperation = replicationOperation;
-  }
-
-  @Override
-  public Date getReplicationDate() {
-    return replicationDate;
-  }
-
-  @Override
-  public void setReplicationDate(Date replicationDate) {
-    this.replicationDate = replicationDate;
-  }
+  private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
   // =======================
   // ApiGroupNormalizer:
@@ -129,5 +94,10 @@ public class ReplicatedEducationProviderContact extends BaseEducationProviderCon
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getLastUpdatedTime(),
         LegacyTable.EDUCATION_PROVIDER);
+  }
+
+  @Override
+  public EmbeddableCmsReplicatedEntity getReplicatedEntity() {
+    return replicatedEntity;
   }
 }

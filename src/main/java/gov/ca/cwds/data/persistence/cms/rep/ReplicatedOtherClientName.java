@@ -5,18 +5,14 @@ import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NamedNativeQuery;
-import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -62,25 +58,10 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
    */
   private static final long serialVersionUID = 1L;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "IBMSNAP_OPERATION", updatable = false)
-  private CmsReplicationOperation replicationOperation;
-
-  @Type(type = "timestamp")
-  @Column(name = "IBMSNAP_LOGMARKER", updatable = false)
-  private Date replicationDate;
-
   @Column(name = "CLIENT_SENSITIVITY_IND", updatable = false)
   private String clientSensitivityIndicator;
 
-  // =======================
-  // CmsReplicatedEntity:
-  // =======================
-
-  @Override
-  public CmsReplicationOperation getReplicationOperation() {
-    return replicationOperation;
-  }
+  private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
   /**
    * Build a ReplicatedOtherClientName from an incoming ResultSet.
@@ -111,21 +92,6 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
   @Override
   public ReplicatedOtherClientName mapRow(final ResultSet rs) throws SQLException {
     return ReplicatedOtherClientName.mapRowToBean(rs);
-  }
-
-  @Override
-  public void setReplicationOperation(CmsReplicationOperation replicationOperation) {
-    this.replicationOperation = replicationOperation;
-  }
-
-  @Override
-  public Date getReplicationDate() {
-    return replicationDate != null ? new Date(replicationDate.getTime()) : null;
-  }
-
-  @Override
-  public void setReplicationDate(Date replicationDate) {
-    this.replicationDate = replicationDate != null ? new Date(replicationDate.getTime()) : null;
   }
 
   // =======================
@@ -235,6 +201,11 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
 
   public void setClientSensitivityIndicator(String clientSensitivityIndicator) {
     this.clientSensitivityIndicator = clientSensitivityIndicator;
+  }
+
+  @Override
+  public EmbeddableCmsReplicatedEntity getReplicatedEntity() {
+    return replicatedEntity;
   }
 
 }

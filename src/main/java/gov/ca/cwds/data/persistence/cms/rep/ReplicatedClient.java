@@ -2,16 +2,12 @@ package gov.ca.cwds.data.persistence.cms.rep;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -19,7 +15,6 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
-import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -93,14 +88,6 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   private static final String HISPANIC_CODE_OTHER_ID = "02";
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "IBMSNAP_OPERATION", updatable = false)
-  private CmsReplicationOperation replicationOperation;
-
-  @Type(type = "timestamp")
-  @Column(name = "IBMSNAP_LOGMARKER", updatable = false)
-  private Date replicationDate;
-
   /**
    * A client can have multiple active addresses, typically one active address per address type.
    */
@@ -110,6 +97,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   private transient List<Short> clientRaces = new ArrayList<>();
 
   private Short clientCountyId;
+
+  private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
   /**
    * Default, no-op constructor
@@ -202,23 +191,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   // =======================
 
   @Override
-  public CmsReplicationOperation getReplicationOperation() {
-    return replicationOperation;
-  }
-
-  @Override
-  public void setReplicationOperation(CmsReplicationOperation replicationOperation) {
-    this.replicationOperation = replicationOperation;
-  }
-
-  @Override
-  public Date getReplicationDate() {
-    return replicationDate;
-  }
-
-  @Override
-  public void setReplicationDate(Date replicationDate) {
-    this.replicationDate = replicationDate;
+  public EmbeddableCmsReplicatedEntity getReplicatedEntity() {
+    return replicatedEntity;
   }
 
   // =======================
