@@ -39,7 +39,7 @@ public class JobRunner {
 
   public static final String GROUP_LAST_CHG = "last_chg";
 
-  static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
 
   /**
    * Singleton instance. One scheduler to rule them all.
@@ -64,9 +64,9 @@ public class JobRunner {
   /**
    * Job options by job type.
    */
-  private static final Map<Class<?>, JobOptions> optionsRegistry = new ConcurrentHashMap<>();
+  private final Map<Class<?>, JobOptions> optionsRegistry = new ConcurrentHashMap<>();
 
-  private static final Map<Class<?>, NeutronJmxFacade> scheduleRegistry = new ConcurrentHashMap<>();
+  private final Map<Class<?>, NeutronJmxFacade> scheduleRegistry = new ConcurrentHashMap<>();
 
   private JobRunner() {
     // Default, no-op
@@ -119,7 +119,7 @@ public class JobRunner {
 
         final NeutronJmxFacade nj = new NeutronJmxFacade(scheduler, sched);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
-        scheduleRegistry.put(klass, nj);
+        instance.scheduleRegistry.put(klass, nj);
       }
 
       // Expose Guice bean attributes through JMX.
@@ -128,7 +128,7 @@ public class JobRunner {
       scheduler.start();
 
       // Start last change jobs.
-      for (NeutronJmxFacade j : scheduleRegistry.values()) {
+      for (NeutronJmxFacade j : instance.scheduleRegistry.values()) {
         j.schedule();
       }
     } catch (IOException | SchedulerException e) {
@@ -148,7 +148,7 @@ public class JobRunner {
       final Class<T> klass, final JobOptions opts) throws NeutronException {
     LOGGER.info("Register job: {}", klass.getName());
     try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
-      optionsRegistry.put(klass, job.getOpts());
+      instance.optionsRegistry.put(klass, job.getOpts());
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception, for ClassNotFound or the like.
       throw JobLogs.buildCheckedException(LOGGER, e, "JOB REGISTRATION FAILED!: {}",
@@ -170,7 +170,7 @@ public class JobRunner {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
       final JobOptions opts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
-          : optionsRegistry.get(klass);
+          : instance.optionsRegistry.get(klass);
       final BasePersonIndexerJob<?, ?> job =
           (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
       job.setOpts(opts);
