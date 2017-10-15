@@ -57,7 +57,7 @@ public class RelationshipIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipIndexerJob.class);
 
-  private static final String INSERT_CLIENT_LAST_CHG =
+  public static final String INSERT_CLIENT_LAST_CHG =
       "INSERT INTO GT_ID (IDENTIFIER)\nSELECT clnr.IDENTIFIER\nFROM CLN_RELT CLNR\n"
           + "WHERE CLNR.IBMSNAP_LOGMARKER > ?\nUNION ALL\nSELECT clnr.IDENTIFIER\n"
           + "FROM CLN_RELT CLNR\nJOIN CLIENT_T CLNS ON CLNR.FKCLIENT_T = CLNS.IDENTIFIER\n"

@@ -171,7 +171,7 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
   }
 
   @Test
-  public void handOff_Args__List() throws Exception {
+  public void normalizeAndQueueIndex() throws Exception {
     List<EsClientAddress> grpRecs = new ArrayList<EsClientAddress>();
     target.normalizeAndQueueIndex(grpRecs);
   }

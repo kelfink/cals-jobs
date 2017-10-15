@@ -18,6 +18,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedRelationshipsDao;
+import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
 import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
 
@@ -93,6 +94,13 @@ public class RelationshipIndexerJobTest
   public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedRelationships()
       throws Exception {
     ReplicatedRelationships p = new ReplicatedRelationships(DEFAULT_CLIENT_ID);
+    ElasticSearchPersonRelationship rel = new ElasticSearchPersonRelationship();
+    rel.setIndexedPersonRelationship("Uncle");
+    rel.setRelatedPersonFirstName("Fred");
+    rel.setRelatedPersonLastName("Meyer");
+    rel.setRelatedPersonLegacyId("xyz1234567");
+    rel.setRelatedPersonId("xyz1234567");
+
     UpdateRequest actual = target.prepareUpsertRequest(esp, p);
     assertThat(actual, is(notNullValue()));
   }
@@ -128,6 +136,23 @@ public class RelationshipIndexerJobTest
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
     final List actual = target.getPartitionRanges();
     assertThat(actual.size(), is(equalTo(64)));
+  }
+
+  @Test
+  public void getPrepLastChangeSQL() throws Exception {
+    assertThat(target.getPrepLastChangeSQL(),
+        is(equalTo(RelationshipIndexerJob.INSERT_CLIENT_LAST_CHG)));
+  }
+
+  @Test
+  public void normalizeAndQueueIndex() throws Exception {
+    List<EsRelationship> grpRecs = new ArrayList<EsRelationship>();
+    EsRelationship rel = new EsRelationship();
+    rel.setThisLegacyId(DEFAULT_CLIENT_ID);
+    rel.setRelatedLegacyId("xyz1234567");
+
+    grpRecs.add(rel);
+    target.normalizeAndQueueIndex(grpRecs);
   }
 
   @Test
