@@ -123,9 +123,10 @@ public class JobProgressTrack implements ApiMarker {
   public String toString() {
     final long endTime = System.currentTimeMillis();
     return MessageFormat.format(
-        "STATS: \nindexed:  {0}\ndeleted: {1}\nbulk before: {2}\nbulk after:  {3}\nbulk error:  {4}\nELAPSED TIME:  {5} SECONDS",
+        "STATS:\n" + "\tindexed:      {0}\n" + "\tdeleted:      {1}\n" + "\tbulk before:  {2}\n"
+            + "\tbulk after:   {3}\n" + "\tbulk error:   {4}\n" + "\tELAPSED TIME: {5} SECONDS",
         getRecsBulkPrepared(), getRecsBulkDeleted(), getRecsBulkBefore(), getRecsBulkAfter(),
-        getRecsBulkError(), ((endTime - startTime) / 1000));
+        getRecsBulkError(), (endTime - startTime) / 1000);
   }
 
   @Override

@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs.schedule;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -27,8 +26,7 @@ public class NeutronJobListenerTest {
   public void getName_Args__() throws Exception {
     NeutronJobListener target = new NeutronJobListener();
     String actual = target.getName();
-    String expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
