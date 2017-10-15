@@ -23,6 +23,7 @@ public class NeutronScheduledJob implements InterruptableJob {
 
   public NeutronScheduledJob() {}
 
+  @SuppressWarnings("rawtypes")
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
     className = context.getJobDetail().getJobDataMap().getString("job_class");
