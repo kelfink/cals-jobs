@@ -188,7 +188,7 @@ public class JobsGuiceInjector extends AbstractModule {
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
-      throw JobLogs.buildException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
+      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
     }
   }
 

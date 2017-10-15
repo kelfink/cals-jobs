@@ -87,8 +87,8 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
     }
   }
 
-  private void flush() throws Exception { // NOSONAR
-    writer.write(chunk);
+  private void flush() throws Exception {
+    writer.write(chunk); // NOSONAR
     chunk.clear();
   }
 

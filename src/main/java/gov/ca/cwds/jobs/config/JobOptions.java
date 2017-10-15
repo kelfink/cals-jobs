@@ -317,7 +317,7 @@ public class JobOptions implements ApiMarker {
    * @param description option description
    * @param required true if required
    * @param argc number of arguments to this option
-   * @param type arguments' Java class
+   * @param type arguments Java class
    * @param sep argument separator
    * @return command line option
    */
@@ -368,8 +368,9 @@ public class JobOptions implements ApiMarker {
           pad + "\nUSAGE: java <job class> ...\n" + pad, buildCmdLineOptions(), 4, 8, pad, true);
       LOGGER.error(sw.toString()); // NOSONAR
     } catch (IOException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "INCORRECT USAGE!: {}", e.getMessage());
     }
+    throw JobLogs.buildCheckedException(LOGGER, new IllegalArgumentException("invalid"),
+        "INCORRECT USAGE!", null);
   }
 
   /**
@@ -455,7 +456,7 @@ public class JobOptions implements ApiMarker {
             break;
 
           default:
-            break;
+            throw new IllegalArgumentException(opt.getArgName());
         }
       }
     } catch (Exception e) { // NOSONAR
