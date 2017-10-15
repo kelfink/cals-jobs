@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.UserType;
 
@@ -32,18 +31,18 @@ public class StringArrayType implements UserType {
   }
 
   @Override
-  public boolean equals(Object x, Object y) throws HibernateException {
+  public boolean equals(Object x, Object y) {
     return x == null ? y == null : x.equals(y);
   }
 
   @Override
-  public int hashCode(Object x) throws HibernateException {
+  public int hashCode(Object x) {
     return x == null ? 0 : x.hashCode();
   }
 
   @Override
   public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session,
-      Object owner) throws HibernateException, SQLException {
+      Object owner) throws SQLException {
     String[] results = null;
     // Get the first column names.
     if (names != null && names.length > 0 && rs != null && rs.getArray(names[0]) != null) {
@@ -54,7 +53,7 @@ public class StringArrayType implements UserType {
 
   @Override
   public void nullSafeSet(PreparedStatement st, Object value, int index,
-      SharedSessionContractImplementor session) throws HibernateException, SQLException {
+      SharedSessionContractImplementor session) throws SQLException {
     // Set the column with string array,
     if (value != null && st != null) {
       String[] castObject = (String[]) value;
@@ -66,7 +65,7 @@ public class StringArrayType implements UserType {
   }
 
   @Override
-  public Object deepCopy(Object value) throws HibernateException {
+  public Object deepCopy(Object value) {
     return value == null ? null : ((String[]) value).clone();
   }
 
@@ -76,17 +75,17 @@ public class StringArrayType implements UserType {
   }
 
   @Override
-  public Serializable disassemble(Object value) throws HibernateException {
+  public Serializable disassemble(Object value) {
     return (Serializable) value;
   }
 
   @Override
-  public Object assemble(Serializable cached, Object owner) throws HibernateException {
+  public Object assemble(Serializable cached, Object owner) {
     return cached;
   }
 
   @Override
-  public Object replace(Object original, Object target, Object owner) throws HibernateException {
+  public Object replace(Object original, Object target, Object owner) {
     return original;
   }
 
