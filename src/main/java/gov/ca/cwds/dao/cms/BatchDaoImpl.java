@@ -100,7 +100,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
           ret.add((T) obj);
         }
 
-        if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
+        if (++cnt % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue() == 0) {
           LOGGER.info("find updated after {}. recs read: {}", ts, cnt);
           session.flush();
         }

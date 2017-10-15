@@ -4,7 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
@@ -38,15 +38,15 @@ public class DocumentMetadataDaoImplTest {
   public void findByLastJobRunTimeMinusOneMinute_Args__Date() throws Exception {
     SessionFactory sessionFactory = Mockito.mock(SessionFactory.class);
     Session session = Mockito.mock(Session.class);
-    Query query = Mockito.mock(Query.class);
+    final Query query = Mockito.mock(Query.class);
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(session.getNamedQuery(any())).thenReturn(query);
 
-    DocumentMetadataDaoImpl target = new DocumentMetadataDaoImpl(sessionFactory);
-    Date lastJobRunTime = new Date();
-    List<DocumentMetadata> actual = target.findByLastJobRunTimeMinusOneMinute(lastJobRunTime);
-    List<DocumentMetadata> expected = null;
+    final DocumentMetadataDaoImpl target = new DocumentMetadataDaoImpl(sessionFactory);
+    final Date lastJobRunTime = new Date();
+    final List<DocumentMetadata> actual = target.findByLastJobRunTimeMinusOneMinute(lastJobRunTime);
+    final List<DocumentMetadata> expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 

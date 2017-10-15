@@ -143,7 +143,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     when(esDao.getClient()).thenReturn(client);
 
     final Map<String, String> mapSettings = new HashMap<>();
-    final Settings settings = Settings.builder().put(mapSettings).build();;
+    final Settings settings = Settings.builder().put(mapSettings).build();
     when(client.settings()).thenReturn(settings);
 
     when(esConfig.getElasticsearchAlias()).thenReturn("people");

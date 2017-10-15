@@ -177,7 +177,6 @@ public class BasePersonIndexerJobTest
     final List<TestNormalizedEntity> expected = new ArrayList<>();
     final TestNormalizedEntity expect = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     expected.add(expect);
-    // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, notNullValue());
   }
 
