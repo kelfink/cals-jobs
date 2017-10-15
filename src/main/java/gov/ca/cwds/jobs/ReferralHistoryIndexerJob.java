@@ -232,7 +232,7 @@ public class ReferralHistoryIndexerJob
   }
 
   /**
-   * Allocate memory once for this thread and reuse it per key range.
+   * Initial mode only. Allocate memory once per thread and reuse it.
    */
   protected void allocateThreadMemory() {
     if (allocAllegations.get() == null) {

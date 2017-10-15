@@ -210,7 +210,6 @@ public class JobRunner {
   /**
    * Expose job execution operations through JMX.
    * 
-   * @param args job runner arguments
    * @throws NeutronException on initialization error
    */
   @SuppressWarnings("unchecked")
