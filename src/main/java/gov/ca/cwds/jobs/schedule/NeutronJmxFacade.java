@@ -23,9 +23,9 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 
 public final class NeutronJmxFacade implements Serializable {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJmxFacade.class);
 
-  private final Scheduler scheduler;
+  private transient Scheduler scheduler;
   private final NeutronDefaultJobSchedule jobSchedule;
   private final String scheduleJobName;
   private final String scheduleTriggerName;

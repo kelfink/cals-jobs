@@ -128,4 +128,8 @@ public enum NeutronDefaultJobSchedule {
     return jsonElement;
   }
 
+  public static NeutronDefaultJobSchedule lookupByJobName(String key) {
+    return mapName.get(key);
+  }
+
 }

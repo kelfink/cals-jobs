@@ -60,4 +60,12 @@ public class NeutronDefaultJobScheduleTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
+  @Test
+  public void lookupByJobName_Args__String() throws Exception {
+    String key = "client";
+    NeutronDefaultJobSchedule actual = NeutronDefaultJobSchedule.lookupByJobName(key);
+    NeutronDefaultJobSchedule expected = NeutronDefaultJobSchedule.CLIENT;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
 }

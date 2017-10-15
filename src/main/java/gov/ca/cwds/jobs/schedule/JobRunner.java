@@ -46,6 +46,8 @@ public class JobRunner {
    */
   private static final JobRunner instance = new JobRunner();
 
+  static Scheduler scheduler;
+
   /**
    * For unit tests where resources either may not close properly or where expensive resources
    * should be mocked.
@@ -58,8 +60,6 @@ public class JobRunner {
   private static boolean continuousMode = false;
 
   private static JobOptions startingOpts;
-
-  static Scheduler scheduler;
 
   /**
    * Job options by job type.
@@ -80,6 +80,18 @@ public class JobRunner {
   @SuppressWarnings("unchecked")
   protected static void init() throws NeutronException {
     try {
+      // Quartz scheduling:
+      final Properties p = new Properties();
+      p.put("org.quartz.scheduler.instanceName", "neutron");
+      p.put("org.quartz.threadPool.threadCount", "4"); // NOTE: make configurable
+      final StdSchedulerFactory factory = new StdSchedulerFactory(p);
+
+      scheduler = factory.getScheduler();
+      final ListenerManager listenerManager = scheduler.getListenerManager();
+      listenerManager.addSchedulerListener(new NeutronSchedulerListener());
+      listenerManager.addJobListener(new NeutronJobListener());
+
+      // JMX:
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
       final DateFormat fmt =
           new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
@@ -97,12 +109,10 @@ public class JobRunner {
 
         // If timestamp file doesn't exist, create it.
         final File f = new File(opts.getLastRunLoc());
-        if (!f.exists()) {
-          if (opts.getLastRunTime() == null) {
-            FileUtils.writeStringToFile(f, fmt.format(now));
-          } else {
-            FileUtils.writeStringToFile(f, fmt.format(opts.getLastRunTime()));
-          }
+        if (!f.exists() && opts.getLastRunTime() == null) {
+          FileUtils.writeStringToFile(f, fmt.format(now));
+        } else if (!f.exists() && opts.getLastRunTime() != null) {
+          FileUtils.writeStringToFile(f, fmt.format(opts.getLastRunTime()));
         }
 
         JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
@@ -115,16 +125,6 @@ public class JobRunner {
       // Expose Guice bean attributes through JMX.
       Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
 
-      // Quartz scheduling:
-      final Properties p = new Properties();
-      p.put("org.quartz.scheduler.instanceName", "neutron");
-      p.put("org.quartz.threadPool.threadCount", "4"); // NOTE: make configurable
-      final StdSchedulerFactory factory = new StdSchedulerFactory(p);
-
-      scheduler = factory.getScheduler();
-      final ListenerManager listenerManager = scheduler.getListenerManager();
-      listenerManager.addSchedulerListener(new NeutronSchedulerListener());
-      listenerManager.addJobListener(new NeutronJobListener());
       scheduler.start();
 
       // Start last change jobs.
@@ -304,6 +304,15 @@ public class JobRunner {
   }
 
   /**
+   * One scheduler to rule them all. And in the multi-threading ... bind them? :-)
+   * 
+   * @return evil single instance
+   */
+  public static JobRunner getInstance() {
+    return instance;
+  }
+
+  /**
    * OPTION: configure individual jobs, like Rundeck.
    * <p>
    * Best to load a configuration file with settings per job.
@@ -323,10 +332,6 @@ public class JobRunner {
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
-  }
-
-  public static JobRunner getInstance() {
-    return instance;
   }
 
 }

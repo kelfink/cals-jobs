@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 public class NeutronJobListener implements JobListener {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronSchedulerListener.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJobListener.class);
 
   @Override
   public String getName() {
