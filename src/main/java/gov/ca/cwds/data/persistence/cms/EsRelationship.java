@@ -79,6 +79,13 @@ public class EsRelationship
     implements PersistentObject, ApiGroupNormalizer<ReplicatedRelationships>,
     Comparable<EsRelationship>, Comparator<EsRelationship> {
 
+  /**
+   * Instead of repeatedly parsing relationship components, parse, store, and read many.
+   * <p>
+   * And, no SonarQube, this approach doesn't cause excessive memory bloat because the WeakHashMap
+   * will clear under memory pressure.
+   * </p>
+   */
   private static final Map<Short, CmsRelationship> mapRelationCodes =
       Collections.synchronizedMap(new WeakHashMap<>());
 

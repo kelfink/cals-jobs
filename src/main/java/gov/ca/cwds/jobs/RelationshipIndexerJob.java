@@ -250,22 +250,11 @@ public class RelationshipIndexerJob
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedRelationships p)
       throws IOException {
-    final StringBuilder buf = new StringBuilder();
-    buf.append("{\"relationships\":[");
+    final Pair<String, String> pair =
+        ElasticTransformer.prepareUpsertJson(this, esp, p, getOptionalElementName(), null);
 
-    if (!p.getRelations().isEmpty()) {
-      try {
-        buf.append(p.getRelations().stream().map(ElasticTransformer::jsonify)
-            .sorted(String::compareTo).collect(Collectors.joining(",")));
-      } catch (Exception e) {
-        JobLogs.raiseError(LOGGER, e, "ERROR SERIALIZING RELATIONSHIPS! {}", e.getMessage());
-      }
-    }
-
-    buf.append("]}");
-
-    final String insertJson = mapper.writeValueAsString(esp);
-    final String updateJson = buf.toString();
+    final String insertJson = pair.getRight();
+    final String updateJson = pair.getLeft();
 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();
