@@ -39,11 +39,11 @@ import org.weakref.jmx.Managed;
 import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.NeutronDefaultJobSchedule;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.schedule.NeutronDefaultJobSchedule;
 import gov.ca.cwds.jobs.schedule.NeutronJobListener;
 import gov.ca.cwds.jobs.schedule.NeutronSchedulerListener;
 import gov.ca.cwds.jobs.util.JobLogs;

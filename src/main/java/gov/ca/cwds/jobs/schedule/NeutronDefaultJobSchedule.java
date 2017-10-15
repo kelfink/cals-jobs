@@ -1,4 +1,23 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.schedule;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import gov.ca.cwds.jobs.ChildCaseHistoryIndexerJob;
+import gov.ca.cwds.jobs.ClientIndexerJob;
+import gov.ca.cwds.jobs.CollateralIndividualIndexerJob;
+import gov.ca.cwds.jobs.EducationProviderContactIndexerJob;
+import gov.ca.cwds.jobs.IntakeScreeningJob;
+import gov.ca.cwds.jobs.OtherAdultInPlacemtHomeIndexerJob;
+import gov.ca.cwds.jobs.OtherChildInPlacemtHomeIndexerJob;
+import gov.ca.cwds.jobs.OtherClientNameIndexerJob;
+import gov.ca.cwds.jobs.ParentCaseHistoryIndexerJob;
+import gov.ca.cwds.jobs.ReferralHistoryIndexerJob;
+import gov.ca.cwds.jobs.RelationshipIndexerJob;
+import gov.ca.cwds.jobs.ReporterIndexerJob;
+import gov.ca.cwds.jobs.SafetyAlertIndexerJob;
+import gov.ca.cwds.jobs.ServiceProviderIndexerJob;
+import gov.ca.cwds.jobs.SubstituteCareProviderIndexJob;
 
 public enum NeutronDefaultJobSchedule {
 
@@ -61,6 +80,14 @@ public enum NeutronDefaultJobSchedule {
   private final int loadOrder;
 
   private final String jsonElement;
+
+  private static final Map<String, NeutronDefaultJobSchedule> mapName = new ConcurrentHashMap<>();
+
+  static {
+    for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
+      mapName.put(sched.name, sched);
+    }
+  }
 
   private NeutronDefaultJobSchedule(Class<?> klazz, boolean newDocument, String name,
       int startDelaySeconds, int periodSeconds, int loadOrder, String jsonElement) {
