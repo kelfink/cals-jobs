@@ -28,6 +28,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -342,19 +343,19 @@ public class EsRelationship
   }
 
   public Date getThisLegacyLastUpdated() {
-    return thisLegacyLastUpdated;
+    return JobDateUtil.freshDate(thisLegacyLastUpdated);
   }
 
   public void setThisLegacyLastUpdated(Date thisLegacyLastUpdated) {
-    this.thisLegacyLastUpdated = thisLegacyLastUpdated;
+    this.thisLegacyLastUpdated = JobDateUtil.freshDate(thisLegacyLastUpdated);
   }
 
   public Date getRelatedLegacyLastUpdated() {
-    return relatedLegacyLastUpdated;
+    return JobDateUtil.freshDate(relatedLegacyLastUpdated);
   }
 
   public void setRelatedLegacyLastUpdated(Date relatedLegacyLastUpdated) {
-    this.relatedLegacyLastUpdated = relatedLegacyLastUpdated;
+    this.relatedLegacyLastUpdated = JobDateUtil.freshDate(relatedLegacyLastUpdated);
   }
 
   @Override
@@ -376,11 +377,11 @@ public class EsRelationship
   }
 
   public Date getThisReplicationDate() {
-    return thisReplicationDate;
+    return JobDateUtil.freshDate(thisReplicationDate);
   }
 
   public void setThisReplicationDate(Date thisReplicationDate) {
-    this.thisReplicationDate = thisReplicationDate;
+    this.thisReplicationDate = JobDateUtil.freshDate(thisReplicationDate);
   }
 
   public CmsReplicationOperation getRelatedReplicationOperation() {
@@ -392,11 +393,11 @@ public class EsRelationship
   }
 
   public Date getRelatedReplicationDate() {
-    return relatedReplicationDate;
+    return JobDateUtil.freshDate(relatedReplicationDate);
   }
 
   public void setRelatedReplicationDate(Date relatedReplicationDate) {
-    this.relatedReplicationDate = relatedReplicationDate;
+    this.relatedReplicationDate = JobDateUtil.freshDate(relatedReplicationDate);
   }
 
 }

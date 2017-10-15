@@ -17,6 +17,7 @@ import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
+import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -190,7 +191,7 @@ public class EsSafetyAlert extends ApiObjectIdentity
    * @return last change date
    */
   public Date getLastChanged() {
-    return lastChanged;
+    return JobDateUtil.freshDate(lastChanged);
   }
 
   /**
@@ -200,7 +201,7 @@ public class EsSafetyAlert extends ApiObjectIdentity
    * @param lastChanged last change date
    */
   public void setLastChanged(Date lastChanged) {
-    this.lastChanged = lastChanged;
+    this.lastChanged = JobDateUtil.freshDate(lastChanged);
   }
 
   public String getClientId() {
@@ -228,11 +229,11 @@ public class EsSafetyAlert extends ApiObjectIdentity
   }
 
   public Date getActivationDate() {
-    return activationDate;
+    return JobDateUtil.freshDate(activationDate);
   }
 
   public void setActivationDate(Date activationDate) {
-    this.activationDate = activationDate;
+    this.activationDate = JobDateUtil.freshDate(activationDate);
   }
 
   public Integer getActivationCountyCode() {
@@ -252,11 +253,11 @@ public class EsSafetyAlert extends ApiObjectIdentity
   }
 
   public Date getDeactivationDate() {
-    return deactivationDate;
+    return JobDateUtil.freshDate(deactivationDate);
   }
 
   public void setDeactivationDate(Date deactivationDate) {
-    this.deactivationDate = deactivationDate;
+    this.deactivationDate = JobDateUtil.freshDate(deactivationDate);
   }
 
   public Integer getDeactivationCountyCode() {
@@ -284,11 +285,11 @@ public class EsSafetyAlert extends ApiObjectIdentity
   }
 
   public Date getLastUpdatedTimestamp() {
-    return lastUpdatedTimestamp;
+    return JobDateUtil.freshDate(lastUpdatedTimestamp);
   }
 
   public void setLastUpdatedTimestamp(Date lastUpdatedTimestamp) {
-    this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    this.lastUpdatedTimestamp = JobDateUtil.freshDate(lastUpdatedTimestamp);
   }
 
   public String getLastUpdatedOperation() {
@@ -300,10 +301,11 @@ public class EsSafetyAlert extends ApiObjectIdentity
   }
 
   public Date getReplicationTimestamp() {
-    return replicationTimestamp;
+    return JobDateUtil.freshDate(replicationTimestamp);
   }
 
   public void setReplicationTimestamp(Date replicationTimestamp) {
-    this.replicationTimestamp = replicationTimestamp;
+    this.replicationTimestamp = JobDateUtil.freshDate(replicationTimestamp);
   }
+
 }

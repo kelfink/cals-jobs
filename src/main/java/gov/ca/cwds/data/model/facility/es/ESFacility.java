@@ -3,6 +3,9 @@ package gov.ca.cwds.data.model.facility.es;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -210,6 +213,16 @@ public class ESFacility extends ApiObjectIdentity implements PersistentObject {
   @Override
   public Serializable getPrimaryKey() {
     return id;
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }

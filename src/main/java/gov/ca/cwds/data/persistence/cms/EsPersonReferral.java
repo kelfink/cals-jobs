@@ -464,7 +464,7 @@ public class EsPersonReferral
    * @param lastChange last change date
    */
   public void setLastChange(Date lastChange) {
-    this.lastChange = lastChange;
+    this.lastChange = JobDateUtil.freshDate(lastChange);
   }
 
   public String getClientId() {
@@ -484,11 +484,11 @@ public class EsPersonReferral
   }
 
   public Date getStartDate() {
-    return startDate != null ? new Date(startDate.getTime()) : null;
+    return JobDateUtil.freshDate(startDate);
   }
 
   public void setStartDate(Date startDate) {
-    this.startDate = startDate;
+    this.startDate = JobDateUtil.freshDate(startDate);
   }
 
   public Date getEndDate() {
@@ -496,7 +496,7 @@ public class EsPersonReferral
   }
 
   public void setEndDate(Date endDate) {
-    this.endDate = endDate;
+    this.endDate = JobDateUtil.freshDate(endDate);
   }
 
   public Integer getReferralResponseType() {
@@ -648,7 +648,7 @@ public class EsPersonReferral
   }
 
   public void setLimitedAccessDate(Date limitedAccessDate) {
-    this.limitedAccessDate = limitedAccessDate;
+    this.limitedAccessDate = JobDateUtil.freshDate(limitedAccessDate);
   }
 
   public String getLimitedAccessDescription() {
@@ -672,7 +672,7 @@ public class EsPersonReferral
   }
 
   public void setReferralLastUpdated(Date referralLastUpdated) {
-    this.referralLastUpdated = referralLastUpdated;
+    this.referralLastUpdated = JobDateUtil.freshDate(referralLastUpdated);
   }
 
   public Date getReporterLastUpdated() {
@@ -680,7 +680,7 @@ public class EsPersonReferral
   }
 
   public void setReporterLastUpdated(Date reporterLastUpdated) {
-    this.reporterLastUpdated = reporterLastUpdated;
+    this.reporterLastUpdated = JobDateUtil.freshDate(reporterLastUpdated);
   }
 
   public Date getWorkerLastUpdated() {
@@ -688,7 +688,7 @@ public class EsPersonReferral
   }
 
   public void setWorkerLastUpdated(Date workerLastUpdated) {
-    this.workerLastUpdated = workerLastUpdated;
+    this.workerLastUpdated = JobDateUtil.freshDate(workerLastUpdated);
   }
 
   public Date getAllegationLastUpdated() {
@@ -696,7 +696,7 @@ public class EsPersonReferral
   }
 
   public void setAllegationLastUpdated(Date allegationLastUpdated) {
-    this.allegationLastUpdated = allegationLastUpdated;
+    this.allegationLastUpdated = JobDateUtil.freshDate(allegationLastUpdated);
   }
 
   public Date getVictimLastUpdated() {
@@ -704,7 +704,7 @@ public class EsPersonReferral
   }
 
   public void setVictimLastUpdated(Date victimLastUpdated) {
-    this.victimLastUpdated = victimLastUpdated;
+    this.victimLastUpdated = JobDateUtil.freshDate(victimLastUpdated);
   }
 
   public Date getPerpetratorLastUpdated() {
@@ -712,7 +712,7 @@ public class EsPersonReferral
   }
 
   public void setPerpetratorLastUpdated(Date perpetratorLastUpdated) {
-    this.perpetratorLastUpdated = perpetratorLastUpdated;
+    this.perpetratorLastUpdated = JobDateUtil.freshDate(perpetratorLastUpdated);
   }
 
   public String getVictimSensitivityIndicator() {

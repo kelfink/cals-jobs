@@ -192,7 +192,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   }
 
   public void setStartDate(Date startDate) {
-    this.startDate = startDate;
+    this.startDate = JobDateUtil.freshDate(startDate);
   }
 
   public Date getEndDate() {
@@ -200,7 +200,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   }
 
   public void setEndDate(Date endDate) {
-    this.endDate = endDate;
+    this.endDate = JobDateUtil.freshDate(endDate);
   }
 
   public Integer getCounty() {
@@ -224,7 +224,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   }
 
   public void setCaseLastUpdated(Date caseLastUpdated) {
-    this.caseLastUpdated = caseLastUpdated;
+    this.caseLastUpdated = JobDateUtil.freshDate(caseLastUpdated);
   }
 
   public String getFocusChildFirstName() {
@@ -248,7 +248,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   }
 
   public void setFocusChildLastUpdated(Date focusChildLastUpdated) {
-    this.focusChildLastUpdated = focusChildLastUpdated;
+    this.focusChildLastUpdated = JobDateUtil.freshDate(focusChildLastUpdated);
   }
 
   public String getWorkerId() {
@@ -280,7 +280,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   }
 
   public void setWorkerLastUpdated(Date workerLastUpdated) {
-    this.workerLastUpdated = workerLastUpdated;
+    this.workerLastUpdated = JobDateUtil.freshDate(workerLastUpdated);
   }
 
   public String getParentFirstName() {
