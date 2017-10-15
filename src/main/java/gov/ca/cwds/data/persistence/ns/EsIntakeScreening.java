@@ -26,6 +26,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
+import gov.ca.cwds.jobs.util.JobDateUtil;
 
 /**
  * Entity bean for PostgreSQL view, VW_SCREENING_HISTORY.
@@ -485,7 +486,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
    * @return last change date
    */
   public Date getLastChange() {
-    return lastChange;
+    return JobDateUtil.freshDate(lastChange);
   }
 
   /**
@@ -495,7 +496,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
    * @param lastChange last change date
    */
   public void setLastChange(Date lastChange) {
-    this.lastChange = lastChange;
+    this.lastChange = JobDateUtil.freshDate(lastChange);
   }
 
   @Override
@@ -552,19 +553,19 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   }
 
   public Date getStartedAt() {
-    return startedAt;
+    return JobDateUtil.freshDate(startedAt);
   }
 
   public void setStartedAt(Date startedAt) {
-    this.startedAt = startedAt;
+    this.startedAt = JobDateUtil.freshDate(startedAt);
   }
 
   public Date getEndedAt() {
-    return endedAt;
+    return JobDateUtil.freshDate(endedAt);
   }
 
   public void setEndedAt(Date endedAt) {
-    this.endedAt = endedAt;
+    this.endedAt = JobDateUtil.freshDate(endedAt);
   }
 
   public String getReferralId() {
@@ -672,11 +673,11 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   }
 
   public Date getBirthDt() {
-    return birthDt;
+    return JobDateUtil.freshDate(birthDt);
   }
 
   public void setBirthDt(Date birthDt) {
-    this.birthDt = birthDt;
+    this.birthDt = JobDateUtil.freshDate(birthDt);
   }
 
   public String getFirstName() {

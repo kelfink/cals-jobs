@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.google.common.collect.Lists;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonCase;
@@ -117,4 +120,15 @@ public class ReplicatedPersonCases extends ApiObjectIdentity
   public String getSsn() {
     return null;
   }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
 }

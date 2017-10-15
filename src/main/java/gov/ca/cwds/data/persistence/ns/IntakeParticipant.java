@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -30,6 +32,7 @@ import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
+import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -93,7 +96,7 @@ public class IntakeParticipant extends ApiObjectIdentity
 
   @Override
   public Date getBirthDate() {
-    return this.birthDate;
+    return JobDateUtil.freshDate(birthDate);
   }
 
   @Override
@@ -268,11 +271,11 @@ public class IntakeParticipant extends ApiObjectIdentity
   }
 
   public Date getLegacyLastUpdated() {
-    return legacyLastUpdated;
+    return JobDateUtil.freshDate(legacyLastUpdated);
   }
 
   public void setLegacyLastUpdated(Date legacyLastUpdated) {
-    this.legacyLastUpdated = legacyLastUpdated;
+    this.legacyLastUpdated = JobDateUtil.freshDate(legacyLastUpdated);
   }
 
   public String getLegacyTable() {
@@ -282,4 +285,15 @@ public class IntakeParticipant extends ApiObjectIdentity
   public void setLegacyTable(String legacyTable) {
     this.legacyTable = legacyTable;
   }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
 }

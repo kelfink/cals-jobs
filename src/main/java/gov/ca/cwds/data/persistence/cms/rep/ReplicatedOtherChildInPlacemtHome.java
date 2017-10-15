@@ -5,6 +5,8 @@ import java.util.Map;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -90,4 +92,15 @@ public class ReplicatedOtherChildInPlacemtHome extends BaseOtherChildInPlacemtHo
   public EmbeddableCmsReplicatedEntity getReplicatedEntity() {
     return replicatedEntity;
   }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
 }

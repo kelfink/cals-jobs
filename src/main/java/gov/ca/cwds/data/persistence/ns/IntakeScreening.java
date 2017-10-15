@@ -24,6 +24,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonAny;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.jobs.util.JobDateUtil;
 
 /**
  * NS Persistence class for Intake Screenings.
@@ -199,19 +200,19 @@ public class IntakeScreening
   }
 
   public Date getStartedAt() {
-    return startedAt;
+    return JobDateUtil.freshDate(startedAt);
   }
 
   public void setStartedAt(Date startedAt) {
-    this.startedAt = startedAt;
+    this.startedAt = JobDateUtil.freshDate(startedAt);
   }
 
   public Date getEndedAt() {
-    return endedAt;
+    return JobDateUtil.freshDate(endedAt);
   }
 
   public void setEndedAt(Date endedAt) {
-    this.endedAt = endedAt;
+    this.endedAt = JobDateUtil.freshDate(endedAt);
   }
 
   public String getIncidentDate() {
