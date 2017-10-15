@@ -20,7 +20,6 @@ import org.weakref.jmx.Managed;
 
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.JobRunner.NeutronScheduledJob;
 
 public final class NeutronJmxFacade implements Serializable {
 

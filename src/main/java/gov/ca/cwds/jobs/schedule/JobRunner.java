@@ -11,16 +11,10 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.InterruptableJob;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.ListenerManager;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.UnableToInterruptJobException;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,66 +39,12 @@ public class JobRunner {
 
   public static final String GROUP_LAST_CHG = "last_chg";
 
-  @DisallowConcurrentExecution
-  public static class NeutronScheduledJob implements InterruptableJob {
-
-    private String className;
-    private String cmdLine;
-    private JobProgressTrack track;
-
-    public NeutronScheduledJob() {}
-
-    @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
-      className = context.getJobDetail().getJobDataMap().getString("job_class");
-      cmdLine = context.getJobDetail().getJobDataMap().getString("cmd_line");
-
-      LOGGER.info("Executing {}", className);
-      try {
-        final BasePersonIndexerJob neutronJob = JobRunner.createJob(className,
-            StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
-        track = neutronJob.getTrack();
-        context.setResult(track);
-        neutronJob.run();
-      } catch (Exception e) {
-        throw new JobExecutionException("SCHEDULED JOB FAILED!", e);
-      }
-    }
-
-    @Override
-    public void interrupt() throws UnableToInterruptJobException {
-      LOGGER.warn("INTERRUPT RUNNING JOB!");
-    }
-
-    public String getClassName() {
-      return className;
-    }
-
-    public void setClassName(String className) {
-      this.className = className;
-    }
-
-    public String getCmdLine() {
-      return cmdLine;
-    }
-
-    public void setCmdLine(String cmdLine) {
-      this.cmdLine = cmdLine;
-    }
-
-    public JobProgressTrack getTrack() {
-      return track;
-    }
-
-    public void setTrack(JobProgressTrack track) {
-      this.track = track;
-    }
-
-  }
-
   static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
 
-  private static JobRunner instance;
+  /**
+   * Singleton instance. One scheduler to rule them all.
+   */
+  private static final JobRunner instance = new JobRunner();
 
   /**
    * For unit tests where resources either may not close properly or where expensive resources
@@ -140,7 +80,6 @@ public class JobRunner {
   @SuppressWarnings("unchecked")
   protected static void init() throws NeutronException {
     try {
-      JobRunner.instance = new JobRunner();
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
       final DateFormat fmt =
           new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
@@ -384,6 +323,10 @@ public class JobRunner {
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
+  }
+
+  public static JobRunner getInstance() {
+    return instance;
   }
 
 }
