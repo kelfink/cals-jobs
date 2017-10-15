@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -53,16 +55,19 @@ public class RelationshipIndexerJobTest
     target.threadRetrieveByJdbc();
   }
 
-  // @Test
+  @Test
   public void extract_Args__ResultSet() throws Exception {
+    when(rs.next()).thenReturn(true).thenReturn(false);
+
     EsRelationship actual = target.extract(rs);
-    EsRelationship expected = new EsRelationship();
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
-  // @Test
+  @Test
   public void extract_Args__ResultSet_T__SQLException() throws Exception {
     try {
+      when(rs.next()).thenThrow(SQLException.class);
+      when(rs.getString(any(String.class))).thenThrow(SQLException.class);
       target.extract(rs);
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
