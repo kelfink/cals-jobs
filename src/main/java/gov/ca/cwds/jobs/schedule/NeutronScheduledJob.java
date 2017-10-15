@@ -32,6 +32,7 @@ public class NeutronScheduledJob implements InterruptableJob {
     try (final BasePersonIndexerJob neutronJob = JobRunner.createJob(className,
         StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"))) {
       track = neutronJob.getTrack();
+      context.getJobDetail().getJobDataMap().put("track", track);
       context.setResult(track);
       neutronJob.run();
     } catch (Exception e) {

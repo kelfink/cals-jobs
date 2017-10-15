@@ -8,6 +8,8 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.es.ElasticSearchAccessLimitation;
@@ -18,6 +20,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonParent;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
+import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -185,7 +188,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   }
 
   public Date getStartDate() {
-    return startDate;
+    return JobDateUtil.freshDate(startDate);
   }
 
   public void setStartDate(Date startDate) {
@@ -193,7 +196,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   }
 
   public Date getEndDate() {
-    return endDate;
+    return JobDateUtil.freshDate(endDate);
   }
 
   public void setEndDate(Date endDate) {
@@ -217,7 +220,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   }
 
   public Date getCaseLastUpdated() {
-    return caseLastUpdated;
+    return JobDateUtil.freshDate(caseLastUpdated);
   }
 
   public void setCaseLastUpdated(Date caseLastUpdated) {
@@ -241,7 +244,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   }
 
   public Date getFocusChildLastUpdated() {
-    return focusChildLastUpdated;
+    return JobDateUtil.freshDate(focusChildLastUpdated);
   }
 
   public void setFocusChildLastUpdated(Date focusChildLastUpdated) {
@@ -273,7 +276,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   }
 
   public Date getWorkerLastUpdated() {
-    return workerLastUpdated;
+    return JobDateUtil.freshDate(workerLastUpdated);
   }
 
   public void setWorkerLastUpdated(Date workerLastUpdated) {
@@ -305,7 +308,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   }
 
   public Date getParentLastUpdated() {
-    return parentLastUpdated;
+    return JobDateUtil.freshDate(parentLastUpdated);
   }
 
   public void setParentLastUpdated(Date parentLastUpdated) {
@@ -329,7 +332,7 @@ public abstract class EsPersonCase extends ApiObjectIdentity
   }
 
   public Date getLimitedAccessDate() {
-    return limitedAccessDate;
+    return JobDateUtil.freshDate(limitedAccessDate);
   }
 
   public void setLimitedAccessDate(Date limitedAccessDate) {
@@ -464,6 +467,16 @@ public abstract class EsPersonCase extends ApiObjectIdentity
 
     cases.addCase(esPersonCase, parent);
     return cases;
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }

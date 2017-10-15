@@ -55,9 +55,9 @@ public abstract class CaseHistoryIndexerJob
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public CaseHistoryIndexerJob(final ReplicatedPersonCasesDao dao,
-      final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
-      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
+  public CaseHistoryIndexerJob(final ReplicatedPersonCasesDao dao, final ElasticsearchDao esDao,
+      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
@@ -81,7 +81,7 @@ public abstract class CaseHistoryIndexerJob
         + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
         + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
         + "\nJOIN CLIENT_T CLP ON CLP.IDENTIFIER = CLR.FKCLIENT_0 "
-        + "\nWHERE CLP.IBMSNAP_LOGMARKER > ? ";
+        + "\nWHERE CLP.IBMSNAP_LOGMARKER > ? "; // NOSONAR
   }
 
   @Override

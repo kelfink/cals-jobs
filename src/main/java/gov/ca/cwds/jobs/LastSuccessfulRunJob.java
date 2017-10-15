@@ -238,7 +238,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
     Date ret = null;
 
     if (!StringUtils.isBlank(this.lastRunTimeFilename)) {
-      try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) {
+      try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
         ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
             .parse(br.readLine().trim()); // NOSONAR
       } catch (IOException e) {
@@ -260,7 +260,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   protected void writeLastSuccessfulRunTime(Date datetime) {
     if (datetime != null && !StringUtils.isBlank(this.lastRunTimeFilename) && !isFailed()) {
-      try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) {
+      try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) { // NOSONAR
         w.write(new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
             .format(datetime));
       } catch (IOException e) {

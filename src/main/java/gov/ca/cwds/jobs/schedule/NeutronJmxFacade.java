@@ -56,15 +56,15 @@ public final class NeutronJmxFacade implements Serializable {
       LOGGER.warn("JOB ALREADY SCHEDULED! {}", scheduleJobName);
     }
 
-    final JobDetail jobDetail =
+    final JobDetail jd =
         newJob(NeutronScheduledJob.class).withIdentity(scheduleJobName, JobRunner.GROUP_LAST_CHG)
             .usingJobData("job_class", jobSchedule.getKlazz().getName()).build();
-    final Trigger trigger = newTrigger().withIdentity(scheduleTriggerName, JobRunner.GROUP_LAST_CHG)
+    final Trigger t = newTrigger().withIdentity(scheduleTriggerName, JobRunner.GROUP_LAST_CHG)
         .withSchedule(
             simpleSchedule().withIntervalInSeconds(jobSchedule.getPeriodSeconds()).repeatForever())
         .startAt(DateTime.now().plusSeconds(jobSchedule.getStartDelaySeconds()).toDate()).build();
 
-    scheduler.scheduleJob(jobDetail, trigger);
+    scheduler.scheduleJob(jd, t);
   }
 
   @Managed(description = "Unschedule job")
@@ -75,10 +75,12 @@ public final class NeutronJmxFacade implements Serializable {
   }
 
   @Managed(description = "Show job status")
-  public void status() throws SchedulerException {
+  public String status() throws SchedulerException {
     LOGGER.debug("Show job status");
     final JobKey jobKey = new JobKey(scheduleJobName, JobRunner.GROUP_LAST_CHG);
-    final JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+    final JobDetail jd = scheduler.getJobDetail(jobKey);
+    final JobProgressTrack track = (JobProgressTrack) jd.getJobDataMap().get("track");
+    return track.toString();
   }
 
   @Managed(description = "Stop running job")

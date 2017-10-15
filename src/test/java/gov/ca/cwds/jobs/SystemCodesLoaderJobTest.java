@@ -14,7 +14,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.SystemCodesLoaderJob.NsSystemCode;
 import gov.ca.cwds.jobs.SystemCodesLoaderJob.NsSystemCodeDao;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.rest.api.domain.cms.SystemCode;

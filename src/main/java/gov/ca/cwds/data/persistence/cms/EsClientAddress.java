@@ -843,7 +843,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getCltConfidentialityActionDate() {
-    return cltConfidentialityActionDate;
+    return JobDateUtil.freshDate(cltConfidentialityActionDate);
   }
 
   public void setCltConfidentialityActionDate(Date cltConfidentialityActionDate) {
@@ -859,7 +859,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getCltCreationDate() {
-    return cltCreationDate;
+    return JobDateUtil.freshDate(cltCreationDate);
   }
 
   public void setCltCreationDate(Date cltCreationDate) {
@@ -883,7 +883,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getCltDeathDate() {
-    return cltDeathDate;
+    return JobDateUtil.freshDate(cltDeathDate);
   }
 
   public String getCltDeathDateVerifiedIndicator() {
@@ -995,7 +995,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getCltMotherParentalRightTermDate() {
-    return cltMotherParentalRightTermDate;
+    return JobDateUtil.freshDate(cltMotherParentalRightTermDate);
   }
 
   public String getCltNamePrefixDescription() {
@@ -1156,7 +1156,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getCltReplicationDate() {
-    return cltReplicationDate;
+    return JobDateUtil.freshDate(cltReplicationDate);
   }
 
   public void setCltReplicationDate(Date cltReplicationDate) {
@@ -1173,7 +1173,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getCltLastUpdatedTime() {
-    return cltLastUpdatedTime;
+    return JobDateUtil.freshDate(cltLastUpdatedTime);
   }
 
   public void setCltLastUpdatedTime(Date cltLastUpdatedTime) {
@@ -1189,7 +1189,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getClaReplicationDate() {
-    return claReplicationDate;
+    return JobDateUtil.freshDate(claReplicationDate);
   }
 
   public void setClaReplicationDate(Date claReplicationDate) {
@@ -1205,7 +1205,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getClaLastUpdatedTime() {
-    return claLastUpdatedTime;
+    return JobDateUtil.freshDate(claLastUpdatedTime);
   }
 
   public void setClaLastUpdatedTime(Date claLastUpdatedTime) {
@@ -1261,7 +1261,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getClaEffectiveEndDate() {
-    return claEffectiveEndDate;
+    return JobDateUtil.freshDate(claEffectiveEndDate);
   }
 
   public void setClaEffectiveEndDate(Date claEffectiveEndDate) {
@@ -1269,7 +1269,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getClaEffectiveStartDate() {
-    return claEffectiveStartDate;
+    return JobDateUtil.freshDate(claEffectiveStartDate);
   }
 
   public void setClaEffectiveStartDate(Date claEffectiveStartDate) {
@@ -1425,7 +1425,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getAdrReplicationDate() {
-    return adrReplicationDate;
+    return JobDateUtil.freshDate(adrReplicationDate);
   }
 
   public Date getLastChange() {
@@ -1471,7 +1471,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   }
 
   public Date getCltFatherParentalRightTermDate() {
-    return cltFatherParentalRightTermDate;
+    return JobDateUtil.freshDate(cltFatherParentalRightTermDate);
   }
 
   public static boolean isUseCounty() {

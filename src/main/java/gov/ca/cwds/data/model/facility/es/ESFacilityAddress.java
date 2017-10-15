@@ -3,6 +3,7 @@ package gov.ca.cwds.data.model.facility.es;
 import java.io.Serializable;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -85,15 +86,7 @@ public class ESFacilityAddress implements Serializable {
 
   @Override
   public int hashCode() {
-    final int prime = 31; // NOSONAR
-    int result = 1;
-    result = prime * result + ((city == null) ? 0 : city.hashCode());
-    result = prime * result + ((county == null) ? 0 : county.hashCode());
-    result = prime * result + ((stateCodeType == null) ? 0 : stateCodeType.hashCode());
-    result = prime * result + ((streetAddress == null) ? 0 : streetAddress.hashCode());
-    result = prime * result + ((zipCode == null) ? 0 : zipCode.hashCode());
-    result = prime * result + ((zipSuffixCode == null) ? 0 : zipSuffixCode.hashCode());
-    return result;
+    return HashCodeBuilder.reflectionHashCode(this, false);
   }
 
   @Override

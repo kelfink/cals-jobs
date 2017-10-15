@@ -125,12 +125,14 @@ public class JobRunner {
       // Expose Guice bean attributes through JMX.
       Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
 
-      scheduler.start();
-
       // Start last change jobs.
       for (NeutronJmxFacade j : instance.scheduleRegistry.values()) {
         j.schedule();
       }
+
+      // Start your engines ...
+      scheduler.start();
+
     } catch (IOException | SchedulerException e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "INIT ERROR: {}", e.getMessage());
     }

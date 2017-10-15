@@ -433,8 +433,9 @@ public class JobOptions implements ApiMarker {
           case CMD_LINE_BUCKET_RANGE:
             lastRunMode = false;
             rangeGiven = true;
-            startBucket = Long.parseLong(opt.getValues()[0]);
-            endBucket = Long.parseLong(opt.getValues()[1]);
+            final String[] vals = opt.getValues();
+            startBucket = Long.parseLong(vals[0]);
+            endBucket = Long.parseLong(vals[1]);
             break;
 
           case CMD_LINE_THREADS:
