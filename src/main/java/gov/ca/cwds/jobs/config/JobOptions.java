@@ -368,9 +368,11 @@ public class JobOptions implements ApiMarker {
           pad + "\nUSAGE: java <job class> ...\n" + pad, buildCmdLineOptions(), 4, 8, pad, true);
       LOGGER.error(sw.toString()); // NOSONAR
     } catch (IOException e) {
+      throw JobLogs.buildCheckedException(LOGGER, new IllegalArgumentException("invalid"),
+          "INCORRECT USAGE! {}", e.getMessage());
     }
     throw JobLogs.buildCheckedException(LOGGER, new IllegalArgumentException("invalid"),
-        "INCORRECT USAGE!", null);
+        "INCORRECT USAGE!", "");
   }
 
   /**
