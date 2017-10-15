@@ -3,14 +3,10 @@ package gov.ca.cwds.data.persistence.cms.rep;
 import java.util.Date;
 import java.util.Map;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.NamedNativeQuery;
-import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -19,7 +15,6 @@ import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseReporter;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -57,21 +52,15 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 @Table(name = "REPTR_T")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ReplicatedReporter extends BaseReporter
-    implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedReporter> {
+public class ReplicatedReporter extends BaseReporter implements CmsReplicatedEntity,
+    ApiGroupNormalizer<ReplicatedReporter>, EmbeddableCmsReplicatedEntityAware {
 
   /**
-   * Default.
+   * Default serialization.
    */
   private static final long serialVersionUID = 1L;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "IBMSNAP_OPERATION", updatable = false)
-  private CmsReplicationOperation replicationOperation;
-
-  @Type(type = "timestamp")
-  @Column(name = "IBMSNAP_LOGMARKER", updatable = false)
-  private Date replicationDate;
+  private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
   // =======================
   // CmsReplicatedEntity:
@@ -79,22 +68,27 @@ public class ReplicatedReporter extends BaseReporter
 
   @Override
   public CmsReplicationOperation getReplicationOperation() {
-    return replicationOperation;
+    return replicatedEntity.getReplicationOperation();
   }
 
   @Override
   public void setReplicationOperation(CmsReplicationOperation replicationOperation) {
-    this.replicationOperation = replicationOperation;
+    replicatedEntity.setReplicationOperation(replicationOperation);
   }
 
   @Override
   public Date getReplicationDate() {
-    return JobDateUtil.freshDate(replicationDate);
+    return replicatedEntity.getReplicationDate();
   }
 
   @Override
   public void setReplicationDate(Date replicationDate) {
-    this.replicationDate = JobDateUtil.freshDate(replicationDate);
+    replicatedEntity.setReplicationDate(replicationDate);
+  }
+
+  @Override
+  public EmbeddableCmsReplicatedEntity getReplicatedEntity() {
+    return replicatedEntity;
   }
 
   // =======================
@@ -136,4 +130,5 @@ public class ReplicatedReporter extends BaseReporter
     return ElasticTransformer.createLegacyDescriptor(getId(), getLastUpdatedTime(),
         LegacyTable.REPORTER);
   }
+
 }

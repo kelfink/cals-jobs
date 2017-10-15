@@ -109,10 +109,12 @@ public class JobRunner {
 
         // If timestamp file doesn't exist, create it.
         final File f = new File(opts.getLastRunLoc());
-        if (!f.exists() && opts.getLastRunTime() == null) {
-          FileUtils.writeStringToFile(f, fmt.format(now));
-        } else if (!f.exists() && opts.getLastRunTime() != null) {
-          FileUtils.writeStringToFile(f, fmt.format(opts.getLastRunTime()));
+        final boolean fileExists = f.exists();
+        final boolean overrideLastRunTime = opts.getLastRunTime() != null;
+
+        if (!fileExists) {
+          FileUtils.writeStringToFile(f,
+              fmt.format(overrideLastRunTime ? opts.getLastRunTime() : now));
         }
 
         JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);

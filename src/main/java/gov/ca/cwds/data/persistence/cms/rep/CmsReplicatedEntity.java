@@ -22,31 +22,42 @@ public interface CmsReplicatedEntity extends ApiLegacyAware, PersistentObject {
     return t.getReplicationOperation() == CmsReplicationOperation.D;
   }
 
+  EmbeddableCmsReplicatedEntity getReplicatedEntity();
+
   /**
    * Getter for replication operation.
    * 
    * @return replication operation
    */
-  CmsReplicationOperation getReplicationOperation();
+  default CmsReplicationOperation getReplicationOperation() {
+    return getReplicatedEntity().getReplicationOperation();
+  }
 
   /**
    * Getter for replication date.
    * 
    * @return replication date
    */
-  Date getReplicationDate();
+  default Date getReplicationDate() {
+    return getReplicatedEntity().getReplicationDate();
+  }
 
   /**
    * Setter for replication operation (I = insert, U = update, D = delete).
    * 
    * @param replicationOperation SQL operation that triggered the replication of this record..
    */
-  void setReplicationOperation(CmsReplicationOperation replicationOperation);
+  default void setReplicationOperation(CmsReplicationOperation replicationOperation) {
+    getReplicatedEntity().setReplicationOperation(replicationOperation);
+  }
 
   /**
    * Setter for replication date.
    * 
    * @param replicationDate when this record replicated
    */
-  void setReplicationDate(Date replicationDate);
+  default void setReplicationDate(Date replicationDate) {
+    getReplicatedEntity().setReplicationDate(replicationDate);
+  }
+
 }
