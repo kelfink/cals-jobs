@@ -11,8 +11,6 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
 
-import gov.ca.cwds.jobs.inject.JobRunner;
-
 public class NeutronSchedulerListenerTest {
 
   @Test

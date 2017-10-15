@@ -1,12 +1,7 @@
-package gov.ca.cwds.jobs.inject;
-
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
+package gov.ca.cwds.jobs.schedule;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,21 +15,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.InterruptableJob;
-import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.JobKey;
 import org.quartz.ListenerManager;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.TriggerKey;
 import org.quartz.UnableToInterruptJobException;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weakref.jmx.MBeanExporter;
-import org.weakref.jmx.Managed;
 
 import com.google.inject.tools.jmx.Manager;
 
@@ -43,9 +33,7 @@ import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.NeutronDefaultJobSchedule;
-import gov.ca.cwds.jobs.schedule.NeutronJobListener;
-import gov.ca.cwds.jobs.schedule.NeutronSchedulerListener;
+import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
@@ -56,69 +44,6 @@ import gov.ca.cwds.jobs.util.JobLogs;
 public class JobRunner {
 
   public static final String GROUP_LAST_CHG = "last_chg";
-
-  public static final class NeutronJmxFacade implements Serializable {
-
-    private final NeutronDefaultJobSchedule jobSchedule;
-    private final String scheduleJobName;
-    private final String scheduleTriggerName;
-
-    public NeutronJmxFacade(NeutronDefaultJobSchedule sched) {
-      this.jobSchedule = sched;
-      this.scheduleJobName = "job_" + jobSchedule.getName();
-      this.scheduleTriggerName = "trg_" + jobSchedule.getName();
-    }
-
-    @Managed(description = "Run job now, show results immediately")
-    public String run(String cmdLineArgs) throws NeutronException {
-      try {
-        LOGGER.info("RUN JOB: {}", jobSchedule.getName());
-        final JobProgressTrack track = JobRunner.runRegisteredJob(jobSchedule.getKlazz(),
-            StringUtils.isBlank(cmdLineArgs) ? null : cmdLineArgs.split("\\s+"));
-        return track.toString();
-      } catch (Exception e) {
-        LOGGER.error(e.getMessage(), e);
-        return "Job failed. Check the logs!";
-      }
-    }
-
-    @Managed(description = "Schedule job on repeat")
-    public void schedule() throws SchedulerException {
-      final JobDetail jobDetail =
-          newJob(NeutronScheduledJob.class).withIdentity(scheduleJobName, GROUP_LAST_CHG)
-              .usingJobData("job_class", jobSchedule.getKlazz().getName()).build();
-      final Trigger trigger = newTrigger().withIdentity(scheduleTriggerName, GROUP_LAST_CHG)
-          .withSchedule(simpleSchedule().withIntervalInSeconds(jobSchedule.getPeriodSeconds())
-              .repeatForever())
-          .startAt(DateTime.now().plusSeconds(jobSchedule.getStartDelaySeconds()).toDate()).build();
-
-      scheduler.scheduleJob(jobDetail, trigger);
-    }
-
-    @Managed(description = "Unschedule job")
-    public void unschedule() throws SchedulerException {
-      LOGGER.warn("unschedule job");
-      final TriggerKey triggerKey = new TriggerKey(scheduleTriggerName, GROUP_LAST_CHG);
-      scheduler.pauseTrigger(triggerKey);
-    }
-
-    @Managed(description = "Show job status")
-    public void status() throws SchedulerException {
-      LOGGER.debug("Show job status");
-      final JobKey jobKey = new JobKey(scheduleJobName, GROUP_LAST_CHG);
-      final JobDetail jobDetail = scheduler.getJobDetail(jobKey);
-    }
-
-    @Managed(description = "Stop running job")
-    public void stop() throws SchedulerException {
-      LOGGER.warn("Stop running job");
-      unschedule();
-
-      final JobKey key = new JobKey(scheduleJobName, GROUP_LAST_CHG);
-      scheduler.interrupt(key);
-    }
-
-  }
 
   @DisallowConcurrentExecution
   public static class NeutronScheduledJob implements InterruptableJob {
@@ -177,7 +102,7 @@ public class JobRunner {
 
   }
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
+  static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
 
   private static JobRunner instance;
 
@@ -194,7 +119,7 @@ public class JobRunner {
 
   private static JobOptions startingOpts;
 
-  private static Scheduler scheduler;
+  static Scheduler scheduler;
 
   /**
    * Job options by job type.
@@ -243,7 +168,7 @@ public class JobRunner {
 
         JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
 
-        final NeutronJmxFacade nj = new NeutronJmxFacade(sched);
+        final NeutronJmxFacade nj = new NeutronJmxFacade(scheduler, sched);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         scheduleRegistry.put(klass, nj);
       }
