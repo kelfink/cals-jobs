@@ -11,10 +11,14 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
+
+import gov.ca.cwds.jobs.component.JobProgressTrack;
 
 public class NeutronJmxFacadeTest {
 
@@ -24,7 +28,6 @@ public class NeutronJmxFacadeTest {
 
   @Before
   public void setup() throws Exception {
-    // scheduler = new TestScheduler();
     scheduler = mock(Scheduler.class);
     sched = NeutronDefaultJobSchedule.CLIENT;
     target = new NeutronJmxFacade(scheduler, sched);
@@ -80,6 +83,18 @@ public class NeutronJmxFacadeTest {
 
   @Test
   public void status_Args__() throws Exception {
+    JobDetail jd = mock(JobDetail.class);
+    when(scheduler.getJobDetail(any(JobKey.class))).thenReturn(jd);
+
+    JobDataMap jdm = new JobDataMap();
+    jdm.put("job_class", "TestNeutronJob");
+    jdm.put("cmd_line", "--invalid");
+
+    final JobProgressTrack track = new JobProgressTrack();
+    jdm.put("track", track);
+
+    when(jd.getJobDataMap()).thenReturn(jdm);
+
     target.status();
   }
 

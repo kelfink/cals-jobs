@@ -79,7 +79,8 @@ public final class NeutronJmxFacade implements Serializable {
     LOGGER.debug("Show job status");
     final JobKey jobKey = new JobKey(scheduleJobName, JobRunner.GROUP_LAST_CHG);
     final JobDetail jd = scheduler.getJobDetail(jobKey);
-    final JobProgressTrack track = (JobProgressTrack) jd.getJobDataMap().get("track");
+
+    JobProgressTrack track = (JobProgressTrack) jd.getJobDataMap().get("track");
     return track.toString();
   }
 
