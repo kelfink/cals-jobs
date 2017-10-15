@@ -5,6 +5,7 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.text.DateFormat;
@@ -42,6 +43,7 @@ import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.schedule.NeutronSchedulerListener;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
@@ -51,9 +53,9 @@ import gov.ca.cwds.jobs.util.JobLogs;
  */
 public class JobRunner {
 
-  public static final class NeutronJmxJob implements Serializable {
+  public static final String GROUP_LAST_CHG = "last_chg";
 
-    private static final String GROUP_LAST_CHG = "last_chg";
+  public static final class NeutronJmxJob implements Serializable {
 
     private final NeutronDefaultJobSchedule jobSchedule;
     private final String scheduleJobName;
@@ -207,58 +209,62 @@ public class JobRunner {
    * Expose job execution operations through JMX.
    * 
    * @param args job runner arguments
-   * @throws Exception configuration error
+   * @throws NeutronException on initialization error
    */
   @SuppressWarnings("unchecked")
-  protected static void init(String[] args) throws Exception {
-    final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-    final DateFormat fmt =
-        new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
-    final Date now = new DateTime().minusHours(2).toDate(); // NOTE: make configurable
+  protected static void init() throws NeutronException {
+    try {
+      final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
+      final DateFormat fmt =
+          new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
+      final Date now = new DateTime().minusHours(2).toDate(); // NOTE: make configurable
 
-    for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
-      final Class<?> klass = sched.getKlazz();
-      final JobOptions opts = new JobOptions(startingOpts);
+      for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
+        final Class<?> klass = sched.getKlazz();
+        final JobOptions opts = new JobOptions(startingOpts);
 
-      // Job's time file under base directory:
-      final StringBuilder buf = new StringBuilder();
-      buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
-          .append(".time");
-      opts.setLastRunLoc(buf.toString());
+        // Job's time file under base directory:
+        final StringBuilder buf = new StringBuilder();
+        buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
+            .append(".time");
+        opts.setLastRunLoc(buf.toString());
 
-      // If timestamp file doesn't exist, create it.
-      final File f = new File(opts.getLastRunLoc());
-      if (!f.exists()) {
-        if (opts.getLastRunTime() == null) {
-          FileUtils.writeStringToFile(f, fmt.format(now));
-        } else {
-          FileUtils.writeStringToFile(f, fmt.format(opts.getLastRunTime()));
+        // If timestamp file doesn't exist, create it.
+        final File f = new File(opts.getLastRunLoc());
+        if (!f.exists()) {
+          if (opts.getLastRunTime() == null) {
+            FileUtils.writeStringToFile(f, fmt.format(now));
+          } else {
+            FileUtils.writeStringToFile(f, fmt.format(opts.getLastRunTime()));
+          }
         }
+
+        JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
+
+        final NeutronJmxJob nj = new NeutronJmxJob(sched);
+        exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
+        scheduleRegistry.put(klass, nj);
       }
 
-      JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
+      // Expose Guice bean attributes through JMX.
+      Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
 
-      final NeutronJmxJob nj = new NeutronJmxJob(sched);
-      exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
-      scheduleRegistry.put(klass, nj);
-    }
+      // Quartz scheduling:
+      final Properties p = new Properties();
+      p.put("org.quartz.scheduler.instanceName", "neutron");
+      p.put("org.quartz.threadPool.threadCount", "4"); // NOTE: make configurable
+      final StdSchedulerFactory factory = new StdSchedulerFactory(p);
 
-    // Expose Guice bean attributes through JMX.
-    Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
+      scheduler = factory.getScheduler();
+      scheduler.getListenerManager().addSchedulerListener(new NeutronSchedulerListener());
+      scheduler.start();
 
-    // Quartz scheduling:
-    final Properties p = new Properties();
-    p.put("org.quartz.scheduler.instanceName", "neutron");
-    p.put("org.quartz.threadPool.threadCount", "4"); // NOTE: make configurable
-    final StdSchedulerFactory factory = new StdSchedulerFactory(p);
-
-    scheduler = factory.getScheduler();
-    scheduler.getListenerManager().addSchedulerListener(new NeutronSchedulerListener());
-    scheduler.start();
-
-    // Start last change jobs.
-    for (NeutronJmxJob j : scheduleRegistry.values()) {
-      j.schedule();
+      // Start last change jobs.
+      for (NeutronJmxJob j : scheduleRegistry.values()) {
+        j.schedule();
+      }
+    } catch (IOException | SchedulerException e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "INIT ERROR: {}", e.getMessage());
     }
   }
 
@@ -443,7 +449,7 @@ public class JobRunner {
       JobRunner.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
           : JobRunner.startingOpts;
       JobRunner.continuousMode = true;
-      JobRunner.init(args);
+      JobRunner.init();
 
       LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
     } catch (Exception e) {

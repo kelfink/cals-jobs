@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.inject;
+package gov.ca.cwds.jobs.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,16 +7,16 @@ import java.lang.annotation.Target;
 
 import com.google.inject.BindingAnnotation;
 
-import gov.ca.cwds.jobs.LastSuccessfulRunJob;
+import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 
 /**
- * Marker annotation identifies batch jobs that implement the "last run" policy.
+ * Alternative input file.
  * 
  * @author CWDS API Team
- * @see LastSuccessfulRunJob
+ * @see JobsGuiceInjector
  */
 @BindingAnnotation
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LastRunFile {
+public @interface AltInputFile {
 }

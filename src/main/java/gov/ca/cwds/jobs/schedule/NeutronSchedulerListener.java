@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.inject;
+package gov.ca.cwds.jobs.schedule;
 
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class NeutronSchedulerListener implements SchedulerListener {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronSchedulerListener.class);
 
   @Override
   public void jobScheduled(Trigger trigger) {

@@ -105,7 +105,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
    * A client can have multiple active addresses, typically one active address per address type.
    */
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "fkClient")
-  protected Set<ReplicatedClientAddress> clientAddresses = new LinkedHashSet<>();
+  private Set<ReplicatedClientAddress> clientAddresses = new LinkedHashSet<>();
 
   private transient List<Short> clientRaces = new ArrayList<>();
 
