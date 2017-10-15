@@ -844,7 +844,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
           .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
               .replaceAll("THE_ID_COL", getIdColumn()), BatchBucket.class)
-          .setParameter("total_buckets", String.valueOf(totalBuckets));;
+          .setParameter("total_buckets", String.valueOf(totalBuckets));
 
       ret = q.getResultList();
       session.clear();

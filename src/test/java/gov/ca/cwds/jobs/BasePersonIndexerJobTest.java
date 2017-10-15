@@ -335,6 +335,7 @@ public class BasePersonIndexerJobTest
   public void getPartitionRanges_Args__() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+    when(q.setParameter(any(String.class), any(String.class))).thenReturn(q);
 
     final List<?> actual = target.getPartitionRanges();
     assertThat(actual, notNullValue());
@@ -374,6 +375,8 @@ public class BasePersonIndexerJobTest
   public void extractHibernate_Args__() throws Exception {
     final Query q = mock(Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+    when(q.getResultList()).thenReturn(new ArrayList<TestDenormalizedEntity>());
+    when(q.setParameter(any(String.class), any(String.class))).thenReturn(q);
 
     final List<BatchBucket> buckets = new ArrayList<>();
     final BatchBucket b = new BatchBucket();
@@ -439,6 +442,8 @@ public class BasePersonIndexerJobTest
   public void buildBucketList_Args__String() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+    when(q.getResultList()).thenReturn(new ArrayList<TestDenormalizedEntity>());
+    when(q.setParameter(any(String.class), any(String.class))).thenReturn(q);
 
     final String table = "SOMETBL";
     final List<BatchBucket> actual = target.buildBucketList(table);
@@ -492,6 +497,8 @@ public class BasePersonIndexerJobTest
   public void _run_Args__Date__auto() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+    when(q.getResultList()).thenReturn(new ArrayList<TestDenormalizedEntity>());
+    when(q.setParameter(any(String.class), any(String.class))).thenReturn(q);
     when(opts.isLastRunMode()).thenReturn(true);
 
     final Calendar cal = Calendar.getInstance();

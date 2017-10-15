@@ -24,6 +24,7 @@ import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
+import org.quartz.ListenerManager;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
@@ -43,6 +44,7 @@ import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.schedule.NeutronJobListener;
 import gov.ca.cwds.jobs.schedule.NeutronSchedulerListener;
 import gov.ca.cwds.jobs.util.JobLogs;
 
@@ -55,13 +57,13 @@ public class JobRunner {
 
   public static final String GROUP_LAST_CHG = "last_chg";
 
-  public static final class NeutronJmxJob implements Serializable {
+  public static final class NeutronJmxFacade implements Serializable {
 
     private final NeutronDefaultJobSchedule jobSchedule;
     private final String scheduleJobName;
     private final String scheduleTriggerName;
 
-    public NeutronJmxJob(NeutronDefaultJobSchedule sched) {
+    public NeutronJmxFacade(NeutronDefaultJobSchedule sched) {
       this.jobSchedule = sched;
       this.scheduleJobName = "job_" + jobSchedule.getName();
       this.scheduleTriggerName = "trg_" + jobSchedule.getName();
@@ -199,7 +201,7 @@ public class JobRunner {
    */
   private static final Map<Class<?>, JobOptions> optionsRegistry = new ConcurrentHashMap<>();
 
-  private static final Map<Class<?>, NeutronJmxJob> scheduleRegistry = new ConcurrentHashMap<>();
+  private static final Map<Class<?>, NeutronJmxFacade> scheduleRegistry = new ConcurrentHashMap<>();
 
   private JobRunner() {
     // Default, no-op
@@ -214,6 +216,7 @@ public class JobRunner {
   @SuppressWarnings("unchecked")
   protected static void init() throws NeutronException {
     try {
+      JobRunner.instance = new JobRunner();
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
       final DateFormat fmt =
           new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
@@ -241,7 +244,7 @@ public class JobRunner {
 
         JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
 
-        final NeutronJmxJob nj = new NeutronJmxJob(sched);
+        final NeutronJmxFacade nj = new NeutronJmxFacade(sched);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         scheduleRegistry.put(klass, nj);
       }
@@ -256,11 +259,13 @@ public class JobRunner {
       final StdSchedulerFactory factory = new StdSchedulerFactory(p);
 
       scheduler = factory.getScheduler();
-      scheduler.getListenerManager().addSchedulerListener(new NeutronSchedulerListener());
+      final ListenerManager listenerManager = scheduler.getListenerManager();
+      listenerManager.addSchedulerListener(new NeutronSchedulerListener());
+      listenerManager.addJobListener(new NeutronJobListener());
       scheduler.start();
 
       // Start last change jobs.
-      for (NeutronJmxJob j : scheduleRegistry.values()) {
+      for (NeutronJmxFacade j : scheduleRegistry.values()) {
         j.schedule();
       }
     } catch (IOException | SchedulerException e) {
