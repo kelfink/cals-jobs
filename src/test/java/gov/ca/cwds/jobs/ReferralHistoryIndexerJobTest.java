@@ -23,7 +23,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -450,13 +449,6 @@ public class ReferralHistoryIndexerJobTest
   @Test
   public void allocateThreadMemory_Args__() throws Exception {
     target.allocateThreadMemory();
-  }
-
-  @Test
-  @Ignore
-  public void main_Args__StringArray() throws Exception {
-    String[] args = new String[] {};
-    ReferralHistoryIndexerJob.main(args);
   }
 
   @Test

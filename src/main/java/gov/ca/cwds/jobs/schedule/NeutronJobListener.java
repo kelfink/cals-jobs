@@ -13,7 +13,7 @@ public class NeutronJobListener implements JobListener {
   @Override
   public String getName() {
     LOGGER.info("getName");
-    return null;
+    return "neutron_job_listener";
   }
 
   @Override
