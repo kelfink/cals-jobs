@@ -11,7 +11,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.SessionFactory;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -111,13 +110,6 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
         new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
-  @Ignore
-  public void main_Args__StringArray() throws Exception {
-    String[] args = new String[] {};
-    ServiceProviderIndexerJob.main(args);
   }
 
 }
