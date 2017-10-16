@@ -419,7 +419,7 @@ public abstract class EsPersonCase
     child.setLastName(this.focusChildLastName);
     child.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.focusChildId,
         this.focusChildLastUpdated, LegacyTable.CLIENT));
-    // child.setSensitivityIndicator(this.focusChildSensitivityIndicator);
+    child.setSensitivityIndicator(this.focusChildSensitivityIndicator);
     esPersonCase.setFocusChild(child);
 
     //
