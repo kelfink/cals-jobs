@@ -15,7 +15,6 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.UnableToInterruptJobException;
 
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 
@@ -39,12 +38,12 @@ public class NeutronScheduledJobTest {
   }
 
   @Test
-  @Ignore
   public void execute_Args__JobExecutionContext() throws Exception {
+    JobRunner.setTestMode(true);
     JobExecutionContext context_ = mock(JobExecutionContext.class);
     JobDetail jd = mock(JobDetail.class);
     JobDataMap jdm = new JobDataMap();
-    jdm.put("job_class", "TestNeutronJob");
+    jdm.put("job_class", "TestIndexerJob");
     jdm.put("cmd_line", "--invalid");
 
     when(context_.getJobDetail()).thenReturn(jd);
@@ -54,11 +53,12 @@ public class NeutronScheduledJobTest {
   }
 
   @Test
+  @Ignore
   public void execute_Args__JobExecutionContext_T__JobExecutionException() throws Exception {
     JobExecutionContext context_ = mock(JobExecutionContext.class);
     JobDetail jd = mock(JobDetail.class);
     JobDataMap jdm = new JobDataMap();
-    jdm.put("job_class", "TestNeutronJob");
+    jdm.put("job_class", "crap");
     jdm.put("cmd_line", "--invalid");
 
     when(context_.getJobDetail()).thenReturn(jd);
@@ -74,16 +74,6 @@ public class NeutronScheduledJobTest {
   @Test
   public void interrupt_Args__() throws Exception {
     target.interrupt();
-  }
-
-  @Test
-  @Ignore
-  public void interrupt_Args___T__UnableToInterruptJobException() throws Exception {
-    try {
-      target.interrupt();
-      fail("Expected exception was not thrown!");
-    } catch (UnableToInterruptJobException e) {
-    }
   }
 
   @Test
