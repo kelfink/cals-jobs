@@ -45,6 +45,9 @@ public class OtherChildInPlacemtHomeIndexerJob extends
     super(mainDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
+  /**
+   * @deprecated scheduled for removal
+   */
   @Override
   @Deprecated
   public String getLegacySourceTable() {

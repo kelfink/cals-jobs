@@ -15,7 +15,6 @@ import com.google.common.collect.Lists;
 import gov.ca.cwds.data.es.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPersonParent;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 
 /**
@@ -23,8 +22,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
  * 
  * @author CWDS API Team
  */
-public class ReplicatedPersonCases extends ApiObjectIdentity
-    implements PersistentObject, ApiPersonAware {
+public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
 
   private static final long serialVersionUID = -8746969311364544478L;
 

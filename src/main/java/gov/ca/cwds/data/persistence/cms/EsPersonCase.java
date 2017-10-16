@@ -19,7 +19,6 @@ import gov.ca.cwds.data.es.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPersonParent;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
@@ -36,7 +35,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * @author CWDS API Team
  */
 @MappedSuperclass
-public abstract class EsPersonCase extends ApiObjectIdentity
+public abstract class EsPersonCase
     implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonCases> {
 
   private static final long serialVersionUID = 2896950873299112269L;

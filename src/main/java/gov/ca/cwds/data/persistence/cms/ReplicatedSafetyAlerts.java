@@ -10,7 +10,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 
 /**
@@ -18,8 +17,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
  * 
  * @author CWDS API Team
  */
-public class ReplicatedSafetyAlerts extends ApiObjectIdentity
-    implements PersistentObject, ApiPersonAware {
+public class ReplicatedSafetyAlerts implements PersistentObject, ApiPersonAware {
 
   private static final long serialVersionUID = 8733181688462933133L;
 

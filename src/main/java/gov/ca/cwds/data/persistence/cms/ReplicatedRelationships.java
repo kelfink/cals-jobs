@@ -10,7 +10,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 
 /**
@@ -18,8 +17,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
  * 
  * @author CWDS API Team
  */
-public class ReplicatedRelationships extends ApiObjectIdentity
-    implements PersistentObject, ApiPersonAware {
+public class ReplicatedRelationships implements PersistentObject, ApiPersonAware {
 
   /**
    * Default serialization.

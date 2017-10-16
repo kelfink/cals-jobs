@@ -181,7 +181,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         con.commit();
       }
 
-    } catch (Exception e) {
+    } catch (SQLException e) {
       markFailed();
       JobLogs.raiseError(LOGGER, e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(), p.getRight(),
           e.getMessage());

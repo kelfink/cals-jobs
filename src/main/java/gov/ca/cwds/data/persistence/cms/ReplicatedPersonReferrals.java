@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -142,6 +145,16 @@ public class ReplicatedPersonReferrals extends ApiObjectIdentity
 
   public void setClientId(String clientId) {
     this.clientId = clientId;
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }
