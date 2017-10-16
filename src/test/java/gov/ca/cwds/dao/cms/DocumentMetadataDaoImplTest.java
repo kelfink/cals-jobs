@@ -7,13 +7,13 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -34,7 +34,6 @@ public class DocumentMetadataDaoImplTest {
   }
 
   @Test
-  @Ignore
   public void findByLastJobRunTimeMinusOneMinute_Args__Date() throws Exception {
     SessionFactory sessionFactory = Mockito.mock(SessionFactory.class);
     Session session = Mockito.mock(Session.class);
@@ -42,6 +41,7 @@ public class DocumentMetadataDaoImplTest {
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(session.getNamedQuery(any())).thenReturn(query);
+    when(query.list()).thenReturn(new ArrayList<>());
 
     final DocumentMetadataDaoImpl target = new DocumentMetadataDaoImpl(sessionFactory);
     final Date lastJobRunTime = new Date();

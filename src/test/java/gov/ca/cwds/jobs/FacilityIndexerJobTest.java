@@ -56,21 +56,6 @@ public class FacilityIndexerJobTest {
   }
 
   @Test
-  @Ignore
-  public void main_Args__StringArray() throws Exception {
-    String[] args = new String[] {};
-    FacilityIndexerJob.main(args);
-  }
-
-  @Test
-  @Ignore
-  public void configure_Args__() throws Exception {
-    File config = null;
-    TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
-    target.configure();
-  }
-
-  @Test
   public void elasticsearchClient_Args__JobConfiguration() throws Exception {
     File config = null;
     TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
@@ -85,15 +70,13 @@ public class FacilityIndexerJobTest {
   }
 
   @Test
-  @Ignore
   public void elasticsearchDao_Args__Client__JobConfiguration() throws Exception {
     File config = null;
     TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
     Client client = mock(Client.class);
     JobConfiguration configuration = mock(JobConfiguration.class);
     Elasticsearch5xDao actual = target.elasticsearchDao(client, configuration);
-    Elasticsearch5xDao expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -141,7 +124,7 @@ public class FacilityIndexerJobTest {
   }
 
   @Test
-  @Ignore
+  // @Ignore
   public void lisItemWriter_Args__JobReader__JobProcessor__JobWriter() throws Exception {
     File config = null;
     TestFacilityIndexerJob target = new TestFacilityIndexerJob(config);
@@ -149,8 +132,7 @@ public class FacilityIndexerJobTest {
     JobProcessor jobProcessor = mock(JobProcessor.class);
     JobWriter jobWriter = mock(JobWriter.class);
     Job actual = target.lisItemWriter(jobReader, jobProcessor, jobWriter);
-    Job expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
 }
