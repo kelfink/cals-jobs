@@ -19,6 +19,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weakref.jmx.MBeanExporter;
+import org.weakref.jmx.Managed;
 
 import com.google.inject.tools.jmx.Manager;
 
@@ -70,6 +71,44 @@ public class JobRunner {
     // Default, no-op
   }
 
+  protected void resetTimestamps(boolean initialMode, int hoursInPast) throws IOException {
+    final DateFormat fmt =
+        new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
+    final Date now = new DateTime().minusHours(initialMode ? 100 : hoursInPast).toDate();
+
+    for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
+      final JobOptions opts = new JobOptions(startingOpts);
+
+      // Find the job's time file under the base directory:
+      final StringBuilder buf = new StringBuilder();
+      buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
+          .append(".time");
+      opts.setLastRunLoc(buf.toString());
+
+      final File f = new File(opts.getLastRunLoc());
+      final boolean fileExists = f.exists();
+
+      if (!fileExists) {
+        FileUtils.writeStringToFile(f, fmt.format(now));
+      }
+    }
+  }
+
+  @Managed(description = "Reset for initial mode.")
+  public void resetTimestampsToInitialMode(boolean initialMode) throws IOException {
+    resetTimestamps(initialMode, 0);
+  }
+
+  @Managed(description = "Stop the scheduler")
+  public void stopScheduler(boolean waitForJobsToComplete) throws SchedulerException {
+    scheduler.shutdown(waitForJobsToComplete);
+  }
+
+  @Managed(description = "Stop the scheduler")
+  public void startScheduler() throws SchedulerException {
+    scheduler.start();
+  }
+
   /**
    * Expose job execution operations through JMX.
    * 
@@ -85,9 +124,10 @@ public class JobRunner {
       // NOTE: make configurable.
       p.put("org.quartz.threadPool.threadCount", NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
       final StdSchedulerFactory factory = new StdSchedulerFactory(p);
+      scheduler = factory.getScheduler();
 
-      instance.scheduler = factory.getScheduler();
-      final ListenerManager listenerManager = instance.scheduler.getListenerManager();
+      // Scheduler listeners.
+      final ListenerManager listenerManager = scheduler.getListenerManager();
       listenerManager.addSchedulerListener(new NeutronSchedulerListener());
       listenerManager.addJobListener(new NeutronJobListener());
 
@@ -100,9 +140,10 @@ public class JobRunner {
       final Date now =
           new DateTime().minusHours(NeutronSchedulerConstants.LAST_CHG_WINDOW_HOURS).toDate();
 
+      // Schedule jobs.
       for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
         final Class<?> klass = sched.getKlazz();
-        final JobOptions opts = new JobOptions(instance.startingOpts);
+        final JobOptions opts = new JobOptions(startingOpts);
 
         // Find the job's time file under the base directory:
         final StringBuilder buf = new StringBuilder();
@@ -122,24 +163,23 @@ public class JobRunner {
 
         registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
 
-        final NeutronJmxFacade nj = new NeutronJmxFacade(instance.scheduler, sched);
+        final NeutronJmxFacade nj = new NeutronJmxFacade(scheduler, sched);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
-        instance.scheduleRegistry.put(klass, nj);
+        scheduleRegistry.put(klass, nj);
       }
 
       // Expose Guice bean attributes through JMX.
       Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
 
       // Start last change jobs.
-      for (NeutronJmxFacade j : instance.scheduleRegistry.values()) {
+      for (NeutronJmxFacade j : scheduleRegistry.values()) {
         j.schedule();
       }
 
       // Start your engines ...
-      instance.scheduler.start();
-
+      scheduler.start();
     } catch (IOException | SchedulerException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "INIT ERROR: {}", e.getMessage());
+      throw JobLogs.buildCheckedException(LOGGER, e, "SCHEDULER INIT ERROR: {}", e.getMessage());
     }
   }
 
@@ -155,7 +195,7 @@ public class JobRunner {
       final JobOptions opts) throws NeutronException {
     LOGGER.info("Register job: {}", klass.getName());
     try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
-      instance.optionsRegistry.put(klass, job.getOpts());
+      optionsRegistry.put(klass, job.getOpts());
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception, for ClassNotFound or the like.
       throw JobLogs.buildCheckedException(LOGGER, e, "JOB REGISTRATION FAILED!: {}",
@@ -177,7 +217,7 @@ public class JobRunner {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
       final JobOptions opts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
-          : instance.optionsRegistry.get(klass);
+          : optionsRegistry.get(klass);
       final BasePersonIndexerJob<?, ?> job =
           (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
       job.setOpts(opts);
