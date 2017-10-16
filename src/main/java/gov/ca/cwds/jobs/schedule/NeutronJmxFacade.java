@@ -41,7 +41,7 @@ public final class NeutronJmxFacade implements Serializable {
   public String run(String cmdLineArgs) throws NeutronException {
     try {
       LOGGER.info("RUN JOB: {}", jobSchedule.getName());
-      final JobProgressTrack track = JobRunner.runRegisteredJob(jobSchedule.getKlazz(),
+      final JobProgressTrack track = JobRunner.runScheduledJob(jobSchedule.getKlazz(),
           StringUtils.isBlank(cmdLineArgs) ? null : cmdLineArgs.split("\\s+"));
       return track.toString();
     } catch (Exception e) {
@@ -52,14 +52,14 @@ public final class NeutronJmxFacade implements Serializable {
 
   @Managed(description = "Schedule job on repeat")
   public void schedule() throws SchedulerException {
-    if (scheduler.checkExists(new JobKey(scheduleJobName, JobRunner.GROUP_LAST_CHG))) {
+    if (scheduler.checkExists(new JobKey(scheduleJobName, NeutronSchedulerConstants.GROUP_LAST_CHG))) {
       LOGGER.warn("JOB ALREADY SCHEDULED! {}", scheduleJobName);
     }
 
     final JobDetail jd =
-        newJob(NeutronScheduledJob.class).withIdentity(scheduleJobName, JobRunner.GROUP_LAST_CHG)
+        newJob(NeutronScheduledJob.class).withIdentity(scheduleJobName, NeutronSchedulerConstants.GROUP_LAST_CHG)
             .usingJobData("job_class", jobSchedule.getKlazz().getName()).build();
-    final Trigger t = newTrigger().withIdentity(scheduleTriggerName, JobRunner.GROUP_LAST_CHG)
+    final Trigger t = newTrigger().withIdentity(scheduleTriggerName, NeutronSchedulerConstants.GROUP_LAST_CHG)
         .withSchedule(
             simpleSchedule().withIntervalInSeconds(jobSchedule.getPeriodSeconds()).repeatForever())
         .startAt(DateTime.now().plusSeconds(jobSchedule.getStartDelaySeconds()).toDate()).build();
@@ -70,14 +70,14 @@ public final class NeutronJmxFacade implements Serializable {
   @Managed(description = "Unschedule job")
   public void unschedule() throws SchedulerException {
     LOGGER.warn("unschedule job");
-    final TriggerKey triggerKey = new TriggerKey(scheduleTriggerName, JobRunner.GROUP_LAST_CHG);
+    final TriggerKey triggerKey = new TriggerKey(scheduleTriggerName, NeutronSchedulerConstants.GROUP_LAST_CHG);
     scheduler.pauseTrigger(triggerKey);
   }
 
   @Managed(description = "Show job status")
   public String status() throws SchedulerException {
     LOGGER.debug("Show job status");
-    final JobKey jobKey = new JobKey(scheduleJobName, JobRunner.GROUP_LAST_CHG);
+    final JobKey jobKey = new JobKey(scheduleJobName, NeutronSchedulerConstants.GROUP_LAST_CHG);
     final JobDetail jd = scheduler.getJobDetail(jobKey);
 
     JobProgressTrack track = (JobProgressTrack) jd.getJobDataMap().get("track");
@@ -89,7 +89,7 @@ public final class NeutronJmxFacade implements Serializable {
     LOGGER.warn("Stop running job");
     unschedule();
 
-    final JobKey key = new JobKey(scheduleJobName, JobRunner.GROUP_LAST_CHG);
+    final JobKey key = new JobKey(scheduleJobName, NeutronSchedulerConstants.GROUP_LAST_CHG);
     scheduler.interrupt(key);
   }
 

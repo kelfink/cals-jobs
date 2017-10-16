@@ -31,13 +31,11 @@ import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
- * Run standalone jobs or serve up jobs in "continuous" mode.
+ * Run standalone jobs or serve up jobs with Quartz.
  * 
  * @author CWDS API Team
  */
 public class JobRunner {
-
-  public static final String GROUP_LAST_CHG = "last_chg";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
 
@@ -45,8 +43,6 @@ public class JobRunner {
    * Singleton instance. One scheduler to rule them all.
    */
   private static final JobRunner instance = new JobRunner();
-
-  static Scheduler scheduler;
 
   /**
    * For unit tests where resources either may not close properly or where expensive resources
@@ -59,7 +55,9 @@ public class JobRunner {
    */
   private static boolean continuousMode = false;
 
-  private static JobOptions startingOpts;
+  private Scheduler scheduler;
+
+  private JobOptions startingOpts;
 
   /**
    * Job options by job type.
@@ -78,16 +76,18 @@ public class JobRunner {
    * @throws NeutronException on initialization error
    */
   @SuppressWarnings("unchecked")
-  protected static void init() throws NeutronException {
+  protected void initScheduler() throws NeutronException {
     try {
       // Quartz scheduling:
       final Properties p = new Properties();
-      p.put("org.quartz.scheduler.instanceName", "neutron");
-      p.put("org.quartz.threadPool.threadCount", "4"); // NOTE: make configurable
+      p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
+
+      // NOTE: make configurable.
+      p.put("org.quartz.threadPool.threadCount", NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
       final StdSchedulerFactory factory = new StdSchedulerFactory(p);
 
-      scheduler = factory.getScheduler();
-      final ListenerManager listenerManager = scheduler.getListenerManager();
+      instance.scheduler = factory.getScheduler();
+      final ListenerManager listenerManager = instance.scheduler.getListenerManager();
       listenerManager.addSchedulerListener(new NeutronSchedulerListener());
       listenerManager.addJobListener(new NeutronJobListener());
 
@@ -95,13 +95,16 @@ public class JobRunner {
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
       final DateFormat fmt =
           new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
-      final Date now = new DateTime().minusHours(2).toDate(); // NOTE: make configurable
+
+      // NOTE: make last change window configurable.
+      final Date now =
+          new DateTime().minusHours(NeutronSchedulerConstants.LAST_CHG_WINDOW_HOURS).toDate();
 
       for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
         final Class<?> klass = sched.getKlazz();
-        final JobOptions opts = new JobOptions(startingOpts);
+        final JobOptions opts = new JobOptions(instance.startingOpts);
 
-        // Job's time file under base directory:
+        // Find the job's time file under the base directory:
         final StringBuilder buf = new StringBuilder();
         buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
             .append(".time");
@@ -117,9 +120,9 @@ public class JobRunner {
               fmt.format(overrideLastRunTime ? opts.getLastRunTime() : now));
         }
 
-        JobRunner.registerContinuousJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
+        JobRunner.registerScheduledJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
 
-        final NeutronJmxFacade nj = new NeutronJmxFacade(scheduler, sched);
+        final NeutronJmxFacade nj = new NeutronJmxFacade(instance.scheduler, sched);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         instance.scheduleRegistry.put(klass, nj);
       }
@@ -133,7 +136,7 @@ public class JobRunner {
       }
 
       // Start your engines ...
-      scheduler.start();
+      instance.scheduler.start();
 
     } catch (IOException | SchedulerException e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "INIT ERROR: {}", e.getMessage());
@@ -148,7 +151,7 @@ public class JobRunner {
    * @param <T> Person persistence type
    * @throws NeutronException unexpected runtime error
    */
-  public static <T extends BasePersonIndexerJob<?, ?>> void registerContinuousJob(
+  public static <T extends BasePersonIndexerJob<?, ?>> void registerScheduledJob(
       final Class<T> klass, final JobOptions opts) throws NeutronException {
     LOGGER.info("Register job: {}", klass.getName());
     try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
@@ -213,7 +216,7 @@ public class JobRunner {
    * @return job progress
    * @throws NeutronException unexpected runtime error
    */
-  public static JobProgressTrack runRegisteredJob(final Class<?> klass, String... args)
+  public static JobProgressTrack runScheduledJob(final Class<?> klass, String... args)
       throws NeutronException {
     try {
       LOGGER.info("Run registered job: {}", klass.getName());
@@ -234,11 +237,11 @@ public class JobRunner {
    * @return job progress
    * @throws NeutronException unexpected runtime error
    */
-  public static JobProgressTrack runRegisteredJob(final String jobName, String... args)
+  public static JobProgressTrack runScheduledJob(final String jobName, String... args)
       throws NeutronException {
     try {
       final Class<?> klass = Class.forName(jobName);
-      return runRegisteredJob(klass, args);
+      return runScheduledJob(klass, args);
     } catch (Exception e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "ON-DEMAND JOB RUN FAILED!: {}",
           e.getMessage());
@@ -250,7 +253,7 @@ public class JobRunner {
    * 
    * @return true if running in continuous mode
    */
-  public static boolean isContinuousMode() {
+  public static boolean isSchedulerMode() {
     return continuousMode;
   }
 
@@ -300,7 +303,7 @@ public class JobRunner {
       throw JobLogs.buildException(LOGGER, e, "STANDALONE JOB FAILED!: {}", e.getMessage());
     } finally {
       // WARNING: kills the JVM in testing but may be needed to shutdown resources.
-      if (!isTestMode() && !isContinuousMode()) {
+      if (!isTestMode() && !isSchedulerMode()) {
         // Shutdown all remaining resources, even those not attached to this job.
         Runtime.getRuntime().exit(exitCode); // NOSONAR
       }
@@ -327,10 +330,10 @@ public class JobRunner {
   public static void main(String[] args) {
     LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
     try {
-      JobRunner.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
-          : JobRunner.startingOpts;
+      instance.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
+          : instance.startingOpts;
       JobRunner.continuousMode = true;
-      JobRunner.init();
+      instance.initScheduler();
 
       LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
     } catch (Exception e) {

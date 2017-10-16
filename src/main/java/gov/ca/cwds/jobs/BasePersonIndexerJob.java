@@ -787,7 +787,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   @Override
   public synchronized void close() throws IOException {
-    if (isRunning() && !JobRunner.isContinuousMode()) {
+    if (isRunning() && !JobRunner.isSchedulerMode()) {
       LOGGER.warn("CLOSING CONNECTIONS!!");
 
       if (this.esDao != null) {
