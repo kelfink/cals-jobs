@@ -358,16 +358,6 @@ public class EsRelationship
     this.relatedLegacyLastUpdated = JobDateUtil.freshDate(relatedLegacyLastUpdated);
   }
 
-  @Override
-  public int compare(EsRelationship o1, EsRelationship o2) {
-    return o1.getThisLegacyId().compareTo(o2.getThisLegacyId());
-  }
-
-  @Override
-  public int compareTo(EsRelationship o) {
-    return compare(this, o);
-  }
-
   public CmsReplicationOperation getThisReplicationOperation() {
     return thisReplicationOperation;
   }
@@ -398,6 +388,16 @@ public class EsRelationship
 
   public void setRelatedReplicationDate(Date relatedReplicationDate) {
     this.relatedReplicationDate = JobDateUtil.freshDate(relatedReplicationDate);
+  }
+
+  @Override
+  public int compare(EsRelationship o1, EsRelationship o2) {
+    return o1.getThisLegacyId().compareTo(o2.getThisLegacyId());
+  }
+
+  @Override
+  public int compareTo(EsRelationship o) {
+    return compare(this, o);
   }
 
 }

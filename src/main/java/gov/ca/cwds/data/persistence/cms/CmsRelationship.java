@@ -67,7 +67,6 @@ public final class CmsRelationship implements ApiMarker {
     } else {
       LOGGER.trace("NO MATCH!! rel={}", wholeRel);
     }
-
   }
 
   public short getSysCodeId() {

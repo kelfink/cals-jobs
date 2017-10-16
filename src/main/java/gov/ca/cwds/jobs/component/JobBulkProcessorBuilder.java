@@ -1,12 +1,8 @@
 package gov.ca.cwds.jobs.component;
 
 import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
@@ -22,8 +18,6 @@ public class JobBulkProcessorBuilder implements ApiMarker {
    * Default serialization.
    */
   private static final long serialVersionUID = 1L;
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobBulkProcessorBuilder.class);
 
   private static final int ES_BULK_SIZE = 5000;
 
@@ -61,29 +55,8 @@ public class JobBulkProcessorBuilder implements ApiMarker {
    * @return an ES bulk processor
    */
   public BulkProcessor buildBulkProcessor() {
-    return BulkProcessor.builder(esDao.getClient(), new BulkProcessor.Listener() {
-
-      @Override
-      public void beforeBulk(long executionId, BulkRequest request) {
-        final int numActions = request.numberOfActions();
-        track.getRecsBulkBefore().getAndAdd(numActions);
-        LOGGER.debug("Ready to execute bulk of {} actions", numActions);
-      }
-
-      @Override
-      public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-        final int numActions = request.numberOfActions();
-        track.getRecsBulkAfter().getAndAdd(numActions);
-        LOGGER.info("Executed bulk of {} actions", numActions);
-      }
-
-      @Override
-      public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-        track.trackBulkError();
-        LOGGER.error("ERROR EXECUTING BULK", failure);
-      }
-
-    }).setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(ES_BYTES_MB, ByteSizeUnit.MB))
+    return BulkProcessor.builder(esDao.getClient(), new NeutronBulkProcessorListener(this.track))
+        .setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(ES_BYTES_MB, ByteSizeUnit.MB))
         .setConcurrentRequests(1).setName("jobs_bp").build();
   }
 
