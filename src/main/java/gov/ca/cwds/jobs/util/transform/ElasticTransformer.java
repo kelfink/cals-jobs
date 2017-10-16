@@ -188,7 +188,7 @@ public class ElasticTransformer {
       throws JsonProcessingException {
 
     // Child classes: Set optional collections before serializing the insert JSON.
-    prepareInsertCollections(docPrep, esp, t, elementName, list, keep);
+    prepareInsertCollections(docPrep, esp, t, list, keep);
     final String insertJson = mapper.writeValueAsString(esp);
 
     String updateJson;
@@ -219,12 +219,11 @@ public class ElasticTransformer {
    * @param esp ES document, already prepared by
    *        {@link #buildElasticSearchPersonDoc(ApiPersonAware)}
    * @param t target ApiPersonAware instance
-   * @param elementName target ES element for update
    * @param list list of ES child objects
    * @param keep ES sections to keep
    */
   public static <T extends PersistentObject> void prepareInsertCollections(
-      AtomPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t, String elementName,
+      AtomPersonDocPrep<T> docPrep, ElasticSearchPerson esp, T t,
       List<? extends ApiTypedIdentifier<String>> list, ESOptionalCollection... keep) {
 
     // Clear out optional collections for updates.

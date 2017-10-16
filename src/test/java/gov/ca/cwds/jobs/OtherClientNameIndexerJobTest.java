@@ -14,12 +14,10 @@ import java.util.List;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
-import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.NativeQuery;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
@@ -60,15 +58,6 @@ public class OtherClientNameIndexerJobTest extends PersonJobTester {
   @Test
   public void testInstantiation() throws Exception {
     assertThat(target, notNullValue());
-  }
-
-  @Test
-  @Ignore
-  public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-    // NOTE: Add as an integration test. Doesn't work with mocks.
-    final Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findAllUpdatedAfter");
-    assertThat(query, is(notNullValue()));
   }
 
   @Test
@@ -185,13 +174,6 @@ public class OtherClientNameIndexerJobTest extends PersonJobTester {
     final String dbSchemaName = "CWSRS1";
     final String actual = target.getInitialLoadQuery(dbSchemaName);
     assertThat(actual, notNullValue());
-  }
-
-  @Test
-  @Ignore
-  public void main_Args__StringArray() throws Exception {
-    String[] args = new String[] {};
-    OtherClientNameIndexerJob.main(args);
   }
 
 }

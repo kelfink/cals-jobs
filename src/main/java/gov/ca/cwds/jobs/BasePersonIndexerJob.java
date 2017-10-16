@@ -665,7 +665,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   @SuppressWarnings("unchecked")
   protected List<T> extractLastRunRecsFromTable(final Date lastRunTime) {
-    LOGGER.info("last successful run: {}", lastRunTime);
+    LOGGER.info("LAST SUCCESSFUL RUN: {}", lastRunTime);
     final Class<?> entityClass = jobDao.getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
     final Session session = jobDao.getSessionFactory().getCurrentSession();

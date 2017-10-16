@@ -4,16 +4,13 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +19,6 @@ import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
-import gov.ca.cwds.jobs.exception.JobsException;
 
 /**
  * 
@@ -56,34 +52,6 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     assertThat(target, notNullValue());
   }
 
-  @Test(expected = JobsException.class)
-  @Ignore
-  public void main_Args$StringArray() throws Exception {
-    final String[] args = new String[] {};
-    ClientIndexerJob.main(args);
-  }
-
-  @Test(expected = JobsException.class)
-  @Ignore
-  public void main_Args__StringArray__t_je() throws Exception {
-    String[] args = new String[] {};
-    ClientIndexerJob.main(args);
-  }
-
-  @Test(expected = JobsException.class)
-  @Ignore
-  public void main_Args__bucket_range() throws Exception {
-    final String[] args = new String[] {"-c", "config/local.yaml", "-r", "21-22", "-b", "500"};
-    ClientIndexerJob.main(args);
-  }
-
-  @Test(expected = JobsException.class)
-  @Ignore
-  public void main_Args__bucket_range_not_digit() throws Exception {
-    final String[] args = new String[] {"-c", "config/local.yaml", "-r", "abc-xyz", "-b", "500"};
-    ClientIndexerJob.main(args);
-  }
-
   @Test
   public void extract_Args__ResultSet() throws Exception {
     when(rs.getString("CLT_IBMSNAP_OPERATION")).thenReturn("I");
@@ -113,16 +81,6 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
 
     // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, notNullValue());
-  }
-
-  @Test
-  @Ignore
-  public void extract_Args__ResultSet_T__SQLException() throws Exception {
-    try {
-      target.extract(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
   }
 
   @Test

@@ -96,21 +96,25 @@ public class JobRunner {
 
   @Managed(description = "Reset for initial load.")
   public void resetTimestampsForInitialLoad() throws IOException {
+    LOGGER.warn("RESET TIMESTAMPS FOR INITIAL LOAD!");
     resetTimestamps(true, 0);
   }
 
   @Managed(description = "Reset for last change.")
   public void resetTimestampsForLastChange(int hoursInPast) throws IOException {
+    LOGGER.warn("RESET TIMESTAMPS FOR LAST CHANGE! hours in past: {}", hoursInPast);
     resetTimestamps(false, hoursInPast);
   }
 
   @Managed(description = "Stop the scheduler")
   public void stopScheduler(boolean waitForJobsToComplete) throws SchedulerException {
+    LOGGER.warn("STOP SCHEDULER! wait for jobs to complete: {}", waitForJobsToComplete);
     scheduler.shutdown(waitForJobsToComplete);
   }
 
-  @Managed(description = "Stop the scheduler")
+  @Managed(description = "Start the scheduler")
   public void startScheduler() throws SchedulerException {
+    LOGGER.warn("START SCHEDULER!");
     scheduler.start();
   }
 
@@ -138,12 +142,12 @@ public class JobRunner {
 
       // JMX:
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-      final DateFormat fmt =
-          new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
 
       // NOTE: make last change window configurable.
       final Date now =
           new DateTime().minusHours(NeutronSchedulerConstants.LAST_CHG_WINDOW_HOURS).toDate();
+      final DateFormat fmt =
+          new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
 
       // Schedule jobs.
       for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
@@ -172,6 +176,8 @@ public class JobRunner {
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         scheduleRegistry.put(klass, nj);
       }
+
+      exporter.export("Neutron:runner=master", this);
 
       // Expose Guice bean attributes through JMX.
       Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());

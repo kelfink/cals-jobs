@@ -4,12 +4,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
-import java.sql.SQLException;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
@@ -49,16 +45,6 @@ public class ChildCaseHistoryIndexerJobTest
   }
 
   @Test
-  @Ignore
-  public void extract_Args__ResultSet_T__SQLException() throws Exception {
-    try {
-      target.extract(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
-  }
-
-  @Test
   public void getDenormalizedClass_Args__() throws Exception {
     Object actual = target.getDenormalizedClass();
     Object expected = EsChildPersonCase.class;
@@ -77,13 +63,6 @@ public class ChildCaseHistoryIndexerJobTest
     String actual = target.getJdbcOrderBy();
     String expected = " ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID ";
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  @Ignore
-  public void main_Args__StringArray() throws Exception {
-    String[] args = new String[] {};
-    ChildCaseHistoryIndexerJob.main(args);
   }
 
 }

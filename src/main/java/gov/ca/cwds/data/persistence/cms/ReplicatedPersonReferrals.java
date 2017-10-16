@@ -13,7 +13,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 
 /**
@@ -21,8 +20,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
  * 
  * @author CWDS API Team
  */
-public class ReplicatedPersonReferrals extends ApiObjectIdentity
-    implements PersistentObject, ApiPersonAware {
+public class ReplicatedPersonReferrals implements PersistentObject, ApiPersonAware {
 
   private static final long serialVersionUID = -8746969311364544478L;
 
