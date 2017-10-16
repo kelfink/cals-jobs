@@ -51,7 +51,7 @@ public class JobRunner {
   private static boolean testMode = false;
 
   /**
-   * Run a single server for all last change jobs. Launch once, use many.
+   * Run a single server for all jobs. Launch once, use many.
    */
   private static boolean continuousMode = false;
 
@@ -120,7 +120,7 @@ public class JobRunner {
               fmt.format(overrideLastRunTime ? opts.getLastRunTime() : now));
         }
 
-        JobRunner.registerScheduledJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
+        registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
 
         final NeutronJmxFacade nj = new NeutronJmxFacade(instance.scheduler, sched);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
@@ -151,8 +151,8 @@ public class JobRunner {
    * @param <T> Person persistence type
    * @throws NeutronException unexpected runtime error
    */
-  public static <T extends BasePersonIndexerJob<?, ?>> void registerScheduledJob(
-      final Class<T> klass, final JobOptions opts) throws NeutronException {
+  public <T extends BasePersonIndexerJob<?, ?>> void registerJob(final Class<T> klass,
+      final JobOptions opts) throws NeutronException {
     LOGGER.info("Register job: {}", klass.getName());
     try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
       instance.optionsRegistry.put(klass, job.getOpts());
@@ -172,7 +172,7 @@ public class JobRunner {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public static BasePersonIndexerJob createJob(final Class<?> klass, String... args)
+  public BasePersonIndexerJob createJob(final Class<?> klass, String... args)
       throws NeutronException {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
@@ -197,7 +197,7 @@ public class JobRunner {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public static BasePersonIndexerJob createJob(final String jobName, String... args)
+  public BasePersonIndexerJob createJob(final String jobName, String... args)
       throws NeutronException {
     try {
       final Class<?> klass = Class.forName(jobName);
@@ -216,7 +216,7 @@ public class JobRunner {
    * @return job progress
    * @throws NeutronException unexpected runtime error
    */
-  public static JobProgressTrack runScheduledJob(final Class<?> klass, String... args)
+  public JobProgressTrack runScheduledJob(final Class<?> klass, String... args)
       throws NeutronException {
     try {
       LOGGER.info("Run registered job: {}", klass.getName());
@@ -237,7 +237,7 @@ public class JobRunner {
    * @return job progress
    * @throws NeutronException unexpected runtime error
    */
-  public static JobProgressTrack runScheduledJob(final String jobName, String... args)
+  public JobProgressTrack runScheduledJob(final String jobName, String... args)
       throws NeutronException {
     try {
       final Class<?> klass = Class.forName(jobName);

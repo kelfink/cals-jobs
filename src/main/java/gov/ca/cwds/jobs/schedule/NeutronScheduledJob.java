@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.schedule;
 
 import org.apache.commons.lang3.StringUtils;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.InterruptableJob;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -11,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 
-// @DisallowConcurrentExecution
+@DisallowConcurrentExecution
 public class NeutronScheduledJob implements InterruptableJob {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronScheduledJob.class);
@@ -29,7 +30,7 @@ public class NeutronScheduledJob implements InterruptableJob {
     cmdLine = context.getJobDetail().getJobDataMap().getString("cmd_line");
 
     LOGGER.info("Executing {}", className);
-    try (final BasePersonIndexerJob neutronJob = JobRunner.createJob(className,
+    try (final BasePersonIndexerJob neutronJob = JobRunner.getInstance().createJob(className,
         StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"))) {
       track = neutronJob.getTrack();
       context.getJobDetail().getJobDataMap().put("track", track);
