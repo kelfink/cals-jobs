@@ -21,7 +21,12 @@ public class NeutronScheduledJob implements InterruptableJob {
   private String cmdLine;
   private JobProgressTrack track;
 
-  public NeutronScheduledJob() {}
+  /**
+   * Constructor.
+   */
+  public NeutronScheduledJob() {
+    // No-op.
+  }
 
   @SuppressWarnings("rawtypes")
   @Override
