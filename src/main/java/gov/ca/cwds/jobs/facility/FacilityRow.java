@@ -7,6 +7,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.jobs.util.JobDateUtil;
 
 /**
  * @author CWDS Elasticsearch Team
@@ -113,27 +114,27 @@ public class FacilityRow implements PersistentObject {
   }
 
   public Date getLicenseEffectiveDate() {
-    return licenseEffectiveDate;
+    return JobDateUtil.freshDate(licenseEffectiveDate);
   }
 
   public void setLicenseEffectiveDate(Date licenseEffectiveDate) {
-    this.licenseEffectiveDate = licenseEffectiveDate;
+    this.licenseEffectiveDate = JobDateUtil.freshDate(licenseEffectiveDate);
   }
 
   public Date getOriginalApplicationReceivedDate() {
-    return originalApplicationReceivedDate;
+    return JobDateUtil.freshDate(originalApplicationReceivedDate);
   }
 
   public void setOriginalApplicationReceivedDate(Date originalApplicationReceivedDate) {
-    this.originalApplicationReceivedDate = originalApplicationReceivedDate;
+    this.originalApplicationReceivedDate = JobDateUtil.freshDate(originalApplicationReceivedDate);
   }
 
   public Date getLastVisitDate() {
-    return lastVisitDate;
+    return JobDateUtil.freshDate(lastVisitDate);
   }
 
   public void setLastVisitDate(Date lastVisitDate) {
-    this.lastVisitDate = lastVisitDate;
+    this.lastVisitDate = JobDateUtil.freshDate(lastVisitDate);
   }
 
   public String getLastVisitReason() {

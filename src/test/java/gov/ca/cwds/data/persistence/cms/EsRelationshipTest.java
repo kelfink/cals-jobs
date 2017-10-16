@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
@@ -121,11 +120,9 @@ public class EsRelationshipTest {
   }
 
   @Test
-  @Ignore
   public void toString_Args__() throws Exception {
     String actual = target.toString();
-    String expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test

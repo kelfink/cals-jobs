@@ -224,9 +224,8 @@ public class ReferralHistoryIndexerJob
    * 
    * @return a connection
    * @throws SQLException on database error
-   * @throws InterruptedException on thread error
    */
-  protected synchronized Connection getConnection() throws SQLException, InterruptedException {
+  protected synchronized Connection getConnection() throws SQLException {
     return jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection();
   }

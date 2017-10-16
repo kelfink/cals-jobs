@@ -175,7 +175,7 @@ public class SystemCodesLoaderJob {
       systemCodesJob.load();
       LOGGER.info("DONE loading system codes from legacy to new system.");
     } catch (Exception e) {
-      LOGGER.error(e.getMessage(), e);
+      LOGGER.error("SYSTEM CODES LOADER FAILED: {}", e.getMessage(), e);
       System.exit(-1);
     }
 

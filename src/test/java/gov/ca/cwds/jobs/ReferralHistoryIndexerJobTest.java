@@ -437,16 +437,6 @@ public class ReferralHistoryIndexerJobTest
   }
 
   @Test
-  public void getConnection_Args___T__InterruptedException() throws Exception {
-    when(cp.getConnection()).thenThrow(InterruptedException.class);
-    try {
-      target.getConnection();
-      fail("Expected exception was not thrown!");
-    } catch (InterruptedException e) {
-    }
-  }
-
-  @Test
   public void allocateThreadMemory_Args__() throws Exception {
     target.allocateThreadMemory();
   }
