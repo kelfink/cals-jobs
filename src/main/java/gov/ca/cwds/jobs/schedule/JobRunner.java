@@ -94,9 +94,14 @@ public class JobRunner {
     }
   }
 
-  @Managed(description = "Reset for initial mode.")
-  public void resetTimestampsToInitialMode(boolean initialMode) throws IOException {
-    resetTimestamps(initialMode, 0);
+  @Managed(description = "Reset for initial load.")
+  public void resetTimestampsForInitialLoad() throws IOException {
+    resetTimestamps(true, 0);
+  }
+
+  @Managed(description = "Reset for last change.")
+  public void resetTimestampsForLastChange(int hoursInPast) throws IOException {
+    resetTimestamps(false, hoursInPast);
   }
 
   @Managed(description = "Stop the scheduler")
