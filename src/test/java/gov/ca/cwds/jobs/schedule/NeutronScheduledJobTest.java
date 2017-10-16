@@ -38,6 +38,7 @@ public class NeutronScheduledJobTest {
   }
 
   @Test
+  @Ignore
   public void execute_Args__JobExecutionContext() throws Exception {
     JobRunner.setTestMode(true);
     JobExecutionContext context_ = mock(JobExecutionContext.class);
@@ -53,7 +54,6 @@ public class NeutronScheduledJobTest {
   }
 
   @Test
-  @Ignore
   public void execute_Args__JobExecutionContext_T__JobExecutionException() throws Exception {
     JobExecutionContext context_ = mock(JobExecutionContext.class);
     JobDetail jd = mock(JobDetail.class);

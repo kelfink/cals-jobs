@@ -57,6 +57,10 @@ public class ReplicatedPersonReferrals implements PersistentObject, ApiPersonAwa
     return new ArrayList<>(referrals.values());
   }
 
+  /**
+   * @param referralId referral to look up
+   * @return whether referral is here here
+   */
   public boolean hasReferral(String referralId) {
     return referrals.containsKey(referralId);
   }

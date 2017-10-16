@@ -129,7 +129,6 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * inserting identifiers into a global temporary table.
    * 
    * @return prepared statement for last change preprocessing
-   * @throws SQLException on database error
    */
   default Function<Connection, PreparedStatement> getPreparedStatementMaker() {
     return c -> {

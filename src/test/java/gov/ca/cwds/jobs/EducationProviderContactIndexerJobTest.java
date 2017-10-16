@@ -1,13 +1,10 @@
 package gov.ca.cwds.jobs;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,7 +32,6 @@ public class EducationProviderContactIndexerJobTest extends
         sessionFactory);
   }
 
-
   @Test
   public void testType() throws Exception {
     assertThat(EducationProviderContactIndexerJob.class, notNullValue());
@@ -52,14 +48,6 @@ public class EducationProviderContactIndexerJobTest extends
         new EducationProviderContactIndexerJob(educationProviderContactDao, elasticsearchDao,
             lastJobRunTimeFilename, mapper, sessionFactory);
     assertThat(target, notNullValue());
-  }
-
-  @Test
-  @Ignore
-  public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-    Query query = session.getNamedQuery(
-        "gov.ca.cwds.data.persistence.cms.rep.ReplicatedEducationProviderContact.findAllUpdatedAfter");
-    assertThat(query, is(notNullValue()));
   }
 
 }
