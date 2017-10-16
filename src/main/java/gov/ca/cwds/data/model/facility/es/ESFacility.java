@@ -9,14 +9,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
  * 
  * @author CWDS Elasticsearch Team
  */
-public class ESFacility extends ApiObjectIdentity implements PersistentObject {
+public class ESFacility implements PersistentObject {
 
   /**
    * Default serialization.

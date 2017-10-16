@@ -311,7 +311,7 @@ public abstract class EsPersonCase
   }
 
   public void setParentLastUpdated(Date parentLastUpdated) {
-    this.parentLastUpdated = parentLastUpdated;
+    this.parentLastUpdated = JobDateUtil.freshDate(parentLastUpdated);
   }
 
   public String getParentSourceTable() {
@@ -335,7 +335,7 @@ public abstract class EsPersonCase
   }
 
   public void setLimitedAccessDate(Date limitedAccessDate) {
-    this.limitedAccessDate = limitedAccessDate;
+    this.limitedAccessDate = JobDateUtil.freshDate(limitedAccessDate);
   }
 
   public String getLimitedAccessDescription() {
