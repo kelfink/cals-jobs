@@ -74,7 +74,7 @@ public class JobRunner {
   protected void resetTimestamps(boolean initialMode, int hoursInPast) throws IOException {
     final DateFormat fmt =
         new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
-    final Date now = new DateTime().minusHours(initialMode ? 100 : hoursInPast).toDate();
+    final Date now = new DateTime().minusHours(initialMode ? 876000 : hoursInPast).toDate();
 
     for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
       final JobOptions opts = new JobOptions(startingOpts);
