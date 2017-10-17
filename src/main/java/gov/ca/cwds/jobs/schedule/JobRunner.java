@@ -8,6 +8,7 @@ import java.lang.management.ManagementFactory;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,7 +55,7 @@ public class JobRunner {
   private static boolean testMode = false;
 
   /**
-   * Run a single server for all jobs. Launch once, use many.
+   * Run a single server for all jobs. Launch one JVM, serve many jobs.
    */
   private static boolean continuousMode = false;
 
@@ -69,7 +70,7 @@ public class JobRunner {
 
   private final Map<Class<?>, NeutronJmxFacade> scheduleRegistry = new ConcurrentHashMap<>();
 
-  private final Map<Class<?>, JobProgressTrack> jobTracks = new ConcurrentHashMap<>();
+  private final Map<Class<?>, List<JobProgressTrack>> jobTracks = new ConcurrentHashMap<>();
 
   private JobRunner() {
     // Default, no-op
