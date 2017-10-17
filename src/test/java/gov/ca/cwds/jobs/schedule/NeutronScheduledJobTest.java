@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -35,22 +34,6 @@ public class NeutronScheduledJobTest {
   @Test
   public void instantiation() throws Exception {
     assertThat(target, notNullValue());
-  }
-
-  @Test
-  @Ignore
-  public void execute_Args__JobExecutionContext() throws Exception {
-    JobRunner.setTestMode(true);
-    JobExecutionContext context_ = mock(JobExecutionContext.class);
-    JobDetail jd = mock(JobDetail.class);
-    JobDataMap jdm = new JobDataMap();
-    jdm.put("job_class", "TestIndexerJob");
-    jdm.put("cmd_line", "--invalid");
-
-    when(context_.getJobDetail()).thenReturn(jd);
-    when(jd.getJobDataMap()).thenReturn(jdm);
-
-    target.execute(context_);
   }
 
   @Test
