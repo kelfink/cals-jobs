@@ -5,23 +5,26 @@ import java.util.List;
 
 import gov.ca.cwds.jobs.component.Job;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 
 /**
  * @author CWDS Elasticsearch Team
+ * @param <I> output reader type
+ * @param <O> output writer type
  */
 @SuppressWarnings("unchecked")
-public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobComponent {
+public class AsyncReadWriteJob<I, O> extends ProducerConsumer<I> implements Job, JobComponent {
 
   /**
    * Default serialization.
    */
   private static final long serialVersionUID = 1L;
 
-  private transient JobReader reader;
-  private transient JobProcessor processor;
-  private transient JobWriter writer;
+  private transient JobReader<I> reader;
+  private transient JobProcessor<I, O> processor;
+  private transient JobWriter<O> writer;
 
-  private transient List chunk = new LinkedList<>();
+  private transient List<O> chunk = new LinkedList<>();
 
   private int chunkSize = 100;
 
@@ -29,11 +32,8 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
    * @param reader reader
    * @param processor processor
    * @param writer writer
-   * @param <I> output reader type
-   * @param <O> output writer type
    */
-  public <I, O> AsyncReadWriteJob(JobReader<I> reader, JobProcessor<I, O> processor,
-      JobWriter<O> writer) {
+  public AsyncReadWriteJob(JobReader<I> reader, JobProcessor<I, O> processor, JobWriter<O> writer) {
     this.reader = reader;
     this.processor = processor;
     this.writer = writer;
@@ -44,12 +44,10 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
    * 
    * @param reader reader
    * @param writer writer
-   * 
-   * @param <I> output reader type
    */
-  public <I> AsyncReadWriteJob(JobReader<I> reader, JobWriter<I> writer) {
+  public AsyncReadWriteJob(JobReader<I> reader, JobWriter<O> writer) {
     this.reader = reader;
-    this.processor = item -> item;
+    this.processor = item -> (O) item;
     this.writer = writer;
   }
 
@@ -65,7 +63,7 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
   }
 
   @Override
-  public Object produce() {
+  public I produce() {
     try {
       return reader.read();
     } catch (Exception e) {
@@ -74,9 +72,9 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
   }
 
   @Override
-  public void consume(Object o) {
+  public void consume(I in) {
     try {
-      Object out = processor.process(o);
+      O out = processor.process(in);
       chunk.add(out);
       if (chunk.size() == chunkSize) {
         flush();
@@ -87,7 +85,7 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
     }
   }
 
-  private void flush() throws Exception {
+  private void flush() throws NeutronException {
     writer.write(chunk); // NOSONAR
     chunk.clear();
   }
@@ -112,7 +110,7 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
   }
 
   @Override
-  public void init() {
+  public void init() throws NeutronException {
     reader.init();
     writer.init();
   }
@@ -122,4 +120,5 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
     reader.destroy();
     writer.destroy();
   }
+
 }

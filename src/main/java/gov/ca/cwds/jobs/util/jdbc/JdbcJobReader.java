@@ -1,9 +1,9 @@
 package gov.ca.cwds.jobs.util.jdbc;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
@@ -25,7 +25,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
   private SessionFactory sessionFactory;
   private ResultSet resultSet;
   private RowMapper<T> rowMapper;
-  private Statement statement;
+  private PreparedStatement statement;
   private String query;
 
   /**
@@ -47,16 +47,15 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
       connection.setAutoCommit(false);
       connection.setReadOnly(true);
 
-      statement = connection.createStatement();
+      statement = connection.prepareStatement(query);
       statement.setFetchSize(5000);
       statement.setMaxRows(0);
       statement.setQueryTimeout(100000);
-      resultSet = statement.executeQuery(query);
+      resultSet = statement.executeQuery();
     } catch (SQLException e) {
       destroy();
       throw new JobsException(e);
     }
-
   }
 
   @Override
@@ -73,7 +72,6 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
   }
 
   @Override
-  @SuppressWarnings("ThrowFromFinallyBlock")
   public void destroy() {
     try {
       if (statement != null) {
@@ -86,4 +84,5 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
       sessionFactory.close();
     }
   }
+
 }
