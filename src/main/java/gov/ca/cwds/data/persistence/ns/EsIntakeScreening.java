@@ -266,19 +266,11 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     if (isOther) {
       ret.setId(otherParticipantId);
       ret.setLegacyId(otherLegacyId);
-      //
-      // TODO - update when legacy last updated and table name are available
-      //
-      // ret.setLegacyLastUpdated(otherLegacyLastUpdated);
-      // ret.setLegacyTable(otherLegacyTable);
+      // NOTE - update when legacy last updated and table name are available
     } else {
       ret.setId(thisParticipantId);
       ret.setLegacyId(thisLegacyId);
-      //
-      // TODO - update when legacy last updated and table name are available
-      //
-      // ret.setLegacyLastUpdated(thisLegacyLastUpdated);
-      // ret.setLegacyTable(thisLegacyTable);
+      // NOTE - update when legacy last updated and table name are available
     }
 
     return ret;

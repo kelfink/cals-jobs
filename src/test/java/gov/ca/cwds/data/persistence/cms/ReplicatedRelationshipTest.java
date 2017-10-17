@@ -23,14 +23,6 @@ public class ReplicatedRelationshipTest {
   }
 
   @Test
-  public void buildUpdateJson_Args__() throws Exception {
-    ReplicatedRelationship target = new ReplicatedRelationship();
-    String actual = target.buildUpdateJson();
-    String expected = "";
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void getPrimaryKey_Args__() throws Exception {
     ReplicatedRelationship target = new ReplicatedRelationship();
     Serializable actual = target.getPrimaryKey();

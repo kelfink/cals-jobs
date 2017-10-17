@@ -89,15 +89,6 @@ public class ReplicatedRelationship implements PersistentObject {
     this.relatedLastName = relatedLastName;
   }
 
-  /**
-   * Update section JSON is the participant's screenings.
-   * 
-   * @return JSON to update document only
-   */
-  public String buildUpdateJson() {
-    return "";
-  }
-
   @Override
   public Serializable getPrimaryKey() {
     return null;
