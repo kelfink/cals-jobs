@@ -25,7 +25,7 @@ public enum NeutronDefaultJobSchedule {
   // Person document roots.
   //
 
-  CLIENT(ClientIndexerJob.class, true, "client", 5, 30, 1, null),
+  CLIENT(ClientIndexerJob.class, true, "client", 5, 20, 1, null),
 
   REPORTER(ReporterIndexerJob.class, true, "reporter", 10, 30, 2, null),
 
@@ -40,10 +40,10 @@ public enum NeutronDefaultJobSchedule {
   EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, true, "education_provider", 42, 120,
       6, null),
 
-  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, true, "other_adult", 50, 30, 7,
+  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, true, "other_adult", 50, 90, 7,
       null),
 
-  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, true, "other_child", 55, 30, 8,
+  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, true, "other_child", 55, 90, 8,
       null),
 
   //
@@ -55,7 +55,7 @@ public enum NeutronDefaultJobSchedule {
    */
   OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 90, 60, 25, "akas"),
 
-  CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 90, 30, 20, "cases"),
+  CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 70, 30, 20, "cases"),
 
   PARENT_CASE(ParentCaseHistoryIndexerJob.class, false, "parent_case", 90, 30, 22, "cases"),
 

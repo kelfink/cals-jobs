@@ -2,6 +2,8 @@ package gov.ca.cwds.jobs.schedule;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -67,6 +69,8 @@ public class JobRunner {
 
   private final Map<Class<?>, NeutronJmxFacade> scheduleRegistry = new ConcurrentHashMap<>();
 
+  private final Map<Class<?>, JobProgressTrack> jobTracks = new ConcurrentHashMap<>();
+
   private JobRunner() {
     // Default, no-op
   }
@@ -95,9 +99,21 @@ public class JobRunner {
   }
 
   @Managed(description = "Reset for initial load.")
-  public void resetTimestampsForInitialLoad() throws IOException {
+  public String resetTimestampsForInitialLoad() {
     LOGGER.warn("RESET TIMESTAMPS FOR INITIAL LOAD!");
-    resetTimestamps(true, 0);
+    try {
+      resetTimestamps(true, 0);
+    } catch (IOException e) {
+      LOGGER.error("FAILED TO RESET TIMESTAMPS! {}", e.getMessage(), e);
+      final StringWriter sw = new StringWriter();
+      final PrintWriter w = new PrintWriter(sw);
+      e.printStackTrace(w);
+      // throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO RESET TIMESTAMPS! {}",
+      // e.getMessage());
+      return sw.toString();
+    }
+
+    return "Timestamps reset for initial load";
   }
 
   @Managed(description = "Reset for last change.")
@@ -107,15 +123,26 @@ public class JobRunner {
   }
 
   @Managed(description = "Stop the scheduler")
-  public void stopScheduler(boolean waitForJobsToComplete) throws SchedulerException {
+  public void stopScheduler(boolean waitForJobsToComplete) throws NeutronException {
     LOGGER.warn("STOP SCHEDULER! wait for jobs to complete: {}", waitForJobsToComplete);
-    scheduler.shutdown(waitForJobsToComplete);
+    try {
+      scheduler.shutdown(waitForJobsToComplete);
+    } catch (SchedulerException e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO STOP SCHEDULER! {}",
+          e.getMessage());
+    }
   }
 
   @Managed(description = "Start the scheduler")
-  public void startScheduler() throws SchedulerException {
+  public void startScheduler() throws NeutronException {
     LOGGER.warn("START SCHEDULER!");
-    scheduler.start();
+    try {
+      scheduler.start();
+    } catch (SchedulerException e) {
+      LOGGER.error("FAILED TO START SCHEDULER! {}", e.getMessage(), e);
+      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO START SCHEDULER! {}",
+          e.getMessage());
+    }
   }
 
   /**
