@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -277,7 +275,7 @@ public class ReferralHistoryIndexerJob
     EsPersonReferral m;
     LOGGER.info("pull referrals");
     final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
-    while (!isFailed() && rs.next() && (m = extractReferral(rs)) != null) {
+    while (!isFailed() && rs.next() && (m = EsPersonReferral.extractReferral(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "bundle referral");
       JobLogs.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
           "referrals");
@@ -295,7 +293,7 @@ public class ReferralHistoryIndexerJob
     EsPersonReferral m;
     LOGGER.info("pull allegations");
     final ResultSet rs = stmtSelAllegation.executeQuery(); // NOSONAR
-    while (!isFailed() && rs.next() && (m = extractAllegation(rs)) != null) {
+    while (!isFailed() && rs.next() && (m = EsPersonReferral.extractAllegation(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "bundle allegation");
       JobLogs.logEvery(LOGGER, 15000, rowsReadAllegations.incrementAndGet(), "Total read",
           "allegations");
@@ -550,74 +548,6 @@ public class ReferralHistoryIndexerJob
 
     return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON).upsert(
         new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
-  }
-
-  /**
-   * IBM strongly recommends retrieving column results by position, not by column name.
-   * 
-   * @param rs referral result set
-   * @return parent referral element
-   * @throws SQLException on DB error
-   */
-  protected EsPersonReferral extractReferral(final ResultSet rs) throws SQLException {
-    EsPersonReferral ret = new EsPersonReferral();
-
-    int columnIndex = 0;
-    ret.setReferralId(rs.getString(++columnIndex));
-    ret.setStartDate(rs.getDate(++columnIndex));
-    ret.setEndDate(rs.getDate(++columnIndex));
-    ret.setReferralResponseType(rs.getInt(++columnIndex));
-
-    ret.setLimitedAccessCode(ifNull(rs.getString(++columnIndex)));
-    ret.setLimitedAccessDate(rs.getDate(++columnIndex));
-    ret.setLimitedAccessDescription(ifNull(rs.getString(++columnIndex)));
-    ret.setLimitedAccessGovernmentEntityId(rs.getInt(++columnIndex));
-    ret.setReferralLastUpdated(rs.getTimestamp(++columnIndex));
-
-    ret.setReporterId(ifNull(rs.getString(++columnIndex)));
-    ret.setReporterFirstName(ifNull(rs.getString(++columnIndex)));
-    ret.setReporterLastName(ifNull(rs.getString(++columnIndex)));
-    ret.setReporterLastUpdated(rs.getTimestamp(++columnIndex));
-
-    ret.setWorkerId(ifNull(rs.getString(++columnIndex)));
-    ret.setWorkerFirstName(ifNull(rs.getString(++columnIndex)));
-    ret.setWorkerLastName(ifNull(rs.getString(++columnIndex)));
-    ret.setWorkerLastUpdated(rs.getTimestamp(++columnIndex));
-
-    ret.setCounty(rs.getInt(++columnIndex));
-    ret.setLastChange(rs.getDate(++columnIndex));
-
-    return ret;
-  }
-
-  /**
-   * @param rs allegation result set
-   * @return allegation side of referral
-   * @throws SQLException database error
-   */
-  protected EsPersonReferral extractAllegation(final ResultSet rs) throws SQLException {
-    EsPersonReferral ret = new EsPersonReferral();
-
-    int columnIndex = 0;
-    ret.setReferralId(ifNull(rs.getString(++columnIndex)));
-    ret.setAllegationId(ifNull(rs.getString(++columnIndex)));
-    ret.setAllegationDisposition(rs.getInt(++columnIndex));
-    ret.setAllegationType(rs.getInt(++columnIndex));
-    ret.setAllegationLastUpdated(rs.getTimestamp(++columnIndex));
-
-    ret.setPerpetratorId(ifNull(rs.getString(++columnIndex)));
-    ret.setPerpetratorSensitivityIndicator(rs.getString(++columnIndex));
-    ret.setPerpetratorFirstName(ifNull(rs.getString(++columnIndex)));
-    ret.setPerpetratorLastName(ifNull(rs.getString(++columnIndex)));
-    ret.setPerpetratorLastUpdated(rs.getTimestamp(++columnIndex));
-
-    ret.setVictimId(ifNull(rs.getString(++columnIndex)));
-    ret.setVictimSensitivityIndicator(rs.getString(++columnIndex));
-    ret.setVictimFirstName(ifNull(rs.getString(++columnIndex)));
-    ret.setVictimLastName(ifNull(rs.getString(++columnIndex)));
-    ret.setVictimLastUpdated(rs.getTimestamp(++columnIndex));
-
-    return ret;
   }
 
   @Override

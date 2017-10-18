@@ -52,7 +52,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 @Table(name = "VW_LST_REFERRAL_HIST")
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
     query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
-        + "WHERE (1=1 OR current timestamp < :after)" + "ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
+        + "WHERE (1=1 OR current timestamp < :after) ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsPersonReferral.class, readOnly = true)
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithUnlimitedAccess",
@@ -246,6 +246,7 @@ public class EsPersonReferral
     this.startDate = rs.getDate("START_DATE");
     this.endDate = rs.getDate("END_DATE");
     this.referralResponseType = rs.getInt("REFERRAL_RESPONSE_TYPE");
+
     this.limitedAccessCode = ifNull(rs.getString("LIMITED_ACCESS_CODE"));
     this.limitedAccessDate = rs.getDate("LIMITED_ACCESS_DATE");
     this.limitedAccessDescription = ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION"));
@@ -283,6 +284,79 @@ public class EsPersonReferral
     this.lastChange = rs.getDate("LAST_CHG");
   }
 
+  /**
+   * Extract allegation.
+   * 
+   * @param rs allegation result set
+   * @return allegation side of referral
+   * @throws SQLException database error
+   */
+  public static EsPersonReferral extractAllegation(final ResultSet rs) throws SQLException {
+    final EsPersonReferral ret = new EsPersonReferral();
+
+    ret.referralId = ifNull(rs.getString("REFERRAL_ID"));
+
+    ret.allegationId = ifNull(rs.getString("ALLEGATION_ID"));
+    ret.allegationType = rs.getInt("ALLEGATION_TYPE");
+    ret.allegationDisposition = rs.getInt("ALLEGATION_DISPOSITION");
+    ret.allegationLastUpdated = rs.getTimestamp("ALLEGATION_LAST_UPDATED");
+
+    ret.perpetratorId = ifNull(rs.getString("PERPETRATOR_ID"));
+    ret.perpetratorFirstName = ifNull(rs.getString("PERPETRATOR_FIRST_NM"));
+    ret.perpetratorLastName = ifNull(rs.getString("PERPETRATOR_LAST_NM"));
+    ret.perpetratorLastUpdated = rs.getTimestamp("PERPETRATOR_LAST_UPDATED");
+    ret.perpetratorSensitivityIndicator = rs.getString("PERPETRATOR_SENSITIVITY_IND");
+
+    ret.victimId = ifNull(rs.getString("VICTIM_ID"));
+    ret.victimFirstName = ifNull(rs.getString("VICTIM_FIRST_NM"));
+    ret.victimLastName = ifNull(rs.getString("VICTIM_LAST_NM"));
+    ret.victimLastUpdated = rs.getTimestamp("VICTIM_LAST_UPDATED");
+    ret.victimSensitivityIndicator = rs.getString("VICTIM_SENSITIVITY_IND");
+
+    return ret;
+  }
+
+  /**
+   * Extract referral.
+   * 
+   * <p>
+   * IBM strongly recommends retrieving column results by position, not by column name.
+   * </p>
+   * 
+   * @param rs referral result set
+   * @return parent referral element
+   * @throws SQLException on DB error
+   */
+  public static EsPersonReferral extractReferral(final ResultSet rs) throws SQLException {
+    final EsPersonReferral ret = new EsPersonReferral();
+
+    ret.referralId = ifNull(rs.getString("REFERRAL_ID"));
+    ret.startDate = rs.getDate("START_DATE");
+    ret.endDate = rs.getDate("END_DATE");
+    ret.referralResponseType = rs.getInt("REFERRAL_RESPONSE_TYPE");
+
+    ret.limitedAccessCode = ifNull(rs.getString("LIMITED_ACCESS_CODE"));
+    ret.limitedAccessDate = rs.getDate("LIMITED_ACCESS_DATE");
+    ret.limitedAccessDescription = ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION"));
+    ret.limitedAccessGovernmentEntityId = rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT");
+    ret.referralLastUpdated = rs.getTimestamp("REFERRAL_LAST_UPDATED");
+
+    ret.reporterId = ifNull(rs.getString("REPORTER_ID"));
+    ret.reporterFirstName = ifNull(rs.getString("REPORTER_FIRST_NM"));
+    ret.reporterLastName = ifNull(rs.getString("REPORTER_LAST_NM"));
+    ret.reporterLastUpdated = rs.getTimestamp("REPORTER_LAST_UPDATED");
+
+    ret.workerId = ifNull(rs.getString("WORKER_ID"));
+    ret.workerFirstName = ifNull(rs.getString("WORKER_FIRST_NM"));
+    ret.workerLastName = ifNull(rs.getString("WORKER_LAST_NM"));
+    ret.workerLastUpdated = rs.getTimestamp("WORKER_LAST_UPDATED");
+
+    ret.county = rs.getInt("REFERRAL_COUNTY");
+    ret.lastChange = rs.getDate("LAST_CHG");
+
+    return ret;
+  }
+
   @Override
   public Class<ReplicatedPersonReferrals> getNormalizationClass() {
     return ReplicatedPersonReferrals.class;
@@ -305,15 +379,15 @@ public class EsPersonReferral
     this.referralLastUpdated = ref.referralLastUpdated;
     this.limitedAccessCode = ref.limitedAccessCode;
     this.limitedAccessDate = ref.limitedAccessDate;
-    this.limitedAccessDescription = ref.limitedAccessDescription;
+    this.limitedAccessDescription = ifNull(ref.limitedAccessDescription);
     this.limitedAccessGovernmentEntityId = ref.limitedAccessGovernmentEntityId;
-    this.reporterFirstName = ref.reporterFirstName;
-    this.reporterId = ref.reporterId;
-    this.reporterLastName = ref.reporterLastName;
+    this.reporterFirstName = ifNull(ref.reporterFirstName);
+    this.reporterId = ifNull(ref.reporterId);
+    this.reporterLastName = ifNull(ref.reporterLastName);
     this.reporterLastUpdated = ref.reporterLastUpdated;
-    this.workerFirstName = ref.workerFirstName;
+    this.workerFirstName = ifNull(ref.workerFirstName);
     this.workerId = ref.workerId;
-    this.workerLastName = ref.workerLastName;
+    this.workerLastName = ifNull(ref.workerLastName);
     this.workerLastUpdated = ref.workerLastUpdated;
   }
 
@@ -321,8 +395,8 @@ public class EsPersonReferral
     final ElasticSearchPersonReporter ret = new ElasticSearchPersonReporter();
     ret.setId(this.reporterId);
     ret.setLegacyClientId(this.reporterId);
-    ret.setFirstName(this.reporterFirstName);
-    ret.setLastName(this.reporterLastName);
+    ret.setFirstName(ifNull(this.reporterFirstName));
+    ret.setLastName(ifNull(this.reporterLastName));
     ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.reporterId,
         this.reporterLastUpdated, LegacyTable.REPORTER));
     return ret;
@@ -332,8 +406,8 @@ public class EsPersonReferral
     final ElasticSearchPersonSocialWorker ret = new ElasticSearchPersonSocialWorker();
     ret.setId(this.workerId);
     ret.setLegacyClientId(this.workerId);
-    ret.setFirstName(this.workerFirstName);
-    ret.setLastName(this.workerLastName);
+    ret.setFirstName(ifNull(this.workerFirstName));
+    ret.setLastName(ifNull(this.workerLastName));
     ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
         this.workerLastUpdated, LegacyTable.STAFF_PERSON));
     return ret;
@@ -343,7 +417,7 @@ public class EsPersonReferral
     ElasticSearchAccessLimitation ret = new ElasticSearchAccessLimitation();
     ret.setLimitedAccessCode(this.limitedAccessCode);
     ret.setLimitedAccessDate(DomainChef.cookDate(this.limitedAccessDate));
-    ret.setLimitedAccessDescription(this.limitedAccessDescription);
+    ret.setLimitedAccessDescription(ifNull(this.limitedAccessDescription));
     ret.setLimitedAccessGovernmentEntityId(this.limitedAccessGovernmentEntityId == null ? null
         : this.limitedAccessGovernmentEntityId.toString());
     ret.setLimitedAccessGovernmentEntityName(SystemCodeCache.global()
@@ -369,8 +443,8 @@ public class EsPersonReferral
   private ElasticSearchPersonNestedPerson makePerpetrator() {
     final ElasticSearchPersonNestedPerson perpetrator = new ElasticSearchPersonNestedPerson();
     perpetrator.setId(this.perpetratorId);
-    perpetrator.setFirstName(this.perpetratorFirstName);
-    perpetrator.setLastName(this.perpetratorLastName);
+    perpetrator.setFirstName(ifNull(this.perpetratorFirstName));
+    perpetrator.setLastName(ifNull(this.perpetratorLastName));
     perpetrator.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.perpetratorId,
         this.perpetratorLastUpdated, LegacyTable.CLIENT));
     perpetrator.setSensitivityIndicator(perpetratorSensitivityIndicator);
@@ -380,8 +454,8 @@ public class EsPersonReferral
   private ElasticSearchPersonNestedPerson makeVictim() {
     ElasticSearchPersonNestedPerson victim = new ElasticSearchPersonNestedPerson();
     victim.setId(this.victimId);
-    victim.setFirstName(this.victimFirstName);
-    victim.setLastName(this.victimLastName);
+    victim.setFirstName(ifNull(this.victimFirstName));
+    victim.setLastName(ifNull(this.victimLastName));
     victim.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.victimId,
         this.victimLastUpdated, LegacyTable.CLIENT));
     victim.setSensitivityIndicator(victimSensitivityIndicator);
@@ -429,8 +503,8 @@ public class EsPersonReferral
       // NOTE: #148091785: deprecated person fields.
       allegation.setPerpetratorId(this.perpetratorId);
       allegation.setPerpetratorLegacyClientId(this.perpetratorId);
-      allegation.setPerpetratorFirstName(this.perpetratorFirstName);
-      allegation.setPerpetratorLastName(this.perpetratorLastName);
+      allegation.setPerpetratorFirstName(ifNull(this.perpetratorFirstName));
+      allegation.setPerpetratorLastName(ifNull(this.perpetratorLastName));
     }
 
     if (AtomSecurity.isNotSealedSensitive(opts, victimSensitivityIndicator)) {
@@ -439,8 +513,8 @@ public class EsPersonReferral
       // NOTE: #148091785: deprecated person fields.
       allegation.setVictimId(this.victimId);
       allegation.setVictimLegacyClientId(this.victimId);
-      allegation.setVictimFirstName(this.victimFirstName);
-      allegation.setVictimLastName(this.victimLastName);
+      allegation.setVictimFirstName(ifNull(this.victimFirstName));
+      allegation.setVictimLastName(ifNull(this.victimLastName));
     }
 
     ret.addReferral(r, allegation);

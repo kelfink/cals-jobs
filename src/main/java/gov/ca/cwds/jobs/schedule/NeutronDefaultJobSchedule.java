@@ -32,18 +32,18 @@ public enum NeutronDefaultJobSchedule {
   COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, true, "collateral_individual", 20, 30,
       3, null),
 
-  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, true, "service_provider", 25, 30, 4, null),
+  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, true, "service_provider", 25, 120, 4, null),
 
   SUBSTITUTE_CARE_PROVIDER(SubstituteCareProviderIndexJob.class, true, "substitute_care_provider",
-      30, 30, 5, null),
+      30, 120, 5, null),
 
   EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, true, "education_provider", 42, 120,
       6, null),
 
-  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, true, "other_adult", 50, 90, 7,
+  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, true, "other_adult", 50, 120, 7,
       null),
 
-  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, true, "other_child", 55, 90, 8,
+  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, true, "other_child", 55, 120, 8,
       null),
 
   //
@@ -53,7 +53,7 @@ public enum NeutronDefaultJobSchedule {
   /**
    * Client name aliases.
    */
-  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 90, 60, 25, "akas"),
+  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 90, 45, 25, "akas"),
 
   CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 70, 30, 20, "cases"),
 
@@ -63,9 +63,9 @@ public enum NeutronDefaultJobSchedule {
 
   RELATIONSHIP(RelationshipIndexerJob.class, false, "relationship", 90, 30, 30, "relationships"),
 
-  SAFETY_ALERT(SafetyAlertIndexerJob.class, false, "safety_alert", 90, 60, 40, "safety_alerts"),
+  SAFETY_ALERT(SafetyAlertIndexerJob.class, false, "safety_alert", 90, 45, 40, "safety_alerts"),
 
-  INTAKE_SCREENING(IntakeScreeningJob.class, false, "intake_screening", 90, 30, 18, "screenings");
+  INTAKE_SCREENING(IntakeScreeningJob.class, false, "intake_screening", 90, 20, 18, "screenings");
 
   private final Class<?> klazz;
 

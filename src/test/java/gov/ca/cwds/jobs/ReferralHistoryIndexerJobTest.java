@@ -383,35 +383,35 @@ public class ReferralHistoryIndexerJobTest
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void extractReferral_Args__ResultSet() throws Exception {
-    EsPersonReferral actual = target.extractReferral(rs);
-    assertThat(actual, notNullValue());
-  }
-
-  @Test
-  public void extractReferral_Args__ResultSet_T__SQLException() throws Exception {
-    when(rs.next()).thenThrow(new SQLException());
-    when(rs.getString(any(Integer.class))).thenThrow(new SQLException());
-    try {
-      target.extractReferral(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
-  }
-
-  @Test
-  public void extractAllegation_Args__ResultSet() throws Exception {
-    EsPersonReferral actual = target.extractAllegation(rs);
-    assertThat(actual, notNullValue());
-  }
-
-  @Test(expected = SQLException.class)
-  public void extractAllegation_Args__ResultSet_T__SQLException() throws Exception {
-    when(rs.next()).thenThrow(new SQLException());
-    when(rs.getString(any(Integer.class))).thenThrow(new SQLException());
-    target.extractAllegation(rs);
-  }
+  // @Test
+  // public void extractReferral_Args__ResultSet() throws Exception {
+  // EsPersonReferral actual = target.extractReferral(rs);
+  // assertThat(actual, notNullValue());
+  // }
+  //
+  // @Test
+  // public void extractReferral_Args__ResultSet_T__SQLException() throws Exception {
+  // when(rs.next()).thenThrow(new SQLException());
+  // when(rs.getString(any(Integer.class))).thenThrow(new SQLException());
+  // try {
+  // target.extractReferral(rs);
+  // fail("Expected exception was not thrown!");
+  // } catch (SQLException e) {
+  // }
+  // }
+  //
+  // @Test
+  // public void extractAllegation_Args__ResultSet() throws Exception {
+  // EsPersonReferral actual = target.extractAllegation(rs);
+  // assertThat(actual, notNullValue());
+  // }
+  //
+  // @Test(expected = SQLException.class)
+  // public void extractAllegation_Args__ResultSet_T__SQLException() throws Exception {
+  // when(rs.next()).thenThrow(new SQLException());
+  // when(rs.getString(any(Integer.class))).thenThrow(new SQLException());
+  // target.extractAllegation(rs);
+  // }
 
   @Test
   public void isRangeSelfManaging_Args__() throws Exception {
