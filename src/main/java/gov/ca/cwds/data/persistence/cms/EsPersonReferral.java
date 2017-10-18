@@ -295,7 +295,6 @@ public class EsPersonReferral
     final EsPersonReferral ret = new EsPersonReferral();
 
     ret.referralId = ifNull(rs.getString("REFERRAL_ID"));
-
     ret.allegationId = ifNull(rs.getString("ALLEGATION_ID"));
     ret.allegationType = rs.getInt("ALLEGATION_TYPE");
     ret.allegationDisposition = rs.getInt("ALLEGATION_DISPOSITION");
