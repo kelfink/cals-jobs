@@ -19,6 +19,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
@@ -124,9 +125,11 @@ public class EsPersonReferral
   private String reporterId;
 
   @Column(name = "REPORTER_FIRST_NM")
+  @ColumnTransformer(read = "trim(REPORTER_FIRST_NM)")
   private String reporterFirstName;
 
   @Column(name = "REPORTER_LAST_NM")
+  @ColumnTransformer(read = "trim(REPORTER_LAST_NM)")
   private String reporterLastName;
 
   @Column(name = "REPORTER_LAST_UPDATED")
@@ -141,9 +144,11 @@ public class EsPersonReferral
   private String workerId;
 
   @Column(name = "WORKER_FIRST_NM")
+  @ColumnTransformer(read = "trim(WORKER_FIRST_NM)")
   private String workerFirstName;
 
   @Column(name = "WORKER_LAST_NM")
+  @ColumnTransformer(read = "trim(WORKER_LAST_NM)")
   private String workerLastName;
 
   @Column(name = "WORKER_LAST_UPDATED")
@@ -177,9 +182,11 @@ public class EsPersonReferral
   private String victimId;
 
   @Column(name = "VICTIM_FIRST_NM")
+  @ColumnTransformer(read = "trim(VICTIM_FIRST_NM)")
   private String victimFirstName;
 
   @Column(name = "VICTIM_LAST_NM")
+  @ColumnTransformer(read = "trim(VICTIM_LAST_NM)")
   private String victimLastName;
 
   @Column(name = "VICTIM_LAST_UPDATED")
@@ -201,6 +208,7 @@ public class EsPersonReferral
   private Date limitedAccessDate;
 
   @Column(name = "LIMITED_ACCESS_DESCRIPTION")
+  @ColumnTransformer(read = "trim(LIMITED_ACCESS_DESCRIPTION)")
   private String limitedAccessDescription;
 
   @Column(name = "LIMITED_ACCESS_GOVERNMENT_ENT")
@@ -215,9 +223,11 @@ public class EsPersonReferral
   private String perpetratorId;
 
   @Column(name = "PERPETRATOR_FIRST_NM")
+  @ColumnTransformer(read = "trim(PERPETRATOR_FIRST_NM)")
   private String perpetratorFirstName;
 
   @Column(name = "PERPETRATOR_LAST_NM")
+  @ColumnTransformer(read = "trim(PERPETRATOR_LAST_NM)")
   private String perpetratorLastName;
 
   @Column(name = "PERPETRATOR_LAST_UPDATED")
