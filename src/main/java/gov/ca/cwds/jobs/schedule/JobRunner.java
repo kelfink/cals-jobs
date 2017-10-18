@@ -63,6 +63,8 @@ public class JobRunner {
 
   private JobOptions startingOpts;
 
+  private final NeutronRestServer jetty = new NeutronRestServer();
+
   /**
    * Job options by job type.
    */
@@ -218,7 +220,6 @@ public class JobRunner {
       // Start your engines ...
       scheduler.start();
 
-      final NeutronRestServer jetty = new NeutronRestServer();
       Thread jettyServer = new Thread(jetty::run);
       jettyServer.start();
 

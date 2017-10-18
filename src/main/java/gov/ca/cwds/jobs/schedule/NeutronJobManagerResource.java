@@ -29,7 +29,7 @@ public class NeutronJobManagerResource implements ApiMarker {
   @Path("test")
   @Produces(MediaType.TEXT_PLAIN)
   public String testIsServerAlive() {
-    return "\n\nCurrent server time: " + new SimpleDateFormat().format(new Date()) + "\n\n";
+    return "\n\nServer time: " + new SimpleDateFormat().format(new Date()) + "\n\n";
   }
 
   /**
