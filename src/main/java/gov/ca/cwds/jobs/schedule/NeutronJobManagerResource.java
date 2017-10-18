@@ -1,6 +1,10 @@
 package gov.ca.cwds.jobs.schedule;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -12,13 +16,20 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.std.ApiMarker;
 
-@Path("/job")
+@Path("/neutron")
 public class NeutronJobManagerResource implements ApiMarker {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJobManagerResource.class);
 
   public NeutronJobManagerResource() {
     // default, no-op
+  }
+
+  @GET
+  @Path("test")
+  @Produces(MediaType.TEXT_PLAIN)
+  public String testIsServerAlive() {
+    return "\n\nCurrent server time: " + new SimpleDateFormat().format(new Date()) + "\n\n";
   }
 
   /**
@@ -31,17 +42,16 @@ public class NeutronJobManagerResource implements ApiMarker {
    * @param body configuration file content in request body
    * @return JSON acknowledgement
    */
-  @Path("/{jobName}/{command}/{fileName}")
+  @Path("/{jobName}/{command}")
   @POST
   @Consumes(MediaType.WILDCARD)
   @Produces(MediaType.APPLICATION_JSON)
   public String masterAndCommander(@PathParam("jobName") String jobName,
       @PathParam("command") String command, String body) {
-    LOGGER.info("job name: {}, " + jobName + "}, user hash: {" + command + "}");
-    LOGGER.info("receiveCap: POST body len: {}", body.length());
+    LOGGER.info("job name: {}, command: {}, POST body len: {}", jobName, command, body.length());
     final StringBuilder buf = new StringBuilder();
-    buf.append("{\"result\":\"Acknowledged\",\"job_name\":\"").append(jobName)
-        .append("\",\"command\":\"").append(command).append("\"}");
+    buf.append("{\"result\":\"ACK\",\"job_name\":\"").append(jobName).append("\",\"command\":\"")
+        .append(command).append("\"}");
     final NeutronJobManagementBean ufb = new NeutronJobManagementBean(jobName, command, body);
     // NOTE: Handle command.
     return buf.toString();

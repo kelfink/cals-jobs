@@ -4,26 +4,31 @@ import gov.ca.cwds.data.std.ApiMarker;
 
 public class NeutronJobManagementBean implements ApiMarker {
 
-  private final String datePath;
-  private final String usrHash;
-  private final String body;
+  /**
+   * Default serialization.
+   */
+  private static final long serialVersionUID = 1L;
 
-  public NeutronJobManagementBean(String datePath, String usrHash, String body) {
-    this.datePath = datePath;
-    this.usrHash = usrHash;
-    this.body = body;
+  private final String jobName;
+  private final String command;
+  private final String config;
+
+  public NeutronJobManagementBean(String jobName, String command, String body) {
+    this.jobName = jobName;
+    this.command = command;
+    this.config = body;
   }
 
-  public String getDatePath() {
-    return datePath;
+  public String getJobName() {
+    return jobName;
   }
 
-  public String getUsrHash() {
-    return usrHash;
+  public String getCommand() {
+    return command;
   }
 
-  public String getBody() {
-    return body;
+  public String getConfig() {
+    return config;
   }
 
 }
