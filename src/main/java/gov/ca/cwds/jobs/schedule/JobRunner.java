@@ -217,6 +217,11 @@ public class JobRunner {
 
       // Start your engines ...
       scheduler.start();
+
+      final NeutronRestServer jetty = new NeutronRestServer();
+      Thread jettyServer = new Thread(jetty::run);
+      jettyServer.start();
+
     } catch (IOException | SchedulerException e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "SCHEDULER INIT ERROR: {}", e.getMessage());
     }

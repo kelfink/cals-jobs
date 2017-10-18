@@ -26,9 +26,9 @@ import com.google.inject.servlet.ServletModule;
 import com.squarespace.jersey2.guice.JerseyGuiceModule;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 
-public class JettyRestServerApp extends Application {
+public class NeutronRestServer extends Application {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JettyRestServerApp.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronRestServer.class);
 
   private static boolean isAppRunning = true;
 
@@ -97,12 +97,12 @@ public class JettyRestServerApp extends Application {
   }
 
   public static void setAppRunning(boolean isAppRunning) {
-    JettyRestServerApp.isAppRunning = isAppRunning;
+    NeutronRestServer.isAppRunning = isAppRunning;
   }
 
   public static void main(String[] args) throws Exception {
     try {
-      new JettyRestServerApp().run();
+      new NeutronRestServer().run();
     } catch (Exception e) {
       LOGGER.error("HTTP SERVER ERROR! {}", e.getMessage(), e);
     }
