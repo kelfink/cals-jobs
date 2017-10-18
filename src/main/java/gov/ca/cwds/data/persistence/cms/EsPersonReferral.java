@@ -413,7 +413,7 @@ public class EsPersonReferral
   }
 
   private ElasticSearchAccessLimitation makeAccessLimitation() {
-    ElasticSearchAccessLimitation ret = new ElasticSearchAccessLimitation();
+    final ElasticSearchAccessLimitation ret = new ElasticSearchAccessLimitation();
     ret.setLimitedAccessCode(this.limitedAccessCode);
     ret.setLimitedAccessDate(DomainChef.cookDate(this.limitedAccessDate));
     ret.setLimitedAccessDescription(ifNull(this.limitedAccessDescription));
@@ -425,7 +425,7 @@ public class EsPersonReferral
   }
 
   private ElasticSearchPersonAllegation makeAllegation() {
-    ElasticSearchPersonAllegation ret = new ElasticSearchPersonAllegation();
+    final ElasticSearchPersonAllegation ret = new ElasticSearchPersonAllegation();
     ret.setId(this.allegationId);
     ret.setLegacyId(this.allegationId);
     ret.setAllegationDescription(
@@ -451,7 +451,7 @@ public class EsPersonReferral
   }
 
   private ElasticSearchPersonNestedPerson makeVictim() {
-    ElasticSearchPersonNestedPerson victim = new ElasticSearchPersonNestedPerson();
+    final ElasticSearchPersonNestedPerson victim = new ElasticSearchPersonNestedPerson();
     victim.setId(this.victimId);
     victim.setFirstName(ifNull(this.victimFirstName));
     victim.setLastName(ifNull(this.victimLastName));
