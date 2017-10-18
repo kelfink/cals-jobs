@@ -29,7 +29,6 @@ public class ReplicatedRelationships implements PersistentObject, ApiPersonAware
    */
   private String id;
 
-  // @JsonIgnore
   private List<ElasticSearchPersonRelationship> relations = new ArrayList<>();
 
   /**

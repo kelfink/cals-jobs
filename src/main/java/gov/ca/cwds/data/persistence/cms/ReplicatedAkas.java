@@ -29,7 +29,6 @@ public class ReplicatedAkas implements PersistentObject, ApiPersonAware {
    */
   private String id;
 
-  // @JsonIgnore
   private List<ElasticSearchPersonAka> akas = new ArrayList<>();
 
   /**
