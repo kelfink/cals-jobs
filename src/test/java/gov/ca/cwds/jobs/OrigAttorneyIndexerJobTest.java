@@ -16,23 +16,23 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
  * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
-public class AttorneyIndexerJobTest
+public class OrigAttorneyIndexerJobTest
     extends PersonJobTester<ReplicatedAttorney, ReplicatedAttorney> {
 
   ReplicatedAttorneyDao dao;
-  AttorneyIndexerJob target;
+  OrigAttorneyIndexerJob target;
 
   @Override
   @Before
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedAttorneyDao(this.sessionFactory);
-    target = new AttorneyIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
+    target = new OrigAttorneyIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
   }
 
   @Test
   public void testType() throws Exception {
-    assertThat(AttorneyIndexerJob.class, notNullValue());
+    assertThat(OrigAttorneyIndexerJob.class, notNullValue());
   }
 
   @Test

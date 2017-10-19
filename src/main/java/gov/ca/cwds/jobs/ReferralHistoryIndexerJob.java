@@ -393,6 +393,7 @@ public class ReferralHistoryIndexerJob
         readReferrals(stmtSelReferral, mapReferrals);
         readAllegations(stmtSelAllegation, listAllegations);
 
+        // Retrieved all data.
         JobDB2Utils.monitorStopAndReport(monitor);
         con.commit();
 

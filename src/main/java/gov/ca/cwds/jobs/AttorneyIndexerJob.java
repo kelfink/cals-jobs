@@ -1,53 +1,20 @@
 package gov.ca.cwds.jobs;
 
-import org.hibernate.SessionFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Inject;
-
-import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
-import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
-import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.schedule.JobRunner;
 
 /**
- * Job to load attorneys from CMS into ElasticSearch.
+ * Original Attorney job now in class {@link OrigAttorneyIndexerJob}.
+ * 
+ * <p>
+ * This job is a temporary facade to test {@link JobRunner}, until DevOps adds a new job.
+ * </p>
  * 
  * @author CWDS API Team
  */
-public class AttorneyIndexerJob
-    extends BasePersonIndexerJob<ReplicatedAttorney, ReplicatedAttorney> {
+public class AttorneyIndexerJob {
 
-  /**
-   * Default serialization.
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
-   * Construct batch job instance with all required dependencies.
-   * 
-   * @param mainDao ReplicatedAttorney DAO
-   * @param elasticsearchDao ElasticSearch DAO
-   * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
-   * @param mapper Jackson ObjectMapper
-   * @param sessionFactory Hibernate session factory
-   */
-  @Inject
-  public AttorneyIndexerJob(final ReplicatedAttorneyDao mainDao,
-      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
-      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
-  }
-
-  /**
-   * @deprecated older attribute will be removed
-   */
-  @Override
-  @Deprecated
-  public String getLegacySourceTable() {
-    return "ATTRNY_T";
+  private AttorneyIndexerJob() {
+    // no-op
   }
 
   /**
@@ -56,7 +23,7 @@ public class AttorneyIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    JobRunner.runStandalone(AttorneyIndexerJob.class, args);
+    JobRunner.main(args);
   }
 
 }

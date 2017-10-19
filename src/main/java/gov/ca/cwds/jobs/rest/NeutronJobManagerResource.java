@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.jobs.rest;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.schedule.NeutronJobManagementBean;
 
 @Path("/neutron")
 public class NeutronJobManagerResource implements ApiMarker {

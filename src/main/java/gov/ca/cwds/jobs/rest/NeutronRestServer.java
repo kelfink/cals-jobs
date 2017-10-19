@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.jobs.rest;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,7 +43,7 @@ public class NeutronRestServer extends Application {
     final Server server = new Server();
 
     final ServerConnector connector = new ServerConnector(server);
-    connector.setPort(9999);
+    connector.setPort(9999); // NOTE: make configurable.
     server.setConnectors(new Connector[] {connector});
 
     final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);

@@ -13,6 +13,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.schedule.NeutronJobExecutionStatus;
+import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
  * Track job progress and record counts.
@@ -171,9 +172,17 @@ public class JobProgressTrack implements ApiMarker {
   @Override
   public String toString() {
     final StringBuilder buf = new StringBuilder();
+    buf.append("[\n    JOB STATUS: ").append(status);
 
-    buf.append("[\n    RUN STATUS: ").append(status)
-        .append("\n\n    TIME:\n\tstart:                  ").append(new Date(startTime))
+    if (initialLoad) {
+      buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
+          .append(pad(initialLoadRangesStarted.size())).append("\n\tranges completed:")
+          .append(pad(initialLoadRangesCompleted.size()));
+    } else {
+      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
+    }
+
+    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime))
         .append("\n\tend:                    ").append(new Date(endTime))
         .append("\n\telapsed (seconds):      ").append((endTime - startTime) / 1000)
         .append("\n\n    ELASTICSEARCH:").append("\n\tto bulk:         ")
@@ -185,25 +194,8 @@ public class JobProgressTrack implements ApiMarker {
         .append(pad(recsBulkAfter.get())).append("\n\tbulk errors:     ")
         .append(pad(recsBulkError.get()));
 
-    if (initialLoad) {
-      buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
-          .append(pad(initialLoadRangesStarted.size())).append("\n\tranges completed:")
-          .append(pad(initialLoadRangesCompleted.size()));
-    } else {
-      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
-    }
-
     buf.append("\n]");
-
     return buf.toString();
-  }
-
-  public static void main(String[] args) {
-    final JobProgressTrack track = new JobProgressTrack();
-    track.done();
-    track.initialLoad = true;
-
-    System.out.println(track.toString());
   }
 
   public boolean isInitialLoad() {
@@ -220,6 +212,15 @@ public class JobProgressTrack implements ApiMarker {
 
   public void setLastChangeSince(Date lastChangeSince) {
     this.lastChangeSince = lastChangeSince;
+  }
+
+  public static void main(String[] args) {
+    final JobProgressTrack track = new JobProgressTrack();
+    track.setLastChangeSince(DomainChef.uncookTimestampString("2017-12-25-08.32.05.123"));
+    track.done();
+    track.initialLoad = false;
+
+    System.out.println(track.toString());
   }
 
 }
