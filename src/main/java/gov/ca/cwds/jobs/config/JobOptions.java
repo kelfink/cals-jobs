@@ -14,6 +14,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +129,7 @@ public class JobOptions implements ApiMarker {
    * Construct from all settings.
    * 
    * @param esConfigLoc location of Elasticsearch configuration file
-   * @param indexName Name of index to use. If not provided then alias is used from es config.
+   * @param indexName Name of index to use. If not provided, then use alias from ES config.
    * @param lastRunTime Last run time to use
    * @param lastRunLoc location of last run file
    * @param lastRunMode is last run mode or not
@@ -136,10 +137,14 @@ public class JobOptions implements ApiMarker {
    * @param endBucket ending bucket number
    * @param totalBuckets total buckets
    * @param threadCount number of simultaneous threads
+   * @param minId initial load -- minimum range
+   * @param maxId initial load -- maximum range
    * @param loadSealedAndSensitive If true then load sealed and sensitive data
    * @param altInputFile alternate input file
+   * @param rangeGiven initial load -- provided range
+   * @param baseDirectory base folder for job execution
    */
-  JobOptions(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
+  public JobOptions(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
       boolean lastRunMode, long startBucket, long endBucket, long totalBuckets, long threadCount,
       String minId, String maxId, boolean loadSealedAndSensitive, String altInputFile,
       boolean rangeGiven, String baseDirectory) {
@@ -161,7 +166,7 @@ public class JobOptions implements ApiMarker {
   }
 
   /**
-   * Copy constructor
+   * Copy constructor.
    * 
    * @param opts other job options
    */
@@ -369,10 +374,14 @@ public class JobOptions implements ApiMarker {
       LOGGER.error(sw.toString()); // NOSONAR
     } catch (IOException e) {
       throw JobLogs.buildCheckedException(LOGGER, new IllegalArgumentException("invalid"),
-          "INCORRECT USAGE! {}", e.getMessage());
+          "INCORRECT USAGE! {}", e.getMessage(), e);
     }
-    throw JobLogs.buildCheckedException(LOGGER, new IllegalArgumentException("invalid"),
-        "INCORRECT USAGE!", "");
+  }
+
+  private static Pair<Long, Long> parseBuckets(final String[] vals) {
+    Long startBucket = Long.parseLong(vals[0]);
+    Long endBucket = Long.parseLong(vals[1]);
+    return Pair.of(startBucket, endBucket);
   }
 
   /**
@@ -382,20 +391,19 @@ public class JobOptions implements ApiMarker {
    * @return JobOptions defining this job
    * @throws NeutronException if unable to parse command line
    */
-  public static JobOptions parseCommandLine(String[] args) throws NeutronException {
+  public static JobOptions parseCommandLine(final String[] args) throws NeutronException {
     String esConfigLoc = null;
     String indexName = null;
     Date lastRunTime = null;
     String lastRunLoc = null;
     String altInputLoc = "junk";
     boolean lastRunMode = false;
-    long startBucket = 0L;
-    long endBucket = 0L;
     long totalBuckets = 0L;
     long threadCount = 0L;
     boolean loadSealedAndSensitive = false;
     boolean rangeGiven = false;
     String baseDirectory = null;
+    Pair<Long, Long> bucketRange = Pair.of(0L, 0L);
 
     String minId = " ";
     String maxId = "9999999999";
@@ -407,7 +415,7 @@ public class JobOptions implements ApiMarker {
 
       // Java clincher: case statements only take constants. Even compile-time constants, like
       // enum members (evaluated at compile time), are not considered "constants."
-      for (Option opt : cmd.getOptions()) {
+      for (final Option opt : cmd.getOptions()) {
         switch (opt.getArgName()) {
           case CMD_LINE_ES_CONFIG:
             esConfigLoc = opt.getValue().trim();
@@ -436,9 +444,7 @@ public class JobOptions implements ApiMarker {
           case CMD_LINE_BUCKET_RANGE:
             lastRunMode = false;
             rangeGiven = true;
-            final String[] vals = opt.getValues();
-            startBucket = Long.parseLong(vals[0]);
-            endBucket = Long.parseLong(vals[1]);
+            bucketRange = parseBuckets(opt.getValues());
             break;
 
           case CMD_LINE_THREADS:
@@ -461,13 +467,14 @@ public class JobOptions implements ApiMarker {
             throw new IllegalArgumentException(opt.getArgName());
         }
       }
-    } catch (Exception e) { // NOSONAR
+    } catch (Exception e) {
       printUsage();
+      throw JobLogs.buildCheckedException(LOGGER, e, "INVALID ARGS", e.getMessage(), e);
     }
 
-    return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode, startBucket,
-        endBucket, totalBuckets, threadCount, minId, maxId, loadSealedAndSensitive, altInputLoc,
-        rangeGiven, baseDirectory);
+    return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode,
+        bucketRange.getLeft(), bucketRange.getRight(), totalBuckets, threadCount, minId, maxId,
+        loadSealedAndSensitive, altInputLoc, rangeGiven, baseDirectory);
   }
 
   public void setStartBucket(long startBucket) {

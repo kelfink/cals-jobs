@@ -20,21 +20,22 @@ import org.weakref.jmx.Managed;
 
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.util.JobLogs;
 
-public final class NeutronJmxFacade implements Serializable {
+public class NeutronJobFacade implements Serializable {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJmxFacade.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJobFacade.class);
 
   private transient Scheduler scheduler;
   private final NeutronDefaultJobSchedule jobSchedule;
   private final String scheduleJobName;
   private final String scheduleTriggerName;
 
-  public NeutronJmxFacade(final Scheduler scheduler, NeutronDefaultJobSchedule sched) {
+  public NeutronJobFacade(final Scheduler scheduler, NeutronDefaultJobSchedule sched) {
     this.scheduler = scheduler;
     this.jobSchedule = sched;
-    this.scheduleJobName = "job_" + jobSchedule.getName();
-    this.scheduleTriggerName = "trg_" + jobSchedule.getName();
+    this.scheduleJobName = jobSchedule.getName();
+    this.scheduleTriggerName = jobSchedule.getName();
   }
 
   @Managed(description = "Run job now, show results immediately")
@@ -78,13 +79,21 @@ public final class NeutronJmxFacade implements Serializable {
   }
 
   @Managed(description = "Show job status")
-  public String status() throws SchedulerException {
+  public String status() {
     LOGGER.debug("Show job status");
-    final JobKey jobKey = new JobKey(scheduleJobName, NeutronSchedulerConstants.GROUP_LAST_CHG);
-    final JobDetail jd = scheduler.getJobDetail(jobKey);
+    String ret;
 
-    JobProgressTrack track = (JobProgressTrack) jd.getJobDataMap().get("track");
-    return track.toString();
+    try {
+      final JobKey jobKey = new JobKey(scheduleJobName, NeutronSchedulerConstants.GROUP_LAST_CHG);
+      final JobDetail jd = scheduler.getJobDetail(jobKey);
+
+      final JobProgressTrack track = (JobProgressTrack) jd.getJobDataMap().get("track");
+      ret = track != null ? track.toString() : "NO TRACK?";
+    } catch (Exception e) {
+      ret = JobLogs.stackToString(e);
+    }
+
+    return ret;
   }
 
   @Managed(description = "Stop running job")

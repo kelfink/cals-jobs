@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.util;
 import java.text.MessageFormat;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,6 +138,10 @@ public final class JobLogs {
    */
   public static void raiseError(final Logger log, Throwable e, Object... args) {
     raiseError(log, e, null, args);
+  }
+
+  public static String stackToString(Exception e) {
+    return ExceptionUtils.getStackTrace(e);
   }
 
 }

@@ -30,7 +30,7 @@ public class NeutronRestServer extends Application {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronRestServer.class);
 
-  private static boolean isAppRunning = true;
+  private boolean isJettyRunning = true;
 
   @Override
   public Set<Class<?>> getClasses() {
@@ -41,63 +41,61 @@ public class NeutronRestServer extends Application {
 
   public void run() {
     final Server server = new Server();
+    try (final ServerConnector connector = new ServerConnector(server)) {
+      connector.setPort(9999); // NOTE: make configurable.
+      server.setConnectors(new Connector[] {connector});
 
-    final ServerConnector connector = new ServerConnector(server);
-    connector.setPort(9999); // NOTE: make configurable.
-    server.setConnectors(new Connector[] {connector});
+      final ServletContextHandler context =
+          new ServletContextHandler(ServletContextHandler.SESSIONS);
+      context.setContextPath("/");
+      server.setHandler(context);
 
-    final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-    context.setContextPath("/");
-    server.setHandler(context);
+      final ServletHolder jerseyServlet =
+          context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
+      jerseyServlet.setInitOrder(0);
 
-    final ServletHolder jerseyServlet =
-        context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
-    jerseyServlet.setInitOrder(0);
+      // Tells the Jersey Servlet which REST service/class to load.
+      final Map<String, String> resources = new ConcurrentHashMap<>();
+      resources.put(ServerProperties.PROVIDER_CLASSNAMES,
+          NeutronJobManagerResource.class.getCanonicalName() + ";");
 
-    // Tells the Jersey Servlet which REST service/class to load.
-    final Map<String, String> resources = new ConcurrentHashMap<>();
-    resources.put(ServerProperties.PROVIDER_CLASSNAMES,
-        NeutronJobManagerResource.class.getCanonicalName() + ";");
+      jerseyServlet.setInitParameters(resources);
+      jerseyServlet.setInitParameter(ServerProperties.PROVIDER_PACKAGES,
+          gov.ca.cwds.jobs.json.GsonMessageBodyHandler.class.getPackage().getName());
 
-    jerseyServlet.setInitParameters(resources);
-    jerseyServlet.setInitParameter(ServerProperties.PROVIDER_PACKAGES,
-        gov.ca.cwds.jobs.json.GsonMessageBodyHandler.class.getPackage().getName());
+      LOGGER.debug("init params: {}", jerseyServlet.getInitParameters());
 
-    LOGGER.info("init params: {}", jerseyServlet.getInitParameters());
+      // Jersey-guice fix.
+      final List<Module> modules = new ArrayList<>();
+      modules.add(new JerseyGuiceModule("__HK2_Generated_0"));
+      modules.add(new ServletModule());
+      modules.add(new AbstractModule() {
 
-    // Jersey-guice fix.
-    final List<Module> modules = new ArrayList<>();
-    modules.add(new JerseyGuiceModule("__HK2_Generated_0"));
-    modules.add(new ServletModule());
-    modules.add(new AbstractModule() {
+        @Override
+        protected void configure() {
+          // no-op, for now.
+        }
 
-      @Override
-      protected void configure() {
-        // no-op, for now.
-      }
+      });
 
-    });
+      final Injector injector = Guice.createInjector(modules);
+      JerseyGuiceUtils.install(injector);
 
-    final Injector injector = Guice.createInjector(modules);
-    JerseyGuiceUtils.install(injector);
-
-    // Start Jetty.
-    try {
+      // Start Jetty.
+      isJettyRunning = true;
       server.start();
       server.join();
     } catch (Exception e) {
       LOGGER.error("HTTP SERVER ERROR! {}", e.getMessage(), e);
     } finally {
+      isJettyRunning = false;
       server.destroy();
     }
+
   }
 
-  public static boolean isAppRunning() {
-    return isAppRunning;
-  }
-
-  public static void setAppRunning(boolean isAppRunning) {
-    NeutronRestServer.isAppRunning = isAppRunning;
+  public boolean isJettyRunning() {
+    return isJettyRunning;
   }
 
   public static void main(String[] args) throws Exception {

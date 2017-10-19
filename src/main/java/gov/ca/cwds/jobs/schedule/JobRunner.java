@@ -71,7 +71,7 @@ public class JobRunner {
    */
   private final Map<Class<?>, JobOptions> optionsRegistry = new ConcurrentHashMap<>();
 
-  private final Map<Class<?>, NeutronJmxFacade> scheduleRegistry = new ConcurrentHashMap<>();
+  private final Map<Class<?>, NeutronJobFacade> scheduleRegistry = new ConcurrentHashMap<>();
 
   private final Map<Class<?>, List<JobProgressTrack>> jobTracks = new ConcurrentHashMap<>();
 
@@ -112,8 +112,6 @@ public class JobRunner {
       final StringWriter sw = new StringWriter();
       final PrintWriter w = new PrintWriter(sw);
       e.printStackTrace(w);
-      // throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO RESET TIMESTAMPS! {}",
-      // e.getMessage());
       return sw.toString();
     }
 
@@ -203,7 +201,7 @@ public class JobRunner {
 
         registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
 
-        final NeutronJmxFacade nj = new NeutronJmxFacade(scheduler, sched);
+        final NeutronJobFacade nj = new NeutronJobFacade(scheduler, sched);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         scheduleRegistry.put(klass, nj);
       }
@@ -214,7 +212,7 @@ public class JobRunner {
       Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
 
       // Start last change jobs.
-      for (NeutronJmxFacade j : scheduleRegistry.values()) {
+      for (NeutronJobFacade j : scheduleRegistry.values()) {
         j.schedule();
       }
 
