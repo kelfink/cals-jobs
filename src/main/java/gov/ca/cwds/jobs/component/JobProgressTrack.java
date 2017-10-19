@@ -130,12 +130,21 @@ public class JobProgressTrack implements ApiMarker {
     initialLoadRangesCompleted.add(pair);
   }
 
-  public void markDone() {
+  public void start() {
+    this.status = NeutronJobExecutionStatus.RUNNING;
+  }
+
+  public void fail() {
+    this.status = NeutronJobExecutionStatus.FAILED;
+  }
+
+  public void done() {
     this.endTime = System.currentTimeMillis();
 
     if (this.status != NeutronJobExecutionStatus.FAILED) {
-
+      this.status = NeutronJobExecutionStatus.SUCCEEDED;
     }
+
   }
 
   @Override
@@ -168,8 +177,7 @@ public class JobProgressTrack implements ApiMarker {
         .append("\n\n    TIME:\n\tstart:                  ").append(new Date(startTime))
         .append("\n\tend:                    ").append(new Date(endTime))
         .append("\n\telapsed (seconds):      ").append((endTime - startTime) / 1000)
-        .append("\n\n    ELASTICSEARCH:\n\tqueued:                 ")
-        .append(pad(recsSentToIndexQueue.get())).append("\n\tto bulk:         ")
+        .append("\n\n    ELASTICSEARCH:").append("\n\tto bulk:         ")
         .append(pad(recsSentToBulkProcessor.get())).append("\n\tnormalized:      ")
         .append(pad(rowsNormalized.get())).append("\n\tbulk prepared:   ")
         .append(pad(recsBulkPrepared.get())).append("\n\tbulk deleted:    ")
@@ -193,7 +201,7 @@ public class JobProgressTrack implements ApiMarker {
 
   public static void main(String[] args) {
     final JobProgressTrack track = new JobProgressTrack();
-    track.markDone();
+    track.done();
     track.initialLoad = true;
 
     System.out.println(track.toString());
