@@ -168,14 +168,15 @@ public class JobProgressTrack implements ApiMarker {
         .append("\n\n    TIME:\n\tstart:                  ").append(new Date(startTime))
         .append("\n\tend:                    ").append(new Date(endTime))
         .append("\n\telapsed (seconds):      ").append((endTime - startTime) / 1000)
-        .append("\n\n    ELASTICSEARCH:\n\tqueued:                 ").append(recsSentToIndexQueue)
-        .append("\n\tto bulk:         ").append(pad(recsSentToBulkProcessor.get()))
-        .append("\n\tnormalized:      ").append(pad(rowsNormalized.get()))
-        .append("\n\tbulk prepared:   ").append(pad(recsBulkPrepared.get()))
-        .append("\n\tbulk deleted:    ").append(pad(recsBulkDeleted.get()))
-        .append("\n\tbulk before:     ").append(pad(recsBulkBefore.get()))
-        .append("\n\tbulk after:      ").append(pad(recsBulkAfter.get()))
-        .append("\n\tbulk errors:     ").append(pad(recsBulkError.get()));
+        .append("\n\n    ELASTICSEARCH:\n\tqueued:                 ")
+        .append(pad(recsSentToIndexQueue.get())).append("\n\tto bulk:         ")
+        .append(pad(recsSentToBulkProcessor.get())).append("\n\tnormalized:      ")
+        .append(pad(rowsNormalized.get())).append("\n\tbulk prepared:   ")
+        .append(pad(recsBulkPrepared.get())).append("\n\tbulk deleted:    ")
+        .append(pad(recsBulkDeleted.get())).append("\n\tbulk before:     ")
+        .append(pad(recsBulkBefore.get())).append("\n\tbulk after:      ")
+        .append(pad(recsBulkAfter.get())).append("\n\tbulk errors:     ")
+        .append(pad(recsBulkError.get()));
 
     if (initialLoad) {
       buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
