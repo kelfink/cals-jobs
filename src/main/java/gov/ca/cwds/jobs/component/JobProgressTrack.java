@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.component;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -156,7 +157,7 @@ public class JobProgressTrack implements ApiMarker {
   }
 
   private String pad(Integer padme) {
-    return StringUtils.leftPad(String.valueOf(padme.intValue()), 8, ' ');
+    return StringUtils.leftPad(new DecimalFormat("###,###,###").format(padme.intValue()), 8, ' ');
   }
 
   @Override
