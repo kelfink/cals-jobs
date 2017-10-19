@@ -28,6 +28,8 @@ public class LastSuccessfulRunJobTest
 
     ElasticsearchDao esDao;
 
+    final JobProgressTrack track = new JobProgressTrack();
+
     public TestLastSuccessfulRunJob(String lastJobRunTimeFilename, ElasticsearchDao esDao) {
       super(lastJobRunTimeFilename);
     }
@@ -42,7 +44,7 @@ public class LastSuccessfulRunJobTest
 
     @Override
     public JobProgressTrack getTrack() {
-      return null;
+      return track;
     }
 
     @Override
@@ -87,8 +89,9 @@ public class LastSuccessfulRunJobTest
   @Test
   public void determineLastSuccessfulRunTime_Args__() throws Exception {
     final Date actual = target.determineLastSuccessfulRunTime();
-    final Date expected = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
-        .parse(FIXED_DATETIME);
+    final Date expected =
+        new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
+            .parse(FIXED_DATETIME);
     assertThat(actual, is(equalTo(expected)));
   }
 
