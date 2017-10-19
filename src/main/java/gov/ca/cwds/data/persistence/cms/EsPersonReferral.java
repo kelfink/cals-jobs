@@ -51,20 +51,21 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 @Entity
 @Table(name = "VW_LST_REFERRAL_HIST")
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
-    query = "SELECT " + EsPersonReferral.COLUMNS + " FROM {h-schema}VW_LST_REFERRAL_HIST r "
-        + "WHERE (1=1 OR current timestamp < :after) ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
+    query = "SELECT DISTINCT " + EsPersonReferral.COLUMNS
+        + " FROM {h-schema}VW_LST_REFERRAL_HIST r "
+        + "WHERE (1=1 OR current timestamp < :after) ORDER BY CLIENT_ID,REFERRAL_ID,ALLEGATION_ID,VICTIM_ID WITH UR ",
     resultClass = EsPersonReferral.class, readOnly = true)
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithUnlimitedAccess",
-    query = "SELECT " + EsPersonReferral.COLUMNS + " FROM {h-schema}VW_LST_REFERRAL_HIST r "
-        + "WHERE (1=1 OR current timestamp < :after)"
-        + "AND r.LIMITED_ACCESS_CODE = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
+    query = "SELECT DISTINCT " + EsPersonReferral.COLUMNS
+        + " FROM {h-schema}VW_LST_REFERRAL_HIST r " + "WHERE (1=1 OR current timestamp < :after)"
+        + "AND r.LIMITED_ACCESS_CODE = 'N' ORDER BY CLIENT_ID,REFERRAL_ID,ALLEGATION_ID,VICTIM_ID WITH UR ",
     resultClass = EsPersonReferral.class, readOnly = true)
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithLimitedAccess",
-    query = "SELECT " + EsPersonReferral.COLUMNS + " FROM {h-schema}VW_LST_REFERRAL_HIST r "
-        + "WHERE (1=1 OR current timestamp < :after)"
-        + "AND r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
+    query = "SELECT DISTINCT " + EsPersonReferral.COLUMNS
+        + " FROM {h-schema}VW_LST_REFERRAL_HIST r " + "WHERE (1=1 OR current timestamp < :after)"
+        + "AND r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID,REFERRAL_ID,ALLEGATION_ID,VICTIM_ID WITH UR ",
     resultClass = EsPersonReferral.class, readOnly = true)
 public class EsPersonReferral
     implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals>,
@@ -75,7 +76,7 @@ public class EsPersonReferral
 
   private static final long serialVersionUID = -2265057057202257108L;
 
-  private static JobOptions opts;
+  private static JobOptions opts; // WARNING: not a good idea. Try another way
 
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)
@@ -162,6 +163,7 @@ public class EsPersonReferral
   // ALLEGATION:
   // =============
 
+  @Id
   @Column(name = "ALLEGATION_ID")
   private String allegationId;
 
@@ -181,6 +183,7 @@ public class EsPersonReferral
   // VICTIM:
   // =============
 
+  @Id
   @Column(name = "VICTIM_ID")
   private String victimId;
 
@@ -825,6 +828,11 @@ public class EsPersonReferral
     this.clientSensitivity = clientSensitivity;
   }
 
+  /**
+   * WARNING: Bad idea. Inject or access by other means.
+   * 
+   * @param opts job options
+   */
   public static void setOpts(JobOptions opts) {
     EsPersonReferral.opts = opts;
   }
