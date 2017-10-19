@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.schedule;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.InterruptableJob;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.UnableToInterruptJobException;
@@ -19,7 +20,7 @@ public class NeutronScheduledJob implements InterruptableJob {
 
   private String className;
   private String cmdLine;
-  private JobProgressTrack track;
+  private volatile JobProgressTrack track;
 
   /**
    * Constructor.
@@ -31,16 +32,17 @@ public class NeutronScheduledJob implements InterruptableJob {
   @SuppressWarnings("rawtypes")
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
-    className = context.getJobDetail().getJobDataMap().getString("job_class");
-    cmdLine = context.getJobDetail().getJobDataMap().getString("cmd_line");
+    final JobDataMap map = context.getJobDetail().getJobDataMap();
+    className = map.getString("job_class");
+    cmdLine = map.getString("cmd_line");
 
     LOGGER.info("Executing {}", className);
-    try (final BasePersonIndexerJob neutronJob = JobRunner.getInstance().createJob(className,
+    try (final BasePersonIndexerJob job = JobRunner.getInstance().createJob(className,
         StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"))) {
-      track = neutronJob.getTrack();
-      context.getJobDetail().getJobDataMap().put("track", track);
+      track = job.getTrack();
+      map.put("track", track);
       context.setResult(track);
-      neutronJob.run();
+      job.run();
     } catch (Exception e) {
       throw new JobExecutionException("SCHEDULED JOB FAILED!", e);
     }

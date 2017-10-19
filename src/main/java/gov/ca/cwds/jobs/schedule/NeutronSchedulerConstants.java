@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.schedule;
 
 public class NeutronSchedulerConstants {
 
-  public static final String GROUP_LAST_CHG = "last_chg";
+  public static final String GRP_LST_CHG = "last_chg";
 
   public static final int LAST_CHG_WINDOW_HOURS = 2;
 

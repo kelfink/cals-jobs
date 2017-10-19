@@ -34,7 +34,7 @@ public class NeutronSchedulerListenerTest {
   @Test
   public void jobUnscheduled_Args__TriggerKey() throws Exception {
     NeutronSchedulerListener target = new NeutronSchedulerListener();
-    TriggerKey triggerKey = new TriggerKey("el_trigger", NeutronSchedulerConstants.GROUP_LAST_CHG);
+    TriggerKey triggerKey = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
     target.jobUnscheduled(triggerKey);
   }
 
@@ -48,7 +48,7 @@ public class NeutronSchedulerListenerTest {
   @Test
   public void triggerPaused_Args__TriggerKey() throws Exception {
     NeutronSchedulerListener target = new NeutronSchedulerListener();
-    TriggerKey triggerKey = new TriggerKey("el_trigger", NeutronSchedulerConstants.GROUP_LAST_CHG);
+    TriggerKey triggerKey = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
     target.triggerPaused(triggerKey);
   }
 
@@ -62,7 +62,7 @@ public class NeutronSchedulerListenerTest {
   @Test
   public void triggerResumed_Args__TriggerKey() throws Exception {
     NeutronSchedulerListener target = new NeutronSchedulerListener();
-    TriggerKey triggerKey = new TriggerKey("el_trigger", NeutronSchedulerConstants.GROUP_LAST_CHG);
+    TriggerKey triggerKey = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
     target.triggerResumed(triggerKey);
   }
 
@@ -83,14 +83,14 @@ public class NeutronSchedulerListenerTest {
   @Test
   public void jobDeleted_Args__JobKey() throws Exception {
     NeutronSchedulerListener target = new NeutronSchedulerListener();
-    final JobKey jobKey = new JobKey("el_job", NeutronSchedulerConstants.GROUP_LAST_CHG);
+    final JobKey jobKey = new JobKey("el_job", NeutronSchedulerConstants.GRP_LST_CHG);
     target.jobDeleted(jobKey);
   }
 
   @Test
   public void jobPaused_Args__JobKey() throws Exception {
     NeutronSchedulerListener target = new NeutronSchedulerListener();
-    JobKey jobKey = new JobKey("el_job", NeutronSchedulerConstants.GROUP_LAST_CHG);
+    JobKey jobKey = new JobKey("el_job", NeutronSchedulerConstants.GRP_LST_CHG);
     target.jobPaused(jobKey);
   }
 
@@ -104,7 +104,7 @@ public class NeutronSchedulerListenerTest {
   @Test
   public void jobResumed_Args__JobKey() throws Exception {
     NeutronSchedulerListener target = new NeutronSchedulerListener();
-    JobKey jobKey = new JobKey("el_job", NeutronSchedulerConstants.GROUP_LAST_CHG);
+    JobKey jobKey = new JobKey("el_job", NeutronSchedulerConstants.GRP_LST_CHG);
     target.jobResumed(jobKey);
   }
 

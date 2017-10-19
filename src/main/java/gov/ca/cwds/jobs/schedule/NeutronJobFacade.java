@@ -27,23 +27,29 @@ public class NeutronJobFacade implements Serializable {
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJobFacade.class);
 
   private transient Scheduler scheduler;
-  private final NeutronDefaultJobSchedule jobSchedule;
-  private final String scheduleJobName;
-  private final String scheduleTriggerName;
+
+  private final NeutronDefaultJobSchedule defaultSchedule;
+  private final String jobName;
+  private final String triggerName;
+
+  private volatile JobKey jobKey;
+  private volatile JobDetail jd;
 
   public NeutronJobFacade(final Scheduler scheduler, NeutronDefaultJobSchedule sched) {
     this.scheduler = scheduler;
-    this.jobSchedule = sched;
-    this.scheduleJobName = jobSchedule.getName();
-    this.scheduleTriggerName = jobSchedule.getName();
+    this.defaultSchedule = sched;
+    this.jobName = defaultSchedule.getName();
+    this.triggerName = defaultSchedule.getName();
+    this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
   }
 
   @Managed(description = "Run job now, show results immediately")
   public String run(String cmdLineArgs) throws NeutronException {
     try {
-      LOGGER.info("RUN JOB: {}", jobSchedule.getName());
-      final JobProgressTrack track = JobRunner.getInstance().runScheduledJob(jobSchedule.getKlazz(),
-          StringUtils.isBlank(cmdLineArgs) ? null : cmdLineArgs.split("\\s+"));
+      LOGGER.info("RUN JOB: {}", defaultSchedule.getName());
+      final JobProgressTrack track =
+          JobRunner.getInstance().runScheduledJob(defaultSchedule.getKlazz(),
+              StringUtils.isBlank(cmdLineArgs) ? null : cmdLineArgs.split("\\s+"));
       return track.toString();
     } catch (Exception e) {
       LOGGER.error(e.getMessage(), e);
@@ -53,28 +59,28 @@ public class NeutronJobFacade implements Serializable {
 
   @Managed(description = "Schedule job on repeat")
   public void schedule() throws SchedulerException {
-    if (scheduler
-        .checkExists(new JobKey(scheduleJobName, NeutronSchedulerConstants.GROUP_LAST_CHG))) {
-      LOGGER.warn("JOB ALREADY SCHEDULED! {}", scheduleJobName);
+    if (scheduler.checkExists(this.jobKey)) {
+      LOGGER.warn("JOB ALREADY SCHEDULED! {}", jobName);
     }
 
-    final JobDetail jd = newJob(NeutronScheduledJob.class)
-        .withIdentity(scheduleJobName, NeutronSchedulerConstants.GROUP_LAST_CHG)
-        .usingJobData("job_class", jobSchedule.getKlazz().getName()).build();
-    final Trigger t = newTrigger()
-        .withIdentity(scheduleTriggerName, NeutronSchedulerConstants.GROUP_LAST_CHG)
-        .withSchedule(
-            simpleSchedule().withIntervalInSeconds(jobSchedule.getPeriodSeconds()).repeatForever())
-        .startAt(DateTime.now().plusSeconds(jobSchedule.getStartDelaySeconds()).toDate()).build();
+    jd = newJob(NeutronScheduledJob.class)
+        .withIdentity(jobName, NeutronSchedulerConstants.GRP_LST_CHG)
+        .usingJobData("job_class", defaultSchedule.getKlazz().getName()).build();
+    final Trigger trg =
+        newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
+            .withSchedule(simpleSchedule().withIntervalInSeconds(defaultSchedule.getPeriodSeconds())
+                .repeatForever())
+            .startAt(DateTime.now().plusSeconds(defaultSchedule.getStartDelaySeconds()).toDate())
+            .build();
 
-    scheduler.scheduleJob(jd, t);
+    scheduler.scheduleJob(jd, trg);
   }
 
   @Managed(description = "Unschedule job")
   public void unschedule() throws SchedulerException {
     LOGGER.warn("unschedule job");
     final TriggerKey triggerKey =
-        new TriggerKey(scheduleTriggerName, NeutronSchedulerConstants.GROUP_LAST_CHG);
+        new TriggerKey(triggerName, NeutronSchedulerConstants.GRP_LST_CHG);
     scheduler.pauseTrigger(triggerKey);
   }
 
@@ -84,9 +90,6 @@ public class NeutronJobFacade implements Serializable {
     String ret;
 
     try {
-      final JobKey jobKey = new JobKey(scheduleJobName, NeutronSchedulerConstants.GROUP_LAST_CHG);
-      final JobDetail jd = scheduler.getJobDetail(jobKey);
-
       final JobProgressTrack track = (JobProgressTrack) jd.getJobDataMap().get("track");
       ret = track != null ? track.toString() : "NO TRACK?";
     } catch (Exception e) {
@@ -101,7 +104,7 @@ public class NeutronJobFacade implements Serializable {
     LOGGER.warn("Stop running job");
     unschedule();
 
-    final JobKey key = new JobKey(scheduleJobName, NeutronSchedulerConstants.GROUP_LAST_CHG);
+    final JobKey key = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
     scheduler.interrupt(key);
   }
 
