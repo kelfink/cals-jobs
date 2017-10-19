@@ -360,7 +360,7 @@ public class ReferralHistoryIndexerJob
     LOGGER.info("BEGIN");
     getTrack().trackRangeStart(p);
 
-    allocateThreadMemory(); // allocate thread locals, if not done prior.
+    allocateThreadMemory(); // allocate thread local memory, if not done prior.
     final List<EsPersonReferral> listAllegations = allocAllegations.get();
     final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
     final List<MinClientReferral> listClientReferralKeys = allocClientReferralKeys.get();

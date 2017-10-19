@@ -1,15 +1,17 @@
 package gov.ca.cwds.jobs.component;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.schedule.NeutronJobExecutionStatus;
 
 /**
  * Track job progress and record counts.
@@ -27,6 +29,14 @@ public class JobProgressTrack implements ApiMarker {
    * Official start time.
    */
   private final long startTime = System.currentTimeMillis();
+
+  private long endTime;
+
+  private boolean initialLoad;
+
+  private Date lastChangeSince;
+
+  private NeutronJobExecutionStatus status = NeutronJobExecutionStatus.NOT_STARTED;
 
   private final AtomicInteger recsSentToIndexQueue = new AtomicInteger(0);
 
@@ -119,14 +129,12 @@ public class JobProgressTrack implements ApiMarker {
     initialLoadRangesCompleted.add(pair);
   }
 
-  @Override
-  public String toString() {
-    final long endTime = System.currentTimeMillis();
-    return MessageFormat.format(
-        "STATS:\n" + "\tindexed:      {0}\n" + "\tdeleted:      {1}\n" + "\tbulk before:  {2}\n"
-            + "\tbulk after:   {3}\n" + "\tbulk error:   {4}\n" + "\tELAPSED TIME: {5} SECONDS",
-        getRecsBulkPrepared(), getRecsBulkDeleted(), getRecsBulkBefore(), getRecsBulkAfter(),
-        getRecsBulkError(), (endTime - startTime) / 1000);
+  public void markDone() {
+    this.endTime = System.currentTimeMillis();
+
+    if (this.status != NeutronJobExecutionStatus.FAILED) {
+
+    }
   }
 
   @Override
@@ -145,6 +153,48 @@ public class JobProgressTrack implements ApiMarker {
 
   public List<Pair<String, String>> getInitialLoadRangesCompleted() {
     return initialLoadRangesCompleted;
+  }
+
+  private String pad(Integer padme) {
+    return StringUtils.leftPad(String.valueOf(padme.intValue()), 8, ' ');
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder buf = new StringBuilder();
+
+    buf.append("[\n    RUN STATUS: ").append(status)
+        .append("\n\n    TIME:\n\tstart:                  ").append(new Date(startTime))
+        .append("\n\tend:                    ").append(new Date(endTime))
+        .append("\n\telapsed (seconds):      ").append((endTime - startTime) / 1000)
+        .append("\n\n    ELASTICSEARCH:\n\tqueued:                 ").append(recsSentToIndexQueue)
+        .append("\n\tto bulk:         ").append(pad(recsSentToBulkProcessor.get()))
+        .append("\n\tnormalized:      ").append(pad(rowsNormalized.get()))
+        .append("\n\tbulk prepared:   ").append(pad(recsBulkPrepared.get()))
+        .append("\n\tbulk deleted:    ").append(pad(recsBulkDeleted.get()))
+        .append("\n\tbulk before:     ").append(pad(recsBulkBefore.get()))
+        .append("\n\tbulk after:      ").append(pad(recsBulkAfter.get()))
+        .append("\n\tbulk errors:     ").append(pad(recsBulkError.get()));
+
+    if (initialLoad) {
+      buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
+          .append(pad(initialLoadRangesStarted.size())).append("\n\tranges completed:")
+          .append(pad(initialLoadRangesCompleted.size()));
+    } else {
+      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
+    }
+
+    buf.append("\n]");
+
+    return buf.toString();
+  }
+
+  public static void main(String[] args) {
+    final JobProgressTrack track = new JobProgressTrack();
+    track.markDone();
+    track.initialLoad = true;
+
+    System.out.println(track.toString());
   }
 
 }
