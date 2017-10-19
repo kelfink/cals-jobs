@@ -51,24 +51,27 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 @Entity
 @Table(name = "VW_LST_REFERRAL_HIST")
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfter",
-    query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
+    query = "SELECT " + EsPersonReferral.COLUMNS + " FROM {h-schema}VW_LST_REFERRAL_HIST r "
         + "WHERE (1=1 OR current timestamp < :after) ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsPersonReferral.class, readOnly = true)
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithUnlimitedAccess",
-    query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
+    query = "SELECT " + EsPersonReferral.COLUMNS + " FROM {h-schema}VW_LST_REFERRAL_HIST r "
         + "WHERE (1=1 OR current timestamp < :after)"
         + "AND r.LIMITED_ACCESS_CODE = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsPersonReferral.class, readOnly = true)
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsPersonReferral.findAllUpdatedAfterWithLimitedAccess",
-    query = "SELECT r.* FROM {h-schema}VW_LST_REFERRAL_HIST r "
+    query = "SELECT " + EsPersonReferral.COLUMNS + " FROM {h-schema}VW_LST_REFERRAL_HIST r "
         + "WHERE (1=1 OR current timestamp < :after)"
         + "AND r.LIMITED_ACCESS_CODE != 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsPersonReferral.class, readOnly = true)
 public class EsPersonReferral
     implements PersistentObject, ApiGroupNormalizer<ReplicatedPersonReferrals>,
     Comparable<EsPersonReferral>, Comparator<EsPersonReferral> {
+
+  public static final String COLUMNS =
+      "r.CLIENT_ID,r.CLIENT_SENSITIVITY_IND,r.REFERRAL_ID,r.START_DATE,r.END_DATE,r.REFERRAL_RESPONSE_TYPE,r.LIMITED_ACCESS_CODE,r.LIMITED_ACCESS_DATE,r.LIMITED_ACCESS_DESCRIPTION,r.LIMITED_ACCESS_GOVERNMENT_ENT,r.REFERRAL_LAST_UPDATED,r.REPORTER_ID,r.REPORTER_FIRST_NM,r.REPORTER_LAST_NM,r.REPORTER_LAST_UPDATED,r.WORKER_ID,r.WORKER_FIRST_NM,r.WORKER_LAST_NM,r.WORKER_LAST_UPDATED,r.PERPETRATOR_ID,r.PERPETRATOR_SENSITIVITY_IND,r.PERPETRATOR_FIRST_NM,r.PERPETRATOR_LAST_NM,r.PERPETRATOR_LAST_UPDATED,r.VICTIM_ID,r.VICTIM_SENSITIVITY_IND,r.VICTIM_FIRST_NM,r.VICTIM_LAST_NM,r.VICTIM_LAST_UPDATED,r.REFERRAL_COUNTY,r.ALLEGATION_ID,r.ALLEGATION_DISPOSITION,r.ALLEGATION_TYPE,r.ALLEGATION_LAST_UPDATED,r.RCT_IBMSNAP_LOGMARKER,r.RCT_IBMSNAP_OPERATION,r.RFL_IBMSNAP_LOGMARKER,r.RFL_IBMSNAP_OPERATION,r.STP_IBMSNAP_LOGMARKER,r.STP_IBMSNAP_OPERATION,r.RPT_IBMSNAP_LOGMARKER,r.RPT_IBMSNAP_OPERATION,r.ALG_IBMSNAP_LOGMARKER,r.ALG_IBMSNAP_OPERATION,r.CLP_IBMSNAP_LOGMARKER,r.CLP_IBMSNAP_OPERATION,r.CLV_IBMSNAP_LOGMARKER,r.CLV_IBMSNAP_OPERATION,r.LAST_CHG";
 
   private static final long serialVersionUID = -2265057057202257108L;
 
@@ -319,7 +322,7 @@ public class EsPersonReferral
    * Extract referral.
    * 
    * <p>
-   * IBM strongly recommends retrieving column results by position, not by column name.
+   * IBM strongly recommends retrieving column results by position and not by column name.
    * </p>
    * 
    * @param rs referral result set

@@ -401,7 +401,7 @@ public class ReferralHistoryIndexerJob
       }
 
     } catch (Exception e) {
-      markFailed();
+      fail();
       JobLogs.raiseError(LOGGER, e, "ERROR HANDING RANGE {} - {}: {}", p.getLeft(), p.getRight(),
           e.getMessage());
     }
@@ -452,7 +452,7 @@ public class ReferralHistoryIndexerJob
 
     // WARNING: static setter is OK in standalone job but NOT permitted in continuous mode.
     EsPersonReferral.setOpts(getOpts());
-    markTransformDone(); // normalize in place **without** the transform thread
+    doneTransform(); // normalize in place **without** the transform thread
 
     try {
       final List<Pair<String, String>> ranges = getPartitionRanges();
@@ -471,10 +471,10 @@ public class ReferralHistoryIndexerJob
       }
 
     } catch (Exception e) {
-      markFailed();
+      fail();
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      markRetrieveDone();
+      doneRetrieve();
     }
 
     LOGGER.info("DONE: read {} ES referral rows", this.rowsReadReferrals.get());
@@ -491,7 +491,7 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  public boolean initialLoadJdbc() {
+  public boolean isInitialLoadJdbc() {
     return true;
   }
 

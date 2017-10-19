@@ -82,7 +82,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
   }
 
   @Override
-  public boolean initialLoadJdbc() {
+  public boolean isInitialLoadJdbc() {
     return true;
   }
 
@@ -98,10 +98,10 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
       }
 
     } catch (Exception e) {
-      markFailed();
+      fail();
       throw new JobsException("ERROR READING PG VIEW", e);
     } finally {
-      markRetrieveDone();
+      doneRetrieve();
     }
 
     LOGGER.info("DONE: retrieval: NS View Reader");

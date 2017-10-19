@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.defaults;
 
-public enum NeutronColumnDefaults {
+public enum NeutronColumn {
 
   /**
    * Common "after" column in "last change" queries.
@@ -9,7 +9,7 @@ public enum NeutronColumnDefaults {
 
   private final String value;
 
-  private NeutronColumnDefaults(String value) {
+  private NeutronColumn(String value) {
     this.value = value;
   }
 

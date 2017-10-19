@@ -48,26 +48,26 @@ public interface AtomJobControl extends ApiMarker {
   /**
    * Mark the job as failed and stop the job. Working threads should stop themselves.
    */
-  void markFailed();
+  void fail();
 
   /**
    * Mark ES indexing done.
    */
-  void markIndexDone();
+  void doneIndex();
 
   /**
    * Mark the job done. Working threads should stop themselves.
    */
-  void markJobDone();
+  void done();
 
   /**
    * Mark the retrieval step done.
    */
-  void markRetrieveDone();
+  void doneRetrieve();
 
   /**
    * Mark the normalize/transform step done.
    */
-  void markTransformDone();
+  void doneTransform();
 
 }

@@ -415,7 +415,7 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void isRangeSelfManaging_Args__() throws Exception {
-    boolean actual = target.initialLoadJdbc();
+    boolean actual = target.isInitialLoadJdbc();
     boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }

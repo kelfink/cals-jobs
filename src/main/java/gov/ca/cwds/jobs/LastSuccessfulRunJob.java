@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.jobs.component.AtomJobControl;
 import gov.ca.cwds.jobs.component.AtomShared;
 import gov.ca.cwds.jobs.component.Job;
+import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -89,13 +90,19 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
 
   @Override
   public final void run() {
+    final JobProgressTrack track = getTrack();
+    track.start();
+
     final Date lastRunTime = determineLastSuccessfulRunTime();
+    track.setLastChangeSince(lastRunTime);
+
     final Date curentTimeRunTime = _run(lastRunTime);
 
     if (!isFailed()) {
       writeLastSuccessfulRunTime(curentTimeRunTime);
     }
 
+    track.done();
     finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
   }
 
@@ -103,15 +110,16 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    * {@inheritDoc}
    */
   @Override
-  public void markJobDone() {
+  public void done() {
     this.doneRetrieve = true;
     this.doneIndex = true;
     this.doneTransform = true;
     this.doneJob = true;
+    this.getTrack().done();
   }
 
   /**
-   * Reset the job's state and start over.
+   * Reset the job's status and start over.
    */
   public void reset() {
     this.doneRetrieve = false;
@@ -125,16 +133,18 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    * {@inheritDoc}
    */
   @Override
-  public void markFailed() {
+  public void fail() {
     this.fatalError = true;
     this.doneJob = true;
+    this.getTrack().fail();
+    this.getTrack().done();
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public void markRetrieveDone() {
+  public void doneRetrieve() {
     this.doneRetrieve = true;
   }
 
@@ -142,7 +152,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    * {@inheritDoc}
    */
   @Override
-  public void markTransformDone() {
+  public void doneTransform() {
     this.doneTransform = true;
   }
 
@@ -150,7 +160,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    * {@inheritDoc}
    */
   @Override
-  public void markIndexDone() {
+  public void doneIndex() {
     this.doneIndex = true;
   }
 
@@ -242,10 +252,10 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
         ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
             .parse(br.readLine().trim()); // NOSONAR
       } catch (IOException e) {
-        markFailed();
+        fail();
         JobLogs.raiseError(LOGGER, e, "Caught IOException: {}", e.getMessage());
       } catch (ParseException e) {
-        markFailed();
+        fail();
         JobLogs.raiseError(LOGGER, e, "Caught ParseException: {}", e.getMessage());
       }
     }
@@ -264,7 +274,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
         w.write(new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
             .format(datetime));
       } catch (IOException e) {
-        markFailed();
+        fail();
         JobLogs.raiseError(LOGGER, e, "Failed to write timestamp file: {}", e.getMessage());
       }
     }

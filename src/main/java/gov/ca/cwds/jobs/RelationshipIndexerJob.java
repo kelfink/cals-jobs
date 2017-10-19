@@ -182,7 +182,7 @@ public class RelationshipIndexerJob
       }
 
     } catch (Exception e) {
-      markFailed();
+      fail();
       JobLogs.raiseError(LOGGER, e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(), p.getRight(),
           e.getMessage());
     }
@@ -199,7 +199,7 @@ public class RelationshipIndexerJob
   protected void threadRetrieveByJdbc() {
     Thread.currentThread().setName("extract_main");
     LOGGER.info("BEGIN: main extract thread");
-    markTransformDone();
+    doneTransform();
 
     try {
       final List<Pair<String, String>> ranges = getPartitionRanges();
@@ -218,10 +218,10 @@ public class RelationshipIndexerJob
       }
 
     } catch (Exception e) {
-      markFailed();
+      fail();
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      markRetrieveDone();
+      doneRetrieve();
     }
 
     LOGGER.info("DONE: main extract thread");
@@ -233,7 +233,7 @@ public class RelationshipIndexerJob
   }
 
   @Override
-  public boolean initialLoadJdbc() {
+  public boolean isInitialLoadJdbc() {
     return true;
   }
 

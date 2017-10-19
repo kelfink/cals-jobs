@@ -144,7 +144,6 @@ public class JobProgressTrack implements ApiMarker {
     if (this.status != NeutronJobExecutionStatus.FAILED) {
       this.status = NeutronJobExecutionStatus.SUCCEEDED;
     }
-
   }
 
   @Override
@@ -205,6 +204,22 @@ public class JobProgressTrack implements ApiMarker {
     track.initialLoad = true;
 
     System.out.println(track.toString());
+  }
+
+  public boolean isInitialLoad() {
+    return initialLoad;
+  }
+
+  public void setInitialLoad(boolean initialLoad) {
+    this.initialLoad = initialLoad;
+  }
+
+  public Date getLastChangeSince() {
+    return lastChangeSince;
+  }
+
+  public void setLastChangeSince(Date lastChangeSince) {
+    this.lastChangeSince = lastChangeSince;
   }
 
 }

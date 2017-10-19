@@ -169,7 +169,7 @@ public class OtherClientNameIndexerJob
   }
 
   @Override
-  public boolean initialLoadJdbc() {
+  public boolean isInitialLoadJdbc() {
     return true;
   }
 

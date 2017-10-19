@@ -350,7 +350,7 @@ public class BasePersonIndexerJobTest
     doThrow(new IOException()).when(esDao).close();
     try {
       target.close();
-      target.markFailed();
+      target.fail();
       fail("Expected exception was not thrown!");
     } catch (IOException e) {
     }
@@ -674,7 +674,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void isRangeSelfManaging_Args__() throws Exception {
-    final boolean actual = target.initialLoadJdbc();
+    final boolean actual = target.isInitialLoadJdbc();
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }

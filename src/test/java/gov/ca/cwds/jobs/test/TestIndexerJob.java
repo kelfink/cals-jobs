@@ -75,12 +75,12 @@ public class TestIndexerJob
   }
 
   @Override
-  public void markJobDone() {
+  public void done() {
     if (isFakeMarkDone()) {
       throw new JobsException("fake error");
     }
 
-    super.markJobDone();
+    super.done();
   }
 
   @Override

@@ -49,7 +49,7 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
   /**
    * @return true if the job provides its own key ranges
    */
-  default boolean initialLoadJdbc() {
+  default boolean isInitialLoadJdbc() {
     return false;
   }
 

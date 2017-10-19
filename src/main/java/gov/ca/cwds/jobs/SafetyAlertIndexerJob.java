@@ -175,7 +175,7 @@ public class SafetyAlertIndexerJob
   }
 
   @Override
-  public boolean initialLoadJdbc() {
+  public boolean isInitialLoadJdbc() {
     return true;
   }
 

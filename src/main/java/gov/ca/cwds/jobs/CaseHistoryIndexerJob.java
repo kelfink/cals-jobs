@@ -149,7 +149,7 @@ public abstract class CaseHistoryIndexerJob
   }
 
   @Override
-  public boolean initialLoadJdbc() {
+  public boolean isInitialLoadJdbc() {
     return true;
   }
 

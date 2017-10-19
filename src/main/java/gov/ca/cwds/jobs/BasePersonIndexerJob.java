@@ -60,7 +60,7 @@ import gov.ca.cwds.jobs.component.AtomTransformer;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
-import gov.ca.cwds.jobs.defaults.NeutronColumnDefaults;
+import gov.ca.cwds.jobs.defaults.NeutronColumn;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.defaults.NeutronElasticsearchDefaults;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
@@ -212,7 +212,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       JobLogs.logEvery(track.trackQueuedToIndex(), "add to index queue", "recs");
       queueIndex.putLast(norm);
     } catch (InterruptedException e) {
-      markFailed();
+      fail();
       Thread.currentThread().interrupt();
       JobLogs.raiseError(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
     }
@@ -303,7 +303,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * </p>
    */
   protected void doInitialLoadJdbc() {
-    Thread.currentThread().setName("main");
+    Thread.currentThread().setName("initial_load");
+    LOGGER.info("INITIAL LOAD WITH JDBC!");
 
     try {
       final Thread threadIndexer = new Thread(this::threadIndex); // Index
@@ -326,14 +327,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       threadIndexer.join();
       Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue());
 
-      // SLF4J does not yet support conditional invocation.
+      // Sorry SonarQube, SLF4J does not yet support conditional invocation.
       LOGGER.info("PROGRESS TRACK: {}", this.getTrack().toString()); // NOSONAR
     } catch (Exception e) {
-      markFailed();
+      fail();
       Thread.currentThread().interrupt();
       JobLogs.raiseError(LOGGER, e, "GENERAL EXCEPTION: {}", e);
     } finally {
-      markJobDone();
+      done();
       this.finish(); // OK for initial load.
     }
 
@@ -377,10 +378,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         con.commit();
       }
     } catch (Exception e) {
-      markFailed();
+      fail();
       throw JobLogs.buildException(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
-      markRetrieveDone();
+      doneRetrieve();
     }
 
     LOGGER.info("DONE: jdbc thread");
@@ -437,11 +438,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         cntr = normalizeLoop(grpRecs, lastId, cntr);
       }
     } catch (Exception e) {
-      markFailed();
+      fail();
       Thread.currentThread().interrupt();
       JobLogs.raiseError(LOGGER, e, "Transformer: FATAL ERROR: {}", e.getMessage());
     } finally {
-      markTransformDone();
+      doneTransform();
     }
 
     LOGGER.info("DONE: normalize thread");
@@ -494,11 +495,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
       LOGGER.info("Closed ES bulk processor");
     } catch (Exception e) {
-      markFailed();
+      fail();
       Thread.currentThread().interrupt();
       JobLogs.raiseError(LOGGER, e, "Indexer: fatal error {}", e.getMessage());
     } finally {
-      markJobDone();
+      done();
     }
 
     LOGGER.info("DONE: indexer thread");
@@ -514,7 +515,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       prepareDocument(bp, p);
     } catch (IOException e) {
-      markFailed();
+      fail();
       JobLogs.raiseError(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
     }
   }
@@ -564,10 +565,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       awaitBulkProcessorClose(bp);
       return new Date(this.startTime);
     } catch (Exception e) {
-      markFailed();
+      fail();
       throw JobLogs.buildException(LOGGER, e, "General Exception: {}", e.getMessage());
     } finally {
-      markJobDone();
+      done();
     }
   }
 
@@ -606,7 +607,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           NeutronElasticsearchDefaults.ES_PEOPLE_INDEX_SETTINGS.getValue(),
           NeutronElasticsearchDefaults.ES_PERSON_MAPPING.getValue());
 
-      // Smart/auto mode:
+      // Smart/auto mode. If last run date is older than 25 years, assume initial load.
+      // Written when DevOps started using Rundeck and was unable to pass parameters to jobs.
       final Calendar cal = Calendar.getInstance();
       cal.add(Calendar.YEAR, -25);
       final boolean autoInitialLoad = lastRun.before(cal.getTime());
@@ -621,12 +623,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       if (autoInitialLoad) {
-        LOGGER.warn("AUTO MODE!");
-        if (initialLoadJdbc()) {
-          LOGGER.info("INITIAL LOAD WITH JDBC!");
+        if (isInitialLoadJdbc()) {
           doInitialLoadJdbc();
         } else {
-          LOGGER.info("INITIAL LOAD WITH HIBERNATE!");
           extractHibernate();
         }
       } else {
@@ -634,17 +633,17 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       // SLF4J does not yet support conditional invocation.
-      LOGGER.info(track.toString()); // NOSONAR
+      LOGGER.info("" + track); // NOSONAR
       LOGGER.info("Updating last successful run time to {}",
           new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
               .format(startTime)); // NOSONAR
       return new Date(this.startTime);
     } catch (Exception e) {
-      markFailed();
+      fail();
       throw JobLogs.buildException(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
     } finally {
       try {
-        markJobDone();
+        done();
         this.close();
       } catch (IOException io) {
         LOGGER.error("IOException on close! {}", io.getMessage(), io);
@@ -673,7 +672,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
-      q.setParameter(NeutronColumnDefaults.SQL_COLUMN_AFTER.getValue(),
+      q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           JobJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
@@ -685,12 +684,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       txn.commit();
       return results.build();
     } catch (HibernateException h) {
-      markFailed();
+      fail();
       LOGGER.error("EXTRACT ERROR! {}", h.getMessage(), h);
       txn.rollback();
       throw new DaoException(h);
     } finally {
-      markRetrieveDone();
+      doneRetrieve();
     }
   }
 
@@ -699,7 +698,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final String namedQueryNameForDeletion =
         entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
     final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
-    q.setParameter(NeutronColumnDefaults.SQL_COLUMN_AFTER.getValue(),
+    q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
         JobJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
     final List<M> deletionRecs = q.list();
@@ -727,7 +726,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param deletionResults records to remove
    * @return List of normalized entities
    */
-  protected List<T> extractLastRunRecsFromView(Date lastRunTime, Set<String> deletionResults) {
+  @SuppressWarnings("unchecked")
+  protected List<T> extractLastRunRecsFromView(final Date lastRunTime,
+      final Set<String> deletionResults) {
     LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
     final Class<?> entityClass = getDenormalizedClass(); // view entity class
     final String namedQueryName =
@@ -741,12 +742,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       prepHibernateLastChange(session, txn, lastRunTime);
       final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
-      q.setParameter(NeutronColumnDefaults.SQL_COLUMN_AFTER.getValue(),
+      q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           JobJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<M> recs = q.list();
-      LOGGER.warn("FOUND {} RECORDS", recs.size());
+      LOGGER.info("FOUND {} RECORDS", recs.size());
 
       // Convert de-normalized rows to normalized persistence objects.
       final List<M> groupRecs = new ArrayList<>();
@@ -777,11 +778,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       txn.commit();
       return results.build();
     } catch (SQLException | HibernateException h) {
-      markFailed();
+      fail();
       txn.rollback();
       throw JobLogs.buildException(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
     } finally {
-      markRetrieveDone();
+      doneRetrieve();
     }
   }
 
@@ -813,10 +814,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected synchronized void finish() {
     LOGGER.info("FINISH JOB!");
     try {
-      markJobDone();
+      done();
       close();
     } catch (Exception e) {
-      markFailed();
+      fail();
       throw JobLogs.buildException(LOGGER, e, "ERROR FINISHING JOB: {}", e.getMessage());
     }
     LOGGER.info("JOB FINISHED!");
@@ -851,13 +852,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       txn.commit();
     } catch (HibernateException e) {
       LOGGER.error("BATCH ERROR! ", e);
-      markFailed();
+      fail();
       if (txn != null) {
         txn.rollback();
       }
       throw new DaoException(e);
     } finally {
-      markIndexDone();
+      doneIndex();
     }
 
     return ret;
@@ -936,7 +937,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       getTrack().trackRangeComplete(p);
       return ret.build();
     } catch (HibernateException e) {
-      markFailed();
+      fail();
       LOGGER.error("ERROR PULLING BUCKET RANGE! {}-{}: {}", minId, maxId, e.getMessage(), e);
       txn.rollback();
       throw new DaoException(e);
@@ -947,10 +948,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
     } catch (Exception e2) {
-      markFailed();
+      fail();
       throw new JobsException("ERROR CLOSING BULK PROCESSOR!", e2);
     } finally {
-      markRetrieveDone();
+      doneRetrieve();
     }
   }
 
@@ -966,6 +967,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @see #pullBucketRange(String, String)
    */
   protected int extractHibernate() {
+    LOGGER.info("INITIAL LOAD WITH HIBERNATE!");
     final List<Pair<String, String>> buckets = getPartitionRanges();
 
     for (Pair<String, String> b : buckets) {
