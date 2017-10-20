@@ -14,20 +14,58 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import gov.ca.cwds.data.BaseDaoImpl;
+import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.component.AtomHibernate;
 import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
+import gov.ca.cwds.jobs.test.TestIndexerJob;
+import gov.ca.cwds.jobs.test.TestNormalizedEntity;
+import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
-public class JobJdbcUtilsTest extends PersonJobTester {
+public class JobJdbcUtilsTest
+    extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
+
+  private static final class TestAtomHibernate extends TestIndexerJob
+      implements AtomHibernate<TestNormalizedEntity, TestDenormalizedEntity> {
+
+    public TestAtomHibernate(final TestNormalizedEntityDao mainDao, final ElasticsearchDao esDao,
+        @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
+        @CmsSessionFactory SessionFactory sessionFactory) {
+      super(mainDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    }
+
+    @Override
+    public BaseDaoImpl getJobDao() {
+      return null;
+    }
+
+    @Override
+    public boolean isLargeDataSet() {
+      return true;
+    }
+
+  }
+
+  AtomHibernate initialLoad;
 
   @Override
   @Before
   public void setup() throws Exception {
     super.setup();
+    initialLoad =
+        new TestAtomHibernate(null, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
+    // initialLoad.setOpts(opts);
   }
 
   @Test
@@ -39,7 +77,7 @@ public class JobJdbcUtilsTest extends PersonJobTester {
   public void makeTimestampString_Args__Date() throws Exception {
     Date date = mock(Date.class);
     String actual = JobJdbcUtils.makeTimestampString(date);
-    String expected = null;
+    String expected = "TIMESTAMP('1969-12-31 16:00:00.000')";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -47,7 +85,7 @@ public class JobJdbcUtilsTest extends PersonJobTester {
   public void makeSimpleTimestampString_Args__Date() throws Exception {
     Date date = new Date(1508521402357L);
     String actual = JobJdbcUtils.makeSimpleTimestampString(date);
-    String expected = null;
+    String expected = "2017-10-20 10:43:22.357";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -99,25 +137,19 @@ public class JobJdbcUtilsTest extends PersonJobTester {
 
   @Test
   public void getCommonPartitionRanges4_Args__AtomHibernate() throws Exception {
-    AtomHibernate initialLoad = mock(AtomHibernate.class);
     List actual = JobJdbcUtils.getCommonPartitionRanges4(initialLoad);
     assertThat(actual.size(), is(equalTo(4)));
   }
 
   @Test
   public void getCommonPartitionRanges16_Args__AtomHibernate() throws Exception {
-    AtomHibernate initialLoad = mock(AtomHibernate.class);
-    List actual = JobJdbcUtils.getCommonPartitionRanges16(initialLoad);
+    final List actual = JobJdbcUtils.getCommonPartitionRanges16(initialLoad);
     assertThat(actual.size(), is(equalTo(16)));
   }
 
   @Test
   public void getCommonPartitionRanges64_Args__AtomHibernate() throws Exception {
-    AtomHibernate initialLoad = mock(AtomHibernate.class);
-    when(initialLoad.isInitialLoadJdbc()).thenReturn(true);
-    // when(initialLoad.isDB2OnZOS()).thenReturn(true);
-
-    List actual = JobJdbcUtils.getCommonPartitionRanges64(initialLoad);
+    final List actual = JobJdbcUtils.getCommonPartitionRanges64(initialLoad);
     assertThat(actual.size(), is(equalTo(64)));
   }
 

@@ -60,28 +60,28 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  ElasticsearchConfiguration esConfig;
-  ElasticsearchDao esDao;
-  Client client;
-  ElasticSearchPerson esp;
+  public ElasticsearchConfiguration esConfig;
+  public ElasticsearchDao esDao;
+  public Client client;
+  public ElasticSearchPerson esp;
 
-  JobOptions opts;
-  File tempFile;
-  File esConfileFile;
-  String lastJobRunTimeFilename;
+  public JobOptions opts;
+  public File tempFile;
+  public File esConfileFile;
+  public String lastJobRunTimeFilename;
   java.util.Date lastRunTime = new java.util.Date();
 
-  protected SessionFactory sessionFactory;
-  protected Session session;
-  protected EntityManager em;
-  protected SessionFactoryOptions sfo;
-  protected Transaction transaction;
-  StandardServiceRegistry reg;
-  ConnectionProvider cp;
-  protected Connection con;
-  protected Statement stmt;
-  protected ResultSet rs;
-  DatabaseMetaData meta;
+  public SessionFactory sessionFactory;
+  public Session session;
+  public EntityManager em;
+  public SessionFactoryOptions sfo;
+  public Transaction transaction;
+  public StandardServiceRegistry reg;
+  public ConnectionProvider cp;
+  public Connection con;
+  public Statement stmt;
+  public ResultSet rs;
+  public DatabaseMetaData meta;
 
   @Before
   public void setup() throws Exception {
