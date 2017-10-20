@@ -4,8 +4,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.junit.Before;
@@ -46,7 +45,7 @@ public class JobJdbcUtilsTest extends PersonJobTester {
 
   @Test
   public void makeSimpleTimestampString_Args__Date() throws Exception {
-    Date date = mock(Date.class);
+    Date date = new Date(1508521402357L);
     String actual = JobJdbcUtils.makeSimpleTimestampString(date);
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
@@ -55,7 +54,7 @@ public class JobJdbcUtilsTest extends PersonJobTester {
   @Test
   public void getDBSchemaName_Args__() throws Exception {
     String actual = JobJdbcUtils.getDBSchemaName();
-    String expected = null;
+    String expected = "CWSRS1";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -71,25 +70,12 @@ public class JobJdbcUtilsTest extends PersonJobTester {
   }
 
   @Test
-  public void prepHibernateLastChange_Args__Session__Transaction__Date__String__Function_T__HibernateException()
-      throws Exception {
-    Session session = mock(Session.class);
-    Transaction txn = mock(Transaction.class);
-    Date lastRunTime = mock(Date.class);
-    String sqlInsertLastChange = null;
-    Function<Connection, PreparedStatement> func = mock(Function.class);
-    try {
-      JobJdbcUtils.prepHibernateLastChange(session, txn, lastRunTime, sqlInsertLastChange, func);
-      fail("Expected exception was not thrown!");
-    } catch (HibernateException e) {
-    }
-  }
-
-  @Test
   public void calcReaderThreads_Args__JobOptions() throws Exception {
     JobOptions opts = mock(JobOptions.class);
+    when(opts.getThreadCount()).thenReturn(4L);
+
     int actual = JobJdbcUtils.calcReaderThreads(opts);
-    int expected = 0;
+    int expected = 4;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -128,6 +114,9 @@ public class JobJdbcUtilsTest extends PersonJobTester {
   @Test
   public void getCommonPartitionRanges64_Args__AtomHibernate() throws Exception {
     AtomHibernate initialLoad = mock(AtomHibernate.class);
+    when(initialLoad.isInitialLoadJdbc()).thenReturn(true);
+    // when(initialLoad.isDB2OnZOS()).thenReturn(true);
+
     List actual = JobJdbcUtils.getCommonPartitionRanges64(initialLoad);
     assertThat(actual.size(), is(equalTo(64)));
   }

@@ -107,47 +107,25 @@ public class JobJdbcUtils {
     };
   }
 
-  private static List<Pair<String, String>> appeaseSonarQubeByNotRepeatingConstants(
-      int partitions) {
-    final int skip = BASE_PARTITIONS.length / (partitions - 1);
-    return IntStream.rangeClosed(0, BASE_PARTITIONS.length).boxed().flatMap(everyNth(skip))
-        .collect(Collectors.toList()).stream()
-        .map(i -> Pair.of(i != 0 ? BASE_PARTITIONS[i - 1] : Z_OS_START, BASE_PARTITIONS[i]))
+  private static List<Pair<String, String>> buildPartitionsRanges(int partitions) {
+    final int len = BASE_PARTITIONS.length;
+    final int skip = len / partitions;
+    return IntStream.rangeClosed(0, BASE_PARTITIONS.length - 1).boxed().flatMap(everyNth(skip))
+        .collect(Collectors.toList()).stream().sorted().sequential()
+        .map(i -> Pair.of(i > 0 ? BASE_PARTITIONS[i - 1] : Z_OS_START, BASE_PARTITIONS[i]))
         .collect(Collectors.toList());
   }
 
   public static List<Pair<String, String>> getPartitionRanges64() {
-    return appeaseSonarQubeByNotRepeatingConstants(64);
+    return buildPartitionsRanges(64);
   }
 
   public static List<Pair<String, String>> getPartitionRanges16() {
-    final List<Pair<String, String>> ret = new ArrayList<>(16);
-    ret.add(Pair.of(Z_OS_START, "B3bMRWu8NV"));
-    ret.add(Pair.of("B3bMRWu8NV", "DW5GzxJ30A"));
-    ret.add(Pair.of("DW5GzxJ30A", "FNOBbaG6qq"));
-    ret.add(Pair.of("FNOBbaG6qq", "HJf1EJe25X"));
-    ret.add(Pair.of("HJf1EJe25X", "JCoyq0Iz36"));
-    ret.add(Pair.of("JCoyq0Iz36", "LvijYcj01S"));
-    ret.add(Pair.of("LvijYcj01S", "Npf4LcB3Lr"));
-    ret.add(Pair.of("Npf4LcB3Lr", "PiJ6a0H49S"));
-    ret.add(Pair.of("PiJ6a0H49S", "RbL4aAL34A"));
-    ret.add(Pair.of("RbL4aAL34A", "S3qiIdg0BN"));
-    ret.add(Pair.of("S3qiIdg0BN", "0Ltok9y5Co"));
-    ret.add(Pair.of("0Ltok9y5Co", "2CFeyJd49S"));
-    ret.add(Pair.of("2CFeyJd49S", "4w3QDw136B"));
-    ret.add(Pair.of("4w3QDw136B", "6p9XaHC10S"));
-    ret.add(Pair.of("6p9XaHC10S", "8jw5J580MQ"));
-    ret.add(Pair.of("8jw5J580MQ", Z_OS_END));
-    return ret;
+    return buildPartitionsRanges(16);
   }
 
   public static List<Pair<String, String>> getPartitionRanges4() {
-    final List<Pair<String, String>> ret = new ArrayList<>(4);
-    ret.add(Pair.of(Z_OS_START, "JCoyq0Iz36"));
-    ret.add(Pair.of("JCoyq0Iz36", "RbL4aAL34A"));
-    ret.add(Pair.of("RbL4aAL34A", "4w3QDw136B"));
-    ret.add(Pair.of("4w3QDw136B", Z_OS_END));
-    return ret;
+    return buildPartitionsRanges(4);
   }
 
   @SuppressWarnings("unchecked")
@@ -159,23 +137,7 @@ public class JobJdbcUtils {
       // z/OS, large data set:
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
-      switch (numPartitions) {
-        case 64:
-          ret = getPartitionRanges64();
-          break;
-
-        case 16:
-          ret = getPartitionRanges16();
-          break;
-
-        case 4:
-          ret = getPartitionRanges4();
-          break;
-
-        default:
-          break;
-      }
-      ret = initialLoad.limitRange(ret);
+      ret = initialLoad.limitRange(buildPartitionsRanges(numPartitions));
     } else if (initialLoad.isDB2OnZOS()) {
       // ----------------------------
       // z/OS, small data set:
@@ -209,7 +171,7 @@ public class JobJdbcUtils {
   }
 
   public static void main(String[] args) {
-    final List<Pair<String, String>> result = appeaseSonarQubeByNotRepeatingConstants(4);
+    final List<Pair<String, String>> result = buildPartitionsRanges(4);
     System.out.println("result size: " + result.size());
     System.out.println(result);
   }
