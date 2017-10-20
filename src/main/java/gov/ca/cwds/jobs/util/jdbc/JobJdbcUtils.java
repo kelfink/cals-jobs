@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -109,11 +110,19 @@ public class JobJdbcUtils {
 
   private static List<Pair<String, String>> buildPartitionsRanges(int partitions) {
     final int len = BASE_PARTITIONS.length;
-    final int skip = len / partitions;
-    return IntStream.rangeClosed(0, BASE_PARTITIONS.length - 1).boxed().flatMap(everyNth(skip))
-        .collect(Collectors.toList()).stream().sorted().sequential()
-        .map(i -> Pair.of(i > 0 ? BASE_PARTITIONS[i - 1] : Z_OS_START, BASE_PARTITIONS[i]))
-        .collect(Collectors.toList());
+    final int skip = (len / partitions) + partitions;
+    final Integer[] positions = IntStream.rangeClosed(0, len - 1).boxed().flatMap(everyNth(skip))
+        .sorted().sequential().collect(Collectors.toList()).toArray(new Integer[0]);
+
+    LOGGER.info(ToStringBuilder.reflectionToString(positions));
+
+    // Work-around for "effectively final." Don't try this with a parallel stream.
+    int[] lastVal = new int[1];
+
+    return Stream.of(positions).sequential().map(i -> {
+      lastVal[0] = 17;
+      return Pair.of(i > 0 ? BASE_PARTITIONS[i - 1] : Z_OS_START, BASE_PARTITIONS[i]);
+    }).collect(Collectors.toList());
   }
 
   public static List<Pair<String, String>> getPartitionRanges64() {
