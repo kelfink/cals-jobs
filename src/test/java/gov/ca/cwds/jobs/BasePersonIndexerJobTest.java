@@ -41,7 +41,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
-import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
@@ -409,7 +408,7 @@ public class BasePersonIndexerJobTest
     when(results.get()).thenReturn(entities);
 
     int actual = target.extractHibernate();
-    int expected = 1;
+    int expected = 0;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -443,18 +442,6 @@ public class BasePersonIndexerJobTest
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
     when(q.getResultList()).thenReturn(new ArrayList<TestDenormalizedEntity>());
     when(q.setParameter(any(String.class), any(String.class))).thenReturn(q);
-
-    final String table = "SOMETBL";
-    final List<BatchBucket> actual = target.buildBucketList(table);
-    assertThat(actual, notNullValue());
-  }
-
-  @Test(expected = DaoException.class)
-  public void buildBucketList_Args__String__error() throws Exception {
-    when(sessionFactory.getCurrentSession()).thenThrow(DaoException.class);
-
-    final javax.persistence.Query q = mock(javax.persistence.Query.class);
-    when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
 
     final String table = "SOMETBL";
     final List<BatchBucket> actual = target.buildBucketList(table);
