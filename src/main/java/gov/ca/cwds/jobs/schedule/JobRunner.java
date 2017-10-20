@@ -168,6 +168,7 @@ public class JobRunner {
       final ListenerManager listenerManager = scheduler.getListenerManager();
       listenerManager.addSchedulerListener(new NeutronSchedulerListener());
       listenerManager.addJobListener(new NeutronJobListener());
+      listenerManager.addTriggerListener(new NeutronTriggerListener());
 
       // JMX:
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
@@ -223,7 +224,7 @@ public class JobRunner {
       jettyServer.start();
 
     } catch (IOException | SchedulerException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "SCHEDULER INIT ERROR: {}", e.getMessage());
+      throw JobLogs.buildCheckedException(LOGGER, e, "INIT ERROR: {}", e.getMessage());
     }
   }
 
