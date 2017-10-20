@@ -116,6 +116,20 @@ public final class JobLogs {
   }
 
   /**
+   * Format message and return a runtime {@link JobsException}.
+   * 
+   * @param log class logger
+   * @param e any Throwable
+   * @param pattern MessageFormat pattern
+   * @param args error message, excluding throwable message
+   * @throws NeutronException checked exception
+   */
+  public static void raiseCheckedException(final Logger log, Throwable e, String pattern,
+      Object... args) throws NeutronException {
+    throw buildCheckedException(LOGGER, e, pattern, args);
+  }
+
+  /**
    * Format message and throw a runtime {@link JobsException}.
    * 
    * @param log class logger

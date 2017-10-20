@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.schedule.NeutronJobManagementBean;
 
 @Path("/neutron")
 public class NeutronJobManagerResource implements ApiMarker {
@@ -49,11 +48,11 @@ public class NeutronJobManagerResource implements ApiMarker {
   @Produces(MediaType.APPLICATION_JSON)
   public String masterAndCommander(@PathParam("jobName") String jobName,
       @PathParam("command") String command, String body) {
-    LOGGER.info("job name: {}, command: {}, POST body len: {}", jobName, command, body.length());
+    // LOGGER.info("job name: {}, command: {}, POST body len: {}", jobName, command, body.length());
     final StringBuilder buf = new StringBuilder();
     buf.append("{\"result\":\"ACK\",\"job_name\":\"").append(jobName).append("\",\"command\":\"")
         .append(command).append("\"}");
-    final NeutronJobManagementBean ufb = new NeutronJobManagementBean(jobName, command, body);
+    // final NeutronJobManagementBean ufb = new NeutronJobManagementBean(jobName, command, body);
     // NOTE: Handle command.
     return buf.toString();
   }

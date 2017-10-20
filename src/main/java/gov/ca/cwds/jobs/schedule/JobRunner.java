@@ -32,7 +32,6 @@ import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
-import gov.ca.cwds.jobs.rest.NeutronRestServer;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
@@ -64,7 +63,7 @@ public class JobRunner {
 
   private JobOptions startingOpts;
 
-  private final NeutronRestServer jetty = new NeutronRestServer();
+  // private final NeutronRestServer jetty = new NeutronRestServer();
 
   /**
    * Job options by job type.

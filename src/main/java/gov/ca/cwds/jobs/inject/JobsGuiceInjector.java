@@ -133,7 +133,7 @@ public class JobsGuiceInjector extends AbstractModule {
    * @return Guice Injector
    * @throws JobsException if unable to construct dependencies
    */
-  public static synchronized Injector buildInjector(final JobOptions opts) throws JobsException {
+  public static synchronized Injector buildInjector(final JobOptions opts) {
     if (injector == null) {
       try {
         injector = Guice.createInjector(new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()),

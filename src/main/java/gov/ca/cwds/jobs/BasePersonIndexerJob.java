@@ -634,9 +634,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       // SLF4J does not yet support conditional invocation.
       LOGGER.info("" + track); // NOSONAR
+      // CHECKSTYLE:OFF
       LOGGER.info("Updating last successful run time to {}",
           new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
               .format(startTime)); // NOSONAR
+      // CHECKSTYLE:ON
       return new Date(this.startTime);
     } catch (Exception e) {
       fail();
@@ -833,33 +835,35 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Deprecated
   @SuppressWarnings("unchecked")
   protected List<BatchBucket> buildBucketList(final String table) {
-    List<BatchBucket> ret;
-    Transaction txn = null;
+    List<BatchBucket> ret = new ArrayList<>();
 
-    try {
-      LOGGER.info("FETCH DYNAMIC BUCKETS FOR {}", table);
-      final Session session = jobDao.getSessionFactory().getCurrentSession();
-      txn = session.beginTransaction();
-      final long totalBuckets = opts.getTotalBuckets() < getJobTotalBuckets() ? getJobTotalBuckets()
-          : opts.getTotalBuckets();
-      final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
-          .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
-              .replaceAll("THE_ID_COL", getIdColumn()), BatchBucket.class)
-          .setParameter("total_buckets", String.valueOf(totalBuckets));
-
-      ret = q.getResultList();
-      session.clear();
-      txn.commit();
-    } catch (HibernateException e) {
-      LOGGER.error("BATCH ERROR! ", e);
-      fail();
-      if (txn != null) {
-        txn.rollback();
-      }
-      throw new DaoException(e);
-    } finally {
-      doneIndex();
-    }
+    // Transaction txn = null;
+    //
+    // try {
+    // LOGGER.info("FETCH DYNAMIC BUCKETS FOR {}", table);
+    // final Session session = jobDao.getSessionFactory().getCurrentSession();
+    // txn = session.beginTransaction();
+    // final long totalBuckets = opts.getTotalBuckets() < getJobTotalBuckets() ?
+    // getJobTotalBuckets()
+    // : opts.getTotalBuckets();
+    // final javax.persistence.Query q = jobDao.getSessionFactory().createEntityManager()
+    // .createNativeQuery(QUERY_BUCKET_LIST.replaceAll("THE_TABLE", table)
+    // .replaceAll("THE_ID_COL", getIdColumn()), BatchBucket.class)
+    // .setParameter("total_buckets", String.valueOf(totalBuckets));
+    //
+    // ret = q.getResultList();
+    // session.clear();
+    // txn.commit();
+    // } catch (HibernateException e) {
+    // LOGGER.error("BATCH ERROR! ", e);
+    // fail();
+    // if (txn != null) {
+    // txn.rollback();
+    // }
+    // throw new DaoException(e);
+    // } finally {
+    // doneIndex();
+    // }
 
     return ret;
   }
@@ -875,11 +879,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected List<Pair<String, String>> getPartitionRanges() {
     final List<Pair<String, String>> ret = new ArrayList<>();
-    final List<BatchBucket> buckets = buildBucketList(getDriverTable());
-
-    for (BatchBucket b : buckets) {
-      ret.add(Pair.of(b.getMinId(), b.getMaxId()));
-    }
+    // final List<BatchBucket> buckets = buildBucketList(getDriverTable());
+    //
+    // for (BatchBucket b : buckets) {
+    // ret.add(Pair.of(b.getMinId(), b.getMaxId()));
+    // }
 
     return ret;
   }

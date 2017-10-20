@@ -373,14 +373,14 @@ public class JobOptions implements ApiMarker {
           pad + "\nUSAGE: java <job class> ...\n" + pad, buildCmdLineOptions(), 4, 8, pad, true);
       LOGGER.error(sw.toString()); // NOSONAR
     } catch (IOException e) {
-      throw JobLogs.buildCheckedException(LOGGER, new IllegalArgumentException("invalid"),
+      JobLogs.raiseCheckedException(LOGGER, new IllegalArgumentException("invalid"),
           "INCORRECT USAGE! {}", e.getMessage(), e);
     }
   }
 
   private static Pair<Long, Long> parseBuckets(final String[] vals) {
-    Long startBucket = Long.parseLong(vals[0]);
-    Long endBucket = Long.parseLong(vals[1]);
+    Long startBucket = Long.valueOf(vals[0]);
+    Long endBucket = Long.valueOf(vals[1]);
     return Pair.of(startBucket, endBucket);
   }
 
@@ -403,7 +403,10 @@ public class JobOptions implements ApiMarker {
     boolean loadSealedAndSensitive = false;
     boolean rangeGiven = false;
     String baseDirectory = null;
+
+    // CHECKSTYLE:OFF
     Pair<Long, Long> bucketRange = Pair.of(0L, 0L);
+    // CHECKSTYLE:ON
 
     String minId = " ";
     String maxId = "9999999999";
