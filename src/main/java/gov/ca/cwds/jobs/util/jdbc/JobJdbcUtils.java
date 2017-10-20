@@ -4,11 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -93,23 +93,27 @@ public class JobJdbcUtils {
     return ret;
   }
 
+  private static <T> Function<T, Stream<T>> everyNth(int n) {
+    return new Function<T, Stream<T>>() {
+      int i = 0;
+
+      @Override
+      public Stream<T> apply(T t) {
+        if (i++ % n == 0) {
+          return Stream.of(t);
+        }
+        return Stream.empty();
+      }
+    };
+  }
+
   private static List<Pair<String, String>> appeaseSonarQubeByNotRepeatingConstants(
       int partitions) {
-    final List<Pair<String, String>> ret = new ArrayList<>(partitions);
-
-    List<String> list = Arrays.asList(BASE_PARTITIONS);
-
-    final int size = BASE_PARTITIONS.length;
-    final int skip = size / (partitions - 1);
-    final int limit = size / skip + Math.min(size % skip, 1); // avoid IndexOutOfBoundsException
-
-    List<String> result = Stream.iterate(list, l -> l.subList(skip, l.size())).limit(limit)
-        .map(l -> l.get(0)).collect(Collectors.toList());
-
-    System.out.println("result size: " + result.size());
-    System.out.println(result);
-
-    return ret;
+    final int skip = BASE_PARTITIONS.length / (partitions - 1);
+    return IntStream.rangeClosed(0, BASE_PARTITIONS.length).boxed().flatMap(everyNth(skip))
+        .collect(Collectors.toList()).stream()
+        .map(i -> Pair.of(i != 0 ? BASE_PARTITIONS[i - 1] : Z_OS_START, BASE_PARTITIONS[i]))
+        .collect(Collectors.toList());
   }
 
   public static List<Pair<String, String>> getPartitionRanges64() {
@@ -205,7 +209,9 @@ public class JobJdbcUtils {
   }
 
   public static void main(String[] args) {
-    appeaseSonarQubeByNotRepeatingConstants(4);
+    final List<Pair<String, String>> result = appeaseSonarQubeByNotRepeatingConstants(4);
+    System.out.println("result size: " + result.size());
+    System.out.println(result);
   }
 
 }

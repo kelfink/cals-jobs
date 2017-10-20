@@ -220,8 +220,8 @@ public class JobRunner {
       // Start your engines ...
       scheduler.start();
 
-      Thread jettyServer = new Thread(jetty::run);
-      jettyServer.start();
+      // Thread jettyServer = new Thread(jetty::run);
+      // jettyServer.start();
 
     } catch (IOException | SchedulerException e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "INIT ERROR: {}", e.getMessage());
