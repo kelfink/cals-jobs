@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -58,6 +59,8 @@ public class JobRunner {
    * Run a single server for all jobs. Launch one JVM, serve many jobs.
    */
   private static boolean continuousMode = false;
+
+  private static boolean initialMode = false;
 
   private Scheduler scheduler;
 
@@ -159,7 +162,8 @@ public class JobRunner {
       p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
 
       // NOTE: make configurable.
-      p.put("org.quartz.threadPool.threadCount", NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
+      p.put("org.quartz.threadPool.threadCount",
+          initialMode ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
       final StdSchedulerFactory factory = new StdSchedulerFactory(p);
       scheduler = factory.getScheduler();
 
@@ -173,10 +177,10 @@ public class JobRunner {
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
 
       // NOTE: make last change window configurable.
-      final Date now =
-          new DateTime().minusHours(NeutronSchedulerConstants.LAST_CHG_WINDOW_HOURS).toDate();
       final DateFormat fmt =
           new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
+      final Date now = initialMode ? fmt.parse("1917-10-31 10:11:12.000")
+          : new DateTime().minusHours(NeutronSchedulerConstants.LAST_CHG_WINDOW_HOURS).toDate();
 
       // Schedule jobs.
       for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
@@ -194,7 +198,7 @@ public class JobRunner {
         final boolean fileExists = f.exists();
         final boolean overrideLastRunTime = opts.getLastRunTime() != null;
 
-        if (!fileExists) {
+        if (!fileExists || initialMode) {
           FileUtils.writeStringToFile(f,
               fmt.format(overrideLastRunTime ? opts.getLastRunTime() : now));
         }
@@ -222,7 +226,7 @@ public class JobRunner {
       // Thread jettyServer = new Thread(jetty::run);
       // jettyServer.start();
 
-    } catch (IOException | SchedulerException e) {
+    } catch (IOException | SchedulerException | ParseException e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "INIT ERROR: {}", e.getMessage());
     }
   }
@@ -417,6 +421,7 @@ public class JobRunner {
       instance.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
           : instance.startingOpts;
       JobRunner.continuousMode = true;
+      JobRunner.initialMode = !instance.startingOpts.isLastRunMode();
       instance.initScheduler();
 
       LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
