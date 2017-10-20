@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -110,19 +111,21 @@ public class JobJdbcUtils {
 
   private static List<Pair<String, String>> buildPartitionsRanges(int partitions) {
     final int len = BASE_PARTITIONS.length;
-    final int skip = (len / partitions) + partitions;
+    final int skip = (len / partitions);
+    LOGGER.info("len: {}, skip: {}", len, skip);
+
     final Integer[] positions = IntStream.rangeClosed(0, len - 1).boxed().flatMap(everyNth(skip))
         .sorted().sequential().collect(Collectors.toList()).toArray(new Integer[0]);
 
-    LOGGER.info(ToStringBuilder.reflectionToString(positions));
+    LOGGER.info(ToStringBuilder.reflectionToString(positions, ToStringStyle.MULTI_LINE_STYLE));
 
-    // Work-around for "effectively final." Don't try this with a parallel stream.
-    int[] lastVal = new int[1];
+    List<Pair<String, String>> ret = new ArrayList<>();
+    for (int i = 0; i < positions.length; i++) {
+      ret.add(Pair.of(i > 0 ? BASE_PARTITIONS[positions[i - 1]] : Z_OS_START,
+          i == positions.length - 1 ? Z_OS_END : BASE_PARTITIONS[positions[i]]));
+    }
 
-    return Stream.of(positions).sequential().map(i -> {
-      lastVal[0] = 17;
-      return Pair.of(i > 0 ? BASE_PARTITIONS[i - 1] : Z_OS_START, BASE_PARTITIONS[i]);
-    }).collect(Collectors.toList());
+    return ret;
   }
 
   public static List<Pair<String, String>> getPartitionRanges64() {
@@ -177,12 +180,6 @@ public class JobJdbcUtils {
   public static List<Pair<String, String>> getCommonPartitionRanges64(
       @SuppressWarnings("rawtypes") AtomHibernate initialLoad) {
     return getCommonPartitionRanges(initialLoad, 64);
-  }
-
-  public static void main(String[] args) {
-    final List<Pair<String, String>> result = buildPartitionsRanges(4);
-    System.out.println("result size: " + result.size());
-    System.out.println(result);
   }
 
 }
