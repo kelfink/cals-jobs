@@ -69,7 +69,7 @@ public class NeutronJobFacade implements Serializable {
 
     // Initial mode: run only once.
     final Trigger trg =
-        JobRunner.isInitialMode()
+        !JobRunner.isInitialMode()
             ? newTrigger()
                 .withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
                 .withSchedule(
@@ -80,7 +80,7 @@ public class NeutronJobFacade implements Serializable {
                 .build()
             : newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
                 .withSchedule(simpleSchedule()
-                    .withIntervalInSeconds(defaultSchedule.getPeriodSeconds()).withRepeatCount(0))
+                    .withIntervalInSeconds(defaultSchedule.getPeriodSeconds()).withRepeatCount(1))
                 .startAt(DateTime.now().toDate()).build();
 
     scheduler.scheduleJob(jd, trg);

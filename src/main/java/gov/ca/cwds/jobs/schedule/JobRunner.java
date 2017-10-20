@@ -155,7 +155,7 @@ public class JobRunner {
    * @throws NeutronException on initialization error
    */
   @SuppressWarnings("unchecked")
-  protected void initScheduler() throws NeutronException {
+  protected void initScheduler() throws NeutronException, SchedulerException {
     try {
       // Quartz scheduling:
       final Properties p = new Properties();
@@ -232,6 +232,7 @@ public class JobRunner {
       // jettyServer.start();
 
     } catch (IOException | SchedulerException | ParseException e) {
+      scheduler.shutdown(false);
       throw JobLogs.buildCheckedException(LOGGER, e, "INIT ERROR: {}", e.getMessage());
     }
   }
@@ -437,6 +438,10 @@ public class JobRunner {
 
   public static boolean isInitialMode() {
     return initialMode;
+  }
+
+  public Map<Class<?>, List<JobProgressTrack>> getJobTracks() {
+    return jobTracks;
   }
 
 }
