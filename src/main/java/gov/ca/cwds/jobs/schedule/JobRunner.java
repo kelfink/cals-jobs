@@ -154,6 +154,7 @@ public class JobRunner {
    * Expose job execution operations through JMX.
    * 
    * @throws NeutronException on initialization error
+   * @throws SchedulerException on scheduler shutdown error
    */
   @SuppressWarnings("unchecked")
   protected void initScheduler() throws NeutronException, SchedulerException {
