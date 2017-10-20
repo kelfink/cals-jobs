@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -57,7 +58,7 @@ public class GsonMessageBodyHandler
       throws IOException, WebApplicationException {
     LOGGER.debug("GSon readFrom");
 
-    InputStreamReader streamReader = new InputStreamReader(entityStream, UTF_8);
+    InputStreamReader streamReader = new InputStreamReader(entityStream, Charset.defaultCharset());
     try {
       Type jsonType;
       if (type.equals(genericType)) {
@@ -90,7 +91,7 @@ public class GsonMessageBodyHandler
 
     LOGGER.debug("GSon writeTo");
 
-    OutputStreamWriter writer = new OutputStreamWriter(entityStream, UTF_8);
+    OutputStreamWriter writer = new OutputStreamWriter(entityStream, Charset.defaultCharset());
     try {
       Type jsonType;
       if (type.equals(genericType)) {

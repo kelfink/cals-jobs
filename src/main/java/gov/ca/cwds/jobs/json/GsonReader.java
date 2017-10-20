@@ -9,6 +9,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -34,16 +35,16 @@ public class GsonReader<T> implements MessageBodyReader<T> {
       MultivaluedMap<String, String> mm, InputStream in)
       throws IOException, WebApplicationException {
     Gson g = new Gson();
-    return g.fromJson(_convertStreamToString(in), type);
+    return g.fromJson(convertStreamToString(in), type);
   }
 
-  private String _convertStreamToString(InputStream inputStream) throws IOException {
+  private String convertStreamToString(InputStream inputStream) throws IOException {
     if (inputStream != null) {
       Writer writer = new StringWriter();
 
       char[] buffer = new char[1024];
-      try {
-        Reader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+      try (Reader reader =
+          new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()))) {
         int n;
         while ((n = reader.read(buffer)) != -1) {
           writer.write(buffer, 0, n);
