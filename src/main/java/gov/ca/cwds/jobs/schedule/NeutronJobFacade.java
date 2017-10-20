@@ -9,6 +9,7 @@ import java.io.Serializable;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -23,6 +24,11 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 public class NeutronJobFacade implements Serializable {
+
+  /**
+   * Default.
+   */
+  private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJobFacade.class);
 
@@ -52,7 +58,7 @@ public class NeutronJobFacade implements Serializable {
               StringUtils.isBlank(cmdLineArgs) ? null : cmdLineArgs.split("\\s+"));
       return track.toString();
     } catch (Exception e) {
-      LOGGER.error(e.getMessage(), e);
+      LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);
       return "Job failed. Check the logs!";
     }
   }
@@ -100,6 +106,12 @@ public class NeutronJobFacade implements Serializable {
     String ret;
 
     try {
+      for (JobExecutionContext ctx : scheduler.getCurrentlyExecutingJobs()) {
+        if (ctx.getJobDetail().getKey().equals(jobKey)) {
+          // LOGGER.info("", ctx.);
+        }
+      }
+
       final JobProgressTrack track = (JobProgressTrack) jd.getJobDataMap().get("track");
       ret = track != null ? track.toString() : "NO TRACK?";
     } catch (Exception e) {

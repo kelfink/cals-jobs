@@ -8,6 +8,7 @@ import java.lang.management.ManagementFactory;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -197,10 +198,11 @@ public class JobRunner {
         final StringBuilder buf = new StringBuilder();
         buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
             .append(".time");
-        opts.setLastRunLoc(buf.toString());
+        final String timeFileLoc = buf.toString();
+        opts.setLastRunLoc(timeFileLoc);
 
         // If timestamp file doesn't exist, create it.
-        final File f = new File(opts.getLastRunLoc());
+        final File f = new File(timeFileLoc);
         final boolean fileExists = f.exists();
         final boolean overrideLastRunTime = opts.getLastRunTime() != null;
 
@@ -210,10 +212,10 @@ public class JobRunner {
         }
 
         registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
-
         final NeutronJobFacade nj = new NeutronJobFacade(scheduler, sched);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         scheduleRegistry.put(klass, nj);
+        jobTracks.put(sched.getKlazz(), new ArrayList<JobProgressTrack>());
       }
 
       exporter.export("Neutron:runner=master", this);
@@ -230,7 +232,7 @@ public class JobRunner {
       scheduler.start();
 
       if (initialMode) {
-        scheduler.shutdown(true);
+        scheduler.shutdown(true); // Stop the scheduler after initial run jobs complete.
       }
 
       // Thread jettyServer = new Thread(jetty::run);
@@ -418,6 +420,14 @@ public class JobRunner {
     return instance;
   }
 
+  public static boolean isInitialMode() {
+    return initialMode;
+  }
+
+  public Map<Class<?>, List<JobProgressTrack>> getJobTracks() {
+    return jobTracks;
+  }
+
   /**
    * OPTION: configure individual jobs, like Rundeck.
    * <p>
@@ -439,14 +449,6 @@ public class JobRunner {
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
-  }
-
-  public static boolean isInitialMode() {
-    return initialMode;
-  }
-
-  public Map<Class<?>, List<JobProgressTrack>> getJobTracks() {
-    return jobTracks;
   }
 
 }

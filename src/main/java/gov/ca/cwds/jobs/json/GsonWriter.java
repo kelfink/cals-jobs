@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -21,10 +21,10 @@ public class GsonWriter<T> implements MessageBodyWriter<T> {
   @Override
   public void writeTo(T t, Class<?> type, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
-      throws IOException, WebApplicationException {
+      throws IOException {
     Gson g = new Gson();
     httpHeaders.get("Content-Type").add("charset=UTF-8");
-    entityStream.write(g.toJson(t).getBytes("UTF-8"));
+    entityStream.write(g.toJson(t).getBytes(Charset.defaultCharset()));
   }
 
   @Override

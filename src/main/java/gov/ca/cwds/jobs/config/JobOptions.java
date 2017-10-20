@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
@@ -150,7 +151,7 @@ public class JobOptions implements ApiMarker {
       String baseDirectory) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
-    this.lastRunTime = lastRunTime;
+    this.lastRunTime = JobDateUtil.freshDate(lastRunTime);
     this.lastRunLoc = lastRunLoc;
     this.lastRunMode = lastRunMode;
     this.startBucket = startBucket;
@@ -403,7 +404,7 @@ public class JobOptions implements ApiMarker {
     String baseDirectory = null;
 
     // CHECKSTYLE:OFF
-    Pair<Long, Long> bucketRange = Pair.of(0L, 0L);
+    Pair<Long, Long> bucketRange = Pair.of(-1L, 0L);
     // CHECKSTYLE:ON
 
     String minId = " ";

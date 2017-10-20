@@ -145,7 +145,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
   }
 
   public void setBirthDate(Date birthDate) {
-    this.birthDate = birthDate;
+    this.birthDate = JobDateUtil.freshDate(birthDate);
   }
 
   public void setGender(String gender) {
