@@ -17,18 +17,6 @@
 		<property name="connection_pool_size">2</property>
 		<property name="show_sql">true</property>
 
-<!-- Taborda -->
-<!--
-		<property name="hibernate.connection.username">postgres</property>
-		<property name="hibernate.connection.password">brIWLuo04rkt</property>
-		<property name="hibernate.connection.url">jdbc:postgresql://ns.db.jenkins.cwds.tabordasolutions.net:5432/cwdsns</property>
- -->
- 
-<!-- Local -->
-<!-- 
-		<property name="hibernate.connection.password">postgres</property>
-		<property name="hibernate.connection.url">jdbc:postgresql://localhost:5400/postgres</property>
- -->
  
 		<mapping class="gov.ca.cwds.data.persistence.ns.EsIntakeScreening" />
 		
