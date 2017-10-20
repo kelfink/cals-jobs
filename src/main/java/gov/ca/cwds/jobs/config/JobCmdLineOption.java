@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.config;
 import org.apache.commons.cli.Option;
 
 /**
- * Definitions of batch job command line options.
+ * Definitions of Neutron job command line options.
  * 
  * @author CWDS API Team
  */
@@ -28,11 +28,6 @@ public enum JobCmdLineOption {
    * Last run date file (yyyy-MM-dd HH:mm:ss)
    */
   LAST_RUN_FILE(JobOptions.makeOpt("l", JobOptions.CMD_LINE_LAST_RUN_FILE, "last run date file (yyyy-MM-dd HH:mm:ss)", false, 1, String.class, ',')),
-
-  /**
-   * Alternate input file
-   */
-  ALT_INPUT_FILE(JobOptions.makeOpt("f", JobOptions.CMD_LINE_ALT_INPUT_FILE, "Alternate input file", false, 1, String.class, ',')),
 
   /**
    * Alternate input file
@@ -67,7 +62,12 @@ public enum JobCmdLineOption {
   /**
    * Indicate if sealed and sensitive data should be loaded
    */
-  LOAD_SEALED_SENSITIVE(JobOptions.makeOpt("s", JobOptions.CMD_LINE_LOAD_SEALED_AND_SENSITIVE, "true or false - load sealed and sensitive data, default is false", false, 1, Boolean.class, ','));
+  LOAD_SEALED_SENSITIVE(JobOptions.makeOpt("s", JobOptions.CMD_LINE_LOAD_SEALED_AND_SENSITIVE, "true or false - load sealed and sensitive data, default is false", false, 1, Boolean.class, ',')),
+
+  /**
+   * Run full (initial) load.
+   */
+  FULL_LOAD(JobOptions.makeOpt("f", JobOptions.CMD_LINE_INITIAL_LOAD, "Run full (initial) load", false, 0, Boolean.class, ','));
 
   private final Option opt;
 

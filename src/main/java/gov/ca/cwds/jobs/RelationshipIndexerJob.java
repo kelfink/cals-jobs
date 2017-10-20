@@ -57,7 +57,7 @@ public class RelationshipIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipIndexerJob.class);
 
-  public static final String INSERT_CLIENT_LAST_CHG =
+  static final String INSERT_CLIENT_LAST_CHG =
       "INSERT INTO GT_ID (IDENTIFIER)\nSELECT clnr.IDENTIFIER\nFROM CLN_RELT CLNR\n"
           + "WHERE CLNR.IBMSNAP_LOGMARKER > ?\nUNION ALL\nSELECT clnr.IDENTIFIER\n"
           + "FROM CLN_RELT CLNR\nJOIN CLIENT_T CLNS ON CLNR.FKCLIENT_T = CLNS.IDENTIFIER\n"
@@ -123,7 +123,7 @@ public class RelationshipIndexerJob
   }
 
   /**
-   * Send all recs for same client id to the index queue.
+   * Send all recs for the same group id to the index queue.
    * 
    * @param grpRecs recs for same client id
    */
@@ -142,7 +142,7 @@ public class RelationshipIndexerJob
     final int i = nextThreadNum.incrementAndGet();
     final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
     Thread.currentThread().setName(threadName);
-    LOGGER.warn("BEGIN: extract thread {}", threadName);
+    LOGGER.info("BEGIN: extract thread {}", threadName);
     getTrack().trackRangeStart(p);
 
     try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
@@ -188,7 +188,7 @@ public class RelationshipIndexerJob
     }
 
     getTrack().trackRangeComplete(p);
-    LOGGER.warn("DONE: Extract thread {}", i);
+    LOGGER.info("DONE: Extract thread {}", i);
   }
 
   /**
@@ -250,11 +250,22 @@ public class RelationshipIndexerJob
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedRelationships p)
       throws IOException {
-    final Pair<String, String> pair =
-        ElasticTransformer.prepareUpsertJson(this, esp, p, getOptionalElementName(), null);
+    final StringBuilder buf = new StringBuilder();
+    buf.append("{\"relationships\":[");
 
-    final String insertJson = pair.getRight();
-    final String updateJson = pair.getLeft();
+    if (!p.getRelations().isEmpty()) {
+      try {
+        buf.append(p.getRelations().stream().map(ElasticTransformer::jsonify)
+            .sorted(String::compareTo).collect(Collectors.joining(",")));
+      } catch (Exception e) {
+        JobLogs.raiseError(LOGGER, e, "ERROR SERIALIZING RELATIONSHIPS! {}", e.getMessage());
+      }
+    }
+
+    buf.append("]}");
+
+    final String insertJson = mapper.writeValueAsString(esp);
+    final String updateJson = buf.toString();
 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();

@@ -48,6 +48,7 @@ public class JobOptions implements ApiMarker {
   public static final String CMD_LINE_MIN_ID = "min_id";
   public static final String CMD_LINE_MAX_ID = "max_id";
   public static final String CMD_LINE_LOAD_SEALED_AND_SENSITIVE = "load-sealed-sensitive";
+  public static final String CMD_LINE_INITIAL_LOAD = "initial_load";
 
   /**
    * Location of Elasticsearch configuration file.
@@ -140,14 +141,13 @@ public class JobOptions implements ApiMarker {
    * @param minId initial load -- minimum range
    * @param maxId initial load -- maximum range
    * @param loadSealedAndSensitive If true then load sealed and sensitive data
-   * @param altInputFile alternate input file
    * @param rangeGiven initial load -- provided range
    * @param baseDirectory base folder for job execution
    */
   public JobOptions(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
       boolean lastRunMode, long startBucket, long endBucket, long totalBuckets, long threadCount,
-      String minId, String maxId, boolean loadSealedAndSensitive, String altInputFile,
-      boolean rangeGiven, String baseDirectory) {
+      String minId, String maxId, boolean loadSealedAndSensitive, boolean rangeGiven,
+      String baseDirectory) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
     this.lastRunTime = lastRunTime;
@@ -160,7 +160,6 @@ public class JobOptions implements ApiMarker {
     this.minId = minId;
     this.maxId = maxId;
     this.loadSealedAndSensitive = loadSealedAndSensitive;
-    this.altInputFile = altInputFile;
     this.rangeGiven = rangeGiven;
     this.baseDirectory = baseDirectory;
   }
@@ -348,7 +347,7 @@ public class JobOptions implements ApiMarker {
     ret.addOption(JobCmdLineOption.MIN_ID.getOpt());
     ret.addOption(JobCmdLineOption.MAX_ID.getOpt());
     ret.addOption(JobCmdLineOption.LOAD_SEALED_SENSITIVE.getOpt());
-    ret.addOption(JobCmdLineOption.ALT_INPUT_FILE.getOpt());
+    ret.addOption(JobCmdLineOption.FULL_LOAD.getOpt());
 
     // RUN MODE: mutually exclusive choice.
     OptionGroup group = new OptionGroup();
@@ -396,8 +395,7 @@ public class JobOptions implements ApiMarker {
     String indexName = null;
     Date lastRunTime = null;
     String lastRunLoc = null;
-    String altInputLoc = "junk";
-    boolean lastRunMode = false;
+    boolean lastRunMode = true;
     long totalBuckets = 0L;
     long threadCount = 0L;
     boolean loadSealedAndSensitive = false;
@@ -429,19 +427,21 @@ public class JobOptions implements ApiMarker {
             break;
 
           case CMD_LINE_LAST_RUN_TIME:
-            lastRunMode = true;
             String lastRunTimeStr = opt.getValue().trim();
             lastRunTime = createDate(lastRunTimeStr);
             break;
 
           case CMD_LINE_LAST_RUN_FILE:
-            lastRunMode = true;
             lastRunLoc = opt.getValue().trim();
             break;
 
           case CMD_LINE_BASE_DIRECTORY:
             lastRunMode = true;
             baseDirectory = opt.getValue().trim();
+            break;
+
+          case CMD_LINE_INITIAL_LOAD:
+            lastRunMode = false;
             break;
 
           case CMD_LINE_BUCKET_RANGE:
@@ -477,7 +477,7 @@ public class JobOptions implements ApiMarker {
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode,
         bucketRange.getLeft(), bucketRange.getRight(), totalBuckets, threadCount, minId, maxId,
-        loadSealedAndSensitive, altInputLoc, rangeGiven, baseDirectory);
+        loadSealedAndSensitive, rangeGiven, baseDirectory);
   }
 
   public void setStartBucket(long startBucket) {

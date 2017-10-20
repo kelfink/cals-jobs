@@ -52,7 +52,7 @@ public class NeutronJobManagerResource implements ApiMarker {
     final StringBuilder buf = new StringBuilder();
     buf.append("{\"result\":\"ACK\",\"job_name\":\"").append(jobName).append("\",\"command\":\"")
         .append(command).append("\"}");
-    // final NeutronJobManagementBean ufb = new NeutronJobManagementBean(jobName, command, body);
+    // final NeutronJobManagementBean cmd = new NeutronJobManagementBean(jobName, command, body);
     // NOTE: Handle command.
     return buf.toString();
   }
