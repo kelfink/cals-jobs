@@ -76,6 +76,8 @@ public class EsPersonReferral
 
   private static final long serialVersionUID = -2265057057202257108L;
 
+  private static final String COLUMN_REFERRAL_ID = "REFERRAL_ID";
+
   private static JobOptions opts; // WARNING: not a good idea. Try another way
 
   @Type(type = "timestamp")
@@ -94,7 +96,7 @@ public class EsPersonReferral
   private transient String clientSensitivity;
 
   @Id
-  @Column(name = "REFERRAL_ID")
+  @Column(name = COLUMN_REFERRAL_ID)
   private String referralId;
 
   // ================
@@ -248,7 +250,7 @@ public class EsPersonReferral
   }
 
   public EsPersonReferral(final ResultSet rs) throws SQLException {
-    this.referralId = ifNull(rs.getString("REFERRAL_ID"));
+    this.referralId = ifNull(rs.getString(COLUMN_REFERRAL_ID));
     this.startDate = rs.getDate("START_DATE");
     this.endDate = rs.getDate("END_DATE");
     this.referralResponseType = rs.getInt("REFERRAL_RESPONSE_TYPE");
@@ -300,7 +302,7 @@ public class EsPersonReferral
   public static EsPersonReferral extractAllegation(final ResultSet rs) throws SQLException {
     final EsPersonReferral ret = new EsPersonReferral();
 
-    ret.referralId = ifNull(rs.getString("REFERRAL_ID"));
+    ret.referralId = ifNull(rs.getString(COLUMN_REFERRAL_ID));
     ret.allegationId = ifNull(rs.getString("ALLEGATION_ID"));
     ret.allegationType = rs.getInt("ALLEGATION_TYPE");
     ret.allegationDisposition = rs.getInt("ALLEGATION_DISPOSITION");
@@ -335,7 +337,7 @@ public class EsPersonReferral
   public static EsPersonReferral extractReferral(final ResultSet rs) throws SQLException {
     final EsPersonReferral ret = new EsPersonReferral();
 
-    ret.referralId = ifNull(rs.getString("REFERRAL_ID"));
+    ret.referralId = ifNull(rs.getString(COLUMN_REFERRAL_ID));
     ret.startDate = rs.getDate("START_DATE");
     ret.endDate = rs.getDate("END_DATE");
     ret.referralResponseType = rs.getInt("REFERRAL_RESPONSE_TYPE");
