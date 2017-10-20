@@ -435,4 +435,8 @@ public class JobRunner {
     }
   }
 
+  public static boolean isInitialMode() {
+    return initialMode;
+  }
+
 }
