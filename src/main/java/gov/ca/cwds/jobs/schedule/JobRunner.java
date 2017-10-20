@@ -185,6 +185,7 @@ public class JobRunner {
       if (initialMode) {
         startingOpts.setLastRunTime(now);
         startingOpts.setLastRunMode(false);
+        LOGGER.warn("\n\n\n\n>>>>>>> INITIAL, FULL LOAD! <<<<<<<\n\n\n\n");
       }
 
       // Schedule jobs.
@@ -227,6 +228,10 @@ public class JobRunner {
 
       // Start your engines ...
       scheduler.start();
+
+      if (initialMode) {
+        scheduler.shutdown(true);
+      }
 
       // Thread jettyServer = new Thread(jetty::run);
       // jettyServer.start();
