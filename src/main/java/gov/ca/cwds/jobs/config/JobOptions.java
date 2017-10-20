@@ -64,7 +64,7 @@ public class JobOptions implements ApiMarker {
    * Last time job was executed in format 'yyyy-MM-dd HH.mm.ss' If this is provided then time stamp
    * given in last run time file is ignored.
    */
-  private final Date lastRunTime;
+  private Date lastRunTime;
 
   /**
    * Location of last run file.
@@ -543,6 +543,10 @@ public class JobOptions implements ApiMarker {
 
   public void setBaseDirectory(String baseDirectory) {
     this.baseDirectory = baseDirectory;
+  }
+
+  public void setLastRunTime(Date lastRunTime) {
+    this.lastRunTime = lastRunTime;
   }
 
 }

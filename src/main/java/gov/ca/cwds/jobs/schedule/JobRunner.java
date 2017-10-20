@@ -182,6 +182,11 @@ public class JobRunner {
       final Date now = initialMode ? fmt.parse("1917-10-31 10:11:12.000")
           : new DateTime().minusHours(NeutronSchedulerConstants.LAST_CHG_WINDOW_HOURS).toDate();
 
+      if (initialMode) {
+        startingOpts.setLastRunTime(now);
+        startingOpts.setLastRunMode(false);
+      }
+
       // Schedule jobs.
       for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
         final Class<?> klass = sched.getKlazz();

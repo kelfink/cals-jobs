@@ -66,6 +66,9 @@ public class NeutronJobFacade implements Serializable {
     jd = newJob(NeutronScheduledJob.class)
         .withIdentity(jobName, NeutronSchedulerConstants.GRP_LST_CHG)
         .usingJobData("job_class", defaultSchedule.getKlazz().getName()).build();
+
+    // NOTE: initial mode: run only once.
+
     final Trigger trg =
         newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
             .withSchedule(simpleSchedule().withIntervalInSeconds(defaultSchedule.getPeriodSeconds())
