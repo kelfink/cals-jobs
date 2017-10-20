@@ -14,9 +14,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,9 +72,8 @@ public class JobJdbcUtils {
     return System.getProperty("DB_CMS_SCHEMA");
   }
 
-  public static void prepHibernateLastChange(final Session session, final Transaction txn,
-      final Date lastRunTime, final String sqlInsertLastChange,
-      final Function<Connection, PreparedStatement> func) throws HibernateException {
+  public static void prepHibernateLastChange(final Session session, final Date lastRunTime,
+      final String sqlInsertLastChange, final Function<Connection, PreparedStatement> func) {
     final Work work = new PrepSQLWork(lastRunTime, sqlInsertLastChange, func);
     session.doWork(work);
   }

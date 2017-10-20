@@ -104,7 +104,7 @@ public class JobJdbcUtilsTest
     Date lastRunTime = mock(Date.class);
     String sqlInsertLastChange = null;
     Function<Connection, PreparedStatement> func = mock(Function.class);
-    JobJdbcUtils.prepHibernateLastChange(session, txn, lastRunTime, sqlInsertLastChange, func);
+    JobJdbcUtils.prepHibernateLastChange(session, lastRunTime, sqlInsertLastChange, func);
   }
 
   @Test
