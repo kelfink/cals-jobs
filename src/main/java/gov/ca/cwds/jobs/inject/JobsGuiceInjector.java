@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.inject;
 import java.io.File;
 import java.net.InetAddress;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -68,7 +69,6 @@ import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.annotation.AltInputFile;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
@@ -98,7 +98,6 @@ public class JobsGuiceInjector extends AbstractModule {
 
   private File esConfig;
   private String lastJobRunTimeFilename;
-  private String altInputFilename;
   private JobOptions opts;
 
   /**
@@ -120,8 +119,11 @@ public class JobsGuiceInjector extends AbstractModule {
     this.esConfig = esConfigFile;
     this.lastJobRunTimeFilename =
         !StringUtils.isBlank(lastJobRunTimeFilename) ? lastJobRunTimeFilename : "";
-    this.altInputFilename = !StringUtils.isBlank(altInputFilename) ? altInputFilename : "";
     this.opts = opts;
+  }
+
+  private static boolean validateFileLocations(String loc) {
+    return StringUtils.isNotBlank(loc) && !loc.equals(FilenameUtils.normalize(loc));
   }
 
   /**
@@ -135,8 +137,20 @@ public class JobsGuiceInjector extends AbstractModule {
   public static synchronized Injector buildInjector(final JobOptions opts) {
     if (injector == null) {
       try {
-        injector = Guice.createInjector(new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()),
-            opts.getLastRunLoc()));
+        // Path traversal vulnerability:
+        // https://github.com/zaproxy/zap-extensions/blob/master/src/org/zaproxy/zap/extension/ascanrules/TestPathTraversal.java
+
+        if (!opts.getEsConfigLoc().equals(FilenameUtils.normalize(opts.getEsConfigLoc()))) {
+          throw new JobsException("PROHIBITED CONFIG FILE LOCATION!");
+        }
+
+        if (!opts.getLastRunLoc().replaceAll(File.separator + File.separator, File.separator)
+            .equals(FilenameUtils.normalize(opts.getLastRunLoc()))) {
+          throw new JobsException("PROHIBITED LAST RUN FILE LOCATION!");
+        }
+
+        injector = Guice.createInjector(
+            new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()), opts.getLastRunLoc()));
 
         // Initialize system code cache.
         injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
@@ -268,9 +282,6 @@ public class JobsGuiceInjector extends AbstractModule {
     // Required for annotation injection.
     bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
 
-    // For alternative, file-based sources.
-    bindConstant().annotatedWith(AltInputFile.class).to(this.altInputFilename);
-
     bind(SystemCodeDao.class);
     bind(SystemMetaDao.class);
 
@@ -345,7 +356,7 @@ public class JobsGuiceInjector extends AbstractModule {
    * @return ES configuration
    */
   @Provides
-  public ElasticsearchConfiguration elasticSearchConfig() {
+  public ElasticsearchConfiguration elasticSearchConfig() throws NeutronException {
     ElasticsearchConfiguration ret = null;
     if (esConfig != null) {
       LOGGER.info("Create NEW ES configuration");
@@ -353,8 +364,8 @@ public class JobsGuiceInjector extends AbstractModule {
         ret = new ObjectMapper(new YAMLFactory()).readValue(esConfig,
             ElasticsearchConfiguration.class);
       } catch (Exception e) {
-        LOGGER.error("Error reading Elasticsearch configuration: {}", e.getMessage(), e);
-        throw new ApiException("Error reading Elasticsearch configuration: " + e.getMessage(), e);
+        throw JobLogs.buildCheckedException(LOGGER, e, "ERROR READING ES CONFIG! {}",
+            e.getMessage(), e);
       }
     }
     return ret;
