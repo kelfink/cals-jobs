@@ -2,6 +2,7 @@ package gov.ca.cwds.data.persistence.cms;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -9,42 +10,32 @@ import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
+import gov.ca.cwds.jobs.PersonJobTester;
 
-public class EsClientAddressTest {
+public class EsClientAddressTest extends PersonJobTester<ReplicatedClient, EsClientAddress> {
 
   private static final String TEST_CLIENT_ID = "abc12340x8";
-  private static EsClientAddress emptyTarget;
+  EsClientAddress target;
 
-  @Mock
-  private ResultSet rs;
-
-  EsClientAddress target = new EsClientAddress();
-
-  @BeforeClass
-  public static void setupClass() throws Exception {
-    emptyTarget = EsClientAddress.extract(Mockito.mock(ResultSet.class));
-  }
-
+  @Override
   @Before
-  public void setUp() throws Exception {
-    MockitoAnnotations.initMocks(this);
+  public void setup() throws Exception {
+    super.setup();
+
     target = new EsClientAddress();
-    when(rs.first()).thenReturn(true);
+    target.setCltId(DEFAULT_CLIENT_ID);
+
     final Short shortZero = Short.valueOf((short) 0);
+    when(rs.first()).thenReturn(true);
     when(rs.getShort("ADR_GVR_ENTC")).thenReturn(shortZero);
     when(rs.getShort("ADR_ST_SFX_C")).thenReturn(shortZero);
     when(rs.getShort("ADR_STATE_C")).thenReturn(shortZero);
@@ -218,7 +209,7 @@ public class EsClientAddressTest {
   @Test
   public void getNormalizationGroupKey_Args__() throws Exception {
     final Object actual = target.getNormalizationGroupKey();
-    Object expected = null;
+    Object expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -232,8 +223,7 @@ public class EsClientAddressTest {
   @Test
   public void hashCode_Args__() throws Exception {
     final int actual = target.hashCode();
-    // final int expected = -380431431;
-    // assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(not(0)));
   }
 
   @Test
@@ -540,7 +530,7 @@ public class EsClientAddressTest {
   @Test
   public void getCltId_Args__() throws Exception {
     String actual = target.getCltId();
-    String expected = null;
+    String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1323,6 +1313,55 @@ public class EsClientAddressTest {
     Date actual = target.getLastChange();
     Date expected = null;
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getClientCounty_Args__() throws Exception {
+    Short actual = target.getClientCounty();
+    Short expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setClientCounty_Args__Short() throws Exception {
+    Short clientCounty = null;
+    target.setClientCounty(clientCounty);
+  }
+
+  @Test
+  public void compare_Args__EsClientAddress__EsClientAddress() throws Exception {
+    EsClientAddress o1 = new EsClientAddress();
+    o1.setCltId(DEFAULT_CLIENT_ID);
+
+    EsClientAddress o2 = new EsClientAddress();
+    o2.setCltId(DEFAULT_CLIENT_ID);
+
+    int actual = target.compare(o1, o2);
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void compareTo_Args__EsClientAddress() throws Exception {
+    EsClientAddress o = new EsClientAddress();
+    o.setCltId(DEFAULT_CLIENT_ID);
+
+    int actual = target.compareTo(o);
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isUseCounty_Args__() throws Exception {
+    boolean actual = EsClientAddress.isUseCounty();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setUseCounty_Args__boolean() throws Exception {
+    boolean useCounty = false;
+    EsClientAddress.setUseCounty(useCounty);
   }
 
 }

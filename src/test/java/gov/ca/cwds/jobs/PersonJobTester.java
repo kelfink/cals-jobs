@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.MockitoAnnotations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.db2.jcc.am.DatabaseMetaData;
@@ -85,6 +86,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
   @Before
   public void setup() throws Exception {
+    MockitoAnnotations.initMocks(this);
     System.setProperty("DB_CMS_SCHEMA", "CWSRS1");
 
     // Last run time:
