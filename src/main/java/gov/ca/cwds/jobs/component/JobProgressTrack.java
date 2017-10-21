@@ -112,15 +112,15 @@ public class JobProgressTrack implements ApiMarker {
   }
 
   public int trackBulkDeleted() {
-    return this.getRecsBulkDeleted().getAndIncrement();
+    return this.getRecsBulkDeleted().incrementAndGet();
   }
 
   public int trackBulkPrepared() {
-    return this.getRecsBulkPrepared().getAndIncrement();
+    return this.getRecsBulkPrepared().incrementAndGet();
   }
 
   public int trackBulkError() {
-    return this.getRecsBulkError().getAndIncrement();
+    return this.getRecsBulkError().incrementAndGet();
   }
 
   public void trackRangeStart(final Pair<String, String> pair) {
