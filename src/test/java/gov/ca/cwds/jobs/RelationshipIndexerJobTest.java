@@ -26,7 +26,6 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
 
 public class RelationshipIndexerJobTest
     extends PersonJobTester<ReplicatedRelationships, EsRelationship> {
-
   ReplicatedRelationshipsDao dao;
   RelationshipIndexerJob target;
 
@@ -34,7 +33,6 @@ public class RelationshipIndexerJobTest
   @Before
   public void setup() throws Exception {
     super.setup();
-
     dao = new ReplicatedRelationshipsDao(sessionFactory);
     target = new RelationshipIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     target.setOpts(opts);
@@ -58,7 +56,6 @@ public class RelationshipIndexerJobTest
   @Test
   public void extract_Args__ResultSet() throws Exception {
     when(rs.next()).thenReturn(true).thenReturn(false);
-
     EsRelationship actual = target.extract(rs);
     assertThat(actual, is(notNullValue()));
   }
@@ -72,6 +69,7 @@ public class RelationshipIndexerJobTest
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
     }
+
   }
 
   @Test
@@ -105,7 +103,6 @@ public class RelationshipIndexerJobTest
     rel.setRelatedPersonLastName("Meyer");
     rel.setRelatedPersonLegacyId("xyz1234567");
     rel.setRelatedPersonId("xyz1234567");
-
     UpdateRequest actual = target.prepareUpsertRequest(esp, p);
     assertThat(actual, is(notNullValue()));
   }
@@ -120,6 +117,7 @@ public class RelationshipIndexerJobTest
       fail("Expected exception was not thrown!");
     } catch (IOException e) {
     }
+
   }
 
   @Test
@@ -155,7 +153,6 @@ public class RelationshipIndexerJobTest
     EsRelationship rel = new EsRelationship();
     rel.setThisLegacyId(DEFAULT_CLIENT_ID);
     rel.setRelatedLegacyId("xyz1234567");
-
     grpRecs.add(rel);
     target.normalizeAndQueueIndex(grpRecs);
   }
@@ -166,7 +163,6 @@ public class RelationshipIndexerJobTest
     EsRelationship rel = new EsRelationship();
     rel.setRelatedLegacyId(DEFAULT_CLIENT_ID);
     recs.add(rel);
-
     ReplicatedRelationships actual = target.normalizeSingle(recs);
     assertThat(actual, is(notNullValue()));
   }
@@ -183,6 +179,64 @@ public class RelationshipIndexerJobTest
   public void main_Args__StringArray() throws Exception {
     String[] args = new String[] {};
     RelationshipIndexerJob.main(args);
+  }
+
+  @Test
+  public void getPrepLastChangeSQL_Args__() throws Exception {
+    String actual = target.getPrepLastChangeSQL();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getInitialLoadViewName_Args__() throws Exception {
+    String actual = target.getInitialLoadViewName();
+    String expected = "VW_MQT_BI_DIR_RELATION";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getInitialLoadQuery_Args__String() throws Exception {
+    String dbSchemaName = null;
+    String actual = target.getInitialLoadQuery(dbSchemaName);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void normalizeAndQueueIndex_Args__List() throws Exception {
+    List<EsRelationship> grpRecs = new ArrayList<EsRelationship>();
+    target.normalizeAndQueueIndex(grpRecs);
+  }
+
+  @Test
+  public void threadRetrieveByJdbc_Args__() throws Exception {
+    target.threadRetrieveByJdbc();
+  }
+
+  @Test
+  public void useTransformThread_Args__() throws Exception {
+    boolean actual = target.useTransformThread();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isInitialLoadJdbc_Args__() throws Exception {
+    boolean actual = target.isInitialLoadJdbc();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getPartitionRanges_Args__() throws Exception {
+    List actual = target.getPartitionRanges();
+    assertThat(actual.size(), is(equalTo(1)));
+  }
+
+  @Test
+  public void getOptionalElementName_Args__() throws Exception {
+    String actual = target.getOptionalElementName();
+    String expected = "relationships";
+    assertThat(actual, is(equalTo(expected)));
   }
 
 }
