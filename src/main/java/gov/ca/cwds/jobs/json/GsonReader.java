@@ -34,15 +34,14 @@ public class GsonReader<T> implements MessageBodyReader<T> {
   public T readFrom(Class<T> type, Type genericType, Annotation[] antns, MediaType mt,
       MultivaluedMap<String, String> mm, InputStream in)
       throws IOException, WebApplicationException {
-    Gson g = new Gson();
-    return g.fromJson(convertStreamToString(in), type);
+    return new Gson().fromJson(convertStreamToString(in), type);
   }
 
   private String convertStreamToString(InputStream inputStream) throws IOException {
     if (inputStream != null) {
       Writer writer = new StringWriter();
 
-      char[] buffer = new char[1024];
+      char[] buffer = new char[1024]; // NOTE: make configurable.
       try (Reader reader =
           new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()))) {
         int n;

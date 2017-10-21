@@ -61,7 +61,7 @@ public class PrepSQLWorkTest extends PersonJobTester<ReplicatedPersonCases, EsPe
       try {
         return c.prepareStatement(sql);
       } catch (SQLException e) {
-        throw JobLogs.buildException(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
+        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
       }
     });
     target.execute(con);
@@ -77,7 +77,7 @@ public class PrepSQLWorkTest extends PersonJobTester<ReplicatedPersonCases, EsPe
       try {
         return c.prepareStatement(sql);
       } catch (SQLException e) {
-        throw JobLogs.buildException(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
+        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
       }
     });
     target.execute(con);

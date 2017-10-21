@@ -76,7 +76,7 @@ public final class JobLogs {
    * @param args error message, excluding throwable message
    * @return JobsException runtime exception
    */
-  public static JobsException buildException(final Logger log, Throwable e, String pattern,
+  public static JobsException buildRuntimeException(final Logger log, Throwable e, String pattern,
       Object... args) {
     final boolean hasArgs = args == null || args.length == 0;
     final boolean hasPattern = !StringUtils.isEmpty(pattern);
@@ -139,7 +139,7 @@ public final class JobLogs {
    * @throws JobsException runtime exception
    */
   public static void raiseError(final Logger log, Throwable e, String pattern, Object... args) {
-    throw buildException(log, e, pattern, args);
+    throw buildRuntimeException(log, e, pattern, args);
   }
 
   /**

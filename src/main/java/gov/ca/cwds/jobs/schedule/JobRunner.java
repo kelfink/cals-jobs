@@ -403,7 +403,7 @@ public class JobRunner {
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
       exitCode = 1;
-      throw JobLogs.buildException(LOGGER, e, "STANDALONE JOB FAILED!: {}", e.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, e, "STANDALONE JOB FAILED!: {}", e.getMessage());
     } finally {
       // WARNING: kills the JVM in testing but may be needed to shutdown resources.
       if (!isTestMode() && !isSchedulerMode()) {

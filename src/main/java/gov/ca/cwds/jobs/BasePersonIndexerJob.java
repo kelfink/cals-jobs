@@ -268,7 +268,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         getTrack().trackBulkPrepared();
       }
     } catch (Exception e) {
-      throw JobLogs.buildException(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey()); // NOSONAR
+      throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey()); // NOSONAR
     }
 
     return ret;
@@ -379,7 +379,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     } catch (Exception e) {
       fail();
-      throw JobLogs.buildException(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
     }
@@ -566,7 +566,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       return new Date(this.startTime);
     } catch (Exception e) {
       fail();
-      throw JobLogs.buildException(LOGGER, e, "General Exception: {}", e.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, e, "General Exception: {}", e.getMessage());
     } finally {
       done();
     }
@@ -642,7 +642,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       return new Date(this.startTime);
     } catch (Exception e) {
       fail();
-      throw JobLogs.buildException(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
     } finally {
       try {
         done();
@@ -782,7 +782,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (SQLException | HibernateException h) {
       fail();
       txn.rollback();
-      throw JobLogs.buildException(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
     } finally {
       doneRetrieve();
     }
@@ -820,7 +820,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       close();
     } catch (Exception e) {
       fail();
-      throw JobLogs.buildException(LOGGER, e, "ERROR FINISHING JOB: {}", e.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINISHING JOB: {}", e.getMessage());
     }
     LOGGER.info("JOB FINISHED!");
   }

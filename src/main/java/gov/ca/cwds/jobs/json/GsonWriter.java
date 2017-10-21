@@ -22,7 +22,7 @@ public class GsonWriter<T> implements MessageBodyWriter<T> {
   public void writeTo(T t, Class<?> type, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
       throws IOException {
-    Gson g = new Gson();
+    final Gson g = new Gson();
     httpHeaders.get("Content-Type").add("charset=UTF-8");
     entityStream.write(g.toJson(t).getBytes(Charset.defaultCharset()));
   }

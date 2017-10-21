@@ -34,8 +34,6 @@ public class GsonMessageBodyHandler
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GsonMessageBodyHandler.class);
 
-  private static final String UTF_8 = "UTF-8";
-
   private Gson gson;
 
   private Gson getGson() {
@@ -58,17 +56,14 @@ public class GsonMessageBodyHandler
       throws IOException, WebApplicationException {
     LOGGER.debug("GSon readFrom");
 
-    InputStreamReader streamReader = new InputStreamReader(entityStream, Charset.defaultCharset());
-    try {
+    try (InputStreamReader reader = new InputStreamReader(entityStream, Charset.defaultCharset())) {
       Type jsonType;
       if (type.equals(genericType)) {
         jsonType = type;
       } else {
         jsonType = genericType;
       }
-      return getGson().fromJson(streamReader, jsonType);
-    } finally {
-      streamReader.close();
+      return getGson().fromJson(reader, jsonType);
     }
   }
 
@@ -88,11 +83,10 @@ public class GsonMessageBodyHandler
   public void writeTo(Object object, Class<?> type, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
       throws IOException, WebApplicationException {
-
     LOGGER.debug("GSon writeTo");
 
-    OutputStreamWriter writer = new OutputStreamWriter(entityStream, Charset.defaultCharset());
-    try {
+    try (OutputStreamWriter writer =
+        new OutputStreamWriter(entityStream, Charset.defaultCharset())) {
       Type jsonType;
       if (type.equals(genericType)) {
         jsonType = type;
@@ -100,8 +94,6 @@ public class GsonMessageBodyHandler
         jsonType = genericType;
       }
       getGson().toJson(object, jsonType, writer);
-    } finally {
-      writer.close();
     }
   }
 
