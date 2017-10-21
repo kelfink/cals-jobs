@@ -54,7 +54,7 @@ public class JobOptions implements ApiMarker {
   /**
    * Location of Elasticsearch configuration file.
    */
-  final String esConfigLoc;
+  String esConfigLoc;
 
   /**
    * Name of index to create or use. If this is not provided then alias is used from ES Config file.
@@ -126,6 +126,11 @@ public class JobOptions implements ApiMarker {
   private boolean rangeGiven;
 
   private String baseDirectory;
+
+  public JobOptions() {
+    // Default contructor
+  }
+
 
   /**
    * Construct from all settings.
