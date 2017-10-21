@@ -64,8 +64,6 @@ public final class CmsRelationship implements ApiMarker {
             break;
         }
       }
-    } else {
-      LOGGER.trace("NO MATCH!! rel={}", wholeRel);
     }
   }
 

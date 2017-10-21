@@ -2,6 +2,7 @@ package gov.ca.cwds.data.persistence.cms;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -17,7 +18,6 @@ import gov.ca.cwds.data.es.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPersonParent;
 
 public class ReplicatedPersonCasesTest {
-
   @Test
   public void type() throws Exception {
     assertThat(ReplicatedPersonCases.class, notNullValue());
@@ -117,6 +117,25 @@ public class ReplicatedPersonCasesTest {
     ReplicatedPersonCases target = new ReplicatedPersonCases(groupId);
     String actual = target.getSsn();
     String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void hashCode_Args__() throws Exception {
+    String groupId = null;
+    ReplicatedPersonCases target = new ReplicatedPersonCases(groupId);
+    int actual = target.hashCode();
+    int expected = 0;
+    assertThat(actual, is(not(expected)));
+  }
+
+  @Test
+  public void equals_Args__Object() throws Exception {
+    String groupId = null;
+    ReplicatedPersonCases target = new ReplicatedPersonCases(groupId);
+    Object obj = null;
+    boolean actual = target.equals(obj);
+    boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 
