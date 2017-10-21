@@ -202,6 +202,7 @@ public class EsClientAddressTest extends PersonJobTester<ReplicatedClient, EsCli
     target.setAdrId(TEST_CLIENT_ID);
 
     when(rs.getString("CLA_IDENTIFIER")).thenReturn(TEST_CLIENT_ID);
+    when(rs.getString("ADR_IDENTIFIER")).thenReturn(TEST_CLIENT_ID);
 
     final Map<Object, ReplicatedClient> map = new HashMap<Object, ReplicatedClient>();
     final ReplicatedClient actual = target.normalize(map);
