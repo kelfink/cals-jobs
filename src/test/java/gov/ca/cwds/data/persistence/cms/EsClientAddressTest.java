@@ -199,8 +199,10 @@ public class EsClientAddressTest extends PersonJobTester<ReplicatedClient, EsCli
   @Test
   public void normalize_Args__Map() throws Exception {
     target.setCltId(TEST_CLIENT_ID);
-    // target.setClaId(TEST_CLIENT_ID);
     target.setAdrId(TEST_CLIENT_ID);
+
+    when(rs.getString("CLA_IDENTIFIER")).thenReturn(TEST_CLIENT_ID);
+
     final Map<Object, ReplicatedClient> map = new HashMap<Object, ReplicatedClient>();
     final ReplicatedClient actual = target.normalize(map);
     assertThat(actual, is(notNullValue()));
