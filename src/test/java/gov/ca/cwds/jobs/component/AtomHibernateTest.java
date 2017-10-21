@@ -11,26 +11,41 @@ import java.sql.PreparedStatement;
 import java.util.Date;
 import java.util.function.Function;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.data.BaseDaoImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.PersonJobTester;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
+import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
+import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
 public class AtomHibernateTest
     extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
 
-  private static final class TestAtomHibernate implements AtomHibernate {
+  private static final class TestAtomHibernate extends TestIndexerJob
+      implements AtomHibernate<TestNormalizedEntity, TestDenormalizedEntity> {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestAtomHibernate.class);
+
     private final JobProgressTrack track = new JobProgressTrack();
+
+    public TestAtomHibernate(final TestNormalizedEntityDao mainDao,
+        final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
+        final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
+      super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    }
 
     @Override
     public JobProgressTrack getTrack() {
@@ -38,34 +53,21 @@ public class AtomHibernateTest
     }
 
     @Override
-    public ElasticsearchDao getEsDao() {
-      return null;
-    }
-
-    @Override
     public Logger getLogger() {
       return LOGGER;
     }
 
-    @Override
-    public JobOptions getOpts() {
-      return null;
-    }
-
-    @Override
-    public BaseDaoImpl getJobDao() {
-      return null;
-    }
-
   }
 
-  AtomHibernate target = new TestAtomHibernate();
+  TestNormalizedEntityDao dao;
+  AtomHibernate target;
 
   @Override
   @Before
   public void setup() throws Exception {
     super.setup();
-    target = new TestAtomHibernate();
+    dao = new TestNormalizedEntityDao(sessionFactory);
+    target = new TestAtomHibernate(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
   }
 
   @Test
@@ -109,7 +111,7 @@ public class AtomHibernateTest
   @Test
   public void getDriverTable_Args__() throws Exception {
     String actual = target.getDriverTable();
-    String expected = "VW_WHATEVER";
+    String expected = "GOOBER_T";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -137,7 +139,7 @@ public class AtomHibernateTest
   @Test
   public void isDB2OnZOS_Args__() throws Exception {
     boolean actual = target.isDB2OnZOS();
-    boolean expected = false;
+    boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
