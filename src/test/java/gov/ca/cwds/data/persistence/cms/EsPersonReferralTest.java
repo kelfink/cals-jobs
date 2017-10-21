@@ -2,11 +2,16 @@ package gov.ca.cwds.data.persistence.cms;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,12 +22,13 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
+import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
-public class EsPersonReferralTest {
+public class EsPersonReferralTest extends PersonJobTester {
 
   EsPersonReferral target;
 
@@ -34,9 +40,12 @@ public class EsPersonReferralTest {
     EsPersonReferral.setOpts(JobOptions.parseCommandLine(args));
   }
 
+  @Override
   @Before
   public void setup() throws Exception {
+    super.setup();
     target = new EsPersonReferral();
+    target.setClientId(DEFAULT_CLIENT_ID);
   }
 
   @Test
@@ -69,7 +78,7 @@ public class EsPersonReferralTest {
   @Test
   public void getNormalizationGroupKey_Args__() throws Exception {
     Object actual = target.getNormalizationGroupKey();
-    Object expected = null;
+    Object expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -104,8 +113,7 @@ public class EsPersonReferralTest {
   @Test
   public void toString_Args__() throws Exception {
     String actual = target.toString();
-    String expected = new EsPersonReferral().toString();
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -144,14 +152,14 @@ public class EsPersonReferralTest {
 
   @Test
   public void setLastChange_Args__Date() throws Exception {
-    Date lastChange = mock(Date.class);
+    Date lastChange = new Date();
     target.setLastChange(lastChange);
   }
 
   @Test
   public void getClientId_Args__() throws Exception {
     String actual = target.getClientId();
-    String expected = null;
+    String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -183,7 +191,7 @@ public class EsPersonReferralTest {
 
   @Test
   public void setStartDate_Args__Date() throws Exception {
-    Date startDate = mock(Date.class);
+    Date startDate = new Date();
     target.setStartDate(startDate);
   }
 
@@ -196,7 +204,7 @@ public class EsPersonReferralTest {
 
   @Test
   public void setEndDate_Args__Date() throws Exception {
-    Date endDate = mock(Date.class);
+    Date endDate = new Date();
     target.setEndDate(endDate);
   }
 
@@ -443,7 +451,7 @@ public class EsPersonReferralTest {
 
   @Test
   public void setLimitedAccessDate_Args__Date() throws Exception {
-    Date limitedAccessDate = mock(Date.class);
+    Date limitedAccessDate = new Date();
     target.setLimitedAccessDate(limitedAccessDate);
   }
 
@@ -477,7 +485,188 @@ public class EsPersonReferralTest {
   // @Ignore
   public void hashCode_Args__() throws Exception {
     int actual = target.hashCode();
-    int expected = -262837655;
+    assertThat(actual, is(not(0)));
+  }
+
+  @Test
+  public void extractAllegation_Args__ResultSet() throws Exception {
+    EsPersonReferral actual = EsPersonReferral.extractAllegation(rs);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void extractAllegation_Args__ResultSet_T__SQLException() throws Exception {
+    try {
+      doThrow(new SQLException()).when(rs).getString(any());
+      EsPersonReferral.extractAllegation(rs);
+      fail("Expected exception was not thrown!");
+    } catch (SQLException e) {
+    }
+  }
+
+  @Test
+  public void extractReferral_Args__ResultSet() throws Exception {
+    EsPersonReferral actual = EsPersonReferral.extractReferral(rs);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void extractReferral_Args__ResultSet_T__SQLException() throws Exception {
+    try {
+      doThrow(new SQLException()).when(rs).getString(any());
+      EsPersonReferral.extractReferral(rs);
+      fail("Expected exception was not thrown!");
+    } catch (SQLException e) {
+    }
+  }
+
+  @Test
+  public void mergeClientReferralInfo_Args__String__EsPersonReferral() throws Exception {
+    String clientId = null;
+    EsPersonReferral ref = new EsPersonReferral();
+    target.mergeClientReferralInfo(clientId, ref);
+  }
+
+  @Test
+  public void getReferralLastUpdated_Args__() throws Exception {
+    Date actual = target.getReferralLastUpdated();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setReferralLastUpdated_Args__Date() throws Exception {
+    Date referralLastUpdated = new Date();
+    target.setReferralLastUpdated(referralLastUpdated);
+  }
+
+  @Test
+  public void getReporterLastUpdated_Args__() throws Exception {
+    Date actual = target.getReporterLastUpdated();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setReporterLastUpdated_Args__Date() throws Exception {
+    Date reporterLastUpdated = new Date();
+    target.setReporterLastUpdated(reporterLastUpdated);
+  }
+
+  @Test
+  public void getWorkerLastUpdated_Args__() throws Exception {
+    Date actual = target.getWorkerLastUpdated();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setWorkerLastUpdated_Args__Date() throws Exception {
+    Date workerLastUpdated = new Date();
+    target.setWorkerLastUpdated(workerLastUpdated);
+  }
+
+  @Test
+  public void getAllegationLastUpdated_Args__() throws Exception {
+    Date actual = target.getAllegationLastUpdated();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setAllegationLastUpdated_Args__Date() throws Exception {
+    Date allegationLastUpdated = new Date();
+    target.setAllegationLastUpdated(allegationLastUpdated);
+  }
+
+  @Test
+  public void getVictimLastUpdated_Args__() throws Exception {
+    Date actual = target.getVictimLastUpdated();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setVictimLastUpdated_Args__Date() throws Exception {
+    Date victimLastUpdated = new Date();
+    target.setVictimLastUpdated(victimLastUpdated);
+  }
+
+  @Test
+  public void getPerpetratorLastUpdated_Args__() throws Exception {
+    Date actual = target.getPerpetratorLastUpdated();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setPerpetratorLastUpdated_Args__Date() throws Exception {
+    Date perpetratorLastUpdated = new Date();
+    target.setPerpetratorLastUpdated(perpetratorLastUpdated);
+  }
+
+  @Test
+  public void getVictimSensitivityIndicator_Args__() throws Exception {
+    String actual = target.getVictimSensitivityIndicator();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setVictimSensitivityIndicator_Args__String() throws Exception {
+    String victimSensitivityIndicator = null;
+    target.setVictimSensitivityIndicator(victimSensitivityIndicator);
+  }
+
+  @Test
+  public void getPerpetratorSensitivityIndicator_Args__() throws Exception {
+    String actual = target.getPerpetratorSensitivityIndicator();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setPerpetratorSensitivityIndicator_Args__String() throws Exception {
+    String perpetratorSensitivityIndicator = null;
+    target.setPerpetratorSensitivityIndicator(perpetratorSensitivityIndicator);
+  }
+
+  @Test
+  public void getClientSensitivity_Args__() throws Exception {
+    String actual = target.getClientSensitivity();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setClientSensitivity_Args__String() throws Exception {
+    String clientSensitivity = null;
+    target.setClientSensitivity(clientSensitivity);
+  }
+
+  @Test
+  public void setOpts_Args__JobOptions() throws Exception {
+    JobOptions opts = mock(JobOptions.class);
+    EsPersonReferral.setOpts(opts);
+  }
+
+  @Test
+  public void compare_Args__EsPersonReferral__EsPersonReferral() throws Exception {
+    EsPersonReferral o1 = new EsPersonReferral();
+    o1.setClientId(DEFAULT_CLIENT_ID);
+    EsPersonReferral o2 = new EsPersonReferral();
+    o2.setClientId(DEFAULT_CLIENT_ID);
+    int actual = target.compare(o1, o2);
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void compareTo_Args__EsPersonReferral() throws Exception {
+    EsPersonReferral o1 = new EsPersonReferral();
+    o1.setClientId(DEFAULT_CLIENT_ID);
+    int actual = target.compareTo(o1);
+    int expected = 0;
     assertThat(actual, is(equalTo(expected)));
   }
 
