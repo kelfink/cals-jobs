@@ -67,7 +67,14 @@ public enum JobCmdLineOption {
   /**
    * Run full (initial) load.
    */
-  FULL_LOAD(JobOptions.makeOpt("f", JobOptions.CMD_LINE_INITIAL_LOAD, "Run full (initial) load", false, 0, Boolean.class, ','));
+  FULL_LOAD(JobOptions.makeOpt("f", JobOptions.CMD_LINE_INITIAL_LOAD, "Run full (initial) load", false, 0, Boolean.class, ',')),
+
+  /**
+   * Run full (initial) load.
+   */
+  REFRESH_MQT(JobOptions.makeOpt("f", JobOptions.CMD_LINE_REFRESH_MQT, "Refresh MQT for initial load", false, 0, Boolean.class, ','))
+
+  ;
 
   private final Option opt;
 

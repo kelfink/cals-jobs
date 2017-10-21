@@ -50,6 +50,7 @@ public class JobOptions implements ApiMarker {
   public static final String CMD_LINE_MAX_ID = "max_id";
   public static final String CMD_LINE_LOAD_SEALED_AND_SENSITIVE = "load-sealed-sensitive";
   public static final String CMD_LINE_INITIAL_LOAD = "initial_load";
+  public static final String CMD_LINE_REFRESH_MQT = "refresh_mqt";
 
   /**
    * Location of Elasticsearch configuration file.
@@ -122,6 +123,8 @@ public class JobOptions implements ApiMarker {
 
   private String baseDirectory;
 
+  private boolean refreshMqt;
+
   public JobOptions() {
     // Default contructor
   }
@@ -143,11 +146,12 @@ public class JobOptions implements ApiMarker {
    * @param loadSealedAndSensitive If true then load sealed and sensitive data
    * @param rangeGiven initial load -- provided range
    * @param baseDirectory base folder for job execution
+   * @param refreshMqt TODO
    */
   public JobOptions(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
       boolean lastRunMode, long startBucket, long endBucket, long totalBuckets, long threadCount,
       String minId, String maxId, boolean loadSealedAndSensitive, boolean rangeGiven,
-      String baseDirectory) {
+      String baseDirectory, boolean refreshMqt) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
     this.lastRunTime = JobDateUtil.freshDate(lastRunTime);
@@ -162,6 +166,7 @@ public class JobOptions implements ApiMarker {
     this.loadSealedAndSensitive = loadSealedAndSensitive;
     this.rangeGiven = rangeGiven;
     this.baseDirectory = baseDirectory;
+    this.refreshMqt = refreshMqt;
   }
 
   /**
@@ -410,6 +415,7 @@ public class JobOptions implements ApiMarker {
     boolean loadSealedAndSensitive = false;
     boolean rangeGiven = false;
     String baseDirectory = null;
+    boolean refreshMqt = false;
 
     // CHECKSTYLE:OFF
     Pair<Long, Long> bucketRange = Pair.of(-1L, 0L);
@@ -475,6 +481,10 @@ public class JobOptions implements ApiMarker {
             loadSealedAndSensitive = Boolean.parseBoolean(opt.getValue().trim());
             break;
 
+          case CMD_LINE_REFRESH_MQT:
+            refreshMqt = true;
+            break;
+
           default:
             throw new IllegalArgumentException(opt.getArgName());
         }
@@ -486,7 +496,7 @@ public class JobOptions implements ApiMarker {
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode,
         bucketRange.getLeft(), bucketRange.getRight(), totalBuckets, threadCount, minId, maxId,
-        loadSealedAndSensitive, rangeGiven, baseDirectory);
+        loadSealedAndSensitive, rangeGiven, baseDirectory, false);
   }
 
   public void setStartBucket(long startBucket) {
@@ -552,6 +562,14 @@ public class JobOptions implements ApiMarker {
 
   public void setLastRunTime(Date lastRunTime) {
     this.lastRunTime = lastRunTime;
+  }
+
+  public boolean isRefreshMqt() {
+    return refreshMqt;
+  }
+
+  public void setRefreshMqt(boolean refreshMqt) {
+    this.refreshMqt = refreshMqt;
   }
 
 }

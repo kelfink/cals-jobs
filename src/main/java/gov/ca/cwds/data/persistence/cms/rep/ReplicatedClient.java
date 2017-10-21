@@ -51,6 +51,10 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * 
  * @author CWDS API Team
  */
+@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient.refreshMQT",
+    query = "REFRESH TABLE {h-schema}MQT_CLIENT_ADDRESS", resultClass = EsClientAddress.class,
+    readOnly = false)
+
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient.findAllUpdatedAfter",
     query = "select z.IDENTIFIER, z.ADPTN_STCD, trim(z.ALN_REG_NO) ALN_REG_NO, z.BIRTH_DT, "

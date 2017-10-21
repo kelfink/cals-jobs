@@ -37,11 +37,14 @@ import gov.ca.cwds.jobs.util.JobDateUtil;
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.
  * </p>
  * 
+ * NOTE: #145240149: find ALL client/address recs affected by changes.
+ *
+ * REFRESH TABLE cwsrsq.ES_REL_CLN_RELT_CLIENT ;
+ * 
  * @author CWDS API Team
  */
 @Entity
 @Table(name = "VW_LST_CLIENT_ADDRESS")
-// #145240149: find ALL client/address recs affected by changes.
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientAddress.findAllUpdatedAfter",
     query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
         + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "

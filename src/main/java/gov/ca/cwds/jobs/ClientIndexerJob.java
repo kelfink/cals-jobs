@@ -103,6 +103,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
+  public String getMQTName() {
+    return getInitialLoadViewName();
+  }
+
+  @Override
   public String getJdbcOrderBy() {
     return " ORDER BY x.clt_identifier ";
   }

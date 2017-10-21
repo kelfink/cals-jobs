@@ -615,7 +615,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final boolean autoInitialLoad = lastRun.before(cal.getTime());
 
       // Configure queue sizes for last run or initial load.
-      if ((autoInitialLoad || opts.getLastRunTime() != null) && !opts.isRangeGiven()) {
+      if (autoInitialLoad) {
         queueNormalize = new LinkedBlockingDeque<>(2000);
         queueIndex = new LinkedBlockingDeque<>(5000);
       } else {
@@ -624,6 +624,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       if (autoInitialLoad) {
+        refreshMQT();
+
         if (isInitialLoadJdbc()) {
           doInitialLoadJdbc();
         } else {
@@ -652,6 +654,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         LOGGER.error("IOException on close! {}", io.getMessage(), io);
       }
     }
+
   }
 
   /**
@@ -719,6 +722,27 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
     if (!deletionResults.isEmpty()) {
       LOGGER.warn("FOUND {} RECORDS FOR DELETION", deletionResults.size());
+    }
+  }
+
+  protected void refreshMQT() throws SQLException {
+    if (opts.isRefreshMqt()) {
+      Transaction txn = null;
+      final Class<?> entityClass = jobDao.getEntityClass();
+
+      try {
+        final Session session = jobDao.getSessionFactory().getCurrentSession();
+        final String namedQueryNameForDeletion = entityClass.getName() + ".refreshMQT";
+        txn = session.beginTransaction();
+        final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
+        q.executeUpdate();
+        session.flush();
+        txn.commit();
+      } finally {
+        if (txn != null) {
+          txn.rollback();
+        }
+      }
     }
   }
 

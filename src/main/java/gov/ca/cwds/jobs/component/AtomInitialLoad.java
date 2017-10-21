@@ -93,4 +93,13 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
         : false;
   }
 
+  /**
+   * Source Materialized Query Table to be refreshed before running initial load.
+   * 
+   * @return MQT name
+   */
+  default String getMQTName() {
+    return null;
+  }
+
 }
