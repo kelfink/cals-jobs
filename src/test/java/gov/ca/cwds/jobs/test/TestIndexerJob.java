@@ -40,10 +40,10 @@ public class TestIndexerJob
     return "VW_NUTTIN";
   }
 
-  @Override
-  public String getDriverTable() {
-    return "GOOBER_T";
-  }
+  // @Override
+  // public String getDriverTable() {
+  // return "GOOBER_T";
+  // }
 
   public String getDriverTableNative() {
     return super.getDriverTable();

@@ -1481,4 +1481,8 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     EsClientAddress.useCounty = useCounty;
   }
 
+  public void setClaId(String claId) {
+    this.claId = claId;
+  }
+
 }

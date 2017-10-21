@@ -57,6 +57,16 @@ public class AtomHibernateTest
       return LOGGER;
     }
 
+    @Override
+    public String getDriverTable() {
+      return super.getDriverTable();
+    }
+
+    @Override
+    public String getPrepLastChangeSQL() {
+      return "INSERT INTO GT_ID (IDENTIFIER)\nSELECT 'abc12347567'\nFROM sysibm.sysdummy1\n";
+    }
+
   }
 
   TestNormalizedEntityDao dao;
@@ -125,8 +135,7 @@ public class AtomHibernateTest
   @Test
   public void getPrepLastChangeSQL_Args__() throws Exception {
     String actual = target.getPrepLastChangeSQL();
-    String expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test

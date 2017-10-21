@@ -200,6 +200,7 @@ public class EsClientAddressTest extends PersonJobTester<ReplicatedClient, EsCli
   public void normalize_Args__Map() throws Exception {
     target.setCltId(TEST_CLIENT_ID);
     target.setAdrId(TEST_CLIENT_ID);
+    target.setClaId(TEST_CLIENT_ID);
 
     when(rs.getString("CLA_IDENTIFIER")).thenReturn(TEST_CLIENT_ID);
     when(rs.getString("ADR_IDENTIFIER")).thenReturn(TEST_CLIENT_ID);

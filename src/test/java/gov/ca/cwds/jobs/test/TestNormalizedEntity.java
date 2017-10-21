@@ -6,6 +6,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import gov.ca.cwds.dao.ApiLegacyAware;
@@ -26,6 +29,8 @@ import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 @JsonPropertyOrder(alphabetic = true)
+@Entity
+@Table(name = "GOOBER_T")
 public class TestNormalizedEntity extends ApiObjectIdentity implements PersistentObject,
     ApiPersonAware, ApiTypedIdentifier<String>, ApiLegacyAware, ApiMultiplePhonesAware,
     ApiMultipleAddressesAware, ApiMultipleLanguagesAware, ApiGroupNormalizer<PersistentObject> {
