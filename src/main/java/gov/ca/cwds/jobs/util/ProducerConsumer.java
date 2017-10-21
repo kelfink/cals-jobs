@@ -1,17 +1,20 @@
 package gov.ca.cwds.jobs.util;
 
+import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import gov.ca.cwds.jobs.exception.JobsException;
 
-public abstract class ProducerConsumer<T> {
+public abstract class ProducerConsumer<T> implements Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   private boolean producerDone;
-  private Thread producer = new Thread(this::producer);
-  private Thread consumer = new Thread(this::consumer);
-  private BlockingQueue<T> queue = new LinkedBlockingQueue<>(5000);
+  private transient Thread producer = new Thread(this::producer);
+  private transient Thread consumer = new Thread(this::consumer);
+  private transient BlockingQueue<T> queue = new LinkedBlockingQueue<>(5000);
 
   protected abstract T produce();
 

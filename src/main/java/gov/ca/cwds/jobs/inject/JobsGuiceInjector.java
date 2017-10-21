@@ -114,10 +114,9 @@ public class JobsGuiceInjector extends AbstractModule {
    * @param opts command line options
    * @param esConfigFile location of Elasticsearch configuration file
    * @param lastJobRunTimeFilename location of last run file
-   * @param altInputFilename alternate input file
    */
   public JobsGuiceInjector(final JobOptions opts, final File esConfigFile,
-      String lastJobRunTimeFilename, String altInputFilename) {
+      String lastJobRunTimeFilename) {
     this.esConfig = esConfigFile;
     this.lastJobRunTimeFilename =
         !StringUtils.isBlank(lastJobRunTimeFilename) ? lastJobRunTimeFilename : "";
@@ -137,15 +136,14 @@ public class JobsGuiceInjector extends AbstractModule {
     if (injector == null) {
       try {
         injector = Guice.createInjector(new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()),
-            opts.getLastRunLoc(), opts.getAltInputFile()));
+            opts.getLastRunLoc()));
 
         // Initialize system code cache.
         injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
-
         ElasticTransformer.setMapper(injector.getInstance(ObjectMapper.class));
-
       } catch (CreationException e) {
-        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO BUILD INJECTOR! {}", e.getMessage());
+        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO BUILD INJECTOR! {}",
+            e.getMessage());
       }
     }
 

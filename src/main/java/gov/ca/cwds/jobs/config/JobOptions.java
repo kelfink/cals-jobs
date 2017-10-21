@@ -73,11 +73,6 @@ public class JobOptions implements ApiMarker {
   private String lastRunLoc;
 
   /**
-   * Location of alternate input file.
-   */
-  String altInputFile = "junk";
-
-  /**
    * Whether to run in periodic "last run" mode or "initial" mode.
    */
   boolean lastRunMode = true;
@@ -130,7 +125,6 @@ public class JobOptions implements ApiMarker {
   public JobOptions() {
     // Default contructor
   }
-
 
   /**
    * Construct from all settings.
@@ -188,7 +182,6 @@ public class JobOptions implements ApiMarker {
     this.minId = opts.minId;
     this.maxId = opts.maxId;
     this.loadSealedAndSensitive = opts.loadSealedAndSensitive;
-    this.altInputFile = opts.altInputFile;
     this.rangeGiven = opts.rangeGiven;
     this.baseDirectory = opts.baseDirectory;
   }
@@ -384,8 +377,18 @@ public class JobOptions implements ApiMarker {
   }
 
   private static Pair<Long, Long> parseBuckets(final String[] vals) {
-    Long startBucket = Long.valueOf(vals[0]);
-    Long endBucket = Long.valueOf(vals[1]);
+    Long startBucket = 0L;
+    Long endBucket = 0L;
+
+    // Appease SonarQube.
+    for (int i = 0; i < vals.length; i++) {
+      if (i == 0) {
+        startBucket = Long.valueOf(vals[i]);
+      } else {
+        endBucket = Long.valueOf(vals[i]);
+      }
+    }
+
     return Pair.of(startBucket, endBucket);
   }
 
@@ -512,10 +515,6 @@ public class JobOptions implements ApiMarker {
 
   public void setIndexName(String indexName) {
     this.indexName = indexName;
-  }
-
-  public String getAltInputFile() {
-    return altInputFile;
   }
 
   private static Date createDate(String timestamp) throws java.text.ParseException {

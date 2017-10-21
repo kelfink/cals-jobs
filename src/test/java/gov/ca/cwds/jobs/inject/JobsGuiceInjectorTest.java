@@ -35,7 +35,7 @@ public class JobsGuiceInjectorTest {
   public void configure_Args__() throws Exception {
     final Path path = Paths.get(this.getClass().getResource("/es-test.yaml").getFile());
     final Injector injector =
-        Guice.createInjector(new JobsGuiceInjector(null, path.toFile(), "last time file", "junk"));
+        Guice.createInjector(new JobsGuiceInjector(null, path.toFile(), "last time file"));
     // target.configure(); // Cannot call this directly. Guice calls it for us.
   }
 
