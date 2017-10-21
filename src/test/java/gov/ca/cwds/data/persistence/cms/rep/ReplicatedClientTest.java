@@ -9,21 +9,23 @@ import static org.mockito.Mockito.mock;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.jobs.PersonJobTester;
 
 public class ReplicatedClientTest extends PersonJobTester<ReplicatedClient, EsClientAddress> {
-
   ReplicatedClient target;
 
   @Override
@@ -31,6 +33,7 @@ public class ReplicatedClientTest extends PersonJobTester<ReplicatedClient, EsCl
   public void setup() throws Exception {
     super.setup();
     target = new ReplicatedClient();
+    target.setId(DEFAULT_CLIENT_ID);
   }
 
   @Test
@@ -97,7 +100,7 @@ public class ReplicatedClientTest extends PersonJobTester<ReplicatedClient, EsCl
   @Test
   public void getLegacyId_Args__() throws Exception {
     String actual = target.getLegacyId();
-    String expected = "";
+    String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -129,6 +132,50 @@ public class ReplicatedClientTest extends PersonJobTester<ReplicatedClient, EsCl
     target.setLastUpdatedTime(lastUpdatedTime);
     target.setReplicationDate(lastUpdatedTime);
     ElasticSearchLegacyDescriptor actual = target.getLegacyDescriptor();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getClientCounty_Args__() throws Exception {
+    Short actual = target.getClientCounty();
+    Short expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setClientCounty_Args__Short() throws Exception {
+    Short clinetCountyId = null;
+    target.setClientCounty(clinetCountyId);
+  }
+
+  @Test
+  public void getClientRaces_Args__() throws Exception {
+    List<Short> actual = target.getClientRaces();
+    List<Short> expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setClientRaces_Args__List() throws Exception {
+    List<Short> clientRaces = new ArrayList<Short>();
+    target.setClientRaces(clientRaces);
+  }
+
+  @Test
+  public void addClientRace_Args__Short() throws Exception {
+    Short clientRace = null;
+    target.addClientRace(clientRace);
+  }
+
+  @Test
+  public void getReplicatedEntity_Args__() throws Exception {
+    EmbeddableCmsReplicatedEntity actual = target.getReplicatedEntity();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getRaceAndEthnicity_Args__() throws Exception {
+    ElasticSearchRaceAndEthnicity actual = target.getRaceAndEthnicity();
     assertThat(actual, is(notNullValue()));
   }
 
