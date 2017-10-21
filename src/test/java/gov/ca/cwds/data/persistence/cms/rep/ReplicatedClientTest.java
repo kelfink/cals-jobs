@@ -175,6 +175,10 @@ public class ReplicatedClientTest extends PersonJobTester<ReplicatedClient, EsCl
 
   @Test
   public void getRaceAndEthnicity_Args__() throws Exception {
+    final List<Short> clientRaces = new ArrayList<>();
+    clientRaces.add((short) 825);
+    clientRaces.add((short) 824);
+    target.setClientRaces(clientRaces);
     ElasticSearchRaceAndEthnicity actual = target.getRaceAndEthnicity();
     assertThat(actual, is(notNullValue()));
   }
