@@ -214,7 +214,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (InterruptedException e) {
       fail();
       Thread.currentThread().interrupt();
-      JobLogs.raiseError(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
     }
   }
 
