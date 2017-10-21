@@ -22,6 +22,7 @@ project.ext {
     log4jVersion = "2.8"
     elasticsearchVersion = "5.5.0"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
+    dropwizardVersion = "1.1.0"
 }
 
 version = 0.34

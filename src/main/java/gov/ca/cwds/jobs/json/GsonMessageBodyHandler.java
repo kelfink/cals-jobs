@@ -87,12 +87,7 @@ public class GsonMessageBodyHandler
 
     try (OutputStreamWriter writer =
         new OutputStreamWriter(entityStream, Charset.defaultCharset())) {
-      Type jsonType;
-      if (type.equals(genericType)) {
-        jsonType = type;
-      } else {
-        jsonType = genericType;
-      }
+      Type jsonType = type.equals(genericType) ? type : genericType;
       getGson().toJson(object, jsonType, writer);
     }
   }
