@@ -52,7 +52,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * @author CWDS API Team
  */
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient.refreshMQT",
-    query = "REFRESH TABLE {h-schema}MQT_CLIENT_ADDRESS", resultClass = EsClientAddress.class,
+    query = "REFRESH TABLE {h-schema}MQT_CLIENT_ADDRESS", resultClass = ReplicatedClient.class,
     readOnly = false)
 
 @NamedNativeQuery(

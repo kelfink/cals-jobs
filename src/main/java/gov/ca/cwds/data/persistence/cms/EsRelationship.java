@@ -44,6 +44,10 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
  */
 @Entity
 @Table(name = "VW_LST_BI_DIR_RELATION")
+@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsRelationship.refreshMQT",
+    query = "REFRESH TABLE {h-schema}MQT_REL_CLN_RELT_CLIENT", resultClass = EsRelationship.class,
+    readOnly = false)
+
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsRelationship.findAllUpdatedAfter",
     query = "WITH driver as (\n"
         + " SELECT v1.THIS_LEGACY_ID, v1.RELATED_LEGACY_ID FROM {h-schema}VW_LST_BI_DIR_RELATION v1 \n"

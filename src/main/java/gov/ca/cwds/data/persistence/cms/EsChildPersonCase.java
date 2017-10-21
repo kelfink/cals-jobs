@@ -12,6 +12,10 @@ import org.hibernate.annotations.NamedNativeQuery;
  */
 @Entity
 @Table(name = "VW_LST_CASE_HIST")
+@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.refreshMQT",
+    query = "REFRESH TABLE {h-schema}MQT_CASE_HIST", resultClass = EsChildPersonCase.class,
+    readOnly = false)
+
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.findAllUpdatedAfter",
     query = "SELECT c.* FROM {h-schema}VW_LST_CASE_HIST c WHERE c.CASE_ID IN ("
         + " SELECT c1.CASE_ID FROM {h-schema}VW_LST_CASE_HIST c1 " + "WHERE c1.LAST_CHG > :after "

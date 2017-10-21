@@ -767,7 +767,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Object lastId = new Object();
 
     try {
-      prepHibernateLastChange(session, txn, lastRunTime);
+      prepHibernateLastChange(session, txn, lastRunTime); // Insert into temp table
       final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           JobJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);

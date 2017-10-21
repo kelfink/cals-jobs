@@ -36,6 +36,11 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * @author CWDS API Team
  */
 @NamedNativeQuery(
+    name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.refreshMQT",
+    query = "REFRESH TABLE {h-schema}MQT_OTHER_CLIENT_NAME",
+    resultClass = ReplicatedOtherClientName.class, readOnly = false)
+
+@NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName.findAllUpdatedAfter",
     query = "SELECT r.* FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r WHERE r.THIRD_ID IN ( "
         + "SELECT r1.THIRD_ID FROM {h-schema}VW_LST_OTHER_CLIENT_NAME r1 "
