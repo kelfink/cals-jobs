@@ -90,7 +90,7 @@ dependencies {
         exclude group: 'junit', module: 'junit'
     }
 
-    // https://mvnrepository.com/artifact/nl.jqno.equalsverifier/equalsverifier
+	testCompile group: "io.dropwizard", name: "dropwizard-testing", version: dropwizardVersion
     testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
     testCompile 'org.ow2.asm:asm-all:5.2'
     // testCompile 'org.jacoco:jacoco:0.7.9'

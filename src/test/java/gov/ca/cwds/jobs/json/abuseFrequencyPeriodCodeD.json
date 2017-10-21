@@ -1,0 +1,21 @@
+{
+  
+  "abuseEndDate": "2016-10-31",
+  "abuseFrequency": 2,
+  "abuseFrequencyPeriodCode": "D",
+  "abuseLocationDescription": "Barber Shop",
+  "abuseStartDate": "2016-10-31",
+  "allegationDispositionType": 0,
+  "allegationType": 2180,
+  "dispositionDescription": "Fremont",
+  "dispositionDate": "",
+  "injuryHarmDetailIndicator": false,
+  "nonProtectingParentCode": "N",
+  "staffPersonAddedIndicator": false,
+  "victimClientId": "AHooKwN0F4",
+  "perpetratorClientId": "MKPFcB90F4",
+  "referralId": "AbiQCgu0Hj",
+  "countySpecificCode": "19",
+  "zippyCreatedIndicator": false,
+  "placementFacilityType": 6574
+}

@@ -236,6 +236,7 @@ public class JobRunner {
         scheduler.shutdown(true); // Stop the scheduler after initial run jobs complete.
       }
 
+      // Jetty for REST administration.
       // Thread jettyServer = new Thread(jetty::run);
       // jettyServer.start();
 

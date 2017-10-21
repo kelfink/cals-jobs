@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.json;
 
+// import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -46,6 +47,7 @@ public class GsonReaderTest {
   }
 
   @Test
+  @Ignore
   public void readFrom_Args__Class__Type__AnnotationArray__MediaType__MultivaluedMap__InputStream()
       throws Exception {
     GsonReader target = new GsonReader();
@@ -54,6 +56,9 @@ public class GsonReaderTest {
     Annotation[] antns = new Annotation[] {};
     MediaType mt = mock(MediaType.class);
     MultivaluedMap<String, String> mm = mock(MultivaluedMap.class);
+
+    // fixture("fixtures/domain/legacy/Allegation/valid/abuseFrequencyPeriodCodeD.json");
+
     InputStream in = mock(InputStream.class);
     Object actual = target.readFrom(type, genericType, antns, mt, mm, in);
     Object expected = null;
