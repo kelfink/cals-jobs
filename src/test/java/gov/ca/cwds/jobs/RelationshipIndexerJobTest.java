@@ -103,6 +103,8 @@ public class RelationshipIndexerJobTest
     rel.setRelatedPersonLastName("Meyer");
     rel.setRelatedPersonLegacyId("xyz1234567");
     rel.setRelatedPersonId("xyz1234567");
+    p.addRelation(rel);
+
     UpdateRequest actual = target.prepareUpsertRequest(esp, p);
     assertThat(actual, is(notNullValue()));
   }
