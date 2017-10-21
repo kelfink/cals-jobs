@@ -178,6 +178,8 @@ public class ReplicatedClientTest extends PersonJobTester<ReplicatedClient, EsCl
     final List<Short> clientRaces = new ArrayList<>();
     clientRaces.add((short) 825);
     clientRaces.add((short) 824);
+    clientRaces.add((short) 3164);
+
     target.setClientRaces(clientRaces);
     ElasticSearchRaceAndEthnicity actual = target.getRaceAndEthnicity();
     assertThat(actual, is(notNullValue()));
