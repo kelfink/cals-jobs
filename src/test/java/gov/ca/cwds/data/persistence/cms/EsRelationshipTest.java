@@ -8,23 +8,34 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
+import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
+import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 
-public class EsRelationshipTest {
+public class EsRelationshipTest extends PersonJobTester<ReplicatedRelationships, EsRelationship> {
 
   EsRelationship target = new EsRelationship();
+
+  @Override
+  @Before
+  public void setup() throws Exception {
+    super.setup();
+    target = new EsRelationship();
+    target.setThisLegacyId(DEFAULT_CLIENT_ID);
+  }
 
   @BeforeClass
   public static void setupTests() {
@@ -43,17 +54,17 @@ public class EsRelationshipTest {
 
   @Test
   public void mapRow_Args__ResultSet() throws Exception {
-    ResultSet rs = mock(ResultSet.class);
+    when(rs.getString(any(String.class))).thenReturn("Y");
+
     EsRelationship actual = EsRelationship.mapRow(rs);
     EsRelationship expected = new EsRelationship();
     expected.setRelCode(Short.valueOf((short) 0));
     expected.setReverseRelationship(false);
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test(expected = SQLException.class)
   public void mapRow_Args__ResultSet_T__SQLException() throws Exception {
-    ResultSet rs = mock(ResultSet.class);
     doThrow(new SQLException()).when(rs).getString(any());
     EsRelationship.mapRow(rs);
     fail("Expected exception was not thrown!");
@@ -93,7 +104,7 @@ public class EsRelationshipTest {
   @Test
   public void getNormalizationGroupKey_Args__() throws Exception {
     Object actual = target.getNormalizationGroupKey();
-    Object expected = null;
+    Object expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -128,13 +139,13 @@ public class EsRelationshipTest {
   @Test
   public void getThisLegacyId_Args__() throws Exception {
     String actual = target.getThisLegacyId();
-    String expected = null;
+    String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void setThisLegacyId_Args__String() throws Exception {
-    String thisLegacyId = null;
+    String thisLegacyId = DEFAULT_CLIENT_ID;
     target.setThisLegacyId(thisLegacyId);
   }
 
@@ -227,6 +238,107 @@ public class EsRelationshipTest {
   public void setReverseRelationship_Args__Boolean() throws Exception {
     Boolean reverseRelationship = null;
     target.setReverseRelationship(reverseRelationship);
+  }
+
+  @Test
+  public void getThisLegacyLastUpdated_Args__() throws Exception {
+    Date actual = target.getThisLegacyLastUpdated();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setThisLegacyLastUpdated_Args__Date() throws Exception {
+    Date thisLegacyLastUpdated = new Date();
+    target.setThisLegacyLastUpdated(thisLegacyLastUpdated);
+  }
+
+  @Test
+  public void getRelatedLegacyLastUpdated_Args__() throws Exception {
+    Date actual = target.getRelatedLegacyLastUpdated();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setRelatedLegacyLastUpdated_Args__Date() throws Exception {
+    Date relatedLegacyLastUpdated = new Date();
+    target.setRelatedLegacyLastUpdated(relatedLegacyLastUpdated);
+  }
+
+  @Test
+  public void getThisReplicationOperation_Args__() throws Exception {
+    CmsReplicationOperation actual = target.getThisReplicationOperation();
+    CmsReplicationOperation expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setThisReplicationOperation_Args__CmsReplicationOperation() throws Exception {
+    CmsReplicationOperation thisReplicationOperation = CmsReplicationOperation.I;
+    target.setThisReplicationOperation(thisReplicationOperation);
+  }
+
+  @Test
+  public void getThisReplicationDate_Args__() throws Exception {
+    Date actual = target.getThisReplicationDate();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setThisReplicationDate_Args__Date() throws Exception {
+    Date thisReplicationDate = new Date();
+    target.setThisReplicationDate(thisReplicationDate);
+  }
+
+  @Test
+  public void getRelatedReplicationOperation_Args__() throws Exception {
+    CmsReplicationOperation actual = target.getRelatedReplicationOperation();
+    CmsReplicationOperation expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setRelatedReplicationOperation_Args__CmsReplicationOperation() throws Exception {
+    CmsReplicationOperation relatedReplicationOperation = CmsReplicationOperation.U;
+    target.setRelatedReplicationOperation(relatedReplicationOperation);
+  }
+
+  @Test
+  public void getRelatedReplicationDate_Args__() throws Exception {
+    Date actual = target.getRelatedReplicationDate();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setRelatedReplicationDate_Args__Date() throws Exception {
+    Date relatedReplicationDate = new Date();
+    target.setRelatedReplicationDate(relatedReplicationDate);
+  }
+
+  @Test
+  public void compare_Args__EsRelationship__EsRelationship() throws Exception {
+    EsRelationship o1 = new EsRelationship();
+    o1.setThisLegacyId(DEFAULT_CLIENT_ID);
+
+    EsRelationship o2 = new EsRelationship();
+    o2.setThisLegacyId(DEFAULT_CLIENT_ID);
+
+    int actual = target.compare(o1, o2);
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void compareTo_Args__EsRelationship() throws Exception {
+    EsRelationship o = new EsRelationship();
+    o.setThisLegacyId(DEFAULT_CLIENT_ID);
+
+    int actual = target.compareTo(o);
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
   }
 
 }
