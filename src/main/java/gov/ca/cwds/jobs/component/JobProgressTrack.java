@@ -13,7 +13,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.schedule.NeutronJobExecutionStatus;
-import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
  * Track job progress and record counts.
@@ -212,15 +211,6 @@ public class JobProgressTrack implements ApiMarker {
 
   public void setLastChangeSince(Date lastChangeSince) {
     this.lastChangeSince = lastChangeSince;
-  }
-
-  public static void main(String[] args) {
-    final JobProgressTrack track = new JobProgressTrack();
-    track.setLastChangeSince(DomainChef.uncookTimestampString("2017-12-25-08.32.05.123"));
-    track.done();
-    track.initialLoad = false;
-
-    System.out.println(track.toString());
   }
 
 }

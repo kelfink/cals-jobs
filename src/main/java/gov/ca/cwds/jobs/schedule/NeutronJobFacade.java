@@ -108,7 +108,7 @@ public class NeutronJobFacade implements Serializable {
     try {
       for (JobExecutionContext ctx : scheduler.getCurrentlyExecutingJobs()) {
         if (ctx.getJobDetail().getKey().equals(jobKey)) {
-          // LOGGER.info("", ctx.);
+          LOGGER.info("job exec context: {}", ctx);
         }
       }
 

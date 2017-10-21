@@ -16,6 +16,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
+import gov.ca.cwds.rest.api.domain.DomainChef;
+
 public class JobProgressTrackTest {
   JobProgressTrack target = new JobProgressTrack();
 
@@ -174,7 +176,21 @@ public class JobProgressTrackTest {
   }
 
   @Test
-  public void toString_Args__() throws Exception {
+  public void toString_Args__initial_load() throws Exception {
+    target.setLastChangeSince(DomainChef.uncookTimestampString("2017-12-25-08.32.05.123"));
+    target.done();
+    target.setInitialLoad(true);
+
+    String actual = target.toString();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void toString_Args__last_chg() throws Exception {
+    target.setLastChangeSince(DomainChef.uncookTimestampString("2017-12-25-08.32.05.123"));
+    target.done();
+    target.setInitialLoad(false);
+
     String actual = target.toString();
     assertThat(actual, is(notNullValue()));
   }
