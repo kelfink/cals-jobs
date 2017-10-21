@@ -122,8 +122,10 @@ public class JobsGuiceInjector extends AbstractModule {
     this.opts = opts;
   }
 
-  private static boolean validateFileLocations(String loc) {
-    return StringUtils.isNotBlank(loc) && !loc.equals(FilenameUtils.normalize(loc));
+  // Path traversal vulnerability:
+  // https://github.com/zaproxy/zap-extensions/blob/master/src/org/zaproxy/zap/extension/ascanrules/TestPathTraversal.java
+  private static boolean validateFileLocation(String loc) {
+    return !(StringUtils.isBlank(loc) || loc.equals(FilenameUtils.normalize(loc)));
   }
 
   /**
@@ -137,15 +139,11 @@ public class JobsGuiceInjector extends AbstractModule {
   public static synchronized Injector buildInjector(final JobOptions opts) {
     if (injector == null) {
       try {
-        // Path traversal vulnerability:
-        // https://github.com/zaproxy/zap-extensions/blob/master/src/org/zaproxy/zap/extension/ascanrules/TestPathTraversal.java
-
-        if (!opts.getEsConfigLoc().equals(FilenameUtils.normalize(opts.getEsConfigLoc()))) {
+        if (validateFileLocation(opts.getEsConfigLoc())) {
           throw new JobsException("PROHIBITED CONFIG FILE LOCATION!");
         }
 
-        if (!opts.getLastRunLoc().replaceAll(File.separator + File.separator, File.separator)
-            .equals(FilenameUtils.normalize(opts.getLastRunLoc()))) {
+        if (validateFileLocation(opts.getLastRunLoc())) {
           throw new JobsException("PROHIBITED LAST RUN FILE LOCATION!");
         }
 
@@ -354,6 +352,7 @@ public class JobsGuiceInjector extends AbstractModule {
    * Read Elasticsearch configuration on demand.
    * 
    * @return ES configuration
+   * @throws NeutronException on error
    */
   @Provides
   public ElasticsearchConfiguration elasticSearchConfig() throws NeutronException {
