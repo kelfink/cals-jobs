@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.persistence.Query;
 
@@ -35,7 +36,6 @@ import org.hibernate.type.StringType;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -61,6 +61,7 @@ public class BasePersonIndexerJobTest
   @Before
   public void setup() throws Exception {
     super.setup();
+
     dao = new TestNormalizedEntityDao(sessionFactory);
     target = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     target.setOpts(opts);
@@ -275,7 +276,7 @@ public class BasePersonIndexerJobTest
   }
 
   @Test
-  public void threadTransform_Args__() throws Exception {
+  public void threadNormalize_Args__() throws Exception {
     runKillThread(target);
     target.threadNormalize();
     sleepItOff();
@@ -365,7 +366,7 @@ public class BasePersonIndexerJobTest
     target.reset();
     target.setFakeMarkDone(true);
     target.setFakeFinish(false);
-    Mockito.doThrow(new JobsException("whatever")).when(esDao).close();
+    doThrow(new JobsException("whatever")).when(esDao).close();
     target.finish();
   }
 
@@ -508,6 +509,8 @@ public class BasePersonIndexerJobTest
   @Test
   public void threadExtractJdbc_Args__() throws Exception {
     runKillThread(target);
+
+    target.reset();
     target.threadRetrieveByJdbc();
     sleepItOff();
   }
@@ -565,6 +568,18 @@ public class BasePersonIndexerJobTest
   @Test
   public void addToIndexQueue_Args__Object() throws Exception {
     TestNormalizedEntity norm = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    target.addToIndexQueue(norm);
+  }
+
+  @Test(expected = JobsException.class)
+  public void addToIndexQueue_Args__interrupt() throws Exception {
+    TestNormalizedEntity norm = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+
+    LinkedBlockingDeque deque = mock(LinkedBlockingDeque.class);
+    when(deque.add(any(TestNormalizedEntity.class))).thenThrow(InterruptedException.class);
+    doThrow(new InterruptedException()).when(deque).putLast(any(TestNormalizedEntity.class));
+
+    target.setQueueIndex(deque);
     target.addToIndexQueue(norm);
   }
 

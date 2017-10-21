@@ -268,7 +268,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         getTrack().trackBulkPrepared();
       }
     } catch (Exception e) {
-      throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey()); // NOSONAR
+      throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}",
+          t.getPrimaryKey()); // NOSONAR
     }
 
     return ret;
@@ -1003,6 +1004,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Override
   public ElasticsearchDao getEsDao() {
     return esDao;
+  }
+
+  public LinkedBlockingDeque<T> getQueueIndex() {
+    return queueIndex;
+  }
+
+  protected void setQueueIndex(LinkedBlockingDeque<T> queueIndex) {
+    this.queueIndex = queueIndex;
   }
 
 }
