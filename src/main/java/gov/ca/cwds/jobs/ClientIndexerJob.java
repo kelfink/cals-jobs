@@ -139,9 +139,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    * @param p partition range to read
    */
   protected void pullRange(final Pair<String, String> p) {
-    final int i = nextThreadNum.incrementAndGet();
-    final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
-    Thread.currentThread().setName(threadName);
+    final String threadName =
+        "extract_" + nextThreadNum.incrementAndGet() + "_" + p.getLeft() + "_" + p.getRight();
+    nameThread(threadName);
     LOGGER.info("BEGIN: extract thread {}", threadName);
     getTrack().trackRangeStart(p);
 
@@ -188,7 +188,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     }
 
     getTrack().trackRangeComplete(p);
-    LOGGER.info("DONE: Extract thread {}", i);
+    LOGGER.info("DONE: Extract thread {}", threadName);
   }
 
   /**
@@ -197,17 +197,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    */
   @Override
   protected void threadRetrieveByJdbc() {
-    Thread.currentThread().setName("extract_main");
+    nameThread("extract_main");
     LOGGER.info("BEGIN: main extract thread");
-    doneTransform();
+    doneTransform(); // no transform/normalize thread
 
     try {
-      // if (opts.isDropIndex()) {
-      // final String index = esDao.getConfig().getElasticsearchAlias();
-      // LOGGER.warn("\n\n\t>>>>>>>>> DELETE INDEX {} <<<<<<<<<\n\n", index);
-      // esDao.deleteIndex(index);
-      // }
-
       final List<Pair<String, String>> ranges = getPartitionRanges();
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());

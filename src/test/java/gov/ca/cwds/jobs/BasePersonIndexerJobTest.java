@@ -37,8 +37,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
@@ -507,7 +505,9 @@ public class BasePersonIndexerJobTest
   }
 
   @Test
-  public void threadExtractJdbc_Args__() throws Exception {
+  public void threadRetrieveByJdbc_Args__() throws Exception {
+    when(rs.next()).thenReturn(true, false);
+
     runKillThread(target);
 
     target.reset();
@@ -555,14 +555,6 @@ public class BasePersonIndexerJobTest
     String id = DEFAULT_CLIENT_ID;
     DeleteRequest actual = target.bulkDelete(id);
     assertThat(actual, notNullValue());
-  }
-
-  @Test(expected = JsonProcessingException.class)
-  @Ignore
-  public void bulkDelete_Args__String_T__JsonProcessingException() throws Exception {
-    String id = DEFAULT_CLIENT_ID;
-    target.bulkDelete(id);
-    fail("Expected exception was not thrown!");
   }
 
   @Test
@@ -638,6 +630,8 @@ public class BasePersonIndexerJobTest
   @Test(expected = JobsException.class)
   @Ignore
   public void doInitialLoadJdbc_Args__error() throws Exception {
+    when(rs.next()).thenReturn(true, false);
+
     runKillThread(target);
     target.doInitialLoadJdbc();
     sleepItOff();
@@ -700,7 +694,6 @@ public class BasePersonIndexerJobTest
   @Test(expected = JobsException.class)
   public void extractLastRunRecsFromView_Args__sql_error() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
-    // when(session.getNamedNativeQuery(any())).thenReturn(qn);
     when(session.getNamedNativeQuery(any())).thenThrow(SQLException.class);
 
     final List<TestDenormalizedEntity> denorms = new ArrayList<>();

@@ -356,9 +356,9 @@ public class ReferralHistoryIndexerJob
    * @return number of client documents affected
    */
   protected int pullRange(final Pair<String, String> p) {
-    final int i = nextThreadNum.incrementAndGet();
-    final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
-    Thread.currentThread().setName(threadName);
+    final String threadName =
+        "extract_" + nextThreadNum.incrementAndGet() + "_" + p.getLeft() + "_" + p.getRight();
+    nameThread(threadName);
     LOGGER.info("BEGIN");
     getTrack().trackRangeStart(p);
 
@@ -448,7 +448,7 @@ public class ReferralHistoryIndexerJob
    */
   @Override
   protected void threadRetrieveByJdbc() {
-    Thread.currentThread().setName("read_main");
+    nameThread("read_main");
     LOGGER.info("BEGIN: main read thread");
 
     // WARNING: static setter is OK in standalone job but NOT permitted in continuous mode.

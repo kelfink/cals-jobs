@@ -160,17 +160,24 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     when(opts.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
   }
 
-  public void runKillThread(final BasePersonIndexerJob<T, M> target) {
-    new Thread(() -> {
+  public Thread runKillThread(final BasePersonIndexerJob<T, M> target, long sleepMillis) {
+    final Thread t = new Thread(() -> {
       try {
-        Thread.sleep(1100); // NOSONAR
+        Thread.sleep(sleepMillis); // NOSONAR
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
       } finally {
         target.done();
       }
 
-    }).start();
+    });
+
+    t.start();
+    return t;
+  }
+
+  public Thread runKillThread(final BasePersonIndexerJob<T, M> target) {
+    return runKillThread(target, 1100L);
   }
 
   public void sleepItOff() {

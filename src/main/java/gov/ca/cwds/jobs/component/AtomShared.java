@@ -23,6 +23,11 @@ public interface AtomShared extends ApiMarker {
    */
   ElasticsearchDao getEsDao();
 
+  /**
+   * Make logger available to interfaces.
+   * 
+   * @return SLF4J logger
+   */
   Logger getLogger();
 
   /**
@@ -32,8 +37,13 @@ public interface AtomShared extends ApiMarker {
    */
   JobOptions getOpts();
 
+  /**
+   * Common method sets the thread's name.
+   * 
+   * @param title title of thread
+   */
   default void nameThread(final String title) {
-    Thread.currentThread().setName(title);
+    Thread.currentThread().setName(getClass().getSimpleName() + "_" + title);
   }
 
 }

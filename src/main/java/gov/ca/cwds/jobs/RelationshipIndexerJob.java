@@ -134,14 +134,14 @@ public class RelationshipIndexerJob
   }
 
   /**
-   * Read recs from a single partition.
+   * Read records from the given key range, typically within a single partition on large tables.
    * 
    * @param p partition range to read
    */
   protected void pullRange(final Pair<String, String> p) {
-    final int i = nextThreadNum.incrementAndGet();
-    final String threadName = "extract_" + i + "_" + p.getLeft() + "_" + p.getRight();
-    Thread.currentThread().setName(threadName);
+    final String threadName =
+        "extract_" + nextThreadNum.incrementAndGet() + "_" + p.getLeft() + "_" + p.getRight();
+    nameThread(threadName);
     LOGGER.info("BEGIN: extract thread {}", threadName);
     getTrack().trackRangeStart(p);
 
@@ -188,7 +188,7 @@ public class RelationshipIndexerJob
     }
 
     getTrack().trackRangeComplete(p);
-    LOGGER.info("DONE: Extract thread {}", i);
+    LOGGER.info("DONE: Extract thread {}", threadName);
   }
 
   /**
@@ -197,9 +197,9 @@ public class RelationshipIndexerJob
    */
   @Override
   protected void threadRetrieveByJdbc() {
-    Thread.currentThread().setName("extract_main");
+    nameThread("extract_main");
     LOGGER.info("BEGIN: main extract thread");
-    doneTransform();
+    doneTransform(); // No transform thread
 
     try {
       final List<Pair<String, String>> ranges = getPartitionRanges();

@@ -304,7 +304,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * </p>
    */
   protected void doInitialLoadJdbc() {
-    Thread.currentThread().setName("initial_load");
+    nameThread("initial_load");
     LOGGER.info("INITIAL LOAD WITH JDBC!");
 
     try {
@@ -319,8 +319,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       final Thread threadJdbc = new Thread(this::threadRetrieveByJdbc); // Extract
       threadJdbc.start();
-
       threadJdbc.join();
+
       if (threadTransformer != null) {
         threadTransformer.join();
       }
@@ -346,7 +346,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * The "extract" part of ETL. Single producer, chained consumers.
    */
   protected void threadRetrieveByJdbc() {
-    Thread.currentThread().setName("jdbc");
+    nameThread("jdbc");
     LOGGER.info("BEGIN: jdbc thread");
 
     try (final Connection con = jobDao.getSessionFactory().getSessionFactoryOptions()
@@ -427,7 +427,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * de-normalized view records to normalized ones and pass to the index queue.
    */
   protected void threadNormalize() {
-    Thread.currentThread().setName("normalize");
+    nameThread("normalize");
     LOGGER.info("BEGIN: normalize thread");
 
     int cntr = 0;
@@ -475,8 +475,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * The "load" part of ETL. Read from normalized record queue and push to ES.
    */
   protected void threadIndex() {
+    nameThread("es_indexer");
     LOGGER.info("BEGIN: indexer thread");
-    Thread.currentThread().setName("es_indexer");
     final BulkProcessor bp = buildBulkProcessor();
     int cntr = 0;
 
@@ -487,14 +487,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       // Catch stragglers.
       cntr = bulkPrepare(bp, cntr);
-      LOGGER.info("Flush ES bulk processor ... recs processed: {}", cntr);
-      bp.flush();
-      Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue());
+      LOGGER.debug("Flush ES bulk processor ... recs processed: {}", cntr);
       bp.flush();
 
-      LOGGER.info("Waiting to close ES bulk processor ...");
+      LOGGER.debug("Waiting to close ES bulk processor ...");
       bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
-      LOGGER.info("Closed ES bulk processor");
+      LOGGER.debug("Closed ES bulk processor");
     } catch (Exception e) {
       fail();
       Thread.currentThread().interrupt();
