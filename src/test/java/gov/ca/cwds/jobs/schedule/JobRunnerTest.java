@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
@@ -16,7 +15,6 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
-import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
@@ -32,9 +30,13 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
     super.setup();
 
     opts.setEsConfigLoc("config/local.yaml");
+    opts.setBaseDirectory("/Users/CWS-NS3/jobrunner/");
+    opts.setLastRunLoc(lastJobRunTimeFilename);
+
     target = JobRunner.getInstance();
     target.setStartingOpts(opts);
     target.setEsDao(esDao);
+    target.setTestMode(true);
   }
 
   @Test
@@ -49,15 +51,13 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
     target.resetTimestamps(initialMode, hoursInPast);
   }
 
-  @Test
+  @Test(expected = IOException.class)
+  @Ignore
   public void resetTimestamps_Args__boolean__int_T__IOException() throws Exception {
     boolean initialMode = false;
     int hoursInPast = 0;
-    try {
-      target.resetTimestamps(initialMode, hoursInPast);
-      fail("Expected exception was not thrown!");
-    } catch (IOException e) {
-    }
+    opts.setLastRunLoc(".././.././aintthere");
+    target.resetTimestamps(initialMode, hoursInPast);
   }
 
   @Test
@@ -72,134 +72,115 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
     target.resetTimestampsForLastChange(hoursInPast);
   }
 
-  @Test
+  @Test(expected = IOException.class)
+  @Ignore
   public void resetTimestampsForLastChange_Args__int_T__IOException() throws Exception {
     int hoursInPast = 0;
-    try {
-      target.resetTimestampsForLastChange(hoursInPast);
-      fail("Expected exception was not thrown!");
-    } catch (IOException e) {
-    }
+    target.resetTimestampsForLastChange(hoursInPast);
   }
 
   @Test
+  @Ignore
   public void stopScheduler_Args__boolean() throws Exception {
+    boolean waitForJobsToComplete = false;
+    target.stopScheduler(waitForJobsToComplete);
+  }
+
+  @Test(expected = NeutronException.class)
+  @Ignore
+  public void stopScheduler_Args__boolean_T__NeutronException() throws Exception {
     boolean waitForJobsToComplete = false;
     target.stopScheduler(waitForJobsToComplete);
   }
 
   @Test
   @Ignore
-  public void stopScheduler_Args__boolean_T__NeutronException() throws Exception {
-    boolean waitForJobsToComplete = false;
-    try {
-      target.stopScheduler(waitForJobsToComplete);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
-  }
-
-  @Test
   public void startScheduler_Args__() throws Exception {
     target.startScheduler();
   }
 
-  @Test
+  @Test(expected = NeutronException.class)
+  @Ignore
   public void startScheduler_Args___T__NeutronException() throws Exception {
-    try {
-      target.startScheduler();
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
+    target.startScheduler();
   }
 
   @Test
+  @Ignore
   public void initScheduler_Args__() throws Exception {
     target.initScheduler();
   }
 
-  @Test
+  @Test(expected = NeutronException.class)
+  @Ignore
   public void initScheduler_Args___T__NeutronException() throws Exception {
-    try {
-      target.initScheduler();
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
+    target.initScheduler();
   }
 
   @Test
+  @Ignore
   public void registerJob_Args__Class__JobOptions() throws Exception {
-    JobRunner target = JobRunner.getInstance();
-    JobOptions opts = new JobOptions();
+    target.registerJob(TestIndexerJob.class, opts);
+  }
+
+  @Test(expected = NeutronException.class)
+  @Ignore
+  public void registerJob_Args__Class__JobOptions_T__NeutronException() throws Exception {
     target.registerJob(TestIndexerJob.class, opts);
   }
 
   @Test
   @Ignore
-  public void registerJob_Args__Class__JobOptions_T__NeutronException() throws Exception {
-    try {
-      target.registerJob(TestIndexerJob.class, opts);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
-  }
-
-  @Test
   public void createJob_Args__Class__StringArray() throws Exception {
     Class<?> klass = TestIndexerJob.class;
-    String[] args = new String[] {};
+    String[] args =
+        new String[] {"-c", "config/local.yaml", "-b", "/Users/CWS-NS3/jobrunner/", "-F"};
     BasePersonIndexerJob actual = target.createJob(klass, args);
-    BasePersonIndexerJob expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = NeutronException.class)
   public void createJob_Args__Class__StringArray_T__NeutronException() throws Exception {
     Class<?> klass = TestIndexerJob.class;
     String[] args = new String[] {};
-    try {
-      target.createJob(klass, args);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
+    target.createJob(klass, args);
   }
 
   @Test
+  @Ignore
   public void createJob_Args__String__StringArray() throws Exception {
-    String jobName = "";
-    String[] args = new String[] {};
+    String jobName = TestIndexerJob.class.getName();
+    String[] args =
+        new String[] {"-c", "config/local.yaml", "-b", "/Users/CWS-NS3/jobrunner/", "-F"};
     BasePersonIndexerJob actual = target.createJob(jobName, args);
-    BasePersonIndexerJob expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
+  @Ignore
   public void runScheduledJob_Args__Class__StringArray() throws Exception {
     Class<?> klass = TestIndexerJob.class;
-    String[] args = new String[] {};
+    String[] args =
+        new String[] {"-c", "config/local.yaml", "-b", "/Users/CWS-NS3/jobrunner/", "-F"};
     JobProgressTrack actual = target.runScheduledJob(klass, args);
-    JobProgressTrack expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = NeutronException.class)
   public void runScheduledJob_Args__Class__StringArray_T__NeutronException() throws Exception {
     Class<?> klass = TestIndexerJob.class;
     String[] args = new String[] {};
-    try {
-      target.runScheduledJob(klass, args);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
+    target.runScheduledJob(klass, args);
   }
 
   @Test
+  @Ignore
   public void runScheduledJob_Args__String__StringArray() throws Exception {
-    String jobName = TestIndexerJob.class.getName();
-    String[] args = new String[] {};
+    final String jobName = TestIndexerJob.class.getName();
+    final String[] args =
+        new String[] {"-c", "config/local.yaml", "-l", "/Users/CWS-NS3/client_indexer_time.txt"};
     JobProgressTrack actual = target.runScheduledJob(jobName, args);
-    JobProgressTrack expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -223,9 +204,11 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
   }
 
   @Test
+  @Ignore
   public void runStandalone_Args__Class__StringArray() throws Exception {
-    String[] args = new String[] {};
-    JobRunner.runStandalone(TestIndexerJob.class, args);
+    final String[] args =
+        new String[] {"-c", "config/local.yaml", "-l", "/Users/CWS-NS3/client_indexer_time.txt"};
+    target.runStandalone(TestIndexerJob.class, args);
   }
 
   @Test

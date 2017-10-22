@@ -172,10 +172,10 @@ public class JobRunner {
       scheduler = factory.getScheduler();
 
       // Scheduler listeners.
-      final ListenerManager listenerManager = scheduler.getListenerManager();
-      listenerManager.addSchedulerListener(new NeutronSchedulerListener());
-      listenerManager.addJobListener(new NeutronJobListener());
-      listenerManager.addTriggerListener(new NeutronTriggerListener());
+      final ListenerManager listenerMgr = scheduler.getListenerManager();
+      listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
+      listenerMgr.addJobListener(new NeutronJobListener());
+      listenerMgr.addTriggerListener(new NeutronTriggerListener());
 
       // JMX:
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
@@ -214,7 +214,10 @@ public class JobRunner {
               fmt.format(overrideLastRunTime ? opts.getLastRunTime() : now));
         }
 
-        registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
+        if (!testMode) {
+          registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
+        }
+
         final NeutronJobFacade nj = new NeutronJobFacade(scheduler, sched);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         scheduleRegistry.put(klass, nj);
@@ -237,7 +240,9 @@ public class JobRunner {
       }
 
       // Start your engines ...
-      scheduler.start();
+      if (!testMode) {
+        scheduler.start();
+      }
 
       // if (initialMode) {
       // Thread.sleep(15000);
@@ -269,13 +274,15 @@ public class JobRunner {
   public <T extends BasePersonIndexerJob<?, ?>> void registerJob(final Class<T> klass,
       final JobOptions opts) throws NeutronException {
     LOGGER.info("Register job: {}", klass.getName());
-    try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
-      optionsRegistry.put(klass, job.getOpts());
-      getInstance().setEsDao(job.getEsDao());
-    } catch (Throwable e) { // NOSONAR
-      // Intentionally catch a Throwable, not an Exception or ClassNotFound or the like.
-      throw JobLogs.buildCheckedException(LOGGER, e, "JOB REGISTRATION FAILED!: {}",
-          e.getMessage());
+    if (!testMode) {
+      try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
+        optionsRegistry.put(klass, job.getOpts());
+        getInstance().setEsDao(job.getEsDao());
+      } catch (Throwable e) { // NOSONAR
+        // Intentionally catch a Throwable, not an Exception or ClassNotFound or the like.
+        throw JobLogs.buildCheckedException(LOGGER, e, "JOB REGISTRATION FAILED!: {}",
+            e.getMessage());
+      }
     }
   }
 
