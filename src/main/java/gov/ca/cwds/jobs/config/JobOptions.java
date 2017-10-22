@@ -497,10 +497,12 @@ public class JobOptions implements ApiMarker {
             break;
 
           case CMD_LINE_REFRESH_MQT:
+            lastRunMode = false;
             refreshMqt = true;
             break;
 
           case CMD_LINE_DROP_INDEX:
+            lastRunMode = false;
             dropIndex = true;
             break;
 
