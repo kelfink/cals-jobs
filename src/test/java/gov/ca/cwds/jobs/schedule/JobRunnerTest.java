@@ -30,7 +30,7 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
     super.setup();
 
     opts.setEsConfigLoc("config/local.yaml");
-    opts.setBaseDirectory("/Users/CWS-NS3/jobrunner/");
+    opts.setBaseDirectory("/var/lib/jenkins/");
     opts.setLastRunLoc(lastJobRunTimeFilename);
 
     target = JobRunner.getInstance();
@@ -133,8 +133,7 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
   @Ignore
   public void createJob_Args__Class__StringArray() throws Exception {
     Class<?> klass = TestIndexerJob.class;
-    String[] args =
-        new String[] {"-c", "config/local.yaml", "-b", "/Users/CWS-NS3/jobrunner/", "-F"};
+    String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
     BasePersonIndexerJob actual = target.createJob(klass, args);
     assertThat(actual, is(notNullValue()));
   }
@@ -150,8 +149,7 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
   @Ignore
   public void createJob_Args__String__StringArray() throws Exception {
     String jobName = TestIndexerJob.class.getName();
-    String[] args =
-        new String[] {"-c", "config/local.yaml", "-b", "/Users/CWS-NS3/jobrunner/", "-F"};
+    String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
     BasePersonIndexerJob actual = target.createJob(jobName, args);
     assertThat(actual, is(notNullValue()));
   }
@@ -160,8 +158,7 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
   @Ignore
   public void runScheduledJob_Args__Class__StringArray() throws Exception {
     Class<?> klass = TestIndexerJob.class;
-    String[] args =
-        new String[] {"-c", "config/local.yaml", "-b", "/Users/CWS-NS3/jobrunner/", "-F"};
+    String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
     JobProgressTrack actual = target.runScheduledJob(klass, args);
     assertThat(actual, is(notNullValue()));
   }
