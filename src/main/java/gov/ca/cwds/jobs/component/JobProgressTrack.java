@@ -184,7 +184,7 @@ public class JobProgressTrack implements ApiMarker {
     buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime))
         .append("\n\tend:                    ").append(new Date(endTime))
         .append("\n\telapsed (seconds):      ").append((endTime - startTime) / 1000)
-        .append("\n\n    ELASTICSEARCH:").append("\n\tdenormalized:         ")
+        .append("\n\n    ELASTICSEARCH:").append("\n\tdenormalized:     ")
         .append(pad(this.getRecsSentToIndexQueue().get())).append("\n\tto bulk:         ")
         .append(pad(recsSentToBulkProcessor.get())).append("\n\tnormalized:      ")
         .append(pad(rowsNormalized.get())).append("\n\tbulk prepared:   ")
