@@ -601,4 +601,8 @@ public class JobOptions implements ApiMarker {
     this.dropIndex = dropIndex;
   }
 
+  public void setEsConfigLoc(String esConfigLoc) {
+    this.esConfigLoc = esConfigLoc;
+  }
+
 }

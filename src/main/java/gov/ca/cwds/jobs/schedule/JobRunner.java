@@ -153,18 +153,13 @@ public class JobRunner {
     }
   }
 
-  public void dropIndex() {
-    // getesdao
-  }
-
   /**
    * Expose job execution operations through JMX.
    * 
    * @throws NeutronException on initialization error
-   * @throws SchedulerException on scheduler shutdown error
    */
   @SuppressWarnings("unchecked")
-  protected void initScheduler() throws NeutronException, SchedulerException {
+  protected void initScheduler() throws NeutronException {
     try {
       // Quartz scheduling:
       final Properties p = new Properties();
@@ -254,7 +249,11 @@ public class JobRunner {
       // jettyServer.start();
 
     } catch (IOException | SchedulerException | ParseException e) {
-      scheduler.shutdown(false);
+      try {
+        scheduler.shutdown(false);
+      } catch (SchedulerException e2) {
+        LOGGER.warn("FAILED TO STOP SCHEDULER! {}", e2.getMessage(), e2);
+      }
       throw JobLogs.buildCheckedException(LOGGER, e, "INIT ERROR: {}", e.getMessage());
     }
   }
@@ -317,8 +316,7 @@ public class JobRunner {
   public BasePersonIndexerJob createJob(final String jobName, String... args)
       throws NeutronException {
     try {
-      final Class<?> klass = Class.forName(jobName);
-      return createJob(klass, args);
+      return createJob(Class.forName(jobName), args);
     } catch (Exception e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!!: {}",
           e.getMessage());
@@ -475,6 +473,14 @@ public class JobRunner {
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
+  }
+
+  public JobOptions getStartingOpts() {
+    return startingOpts;
+  }
+
+  public void setStartingOpts(JobOptions startingOpts) {
+    this.startingOpts = startingOpts;
   }
 
 }
