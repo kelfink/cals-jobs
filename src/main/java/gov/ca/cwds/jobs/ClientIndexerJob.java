@@ -202,11 +202,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     doneTransform();
 
     try {
-      if (opts.isDropIndex()) {
-        final String index = esDao.getConfig().getElasticsearchAlias();
-        LOGGER.warn("\n\n\t>>>>>>>>> DELETE INDEX {} <<<<<<<<<\n\n", index);
-        esDao.deleteIndex(index);
-      }
+      // if (opts.isDropIndex()) {
+      // final String index = esDao.getConfig().getElasticsearchAlias();
+      // LOGGER.warn("\n\n\t>>>>>>>>> DELETE INDEX {} <<<<<<<<<\n\n", index);
+      // esDao.deleteIndex(index);
+      // }
 
       final List<Pair<String, String>> ranges = getPartitionRanges();
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
