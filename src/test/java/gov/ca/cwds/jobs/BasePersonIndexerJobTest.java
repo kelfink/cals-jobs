@@ -816,7 +816,19 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void refreshMQT() throws Exception {
+    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
+    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
+    when(q.setParameter(any(String.class), any(String.class), any(StringType.class))).thenReturn(q);
+    when(q.setHibernateFlushMode(any(FlushMode.class))).thenReturn(q);
+    when(q.setReadOnly(any(Boolean.class))).thenReturn(q);
+    when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
+    when(q.setFetchSize(any(Integer.class))).thenReturn(q);
+    when(q.setCacheable(any(Boolean.class))).thenReturn(q);
+
+    JobOptions opts = new JobOptions();
     opts.setRefreshMqt(true);
+    opts.setEsConfigLoc("config/local.yaml");
     target.setOpts(opts);
     target.refreshMQT();
   }
