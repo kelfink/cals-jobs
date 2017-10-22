@@ -150,6 +150,10 @@ public class JobRunner {
     }
   }
 
+  public void dropIndex() {
+    // getesdao
+  }
+
   /**
    * Expose job execution operations through JMX.
    * 
