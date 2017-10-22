@@ -647,8 +647,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       fail();
       throw JobLogs.buildRuntimeException(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
     } finally {
+      done();
       try {
-        done();
         this.close();
       } catch (IOException io) {
         LOGGER.error("IOException on close! {}", io.getMessage(), io);

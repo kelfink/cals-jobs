@@ -245,6 +245,7 @@ public class JobRunner {
       scheduler.start();
 
       // if (initialMode) {
+      // Thread.sleep(15000);
       // scheduler.shutdown(true); // Stop the scheduler after initial run jobs complete.
       // }
 
@@ -273,7 +274,7 @@ public class JobRunner {
       optionsRegistry.put(klass, job.getOpts());
       getInstance().setEsDao(job.getEsDao());
     } catch (Throwable e) { // NOSONAR
-      // Intentionally catch a Throwable, not an Exception, for ClassNotFound or the like.
+      // Intentionally catch a Throwable, not an Exception or ClassNotFound or the like.
       throw JobLogs.buildCheckedException(LOGGER, e, "JOB REGISTRATION FAILED!: {}",
           e.getMessage());
     }
