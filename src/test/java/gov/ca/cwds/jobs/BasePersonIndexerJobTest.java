@@ -289,10 +289,10 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  @Test
+  @Test(expected = JobsException.class)
   public void extractLastRunRecsFromTable_Args__Date__error() throws Exception {
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
-    when(session.getNamedNativeQuery(any())).thenReturn(q);
+    when(session.getNamedNativeQuery(any())).thenThrow(JobsException.class);
 
     final List<TestNormalizedEntity> actual = target.extractLastRunRecsFromTable(lastRunTime);
     assertThat(actual, notNullValue());
@@ -816,6 +816,8 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void refreshMQT() throws Exception {
+    opts.setRefreshMqt(true);
+    target.setOpts(opts);
     target.refreshMQT();
   }
 

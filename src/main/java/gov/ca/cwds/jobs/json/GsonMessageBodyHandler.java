@@ -19,9 +19,6 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -31,8 +28,6 @@ import com.google.gson.GsonBuilder;
 @Singleton
 public class GsonMessageBodyHandler
     implements MessageBodyWriter<Object>, MessageBodyReader<Object> {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(GsonMessageBodyHandler.class);
 
   private Gson gson;
 
@@ -54,8 +49,6 @@ public class GsonMessageBodyHandler
   public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
       throws IOException, WebApplicationException {
-    LOGGER.debug("GSon readFrom");
-
     try (InputStreamReader reader = new InputStreamReader(entityStream, Charset.defaultCharset())) {
       Type jsonType;
       if (type.equals(genericType)) {
@@ -83,8 +76,6 @@ public class GsonMessageBodyHandler
   public void writeTo(Object object, Class<?> type, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
       throws IOException, WebApplicationException {
-    LOGGER.debug("GSon writeTo");
-
     try (OutputStreamWriter writer =
         new OutputStreamWriter(entityStream, Charset.defaultCharset())) {
       Type jsonType = type.equals(genericType) ? type : genericType;
