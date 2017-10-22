@@ -23,6 +23,7 @@ public class TestIndexerJob
 
   private boolean fakeMarkDone;
   private boolean fakeFinish = true;
+  private boolean fakeBulkProcessor = true;
 
   public TestIndexerJob(final TestNormalizedEntityDao mainDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
@@ -39,11 +40,6 @@ public class TestIndexerJob
   public String getInitialLoadViewName() {
     return "VW_NUTTIN";
   }
-
-  // @Override
-  // public String getDriverTable() {
-  // return "GOOBER_T";
-  // }
 
   public String getDriverTableNative() {
     return super.getDriverTable();
@@ -84,8 +80,10 @@ public class TestIndexerJob
   }
 
   @Override
-  protected void awaitBulkProcessorClose(BulkProcessor bp) {
-    // Do nothing.
+  public void awaitBulkProcessorClose(BulkProcessor bp) {
+    if (!fakeBulkProcessor) {
+      super.awaitBulkProcessorClose(bp);
+    }
   }
 
   @Override
@@ -109,6 +107,14 @@ public class TestIndexerJob
 
   public void setFakeMarkDone(boolean fakeMarkDone) {
     this.fakeMarkDone = fakeMarkDone;
+  }
+
+  public boolean isFakeBulkProcessor() {
+    return fakeBulkProcessor;
+  }
+
+  public void setFakeBulkProcessor(boolean fakeBulkProcessor) {
+    this.fakeBulkProcessor = fakeBulkProcessor;
   }
 
 }

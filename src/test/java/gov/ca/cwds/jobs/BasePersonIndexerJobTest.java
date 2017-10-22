@@ -303,6 +303,10 @@ public class BasePersonIndexerJobTest
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(qn);
 
+    final List<TestDenormalizedEntity> recs = new ArrayList<>();
+    TestDenormalizedEntity rec = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "one", "two");
+    recs.add(rec);
+
     final List<TestNormalizedEntity> actual =
         target.extractLastRunRecsFromView(lastRunTime, new HashSet<String>());
     assertThat(actual, notNullValue());
@@ -803,15 +807,29 @@ public class BasePersonIndexerJobTest
     target.normalizeLoop(grpRecs, lastId, cntr);
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   @Ignore
   public void prepHibernatePull_Args__Session__Transaction__Date_T__SQLException()
       throws Exception {
-    try {
-      target.prepHibernateLastChange(session, transaction, lastRunTime);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    target.prepHibernateLastChange(session, transaction, lastRunTime);
+  }
+
+  @Test
+  public void refreshMQT() throws Exception {
+    target.refreshMQT();
+  }
+
+  @Test
+  public void getQueueIndex() throws Exception {
+    LinkedBlockingDeque actual = target.getQueueIndex();
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
+  public void awaitBulkProcessorClose() throws Exception {
+    BulkProcessor bp = mock(BulkProcessor.class);
+    target.setFakeBulkProcessor(false);
+    target.awaitBulkProcessorClose(bp);
   }
 
 }
