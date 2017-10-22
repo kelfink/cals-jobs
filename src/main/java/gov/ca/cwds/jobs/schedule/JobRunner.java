@@ -70,7 +70,7 @@ public class JobRunner {
 
   private ElasticsearchDao esDao;
 
-  // private final NeutronRestServer jetty = new NeutronRestServer();
+  // private final NeutronRestServer restServer;
 
   /**
    * Job options by job type.
@@ -250,7 +250,7 @@ public class JobRunner {
       // }
 
       // Jetty for REST administration.
-      // Thread jettyServer = new Thread(jetty::run);
+      // Thread jettyServer = new Thread(restServer::run);
       // jettyServer.start();
 
     } catch (IOException | SchedulerException | ParseException e) {
@@ -449,7 +449,7 @@ public class JobRunner {
     return jobTracks;
   }
 
-  public ElasticsearchDao getEsDao() {
+  public synchronized ElasticsearchDao getEsDao() {
     return esDao;
   }
 
@@ -457,6 +457,14 @@ public class JobRunner {
     if (this.esDao == null) {
       this.esDao = esDao;
     }
+  }
+
+  public JobOptions getStartingOpts() {
+    return startingOpts;
+  }
+
+  public void setStartingOpts(JobOptions startingOpts) {
+    this.startingOpts = startingOpts;
   }
 
   /**
@@ -480,14 +488,6 @@ public class JobRunner {
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
-  }
-
-  public JobOptions getStartingOpts() {
-    return startingOpts;
-  }
-
-  public void setStartingOpts(JobOptions startingOpts) {
-    this.startingOpts = startingOpts;
   }
 
 }
