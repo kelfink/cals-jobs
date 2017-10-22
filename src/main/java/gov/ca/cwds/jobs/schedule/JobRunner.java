@@ -28,6 +28,7 @@ import org.weakref.jmx.Managed;
 
 import com.google.inject.tools.jmx.Manager;
 
+import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
@@ -66,6 +67,8 @@ public class JobRunner {
   private Scheduler scheduler;
 
   private JobOptions startingOpts;
+
+  private ElasticsearchDao esDao;
 
   // private final NeutronRestServer jetty = new NeutronRestServer();
 
@@ -233,12 +236,17 @@ public class JobRunner {
         j.schedule();
       }
 
+      if (startingOpts.isDropIndex()) {
+        final ElasticsearchDao anEsDao = getInstance().esDao;
+        anEsDao.deleteIndex(anEsDao.getConfig().getElasticsearchAlias());
+      }
+
       // Start your engines ...
       scheduler.start();
 
-      if (initialMode) {
-        scheduler.shutdown(true); // Stop the scheduler after initial run jobs complete.
-      }
+      // if (initialMode) {
+      // scheduler.shutdown(true); // Stop the scheduler after initial run jobs complete.
+      // }
 
       // Jetty for REST administration.
       // Thread jettyServer = new Thread(jetty::run);
@@ -263,6 +271,7 @@ public class JobRunner {
     LOGGER.info("Register job: {}", klass.getName());
     try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
       optionsRegistry.put(klass, job.getOpts());
+      getInstance().setEsDao(job.getEsDao());
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception, for ClassNotFound or the like.
       throw JobLogs.buildCheckedException(LOGGER, e, "JOB REGISTRATION FAILED!: {}",
@@ -432,6 +441,16 @@ public class JobRunner {
 
   public Map<Class<?>, List<JobProgressTrack>> getJobTracks() {
     return jobTracks;
+  }
+
+  public ElasticsearchDao getEsDao() {
+    return esDao;
+  }
+
+  public synchronized void setEsDao(ElasticsearchDao esDao) {
+    if (this.esDao == null) {
+      this.esDao = esDao;
+    }
   }
 
   /**

@@ -124,8 +124,24 @@ public class JobsGuiceInjector extends AbstractModule {
 
   // Path traversal vulnerability:
   // https://github.com/zaproxy/zap-extensions/blob/master/src/org/zaproxy/zap/extension/ascanrules/TestPathTraversal.java
-  private static boolean validateFileLocation(String loc) {
-    return !(StringUtils.isBlank(loc) || loc.equals(FilenameUtils.normalize(loc)));
+  private static File validateFileLocation(String loc) {
+    File ret = null;
+    if (StringUtils.isNotBlank(loc)) {
+      final String cleanLoc =
+          loc.lastIndexOf('/') > -1 ? loc.substring(0, loc.lastIndexOf('/')) : loc;
+      if (cleanLoc.equals(FilenameUtils.normalize(cleanLoc))) {
+        ret = new File(cleanLoc);
+        if (ret.exists()) {
+          return ret;
+        }
+      }
+    }
+
+    if (ret != null) {
+      return ret;
+    } else {
+      throw new JobsException("PROHIBITED FILE LOCATION!");
+    }
   }
 
   /**
@@ -139,14 +155,6 @@ public class JobsGuiceInjector extends AbstractModule {
   public static synchronized Injector buildInjector(final JobOptions opts) {
     if (injector == null) {
       try {
-        if (validateFileLocation(opts.getEsConfigLoc())) {
-          throw new JobsException("PROHIBITED CONFIG FILE LOCATION!");
-        }
-
-        if (validateFileLocation(opts.getLastRunLoc())) {
-          throw new JobsException("PROHIBITED LAST RUN FILE LOCATION!");
-        }
-
         injector = Guice.createInjector(
             new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()), opts.getLastRunLoc()));
 

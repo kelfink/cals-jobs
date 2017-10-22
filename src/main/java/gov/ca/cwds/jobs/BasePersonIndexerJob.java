@@ -734,10 +734,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         final Session session = jobDao.getSessionFactory().getCurrentSession();
         final String namedQueryNameForDeletion = entityClass.getName() + ".refreshMQT";
         txn = session.beginTransaction();
-        final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
-        q.executeUpdate();
-        session.flush();
-        txn.commit();
+        try {
+          final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
+          q.executeUpdate();
+          session.flush();
+          txn.commit();
+        } catch (java.lang.IllegalArgumentException e) {
+          LOGGER.debug("Job doesn't use MQT: {}", e.getMessage(), e);
+        }
       } finally {
         if (txn != null) {
           txn.rollback();

@@ -51,6 +51,7 @@ public class JobOptions implements ApiMarker {
   public static final String CMD_LINE_LOAD_SEALED_AND_SENSITIVE = "load-sealed-sensitive";
   public static final String CMD_LINE_INITIAL_LOAD = "initial_load";
   public static final String CMD_LINE_REFRESH_MQT = "refresh_mqt";
+  public static final String CMD_LINE_DROP_INDEX = "drop_index";
 
   /**
    * Location of Elasticsearch configuration file.
@@ -125,6 +126,11 @@ public class JobOptions implements ApiMarker {
 
   private boolean refreshMqt;
 
+  private boolean dropIndex;
+
+  /**
+   * Default constructor.
+   */
   public JobOptions() {
     // Default contructor
   }
@@ -144,14 +150,15 @@ public class JobOptions implements ApiMarker {
    * @param minId initial load -- minimum range
    * @param maxId initial load -- maximum range
    * @param loadSealedAndSensitive If true then load sealed and sensitive data
-   * @param rangeGiven initial load -- provided range
-   * @param baseDirectory base folder for job execution
-   * @param refreshMqt TODO
+   * @param rangeGiven initial load -- provided range (full load only)
+   * @param baseDirectory base folder for job execution (full load only)
+   * @param refreshMqt refresh materialized query tables (full load only)
+   * @param dropIndex drop the index before start (full load only)
    */
   public JobOptions(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
       boolean lastRunMode, long startBucket, long endBucket, long totalBuckets, long threadCount,
       String minId, String maxId, boolean loadSealedAndSensitive, boolean rangeGiven,
-      String baseDirectory, boolean refreshMqt) {
+      String baseDirectory, boolean refreshMqt, boolean dropIndex) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
     this.lastRunTime = JobDateUtil.freshDate(lastRunTime);
@@ -167,6 +174,7 @@ public class JobOptions implements ApiMarker {
     this.rangeGiven = rangeGiven;
     this.baseDirectory = baseDirectory;
     this.refreshMqt = refreshMqt;
+    this.dropIndex = dropIndex;
   }
 
   /**
@@ -189,6 +197,8 @@ public class JobOptions implements ApiMarker {
     this.loadSealedAndSensitive = opts.loadSealedAndSensitive;
     this.rangeGiven = opts.rangeGiven;
     this.baseDirectory = opts.baseDirectory;
+    this.refreshMqt = opts.refreshMqt;
+    this.dropIndex = opts.dropIndex;
   }
 
   /**
@@ -228,6 +238,7 @@ public class JobOptions implements ApiMarker {
     return lastRunLoc;
   }
 
+  @SuppressWarnings("javadoc")
   public void setLastRunLoc(String lastRunLoc) {
     this.lastRunLoc = lastRunLoc;
   }
@@ -352,6 +363,8 @@ public class JobOptions implements ApiMarker {
     ret.addOption(JobCmdLineOption.MAX_ID.getOpt());
     ret.addOption(JobCmdLineOption.LOAD_SEALED_SENSITIVE.getOpt());
     ret.addOption(JobCmdLineOption.FULL_LOAD.getOpt());
+    ret.addOption(JobCmdLineOption.REFRESH_MQT.getOpt());
+    ret.addOption(JobCmdLineOption.DROP_INDEX.getOpt());
 
     // RUN MODE: mutually exclusive choice.
     OptionGroup group = new OptionGroup();
@@ -382,15 +395,16 @@ public class JobOptions implements ApiMarker {
   }
 
   private static Pair<Long, Long> parseBuckets(final String[] vals) {
-    Long startBucket = 0L;
-    Long endBucket = 0L;
+    Long startBucket = Long.MIN_VALUE;
+    Long endBucket = Long.MIN_VALUE;
 
     // Appease SonarQube.
-    for (int i = 0; i < vals.length; i++) {
-      if (i == 0) {
-        startBucket = Long.valueOf(vals[i]);
+    int cntr = 0;
+    for (String val : vals) {
+      if (cntr++ == 0) {
+        startBucket = Long.valueOf(val);
       } else {
-        endBucket = Long.valueOf(vals[i]);
+        endBucket = Long.valueOf(val);
       }
     }
 
@@ -416,6 +430,7 @@ public class JobOptions implements ApiMarker {
     boolean rangeGiven = false;
     String baseDirectory = null;
     boolean refreshMqt = false;
+    boolean dropIndex = false;
 
     // CHECKSTYLE:OFF
     Pair<Long, Long> bucketRange = Pair.of(-1L, 0L);
@@ -485,6 +500,10 @@ public class JobOptions implements ApiMarker {
             refreshMqt = true;
             break;
 
+          case CMD_LINE_DROP_INDEX:
+            dropIndex = true;
+            break;
+
           default:
             throw new IllegalArgumentException(opt.getArgName());
         }
@@ -496,7 +515,7 @@ public class JobOptions implements ApiMarker {
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode,
         bucketRange.getLeft(), bucketRange.getRight(), totalBuckets, threadCount, minId, maxId,
-        loadSealedAndSensitive, rangeGiven, baseDirectory, false);
+        loadSealedAndSensitive, rangeGiven, baseDirectory, refreshMqt, dropIndex);
   }
 
   public void setStartBucket(long startBucket) {
@@ -570,6 +589,14 @@ public class JobOptions implements ApiMarker {
 
   public void setRefreshMqt(boolean refreshMqt) {
     this.refreshMqt = refreshMqt;
+  }
+
+  public boolean isDropIndex() {
+    return dropIndex;
+  }
+
+  public void setDropIndex(boolean dropIndex) {
+    this.dropIndex = dropIndex;
   }
 
 }
