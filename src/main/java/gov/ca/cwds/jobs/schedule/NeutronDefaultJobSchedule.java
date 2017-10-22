@@ -25,25 +25,25 @@ public enum NeutronDefaultJobSchedule {
   // Person document roots.
   //
 
-  CLIENT(ClientIndexerJob.class, true, "client", 5, 20, 1, null),
+  CLIENT(ClientIndexerJob.class, true, "client", 5, 20, 100, null),
 
-  REPORTER(ReporterIndexerJob.class, true, "reporter", 10, 30, 2, null),
+  REPORTER(ReporterIndexerJob.class, true, "reporter", 10, 30, 95, null),
 
   COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, true, "collateral_individual", 20, 30,
-      3, null),
+      90, null),
 
-  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, true, "service_provider", 25, 120, 4, null),
+  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, true, "service_provider", 25, 120, 85, null),
 
   SUBSTITUTE_CARE_PROVIDER(SubstituteCareProviderIndexJob.class, true, "substitute_care_provider",
-      30, 120, 5, null),
+      30, 120, 80, null),
 
   EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, true, "education_provider", 42, 120,
-      6, null),
+      75, null),
 
-  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, true, "other_adult", 50, 120, 7,
+  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, true, "other_adult", 50, 120, 70,
       null),
 
-  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, true, "other_child", 55, 120, 8,
+  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, true, "other_child", 55, 120, 65,
       null),
 
   //
@@ -53,19 +53,19 @@ public enum NeutronDefaultJobSchedule {
   /**
    * Client name aliases.
    */
-  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 90, 45, 25, "akas"),
+  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 90, 45, 60, "akas"),
 
-  CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 70, 30, 20, "cases"),
+  CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 70, 30, 55, "cases"),
 
-  PARENT_CASE(ParentCaseHistoryIndexerJob.class, false, "parent_case", 90, 30, 22, "cases"),
+  PARENT_CASE(ParentCaseHistoryIndexerJob.class, false, "parent_case", 90, 30, 50, "cases"),
 
-  REFERRAL(ReferralHistoryIndexerJob.class, false, "referral", 90, 30, 10, "referrals"),
+  REFERRAL(ReferralHistoryIndexerJob.class, false, "referral", 90, 30, 45, "referrals"),
 
-  RELATIONSHIP(RelationshipIndexerJob.class, false, "relationship", 90, 30, 30, "relationships"),
+  RELATIONSHIP(RelationshipIndexerJob.class, false, "relationship", 90, 30, 40, "relationships"),
 
-  SAFETY_ALERT(SafetyAlertIndexerJob.class, false, "safety_alert", 90, 45, 40, "safety_alerts"),
+  SAFETY_ALERT(SafetyAlertIndexerJob.class, false, "safety_alert", 90, 45, 35, "safety_alerts"),
 
-  INTAKE_SCREENING(IntakeScreeningJob.class, false, "intake_screening", 90, 20, 18, "screenings");
+  INTAKE_SCREENING(IntakeScreeningJob.class, false, "intake_screening", 90, 20, 30, "screenings");
 
   private final Class<?> klazz;
 
@@ -77,7 +77,7 @@ public enum NeutronDefaultJobSchedule {
 
   private final int periodSeconds;
 
-  private final int loadOrder;
+  private final int priority;
 
   private final String jsonElement;
 
@@ -90,13 +90,13 @@ public enum NeutronDefaultJobSchedule {
   }
 
   private NeutronDefaultJobSchedule(Class<?> klazz, boolean newDocument, String name,
-      int startDelaySeconds, int periodSeconds, int loadOrder, String jsonElement) {
+      int startDelaySeconds, int periodSeconds, int loadPriority, String jsonElement) {
     this.klazz = klazz;
     this.newDocument = newDocument;
     this.name = name;
     this.startDelaySeconds = startDelaySeconds;
     this.periodSeconds = periodSeconds;
-    this.loadOrder = loadOrder;
+    this.priority = loadPriority;
     this.jsonElement = jsonElement;
   }
 
@@ -120,8 +120,8 @@ public enum NeutronDefaultJobSchedule {
     return periodSeconds;
   }
 
-  public int getLoadOrder() {
-    return loadOrder;
+  public int getPriority() {
+    return priority;
   }
 
   public String getJsonElement() {
