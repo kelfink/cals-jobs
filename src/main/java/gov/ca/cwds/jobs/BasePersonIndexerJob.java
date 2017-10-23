@@ -733,7 +733,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       try {
         final Session session = jobDao.getSessionFactory().getCurrentSession();
         final String namedQueryNameForDeletion = entityClass.getName() + ".refreshMQT";
-        txn = session.beginTransaction();
+        txn = getOrCreateTransaction();
         try {
           final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
           q.executeUpdate();
@@ -767,7 +767,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
             : entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
 
     final Session session = jobDao.getSessionFactory().getCurrentSession();
-    final Transaction txn = session.beginTransaction();
+    final Transaction txn = getOrCreateTransaction();
     Object lastId = new Object();
 
     try {
@@ -901,7 +901,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         getDenormalizedClass() != null ? getDenormalizedClass() : getJobDao().getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findBucketRange";
     final Session session = jobDao.getSessionFactory().getCurrentSession();
-    final Transaction txn = session.beginTransaction();
+    final Transaction txn = getOrCreateTransaction();
 
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);

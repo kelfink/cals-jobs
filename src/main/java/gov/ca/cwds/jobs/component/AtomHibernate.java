@@ -111,6 +111,17 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
     return null;
   }
 
+  default Transaction getOrCreateTransaction() {
+    Transaction txn = null;
+    final Session session = getJobDao().getSessionFactory().getCurrentSession();
+    try {
+      txn = session.beginTransaction();
+    } catch (Exception e) {
+      txn = session.getTransaction();
+    }
+    return txn;
+  }
+
   /**
    * @see JobDB2Utils#isDB2OnZOS(BaseDaoImpl)
    * @return true if DB2 on mainframe
