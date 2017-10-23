@@ -188,6 +188,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     this.sessionFactory = sessionFactory;
     this.jobBulkProcessorBuilder = new JobBulkProcessorBuilder(esDao, track);
     this.lock = new ReentrantReadWriteLock(false);
+    this.track.setJobName(getClass().getSimpleName());
   }
 
   /**
