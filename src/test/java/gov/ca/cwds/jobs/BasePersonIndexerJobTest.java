@@ -456,6 +456,13 @@ public class BasePersonIndexerJobTest
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(qn);
 
+    final List<TestDenormalizedEntity> recs = new ArrayList<>();
+    TestDenormalizedEntity rec = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "one", "two");
+    recs.add(rec);
+
+    final Set<String> deletionSet = new HashSet<>();
+    deletionSet.add(DEFAULT_CLIENT_ID);
+
     final Date actual = target.doLastRun(lastRunTime);
     assertThat(actual, notNullValue());
   }
@@ -749,7 +756,6 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void testLoadRecsForDeletion() {
-
     final List<TestNormalizedEntity> deletionRecs = new ArrayList<>();
     TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     deletionRecs.add(entity);
