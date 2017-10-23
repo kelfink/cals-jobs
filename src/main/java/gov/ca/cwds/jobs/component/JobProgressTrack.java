@@ -74,6 +74,8 @@ public class JobProgressTrack implements ApiMarker {
 
   private final List<Pair<String, String>> initialLoadRangesCompleted = new ArrayList<>();
 
+  private final List<String> affectedDocuments = new ArrayList<>(); // last change only
+
   public AtomicInteger getRecsSentToIndexQueue() {
     return recsSentToIndexQueue;
   }
