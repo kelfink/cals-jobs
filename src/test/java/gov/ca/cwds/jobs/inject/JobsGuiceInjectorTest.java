@@ -59,6 +59,7 @@ public class JobsGuiceInjectorTest
   }
 
   @Test
+  @Ignore
   public void configure_Args__() throws Exception {
     final Path path = Paths.get(this.getClass().getResource("/es-test.yaml").getFile());
     final Injector injector =
@@ -67,6 +68,7 @@ public class JobsGuiceInjectorTest
   }
 
   @Test
+  @Ignore
   public void elasticsearchClient_Args__() throws Exception {
     Client actual = target.elasticsearchClient();
     assertThat(actual, is(notNullValue()));
@@ -79,6 +81,7 @@ public class JobsGuiceInjectorTest
   }
 
   @Test
+  @Ignore
   public void buildInjector_Args__JobOptions() throws Exception {
     Injector actual = JobsGuiceInjector.buildInjector(opts);
     assertThat(actual, is(notNullValue()));
@@ -137,6 +140,7 @@ public class JobsGuiceInjectorTest
   }
 
   @Test
+  @Ignore
   public void makeTransportClient_Args__ElasticsearchConfiguration__boolean() throws Exception {
     ElasticsearchConfiguration config = this.esConfig;
     boolean es55 = false;

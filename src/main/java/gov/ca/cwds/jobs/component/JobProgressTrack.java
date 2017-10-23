@@ -70,9 +70,13 @@ public class JobProgressTrack implements ApiMarker {
    */
   private final AtomicInteger recsBulkError = new AtomicInteger(0);
 
-  private final List<Pair<String, String>> initialLoadRangesStarted = new ArrayList<>();
+  private final List<Pair<String, String>> initialLoadRangesStarted = new ArrayList<>(); // initial
+                                                                                         // load
+                                                                                         // only
 
-  private final List<Pair<String, String>> initialLoadRangesCompleted = new ArrayList<>();
+  private final List<Pair<String, String>> initialLoadRangesCompleted = new ArrayList<>(); // initial
+                                                                                           // load
+                                                                                           // only
 
   private final List<String> affectedDocuments = new ArrayList<>(); // last change only
 
