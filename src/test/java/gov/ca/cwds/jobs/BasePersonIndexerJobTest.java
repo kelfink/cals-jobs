@@ -410,8 +410,9 @@ public class BasePersonIndexerJobTest
     entities[0] = entity;
     when(results.get()).thenReturn(entities);
 
+    target.setFakeRanges(true);
     int actual = target.extractHibernate();
-    int expected = 0;
+    int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 

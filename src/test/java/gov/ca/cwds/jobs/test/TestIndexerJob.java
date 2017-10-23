@@ -1,9 +1,11 @@
 package gov.ca.cwds.jobs.test;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.hibernate.SessionFactory;
 
@@ -24,6 +26,7 @@ public class TestIndexerJob
   private boolean fakeMarkDone;
   private boolean fakeFinish = true;
   private boolean fakeBulkProcessor = true;
+  private boolean fakeRanges = false;
 
   public TestIndexerJob(final TestNormalizedEntityDao mainDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
@@ -93,6 +96,17 @@ public class TestIndexerJob
     }
   }
 
+  @Override
+  public List<Pair<String, String>> getPartitionRanges() {
+    final List<Pair<String, String>> ret = new ArrayList<>();
+
+    if (fakeRanges) {
+      ret.add(Pair.of("aaaaaaaaaa", "999999999"));
+    }
+
+    return ret;
+  }
+
   public boolean isFakeFinish() {
     return fakeFinish;
   }
@@ -115,6 +129,14 @@ public class TestIndexerJob
 
   public void setFakeBulkProcessor(boolean fakeBulkProcessor) {
     this.fakeBulkProcessor = fakeBulkProcessor;
+  }
+
+  public boolean isFakeRanges() {
+    return fakeRanges;
+  }
+
+  public void setFakeRanges(boolean fakeRanges) {
+    this.fakeRanges = fakeRanges;
   }
 
 }
