@@ -474,6 +474,16 @@ public class JobRunner {
     this.startingOpts = startingOpts;
   }
 
+  public void removeExecutingJob(final TriggerKey key) {
+    if (executingJobs.containsKey(key)) {
+      executingJobs.remove(key);
+    }
+  }
+
+  public Map<TriggerKey, NeutronInterruptableJob> getExecutingJobs() {
+    return executingJobs;
+  }
+
   /**
    * OPTION: configure individual jobs, like Rundeck.
    * <p>
@@ -496,9 +506,4 @@ public class JobRunner {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
   }
-
-  public Map<TriggerKey, NeutronInterruptableJob> getExecutingJobs() {
-    return executingJobs;
-  }
-
 }

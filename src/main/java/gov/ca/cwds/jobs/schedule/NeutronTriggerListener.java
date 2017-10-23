@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.schedule;
 import org.quartz.JobExecutionContext;
 import org.quartz.Trigger;
 import org.quartz.Trigger.CompletedExecutionInstruction;
+import org.quartz.TriggerKey;
 import org.quartz.TriggerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,28 +19,33 @@ public class NeutronTriggerListener implements TriggerListener {
 
   @Override
   public void triggerFired(Trigger trigger, JobExecutionContext context) {
-    LOGGER.info("trigger fired: ");
-    JobRunner.getInstance().getExecutingJobs().put(trigger.getKey(),
+    final TriggerKey key = trigger.getKey();
+    LOGGER.info("trigger fired: key: {}", key);
+    JobRunner.getInstance().getExecutingJobs().put(key,
         (NeutronInterruptableJob) context.getJobInstance());
   }
 
   @Override
   public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
-    LOGGER.info("veto Job Execution");
     final NeutronInterruptableJob job = (NeutronInterruptableJob) context.getJobInstance();
-    return false;
+    final boolean answer = job.isVetoExecution();
+    LOGGER.info("veto job execution: {}", answer);
+    return answer;
   }
 
   @Override
   public void triggerMisfired(Trigger trigger) {
-    LOGGER.info("trigger misfired");
-    JobRunner.getInstance().getExecutingJobs().remove(trigger.getKey());
+    final TriggerKey key = trigger.getKey();
+    LOGGER.error("TRIGGER MISFIRED! key: {}", key);
+    JobRunner.getInstance().removeExecutingJob(key);
   }
 
   @Override
   public void triggerComplete(Trigger trigger, JobExecutionContext context,
       CompletedExecutionInstruction triggerInstructionCode) {
-    LOGGER.info("triggerComplete");
+    final TriggerKey key = trigger.getKey();
+    LOGGER.info("trigger complete: key: {}", key);
+    JobRunner.getInstance().removeExecutingJob(key);
   }
 
 }
