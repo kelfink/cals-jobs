@@ -35,7 +35,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
     query = "SELECT z.IDENTIFIER, z.PRICNTIND, z.PH_NUMBR, z.PH_EXTNO, z.FAX_NO, "
         + "z.FIRST_NME, z.MIDDLE_NM, z.LAST_NME, z.NM_PREFIX, z.SUFFX_TITL, "
         + "z.TITLDESC, z.EMAILADR, z.DOE_IND, z.LST_UPD_ID, z.LST_UPD_TS, z.FKED_PVDRT, "
-        + "z.IBMSNAP_COMMITSEQ, z.IBMSNAP_INTENTSEQ, z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
+        + "z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
         + "from {h-schema}EDPRVCNT z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR ",
     resultClass = ReplicatedEducationProviderContact.class, readOnly = true)
 @NamedNativeQuery(
@@ -43,7 +43,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
     query = "SELECT z.IDENTIFIER, z.PRICNTIND, z.PH_NUMBR, z.PH_EXTNO, z.FAX_NO, "
         + "z.FIRST_NME, z.MIDDLE_NM, z.LAST_NME, z.NM_PREFIX, z.SUFFX_TITL, "
         + "z.TITLDESC, z.EMAILADR, z.DOE_IND, z.LST_UPD_ID, z.LST_UPD_TS, z.FKED_PVDRT, "
-        + "z.IBMSNAP_COMMITSEQ, z.IBMSNAP_INTENTSEQ, z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
+        + "z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
         + "from ( select mod(y.rn, CAST(:total_buckets AS INTEGER)) + 1 as bucket, y.* "
         + "from ( select row_number() over (order by 1) as rn, x.* "
         + "from {h-schema}EDPRVCNT x ) y ) z where z.bucket = :bucket_num FOR READ ONLY WITH UR",
