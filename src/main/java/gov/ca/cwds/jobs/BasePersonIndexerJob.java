@@ -531,7 +531,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param lastRunDt last time the batch ran successfully.
    * @return List of results to process
-   * @see gov.ca.cwds.jobs.LastSuccessfulRunJob#_run(java.util.Date)
+   * @see gov.ca.cwds.jobs.LastSuccessfulRunJob#executeJob(java.util.Date)
    */
   protected Date doLastRun(Date lastRunDt) {
     LOGGER.info("LAST RUN MODE!");
@@ -583,10 +583,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * {@inheritDoc}
    * 
-   * @see gov.ca.cwds.jobs.LastSuccessfulRunJob#_run(java.util.Date)
+   * @see gov.ca.cwds.jobs.LastSuccessfulRunJob#executeJob(java.util.Date)
    */
   @Override
-  public Date _run(Date lastSuccessfulRunTime) {
+  public Date executeJob(Date lastSuccessfulRunTime) {
+    Date ret;
     try {
       LOGGER.info("RUNNING JOB: {}", getClass().getName());
 
@@ -640,7 +641,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
               .format(startTime)); // NOSONAR
       // CHECKSTYLE:ON
-      return new Date(this.startTime);
+      ret = new Date(this.startTime);
     } catch (Exception e) {
       fail();
       throw JobLogs.buildRuntimeException(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
@@ -653,6 +654,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }
 
+    return ret;
   }
 
   /**

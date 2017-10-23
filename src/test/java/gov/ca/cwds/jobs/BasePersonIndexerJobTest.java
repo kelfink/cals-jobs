@@ -486,7 +486,7 @@ public class BasePersonIndexerJobTest
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
     when(opts.isLastRunMode()).thenReturn(true);
 
-    final Date actual = target._run(lastRunTime);
+    final Date actual = target.executeJob(lastRunTime);
     assertThat(actual, notNullValue());
   }
 
@@ -502,7 +502,7 @@ public class BasePersonIndexerJobTest
     cal.add(Calendar.YEAR, -50);
     lastRunTime = cal.getTime();
 
-    final Date actual = target._run(lastRunTime);
+    final Date actual = target.executeJob(lastRunTime);
     assertThat(actual, notNullValue());
   }
 
@@ -512,7 +512,7 @@ public class BasePersonIndexerJobTest
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
     when(esDao.getConfig()).thenThrow(JobsException.class);
 
-    final Date actual = target._run(lastRunTime);
+    final Date actual = target.executeJob(lastRunTime);
     assertThat(actual, notNullValue());
   }
 

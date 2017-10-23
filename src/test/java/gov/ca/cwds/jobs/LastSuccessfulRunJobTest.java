@@ -35,7 +35,7 @@ public class LastSuccessfulRunJobTest
     }
 
     @Override
-    public Date _run(Date lastSuccessfulRunTime) {
+    public Date executeJob(Date lastSuccessfulRunTime) {
       return null;
     }
 
