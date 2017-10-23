@@ -156,6 +156,7 @@ public class JobsGuiceInjectorTest
   }
 
   @Test
+  @Ignore
   public void getInjector_Args__() throws Exception {
     final Path path = Paths.get(this.getClass().getResource("/es-test.yaml").getFile());
     final Injector injector =

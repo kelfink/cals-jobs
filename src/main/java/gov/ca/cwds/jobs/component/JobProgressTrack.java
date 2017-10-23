@@ -217,4 +217,8 @@ public class JobProgressTrack implements ApiMarker {
     this.lastChangeSince = lastChangeSince;
   }
 
+  public void addAffectedDocumentId(String docId) {
+    affectedDocuments.add(docId);
+  }
+
 }
