@@ -147,7 +147,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Track job progress.
    */
-  protected final JobProgressTrack track = new JobProgressTrack();
+  protected JobProgressTrack track = new JobProgressTrack();
 
   /**
    * Queue of raw, de-normalized records waiting to be normalized.
@@ -248,9 +248,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Prepare an "upsert" request without a checked exception. Throws runtime {@link JobsException}
-   * on error. This method's signature is easier to use in functional lambda and stream calls than
-   * method signatures with checked exceptions.
+   * Prepare an "upsert" request <strong>without a checked exception</strong> and throw a runtime
+   * {@link JobsException} on error.
+   * 
+   * <p>
+   * This method's signature is easier to use in functional lambda and stream calls than method
+   * signatures with checked exceptions.
+   * </p>
    * 
    * @param esp person document object
    * @param t normalized entity
@@ -1001,6 +1005,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   protected void setQueueIndex(LinkedBlockingDeque<T> queueIndex) {
     this.queueIndex = queueIndex;
+  }
+
+  public void setTrack(JobProgressTrack track) {
+    this.track = track;
   }
 
 }

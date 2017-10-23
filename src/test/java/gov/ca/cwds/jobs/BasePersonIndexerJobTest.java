@@ -40,6 +40,7 @@ import org.junit.Test;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
+import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.schedule.JobRunner;
@@ -242,15 +243,15 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void prepareUpsertRequestNoChecked_Args__ElasticSearchPerson__Object() throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    DocWriteRequest actual = target.prepareUpsertRequestNoChecked(esp, t);
+    final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    final DocWriteRequest actual = target.prepareUpsertRequestNoChecked(esp, t);
     assertThat(actual, notNullValue());
   }
 
   @Test
   public void prepareUpsertRequest_Args__ElasticSearchPerson__Object() throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    UpdateRequest actual = target.prepareUpsertRequest(esp, t);
+    final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    final UpdateRequest actual = target.prepareUpsertRequest(esp, t);
     assertThat(actual, notNullValue());
   }
 
@@ -267,7 +268,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void getOptionalCollection_Args__ElasticSearchPerson__Object() throws Exception {
-    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     final List<? extends ApiTypedIdentifier<String>> actual = target.getOptionalCollection(esp, t);
     final List<? extends ApiTypedIdentifier<String>> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
@@ -304,7 +305,7 @@ public class BasePersonIndexerJobTest
     when(session.getNamedNativeQuery(any())).thenReturn(qn);
 
     final List<TestDenormalizedEntity> recs = new ArrayList<>();
-    TestDenormalizedEntity rec = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "one", "two");
+    final TestDenormalizedEntity rec = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "one", "two");
     recs.add(rec);
 
     final List<TestNormalizedEntity> actual =
@@ -674,6 +675,18 @@ public class BasePersonIndexerJobTest
   public void prepLastRunDoc_Args__BulkProcessor__Object() throws Exception {
     BulkProcessor bp = mock(BulkProcessor.class);
     TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    target.prepareDocumentTrapIO(bp, p);
+  }
+
+  @Test(expected = JobsException.class)
+  public void prepareDocumentTrapIO__error() throws Exception {
+    final BulkProcessor bp = mock(BulkProcessor.class);
+    final TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+
+    final JobProgressTrack track = mock(JobProgressTrack.class);
+    when(track.trackBulkPrepared()).thenThrow(IOException.class);
+
+    target.setTrack(track);
     target.prepareDocumentTrapIO(bp, p);
   }
 

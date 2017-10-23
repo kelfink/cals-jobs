@@ -462,7 +462,6 @@ public class ElasticTransformer {
     // Sealed and sensitive.
     ret.setSensitivityIndicator(p.getSensitivityIndicator());
 
-
     if (!EsClientAddress.isUseCounty()) {
       // Set client county
       ret.setClientCounty(handleClientCountyC(p));
