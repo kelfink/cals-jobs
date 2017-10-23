@@ -318,6 +318,7 @@ public class BasePersonIndexerJobTest
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(qn);
     when(session.beginTransaction()).thenThrow(SQLException.class);
+    when(session.getTransaction()).thenThrow(SQLException.class);
 
     final List<TestNormalizedEntity> actual =
         target.extractLastRunRecsFromView(lastRunTime, new HashSet<String>());
@@ -328,6 +329,7 @@ public class BasePersonIndexerJobTest
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(qn);
     when(session.beginTransaction()).thenThrow(HibernateException.class);
+    when(session.getTransaction()).thenThrow(HibernateException.class);
 
     final List<TestNormalizedEntity> actual =
         target.extractLastRunRecsFromView(lastRunTime, new HashSet<String>());
@@ -794,12 +796,18 @@ public class BasePersonIndexerJobTest
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
     when(q.setString(any(String.class), any(String.class))).thenReturn(q);
     when(q.setParameter(any(String.class), any(String.class), any(StringType.class))).thenReturn(q);
-    when(nq.setFlushMode(any(FlushMode.class))).thenReturn(nq);
+    when(q.setFlushMode(any(FlushMode.class))).thenReturn(q);
     when(q.setHibernateFlushMode(any(FlushMode.class))).thenReturn(q);
     when(q.setReadOnly(any(Boolean.class))).thenReturn(q);
     when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
     when(q.setFetchSize(any(Integer.class))).thenReturn(q);
     when(q.setCacheable(any(Boolean.class))).thenReturn(q);
+
+    // q.setParameter("min_id", minId, StringType.INSTANCE)
+    // .setParameter("max_id", maxId, StringType.INSTANCE).setCacheable(false)
+    // .setFlushMode(FlushMode.MANUAL).setCacheMode(CacheMode.IGNORE)
+    // .setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
+
 
     final ScrollableResults results = mock(ScrollableResults.class);
     when(q.scroll(any(ScrollMode.class))).thenReturn(results);

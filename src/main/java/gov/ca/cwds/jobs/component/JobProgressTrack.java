@@ -37,6 +37,8 @@ public class JobProgressTrack implements ApiMarker {
 
   private Date lastChangeSince;
 
+  private String jobName;
+
   private NeutronJobExecutionStatus status = NeutronJobExecutionStatus.NOT_STARTED;
 
   private final AtomicInteger recsSentToIndexQueue = new AtomicInteger(0);
@@ -223,6 +225,26 @@ public class JobProgressTrack implements ApiMarker {
 
   public void addAffectedDocumentId(String docId) {
     affectedDocuments.add(docId);
+  }
+
+  public String getJobName() {
+    return jobName;
+  }
+
+  public void setJobName(String jobName) {
+    this.jobName = jobName;
+  }
+
+  public long getStartTime() {
+    return startTime;
+  }
+
+  public long getEndTime() {
+    return endTime;
+  }
+
+  public NeutronJobExecutionStatus getStatus() {
+    return status;
   }
 
 }

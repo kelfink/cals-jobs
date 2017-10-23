@@ -115,6 +115,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(sessionFactory.createEntityManager()).thenReturn(em);
     when(session.beginTransaction()).thenReturn(transaction);
+    when(session.getTransaction()).thenReturn(transaction);
     when(sessionFactory.getSessionFactoryOptions()).thenReturn(sfo);
     when(sfo.getServiceRegistry()).thenReturn(reg);
     when(reg.getService(ConnectionProvider.class)).thenReturn(cp);
