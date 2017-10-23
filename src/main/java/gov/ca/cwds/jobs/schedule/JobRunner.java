@@ -20,6 +20,7 @@ import org.joda.time.DateTime;
 import org.quartz.ListenerManager;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +82,7 @@ public class JobRunner {
 
   private final Map<Class<?>, List<JobProgressTrack>> jobTracks = new ConcurrentHashMap<>();
 
-
+  private final Map<TriggerKey, NeutronScheduledJob> executingJobs = new ConcurrentHashMap<>();
 
   private JobRunner() {
     // Default, no-op
@@ -490,6 +491,10 @@ public class JobRunner {
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
+  }
+
+  public Map<TriggerKey, NeutronScheduledJob> getExecutingJobs() {
+    return executingJobs;
   }
 
 }

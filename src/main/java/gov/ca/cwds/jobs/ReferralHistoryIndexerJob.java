@@ -344,6 +344,20 @@ public class ReferralHistoryIndexerJob
     return cntr;
   }
 
+  private void cleanUpMemory(final List<EsPersonReferral> listAllegations,
+      Map<String, EsPersonReferral> mapReferrals, List<MinClientReferral> listClientReferralKeys,
+      List<EsPersonReferral> listReadyToNorm) {
+    // Release heap objects early and often.
+    releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
+
+    // Good time to *request* garbage collection, not *demand* it. GC runs in another thread.
+    // SonarQube disagrees.
+    // The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
+    // memory is exhausted. Yes, this is a good place to drop a hint to GC that it *might* want to
+    // clean up memory.
+    System.gc(); // NOSONAR
+  }
+
   /**
    * Read all records from a single partition (key range) in buckets. Then sort results and
    * normalize.
@@ -397,8 +411,6 @@ public class ReferralHistoryIndexerJob
         JobDB2Utils.monitorStopAndReport(monitor);
         con.commit();
 
-      } finally {
-        // The statements and result sets close automatically.
       }
 
     } catch (Exception e) {
@@ -423,15 +435,7 @@ public class ReferralHistoryIndexerJob
       cntr = normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
           mapAllegationByReferral);
     } finally {
-      // Release heap objects early and often.
-      releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
-
-      // Good time to *request* garbage collection, not *demand* it. GC runs in another thread.
-      // SonarQube disagrees.
-      // The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
-      // memory is exhausted. Yes, this is a good place to drop a hint to GC that it *might* want to
-      // clean up memory.
-      System.gc(); // NOSONAR
+      cleanUpMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
     }
 
     getTrack().trackRangeComplete(p);

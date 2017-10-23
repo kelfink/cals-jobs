@@ -447,4 +447,11 @@ public class ReferralHistoryIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
+  @Test
+  public void getOptionalElementName() throws Exception {
+    String actual = target.getOptionalElementName();
+    String expected = "referrals";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
 }
