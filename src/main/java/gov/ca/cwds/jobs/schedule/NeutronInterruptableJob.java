@@ -22,7 +22,7 @@ public class NeutronInterruptableJob implements InterruptableJob {
   private String cmdLine;
   private volatile JobProgressTrack track;
 
-  private boolean vetoExecution;
+  private boolean okToStart = true;
 
   /**
    * Constructor.
@@ -79,12 +79,12 @@ public class NeutronInterruptableJob implements InterruptableJob {
     this.track = track;
   }
 
-  public boolean isVetoExecution() {
-    return vetoExecution;
+  public boolean isOkToStart() {
+    return okToStart;
   }
 
-  public void setVetoExecution(boolean vetoExecution) {
-    this.vetoExecution = vetoExecution;
+  public void setOkToStart(boolean clearToStart) {
+    this.okToStart = clearToStart;
   }
 
 }

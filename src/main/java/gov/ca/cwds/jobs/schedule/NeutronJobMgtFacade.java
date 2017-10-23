@@ -25,9 +25,6 @@ import gov.ca.cwds.jobs.util.JobLogs;
 
 public class NeutronJobMgtFacade implements Serializable {
 
-  /**
-   * Default.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJobMgtFacade.class);
@@ -54,9 +51,8 @@ public class NeutronJobMgtFacade implements Serializable {
   public String run(String cmdLine) throws NeutronException {
     try {
       LOGGER.info("RUN JOB: {}", defaultSchedule.getName());
-      final JobProgressTrack track =
-          JobRunner.getInstance().runScheduledJob(defaultSchedule.getKlazz(),
-              StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
+      final JobProgressTrack track = JobRunner.getInstance().runScheduledJob(
+          defaultSchedule.getKlazz(), StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       return track.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);
