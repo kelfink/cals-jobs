@@ -10,6 +10,7 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -28,10 +29,11 @@ public class TestIndexerJob
   private boolean fakeBulkProcessor = true;
   private boolean fakeRanges = false;
 
-  public TestIndexerJob(final TestNormalizedEntityDao mainDao,
-      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
+  @Inject
+  public TestIndexerJob(final TestNormalizedEntityDao dao,
+      final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   @Override

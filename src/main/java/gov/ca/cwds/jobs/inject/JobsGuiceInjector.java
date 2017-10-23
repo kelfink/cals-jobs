@@ -182,7 +182,7 @@ public class JobsGuiceInjector extends AbstractModule {
   public static <T extends BasePersonIndexerJob<?, ?>> T newContinuousJob(final Class<T> klass,
       final JobOptions opts) {
     try {
-      final T ret = injector.getInstance(klass);
+      final T ret = buildInjector(opts).getInstance(klass);
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
