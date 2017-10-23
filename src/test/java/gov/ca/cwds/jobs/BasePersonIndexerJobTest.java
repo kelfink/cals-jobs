@@ -393,6 +393,7 @@ public class BasePersonIndexerJobTest
     when(nq.setString(any(String.class), any(String.class))).thenReturn(nq);
     when(nq.setParameter(any(String.class), any(String.class), any(StringType.class)))
         .thenReturn(nq);
+    when(nq.setFlushMode(any(FlushMode.class))).thenReturn(nq);
     when(nq.setHibernateFlushMode(any(FlushMode.class))).thenReturn(nq);
     when(nq.setReadOnly(any(Boolean.class))).thenReturn(nq);
     when(nq.setCacheMode(any(CacheMode.class))).thenReturn(nq);
@@ -780,6 +781,7 @@ public class BasePersonIndexerJobTest
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
     when(q.setString(any(String.class), any(String.class))).thenReturn(q);
     when(q.setParameter(any(String.class), any(String.class), any(StringType.class))).thenReturn(q);
+    when(nq.setFlushMode(any(FlushMode.class))).thenReturn(nq);
     when(q.setHibernateFlushMode(any(FlushMode.class))).thenReturn(q);
     when(q.setReadOnly(any(Boolean.class))).thenReturn(q);
     when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
@@ -829,6 +831,7 @@ public class BasePersonIndexerJobTest
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);
     when(q.setString(any(String.class), any(String.class))).thenReturn(q);
     when(q.setParameter(any(String.class), any(String.class), any(StringType.class))).thenReturn(q);
+    when(nq.setFlushMode(any(FlushMode.class))).thenReturn(nq);
     when(q.setHibernateFlushMode(any(FlushMode.class))).thenReturn(q);
     when(q.setReadOnly(any(Boolean.class))).thenReturn(q);
     when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);

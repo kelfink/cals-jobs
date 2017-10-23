@@ -18,12 +18,16 @@ import javax.persistence.EntityManager;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
+import org.hibernate.CacheMode;
+import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.spi.SessionFactoryOptions;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.type.StringType;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -83,6 +87,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   public Statement stmt;
   public ResultSet rs;
   public DatabaseMetaData meta;
+  public NativeQuery<M> nq;
 
   @Before
   public void setup() throws Exception {
@@ -158,6 +163,19 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
     when(opts.isLoadSealedAndSensitive()).thenReturn(false);
     when(opts.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
+
+    nq = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any(String.class))).thenReturn(nq);
+    when(nq.setString(any(String.class), any(String.class))).thenReturn(nq);
+    when(nq.setParameter(any(String.class), any(String.class), any(StringType.class)))
+        .thenReturn(nq);
+    when(nq.setFlushMode(any(FlushMode.class))).thenReturn(nq);
+    when(nq.setHibernateFlushMode(any(FlushMode.class))).thenReturn(nq);
+    when(nq.setReadOnly(any(Boolean.class))).thenReturn(nq);
+    when(nq.setCacheMode(any(CacheMode.class))).thenReturn(nq);
+    when(nq.setFetchSize(any(Integer.class))).thenReturn(nq);
+    when(nq.setCacheable(any(Boolean.class))).thenReturn(nq);
+
   }
 
   public Thread runKillThread(final BasePersonIndexerJob<T, M> target, long sleepMillis) {

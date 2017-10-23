@@ -907,7 +907,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setParameter("min_id", minId, StringType.INSTANCE)
           .setParameter("max_id", maxId, StringType.INSTANCE).setCacheable(false)
-          .setHibernateFlushMode(FlushMode.MANUAL).setCacheMode(CacheMode.IGNORE)
+          .setFlushMode(FlushMode.MANUAL).setCacheMode(CacheMode.IGNORE)
           .setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
 
       // No reduction/normalization. Iterate, process, flush.

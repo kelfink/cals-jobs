@@ -7,12 +7,12 @@ import java.util.List;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +84,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
     final java.sql.Timestamp ts = new java.sql.Timestamp(datetime.getTime());
     try {
       // Cross platform DB2 (both z/OS and Linux).
-      final Query query = session.getNamedQuery(namedQueryName).setCacheable(false)
+      final Query<T> query = session.getNamedQuery(namedQueryName).setCacheable(false)
           .setHibernateFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
           .setTimestamp("after", ts);
 
