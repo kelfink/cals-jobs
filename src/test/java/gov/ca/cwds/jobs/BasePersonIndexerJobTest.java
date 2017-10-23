@@ -649,13 +649,15 @@ public class BasePersonIndexerJobTest
     sleepItOff();
   }
 
-  @Test(expected = InterruptedException.class)
-  @Ignore
+  @Test
   public void bulkPrepare_Args__BulkProcessor__int() throws Exception {
+    TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    target.queueIndex.add(entity);
+
     BulkProcessor bp = mock(BulkProcessor.class);
     int cntr = 0;
     int actual = target.bulkPrepare(bp, cntr);
-    int expected = 0;
+    int expected = 1;
     sleepItOff();
     assertThat(actual, is(equalTo(expected)));
   }

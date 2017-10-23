@@ -26,6 +26,7 @@ public class NeutronTriggerListener implements TriggerListener {
   @Override
   public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
     LOGGER.info("veto Job Execution");
+    final NeutronInterruptableJob job = (NeutronInterruptableJob) context.getJobInstance();
     return false;
   }
 
