@@ -14,9 +14,9 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 
 @DisallowConcurrentExecution
-public class NeutronScheduledJob implements InterruptableJob {
+public class NeutronInterruptableJob implements InterruptableJob {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronScheduledJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronInterruptableJob.class);
 
   private String className;
   private String cmdLine;
@@ -25,7 +25,7 @@ public class NeutronScheduledJob implements InterruptableJob {
   /**
    * Constructor.
    */
-  public NeutronScheduledJob() {
+  public NeutronInterruptableJob() {
     // No-op.
   }
 

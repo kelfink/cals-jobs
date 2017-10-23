@@ -23,14 +23,14 @@ import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 
-public class NeutronJobFacade implements Serializable {
+public class NeutronJobMgtFacade implements Serializable {
 
   /**
    * Default.
    */
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJobFacade.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJobMgtFacade.class);
 
   private transient Scheduler scheduler;
 
@@ -41,7 +41,7 @@ public class NeutronJobFacade implements Serializable {
   private volatile JobKey jobKey;
   private volatile JobDetail jd;
 
-  public NeutronJobFacade(final Scheduler scheduler, NeutronDefaultJobSchedule sched) {
+  public NeutronJobMgtFacade(final Scheduler scheduler, NeutronDefaultJobSchedule sched) {
     this.scheduler = scheduler;
     this.defaultSchedule = sched;
     this.jobName = defaultSchedule.getName();
@@ -69,7 +69,7 @@ public class NeutronJobFacade implements Serializable {
       LOGGER.warn("JOB ALREADY SCHEDULED! {}", jobName);
     }
 
-    jd = newJob(NeutronScheduledJob.class)
+    jd = newJob(NeutronInterruptableJob.class)
         .withIdentity(jobName, NeutronSchedulerConstants.GRP_LST_CHG)
         .usingJobData("job_class", defaultSchedule.getKlazz().getName()).build();
 

@@ -17,18 +17,18 @@ import org.quartz.JobExecutionException;
 
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 
-public class NeutronScheduledJobTest {
+public class NeutronInterruptableJobTest {
 
-  NeutronScheduledJob target;
+  NeutronInterruptableJob target;
 
   @Before
   public void setup() throws Exception {
-    target = new NeutronScheduledJob();
+    target = new NeutronInterruptableJob();
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(NeutronScheduledJob.class, notNullValue());
+    assertThat(NeutronInterruptableJob.class, notNullValue());
   }
 
   @Test

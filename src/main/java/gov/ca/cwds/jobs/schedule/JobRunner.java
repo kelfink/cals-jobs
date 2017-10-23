@@ -78,11 +78,11 @@ public class JobRunner {
    */
   private final Map<Class<?>, JobOptions> optionsRegistry = new ConcurrentHashMap<>();
 
-  private final Map<Class<?>, NeutronJobFacade> scheduleRegistry = new ConcurrentHashMap<>();
+  private final Map<Class<?>, NeutronJobMgtFacade> scheduleRegistry = new ConcurrentHashMap<>();
+
+  private final Map<TriggerKey, NeutronInterruptableJob> executingJobs = new ConcurrentHashMap<>();
 
   private final Map<Class<?>, List<JobProgressTrack>> jobTracks = new ConcurrentHashMap<>();
-
-  private final Map<TriggerKey, NeutronScheduledJob> executingJobs = new ConcurrentHashMap<>();
 
   private JobRunner() {
     // Default, no-op
@@ -221,7 +221,7 @@ public class JobRunner {
           registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
         }
 
-        final NeutronJobFacade nj = new NeutronJobFacade(scheduler, sched);
+        final NeutronJobMgtFacade nj = new NeutronJobMgtFacade(scheduler, sched);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         scheduleRegistry.put(klass, nj);
         jobTracks.put(sched.getKlazz(), new ArrayList<JobProgressTrack>());
@@ -233,7 +233,7 @@ public class JobRunner {
       Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
 
       // Start last change jobs.
-      for (NeutronJobFacade j : scheduleRegistry.values()) {
+      for (NeutronJobMgtFacade j : scheduleRegistry.values()) {
         j.schedule();
       }
 
@@ -452,6 +452,10 @@ public class JobRunner {
     return jobTracks;
   }
 
+  public void addJobTrack(Class<?> klazz, JobProgressTrack track) {
+    jobTracks.get(klazz).add(track);
+  }
+
   public synchronized ElasticsearchDao getEsDao() {
     return esDao;
   }
@@ -493,7 +497,7 @@ public class JobRunner {
     }
   }
 
-  public Map<TriggerKey, NeutronScheduledJob> getExecutingJobs() {
+  public Map<TriggerKey, NeutronInterruptableJob> getExecutingJobs() {
     return executingJobs;
   }
 

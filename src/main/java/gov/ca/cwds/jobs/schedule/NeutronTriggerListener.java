@@ -18,18 +18,21 @@ public class NeutronTriggerListener implements TriggerListener {
 
   @Override
   public void triggerFired(Trigger trigger, JobExecutionContext context) {
-    LOGGER.info("triggerFired");
+    LOGGER.info("trigger fired: ");
+    JobRunner.getInstance().getExecutingJobs().put(trigger.getKey(),
+        (NeutronInterruptableJob) context.getJobInstance());
   }
 
   @Override
   public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
-    LOGGER.info("vetoJobExecution");
+    LOGGER.info("veto Job Execution");
     return false;
   }
 
   @Override
   public void triggerMisfired(Trigger trigger) {
-    LOGGER.info("triggerMisfired");
+    LOGGER.info("trigger misfired");
+    JobRunner.getInstance().getExecutingJobs().remove(trigger.getKey());
   }
 
   @Override

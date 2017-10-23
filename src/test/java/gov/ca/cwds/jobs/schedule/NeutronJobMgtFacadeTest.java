@@ -21,22 +21,22 @@ import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 
-public class NeutronJobFacadeTest {
+public class NeutronJobMgtFacadeTest {
 
   Scheduler scheduler;
   NeutronDefaultJobSchedule sched;
-  NeutronJobFacade target;
+  NeutronJobMgtFacade target;
 
   @Before
   public void setup() throws Exception {
     scheduler = mock(Scheduler.class);
     sched = NeutronDefaultJobSchedule.CLIENT;
-    target = new NeutronJobFacade(scheduler, sched);
+    target = new NeutronJobMgtFacade(scheduler, sched);
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(NeutronJobFacade.class, notNullValue());
+    assertThat(NeutronJobMgtFacade.class, notNullValue());
   }
 
   @Test
