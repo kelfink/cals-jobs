@@ -456,11 +456,11 @@ public class JobRunner {
     jobTracks.get(klazz).add(track);
   }
 
-  public synchronized ElasticsearchDao getEsDao() {
+  public ElasticsearchDao getEsDao() {
     return esDao;
   }
 
-  public synchronized void setEsDao(ElasticsearchDao esDao) {
+  public void setEsDao(ElasticsearchDao esDao) {
     if (this.esDao == null) {
       this.esDao = esDao;
     }
