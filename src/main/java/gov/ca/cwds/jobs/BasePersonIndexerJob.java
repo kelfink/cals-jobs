@@ -859,9 +859,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param table the driver table
    * @return batch buckets
-   * @deprecated use {@link #threadRetrieveByJdbc()} or {@link #extractHibernate()} instead
    */
-  @Deprecated
   @SuppressWarnings("unchecked")
   protected List<BatchBucket> buildBucketList(final String table) {
     return new ArrayList<>();

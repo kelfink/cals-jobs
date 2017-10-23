@@ -55,9 +55,6 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 public class ReplicatedEducationProviderContact extends BaseEducationProviderContact
     implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedEducationProviderContact> {
 
-  /**
-   * Default.
-   */
   private static final long serialVersionUID = 1L;
 
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
