@@ -97,12 +97,12 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
     track.setLastChangeSince(lastRunTime);
 
     final Date curentTimeRunTime = executeJob(lastRunTime);
+    track.done();
 
     if (!isFailed()) {
       writeLastSuccessfulRunTime(curentTimeRunTime);
     }
 
-    track.done();
     finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
   }
 

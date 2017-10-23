@@ -498,7 +498,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       Thread.currentThread().interrupt();
       JobLogs.raiseError(LOGGER, e, "Indexer: fatal error {}", e.getMessage());
     } finally {
-      done();
+      doneIndex();
     }
 
     LOGGER.info("DONE: indexer thread");

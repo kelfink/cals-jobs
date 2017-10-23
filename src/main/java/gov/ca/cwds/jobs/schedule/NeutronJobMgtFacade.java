@@ -37,6 +37,7 @@ public class NeutronJobMgtFacade implements Serializable {
   private final NeutronDefaultJobSchedule defaultSchedule;
   private final String jobName;
   private final String triggerName;
+  private boolean vetoExecution;
 
   private volatile JobKey jobKey;
   private volatile JobDetail jd;
@@ -50,12 +51,12 @@ public class NeutronJobMgtFacade implements Serializable {
   }
 
   @Managed(description = "Run job now, show results immediately")
-  public String run(String cmdLineArgs) throws NeutronException {
+  public String run(String cmdLine) throws NeutronException {
     try {
       LOGGER.info("RUN JOB: {}", defaultSchedule.getName());
       final JobProgressTrack track =
           JobRunner.getInstance().runScheduledJob(defaultSchedule.getKlazz(),
-              StringUtils.isBlank(cmdLineArgs) ? null : cmdLineArgs.split("\\s+"));
+              StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       return track.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);
@@ -97,6 +98,11 @@ public class NeutronJobMgtFacade implements Serializable {
     scheduler.pauseTrigger(triggerKey);
   }
 
+  @Managed(description = "Veto scheduled job execution")
+  public void vetoScheduledJob() {
+    LOGGER.debug("Veto job execution");
+  }
+
   @Managed(description = "Show job status")
   public String status() {
     LOGGER.debug("Show job status");
@@ -125,6 +131,14 @@ public class NeutronJobMgtFacade implements Serializable {
 
     final JobKey key = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
     scheduler.interrupt(key);
+  }
+
+  public boolean isVetoExecution() {
+    return vetoExecution;
+  }
+
+  public void setVetoExecution(boolean vetoExecution) {
+    this.vetoExecution = vetoExecution;
   }
 
 }

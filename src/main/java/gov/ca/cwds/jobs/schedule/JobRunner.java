@@ -474,6 +474,10 @@ public class JobRunner {
     this.startingOpts = startingOpts;
   }
 
+  public void addExecutingJob(final TriggerKey key, NeutronInterruptableJob job) {
+    executingJobs.put(key, job);
+  }
+
   public void removeExecutingJob(final TriggerKey key) {
     if (executingJobs.containsKey(key)) {
       executingJobs.remove(key);

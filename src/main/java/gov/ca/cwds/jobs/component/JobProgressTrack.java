@@ -135,6 +135,7 @@ public class JobProgressTrack implements ApiMarker {
   }
 
   public void fail() {
+    this.endTime = System.currentTimeMillis();
     this.status = NeutronJobExecutionStatus.FAILED;
   }
 
