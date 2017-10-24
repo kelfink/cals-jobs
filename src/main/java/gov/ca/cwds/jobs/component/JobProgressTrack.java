@@ -72,15 +72,14 @@ public class JobProgressTrack implements ApiMarker {
    */
   private final AtomicInteger recsBulkError = new AtomicInteger(0);
 
-  private final List<Pair<String, String>> initialLoadRangesStarted = new ArrayList<>(); // initial
-                                                                                         // load
-                                                                                         // only
+  // initial load only
+  private final List<Pair<String, String>> initialLoadRangesStarted = new ArrayList<>();
 
-  private final List<Pair<String, String>> initialLoadRangesCompleted = new ArrayList<>(); // initial
-                                                                                           // load
-                                                                                           // only
+  // initial load only
+  private final List<Pair<String, String>> initialLoadRangesCompleted = new ArrayList<>();
 
-  private final List<String> affectedDocuments = new ArrayList<>(); // last change only
+  // last change only
+  private final List<String> affectedDocuments = new ArrayList<>();
 
   public AtomicInteger getRecsSentToIndexQueue() {
     return recsSentToIndexQueue;
@@ -190,10 +189,13 @@ public class JobProgressTrack implements ApiMarker {
       buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
     }
 
-    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime))
-        .append("\n\tend:                    ").append(new Date(endTime))
-        .append("\n\telapsed (seconds):      ").append((endTime - startTime) / 1000)
-        .append("\n\n    RECORDS RETRIEVED:").append("\n\tdenormalized:    ")
+    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
+    if (endTime > 0L) {
+      buf.append("\n\tend:                    ").append(new Date(endTime))
+          .append("\n\telapsed (seconds):      ").append((endTime - startTime) / 1000);
+    }
+
+    buf.append("\n\n    RECORDS RETRIEVED:").append("\n\tdenormalized:    ")
         .append(pad(this.getRecsSentToIndexQueue().get())).append("\n\tnormalized:      ")
         .append(pad(rowsNormalized.get())).append("\n\n    ELASTICSEARCH:")
         .append("\n\tto bulk:         ").append(pad(recsSentToBulkProcessor.get()))
@@ -245,6 +247,10 @@ public class JobProgressTrack implements ApiMarker {
 
   public NeutronJobExecutionStatus getStatus() {
     return status;
+  }
+
+  public List<String> getAffectedDocuments() {
+    return affectedDocuments;
   }
 
 }

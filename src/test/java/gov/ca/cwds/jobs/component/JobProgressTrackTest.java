@@ -16,10 +16,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
+import gov.ca.cwds.jobs.schedule.NeutronJobExecutionStatus;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 public class JobProgressTrackTest {
-  JobProgressTrack target = new JobProgressTrack();
+
+  JobProgressTrack target;
 
   @Before
   public void setup() throws Exception {
@@ -180,7 +182,6 @@ public class JobProgressTrackTest {
     target.setLastChangeSince(DomainChef.uncookTimestampString("2017-12-25-08.32.05.123"));
     target.done();
     target.setInitialLoad(true);
-
     String actual = target.toString();
     assertThat(actual, is(notNullValue()));
   }
@@ -190,7 +191,6 @@ public class JobProgressTrackTest {
     target.setLastChangeSince(DomainChef.uncookTimestampString("2017-12-25-08.32.05.123"));
     target.done();
     target.setInitialLoad(false);
-
     String actual = target.toString();
     assertThat(actual, is(notNullValue()));
   }
@@ -219,6 +219,59 @@ public class JobProgressTrackTest {
   public void setLastChangeSince_Args__Date() throws Exception {
     Date lastChangeSince = mock(Date.class);
     target.setLastChangeSince(lastChangeSince);
+  }
+
+  @Test
+  public void toString_Args__() throws Exception {
+    String actual = target.toString();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void addAffectedDocumentId_Args__String() throws Exception {
+    String docId = null;
+    target.addAffectedDocumentId(docId);
+  }
+
+  @Test
+  public void getJobName_Args__() throws Exception {
+    String actual = target.getJobName();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setJobName_Args__String() throws Exception {
+    String jobName = null;
+    target.setJobName(jobName);
+  }
+
+  @Test
+  public void getStartTime_Args__() throws Exception {
+    long actual = target.getStartTime();
+    long expected = 0L;
+    assertThat(actual, is(not(expected)));
+  }
+
+  @Test
+  public void getEndTime_Args__() throws Exception {
+    long actual = target.getEndTime();
+    long expected = 0L;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getStatus_Args__() throws Exception {
+    NeutronJobExecutionStatus actual = target.getStatus();
+    NeutronJobExecutionStatus expected = NeutronJobExecutionStatus.NOT_STARTED;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getAffectedDocuments_Args__() throws Exception {
+    List<String> actual = target.getAffectedDocuments();
+    List<String> expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
   }
 
 }
