@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.inject;
 import java.io.File;
 import java.net.InetAddress;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -24,6 +23,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
+import gov.ca.cwds.common.ApiFileAssistant;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
@@ -125,23 +125,13 @@ public class JobsGuiceInjector extends AbstractModule {
   // Path traversal vulnerability:
   // https://github.com/zaproxy/zap-extensions/blob/master/src/org/zaproxy/zap/extension/ascanrules/TestPathTraversal.java
   private static File validateFileLocation(String loc) {
-    File ret = null;
-    if (StringUtils.isNotBlank(loc)) {
-      final String cleanLoc =
-          loc.lastIndexOf('/') > -1 ? loc.substring(0, loc.lastIndexOf('/')) : loc;
-      if (cleanLoc.equals(FilenameUtils.normalize(cleanLoc))) {
-        ret = new File(cleanLoc);
-        if (ret.exists()) {
-          return ret;
-        }
-      }
-    }
+    final File ret = new ApiFileAssistant().validateFileLocation(loc);
 
-    if (ret != null) {
-      return ret;
-    } else {
+    if (ret == null) {
       throw new JobsException("PROHIBITED FILE LOCATION!");
     }
+
+    return ret;
   }
 
   /**
@@ -155,8 +145,8 @@ public class JobsGuiceInjector extends AbstractModule {
   public static synchronized Injector buildInjector(final JobOptions opts) {
     if (injector == null) {
       try {
-        injector = Guice.createInjector(
-            new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()), opts.getLastRunLoc()));
+        injector = Guice.createInjector(new JobsGuiceInjector(opts,
+            validateFileLocation(opts.getEsConfigLoc()), opts.getLastRunLoc()));
 
         // Initialize system code cache.
         injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
