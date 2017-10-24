@@ -140,6 +140,31 @@ public class RelationshipIndexerJob
   }
 
   /**
+   * Iterate results sets from {@link #pullRange(Pair)}.
+   * 
+   * @param rs result set
+   * @throws SQLException on database error
+   */
+  protected void iterateRangeResults(final ResultSet rs) throws SQLException {
+    int cntr = 0;
+    EsRelationship m;
+    Object lastId = new Object();
+    final List<EsRelationship> grpRecs = new ArrayList<>();
+
+    // NOTE: Assumes that records are sorted by group key.
+    while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
+      JobLogs.logEvery(++cntr, "Retrieved", "recs");
+      if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
+        normalizeAndQueueIndex(grpRecs);
+        grpRecs.clear(); // Single thread, re-use memory.
+      }
+
+      grpRecs.add(m);
+      lastId = m.getNormalizationGroupKey();
+    }
+  }
+
+  /**
    * Read records from the given key range, typically within a single partition on large tables.
    * 
    * @param p partition range to read
@@ -161,29 +186,12 @@ public class RelationshipIndexerJob
       LOGGER.info("query: {}", query);
       JobDB2Utils.enableParallelism(con);
 
-      int cntr = 0;
-      EsRelationship m;
-      Object lastId = new Object();
-      final List<EsRelationship> grpRecs = new ArrayList<>();
-
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
-
-        // NOTE: Assumes that records are sorted by group key.
-        while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
-          JobLogs.logEvery(++cntr, "Retrieved", "recs");
-          if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
-            normalizeAndQueueIndex(grpRecs);
-            grpRecs.clear(); // Single thread, re-use memory.
-          }
-
-          grpRecs.add(m);
-          lastId = m.getNormalizationGroupKey();
-        }
-
+        iterateRangeResults(rs);
         con.commit();
       }
 
