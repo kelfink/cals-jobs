@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.inject;
 import java.io.File;
 import java.net.InetAddress;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -23,7 +24,6 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
-import gov.ca.cwds.common.ApiFileAssistant;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
@@ -77,7 +77,6 @@ import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
-import gov.ca.cwds.rest.api.ApiException;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
 
@@ -125,7 +124,19 @@ public class JobsGuiceInjector extends AbstractModule {
   // Path traversal vulnerability:
   // https://github.com/zaproxy/zap-extensions/blob/master/src/org/zaproxy/zap/extension/ascanrules/TestPathTraversal.java
   private static File validateFileLocation(String loc) {
-    final File ret = new ApiFileAssistant().validateFileLocation(loc);
+    // final File ret = new ApiFileAssistant().validateFileLocation(loc);
+
+    File ret = null;
+    if (StringUtils.isNotBlank(loc)) {
+      final String cleanLoc =
+          loc.lastIndexOf('/') > -1 ? loc.substring(0, loc.lastIndexOf('/')) : loc;
+      if (cleanLoc.equals(FilenameUtils.normalize(cleanLoc))) {
+        ret = new File(cleanLoc);
+        if (ret.exists()) {
+          return ret;
+        }
+      }
+    }
 
     if (ret == null) {
       throw new JobsException("PROHIBITED FILE LOCATION!");
@@ -286,6 +297,7 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   @Provides
+  // @Singleton
   public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
       SystemMetaDao systemMetaDao) {
     final long secondsToRefreshCache = 15 * 24 * 60 * (long) 60; // 15 days
@@ -320,16 +332,21 @@ public class JobsGuiceInjector extends AbstractModule {
   /**
    * Elasticsearch 5x. Instantiate the singleton ElasticSearch client on demand.
    * 
+   * <p>
+   * Initializes X-Pack security.
+   * </p>
+   * 
    * @return initialized singleton ElasticSearch client
+   * @throws NeutronException on ES connection error
    */
   @Provides
-  public Client elasticsearchClient() {
+  // @Singleton
+  public Client elasticsearchClient() throws NeutronException {
     TransportClient client = null;
     if (esConfig != null) {
-      LOGGER.warn("Create NEW ES client");
+      LOGGER.debug("Create NEW ES client");
       try {
         final ElasticsearchConfiguration config = elasticSearchConfig();
-        // X-Pack security
         client = makeTransportClient(config, StringUtils.isNotBlank(config.getUser())
             && StringUtils.isNotBlank(config.getPassword()));
         client.addTransportAddress(
@@ -340,7 +357,8 @@ public class JobsGuiceInjector extends AbstractModule {
         if (client != null) {
           client.close();
         }
-        throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
+        throw JobLogs.buildCheckedException(LOGGER, e,
+            "Error initializing Elasticsearch client: " + e.getMessage(), e);
       }
     }
     return client;
@@ -356,7 +374,7 @@ public class JobsGuiceInjector extends AbstractModule {
   public ElasticsearchConfiguration elasticSearchConfig() throws NeutronException {
     ElasticsearchConfiguration ret = null;
     if (esConfig != null) {
-      LOGGER.info("Create NEW ES configuration");
+      LOGGER.debug("Create NEW ES configuration");
       try {
         ret = new ObjectMapper(new YAMLFactory()).readValue(esConfig,
             ElasticsearchConfiguration.class);
