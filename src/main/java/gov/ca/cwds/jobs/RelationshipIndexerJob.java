@@ -153,7 +153,7 @@ public class RelationshipIndexerJob
 
     // NOTE: Assumes that records are sorted by group key.
     while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
-      JobLogs.logEvery(++cntr, "Retrieved", "recs");
+      JobLogs.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
         normalizeAndQueueIndex(grpRecs);
         grpRecs.clear(); // Single thread, re-use memory.
