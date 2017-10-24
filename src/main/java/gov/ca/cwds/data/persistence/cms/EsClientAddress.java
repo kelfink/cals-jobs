@@ -1515,4 +1515,24 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     return clientEthnicityCode;
   }
 
+  public String getClientCountyRule() {
+    return clientCountyRule;
+  }
+
+  public void setClientCountyRule(String clientCountyRule) {
+    this.clientCountyRule = clientCountyRule;
+  }
+
+  public void setClientCountyId(String clientCountyId) {
+    this.clientCountyId = clientCountyId;
+  }
+
+  public void setClientEthnicityId(String clientEthnicityId) {
+    this.clientEthnicityId = clientEthnicityId;
+  }
+
+  public void setClientEthnicityCode(Short clientEthnicityCode) {
+    this.clientEthnicityCode = clientEthnicityCode;
+  }
+
 }
