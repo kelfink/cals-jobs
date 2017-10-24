@@ -75,6 +75,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+
+    // WARNING: **short-term** fix for county table in Perf and Prod.
+    EsClientAddress.setUseCounty(isLargeDataSet());
   }
 
   @Override
@@ -236,7 +239,6 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   protected List<Pair<String, String>> getPartitionRanges() {
     // WARNING: **short-term** fix for county table in Perf and Prod.
     EsClientAddress.setUseCounty(isLargeDataSet());
-
     return JobJdbcUtils.getCommonPartitionRanges16(this);
   }
 

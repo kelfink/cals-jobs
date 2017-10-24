@@ -338,6 +338,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   @Column(name = "CLA_LST_UPD_TS")
   private Date claLastUpdatedTime;
 
+  @Id
   @Column(name = "CLA_IDENTIFIER")
   private String claId;
 
@@ -460,13 +461,24 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
   // CLIENT_CNTY:
   // ================
 
+  @Id
+  @Column(name = "CLC_CLIENT_ID")
+  private String clientCountyId;
+
   @Type(type = "short")
   @Column(name = "CLC_GVR_ENTC")
   private Short clientCounty;
 
+  @Column(name = "CLC_CNTY_RULE")
+  private String clientCountyRule;
+
   // ================
   // CLSCP_ET:
   // ================
+
+  @Id
+  @Column(name = "ETH_IDENTIFIER")
+  private String clientEthnicityId;
 
   @Type(type = "short")
   @Column(name = "ETHNICITY_CODE")
@@ -541,6 +553,9 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     if (!EsClientAddress.isUseCounty()) {
       ret.clientEthnicityCode = rs.getShort("ETHNICITY_CODE");
       ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
+
+      ret.clientCountyId = rs.getString("CLC_CLIENT_ID");
+      ret.clientEthnicityId = rs.getString("ETHNICITY_CODE");
     }
 
     // Languages
@@ -1486,6 +1501,18 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
 
   public void setClaId(String claId) {
     this.claId = claId;
+  }
+
+  public String getClientCountyId() {
+    return clientCountyId;
+  }
+
+  public String getClientEthnicityId() {
+    return clientEthnicityId;
+  }
+
+  public Short getClientEthnicityCode() {
+    return clientEthnicityCode;
   }
 
 }
