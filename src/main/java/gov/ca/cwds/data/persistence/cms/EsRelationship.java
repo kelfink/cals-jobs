@@ -85,7 +85,7 @@ public class EsRelationship
     Comparable<EsRelationship>, Comparator<EsRelationship> {
 
   /**
-   * Instead of repeatedly parsing relationship components, parse, store, and read many.
+   * Instead of repeatedly parsing relationship components, just parse once and lookup, as needed.
    * <p>
    * And, no SonarQube, this approach doesn't cause excessive memory bloat because the WeakHashMap
    * will clear under memory pressure.

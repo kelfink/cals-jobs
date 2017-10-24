@@ -396,7 +396,7 @@ public class JobOptions implements ApiMarker {
 
   private static Pair<Long, Long> parseBuckets(final String[] vals) {
     Long startBucket = Long.MIN_VALUE;
-    Long endBucket = Long.MIN_VALUE;
+    Long endBucket = startBucket;
 
     // Appease SonarQube.
     int cntr = 0;

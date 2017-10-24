@@ -42,7 +42,11 @@ public class NeutronInterruptableJob implements InterruptableJob {
       track = job.getTrack();
       map.put("track", track);
       context.setResult(track);
+
+      // OPTION: track execution start here.
+      // OPTION: remove execution track in finally block.
       job.run();
+
     } catch (Exception e) {
       LOGGER.error("SCHEDULED JOB FAILED! {}", className, e);
       throw new JobExecutionException("SCHEDULED JOB FAILED!", e);
