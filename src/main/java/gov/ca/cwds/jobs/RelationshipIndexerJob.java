@@ -57,6 +57,10 @@ public class RelationshipIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipIndexerJob.class);
 
+  /**
+   * SQL to insert last changed client list into global temporary table for use in views,
+   * VW_LST_BI_DIR_RELATION and VW_LST_REL_CLN_RELT_CLIENT.
+   */
   static final String INSERT_CLIENT_LAST_CHG =
       "INSERT INTO GT_ID (IDENTIFIER)\nSELECT clnr.IDENTIFIER\nFROM CLN_RELT CLNR\n"
           + "WHERE CLNR.IBMSNAP_LOGMARKER > ?\nUNION ALL\nSELECT clnr.IDENTIFIER\n"
@@ -81,6 +85,7 @@ public class RelationshipIndexerJob
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    EsRelationship.SonarQubeMemoryBloatComplaintCache.getInstance().clearCache();
   }
 
   @Override
@@ -201,6 +206,7 @@ public class RelationshipIndexerJob
     LOGGER.info("BEGIN: main extract thread");
     doneTransform(); // No transform thread
 
+    EsRelationship.SonarQubeMemoryBloatComplaintCache.getInstance().clearCache();
     try {
       final List<Pair<String, String>> ranges = getPartitionRanges();
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
@@ -222,6 +228,7 @@ public class RelationshipIndexerJob
       JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
+      EsRelationship.SonarQubeMemoryBloatComplaintCache.getInstance().clearCache();
     }
 
     LOGGER.info("DONE: main extract thread");
@@ -282,6 +289,12 @@ public class RelationshipIndexerJob
   @Override
   public List<ReplicatedRelationships> normalize(List<EsRelationship> recs) {
     return EntityNormalizer.<ReplicatedRelationships, EsRelationship>normalizeList(recs);
+  }
+
+  @Override
+  public synchronized void close() throws IOException {
+    EsRelationship.SonarQubeMemoryBloatComplaintCache.getInstance().clearCache();
+    super.close();
   }
 
   /**

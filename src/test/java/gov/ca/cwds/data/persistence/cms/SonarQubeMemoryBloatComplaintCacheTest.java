@@ -25,7 +25,7 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 
-public class EsRelationshipTest extends PersonJobTester<ReplicatedRelationships, EsRelationship> {
+public class SonarQubeMemoryBloatComplaintCacheTest extends PersonJobTester<ReplicatedRelationships, EsRelationship> {
 
   EsRelationship target = new EsRelationship();
 
