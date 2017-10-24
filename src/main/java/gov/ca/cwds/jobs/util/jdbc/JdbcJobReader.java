@@ -42,12 +42,18 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
     this.query = query;
   }
 
-  Function<Connection, PreparedStatement> preparedStatementProducer() {
+  /**
+   * SonarQube complains loudly about this "vulnerability" with
+   * {@code connection.prepareStatement(query)}.
+   * 
+   * @return Function that produces a PreparedStatement
+   */
+  private Function<Connection, PreparedStatement> preparedStatementProducer() {
     return c -> {
       try {
         return c.prepareStatement(query);
       } catch (SQLException e) {
-        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PREPARE STATEMENT",
+        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PREPARE STATEMENT!",
             e.getMessage());
       }
     };
@@ -100,6 +106,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
     }
   }
 
+  @SuppressWarnings("javadoc")
   public String getQuery() {
     return query;
   }
