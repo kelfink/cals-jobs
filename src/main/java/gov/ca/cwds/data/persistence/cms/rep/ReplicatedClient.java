@@ -162,7 +162,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   }
 
   public void addClientRace(Short clientRace) {
-    if (clientRace != null) {
+    if (clientRace != null && !this.clientRaces.contains(clientRace)) {
       this.clientRaces.add(clientRace);
     }
   }
