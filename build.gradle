@@ -61,7 +61,7 @@ dependencies {
 	compile 'org.hibernate:hibernate-c3p0:5.2.10.Final'
 
 	// Exclude transitive dependencies.
-	compile ('gov.ca.cwds.api:api-core:3.6.484') {
+	compile ('gov.ca.cwds.api:api-core:3.6.485') {
 	    exclude group: 'org.glassfish.jersey.core'
         exclude group: 'ch.qos.logback'
         exclude group: 'org.slf4j'
