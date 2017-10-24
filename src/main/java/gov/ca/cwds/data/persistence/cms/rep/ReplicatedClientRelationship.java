@@ -50,6 +50,8 @@ public class ReplicatedClientRelationship extends BaseClientRelationship
 
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
+
+
   // =======================
   // CmsReplicatedEntity:
   // =======================
