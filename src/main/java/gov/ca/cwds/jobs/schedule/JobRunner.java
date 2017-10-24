@@ -488,6 +488,22 @@ public class JobRunner {
     return executingJobs;
   }
 
+  public boolean isJobVetoed(String className) throws NeutronException {
+    Class<?> klazz = null;
+    try {
+      klazz = Class.forName(className);
+    } catch (Exception e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "UNKNOWN JOB CLASS! {}", className, e);
+    }
+    return scheduleRegistry.get(klazz).isVetoExecution();
+  }
+
+  public NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched) {
+    final NeutronJobMgtFacade nj = new NeutronJobMgtFacade(scheduler, sched);
+    scheduleRegistry.put(klazz, nj);
+    return nj;
+  }
+
   /**
    * OPTION: configure individual jobs, like Rundeck.
    * <p>
@@ -510,4 +526,5 @@ public class JobRunner {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
   }
+
 }

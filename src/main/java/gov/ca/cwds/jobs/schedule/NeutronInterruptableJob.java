@@ -22,8 +22,6 @@ public class NeutronInterruptableJob implements InterruptableJob {
   private String cmdLine;
   private volatile JobProgressTrack track;
 
-  private boolean okToStart = true;
-
   /**
    * Constructor.
    */
@@ -46,6 +44,7 @@ public class NeutronInterruptableJob implements InterruptableJob {
       context.setResult(track);
       job.run();
     } catch (Exception e) {
+      LOGGER.error("SCHEDULED JOB FAILED! {}", className, e);
       throw new JobExecutionException("SCHEDULED JOB FAILED!", e);
     }
   }
@@ -77,14 +76,6 @@ public class NeutronInterruptableJob implements InterruptableJob {
 
   public void setTrack(JobProgressTrack track) {
     this.track = track;
-  }
-
-  public boolean isOkToStart() {
-    return okToStart;
-  }
-
-  public void setOkToStart(boolean clearToStart) {
-    this.okToStart = clearToStart;
   }
 
 }

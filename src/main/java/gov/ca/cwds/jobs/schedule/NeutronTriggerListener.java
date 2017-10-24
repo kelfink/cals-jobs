@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.schedule;
 
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.Trigger;
 import org.quartz.Trigger.CompletedExecutionInstruction;
@@ -7,6 +8,9 @@ import org.quartz.TriggerKey;
 import org.quartz.TriggerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.util.JobLogs;
 
 public class NeutronTriggerListener implements TriggerListener {
 
@@ -28,7 +32,18 @@ public class NeutronTriggerListener implements TriggerListener {
   @Override
   public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
     final NeutronInterruptableJob job = (NeutronInterruptableJob) context.getJobInstance();
-    final boolean answer = !job.isOkToStart();
+
+    final JobDataMap map = context.getJobDetail().getJobDataMap();
+    final String className = map.getString("job_class");
+    boolean answer = true;
+
+    try {
+      answer = JobRunner.getInstance().isJobVetoed(className);
+    } catch (NeutronException e) {
+      throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINDING JOB FACADE! job class: {}",
+          className, e);
+    }
+
     LOGGER.info("veto job execution: {}", answer);
     return answer;
   }
