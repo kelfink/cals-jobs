@@ -51,15 +51,6 @@ public class ServiceProviderIndexerJob
   }
 
   /**
-   * @deprecated soon to be removed.
-   */
-  @Override
-  @Deprecated
-  public String getLegacySourceTable() {
-    return "SVC_PVRT";
-  }
-
-  /**
    * Batch job entry point.
    * 
    * @param args command line arguments

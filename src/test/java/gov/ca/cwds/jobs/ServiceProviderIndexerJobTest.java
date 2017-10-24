@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -84,15 +83,6 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   @Test
   public void instantiation() throws Exception {
     assertThat(target, notNullValue());
-  }
-
-  @Test
-  public void getLegacySourceTable_Args__() throws Exception {
-    target =
-        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
-    String actual = target.getLegacySourceTable();
-    String expected = "SVC_PVRT";
-    assertThat(actual, is(equalTo(expected)));
   }
 
   @Test

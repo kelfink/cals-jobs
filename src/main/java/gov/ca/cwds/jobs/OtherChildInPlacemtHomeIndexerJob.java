@@ -32,26 +32,17 @@ public class OtherChildInPlacemtHomeIndexerJob extends
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param mainDao OtherChildInPlacemtHomeDao DAO
+   * @param dao OtherChildInPlacemtHomeDao DAO
    * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    */
   @Inject
-  public OtherChildInPlacemtHomeIndexerJob(final ReplicatedOtherChildInPlacemtHomeDao mainDao,
+  public OtherChildInPlacemtHomeIndexerJob(final ReplicatedOtherChildInPlacemtHomeDao dao,
       final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(mainDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
-  }
-
-  /**
-   * @deprecated scheduled for removal
-   */
-  @Override
-  @Deprecated
-  public String getLegacySourceTable() {
-    return "OTH_KIDT";
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
   @Override

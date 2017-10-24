@@ -42,15 +42,6 @@ public class OrigAttorneyIndexerJob
   }
 
   /**
-   * @deprecated older attribute will be removed
-   */
-  @Override
-  @Deprecated
-  public String getLegacySourceTable() {
-    return "ATTRNY_T";
-  }
-
-  /**
    * Batch job entry point.
    * 
    * @param args command line arguments

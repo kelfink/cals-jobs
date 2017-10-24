@@ -50,15 +50,6 @@ public class ReporterIndexerJob
     return "FKREFERL_T";
   }
 
-  /**
-   * @deprecated soon to be removed
-   */
-  @Override
-  @Deprecated
-  public String getLegacySourceTable() {
-    return "REPTR_T";
-  }
-
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
     return JobJdbcUtils.getCommonPartitionRanges64(this);

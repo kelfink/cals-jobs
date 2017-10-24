@@ -64,13 +64,6 @@ public class ReporterIndexerJobTest
   }
 
   @Test
-  public void getLegacySourceTable_Args__() throws Exception {
-    final String actual = target.getLegacySourceTable();
-    String expected = "REPTR_T";
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void getPartitionRanges_Args() throws Exception {
     final List actual = target.getPartitionRanges();
     final List expected = new ArrayList<>();

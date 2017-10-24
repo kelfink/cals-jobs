@@ -1,8 +1,6 @@
 package gov.ca.cwds.jobs;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -68,13 +66,6 @@ public class CollateralIndividualIndexerJobTest
   @Test
   public void instantiation() throws Exception {
     assertThat(target, notNullValue());
-  }
-
-  @Test
-  public void getLegacySourceTable_Args__() throws Exception {
-    final String actual = target.getLegacySourceTable();
-    String expected = "COLTRL_T";
-    assertThat(actual, is(equalTo(expected)));
   }
 
   @Test

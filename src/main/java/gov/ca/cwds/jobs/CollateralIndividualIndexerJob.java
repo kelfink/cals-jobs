@@ -45,15 +45,6 @@ public final class CollateralIndividualIndexerJob
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
-  /**
-   * @deprecated method scheduled for deletion
-   */
-  @Override
-  @Deprecated
-  public String getLegacySourceTable() {
-    return "COLTRL_T";
-  }
-
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
     return JobJdbcUtils.getCommonPartitionRanges64(this);

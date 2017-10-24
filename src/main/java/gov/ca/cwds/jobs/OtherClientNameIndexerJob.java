@@ -150,15 +150,6 @@ public class OtherClientNameIndexerJob
   }
 
   /**
-   * @deprecated delete after old legacy_source_table attribute is removed from ES
-   */
-  @Override
-  @Deprecated
-  public String getLegacySourceTable() {
-    return "OCL_NM_T";
-  }
-
-  /**
    * Optional method to customize JDBC ORDER BY clause on initial load.
    * 
    * @return custom ORDER BY clause for JDBC query

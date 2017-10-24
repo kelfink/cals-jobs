@@ -33,10 +33,4 @@ public class MSearchJobTest
     assertThat(target, notNullValue());
   }
 
-  @Test
-  public void getLegacySourceTable_Args__() throws Exception {
-    String actual = target.getLegacySourceTable();
-    assertThat(actual, notNullValue());
-  }
-
 }

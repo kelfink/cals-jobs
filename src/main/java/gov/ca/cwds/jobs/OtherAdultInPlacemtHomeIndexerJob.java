@@ -45,15 +45,6 @@ public class OtherAdultInPlacemtHomeIndexerJob extends
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
-  /**
-   * @deprecated soon to be removed
-   */
-  @Override
-  @Deprecated
-  public String getLegacySourceTable() {
-    return "OTH_ADLT";
-  }
-
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
     return JobJdbcUtils.getCommonPartitionRanges4(this);

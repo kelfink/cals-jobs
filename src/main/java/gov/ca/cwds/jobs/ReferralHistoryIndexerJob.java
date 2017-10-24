@@ -191,15 +191,6 @@ public class ReferralHistoryIndexerJob
   }
 
   /**
-   * @deprecated soon to be removed
-   */
-  @Override
-  @Deprecated
-  public String getLegacySourceTable() {
-    return "REFERL_T";
-  }
-
-  /**
    * Roll your own SQL. Turn-around on DB2 objects from other teams takes too long.
    */
   @Override

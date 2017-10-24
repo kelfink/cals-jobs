@@ -5,7 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -100,13 +100,6 @@ public class SafetyAlertIndexerJobTest {
   public void getJdbcOrderBy_Args__() throws Exception {
     String actual = target.getJdbcOrderBy().trim();
     String expected = "ORDER BY CLIENT_ID";
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void getLegacySourceTable_Args__() throws Exception {
-    String actual = target.getLegacySourceTable();
-    String expected = "SAF_ALRT";
     assertThat(actual, is(equalTo(expected)));
   }
 

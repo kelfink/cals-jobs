@@ -125,13 +125,6 @@ public class ReferralHistoryIndexerJobTest
   }
 
   @Test
-  public void getLegacySourceTable_Args__() throws Exception {
-    String actual = target.getLegacySourceTable();
-    String expected = "REFERL_T";
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void normalizeSingle_Args__List() throws Exception {
     List<EsPersonReferral> recs = new ArrayList<EsPersonReferral>();
     EsPersonReferral addMe = new EsPersonReferral();

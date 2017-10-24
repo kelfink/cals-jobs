@@ -88,15 +88,6 @@ public class MSearchJob extends
   }
 
   /**
-   * @deprecated scheduled for removal
-   */
-  @Deprecated
-  @Override
-  public String getLegacySourceTable() {
-    return "OTH_ADLT";
-  }
-
-  /**
    * Batch job entry point.
    * 
    * @param args command line arguments

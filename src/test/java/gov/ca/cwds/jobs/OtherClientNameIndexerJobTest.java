@@ -106,13 +106,6 @@ public class OtherClientNameIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  public void getLegacySourceTable_Args__() throws Exception {
-    final String actual = target.getLegacySourceTable();
-    final String expected = "OCL_NM_T";
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void extract_Args__ResultSet() throws Exception {
     final ReplicatedOtherClientName actual = target.extract(rs);
     assertThat(actual, notNullValue());

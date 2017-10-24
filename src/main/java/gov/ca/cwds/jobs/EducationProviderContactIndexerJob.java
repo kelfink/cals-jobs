@@ -45,15 +45,6 @@ public class EducationProviderContactIndexerJob extends
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
   }
 
-  /**
-   * @deprecated method scheduled for deletion
-   */
-  @Override
-  @Deprecated
-  public String getLegacySourceTable() {
-    return "EDPRVCNT";
-  }
-
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
     return JobJdbcUtils.getCommonPartitionRanges4(this);
