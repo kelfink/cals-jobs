@@ -739,7 +739,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void prepHibernatePull_Args__Session__Transaction__Date() throws Exception {
-    target.prepHibernateLastChange(session, transaction, lastRunTime);
+    target.prepHibernateLastChange(session, lastRunTime);
   }
 
   @Test
@@ -843,7 +843,7 @@ public class BasePersonIndexerJobTest
   @Ignore
   public void prepHibernatePull_Args__Session__Transaction__Date_T__SQLException()
       throws Exception {
-    target.prepHibernateLastChange(session, transaction, lastRunTime);
+    target.prepHibernateLastChange(session, lastRunTime);
   }
 
   @Test

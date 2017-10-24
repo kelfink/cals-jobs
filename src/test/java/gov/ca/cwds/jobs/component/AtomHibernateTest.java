@@ -169,7 +169,7 @@ public class AtomHibernateTest
   public void prepHibernateLastChange_Args__Session__Transaction__Date() throws Exception {
     Transaction txn = mock(Transaction.class);
     Date lastRunTime = new Date();
-    target.prepHibernateLastChange(session, txn, lastRunTime);
+    target.prepHibernateLastChange(session, lastRunTime);
   }
 
 }

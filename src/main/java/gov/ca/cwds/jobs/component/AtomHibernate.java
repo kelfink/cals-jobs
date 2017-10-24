@@ -130,16 +130,21 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
     return JobDB2Utils.isDB2OnZOS(getJobDao());
   }
 
+  /**
+   * Detect large datasets on the mainframe.
+   * 
+   * @return true if is large data set on z/OS
+   */
   default boolean isLargeDataSet() {
     return isDB2OnZOS() && (getDBSchemaName().toUpperCase().endsWith("RSQ")
         || getDBSchemaName().toUpperCase().endsWith("REP"));
   }
 
   /**
-   * Return Function that creates a prepared statement for last change preprocessing, such as
+   * Return Function that creates a prepared statement for last change pre-processing, such as
    * inserting identifiers into a global temporary table.
    * 
-   * @return prepared statement for last change preprocessing
+   * @return prepared statement for last change pre-processing
    */
   default Function<Connection, PreparedStatement> getPreparedStatementMaker() {
     return c -> {
@@ -171,12 +176,11 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * </blockquote>
    * 
    * @param session current Hibernate session
-   * @param txn current transaction
    * @param lastRunTime last successful run datetime
    * @throws SQLException on disconnect, invalid parameters, etc.
    */
-  default void prepHibernateLastChange(final Session session, final Transaction txn,
-      final Date lastRunTime) throws SQLException {
+  default void prepHibernateLastChange(final Session session, final Date lastRunTime)
+      throws SQLException {
     final String sql = getPrepLastChangeSQL();
     if (StringUtils.isNotBlank(sql)) {
       JobJdbcUtils.prepHibernateLastChange(session, lastRunTime, sql, getPreparedStatementMaker());
