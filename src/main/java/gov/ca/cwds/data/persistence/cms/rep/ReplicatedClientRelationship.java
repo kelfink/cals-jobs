@@ -1,5 +1,6 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
+import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Entity;
@@ -50,7 +51,16 @@ public class ReplicatedClientRelationship extends BaseClientRelationship
 
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
+  public ReplicatedClientRelationship() {
+    super();
+  }
 
+  public ReplicatedClientRelationship(String absentParentCode, Short clientRelationshipType,
+      Date endDate, String secondaryClientId, String primaryClientId, String id,
+      String sameHomeCode, Date startDate) {
+    super(absentParentCode, clientRelationshipType, endDate, secondaryClientId, primaryClientId, id,
+        sameHomeCode, startDate);
+  }
 
   // =======================
   // CmsReplicatedEntity:
