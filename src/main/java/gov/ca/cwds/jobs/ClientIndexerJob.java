@@ -28,6 +28,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
+import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.schedule.JobRunner;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
@@ -137,6 +138,31 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   /**
+   * Iterate results sets from {@link #pullRange(Pair)}.
+   * 
+   * @param rs result set
+   * @throws SQLException on database error
+   */
+  protected void iterateRangeResults(final ResultSet rs) throws SQLException {
+    int cntr = 0;
+    EsClientAddress m;
+    Object lastId = new Object();
+    final List<EsClientAddress> grpRecs = new ArrayList<>();
+
+    // NOTE: Assumes that records are sorted by group key.
+    while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
+      JobLogs.logEvery(++cntr, "Retrieved", "recs");
+      if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
+        normalizeAndQueueIndex(grpRecs);
+        grpRecs.clear(); // Single thread, re-use memory.
+      }
+
+      grpRecs.add(m);
+      lastId = m.getNormalizationGroupKey();
+    }
+  }
+
+  /**
    * Read recs from a single partition.
    * 
    * @param p partition range to read
@@ -158,29 +184,12 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       LOGGER.info("query: {}", query);
       JobDB2Utils.enableParallelism(con);
 
-      int cntr = 0;
-      EsClientAddress m;
-      Object lastId = new Object();
-      final List<EsClientAddress> grpRecs = new ArrayList<>();
-
       try (Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(5000); // faster
+        stmt.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
-
-        // NOTE: Assumes that records are sorted by group key.
-        while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
-          JobLogs.logEvery(++cntr, "Retrieved", "recs");
-          if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
-            normalizeAndQueueIndex(grpRecs);
-            grpRecs.clear(); // Single thread, re-use memory.
-          }
-
-          grpRecs.add(m);
-          lastId = m.getNormalizationGroupKey();
-        }
-
+        iterateRangeResults(rs);
         con.commit();
       }
 

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.JobReader;
@@ -62,7 +63,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
 
       // SonarQube complains loudly about this "vulnerability."
       statement = makePreparedStatementProducer().apply(con);
-      statement.setFetchSize(5000);
+      statement.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
       statement.setMaxRows(0);
       statement.setQueryTimeout(100000);
       resultSet = statement.executeQuery();

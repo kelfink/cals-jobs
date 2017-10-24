@@ -33,6 +33,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
+import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.schedule.JobRunner;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
@@ -166,7 +167,7 @@ public class RelationshipIndexerJob
       final List<EsRelationship> grpRecs = new ArrayList<>();
 
       try (Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(5000); // faster
+        stmt.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
