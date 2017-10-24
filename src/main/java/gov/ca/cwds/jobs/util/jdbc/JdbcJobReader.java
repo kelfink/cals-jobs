@@ -42,7 +42,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
     this.query = query;
   }
 
-  Function<Connection, PreparedStatement> makePreparedStatementProducer() {
+  Function<Connection, PreparedStatement> preparedStatementProducer() {
     return c -> {
       try {
         return c.prepareStatement(query);
@@ -53,16 +53,20 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
     };
   }
 
+  private PreparedStatement createPreparedStatement(Connection con) {
+    return preparedStatementProducer().apply(con);
+  }
+
   @Override
   public void init() {
     try {
       final Connection con = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
           .getService(ConnectionProvider.class).getConnection();
-      con.setAutoCommit(false); // connection pool should set this ...
+      con.setAutoCommit(false);
       con.setReadOnly(true); // may fail in some situations.
 
       // SonarQube complains loudly about this "vulnerability."
-      statement = makePreparedStatementProducer().apply(con);
+      statement = createPreparedStatement(con);
       statement.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
       statement.setMaxRows(0);
       statement.setQueryTimeout(100000);

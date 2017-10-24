@@ -108,21 +108,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   private static final Logger LOGGER = LoggerFactory.getLogger(BasePersonIndexerJob.class);
 
   /**
-   * Obsolete. Doesn't optimize on DB2 z/OS, though on "smaller" tables (single digit millions) it's
-   * not too bad (table scan performance).
-   * 
-   * @deprecated other options now
-   * @see #doInitialLoadJdbc()
-   */
-  @Deprecated
-  private static final String QUERY_BUCKET_LIST =
-      "SELECT z.bucket, MIN(z.THE_ID_COL) AS minId, MAX(z.THE_ID_COL) AS maxId, COUNT(*) AS bucketCount "
-          + "FROM (SELECT (y.rn / (total_cnt/:total_buckets)) + 1 AS bucket, y.rn, y.THE_ID_COL FROM ( "
-          + "SELECT c.THE_ID_COL, ROW_NUMBER() OVER (ORDER BY 1) AS rn, COUNT(*) OVER (ORDER BY 1) AS total_cnt "
-          + "FROM {h-schema}THE_TABLE c ORDER BY c.THE_ID_COL) y ORDER BY y.rn "
-          + ") z GROUP BY z.bucket FOR READ ONLY WITH UR ";
-
-  /**
    * Jackson ObjectMapper.
    */
   protected final ObjectMapper mapper;
@@ -776,7 +761,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Object lastId = new Object();
 
     try {
-      prepHibernateLastChange(session, lastRunTime); // Insert into session temp table.
+      // Insert into session temp table that drives a last change view.
+      prepHibernateLastChange(session, lastRunTime);
       final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           JobJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);

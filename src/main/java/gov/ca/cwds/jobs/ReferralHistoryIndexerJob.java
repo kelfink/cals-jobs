@@ -358,6 +358,31 @@ public class ReferralHistoryIndexerJob
     System.gc(); // NOSONAR
   }
 
+  protected int mapReduce(final List<EsPersonReferral> listAllegations,
+      final Map<String, EsPersonReferral> mapReferrals,
+      final List<MinClientReferral> listClientReferralKeys,
+      final List<EsPersonReferral> listReadyToNorm) {
+    int cntr = 0;
+    try {
+      final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys
+          .stream().sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
+          .collect(Collectors.groupingBy(MinClientReferral::getClientId));
+      listClientReferralKeys.clear();
+
+      final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
+          .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
+          .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
+      listAllegations.clear();
+
+      // For each client group:
+      cntr = normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
+          mapAllegationByReferral);
+    } finally {
+      cleanUpMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
+    }
+    return cntr;
+  }
+
   /**
    * Read all records from a single partition (key range) in buckets. Then sort results and
    * normalize.
@@ -403,6 +428,7 @@ public class ReferralHistoryIndexerJob
           final PreparedStatement stmtSelAllegation =
               con.prepareStatement(SELECT_ALLEGATION.replaceAll("\\s+", " ").trim())) {
 
+        // Read separate components for this key bundle.
         readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
         readReferrals(stmtSelReferral, mapReferrals);
         readAllegations(stmtSelAllegation, listAllegations);
@@ -410,34 +436,14 @@ public class ReferralHistoryIndexerJob
         // Retrieved all data.
         JobDB2Utils.monitorStopAndReport(monitor);
         con.commit();
-
       }
-
     } catch (Exception e) {
       fail();
       JobLogs.raiseError(LOGGER, e, "ERROR HANDING RANGE {} - {}: {}", p.getLeft(), p.getRight(),
           e.getMessage());
     }
 
-    int cntr = 0;
-    try {
-      final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys
-          .stream().sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
-          .collect(Collectors.groupingBy(MinClientReferral::getClientId));
-      listClientReferralKeys.clear();
-
-      final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
-          .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
-          .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
-      listAllegations.clear();
-
-      // For each client group:
-      cntr = normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
-          mapAllegationByReferral);
-    } finally {
-      cleanUpMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
-    }
-
+    int cntr = mapReduce(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
     getTrack().trackRangeComplete(p);
     LOGGER.info("DONE");
     return cntr;
