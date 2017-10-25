@@ -1,7 +1,11 @@
 package gov.ca.cwds.jobs.schedule;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.quartz.JobKey;
+import org.quartz.listeners.JobChainingJobListener;
 
 import gov.ca.cwds.jobs.ChildCaseHistoryIndexerJob;
 import gov.ca.cwds.jobs.ClientIndexerJob;
@@ -25,25 +29,25 @@ public enum NeutronDefaultJobSchedule {
   // Person document roots.
   //
 
-  CLIENT(ClientIndexerJob.class, true, "client", 5, 20, 1000, null),
+  CLIENT(ClientIndexerJob.class, true, "client", 1, 5, 20, 1000, null),
 
-  REPORTER(ReporterIndexerJob.class, true, "reporter", 10, 30, 950, null),
+  REPORTER(ReporterIndexerJob.class, true, "reporter", 2, 10, 30, 950, null),
 
-  COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, true, "collateral_individual", 20, 30,
-      90, null),
+  COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, true, "collateral_individual", 3, 20,
+      30, 90, null),
 
-  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, true, "service_provider", 25, 120, 85, null),
+  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, true, "service_provider", 4, 25, 120, 85, null),
 
   SUBSTITUTE_CARE_PROVIDER(SubstituteCareProviderIndexJob.class, true, "substitute_care_provider",
-      30, 120, 80, null),
+      5, 30, 120, 80, null),
 
-  EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, true, "education_provider", 42, 120,
-      75, null),
+  EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, true, "education_provider", 6, 42,
+      120, 75, null),
 
-  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, true, "other_adult", 50, 120, 70,
+  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, true, "other_adult", 7, 50, 120, 70,
       null),
 
-  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, true, "other_child", 55, 120, 65,
+  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, true, "other_child", 8, 55, 120, 65,
       null),
 
   //
@@ -53,34 +57,39 @@ public enum NeutronDefaultJobSchedule {
   /**
    * Client name aliases.
    */
-  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 90, 45, 300, "akas"),
+  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 20, 90, 45, 300, "akas"),
 
   /**
    * Child cases.
    */
-  CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 70, 30, 550, "cases"),
+  CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 25, 70, 30, 550, "cases"),
 
   /**
    * Parent cases.
    */
-  PARENT_CASE(ParentCaseHistoryIndexerJob.class, false, "parent_case", 90, 30, 500, "cases"),
+  PARENT_CASE(ParentCaseHistoryIndexerJob.class, false, "parent_case", 30, 90, 30, 500, "cases"),
+
+  RELATIONSHIP(RelationshipIndexerJob.class, false, "relationship", 40, 90, 30, 600,
+      "relationships"),
 
   /**
    * Referrals.
    */
-  REFERRAL(ReferralHistoryIndexerJob.class, false, "referral", 45, 30, 700, "referrals"),
+  REFERRAL(ReferralHistoryIndexerJob.class, false, "referral", 50, 45, 30, 700, "referrals"),
 
-  RELATIONSHIP(RelationshipIndexerJob.class, false, "relationship", 90, 30, 600, "relationships"),
+  SAFETY_ALERT(SafetyAlertIndexerJob.class, false, "safety_alert", 60, 90, 45, 350,
+      "safety_alerts"),
 
-  SAFETY_ALERT(SafetyAlertIndexerJob.class, false, "safety_alert", 90, 45, 350, "safety_alerts"),
-
-  INTAKE_SCREENING(IntakeScreeningJob.class, false, "intake_screening", 90, 20, 800, "screenings");
+  INTAKE_SCREENING(IntakeScreeningJob.class, false, "intake_screening", 70, 90, 20, 800,
+      "screenings");
 
   private final Class<?> klazz;
 
   private final String name;
 
   private final boolean newDocument;
+
+  private final int initialLoadOrder;
 
   private final int startDelaySeconds;
 
@@ -99,14 +108,35 @@ public enum NeutronDefaultJobSchedule {
   }
 
   private NeutronDefaultJobSchedule(Class<?> klazz, boolean newDocument, String name,
-      int startDelaySeconds, int periodSeconds, int lastRunPriority, String jsonElement) {
+      int initialLoadOrder, int startDelaySeconds, int periodSeconds, int lastRunPriority,
+      String jsonElement) {
     this.klazz = klazz;
     this.newDocument = newDocument;
     this.name = name;
+    this.initialLoadOrder = initialLoadOrder;
     this.startDelaySeconds = startDelaySeconds;
     this.periodSeconds = periodSeconds;
     this.lastRunPriority = lastRunPriority;
     this.jsonElement = jsonElement;
+  }
+
+  public static JobChainingJobListener fullLoadJobChainListener() {
+    final JobChainingJobListener ret = new JobChainingJobListener("initial_load");
+
+    final NeutronDefaultJobSchedule[] arr = Arrays.copyOf(NeutronDefaultJobSchedule.values(),
+        NeutronDefaultJobSchedule.values().length);
+    Arrays.sort(arr, (o1, o2) -> Integer.compare(o1.initialLoadOrder, o2.initialLoadOrder));
+
+    NeutronDefaultJobSchedule sched;
+    final int len = arr.length;
+    for (int i = 0; i < len; i++) {
+      sched = arr[i];
+      ret.addJobChainLink(new JobKey(sched.name, NeutronSchedulerConstants.GRP_FULL_LOAD),
+          i != (len - 1) ? new JobKey(arr[i + 1].name, NeutronSchedulerConstants.GRP_FULL_LOAD)
+              : new JobKey("verify", NeutronSchedulerConstants.GRP_FULL_LOAD));
+    }
+
+    return ret;
   }
 
   public Class<?> getKlazz() {
@@ -139,6 +169,10 @@ public enum NeutronDefaultJobSchedule {
 
   public static NeutronDefaultJobSchedule lookupByJobName(String key) {
     return mapName.get(key);
+  }
+
+  public int getInitialLoadOrder() {
+    return initialLoadOrder;
   }
 
 }

@@ -72,6 +72,8 @@ public class JobRunner {
 
   private ElasticsearchDao esDao;
 
+  private ListenerManager listenerMgr;
+
   private NeutronRestServer restServer = new NeutronRestServer();
 
   /**
@@ -173,7 +175,7 @@ public class JobRunner {
     scheduler = factory.getScheduler();
 
     // Scheduler listeners.
-    final ListenerManager listenerMgr = scheduler.getListenerManager();
+    listenerMgr = scheduler.getListenerManager();
     listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
     listenerMgr.addJobListener(new NeutronJobListener());
     listenerMgr.addTriggerListener(new NeutronTriggerListener());
@@ -198,6 +200,15 @@ public class JobRunner {
     }
   }
 
+  protected void configureInitialMode(final Date now) {
+    if (initialMode) {
+      startingOpts.setLastRunTime(now);
+      startingOpts.setLastRunMode(false);
+      listenerMgr.addJobListener(NeutronDefaultJobSchedule.fullLoadJobChainListener());
+      LOGGER.warn("\n\n\n\n>>>>>>> INITIAL, FULL LOAD! <<<<<<<\n\n\n\n");
+    }
+  }
+
   /**
    * Expose job execution operations through JMX.
    * 
@@ -217,11 +228,7 @@ public class JobRunner {
       final Date now = initialMode ? fmt.parse("1917-10-31 10:11:12.000")
           : new DateTime().minusHours(NeutronSchedulerConstants.LAST_CHG_WINDOW_HOURS).toDate();
 
-      if (initialMode) {
-        startingOpts.setLastRunTime(now);
-        startingOpts.setLastRunMode(false);
-        LOGGER.warn("\n\n\n\n>>>>>>> INITIAL, FULL LOAD! <<<<<<<\n\n\n\n");
-      }
+      configureInitialMode(now);
 
       // Schedule jobs.
       for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
