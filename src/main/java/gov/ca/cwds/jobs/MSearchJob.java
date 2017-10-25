@@ -34,9 +34,6 @@ import gov.ca.cwds.jobs.service.NeutronElasticValidator;
 public class MSearchJob extends
     BasePersonIndexerJob<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MSearchJob.class);
@@ -61,18 +58,19 @@ public class MSearchJob extends
     this.validator = validator;
   }
 
+  /**
+   * Run in full mode!
+   */
   @Override
   public Date executeJob(Date lastSuccessfulRunTime) {
     LOGGER.info("MSEARCH!");
-    final Client client = this.esDao.getClient();
+    final Client esClient = this.esDao.getClient();
 
-    final SearchRequestBuilder srb1 =
-        client.prepareSearch().setQuery(QueryBuilders.idsQuery().addIds("JRRwMqs06Q")).setSize(1);
-    final SearchRequestBuilder srb3 =
-        client.prepareSearch().setQuery(QueryBuilders.idsQuery().addIds("Bn0LhX6aah")).setSize(1);
-    final SearchRequestBuilder srb2 = client.prepareSearch().setQuery(QueryBuilders
-        .multiMatchQuery("N6dhOan15A", "cases.focus_child.legacy_descriptor.legacy_id")).setSize(1);
-    final MultiSearchResponse sr = client.prepareMultiSearch().add(srb1).add(srb2).add(srb3).get();
+    final SearchRequestBuilder srb2 = esClient.prepareSearch().setQuery(QueryBuilders
+        .multiMatchQuery("N6dhOan15A", "cases.focus_child.legacy_descriptor.legacy_id"));
+    final MultiSearchResponse sr =
+        esClient.prepareMultiSearch().add(esClient.prepareSearch().setQuery(QueryBuilders.idsQuery()
+            .addIds("Ahr3T2S0BN", "Bn0LhX6aah", "DUy4ET400b", "AkxX6G50Ki"))).add(srb2).get();
 
     // Fetch **ALL** individual responses from MultiSearchResponse#getResponses().
     long totalHits = 0;
@@ -88,7 +86,7 @@ public class MSearchJob extends
     }
 
     LOGGER.info("es host: {}", validator.getEsDao().getConfig().getElasticsearchHost());
-    LOGGER.info("hits: {}", totalHits);
+    LOGGER.info("total hits: {}", totalHits);
     return lastSuccessfulRunTime;
   }
 
