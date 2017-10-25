@@ -480,6 +480,10 @@ public class JobRunner {
 
   public void addLastTrack(final Class<?> klazz, final JobProgressTrack track) {
     lastTracks.put(klazz, track);
+
+    if (!trackHistory.containsKey(klazz)) {
+      trackHistory.put(klazz, new ArrayList<>());
+    }
     trackHistory.get(klazz).add(track);
   }
 
@@ -513,15 +517,7 @@ public class JobRunner {
     return nj;
   }
 
-  /**
-   * OPTION: configure individual jobs, like Rundeck.
-   * <p>
-   * Best to load a configuration file with settings per job.
-   * </p>
-   * 
-   * @param args command line
-   */
-  public static void main(String[] args) {
+  protected static void startContinuousMode(String[] args) {
     LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
     try {
       instance.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
@@ -534,6 +530,18 @@ public class JobRunner {
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
+  }
+
+  /**
+   * OPTION: configure individual jobs, like Rundeck.
+   * <p>
+   * Best to load a configuration file with settings per job.
+   * </p>
+   * 
+   * @param args command line
+   */
+  public static void main(String[] args) {
+    startContinuousMode(args);
   }
 
 }
