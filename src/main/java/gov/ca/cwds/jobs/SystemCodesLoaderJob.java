@@ -144,8 +144,6 @@ public class SystemCodesLoaderJob {
       LOGGER.info("Deleting system codes from new system...");
       stmt.execute("DELETE FROM SYSTEM_CODES");
       LOGGER.info("Deleting system codes from new system");
-    } finally {
-      // Close statement.
     }
   }
 

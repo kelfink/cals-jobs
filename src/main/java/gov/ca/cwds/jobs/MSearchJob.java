@@ -14,8 +14,6 @@ import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
@@ -25,8 +23,10 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.JobRunner;
 import gov.ca.cwds.jobs.service.NeutronElasticValidator;
+import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
  * Job to load Other Adult In Placement Home from CMS into ElasticSearch.
@@ -60,9 +60,13 @@ public class MSearchJob extends
     this.validator = validator;
   }
 
-  protected ElasticSearchPerson readPerson(String json)
-      throws JsonMappingException, JsonParseException, IOException {
-    return ElasticSearchPerson.MAPPER.readValue(json, ElasticSearchPerson.class);
+  protected ElasticSearchPerson readPerson(String json) throws NeutronException {
+    try {
+      return ElasticSearchPerson.MAPPER.readValue(json, ElasticSearchPerson.class);
+    } catch (IOException e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO READ ES PERSON! {}", e.getMessage(),
+          e);
+    }
   }
 
   /**
@@ -86,9 +90,16 @@ public class MSearchJob extends
       final SearchHits hits = response.getHits();
       totalHits += hits.getTotalHits();
 
-      for (SearchHit hit : hits.getHits()) {
-        LOGGER.info("hit as string: {}", hit.getSourceAsString());
+      try {
+        for (SearchHit hit : hits.getHits()) {
+          LOGGER.info("hit as string: {}", hit.getSourceAsString());
+          final ElasticSearchPerson person = readPerson(hit.getSourceAsString());
+          LOGGER.info("person: {}", person);
+        }
+      } catch (NeutronException e) {
+        LOGGER.error("whatever");
       }
+
     }
 
     LOGGER.info("es host: {}", validator.getEsDao().getConfig().getElasticsearchHost());

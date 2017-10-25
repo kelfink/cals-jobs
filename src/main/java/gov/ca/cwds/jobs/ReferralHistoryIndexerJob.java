@@ -292,6 +292,39 @@ public class ReferralHistoryIndexerJob
     }
   }
 
+  protected int normalizeClientReferrals(int cntr, Map.Entry<String, List<MinClientReferral>> rc,
+      MinClientReferral rc1, final String clientId,
+      final Map<String, EsPersonReferral> mapReferrals,
+      final List<EsPersonReferral> listReadyToNorm,
+      final Map<String, List<MinClientReferral>> mapReferralByClient,
+      final Map<String, List<EsPersonReferral>> mapAllegationByReferral) {
+    int ret = cntr;
+    final String referralId = rc1.referralId;
+    final EsPersonReferral ref = mapReferrals.get(referralId);
+
+    // Sealed and sensitive may be excluded.
+    if (ref != null) {
+      // Loop allegations for this referral:
+      if (mapAllegationByReferral.containsKey(referralId)) {
+        for (EsPersonReferral alg : mapAllegationByReferral.get(referralId)) {
+          alg.mergeClientReferralInfo(clientId, ref);
+          listReadyToNorm.add(alg);
+        }
+      } else {
+        listReadyToNorm.add(ref);
+      }
+    }
+
+    final ReplicatedPersonReferrals repl = normalizeSingle(listReadyToNorm);
+    if (repl != null) {
+      ++ret;
+      repl.setClientId(clientId);
+      addToIndexQueue(repl);
+    }
+
+    return ret;
+  }
+
   protected int normalizeQueryResults(final Map<String, EsPersonReferral> mapReferrals,
       final List<EsPersonReferral> listReadyToNorm,
       final Map<String, List<MinClientReferral>> mapReferralByClient,
@@ -301,32 +334,13 @@ public class ReferralHistoryIndexerJob
     int cntr = 0;
     for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
       // Loop referrals for this client:
+
       final String clientId = rc.getKey();
       if (StringUtils.isNotBlank(clientId)) {
         listReadyToNorm.clear();
         for (MinClientReferral rc1 : rc.getValue()) {
-          final String referralId = rc1.referralId;
-          final EsPersonReferral ref = mapReferrals.get(referralId);
-
-          // Sealed and sensitive may be excluded.
-          if (ref != null) {
-            // Loop allegations for this referral:
-            if (mapAllegationByReferral.containsKey(referralId)) {
-              for (EsPersonReferral alg : mapAllegationByReferral.get(referralId)) {
-                alg.mergeClientReferralInfo(clientId, ref);
-                listReadyToNorm.add(alg);
-              }
-            } else {
-              listReadyToNorm.add(ref);
-            }
-          }
-        }
-
-        final ReplicatedPersonReferrals repl = normalizeSingle(listReadyToNorm);
-        if (repl != null) {
-          ++cntr;
-          repl.setClientId(clientId);
-          addToIndexQueue(repl);
+          cntr = normalizeClientReferrals(cntr, rc, rc1, clientId, mapReferrals, listReadyToNorm,
+              mapReferralByClient, mapAllegationByReferral);
         }
       }
     }
