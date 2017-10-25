@@ -486,6 +486,10 @@ public class JobRunner {
     return lastTracks;
   }
 
+  public JobProgressTrack getLastTrack(final Class<?> klazz) {
+    return lastTracks.get(klazz);
+  }
+
   public void addLastTrack(final Class<?> klazz, final JobProgressTrack track) {
     lastTracks.put(klazz, track);
 

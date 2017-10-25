@@ -9,7 +9,6 @@ import java.io.Serializable;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -21,7 +20,6 @@ import org.weakref.jmx.Managed;
 
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.util.JobLogs;
 
 public class NeutronJobMgtFacade implements Serializable {
 
@@ -102,22 +100,7 @@ public class NeutronJobMgtFacade implements Serializable {
   @Managed(description = "Show job status")
   public String status() {
     LOGGER.debug("Show job status");
-    String ret;
-
-    try {
-      for (JobExecutionContext ctx : scheduler.getCurrentlyExecutingJobs()) {
-        if (ctx.getJobDetail().getKey().equals(jobKey)) {
-          LOGGER.info("job exec context: {}", ctx);
-        }
-      }
-
-      final JobProgressTrack track = (JobProgressTrack) jd.getJobDataMap().get("track");
-      ret = track != null ? track.toString() : "NO TRACK?";
-    } catch (Exception e) {
-      ret = JobLogs.stackToString(e);
-    }
-
-    return ret;
+    return JobRunner.getInstance().getLastTrack(this.defaultSchedule.getKlazz()).toString();
   }
 
   @Managed(description = "Stop running job")
