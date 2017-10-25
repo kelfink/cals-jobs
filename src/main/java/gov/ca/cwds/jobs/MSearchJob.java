@@ -22,6 +22,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.service.NeutronElasticValidator;
 
 /**
  * Job to load Other Adult In Placement Home from CMS into ElasticSearch.
@@ -38,6 +39,8 @@ public class MSearchJob extends
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MSearchJob.class);
 
+  private final NeutronElasticValidator validator;
+
   /**
    * Construct batch job instance with all required dependencies.
    * 
@@ -50,8 +53,9 @@ public class MSearchJob extends
   @Inject
   public MSearchJob(final ReplicatedOtherAdultInPlacemtHomeDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory) {
+      @CmsSessionFactory SessionFactory sessionFactory, final NeutronElasticValidator validator) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    this.validator = validator;
   }
 
   @Override
@@ -64,6 +68,7 @@ public class MSearchJob extends
     LOGGER.info("MSEARCH!");
     final Client client = this.esDao.getClient();
 
+    // Bn0LhX6aah
     final SearchRequestBuilder srb1 =
         client.prepareSearch().setQuery(QueryBuilders.idsQuery().addIds("JRRwMqs06Q")).setSize(1);
     final SearchRequestBuilder srb2 = client.prepareSearch().setQuery(QueryBuilders

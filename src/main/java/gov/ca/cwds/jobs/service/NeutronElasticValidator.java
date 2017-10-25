@@ -47,4 +47,32 @@ public class NeutronElasticValidator {
         config.getElasticsearchDocType());
   }
 
+  public ElasticsearchDao getEsDao() {
+    return esDao;
+  }
+
+  public ReplicatedClientDao getRepClientDao() {
+    return repClientDao;
+  }
+
+  public ReplicatedClientAddressDao getRepClientAddressDao() {
+    return repClientAddressDao;
+  }
+
+  public ReplicatedReporterDao getRepReporterDao() {
+    return repReporterDao;
+  }
+
+  public ReplicatedCollateralIndividualDao getRepCollateralIndividualDao() {
+    return repCollateralIndividualDao;
+  }
+
+  public ReplicatedOtherClientNameDao getRepOtherClientNameDao() {
+    return repOtherClientNameDao;
+  }
+
+  public ReplicatedClientRelationshipDao getRepClientRelationshipDao() {
+    return repClientRelationshipDao;
+  }
+
 }

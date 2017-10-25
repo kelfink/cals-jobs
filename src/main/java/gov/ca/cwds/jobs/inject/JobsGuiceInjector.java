@@ -72,6 +72,7 @@ import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.service.NeutronElasticValidator;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
@@ -272,15 +273,18 @@ public class JobsGuiceInjector extends AbstractModule {
     // Required for annotation injection.
     bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
 
+    // CMS system codes.
     bind(SystemCodeDao.class);
     bind(SystemMetaDao.class);
 
     // Only one instance of ES DAO.
     bind(ElasticsearchDao.class).asEagerSingleton();
+
+    bind(NeutronElasticValidator.class);
   }
 
   @Provides
-  // @Singleton
+  @Singleton
   public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
       SystemMetaDao systemMetaDao) {
     final long secondsToRefreshCache = 15 * 24 * 60 * (long) 60; // 15 days
