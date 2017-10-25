@@ -1,9 +1,8 @@
 package gov.ca.cwds.jobs;
 
+import java.io.IOException;
 import java.util.Date;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -15,10 +14,13 @@ import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
+import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.inject.CmsSessionFactory;
@@ -58,6 +60,11 @@ public class MSearchJob extends
     this.validator = validator;
   }
 
+  protected ElasticSearchPerson readPerson(String json)
+      throws JsonMappingException, JsonParseException, IOException {
+    return ElasticSearchPerson.MAPPER.readValue(json, ElasticSearchPerson.class);
+  }
+
   /**
    * Run in full mode!
    */
@@ -80,8 +87,7 @@ public class MSearchJob extends
       totalHits += hits.getTotalHits();
 
       for (SearchHit hit : hits.getHits()) {
-        LOGGER.info("hit: {}",
-            ToStringBuilder.reflectionToString(hit, ToStringStyle.MULTI_LINE_STYLE)); // NOSONAR
+        LOGGER.info("hit as string: {}", hit.getSourceAsString());
       }
     }
 
