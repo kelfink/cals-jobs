@@ -20,6 +20,7 @@ import gov.ca.cwds.jobs.component.Job;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
+import gov.ca.cwds.jobs.schedule.JobRunner;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
@@ -103,6 +104,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
       writeLastSuccessfulRunTime(curentTimeRunTime);
     }
 
+    JobRunner.getInstance().addLastTrack(getClass(), track);
     finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
   }
 

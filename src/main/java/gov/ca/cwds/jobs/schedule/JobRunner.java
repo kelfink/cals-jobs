@@ -36,6 +36,7 @@ import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
+import gov.ca.cwds.jobs.rest.NeutronRestServer;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
@@ -71,7 +72,7 @@ public class JobRunner {
 
   private ElasticsearchDao esDao;
 
-  // private final NeutronRestServer restServer;
+  private NeutronRestServer restServer = new NeutronRestServer();
 
   /**
    * Job options by job type.
@@ -82,7 +83,11 @@ public class JobRunner {
 
   private final Map<TriggerKey, NeutronInterruptableJob> executingJobs = new ConcurrentHashMap<>();
 
-  private final Map<Class<?>, List<JobProgressTrack>> jobTracks = new ConcurrentHashMap<>();
+  private final Map<Class<?>, List<JobProgressTrack>> trackHistory = new ConcurrentHashMap<>();
+
+  private final Map<Class<?>, JobProgressTrack> lastTracks = new ConcurrentHashMap<>();
+
+  // CircularFifoQueue
 
   private JobRunner() {
     // Default, no-op
@@ -224,7 +229,7 @@ public class JobRunner {
         final NeutronJobMgtFacade nj = new NeutronJobMgtFacade(scheduler, sched);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         scheduleRegistry.put(klass, nj);
-        jobTracks.put(sched.getKlazz(), new ArrayList<JobProgressTrack>());
+        trackHistory.put(sched.getKlazz(), new ArrayList<JobProgressTrack>());
       }
 
       exporter.export("Neutron:runner=master", this);
@@ -247,14 +252,9 @@ public class JobRunner {
         scheduler.start();
       }
 
-      // if (initialMode) {
-      // Thread.sleep(15000);
-      // scheduler.shutdown(true); // Stop the scheduler after initial run jobs complete.
-      // }
-
       // Jetty for REST administration.
-      // Thread jettyServer = new Thread(restServer::run);
-      // jettyServer.start();
+      Thread jettyServer = new Thread(restServer::run);
+      jettyServer.start();
 
     } catch (IOException | SchedulerException | ParseException e) {
       try {
@@ -448,12 +448,12 @@ public class JobRunner {
     return initialMode;
   }
 
-  public Map<Class<?>, List<JobProgressTrack>> getJobTracks() {
-    return jobTracks;
+  public Map<Class<?>, List<JobProgressTrack>> getTrackHistory() {
+    return trackHistory;
   }
 
   public void addJobTrack(Class<?> klazz, JobProgressTrack track) {
-    jobTracks.get(klazz).add(track);
+    trackHistory.get(klazz).add(track);
   }
 
   public ElasticsearchDao getEsDao() {
@@ -472,6 +472,15 @@ public class JobRunner {
 
   public void setStartingOpts(JobOptions startingOpts) {
     this.startingOpts = startingOpts;
+  }
+
+  public Map<Class<?>, JobProgressTrack> getLastTracks() {
+    return lastTracks;
+  }
+
+  public void addLastTrack(final Class<?> klazz, final JobProgressTrack track) {
+    lastTracks.put(klazz, track);
+    trackHistory.get(klazz).add(track);
   }
 
   public void addExecutingJob(final TriggerKey key, NeutronInterruptableJob job) {

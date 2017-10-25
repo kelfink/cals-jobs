@@ -24,7 +24,7 @@ public class NeutronTriggerListener implements TriggerListener {
   @Override
   public void triggerFired(Trigger trigger, JobExecutionContext context) {
     final TriggerKey key = trigger.getKey();
-    LOGGER.info("trigger fired: key: {}", key);
+    LOGGER.debug("trigger fired: key: {}", key);
     JobRunner.getInstance().getExecutingJobs().put(key,
         (NeutronInterruptableJob) context.getJobInstance());
   }
@@ -51,7 +51,7 @@ public class NeutronTriggerListener implements TriggerListener {
   @Override
   public void triggerMisfired(Trigger trigger) {
     final TriggerKey key = trigger.getKey();
-    LOGGER.error("TRIGGER MISFIRED! key: {}", key);
+    LOGGER.warn("TRIGGER MISFIRED! key: {}", key);
     JobRunner.getInstance().removeExecutingJob(key);
   }
 
@@ -59,7 +59,7 @@ public class NeutronTriggerListener implements TriggerListener {
   public void triggerComplete(Trigger trigger, JobExecutionContext context,
       CompletedExecutionInstruction triggerInstructionCode) {
     final TriggerKey key = trigger.getKey();
-    LOGGER.info("trigger complete: key: {}", key);
+    LOGGER.debug("trigger complete: key: {}", key);
     JobRunner.getInstance().removeExecutingJob(key);
   }
 

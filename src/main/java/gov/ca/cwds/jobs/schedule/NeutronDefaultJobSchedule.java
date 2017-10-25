@@ -25,9 +25,9 @@ public enum NeutronDefaultJobSchedule {
   // Person document roots.
   //
 
-  CLIENT(ClientIndexerJob.class, true, "client", 5, 20, 100, null),
+  CLIENT(ClientIndexerJob.class, true, "client", 5, 20, 1000, null),
 
-  REPORTER(ReporterIndexerJob.class, true, "reporter", 10, 30, 95, null),
+  REPORTER(ReporterIndexerJob.class, true, "reporter", 10, 30, 950, null),
 
   COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, true, "collateral_individual", 20, 30,
       90, null),
@@ -53,19 +53,28 @@ public enum NeutronDefaultJobSchedule {
   /**
    * Client name aliases.
    */
-  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 90, 45, 60, "akas"),
+  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, false, "other_client_name", 90, 45, 300, "akas"),
 
-  CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 70, 30, 55, "cases"),
+  /**
+   * Child cases.
+   */
+  CHILD_CASE(ChildCaseHistoryIndexerJob.class, false, "child_case", 70, 30, 550, "cases"),
 
-  PARENT_CASE(ParentCaseHistoryIndexerJob.class, false, "parent_case", 90, 30, 50, "cases"),
+  /**
+   * Parent cases.
+   */
+  PARENT_CASE(ParentCaseHistoryIndexerJob.class, false, "parent_case", 90, 30, 500, "cases"),
 
-  REFERRAL(ReferralHistoryIndexerJob.class, false, "referral", 90, 30, 45, "referrals"),
+  /**
+   * Referrals.
+   */
+  REFERRAL(ReferralHistoryIndexerJob.class, false, "referral", 45, 30, 700, "referrals"),
 
-  RELATIONSHIP(RelationshipIndexerJob.class, false, "relationship", 90, 30, 40, "relationships"),
+  RELATIONSHIP(RelationshipIndexerJob.class, false, "relationship", 90, 30, 600, "relationships"),
 
-  SAFETY_ALERT(SafetyAlertIndexerJob.class, false, "safety_alert", 90, 45, 35, "safety_alerts"),
+  SAFETY_ALERT(SafetyAlertIndexerJob.class, false, "safety_alert", 90, 45, 350, "safety_alerts"),
 
-  INTAKE_SCREENING(IntakeScreeningJob.class, false, "intake_screening", 90, 20, 30, "screenings");
+  INTAKE_SCREENING(IntakeScreeningJob.class, false, "intake_screening", 90, 20, 800, "screenings");
 
   private final Class<?> klazz;
 

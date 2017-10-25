@@ -15,102 +15,102 @@ public class NeutronSchedulerListener implements SchedulerListener {
 
   @Override
   public void jobScheduled(Trigger trigger) {
-    LOGGER.info("job scheduled");
+    LOGGER.debug("job scheduled");
   }
 
   @Override
   public void jobUnscheduled(TriggerKey triggerKey) {
-    LOGGER.info("job unscheduled");
+    LOGGER.debug("job unscheduled");
   }
 
   @Override
   public void triggerFinalized(Trigger trigger) {
-    LOGGER.info("trigger finalized");
+    LOGGER.debug("trigger finalized");
   }
 
   @Override
   public void triggerPaused(TriggerKey triggerKey) {
-    LOGGER.info("trigger paused");
+    LOGGER.debug("trigger paused");
   }
 
   @Override
   public void triggersPaused(String triggerGroup) {
-    LOGGER.info("triggers paused");
+    LOGGER.debug("triggers paused");
   }
 
   @Override
   public void triggerResumed(TriggerKey triggerKey) {
-    LOGGER.info("trigger resumed");
+    LOGGER.debug("trigger resumed");
   }
 
   @Override
   public void triggersResumed(String triggerGroup) {
-    LOGGER.info("triggers resumed");
+    LOGGER.debug("triggers resumed");
   }
 
   @Override
   public void jobAdded(JobDetail jobDetail) {
-    LOGGER.info("job added");
+    LOGGER.debug("job added");
   }
 
   @Override
   public void jobDeleted(JobKey jobKey) {
-    LOGGER.info("job deleted");
+    LOGGER.debug("job deleted");
   }
 
   @Override
   public void jobPaused(JobKey jobKey) {
-    LOGGER.info("job paused");
+    LOGGER.debug("job paused");
   }
 
   @Override
   public void jobsPaused(String jobGroup) {
-    LOGGER.info("jobs paused");
+    LOGGER.debug("jobs paused");
   }
 
   @Override
   public void jobResumed(JobKey jobKey) {
-    LOGGER.info("job resumed");
+    LOGGER.debug("job resumed");
   }
 
   @Override
   public void jobsResumed(String jobGroup) {
-    LOGGER.info("jobs resumed");
+    LOGGER.debug("jobs resumed");
   }
 
   @Override
   public void schedulerError(String msg, SchedulerException cause) {
-    LOGGER.info("scheduler error");
+    LOGGER.debug("scheduler error");
   }
 
   @Override
   public void schedulerInStandbyMode() {
-    LOGGER.info("scheduler in standby mode");
+    LOGGER.debug("scheduler in standby mode");
   }
 
   @Override
   public void schedulerStarted() {
-    LOGGER.info("scheduler started");
+    LOGGER.debug("scheduler started");
   }
 
   @Override
   public void schedulerStarting() {
-    LOGGER.info("scheduler starting");
+    LOGGER.debug("scheduler starting");
   }
 
   @Override
   public void schedulerShutdown() {
-    LOGGER.info("scheduler shutdown");
+    LOGGER.debug("scheduler shutdown");
   }
 
   @Override
   public void schedulerShuttingdown() {
-    LOGGER.info("scheduler shuttingdown");
+    LOGGER.debug("scheduler shuttingdown");
   }
 
   @Override
   public void schedulingDataCleared() {
-    LOGGER.info("scheduling data cleared");
+    LOGGER.debug("scheduling data cleared");
   }
 
 }

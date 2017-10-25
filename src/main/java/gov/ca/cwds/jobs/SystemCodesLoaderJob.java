@@ -47,6 +47,41 @@ public class SystemCodesLoaderJob {
     this.systemCodeDao = systemCodeDao;
   }
 
+  private void handleSystemMeta(Map<String, SystemMeta> systemMetaMap, NsSystemCode nsc,
+      String categoryId, final SystemCode systemCode) {
+    SystemMeta systemMeta = systemMetaMap.get(categoryId);
+    if (systemMeta != null) {
+      nsc.setCategoryDescription(StringUtils.trim(systemMeta.getShortDescriptionName()));
+    } else {
+      LOGGER.warn("Missing system meta for category {} for system code {}", categoryId,
+          systemCode.getSystemId());
+    }
+  }
+
+  private void handleLogicalId(final NsSystemCode nsc, final SystemCode systemCode) {
+    String logicalId = StringUtils.trim(systemCode.getLogicalId());
+    if (!StringUtils.isBlank(logicalId)) {
+      nsc.setLogicalId(logicalId);
+    } else {
+      LOGGER.warn("Missing logical ID for system code {}", systemCode.getSystemId());
+    }
+  }
+
+  private void handleSubCategory(Map<Short, SystemCode> systemCodeMap, final NsSystemCode nsc,
+      final SystemCode systemCode) {
+    Short subCategoryId = systemCode.getCategoryId();
+    if (subCategoryId != null && subCategoryId != 0) {
+      nsc.setSubCategoryId(subCategoryId.intValue());
+      SystemCode subCategoySystemCode = systemCodeMap.get(subCategoryId);
+      if (subCategoySystemCode != null) {
+        nsc.setSubCategoryDescription(StringUtils.trim(subCategoySystemCode.getShortDescription()));
+      } else {
+        LOGGER.warn("Missing system code for sub-category ID {} for system code {}", subCategoryId,
+            systemCode.getSystemId());
+      }
+    }
+  }
+
   /**
    * Delete and load system codes into new system.
    * 
@@ -95,34 +130,9 @@ public class SystemCodesLoaderJob {
           String categoryId = StringUtils.trim(systemCode.getForeignKeyMetaTable());
           nsc.setCategoryId(categoryId);
 
-          SystemMeta systemMeta = systemMetaMap.get(categoryId);
-          if (systemMeta != null) {
-            nsc.setCategoryDescription(StringUtils.trim(systemMeta.getShortDescriptionName()));
-          } else {
-            LOGGER.warn("Missing system meta for category {} for system code {}", categoryId,
-                systemCode.getSystemId());
-          }
-
-          Short subCategoryId = systemCode.getCategoryId();
-          if (subCategoryId != null && subCategoryId != 0) {
-            nsc.setSubCategoryId(subCategoryId.intValue());
-            SystemCode subCategoySystemCode = systemCodeMap.get(subCategoryId);
-            if (subCategoySystemCode != null) {
-              nsc.setSubCategoryDescription(
-                  StringUtils.trim(subCategoySystemCode.getShortDescription()));
-            } else {
-              LOGGER.warn("Missing system code for sub-category ID {} for system code {}",
-                  subCategoryId, systemCode.getSystemId());
-            }
-          }
-
-          String logicalId = StringUtils.trim(systemCode.getLogicalId());
-          if (!StringUtils.isBlank(logicalId)) {
-            nsc.setLogicalId(logicalId);
-          } else {
-            LOGGER.warn("Missing logical ID for system code {}", systemCode.getSystemId());
-          }
-
+          handleSystemMeta(systemMetaMap, nsc, categoryId, systemCode);
+          handleSubCategory(systemCodeMap, nsc, systemCode);
+          handleLogicalId(nsc, systemCode);
           systemCodeDao.createOrUpdate(nsc);
           loadedSystemCodes.put(nsc.getId(), nsc);
         }
