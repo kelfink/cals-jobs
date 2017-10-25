@@ -43,7 +43,7 @@ public class NeutronElasticValidator {
   public String fetchESPerson(String docId) {
     final ElasticsearchConfiguration config = esDao.getConfig();
     return esDao.searchIndexByQuery(config.getElasticsearchAlias(), "",
-        config.getElasticsearchHost(), Integer.valueOf(config.getElasticsearchPort()),
+        config.getElasticsearchHost(), Integer.parseInt(config.getElasticsearchPort()),
         config.getElasticsearchDocType());
   }
 

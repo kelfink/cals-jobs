@@ -49,6 +49,7 @@ public class MSearchJob extends
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
+   * @param validator document validation logic
    */
   @Inject
   public MSearchJob(final ReplicatedOtherAdultInPlacemtHomeDao dao, final ElasticsearchDao esDao,
@@ -59,8 +60,8 @@ public class MSearchJob extends
   }
 
   @Override
-  protected void doInitialLoadJdbc() {
-    extractHibernate();
+  public boolean isInitialLoadJdbc() {
+    return true;
   }
 
   @Override
@@ -68,12 +69,13 @@ public class MSearchJob extends
     LOGGER.info("MSEARCH!");
     final Client client = this.esDao.getClient();
 
-    // Bn0LhX6aah
     final SearchRequestBuilder srb1 =
         client.prepareSearch().setQuery(QueryBuilders.idsQuery().addIds("JRRwMqs06Q")).setSize(1);
+    final SearchRequestBuilder srb3 =
+        client.prepareSearch().setQuery(QueryBuilders.idsQuery().addIds("Bn0LhX6aah")).setSize(1);
     final SearchRequestBuilder srb2 = client.prepareSearch().setQuery(QueryBuilders
         .multiMatchQuery("N6dhOan15A", "cases.focus_child.legacy_descriptor.legacy_id")).setSize(1);
-    final MultiSearchResponse sr = client.prepareMultiSearch().add(srb1).add(srb2).get();
+    final MultiSearchResponse sr = client.prepareMultiSearch().add(srb1).add(srb2).add(srb3).get();
 
     // Fetch **ALL** individual responses from MultiSearchResponse#getResponses().
     long totalHits = 0;
@@ -88,6 +90,7 @@ public class MSearchJob extends
       }
     }
 
+    LOGGER.info("es host: {}", validator.getEsDao().getConfig().getElasticsearchHost());
     LOGGER.info("hits: {}", totalHits);
     return (int) totalHits;
   }
