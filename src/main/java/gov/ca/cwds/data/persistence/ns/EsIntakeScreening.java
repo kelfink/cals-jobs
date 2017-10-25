@@ -327,6 +327,86 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
     return fillScreening(null);
   }
 
+  private void addParticipantRoles(IntakeScreening s, IntakeParticipant otherPartc) {
+    if (!ArrayUtils.isEmpty(roles)) {
+      for (String role : roles) {
+        s.addParticipantRole(otherPartc.getId(), role);
+      }
+    }
+  }
+
+  private IntakeParticipant handleOtherParticipant(IntakeScreening s) {
+    IntakeParticipant otherPartc = null;
+    if (isNotBlank(otherParticipantId)) {
+      if (s.getParticipants().containsKey(otherParticipantId)) {
+        otherPartc = s.getParticipants().get(otherParticipantId);
+      } else {
+        otherPartc = fillParticipant(true);
+        s.addParticipant(otherPartc);
+        addParticipantRoles(s, otherPartc);
+      }
+    }
+
+    return otherPartc;
+  }
+
+  private IntakeAllegation makeAllegation(IntakeScreening s) {
+    IntakeAllegation alg;
+    if (s.getAllegations().containsKey(allegationId)) {
+      alg = s.getAllegations().get(allegationId);
+    } else {
+      alg = new IntakeAllegation();
+      alg.setId(allegationId);
+      s.addAllegation(alg);
+    }
+
+    return alg;
+  }
+
+  private void handleAllegations(String thisPartcId, IntakeScreening s,
+      IntakeParticipant otherPartc) {
+    final IntakeAllegation alg = makeAllegation(s);
+
+    if (isNotBlank(otherParticipantId)) {
+      if (flgPerpetrator) {
+        alg.setPerpetrator(otherPartc);
+      }
+
+      if (flgVictim) {
+        alg.setVictim(otherPartc);
+      }
+
+      if (flgReporter) {
+        fillParticipant(s.getReporter(), otherPartc.getId().equals(thisPartcId));
+      }
+
+      if (isNotBlank(addressId)) {
+        final ElasticSearchPersonAddress addr = new ElasticSearchPersonAddress();
+        addr.setId(addressId);
+        addr.setCity(city);
+        addr.setState(state);
+
+        // Synthetic, composite field, "state_name", not found in legacy.
+        addr.setStreetAddress(streetAddress);
+        addr.setType(addressType);
+        addr.setZip(zip);
+        otherPartc.addAddress(addr);
+      }
+
+      if (isNotBlank(phoneNumberId)) {
+        final ElasticSearchPersonPhone ph = new ElasticSearchPersonPhone();
+        ph.setId(phoneNumberId);
+        ph.setPhoneNumber(phoneNumber);
+
+        if (isNotBlank(phoneType)) {
+          ph.setPhoneType(PhoneType.valueOf(phoneType));
+        }
+
+        otherPartc.addPhone(ph);
+      }
+    }
+  }
+
   /**
    * Iterate screenings from the perspective of "this" participant. Separate "this" participant from
    * "other" participant. This job stores person documents in ES, not disconnected or independent
@@ -359,72 +439,8 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
         s = mapScreenings.get(screeningId);
       }
 
-      // Other participant.
-      final boolean hasOtherPartc = isNotBlank(otherParticipantId);
-      IntakeParticipant otherPartc = null;
-
-      if (hasOtherPartc) {
-        if (s.getParticipants().containsKey(otherParticipantId)) {
-          otherPartc = s.getParticipants().get(otherParticipantId);
-        } else {
-          otherPartc = fillParticipant(true);
-          s.addParticipant(otherPartc);
-
-          if (!ArrayUtils.isEmpty(roles)) {
-            for (String role : roles) {
-              s.addParticipantRole(otherPartc.getId(), role);
-            }
-          }
-        }
-      }
-
-      IntakeAllegation alg;
-      if (s.getAllegations().containsKey(allegationId)) {
-        alg = s.getAllegations().get(allegationId);
-      } else {
-        alg = new IntakeAllegation();
-        alg.setId(allegationId);
-        s.addAllegation(alg);
-      }
-
-      if (hasOtherPartc) {
-        if (flgPerpetrator) {
-          alg.setPerpetrator(otherPartc);
-        }
-
-        if (flgVictim) {
-          alg.setVictim(otherPartc);
-        }
-
-        if (flgReporter) {
-          fillParticipant(s.getReporter(), otherPartc.getId().equals(thisPartcId));
-        }
-
-        if (isNotBlank(addressId)) {
-          final ElasticSearchPersonAddress addr = new ElasticSearchPersonAddress();
-          addr.setId(addressId);
-          addr.setCity(city);
-          addr.setState(state);
-
-          // Synthetic, composite field, "state_name", not found in legacy.
-          addr.setStreetAddress(streetAddress);
-          addr.setType(addressType);
-          addr.setZip(zip);
-          otherPartc.addAddress(addr);
-        }
-
-        if (isNotBlank(phoneNumberId)) {
-          final ElasticSearchPersonPhone ph = new ElasticSearchPersonPhone();
-          ph.setId(phoneNumberId);
-          ph.setPhoneNumber(phoneNumber);
-
-          if (isNotBlank(phoneType)) {
-            ph.setPhoneType(PhoneType.valueOf(phoneType));
-          }
-
-          otherPartc.addPhone(ph);
-        }
-      }
+      final IntakeParticipant otherPartc = handleOtherParticipant(s);
+      handleAllegations(thisPartcId, s, otherPartc);
     } catch (Exception e) {
       // Log the offending record.
       LOGGER.error("OOPS! {}", this);

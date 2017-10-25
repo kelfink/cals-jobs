@@ -440,28 +440,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Reusable method to poll index queue, track counts, and bulk prepare documents.
-   * 
-   * @param bp ES bulk processor
-   * @param cntr record count
-   * @throws IOException on IO error
-   * @throws InterruptedException if thread interrupted
-   * @return number of documents prepared
-   */
-  protected int bulkPrepare(final BulkProcessor bp, int cntr)
-      throws IOException, InterruptedException {
-    int i = cntr;
-    T t;
-
-    while ((t = queueIndex.pollFirst(NeutronIntegerDefaults.POLL_MILLIS.getValue(),
-        TimeUnit.MILLISECONDS)) != null) {
-      JobLogs.logEvery(++i, "Indexed", "recs to ES");
-      prepareDocument(bp, t);
-    }
-    return i;
-  }
-
-  /**
    * The "load" part of ETL. Read from normalized record queue and push to ES.
    */
   protected void threadIndex() {
@@ -492,6 +470,28 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
 
     LOGGER.info("DONE: indexer thread");
+  }
+
+  /**
+   * Reusable method to poll index queue, track counts, and bulk prepare documents.
+   * 
+   * @param bp ES bulk processor
+   * @param cntr record count
+   * @throws IOException on IO error
+   * @throws InterruptedException if thread interrupted
+   * @return number of documents prepared
+   */
+  protected int bulkPrepare(final BulkProcessor bp, int cntr)
+      throws IOException, InterruptedException {
+    int i = cntr;
+    T t;
+
+    while ((t = queueIndex.pollFirst(NeutronIntegerDefaults.POLL_MILLIS.getValue(),
+        TimeUnit.MILLISECONDS)) != null) {
+      JobLogs.logEvery(++i, "Indexed", "recs to ES");
+      prepareDocument(bp, t);
+    }
+    return i;
   }
 
   /**

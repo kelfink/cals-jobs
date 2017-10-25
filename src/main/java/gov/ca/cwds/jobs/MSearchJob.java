@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs;
 
+import java.util.Date;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -60,12 +62,7 @@ public class MSearchJob extends
   }
 
   @Override
-  public boolean isInitialLoadJdbc() {
-    return true;
-  }
-
-  @Override
-  protected int extractHibernate() {
+  public Date executeJob(Date lastSuccessfulRunTime) {
     LOGGER.info("MSEARCH!");
     final Client client = this.esDao.getClient();
 
@@ -86,13 +83,13 @@ public class MSearchJob extends
 
       for (SearchHit hit : hits.getHits()) {
         LOGGER.info("hit: {}",
-            ToStringBuilder.reflectionToString(hit, ToStringStyle.DEFAULT_STYLE)); // NOSONAR
+            ToStringBuilder.reflectionToString(hit, ToStringStyle.MULTI_LINE_STYLE)); // NOSONAR
       }
     }
 
     LOGGER.info("es host: {}", validator.getEsDao().getConfig().getElasticsearchHost());
     LOGGER.info("hits: {}", totalHits);
-    return (int) totalHits;
+    return lastSuccessfulRunTime;
   }
 
   /**
