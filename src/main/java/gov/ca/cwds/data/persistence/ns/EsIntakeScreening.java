@@ -159,6 +159,7 @@ public class EsIntakeScreening implements PersistentObject, ApiGroupNormalizer<I
   @Column(name = "PARTICIPANT_ID")
   private String otherParticipantId;
 
+  @Id
   @Column(name = "PERSON_LEGACY_ID")
   private String otherLegacyId;
 

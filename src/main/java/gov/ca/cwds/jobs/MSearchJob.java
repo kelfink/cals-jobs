@@ -38,7 +38,7 @@ public class MSearchJob extends
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MSearchJob.class);
 
-  private final NeutronElasticValidator validator;
+  private transient NeutronElasticValidator validator;
 
   /**
    * Construct batch job instance with all required dependencies.
