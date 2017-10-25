@@ -467,7 +467,12 @@ public class JobRunner {
     return trackHistory;
   }
 
-  public void addJobTrack(Class<?> klazz, JobProgressTrack track) {
+  public void addTrack(Class<?> klazz, JobProgressTrack track) {
+    lastTracks.put(klazz, track);
+
+    if (!trackHistory.containsKey(klazz)) {
+      trackHistory.put(klazz, new ArrayList<>());
+    }
     trackHistory.get(klazz).add(track);
   }
 
@@ -495,15 +500,6 @@ public class JobRunner {
 
   public JobProgressTrack getLastTrack(final Class<?> klazz) {
     return lastTracks.get(klazz);
-  }
-
-  public void addLastTrack(final Class<?> klazz, final JobProgressTrack track) {
-    lastTracks.put(klazz, track);
-
-    if (!trackHistory.containsKey(klazz)) {
-      trackHistory.put(klazz, new ArrayList<>());
-    }
-    trackHistory.get(klazz).add(track);
   }
 
   public void addExecutingJob(final TriggerKey key, NeutronInterruptableJob job) {

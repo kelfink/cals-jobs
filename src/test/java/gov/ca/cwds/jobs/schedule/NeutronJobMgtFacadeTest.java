@@ -19,6 +19,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
 
+import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 
 public class NeutronJobMgtFacadeTest {
@@ -95,7 +96,7 @@ public class NeutronJobMgtFacadeTest {
     jdm.put("track", track);
 
     when(jd.getJobDataMap()).thenReturn(jdm);
-
+    JobRunner.getInstance().addTrack(ClientIndexerJob.class, track);
     target.status();
   }
 
