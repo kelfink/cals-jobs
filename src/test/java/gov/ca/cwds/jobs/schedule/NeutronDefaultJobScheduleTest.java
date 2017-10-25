@@ -48,7 +48,7 @@ public class NeutronDefaultJobScheduleTest {
   @Test
   public void getLoadOrder_Args__() throws Exception {
     NeutronDefaultJobSchedule target = NeutronDefaultJobSchedule.COLLATERAL_INDIVIDUAL;
-    int actual = target.getPriority();
+    int actual = target.getLastRunPriority();
     assertThat(actual, is(not(5)));
   }
 

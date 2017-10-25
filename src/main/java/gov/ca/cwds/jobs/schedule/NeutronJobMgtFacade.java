@@ -73,13 +73,13 @@ public class NeutronJobMgtFacade implements Serializable {
     // Initial mode: run only once.
     final Trigger trg = !JobRunner.isInitialMode()
         ? newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
-            .withPriority(defaultSchedule.getPriority())
+            .withPriority(defaultSchedule.getLastRunPriority())
             .withSchedule(simpleSchedule().withIntervalInSeconds(defaultSchedule.getPeriodSeconds())
                 .repeatForever())
             .startAt(DateTime.now().plusSeconds(defaultSchedule.getStartDelaySeconds()).toDate())
             .build()
         : newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_FULL_LOAD)
-            .withPriority(defaultSchedule.getPriority())
+            .withPriority(defaultSchedule.getLastRunPriority())
             .startAt(DateTime.now().plusSeconds(defaultSchedule.getStartDelaySeconds()).toDate())
             .build();
 

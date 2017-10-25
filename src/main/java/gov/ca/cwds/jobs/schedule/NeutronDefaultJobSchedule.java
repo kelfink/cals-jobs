@@ -86,7 +86,7 @@ public enum NeutronDefaultJobSchedule {
 
   private final int periodSeconds;
 
-  private final int priority;
+  private final int lastRunPriority;
 
   private final String jsonElement;
 
@@ -99,13 +99,13 @@ public enum NeutronDefaultJobSchedule {
   }
 
   private NeutronDefaultJobSchedule(Class<?> klazz, boolean newDocument, String name,
-      int startDelaySeconds, int periodSeconds, int loadPriority, String jsonElement) {
+      int startDelaySeconds, int periodSeconds, int lastRunPriority, String jsonElement) {
     this.klazz = klazz;
     this.newDocument = newDocument;
     this.name = name;
     this.startDelaySeconds = startDelaySeconds;
     this.periodSeconds = periodSeconds;
-    this.priority = loadPriority;
+    this.lastRunPriority = lastRunPriority;
     this.jsonElement = jsonElement;
   }
 
@@ -129,8 +129,8 @@ public enum NeutronDefaultJobSchedule {
     return periodSeconds;
   }
 
-  public int getPriority() {
-    return priority;
+  public int getLastRunPriority() {
+    return lastRunPriority;
   }
 
   public String getJsonElement() {

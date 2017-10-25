@@ -161,6 +161,43 @@ public class JobRunner {
     }
   }
 
+  protected void configureQuartz() throws SchedulerException {
+    // Quartz scheduling:
+    final Properties p = new Properties();
+    p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
+
+    // NOTE: make configurable.
+    p.put("org.quartz.threadPool.threadCount",
+        initialMode ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
+    final StdSchedulerFactory factory = new StdSchedulerFactory(p);
+    scheduler = factory.getScheduler();
+
+    // Scheduler listeners.
+    final ListenerManager listenerMgr = scheduler.getListenerManager();
+    listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
+    listenerMgr.addJobListener(new NeutronJobListener());
+    listenerMgr.addTriggerListener(new NeutronTriggerListener());
+  }
+
+  protected void handleTimeFile(final JobOptions opts, final DateFormat fmt, final Date now,
+      NeutronDefaultJobSchedule sched) throws IOException {
+    // Find the job's time file under the base directory:
+    final StringBuilder buf = new StringBuilder();
+    buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
+        .append(".time");
+    final String timeFileLoc = buf.toString();
+    opts.setLastRunLoc(timeFileLoc);
+
+    // If timestamp file doesn't exist, create it.
+    final File f = new File(timeFileLoc);
+    final boolean fileExists = f.exists();
+    final boolean overrideLastRunTime = opts.getLastRunTime() != null;
+
+    if (!fileExists || initialMode) {
+      FileUtils.writeStringToFile(f, fmt.format(overrideLastRunTime ? opts.getLastRunTime() : now));
+    }
+  }
+
   /**
    * Expose job execution operations through JMX.
    * 
@@ -169,21 +206,7 @@ public class JobRunner {
   @SuppressWarnings("unchecked")
   protected void initScheduler() throws NeutronException {
     try {
-      // Quartz scheduling:
-      final Properties p = new Properties();
-      p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
-
-      // NOTE: make configurable.
-      p.put("org.quartz.threadPool.threadCount",
-          initialMode ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
-      final StdSchedulerFactory factory = new StdSchedulerFactory(p);
-      scheduler = factory.getScheduler();
-
-      // Scheduler listeners.
-      final ListenerManager listenerMgr = scheduler.getListenerManager();
-      listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
-      listenerMgr.addJobListener(new NeutronJobListener());
-      listenerMgr.addTriggerListener(new NeutronTriggerListener());
+      configureQuartz();
 
       // JMX:
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
@@ -205,22 +228,7 @@ public class JobRunner {
         final Class<?> klass = sched.getKlazz();
         final JobOptions opts = new JobOptions(startingOpts);
 
-        // Find the job's time file under the base directory:
-        final StringBuilder buf = new StringBuilder();
-        buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
-            .append(".time");
-        final String timeFileLoc = buf.toString();
-        opts.setLastRunLoc(timeFileLoc);
-
-        // If timestamp file doesn't exist, create it.
-        final File f = new File(timeFileLoc);
-        final boolean fileExists = f.exists();
-        final boolean overrideLastRunTime = opts.getLastRunTime() != null;
-
-        if (!fileExists || initialMode) {
-          FileUtils.writeStringToFile(f,
-              fmt.format(overrideLastRunTime ? opts.getLastRunTime() : now));
-        }
+        handleTimeFile(opts, fmt, now, sched);
 
         if (!testMode) {
           registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
