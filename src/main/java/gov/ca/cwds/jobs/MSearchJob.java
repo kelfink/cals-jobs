@@ -64,8 +64,8 @@ public class MSearchJob extends
     try {
       return ElasticSearchPerson.MAPPER.readValue(json, ElasticSearchPerson.class);
     } catch (IOException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO READ ES PERSON! {}", e.getMessage(),
-          e);
+      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO READ PERSON DOC! {}",
+          e.getMessage(), e);
     }
   }
 
@@ -83,7 +83,6 @@ public class MSearchJob extends
         esClient.prepareMultiSearch().add(esClient.prepareSearch().setQuery(QueryBuilders.idsQuery()
             .addIds("Ahr3T2S0BN", "Bn0LhX6aah", "DUy4ET400b", "AkxX6G50Ki"))).add(srb2).get();
 
-    // Fetch **ALL** individual responses from MultiSearchResponse#getResponses().
     long totalHits = 0;
     for (MultiSearchResponse.Item item : sr.getResponses()) {
       final SearchResponse response = item.getResponse();
@@ -97,9 +96,8 @@ public class MSearchJob extends
           LOGGER.info("person: {}", person);
         }
       } catch (NeutronException e) {
-        LOGGER.error("whatever");
+        LOGGER.warn("whatever", e);
       }
-
     }
 
     LOGGER.info("es host: {}", validator.getEsDao().getConfig().getElasticsearchHost());
