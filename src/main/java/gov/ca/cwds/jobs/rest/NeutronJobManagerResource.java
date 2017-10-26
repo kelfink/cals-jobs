@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.rest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.annotation.Nonnull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -47,8 +48,8 @@ public class NeutronJobManagerResource implements ApiMarker {
   @Consumes(MediaType.WILDCARD)
   @Produces(MediaType.APPLICATION_JSON)
   public String masterAndCommander(@PathParam("jobName") String jobName,
-      @PathParam("command") String command, String body) {
-    // LOGGER.info("job name: {}, command: {}, POST body len: {}", jobName, command, body.length());
+      @PathParam("command") String command, @Nonnull String body) {
+    LOGGER.info("job name: {}, command: {}, POST body len: {}", jobName, command, body.length());
     final StringBuilder buf = new StringBuilder();
     buf.append("{\"result\":\"ACK\",\"job_name\":\"").append(jobName).append("\",\"command\":\"")
         .append(command).append("\"}");
