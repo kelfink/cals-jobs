@@ -536,6 +536,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       if (results != null && !results.isEmpty()) {
         LOGGER.info("Found {} people to index", results.size());
         results.stream().forEach(p -> { // NOSONAR
+          getTrack().addAffectedDocumentId(p.getPrimaryKey().toString());
           prepareDocumentTrapIO(bp, p);
         });
       }

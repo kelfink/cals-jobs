@@ -4,8 +4,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -79,7 +81,7 @@ public class JobProgressTrack implements ApiMarker {
   private final List<Pair<String, String>> initialLoadRangesCompleted = new ArrayList<>();
 
   // last change only
-  private final List<String> affectedDocuments = new ArrayList<>();
+  private final Queue<String> sampleDocumentKeys = new CircularFifoQueue<>();
 
   public AtomicInteger getRecsSentToIndexQueue() {
     return recsSentToIndexQueue;
@@ -205,6 +207,11 @@ public class JobProgressTrack implements ApiMarker {
         .append("\n\tbulk after:      ").append(pad(recsBulkAfter.get()))
         .append("\n\tbulk errors:     ").append(pad(recsBulkError.get()));
 
+    if (!getSampleDocumentKeys().isEmpty()) {
+      buf.append("\n\n    SAMPLE DOCUMENTS:").append("\n\tdocument id's:    ")
+          .append(StringUtils.join(getSampleDocumentKeys()));
+    }
+
     buf.append("\n]");
     return buf.toString();
   }
@@ -226,7 +233,7 @@ public class JobProgressTrack implements ApiMarker {
   }
 
   public void addAffectedDocumentId(String docId) {
-    affectedDocuments.add(docId);
+    sampleDocumentKeys.add(docId);
   }
 
   public String getJobName() {
@@ -249,8 +256,8 @@ public class JobProgressTrack implements ApiMarker {
     return status;
   }
 
-  public List<String> getAffectedDocuments() {
-    return affectedDocuments;
+  public Queue<String> getSampleDocumentKeys() {
+    return sampleDocumentKeys;
   }
 
 }

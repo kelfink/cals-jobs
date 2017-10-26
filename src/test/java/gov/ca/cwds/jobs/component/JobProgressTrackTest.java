@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -269,9 +270,8 @@ public class JobProgressTrackTest {
 
   @Test
   public void getAffectedDocuments_Args__() throws Exception {
-    List<String> actual = target.getAffectedDocuments();
-    List<String> expected = new ArrayList<>();
-    assertThat(actual, is(equalTo(expected)));
+    Queue<String> actual = target.getSampleDocumentKeys();
+    assertThat(actual, is(notNullValue()));
   }
 
 }

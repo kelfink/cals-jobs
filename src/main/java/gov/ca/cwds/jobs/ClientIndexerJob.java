@@ -248,7 +248,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   protected List<Pair<String, String>> getPartitionRanges() {
     // WARNING: **short-term** fix for county table in Perf and Prod.
     EsClientAddress.setUseCounty(isLargeDataSet());
-    return JobJdbcUtils.getCommonPartitionRanges16(this);
+    return JobJdbcUtils.getCommonPartitionRanges64(this);
   }
 
   /**
