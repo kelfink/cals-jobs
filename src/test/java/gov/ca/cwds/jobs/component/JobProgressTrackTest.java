@@ -230,7 +230,7 @@ public class JobProgressTrackTest {
 
   @Test
   public void addAffectedDocumentId_Args__String() throws Exception {
-    String docId = null;
+    String docId = "abc1234567";
     target.addAffectedDocumentId(docId);
   }
 
