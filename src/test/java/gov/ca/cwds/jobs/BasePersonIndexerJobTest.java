@@ -43,6 +43,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.JobRunner;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
@@ -510,7 +511,7 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  @Test(expected = JobsException.class)
+  @Test(expected = NeutronException.class)
   public void _run_Args__Date__error() throws Exception {
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
@@ -523,9 +524,7 @@ public class BasePersonIndexerJobTest
   @Test
   public void threadRetrieveByJdbc_Args__() throws Exception {
     when(rs.next()).thenReturn(true, false);
-
     runKillThread(target);
-
     target.reset();
     target.threadRetrieveByJdbc();
     sleepItOff();
