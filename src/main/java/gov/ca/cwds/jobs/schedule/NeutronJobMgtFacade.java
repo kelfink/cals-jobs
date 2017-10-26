@@ -103,6 +103,14 @@ public class NeutronJobMgtFacade implements Serializable {
     return JobRunner.getInstance().getLastTrack(this.defaultSchedule.getKlazz()).toString();
   }
 
+  @Managed(description = "Show job history")
+  public String history() {
+    StringBuilder buf = new StringBuilder();
+    JobRunner.getInstance().getTrackHistory().get(this.defaultSchedule.getKlazz()).stream()
+        .forEach(t -> buf.append(t));
+    return buf.toString();
+  }
+
   @Managed(description = "Stop running job")
   public void stop() throws SchedulerException {
     LOGGER.warn("Stop running job");
