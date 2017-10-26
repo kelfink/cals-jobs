@@ -12,6 +12,7 @@ import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.CollateralIndividualIndexerJob;
 import gov.ca.cwds.jobs.EducationProviderContactIndexerJob;
 import gov.ca.cwds.jobs.IntakeScreeningJob;
+import gov.ca.cwds.jobs.MSearchJob;
 import gov.ca.cwds.jobs.OtherAdultInPlacemtHomeIndexerJob;
 import gov.ca.cwds.jobs.OtherChildInPlacemtHomeIndexerJob;
 import gov.ca.cwds.jobs.OtherClientNameIndexerJob;
@@ -29,6 +30,9 @@ public enum NeutronDefaultJobSchedule {
   // Person document roots.
   //
 
+  /**
+   * Client. Essential document root.
+   */
   CLIENT(ClientIndexerJob.class, true, "client", 1, 5, 20, 1000, null),
 
   REPORTER(ReporterIndexerJob.class, true, "reporter", 2, 10, 30, 950, null),
@@ -69,19 +73,32 @@ public enum NeutronDefaultJobSchedule {
    */
   PARENT_CASE(ParentCaseHistoryIndexerJob.class, false, "parent_case", 30, 90, 30, 500, "cases"),
 
-  RELATIONSHIP(RelationshipIndexerJob.class, false, "relationship", 40, 90, 30, 600,
-      "relationships"),
+  /**
+   * Relationships.
+   */
+  RELATIONSHIP(RelationshipIndexerJob.class, false, "relationship", 40, 90, 30, 600, "relationships"),
 
   /**
    * Referrals.
    */
   REFERRAL(ReferralHistoryIndexerJob.class, false, "referral", 50, 45, 30, 700, "referrals"),
 
-  SAFETY_ALERT(SafetyAlertIndexerJob.class, false, "safety_alert", 60, 90, 45, 350,
-      "safety_alerts"),
+  /**
+   * Safety alerts.
+   */
+  SAFETY_ALERT(SafetyAlertIndexerJob.class, false, "safety_alert", 60, 90, 45, 350, "safety_alerts"),
 
-  INTAKE_SCREENING(IntakeScreeningJob.class, false, "intake_screening", 70, 90, 20, 800,
-      "screenings");
+  /**
+   * Screenings.
+   */
+  INTAKE_SCREENING(IntakeScreeningJob.class, false, "intake_screening", 70, 90, 20, 800, "screenings"),
+
+  /**
+   * Validation.
+   */
+  VALIDATE_LAST_RUN(MSearchJob.class, false, "validate_last_run", 90, 90, 10, 100, null)
+
+  ;
 
   private final Class<?> klazz;
 

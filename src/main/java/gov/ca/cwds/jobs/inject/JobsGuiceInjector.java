@@ -72,6 +72,7 @@ import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.schedule.JobRunner;
 import gov.ca.cwds.jobs.service.NeutronElasticValidator;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
@@ -145,6 +146,8 @@ public class JobsGuiceInjector extends AbstractModule {
 
         // Initialize system code cache.
         injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
+
+        // Static injection.
         ElasticTransformer.setMapper(injector.getInstance(ObjectMapper.class));
       } catch (CreationException e) {
         throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO BUILD INJECTOR! {}",
@@ -281,6 +284,12 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ElasticsearchDao.class).asEagerSingleton();
 
     bind(NeutronElasticValidator.class);
+  }
+
+  @Provides
+  @Singleton
+  public JobRunner provideJobRunner() {
+    return JobRunner.getInstance();
   }
 
   @Provides

@@ -8,13 +8,12 @@ import java.lang.management.ManagementFactory;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.quartz.ListenerManager;
@@ -83,11 +82,10 @@ public class JobRunner {
 
   private final Map<TriggerKey, NeutronInterruptableJob> executingJobs = new ConcurrentHashMap<>();
 
-  private final Map<Class<?>, List<JobProgressTrack>> trackHistory = new ConcurrentHashMap<>();
+  private final Map<Class<?>, CircularFifoQueue<JobProgressTrack>> trackHistory =
+      new ConcurrentHashMap<>();
 
   private final Map<Class<?>, JobProgressTrack> lastTracks = new ConcurrentHashMap<>();
-
-  // CircularFifoQueue
 
   private JobRunner() {
     // Default, no-op
@@ -242,12 +240,13 @@ public class JobRunner {
         final NeutronJobMgtFacade nj = new NeutronJobMgtFacade(scheduler, sched);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         scheduleRegistry.put(klass, nj);
-        trackHistory.put(sched.getKlazz(), new ArrayList<JobProgressTrack>());
+        trackHistory.put(sched.getKlazz(), new CircularFifoQueue<JobProgressTrack>(96));
       }
 
+      // Expose JobRunner methods to JMX.
       exporter.export("Neutron:runner=master", this);
 
-      // Expose Guice bean attributes through JMX.
+      // Expose Guice bean attributes to JMX.
       Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
 
       // Start last change jobs.
@@ -461,7 +460,7 @@ public class JobRunner {
     return initialMode;
   }
 
-  public Map<Class<?>, List<JobProgressTrack>> getTrackHistory() {
+  public Map<Class<?>, CircularFifoQueue<JobProgressTrack>> getTrackHistory() {
     return trackHistory;
   }
 
@@ -469,7 +468,7 @@ public class JobRunner {
     lastTracks.put(klazz, track);
 
     if (!trackHistory.containsKey(klazz)) {
-      trackHistory.put(klazz, new ArrayList<>());
+      trackHistory.put(klazz, new CircularFifoQueue<>(96));
     }
     trackHistory.get(klazz).add(track);
   }
