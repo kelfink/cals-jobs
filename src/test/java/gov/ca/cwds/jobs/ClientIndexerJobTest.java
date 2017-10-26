@@ -157,7 +157,7 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
     final List actual = target.getPartitionRanges();
-    assertThat(actual.size(), is(equalTo(16)));
+    assertThat(actual.size(), is(equalTo(64)));
   }
 
   @Test
