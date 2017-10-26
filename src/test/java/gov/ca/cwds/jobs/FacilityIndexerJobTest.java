@@ -17,7 +17,6 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.Elasticsearch5xDao;
@@ -49,12 +48,25 @@ public class FacilityIndexerJobTest
 
   File config;
   TestFacilityIndexerJob target;
+  JobConfiguration jobConfiguration;
+  FacilityRowMapper facilityRowMapper;
+  SessionFactory sessionFactory;
+  PreparedStatement statement;
+  Function<Connection, PreparedStatement> func;
+  JobConfiguration config_;
 
   @Override
   @Before
   public void setup() throws Exception {
     super.setup();
     target = new TestFacilityIndexerJob(config);
+
+    config_ = mock(JobConfiguration.class);
+    jobConfiguration = mock(JobConfiguration.class);
+    facilityRowMapper = mock(FacilityRowMapper.class);
+    sessionFactory = mock(SessionFactory.class);
+    statement = mock(PreparedStatement.class);
+    func = c -> statement;
   }
 
   @Test
@@ -69,7 +81,6 @@ public class FacilityIndexerJobTest
 
   @Test
   public void elasticsearchClient_Args__JobConfiguration() throws Exception {
-    JobConfiguration config_ = mock(JobConfiguration.class);
     when(config_.getElasticsearchCluster()).thenReturn("elasticsearch");
     when(config_.getElasticsearchHost()).thenReturn("localhost");
     when(config_.getElasticsearchPort()).thenReturn("9200");
@@ -95,12 +106,6 @@ public class FacilityIndexerJobTest
   @Test
   public void lisItemReader_Args__JobConfiguration__FacilityRowMapper__SessionFactory()
       throws Exception {
-    JobConfiguration jobConfiguration = mock(JobConfiguration.class);
-    FacilityRowMapper facilityRowMapper = mock(FacilityRowMapper.class);
-    SessionFactory sessionFactory = mock(SessionFactory.class);
-    PreparedStatement statement = mock(PreparedStatement.class);
-    Function<Connection, PreparedStatement> func = c -> statement;
-
     JobReader actual =
         target.lisItemReader(jobConfiguration, facilityRowMapper, sessionFactory, func);
     assertThat(actual, is(notNullValue()));
@@ -114,12 +119,12 @@ public class FacilityIndexerJobTest
   }
 
   @Test
-  @Ignore
+  // @Ignore
   public void lisItemWriter_Args__Elasticsearch5xDao__ObjectMapper() throws Exception {
     Elasticsearch5xDao elasticsearchDao = mock(Elasticsearch5xDao.class);
+    when(elasticsearchDao.getClient()).thenReturn(client);
     JobWriter actual = target.lisItemWriter(elasticsearchDao, MAPPER);
-    JobWriter expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
