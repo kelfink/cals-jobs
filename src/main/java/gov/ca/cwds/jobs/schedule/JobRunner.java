@@ -72,8 +72,6 @@ public class JobRunner {
 
   private ElasticsearchDao esDao;
 
-  private ListenerManager listenerMgr;
-
   private NeutronRestServer restServer = new NeutronRestServer();
 
   /**
@@ -175,7 +173,7 @@ public class JobRunner {
     scheduler = factory.getScheduler();
 
     // Scheduler listeners.
-    listenerMgr = scheduler.getListenerManager();
+    final ListenerManager listenerMgr = scheduler.getListenerManager();
     listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
     listenerMgr.addTriggerListener(new NeutronTriggerListener());
     listenerMgr.addJobListener(initialMode ? NeutronDefaultJobSchedule.fullLoadJobChainListener()

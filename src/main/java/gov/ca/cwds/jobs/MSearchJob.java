@@ -93,8 +93,9 @@ public class MSearchJob extends
 
       try {
         for (SearchHit hit : hits.getHits()) {
-          LOGGER.info("hit as string: {}", hit.getSourceAsString());
-          final ElasticSearchPerson person = readPerson(hit.getSourceAsString());
+          final String json = hit.getSourceAsString();
+          LOGGER.info("json: {}", json);
+          final ElasticSearchPerson person = readPerson(json);
           LOGGER.info("person: {}", person);
         }
       } catch (NeutronException e) {

@@ -65,6 +65,7 @@ import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.defaults.NeutronElasticsearchDefaults;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.JobRunner;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
@@ -576,7 +577,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @see gov.ca.cwds.jobs.LastSuccessfulRunJob#executeJob(java.util.Date)
    */
   @Override
-  public Date executeJob(Date lastSuccessfulRunTime) {
+  public Date executeJob(Date lastSuccessfulRunTime) throws NeutronException {
     Date ret;
     try {
       LOGGER.info("RUNNING JOB: {}", getClass().getName());
@@ -625,14 +626,16 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       // CHECKSTYLE:OFF
-      LOGGER.info("Updating last successful run time to {}",
-          new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
-              .format(startTime)); // NOSONAR
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("Updating last successful run time to {}",
+            new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
+                .format(startTime));
+      }
       // CHECKSTYLE:ON
       ret = new Date(this.startTime);
     } catch (Exception e) {
       fail();
-      throw JobLogs.buildRuntimeException(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
+      throw JobLogs.buildCheckedException(LOGGER, e, "JOB BOMBED! {}", e.getMessage());
     } finally {
       done();
       try {

@@ -190,8 +190,8 @@ public class FacilityIndexerJob extends AbstractModule {
 
   public static void main(String[] args) {
     if (args.length == 0) {
-      LOGGER.warn("usage: java -cp jobs.jar " + FacilityIndexerJob.class.getName()
-          + " path/to/config/file.yaml");
+      LOGGER.warn("usage: java -cp jobs.jar {} {}", FacilityIndexerJob.class.getName(),
+          " path/to/config/file.yaml");
     }
     try {
       File configFile = new File(args[0]);

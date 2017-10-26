@@ -114,7 +114,9 @@ public class JobJdbcUtils {
     final Integer[] positions = IntStream.rangeClosed(0, len - 1).boxed().flatMap(everyNth(skip))
         .sorted().sequential().collect(Collectors.toList()).toArray(new Integer[0]);
 
-    LOGGER.info(ToStringBuilder.reflectionToString(positions, ToStringStyle.MULTI_LINE_STYLE));
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info(ToStringBuilder.reflectionToString(positions, ToStringStyle.MULTI_LINE_STYLE));
+    }
 
     List<Pair<String, String>> ret = new ArrayList<>();
     for (int i = 0; i < positions.length; i++) {

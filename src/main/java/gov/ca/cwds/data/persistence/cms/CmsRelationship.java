@@ -6,8 +6,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -20,8 +18,6 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 public final class CmsRelationship implements ApiMarker {
 
   private static final long serialVersionUID = 1L;
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(CmsRelationship.class);
 
   private static final Pattern RGX_RELATIONSHIP = Pattern
       .compile("^\\s*([A-Za-z0-9 _-]+)[/]?([A-Za-z0-9 _-]+)?\\s*(\\([A-Za-z0-9 _-]+\\))?\\s*$"); // NOSONAR

@@ -20,6 +20,7 @@ import gov.ca.cwds.jobs.component.Job;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.JobRunner;
 import gov.ca.cwds.jobs.util.JobLogs;
 
@@ -97,15 +98,22 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
     final Date lastRunTime = determineLastSuccessfulRunTime();
     track.setLastChangeSince(lastRunTime);
 
-    final Date curentTimeRunTime = executeJob(lastRunTime);
+
+    try {
+      final Date curentTimeRunTime = executeJob(lastRunTime);
+      if (!isFailed()) {
+        writeLastSuccessfulRunTime(curentTimeRunTime);
+      }
+    } catch (Exception e) {
+      LOGGER.error("FAIL JOB", e);
+    }
+
     track.done();
     JobRunner.getInstance().addTrack(getClass(), track);
 
     // SLF4J does not yet support conditional invocation.
-    LOGGER.info("" + track);
-
-    if (!isFailed()) {
-      writeLastSuccessfulRunTime(curentTimeRunTime);
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info(track.toString());
     }
 
     finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
@@ -290,8 +298,9 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    * 
    * @param lastSuccessfulRunTime The last successful run
    * @return The time of the latest run if successful.
+   * @throws NeutronException if job fails
    */
-  public abstract Date executeJob(Date lastSuccessfulRunTime);
+  public abstract Date executeJob(Date lastSuccessfulRunTime) throws NeutronException;
 
   /**
    * Marks the job as completed. Close resources, notify listeners, or even close JVM.
