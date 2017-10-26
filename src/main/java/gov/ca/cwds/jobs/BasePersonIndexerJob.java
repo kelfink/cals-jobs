@@ -624,8 +624,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         doLastRun(lastRun);
       }
 
-      // SLF4J does not yet support conditional invocation.
-      LOGGER.info("" + track); // NOSONAR
       // CHECKSTYLE:OFF
       LOGGER.info("Updating last successful run time to {}",
           new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())

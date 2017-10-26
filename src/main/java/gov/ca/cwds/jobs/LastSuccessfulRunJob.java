@@ -101,6 +101,9 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
     track.done();
     JobRunner.getInstance().addTrack(getClass(), track);
 
+    // SLF4J does not yet support conditional invocation.
+    LOGGER.info("" + track);
+
     if (!isFailed()) {
       writeLastSuccessfulRunTime(curentTimeRunTime);
     }
