@@ -12,6 +12,7 @@ import org.elasticsearch.client.Requests;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -50,7 +51,7 @@ public class Elasticsearch5xDao implements Closeable, ApiMarker {
    */
   private static final long serialVersionUID = 1L;
 
-  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Elasticsearch5xDao.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Elasticsearch5xDao.class);
 
   private static final int NUMBER_OF_SHARDS = 5;
 
@@ -105,7 +106,7 @@ public class Elasticsearch5xDao implements Closeable, ApiMarker {
     CreateIndexRequest indexRequest = new CreateIndexRequest(index, indexSettings);
     getClient().admin().indices().create(indexRequest).actionGet();
 
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
     IOUtils.copy(
         this.getClass().getResourceAsStream("/elasticsearch/mapping/map_person_5x_snake.json"),
         out);

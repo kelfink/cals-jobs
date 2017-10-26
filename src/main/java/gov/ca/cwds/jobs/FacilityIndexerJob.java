@@ -2,6 +2,10 @@ package gov.ca.cwds.jobs;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.function.Function;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -29,10 +33,11 @@ import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.model.facility.es.ESFacility;
 import gov.ca.cwds.jobs.component.Job;
 import gov.ca.cwds.jobs.config.JobConfiguration;
-import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.facility.FacilityProcessor;
 import gov.ca.cwds.jobs.facility.FacilityRowMapper;
 import gov.ca.cwds.jobs.util.AsyncReadWriteJob;
+import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.JobProcessor;
 import gov.ca.cwds.jobs.util.JobReader;
 import gov.ca.cwds.jobs.util.JobWriter;
@@ -69,24 +74,8 @@ public class FacilityIndexerJob extends AbstractModule {
     this.config = config;
   }
 
-  public static void main(String[] args) {
-    if (args.length == 0) {
-      LOGGER.warn(
-          "usage: java -cp jobs.jar gov.ca.cwds.jobs.FacilityIndexerJob path/to/config/file.yaml");
-    }
-    try {
-      File configFile = new File(args[0]); // NOSONAR
-      Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile));
-      Job job = injector.getInstance(Key.get(Job.class, Names.named("facility-job")));
-      job.run();
-    } catch (Exception e) {
-      LOGGER.error("ERROR: {}", e.getMessage(), e);
-    }
-  }
-
   @Override
   protected void configure() {
-    // DRS: let Guice inject dependencies for you instead of calling Guice here.
     bind(SessionFactory.class).annotatedWith(Names.named(LIS_SESSION_FACTORY_NM))
         .toInstance(new Configuration().configure("lis-hibernate.cfg.xml").buildSessionFactory());
     bind(RowMapper.class).to(FacilityRowMapper.class);
@@ -104,21 +93,19 @@ public class FacilityIndexerJob extends AbstractModule {
 
   @Provides
   @Inject
-  public Client elasticsearchClient(JobConfiguration config) {
+  public Client elasticsearchClient(JobConfiguration config) throws NeutronException {
     TransportClient client = null;
     if (config != null) {
       LOGGER.warn("Create NEW ES client");
       try {
-        final Settings settings =
-            Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build();
-
-        client = produceTransportClient(settings);
+        client = produceTransportClient(
+            Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build());
         client.addTransportAddress(
             new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
                 Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {
-        LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
-        throw new JobsException("Error initializing Elasticsearch client: " + e.getMessage(), e);
+        throw JobLogs.buildCheckedException(LOGGER, e,
+            "Error initializing Elasticsearch client: {}", e.getMessage());
       }
     }
     return client;
@@ -132,18 +119,40 @@ public class FacilityIndexerJob extends AbstractModule {
   }
 
   @Provides
-  public JobConfiguration config() {
+  public JobConfiguration config() throws NeutronException {
     JobConfiguration configuration = null;
     if (config != null) {
       try {
         configuration =
             new ObjectMapper(new YAMLFactory()).readValue(config, JobConfiguration.class);
       } catch (Exception e) {
-        LOGGER.error("Error reading job configuration: {}", e.getMessage(), e);
-        throw new JobsException("Error reading job configuration: " + e.getMessage(), e);
+        throw JobLogs.buildCheckedException(LOGGER, e,
+            "Error initializing Elasticsearch client: {}", e.getMessage());
       }
     }
     return configuration;
+  }
+
+  /**
+   * SonarQube complains loudly about a "vulnerability" with
+   * {@code connection.prepareStatement(query)}.
+   * 
+   * @param jobConfig config file containing the SQL query.
+   * @return Function that produces a PreparedStatement
+   */
+  @Provides
+  @Named("facility-statement-maker")
+  @Inject
+  public Function<Connection, PreparedStatement> createPreparedStatementMaker(
+      final JobConfiguration jobConfig) {
+    return c -> {
+      try {
+        return c.prepareStatement(jobConfig.getJobLisReaderQuery());
+      } catch (SQLException e) {
+        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PREPARE STATEMENT!",
+            e.getMessage());
+      }
+    };
   }
 
   @Provides
@@ -151,9 +160,9 @@ public class FacilityIndexerJob extends AbstractModule {
   @Inject
   public JobReader lisItemReader(JobConfiguration jobConfiguration,
       FacilityRowMapper facilityRowMapper,
-      @Named(LIS_SESSION_FACTORY_NM) SessionFactory sessionFactory) {
-    return new JdbcJobReader<>(sessionFactory, facilityRowMapper,
-        jobConfiguration.getJobLisReaderQuery());
+      @Named(LIS_SESSION_FACTORY_NM) SessionFactory sessionFactory,
+      Function<Connection, PreparedStatement> createPreparedStatementMaker) {
+    return new JdbcJobReader<>(sessionFactory, facilityRowMapper, createPreparedStatementMaker);
   }
 
   @Provides
@@ -177,6 +186,21 @@ public class FacilityIndexerJob extends AbstractModule {
       @Named("facility-processor") JobProcessor jobProcessor,
       @Named("facility-writer") JobWriter jobWriter) {
     return new AsyncReadWriteJob(jobReader, jobProcessor, jobWriter);
+  }
+
+  public static void main(String[] args) {
+    if (args.length == 0) {
+      LOGGER.warn("usage: java -cp jobs.jar " + FacilityIndexerJob.class.getName()
+          + " path/to/config/file.yaml");
+    }
+    try {
+      File configFile = new File(args[0]);
+      Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile));
+      Job job = injector.getInstance(Key.get(Job.class, Names.named("facility-job")));
+      job.run();
+    } catch (Exception e) {
+      LOGGER.error("ERROR: {}", e.getMessage(), e);
+    }
   }
 
 }

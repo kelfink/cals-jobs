@@ -72,6 +72,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
   public JobOptions opts;
   public File tempFile;
+  public File jobConfigFile;
   public File esConfileFile;
   public String lastJobRunTimeFilename;
   java.util.Date lastRunTime = new java.util.Date();
@@ -96,6 +97,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
     // Last run time:
     tempFile = tempFolder.newFile("tempFile.txt");
+    jobConfigFile = tempFolder.newFile("jobConfigFile.yml");
     lastJobRunTimeFilename = tempFile.getAbsolutePath();
 
     // JDBC:

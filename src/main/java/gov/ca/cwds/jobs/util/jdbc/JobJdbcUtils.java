@@ -73,8 +73,8 @@ public class JobJdbcUtils {
   }
 
   public static void prepHibernateLastChange(final Session session, final Date lastRunTime,
-      final String sqlInsertLastChange, final Function<Connection, PreparedStatement> func) {
-    final Work work = new PrepSQLWork(lastRunTime, sqlInsertLastChange, func);
+      final String sqlPrepLastChange, final Function<Connection, PreparedStatement> func) {
+    final Work work = new PrepSQLWork(lastRunTime, sqlPrepLastChange, func);
     session.doWork(work);
   }
 

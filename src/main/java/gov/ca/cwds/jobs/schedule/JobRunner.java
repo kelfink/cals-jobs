@@ -177,8 +177,9 @@ public class JobRunner {
     // Scheduler listeners.
     listenerMgr = scheduler.getListenerManager();
     listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
-    listenerMgr.addJobListener(new NeutronJobListener());
     listenerMgr.addTriggerListener(new NeutronTriggerListener());
+    listenerMgr.addJobListener(initialMode ? NeutronDefaultJobSchedule.fullLoadJobChainListener()
+        : new NeutronJobListener());
   }
 
   protected void handleTimeFile(final JobOptions opts, final DateFormat fmt, final Date now,
@@ -204,7 +205,6 @@ public class JobRunner {
     if (initialMode) {
       startingOpts.setLastRunTime(now);
       startingOpts.setLastRunMode(false);
-      listenerMgr.addJobListener(NeutronDefaultJobSchedule.fullLoadJobChainListener());
       LOGGER.warn("\n\n\n\n>>>>>>> INITIAL, FULL LOAD! <<<<<<<\n\n\n\n");
     }
   }

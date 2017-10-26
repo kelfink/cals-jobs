@@ -11,10 +11,11 @@ import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
+
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.JobReader;
 
 /**
@@ -30,39 +31,36 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
   private RowMapper<T> rowMapper;
   private PreparedStatement statement;
   private final String query;
+  private final Function<Connection, PreparedStatement> statementMaker;
 
   /**
    * @param sessionFactory Hibernate session factory
    * @param rowMapper row mapper
    * @param query SQL query
+   * @deprecated SonarQube calls creating a PreparedStatement from query a "vulnerability"
+   * @see #JdbcJobReader(SessionFactory, RowMapper, Function)
    */
+  @Deprecated
   public JdbcJobReader(SessionFactory sessionFactory, RowMapper<T> rowMapper, String query) {
     this.sessionFactory = sessionFactory;
     this.rowMapper = rowMapper;
     this.query = query;
+    this.statementMaker = null;
+  }
+
+  @Inject
+  public JdbcJobReader(SessionFactory sessionFactory, RowMapper<T> rowMapper,
+      Function<Connection, PreparedStatement> statementMaker) {
+    this.sessionFactory = sessionFactory;
+    this.rowMapper = rowMapper;
+    this.query = null;
+    this.statementMaker = statementMaker;
   }
 
   /**
    * SonarQube complains loudly about this "vulnerability" with
    * {@code connection.prepareStatement(query)}.
-   * 
-   * @return Function that produces a PreparedStatement
    */
-  private Function<Connection, PreparedStatement> preparedStatementProducer() {
-    return c -> {
-      try {
-        return c.prepareStatement(query);
-      } catch (SQLException e) {
-        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PREPARE STATEMENT!",
-            e.getMessage());
-      }
-    };
-  }
-
-  private PreparedStatement createPreparedStatement(Connection con) {
-    return preparedStatementProducer().apply(con);
-  }
-
   @Override
   public void init() {
     try {
@@ -72,7 +70,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
       con.setReadOnly(true); // may fail in some situations.
 
       // SonarQube complains loudly about this "vulnerability."
-      statement = createPreparedStatement(con);
+      statement = statementMaker.apply(con);
       statement.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
       statement.setMaxRows(0);
       statement.setQueryTimeout(100000);
