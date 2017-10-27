@@ -108,7 +108,7 @@ public class JobRunner {
           .append(".time");
       opts.setLastRunLoc(buf.toString());
 
-      final File f = new File(opts.getLastRunLoc());
+      final File f = new File(opts.getLastRunLoc()); // NOSONAR
       final boolean fileExists = f.exists();
 
       if (!fileExists) {
@@ -191,7 +191,7 @@ public class JobRunner {
     opts.setLastRunLoc(timeFileLoc);
 
     // If timestamp file doesn't exist, create it.
-    final File f = new File(timeFileLoc);
+    final File f = new File(timeFileLoc); // NOSONAR
     final boolean fileExists = f.exists();
     final boolean overrideLastRunTime = opts.getLastRunTime() != null;
 

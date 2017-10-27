@@ -195,7 +195,7 @@ public class FacilityIndexerJob extends AbstractModule {
     }
     try {
       File configFile = new File(args[0]);
-      Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile));
+      Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile)); // NOSONAR
       Job job = injector.getInstance(Key.get(Job.class, Names.named("facility-job")));
       job.run();
     } catch (Exception e) {

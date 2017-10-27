@@ -169,8 +169,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
     // TODO: Initialize transaction. Fix DAO impl instead.
     final org.hibernate.Transaction txn = getOrCreateTransaction();
+
     final ReplicatedClient client = getJobDao().find(clientId);
-    return client.getCommonFirstName().equals(person.getFirstName());
+    return client.getCommonFirstName().equals(person.getFirstName())
+        && client.getCommonLastName().equals(person.getLastName())
+        && client.getCommonMiddleName().equals(person.getMiddleName());
   }
 
   /**
