@@ -246,7 +246,6 @@ public class JobProgressTrack implements ApiMarker {
     return affectedDocumentIds.toArray(new String[0]);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public String toString() {
     final StringBuilder buf = new StringBuilder();

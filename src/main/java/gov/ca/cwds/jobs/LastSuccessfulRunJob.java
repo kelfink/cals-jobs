@@ -104,11 +104,9 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
         writeLastSuccessfulRunTime(curentTimeRunTime);
       }
     } catch (Exception e) {
-      LOGGER.error("FAIL JOB", e);
+      fail();
+      LOGGER.error("FAIL JOB!", e);
     }
-
-    track.done();
-    JobRunner.getInstance().addTrack(getClass(), track);
 
     // SLF4J does not yet support conditional invocation.
     if (LOGGER.isInfoEnabled()) {
@@ -116,6 +114,8 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
     }
 
     finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
+    track.done();
+    JobRunner.getInstance().addTrack(getClass(), track);
   }
 
   /**

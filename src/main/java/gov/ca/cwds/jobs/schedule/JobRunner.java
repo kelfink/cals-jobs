@@ -494,10 +494,6 @@ public class JobRunner {
     this.startingOpts = startingOpts;
   }
 
-  public Map<Class<?>, JobProgressTrack> getLastTracks() {
-    return lastTracks;
-  }
-
   public JobProgressTrack getLastTrack(final Class<?> klazz) {
     return lastTracks.get(klazz);
   }

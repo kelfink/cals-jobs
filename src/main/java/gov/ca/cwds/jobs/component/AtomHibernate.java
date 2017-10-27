@@ -116,7 +116,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
     final Session session = getJobDao().getSessionFactory().getCurrentSession();
     try {
       txn = session.beginTransaction();
-    } catch (Exception e) {
+    } catch (Exception e) { // NOSONAR
       txn = session.getTransaction();
     }
     return txn;
