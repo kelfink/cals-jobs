@@ -31,10 +31,11 @@ public class NeutronTriggerListener implements TriggerListener {
         (NeutronInterruptableJob) context.getJobInstance());
   }
 
+  /**
+   * Job instance type is {@link NeutronInterruptableJob}.
+   */
   @Override
   public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
-    // final NeutronInterruptableJob job = (NeutronInterruptableJob) context.getJobInstance();
-
     final JobDataMap map = context.getJobDetail().getJobDataMap();
     final String className = map.getString("job_class");
     boolean answer = true;
