@@ -595,7 +595,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       getOpts().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
 
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
-      LOGGER.info("Last successsful run time: {}", lastRun); // NOSONAR
+      LOGGER.debug("Last successsful run time: {}", lastRun); // NOSONAR
 
       // If the index is missing, create it.
       LOGGER.debug("Create index if missing, effectiveIndexName: {}", effectiveIndexName);

@@ -277,7 +277,7 @@ public class JobProgressTrack implements ApiMarker {
 
     if (!initialLoad && !affectedDocumentIds.isEmpty()) {
       buf.append("\n\n    SAMPLE DOCUMENTS:").append("\n\tdocument id's:    ")
-          .append(StringUtils.join(getAffectedDocumentIds()));
+          .append(StringUtils.joinWith(",", (Object[]) getAffectedDocumentIds()));
     }
 
     buf.append("\n]");
