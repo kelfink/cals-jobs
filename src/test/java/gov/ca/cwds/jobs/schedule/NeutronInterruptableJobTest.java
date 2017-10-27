@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +13,8 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
+import org.quartz.Trigger;
 
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 
@@ -36,22 +37,24 @@ public class NeutronInterruptableJobTest {
     assertThat(target, notNullValue());
   }
 
-  @Test
+  @Test(expected = JobExecutionException.class)
   public void execute_Args__JobExecutionContext_T__JobExecutionException() throws Exception {
     JobExecutionContext context_ = mock(JobExecutionContext.class);
     JobDetail jd = mock(JobDetail.class);
+    Trigger trg = mock(Trigger.class);
+
+    final JobKey jobKey = new JobKey("crap", NeutronSchedulerConstants.GRP_LST_CHG);
+
     JobDataMap jdm = new JobDataMap();
     jdm.put("job_class", "crap");
     jdm.put("cmd_line", "--invalid");
 
     when(context_.getJobDetail()).thenReturn(jd);
+    when(context_.getTrigger()).thenReturn(trg);
     when(jd.getJobDataMap()).thenReturn(jdm);
+    when(trg.getJobKey()).thenReturn(jobKey);
 
-    try {
-      target.execute(context_);
-      fail("Expected exception was not thrown!");
-    } catch (JobExecutionException e) {
-    }
+    target.execute(context_);
   }
 
   @Test

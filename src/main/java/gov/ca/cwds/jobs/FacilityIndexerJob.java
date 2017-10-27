@@ -29,6 +29,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
+import gov.ca.cwds.common.ApiFileAssistant;
 import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.model.facility.es.ESFacility;
 import gov.ca.cwds.jobs.component.Job;
@@ -194,7 +195,7 @@ public class FacilityIndexerJob extends AbstractModule {
           " path/to/config/file.yaml");
     }
     try {
-      File configFile = new File(args[0]);
+      final File configFile = new ApiFileAssistant().validateFileLocation(args[0]);
       Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile)); // NOSONAR
       Job job = injector.getInstance(Key.get(Job.class, Names.named("facility-job")));
       job.run();
