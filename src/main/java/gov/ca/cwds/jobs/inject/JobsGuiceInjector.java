@@ -284,6 +284,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ElasticsearchDao.class).asEagerSingleton();
 
     bind(NeutronElasticValidator.class);
+    bind(JobRunner.class).toInstance(JobRunner.getInstance());
   }
 
   @Provides
@@ -313,12 +314,12 @@ public class JobsGuiceInjector extends AbstractModule {
       boolean es55) {
     TransportClient ret;
     if (es55) {
-      LOGGER.info("ENABLE X-PACK");
+      LOGGER.warn("ENABLE X-PACK");
       final Settings.Builder settings =
           Settings.builder().put("cluster.name", config.getElasticsearchCluster());
       ret = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
     } else {
-      LOGGER.info("DISABLE X-PACK");
+      LOGGER.warn("DISABLE X-PACK");
       ret = new PreBuiltTransportClient(
           Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build());
     }
@@ -382,14 +383,17 @@ public class JobsGuiceInjector extends AbstractModule {
     return ret;
   }
 
+  @SuppressWarnings("javadoc")
   public JobOptions getOpts() {
     return opts;
   }
 
+  @SuppressWarnings("javadoc")
   public void setOpts(JobOptions opts) {
     this.opts = opts;
   }
 
+  @SuppressWarnings("javadoc")
   public static Injector getInjector() {
     return injector;
   }
