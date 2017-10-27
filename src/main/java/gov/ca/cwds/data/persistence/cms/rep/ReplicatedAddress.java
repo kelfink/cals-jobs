@@ -30,9 +30,6 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReplicatedAddress extends BaseAddress implements CmsReplicatedEntity {
 
-  private CmsReplicationOperation replicationOperation;
-  private transient Date replicationDate;
-
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
   /**
@@ -60,22 +57,22 @@ public class ReplicatedAddress extends BaseAddress implements CmsReplicatedEntit
 
   @Override
   public CmsReplicationOperation getReplicationOperation() {
-    return replicationOperation;
+    return replicatedEntity.getReplicationOperation();
   }
 
   @Override
   public Date getReplicationDate() {
-    return JobDateUtil.freshDate(replicationDate);
+    return JobDateUtil.freshDate(replicatedEntity.getReplicationDate());
   }
 
   @Override
   public void setReplicationOperation(CmsReplicationOperation replicationOperation) {
-    this.replicationOperation = replicationOperation;
+    this.replicatedEntity.setReplicationOperation(replicationOperation);
   }
 
   @Override
   public void setReplicationDate(Date replicationDate) {
-    this.replicationDate = JobDateUtil.freshDate(replicationDate);
+    this.setReplicationDate(JobDateUtil.freshDate(replicationDate));
   }
 
   @Override

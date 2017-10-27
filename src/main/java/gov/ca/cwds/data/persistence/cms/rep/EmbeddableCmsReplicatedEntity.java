@@ -15,9 +15,6 @@ import gov.ca.cwds.jobs.util.JobDateUtil;
 @Embeddable
 public class EmbeddableCmsReplicatedEntity implements ApiMarker {
 
-  /**
-   * Default.
-   */
   private static final long serialVersionUID = 1L;
 
   @Enumerated(EnumType.STRING)
