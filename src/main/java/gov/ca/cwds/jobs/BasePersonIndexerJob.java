@@ -671,7 +671,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     final Class<?> entityClass = jobDao.getEntityClass();
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter";
     final Session session = jobDao.getSessionFactory().getCurrentSession();
-    final Transaction txn = session.beginTransaction();
+    final Transaction txn = getOrCreateTransaction(); // Cheesy hack.
 
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);

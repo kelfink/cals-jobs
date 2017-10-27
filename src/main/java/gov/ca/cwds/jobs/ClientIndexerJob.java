@@ -168,10 +168,10 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   @Override
   public boolean validateDocument(ElasticSearchPerson person) throws NeutronException {
     final String clientId = person.getId();
-    final org.hibernate.Transaction txn =
-        getJobDao().getSessionFactory().getCurrentSession().beginTransaction();
-    final ReplicatedClient client = getJobDao().find(clientId);
 
+    // TODO: Initialize transaction. Fix DAO impl instead.
+    final org.hibernate.Transaction txn = getOrCreateTransaction();
+    final ReplicatedClient client = getJobDao().find(clientId);
     return client.getCommonFirstName().equals(person.getFirstName());
   }
 
