@@ -14,7 +14,7 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
  * @param <T> normalized type
  * @param <M> de-normalized type
  */
-public interface AtomTransformer<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
+public interface AtomTransform<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends AtomShared {
 
   /**
@@ -59,6 +59,9 @@ public interface AtomTransformer<T extends PersistentObject, M extends ApiGroupN
     return (List<T>) recs;
   }
 
+  /**
+   * Increment the number normalized records.
+   */
   default void incrementNormalizeCount() {
     JobLogs.logEvery(getTrack().trackNormalized(), "Normalize", "single");
   }

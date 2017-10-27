@@ -47,9 +47,6 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsClientAddress>
     implements JobResultSetAware<EsClientAddress>, AtomValidateDocument {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientIndexerJob.class);
@@ -80,7 +77,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       @CmsSessionFactory SessionFactory sessionFactory) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
 
-    // WARNING: **short-term** fix for county table in Perf and Prod.
+    // TODO: **short-term** fix for county table in Perf and Prod.
     EsClientAddress.setUseCounty(isLargeDataSet());
   }
 
@@ -168,6 +165,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   @Override
   public boolean validateDocument(ElasticSearchPerson person) throws NeutronException {
     final String clientId = person.getId();
+    LOGGER.info("Validate client: {}", clientId);
 
     // TODO: Initialize transaction. Fix DAO impl instead.
     final org.hibernate.Transaction txn = getOrCreateTransaction();
@@ -176,9 +174,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   /**
-   * Read recs from a single partition.
+   * Read a record bundle for initial load.
    * 
-   * @param p partition range to read
+   * @param p key range to read
    */
   protected void pullRange(final Pair<String, String> p) {
     final String threadName =
@@ -259,7 +257,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
-    // WARNING: **short-term** fix for county table in Perf and Prod.
+    // TODO: **short-term** fix for county table in Perf and Prod.
     EsClientAddress.setUseCounty(isLargeDataSet());
     return JobJdbcUtils.getCommonPartitionRanges64(this);
   }

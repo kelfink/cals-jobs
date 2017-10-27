@@ -147,7 +147,7 @@ public class FacilityIndexerJob extends AbstractModule {
       final JobConfiguration jobConfig) {
     return c -> {
       try {
-        return c.prepareStatement(jobConfig.getJobLisReaderQuery());
+        return c.prepareStatement(jobConfig.getJobLisReaderQuery()); // NOSONAR
       } catch (SQLException e) {
         throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PREPARE STATEMENT!",
             e.getMessage());
