@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.inject;
 import java.io.File;
 import java.net.InetAddress;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -23,7 +24,6 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
-import gov.ca.cwds.common.ApiFileAssistant;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
@@ -123,12 +123,34 @@ public class JobsGuiceInjector extends AbstractModule {
     this.opts = opts;
   }
 
+  /**
+   * Avoid path traversal vulnerabilities.
+   * 
+   * @param loc proposed file location
+   * @return file to proposed location
+   * @throws NeutronException on prohibited location
+   */
+  public static File validateFileLocation(String loc) throws NeutronException {
+    File ret;
+    if (StringUtils.isNotBlank(loc)) {
+      final String cleanLoc = loc.trim();
+      if (cleanLoc.equals(FilenameUtils.normalize(cleanLoc))) {
+        ret = new File(cleanLoc);
+        if (ret.exists()) {
+          return ret;
+        }
+      }
+    }
+
+    throw new NeutronException("PROHIBITED FILE LOCATION!");
+  }
+
   // Path traversal vulnerability:
   // https://github.com/zaproxy/zap-extensions/blob/master/src/org/zaproxy/zap/extension/ascanrules/TestPathTraversal.java
-  private static File validateFileLocation(String loc) {
-    return new ApiFileAssistant()
-        .validateFileLocation(loc.replaceAll(File.separator + File.separator, File.separator)); // NOSONAR
-  }
+  // private static File validateFileLocation(String loc) {
+  // return new ApiFileAssistant()
+  // .validateFileLocation(loc.replaceAll(File.separator + File.separator, File.separator));
+  // }
 
   /**
    * Build the Guice Injector once and use it for all Job instances during the life of this batch
@@ -149,7 +171,7 @@ public class JobsGuiceInjector extends AbstractModule {
 
         // Static injection.
         ElasticTransformer.setMapper(injector.getInstance(ObjectMapper.class));
-      } catch (CreationException e) {
+      } catch (CreationException | NeutronException e) {
         throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO BUILD INJECTOR! {}",
             e.getMessage());
       }

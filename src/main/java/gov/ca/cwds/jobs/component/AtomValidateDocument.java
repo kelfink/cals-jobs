@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.component;
 import java.io.IOException;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -62,8 +61,7 @@ public interface AtomValidateDocument {
           .get();
 
       for (MultiSearchResponse.Item item : multiResponse.getResponses()) {
-        final SearchResponse response = item.getResponse();
-        final SearchHits hits = response.getHits();
+        final SearchHits hits = item.getResponse().getHits();
         totalHits += hits.getTotalHits();
         processDocumentHits(hits);
       }
