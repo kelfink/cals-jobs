@@ -23,6 +23,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
+import gov.ca.cwds.common.ApiFileAssistant;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
@@ -125,9 +126,8 @@ public class JobsGuiceInjector extends AbstractModule {
   // Path traversal vulnerability:
   // https://github.com/zaproxy/zap-extensions/blob/master/src/org/zaproxy/zap/extension/ascanrules/TestPathTraversal.java
   private static File validateFileLocation(String loc) {
-    // final File ret = new ApiFileAssistant()
-    // .validateFileLocation(loc.replaceAll(File.separator + File.separator, File.separator));
-    return new File(loc.replaceAll(File.separator + File.separator, File.separator));
+    return new ApiFileAssistant()
+        .validateFileLocation(loc.replaceAll(File.separator + File.separator, File.separator)); // NOSONAR
   }
 
   /**

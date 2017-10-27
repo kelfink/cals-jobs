@@ -1,8 +1,6 @@
 package gov.ca.cwds.jobs.component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -29,8 +27,30 @@ public interface AtomValidateDocument {
     return true;
   }
 
-  default List<ElasticSearchPerson> validateDocuments() throws NeutronException {
-    List<ElasticSearchPerson> persons = new ArrayList<>();
+  default void processDocumentHits(final SearchHits hits) throws NeutronException {
+    int docId = 0;
+    String json;
+    ElasticSearchPerson person;
+    try {
+      for (SearchHit hit : hits.getHits()) {
+        docId = hit.docId();
+        json = hit.getSourceAsString();
+
+        getLogger().info("docId: {}", docId);
+        getLogger().trace("json: {}", json);
+
+        person = ElasticSearchPerson.readPerson(json);
+        getLogger().trace("person: {}", person);
+
+        validateDocument(person);
+      }
+    } catch (IOException e) {
+      throw JobLogs.buildCheckedException(getLogger(), e, "ERROR READING DOCUMENT! doc id: {}",
+          docId);
+    }
+  }
+
+  default void validateDocuments() throws NeutronException {
     final String[] docIds = getTrack().getAffectedDocumentIds();
     long totalHits = 0;
 
@@ -45,32 +65,11 @@ public interface AtomValidateDocument {
         final SearchResponse response = item.getResponse();
         final SearchHits hits = response.getHits();
         totalHits += hits.getTotalHits();
-
-        int docId = 0;
-        String json;
-        ElasticSearchPerson person;
-        try {
-          for (SearchHit hit : hits.getHits()) {
-            docId = hit.docId();
-            json = hit.getSourceAsString();
-
-            getLogger().info("docId: {}", docId);
-            getLogger().trace("json: {}", json);
-
-            person = ElasticSearchPerson.readPerson(json);
-            getLogger().trace("person: {}", person);
-
-            validateDocument(person);
-          }
-        } catch (IOException e) {
-          throw JobLogs.buildCheckedException(getLogger(), e, "ERROR READING DOCUMENT! doc id: {}",
-              docId);
-        }
+        processDocumentHits(hits);
       }
     }
 
     getLogger().info("total hits: {}", totalHits);
-    return persons;
   }
 
 }
