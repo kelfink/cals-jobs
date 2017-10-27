@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.jobs.listener;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -8,6 +8,8 @@ import static org.mockito.Mockito.mock;
 import org.junit.Test;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+
+import gov.ca.cwds.jobs.listener.NeutronJobListener;
 
 public class NeutronJobListenerTest {
 

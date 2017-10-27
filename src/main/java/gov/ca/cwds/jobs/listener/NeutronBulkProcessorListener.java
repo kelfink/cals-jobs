@@ -1,10 +1,12 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.jobs.listener;
 
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import gov.ca.cwds.jobs.component.JobProgressTrack;
 
 public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
 

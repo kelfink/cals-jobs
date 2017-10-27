@@ -13,6 +13,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.google.common.collect.ImmutableList;
+
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.schedule.NeutronJobExecutionStatus;
 import gov.ca.cwds.jobs.util.JobDateUtil;
@@ -34,7 +36,7 @@ public class JobProgressTrack implements ApiMarker {
   /**
    * Official start time.
    */
-  private final long startTime = System.currentTimeMillis();
+  private long startTime = System.currentTimeMillis();
 
   /**
    * Official end time.
@@ -85,35 +87,7 @@ public class JobProgressTrack implements ApiMarker {
   private final List<Pair<String, String>> initialLoadRangesCompleted = new ArrayList<>();
 
   // last change only
-  private final Queue<String> sampleDocumentKeys = new CircularFifoQueue<>();
-
-  // public AtomicInteger getRecsSentToIndexQueue() {
-  // return recsSentToIndexQueue;
-  // }
-  //
-  // public AtomicInteger getRecsSentToBulkProcessor() {
-  // return recsSentToBulkProcessor;
-  // }
-  //
-  // public AtomicInteger getRecsBulkPrepared() {
-  // return recsBulkPrepared;
-  // }
-  //
-  // public AtomicInteger getRecsBulkDeleted() {
-  // return recsBulkDeleted;
-  // }
-  //
-  // public AtomicInteger getRecsBulkBefore() {
-  // return recsBulkBefore;
-  // }
-  //
-  // public AtomicInteger getRecsBulkAfter() {
-  // return recsBulkAfter;
-  // }
-  //
-  // public AtomicInteger getRecsBulkError() {
-  // return recsBulkError;
-  // }
+  private final Queue<String> affectedDocumentIds = new CircularFifoQueue<>();
 
   public int getCurrentQueuedToIndex() {
     return this.recsSentToIndexQueue.get();
@@ -192,29 +166,36 @@ public class JobProgressTrack implements ApiMarker {
   }
 
   public void start() {
-    this.status = NeutronJobExecutionStatus.RUNNING;
+    if (this.status == NeutronJobExecutionStatus.NOT_STARTED) {
+      this.status = NeutronJobExecutionStatus.RUNNING;
+      startTime = System.currentTimeMillis();
+    }
   }
 
   public void fail() {
-    this.endTime = System.currentTimeMillis();
-    this.status = NeutronJobExecutionStatus.FAILED;
+    if (this.status != NeutronJobExecutionStatus.FAILED) {
+      this.status = NeutronJobExecutionStatus.FAILED;
+      this.endTime = System.currentTimeMillis();
+    }
   }
 
   public void done() {
-    this.endTime = System.currentTimeMillis();
-
-    if (this.status != NeutronJobExecutionStatus.FAILED) {
+    if (this.status == NeutronJobExecutionStatus.RUNNING) {
       this.status = NeutronJobExecutionStatus.SUCCEEDED;
+      this.endTime = System.currentTimeMillis();
     }
-
   }
 
   public List<Pair<String, String>> getInitialLoadRangesStarted() {
-    return initialLoadRangesStarted;
+    final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();
+    results.addAll(initialLoadRangesStarted);
+    return results.build();
   }
 
   public List<Pair<String, String>> getInitialLoadRangesCompleted() {
-    return initialLoadRangesCompleted;
+    final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();
+    results.addAll(initialLoadRangesCompleted);
+    return results.build();
   }
 
   private String pad(Integer padme) {
@@ -238,7 +219,7 @@ public class JobProgressTrack implements ApiMarker {
   }
 
   public void addAffectedDocumentId(String docId) {
-    sampleDocumentKeys.add(docId);
+    affectedDocumentIds.add(docId);
   }
 
   public String getJobName() {
@@ -261,8 +242,8 @@ public class JobProgressTrack implements ApiMarker {
     return status;
   }
 
-  public Queue<String> getSampleDocumentKeys() {
-    return sampleDocumentKeys;
+  public String[] getAffectedDocumentIds() {
+    return affectedDocumentIds.toArray(new String[0]);
   }
 
   @SuppressWarnings("unchecked")
@@ -295,9 +276,9 @@ public class JobProgressTrack implements ApiMarker {
         .append("\n\tbulk after:      ").append(pad(recsBulkAfter.get()))
         .append("\n\tbulk errors:     ").append(pad(recsBulkError.get()));
 
-    if (!initialLoad && !sampleDocumentKeys.isEmpty()) {
+    if (!initialLoad && !affectedDocumentIds.isEmpty()) {
       buf.append("\n\n    SAMPLE DOCUMENTS:").append("\n\tdocument id's:    ")
-          .append(StringUtils.join(getSampleDocumentKeys()));
+          .append(StringUtils.join(getAffectedDocumentIds()));
     }
 
     buf.append("\n]");

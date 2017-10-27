@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.jobs.listener;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -8,6 +8,8 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.junit.Before;
 import org.junit.Test;
+
+import gov.ca.cwds.jobs.component.JobProgressTrack;
 
 public class NeutronBulkProcessorListenerTest {
 

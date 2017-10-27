@@ -10,7 +10,6 @@ import static org.mockito.Mockito.mock;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Queue;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -220,7 +219,7 @@ public class JobProgressTrackTest {
 
   @Test
   public void getAffectedDocuments_Args__() throws Exception {
-    Queue<String> actual = target.getSampleDocumentKeys();
+    String[] actual = target.getAffectedDocumentIds();
     assertThat(actual, is(notNullValue()));
   }
 

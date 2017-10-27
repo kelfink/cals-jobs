@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.jobs.listener;
 
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 public class NeutronTriggerListener implements TriggerListener {

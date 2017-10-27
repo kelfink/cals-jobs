@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.jobs.listener;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -10,6 +10,8 @@ import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
+
+import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
 
 public class NeutronSchedulerListenerTest {
 

@@ -853,7 +853,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param table the driver table
    * @return batch buckets
    */
-  @SuppressWarnings("unchecked")
   protected List<BatchBucket> buildBucketList(final String table) {
     return new ArrayList<>();
   }
@@ -988,14 +987,29 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     return esDao;
   }
 
-  public LinkedBlockingDeque<T> getQueueIndex() {
+  /**
+   * Only used for testing.
+   * 
+   * @return impl index queue
+   */
+  protected LinkedBlockingDeque<T> getQueueIndex() {
     return queueIndex;
   }
 
+  /**
+   * Only used for testing.
+   * 
+   * @param queueIndex impl index queue
+   */
   protected void setQueueIndex(LinkedBlockingDeque<T> queueIndex) {
     this.queueIndex = queueIndex;
   }
 
+  /**
+   * Only used for testing.
+   * 
+   * @param track progress tracker
+   */
   public void setTrack(JobProgressTrack track) {
     this.track = track;
   }

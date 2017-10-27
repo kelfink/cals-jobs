@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.jobs.listener;
 
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
