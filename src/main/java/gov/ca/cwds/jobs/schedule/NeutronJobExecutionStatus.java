@@ -6,8 +6,10 @@ public enum NeutronJobExecutionStatus {
 
   RUNNING,
 
-  FAILED,
+  SUCCEEDED,
 
-  SUCCEEDED;
+  FAILED
+
+  ;
 
 }

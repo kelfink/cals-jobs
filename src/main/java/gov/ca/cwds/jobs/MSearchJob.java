@@ -69,9 +69,6 @@ public class MSearchJob extends
     }
   }
 
-  /**
-   * Run in full mode!
-   */
   @Override
   public Date executeJob(Date lastSuccessfulRunTime) {
     LOGGER.info("MSEARCH!");

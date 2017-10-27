@@ -62,13 +62,14 @@ public class NeutronJobMgtFacade implements Serializable {
   public void schedule() throws SchedulerException {
     if (scheduler.checkExists(this.jobKey)) {
       LOGGER.warn("JOB ALREADY SCHEDULED! {}", jobName);
+      return;
     }
 
     jd = newJob(NeutronInterruptableJob.class)
         .withIdentity(jobName, NeutronSchedulerConstants.GRP_LST_CHG)
         .usingJobData("job_class", defaultSchedule.getKlazz().getName()).build();
 
-    // Initial mode: run only once.
+    // Initial mode: run only **once**.
     final Trigger trg = !JobRunner.isInitialMode()
         ? newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
             .withPriority(defaultSchedule.getLastRunPriority())
@@ -82,6 +83,7 @@ public class NeutronJobMgtFacade implements Serializable {
             .build();
 
     scheduler.scheduleJob(jd, trg);
+    LOGGER.info("Scheduled trigger {}", jobName);
   }
 
   @Managed(description = "Unschedule job")
@@ -107,7 +109,7 @@ public class NeutronJobMgtFacade implements Serializable {
   public String history() {
     StringBuilder buf = new StringBuilder();
     JobRunner.getInstance().getTrackHistory().get(this.defaultSchedule.getKlazz()).stream()
-        .forEach(t -> buf.append(t));
+        .forEach(buf::append);
     return buf.toString();
   }
 

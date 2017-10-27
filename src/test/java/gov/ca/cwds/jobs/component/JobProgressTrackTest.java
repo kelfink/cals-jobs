@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -37,55 +36,6 @@ public class JobProgressTrackTest {
   @Test
   public void instantiation() throws Exception {
     assertThat(target, notNullValue());
-  }
-
-  @Test
-  public void getRecsSentToIndexQueue_Args__() throws Exception {
-    AtomicInteger actual = target.getRecsSentToIndexQueue();
-    AtomicInteger expected = new AtomicInteger(0);
-    assertThat(actual.get(), is(equalTo(expected.get())));
-  }
-
-  @Test
-  public void getRecsSentToBulkProcessor_Args__() throws Exception {
-    AtomicInteger actual = target.getRecsSentToBulkProcessor();
-    AtomicInteger expected = new AtomicInteger(0);
-    assertThat(actual.get(), is(equalTo(expected.get())));
-  }
-
-  @Test
-  public void getRecsBulkPrepared_Args__() throws Exception {
-    AtomicInteger actual = target.getRecsBulkPrepared();
-    AtomicInteger expected = new AtomicInteger(0);
-    assertThat(actual.get(), is(equalTo(expected.get())));
-  }
-
-  @Test
-  public void getRecsBulkDeleted_Args__() throws Exception {
-    AtomicInteger actual = target.getRecsBulkDeleted();
-    AtomicInteger expected = new AtomicInteger(0);
-    assertThat(actual.get(), is(equalTo(expected.get())));
-  }
-
-  @Test
-  public void getRecsBulkBefore_Args__() throws Exception {
-    AtomicInteger actual = target.getRecsBulkBefore();
-    AtomicInteger expected = new AtomicInteger(0);
-    assertThat(actual.get(), is(equalTo(expected.get())));
-  }
-
-  @Test
-  public void getRecsBulkAfter_Args__() throws Exception {
-    AtomicInteger actual = target.getRecsBulkAfter();
-    AtomicInteger expected = new AtomicInteger(0);
-    assertThat(actual.get(), is(equalTo(expected.get())));
-  }
-
-  @Test
-  public void getRecsBulkError_Args__() throws Exception {
-    AtomicInteger actual = target.getRecsBulkError();
-    AtomicInteger expected = new AtomicInteger(0);
-    assertThat(actual.get(), is(equalTo(expected.get())));
   }
 
   @Test

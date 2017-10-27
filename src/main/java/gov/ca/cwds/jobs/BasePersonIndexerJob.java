@@ -550,7 +550,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
               esDao.getConfig().getElasticsearchDocType(), deletionId));
         }
 
-        track.getRecsBulkDeleted().getAndAdd(deletionResults.size());
+        track.addToBulkDeleted(deletionResults.size());
       }
 
       awaitBulkProcessorClose(bp);
@@ -970,7 +970,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }
 
-    return getTrack().getRecsBulkPrepared().get();
+    return getTrack().getCurrentBulkPrepared();
   }
 
   @Override

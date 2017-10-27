@@ -22,14 +22,14 @@ public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
   @Override
   public void beforeBulk(long executionId, BulkRequest request) {
     final int numActions = request.numberOfActions();
-    track.getRecsBulkBefore().getAndAdd(numActions);
+    track.addToBulkBefore(numActions);
     LOGGER.debug("Ready to execute bulk of {} actions", numActions);
   }
 
   @Override
   public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
     final int numActions = request.numberOfActions();
-    track.getRecsBulkAfter().getAndAdd(numActions);
+    track.addToBulkAfter(numActions);
     LOGGER.info("Executed bulk of {} actions", numActions);
   }
 

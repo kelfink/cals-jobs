@@ -15,6 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.schedule.NeutronJobExecutionStatus;
+import gov.ca.cwds.jobs.util.JobDateUtil;
 
 /**
  * Track job progress and record counts.
@@ -28,18 +29,21 @@ public class JobProgressTrack implements ApiMarker {
    */
   private static final long serialVersionUID = 1L;
 
+  private String jobName;
+
   /**
    * Official start time.
    */
   private final long startTime = System.currentTimeMillis();
 
+  /**
+   * Official end time.
+   */
   private long endTime;
 
   private boolean initialLoad;
 
-  private Date lastChangeSince;
-
-  private String jobName;
+  private Date lastChangeSince; // last change only
 
   private NeutronJobExecutionStatus status = NeutronJobExecutionStatus.NOT_STARTED;
 
@@ -83,36 +87,84 @@ public class JobProgressTrack implements ApiMarker {
   // last change only
   private final Queue<String> sampleDocumentKeys = new CircularFifoQueue<>();
 
-  public AtomicInteger getRecsSentToIndexQueue() {
-    return recsSentToIndexQueue;
+  // public AtomicInteger getRecsSentToIndexQueue() {
+  // return recsSentToIndexQueue;
+  // }
+  //
+  // public AtomicInteger getRecsSentToBulkProcessor() {
+  // return recsSentToBulkProcessor;
+  // }
+  //
+  // public AtomicInteger getRecsBulkPrepared() {
+  // return recsBulkPrepared;
+  // }
+  //
+  // public AtomicInteger getRecsBulkDeleted() {
+  // return recsBulkDeleted;
+  // }
+  //
+  // public AtomicInteger getRecsBulkBefore() {
+  // return recsBulkBefore;
+  // }
+  //
+  // public AtomicInteger getRecsBulkAfter() {
+  // return recsBulkAfter;
+  // }
+  //
+  // public AtomicInteger getRecsBulkError() {
+  // return recsBulkError;
+  // }
+
+  public int getCurrentQueuedToIndex() {
+    return this.recsSentToIndexQueue.get();
   }
 
-  public AtomicInteger getRecsSentToBulkProcessor() {
-    return recsSentToBulkProcessor;
+  public int getCurrentNormalized() {
+    return this.rowsNormalized.get();
   }
 
-  public AtomicInteger getRecsBulkPrepared() {
-    return recsBulkPrepared;
+  public int getCurrentBulkDeleted() {
+    return this.recsBulkDeleted.get();
   }
 
-  public AtomicInteger getRecsBulkDeleted() {
-    return recsBulkDeleted;
+  public int getCurrentBulkPrepared() {
+    return this.recsBulkPrepared.get();
   }
 
-  public AtomicInteger getRecsBulkBefore() {
-    return recsBulkBefore;
+  public int getCurrentBulkError() {
+    return this.recsBulkError.get();
   }
 
-  public AtomicInteger getRecsBulkAfter() {
-    return recsBulkAfter;
+  public int addToQueuedToIndex(int addMe) {
+    return this.recsSentToIndexQueue.getAndAdd(addMe);
   }
 
-  public AtomicInteger getRecsBulkError() {
-    return recsBulkError;
+  public int addToNormalized(int addMe) {
+    return this.rowsNormalized.getAndAdd(addMe);
+  }
+
+  public int addToBulkDeleted(int addMe) {
+    return this.recsBulkDeleted.getAndAdd(addMe);
+  }
+
+  public int addToBulkPrepared(int addMe) {
+    return this.recsBulkPrepared.getAndAdd(addMe);
+  }
+
+  public int addToBulkError(int addMe) {
+    return this.recsBulkError.getAndAdd(addMe);
+  }
+
+  public int addToBulkAfter(int addMe) {
+    return this.recsBulkAfter.getAndAdd(addMe);
+  }
+
+  public int addToBulkBefore(int addMe) {
+    return this.recsBulkBefore.getAndAdd(addMe);
   }
 
   public int trackQueuedToIndex() {
-    return this.getRecsSentToIndexQueue().incrementAndGet();
+    return this.recsSentToIndexQueue.incrementAndGet();
   }
 
   public int trackNormalized() {
@@ -120,15 +172,15 @@ public class JobProgressTrack implements ApiMarker {
   }
 
   public int trackBulkDeleted() {
-    return this.getRecsBulkDeleted().incrementAndGet();
+    return this.recsBulkDeleted.incrementAndGet();
   }
 
   public int trackBulkPrepared() {
-    return this.getRecsBulkPrepared().incrementAndGet();
+    return this.recsBulkPrepared.incrementAndGet();
   }
 
   public int trackBulkError() {
-    return this.getRecsBulkError().incrementAndGet();
+    return this.recsBulkError.incrementAndGet();
   }
 
   public void trackRangeStart(final Pair<String, String> pair) {
@@ -154,16 +206,7 @@ public class JobProgressTrack implements ApiMarker {
     if (this.status != NeutronJobExecutionStatus.FAILED) {
       this.status = NeutronJobExecutionStatus.SUCCEEDED;
     }
-  }
 
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this, false);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
   public List<Pair<String, String>> getInitialLoadRangesStarted() {
@@ -178,44 +221,6 @@ public class JobProgressTrack implements ApiMarker {
     return StringUtils.leftPad(new DecimalFormat("###,###,###").format(padme.intValue()), 8, ' ');
   }
 
-  @Override
-  public String toString() {
-    final StringBuilder buf = new StringBuilder();
-    buf.append("[\n    JOB STATUS: ").append(status).append(":\t").append(jobName);
-
-    if (initialLoad) {
-      buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
-          .append(pad(initialLoadRangesStarted.size())).append("\n\tranges completed:")
-          .append(pad(initialLoadRangesCompleted.size()));
-    } else {
-      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
-    }
-
-    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
-    if (endTime > 0L) {
-      buf.append("\n\tend:                    ").append(new Date(endTime))
-          .append("\n\telapsed (seconds):      ").append((endTime - startTime) / 1000);
-    }
-
-    buf.append("\n\n    RECORDS RETRIEVED:").append("\n\tdenormalized:    ")
-        .append(pad(this.getRecsSentToIndexQueue().get())).append("\n\tnormalized:      ")
-        .append(pad(rowsNormalized.get())).append("\n\n    ELASTICSEARCH:")
-        .append("\n\tto bulk:         ").append(pad(recsSentToBulkProcessor.get()))
-        .append("\n\tbulk prepared:   ").append(pad(recsBulkPrepared.get()))
-        .append("\n\tbulk deleted:    ").append(pad(recsBulkDeleted.get()))
-        .append("\n\tbulk before:     ").append(pad(recsBulkBefore.get()))
-        .append("\n\tbulk after:      ").append(pad(recsBulkAfter.get()))
-        .append("\n\tbulk errors:     ").append(pad(recsBulkError.get()));
-
-    if (!getSampleDocumentKeys().isEmpty()) {
-      buf.append("\n\n    SAMPLE DOCUMENTS:").append("\n\tdocument id's:    ")
-          .append(StringUtils.join(getSampleDocumentKeys()));
-    }
-
-    buf.append("\n]");
-    return buf.toString();
-  }
-
   public boolean isInitialLoad() {
     return initialLoad;
   }
@@ -225,11 +230,11 @@ public class JobProgressTrack implements ApiMarker {
   }
 
   public Date getLastChangeSince() {
-    return lastChangeSince;
+    return JobDateUtil.freshDate(lastChangeSince);
   }
 
   public void setLastChangeSince(Date lastChangeSince) {
-    this.lastChangeSince = lastChangeSince;
+    this.lastChangeSince = JobDateUtil.freshDate(lastChangeSince);
   }
 
   public void addAffectedDocumentId(String docId) {
@@ -258,6 +263,55 @@ public class JobProgressTrack implements ApiMarker {
 
   public Queue<String> getSampleDocumentKeys() {
     return sampleDocumentKeys;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public String toString() {
+    final StringBuilder buf = new StringBuilder();
+    buf.append("[\n    JOB STATUS: ").append(status).append(":\t").append(jobName);
+
+    if (initialLoad) {
+      buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
+          .append(pad(initialLoadRangesStarted.size())).append("\n\tranges completed:")
+          .append(pad(initialLoadRangesCompleted.size()));
+    } else {
+      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
+    }
+
+    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
+    if (endTime > 0L) {
+      buf.append("\n\tend:                    ").append(new Date(endTime))
+          .append("\n\telapsed (seconds):      ").append((endTime - startTime) / 1000);
+    }
+
+    buf.append("\n\n    RECORDS RETRIEVED:").append("\n\tdenormalized:    ")
+        .append(pad(recsSentToIndexQueue.get())).append("\n\tnormalized:      ")
+        .append(pad(rowsNormalized.get())).append("\n\n    ELASTICSEARCH:")
+        .append("\n\tto bulk:         ").append(pad(recsSentToBulkProcessor.get()))
+        .append("\n\tbulk prepared:   ").append(pad(recsBulkPrepared.get()))
+        .append("\n\tbulk deleted:    ").append(pad(recsBulkDeleted.get()))
+        .append("\n\tbulk before:     ").append(pad(recsBulkBefore.get()))
+        .append("\n\tbulk after:      ").append(pad(recsBulkAfter.get()))
+        .append("\n\tbulk errors:     ").append(pad(recsBulkError.get()));
+
+    if (!initialLoad && !sampleDocumentKeys.isEmpty()) {
+      buf.append("\n\n    SAMPLE DOCUMENTS:").append("\n\tdocument id's:    ")
+          .append(StringUtils.join(getSampleDocumentKeys()));
+    }
+
+    buf.append("\n]");
+    return buf.toString();
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }
