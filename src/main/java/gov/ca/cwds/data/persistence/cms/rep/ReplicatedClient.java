@@ -100,7 +100,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   private transient List<Short> clientRaces = new ArrayList<>();
 
-  private Short clientCountyId;
+  private transient Short clientCountyId;
 
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
