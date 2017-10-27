@@ -31,7 +31,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 public class ReplicatedAddress extends BaseAddress implements CmsReplicatedEntity {
 
   private CmsReplicationOperation replicationOperation;
-  private Date replicationDate;
+  private transient Date replicationDate;
 
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
