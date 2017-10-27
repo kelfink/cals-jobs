@@ -31,38 +31,41 @@ public interface AtomValidateDocument {
 
   default List<ElasticSearchPerson> validateDocuments() throws NeutronException {
     List<ElasticSearchPerson> persons = new ArrayList<>();
-    final Client esClient = getEsDao().getClient();
-    final MultiSearchResponse multiResponse =
-        esClient.prepareMultiSearch()
-            .add(esClient.prepareSearch()
-                .setQuery(QueryBuilders.idsQuery().addIds(getTrack().getAffectedDocumentIds())))
-            .get();
-
+    final String[] docIds = getTrack().getAffectedDocumentIds();
     long totalHits = 0;
-    for (MultiSearchResponse.Item item : multiResponse.getResponses()) {
-      final SearchResponse response = item.getResponse();
-      final SearchHits hits = response.getHits();
-      totalHits += hits.getTotalHits();
 
-      int docId = 0;
-      String json;
-      ElasticSearchPerson person;
-      try {
-        for (SearchHit hit : hits.getHits()) {
-          docId = hit.docId();
-          json = hit.getSourceAsString();
+    if (docIds != null && docIds.length > 0) {
+      final Client esClient = getEsDao().getClient();
+      final MultiSearchResponse multiResponse = esClient.prepareMultiSearch()
+          .add(esClient.prepareSearch()
+              .setQuery(QueryBuilders.idsQuery().addIds(getTrack().getAffectedDocumentIds())))
+          .get();
 
-          getLogger().info("docId: {}", docId);
-          getLogger().trace("json: {}", json);
+      for (MultiSearchResponse.Item item : multiResponse.getResponses()) {
+        final SearchResponse response = item.getResponse();
+        final SearchHits hits = response.getHits();
+        totalHits += hits.getTotalHits();
 
-          person = ElasticSearchPerson.readPerson(json);
-          getLogger().trace("person: {}", person);
+        int docId = 0;
+        String json;
+        ElasticSearchPerson person;
+        try {
+          for (SearchHit hit : hits.getHits()) {
+            docId = hit.docId();
+            json = hit.getSourceAsString();
 
-          validateDocument(person);
+            getLogger().info("docId: {}", docId);
+            getLogger().trace("json: {}", json);
+
+            person = ElasticSearchPerson.readPerson(json);
+            getLogger().trace("person: {}", person);
+
+            validateDocument(person);
+          }
+        } catch (IOException e) {
+          throw JobLogs.buildCheckedException(getLogger(), e, "ERROR READING DOCUMENT! doc id: {}",
+              docId);
         }
-      } catch (IOException e) {
-        throw JobLogs.buildCheckedException(getLogger(), e, "ERROR READING DOCUMENT! doc id: {}",
-            docId);
       }
     }
 

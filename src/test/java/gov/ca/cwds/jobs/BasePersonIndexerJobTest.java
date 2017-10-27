@@ -65,6 +65,7 @@ public class BasePersonIndexerJobTest
     dao = new TestNormalizedEntityDao(sessionFactory);
     target = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
     target.setOpts(opts);
+    target.setTrack(track);
   }
 
   @Test

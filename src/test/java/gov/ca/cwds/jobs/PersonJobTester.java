@@ -42,6 +42,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.schedule.JobRunner;
@@ -76,6 +77,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   public File esConfileFile;
   public String lastJobRunTimeFilename;
   java.util.Date lastRunTime = new java.util.Date();
+  JobProgressTrack track;
 
   public SessionFactory sessionFactory;
   public Session session;
@@ -179,6 +181,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     when(nq.setFetchSize(any(Integer.class))).thenReturn(nq);
     when(nq.setCacheable(any(Boolean.class))).thenReturn(nq);
 
+    track = new JobProgressTrack();
   }
 
   public Thread runKillThread(final BasePersonIndexerJob<T, M> target, long sleepMillis) {
