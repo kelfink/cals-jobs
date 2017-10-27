@@ -284,7 +284,6 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ElasticsearchDao.class).asEagerSingleton();
 
     bind(NeutronElasticValidator.class);
-    bind(JobRunner.class).toInstance(JobRunner.getInstance());
   }
 
   @Provides

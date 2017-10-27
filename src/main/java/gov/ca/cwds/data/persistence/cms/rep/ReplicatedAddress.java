@@ -72,7 +72,7 @@ public class ReplicatedAddress extends BaseAddress implements CmsReplicatedEntit
 
   @Override
   public void setReplicationDate(Date replicationDate) {
-    this.setReplicationDate(JobDateUtil.freshDate(replicationDate));
+    this.replicatedEntity.setReplicationDate(JobDateUtil.freshDate(replicationDate));
   }
 
   @Override
