@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
+import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
@@ -28,7 +29,9 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
+import gov.ca.cwds.jobs.component.AtomValidateDocument;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.JobRunner;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
@@ -42,7 +45,7 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
  * @author CWDS API Team
  */
 public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsClientAddress>
-    implements JobResultSetAware<EsClientAddress> {
+    implements JobResultSetAware<EsClientAddress>, AtomValidateDocument {
 
   /**
    * Default serialization.
@@ -160,6 +163,14 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       grpRecs.add(m);
       lastId = m.getNormalizationGroupKey();
     }
+  }
+
+  @Override
+  public boolean validateDocument(ElasticSearchPerson person) throws NeutronException {
+    final String clientId = person.getId();
+    final ReplicatedClient client = getJobDao().find(clientId);
+
+    return client.getCommonFirstName().equals(person.getFirstName());
   }
 
   /**

@@ -19,15 +19,17 @@ import gov.ca.cwds.jobs.util.JobLogs;
 
 public interface AtomValidateDocument {
 
-  Logger getLog();
+  Logger getLogger();
 
   JobProgressTrack getTrack();
 
   ElasticsearchDao getEsDao();
 
-  boolean validateDocument(final ElasticSearchPerson person) throws NeutronException;
+  default boolean validateDocument(final ElasticSearchPerson person) throws NeutronException {
+    return true;
+  }
 
-  default List<ElasticSearchPerson> validateAffectedDocuments() throws NeutronException {
+  default List<ElasticSearchPerson> validateDocuments() throws NeutronException {
     List<ElasticSearchPerson> persons = new ArrayList<>();
     final Client esClient = getEsDao().getClient();
     final MultiSearchResponse multiResponse =
@@ -50,19 +52,21 @@ public interface AtomValidateDocument {
           docId = hit.docId();
           json = hit.getSourceAsString();
 
-          getLog().info("docId: {}", docId);
-          getLog().trace("json: {}", json);
+          getLogger().info("docId: {}", docId);
+          getLogger().trace("json: {}", json);
 
           person = ElasticSearchPerson.readPerson(json);
-          getLog().info("person: {}", person);
+          getLogger().trace("person: {}", person);
+
+          validateDocument(person);
         }
       } catch (IOException e) {
-        throw JobLogs.buildCheckedException(getLog(), e, "ERROR READING DOCUMENT! doc id: {}",
+        throw JobLogs.buildCheckedException(getLogger(), e, "ERROR READING DOCUMENT! doc id: {}",
             docId);
       }
     }
 
-    getLog().info("total hits: {}", totalHits);
+    getLogger().info("total hits: {}", totalHits);
     return persons;
   }
 

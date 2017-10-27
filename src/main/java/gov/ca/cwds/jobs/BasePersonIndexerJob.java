@@ -57,6 +57,7 @@ import gov.ca.cwds.jobs.component.AtomInitialLoad;
 import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
 import gov.ca.cwds.jobs.component.AtomSecurity;
 import gov.ca.cwds.jobs.component.AtomTransformer;
+import gov.ca.cwds.jobs.component.AtomValidateDocument;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
@@ -98,8 +99,9 @@ import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
  * @see JobOptions
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends LastSuccessfulRunJob implements AutoCloseable, AtomPersonDocPrep<T>,
-    AtomHibernate<T, M>, AtomTransformer<T, M>, AtomInitialLoad<T>, AtomSecurity {
+    extends LastSuccessfulRunJob
+    implements AutoCloseable, AtomPersonDocPrep<T>, AtomHibernate<T, M>, AtomTransformer<T, M>,
+    AtomInitialLoad<T>, AtomSecurity, AtomValidateDocument {
 
   /**
    * Default serialization.
@@ -554,6 +556,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       awaitBulkProcessorClose(bp);
+
+      validateDocuments();
+
       return new Date(this.startTime);
     } catch (Exception e) {
       fail();
