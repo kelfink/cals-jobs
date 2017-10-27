@@ -25,7 +25,9 @@ public interface AtomValidateDocument {
 
   ElasticsearchDao getEsDao();
 
-  default List<ElasticSearchPerson> validate() throws NeutronException {
+  boolean validateDocument(final ElasticSearchPerson person) throws NeutronException;
+
+  default List<ElasticSearchPerson> validateAffectedDocuments() throws NeutronException {
     List<ElasticSearchPerson> persons = new ArrayList<>();
     final Client esClient = getEsDao().getClient();
     final MultiSearchResponse multiResponse =
