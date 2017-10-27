@@ -36,11 +36,15 @@ public class NeutronInterruptableJob implements InterruptableJob {
     className = map.getString("job_class");
     cmdLine = map.getString("cmd_line");
 
+    final String jobName = context.getTrigger().getJobKey().getName();
+
     LOGGER.info("Execute {}", className);
     try (final BasePersonIndexerJob job = JobRunner.getInstance().createJob(className,
         StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"))) {
       track = new JobProgressTrack();
+      track.setJobName(jobName);
       job.setTrack(track);
+
       map.put("track", track);
       context.setResult(track);
 
