@@ -36,21 +36,21 @@ public class NeutronInterruptableJob implements InterruptableJob {
     className = map.getString("job_class");
     cmdLine = map.getString("cmd_line");
 
-    LOGGER.info("Executing {}", className);
+    LOGGER.info("Execute {}", className);
     try (final BasePersonIndexerJob job = JobRunner.getInstance().createJob(className,
         StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"))) {
-      track = job.getTrack();
+      track = new JobProgressTrack();
+      job.setTrack(track);
       map.put("track", track);
       context.setResult(track);
 
-      // OPTION: track execution start here.
-      // OPTION: remove execution track in finally block.
       job.run();
-
     } catch (Exception e) {
       LOGGER.error("SCHEDULED JOB FAILED! {}", className, e);
       throw new JobExecutionException("SCHEDULED JOB FAILED!", e);
     }
+
+    LOGGER.info("Executed {}", className);
   }
 
   @Override
