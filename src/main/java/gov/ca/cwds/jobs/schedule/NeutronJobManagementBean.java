@@ -4,9 +4,6 @@ import gov.ca.cwds.data.std.ApiMarker;
 
 public class NeutronJobManagementBean implements ApiMarker {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private final String jobName;
@@ -29,6 +26,12 @@ public class NeutronJobManagementBean implements ApiMarker {
 
   public String getConfig() {
     return config;
+  }
+
+  @Override
+  public String toString() {
+    return "NeutronJobManagementBean [jobName=" + jobName + ", command=" + command + ", config="
+        + config + "]";
   }
 
 }
