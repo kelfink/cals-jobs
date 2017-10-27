@@ -1,7 +1,10 @@
 package gov.ca.cwds.jobs.component;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.elasticsearch.action.search.MultiSearchResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -12,6 +15,7 @@ import org.slf4j.Logger;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.util.JobLogs;
 
 public interface AtomValidateDocument {
 
@@ -21,38 +25,43 @@ public interface AtomValidateDocument {
 
   ElasticsearchDao getEsDao();
 
-  default void validate() throws NeutronException {
-    getTrack().getAffectedDocumentIds();
+  default List<ElasticSearchPerson> validate() throws NeutronException {
+    List<ElasticSearchPerson> persons = new ArrayList<>();
     final Client esClient = getEsDao().getClient();
-
-    final SearchRequestBuilder srb2 = esClient.prepareSearch().setQuery(QueryBuilders
-        .multiMatchQuery("N6dhOan15A", "cases.focus_child.legacy_descriptor.legacy_id"));
-    final MultiSearchResponse sr =
+    final MultiSearchResponse multiResponse =
         esClient.prepareMultiSearch()
-            .add(esClient.prepareSearch().setQuery(QueryBuilders.idsQuery().addIds("Ahr3T2S0BN",
-                "Bn0LhX6aah", "DUy4ET400b", "AkxX6G50Ki", "E5pf1dg0Py", "CtMFii209X")))
-            .add(srb2).get();
+            .add(esClient.prepareSearch()
+                .setQuery(QueryBuilders.idsQuery().addIds(getTrack().getAffectedDocumentIds())))
+            .get();
 
     long totalHits = 0;
-    for (MultiSearchResponse.Item item : sr.getResponses()) {
+    for (MultiSearchResponse.Item item : multiResponse.getResponses()) {
       final SearchResponse response = item.getResponse();
       final SearchHits hits = response.getHits();
       totalHits += hits.getTotalHits();
 
+      int docId = 0;
+      String json;
+      ElasticSearchPerson person;
       try {
         for (SearchHit hit : hits.getHits()) {
-          final String json = hit.getSourceAsString();
-          getLog().info("json: {}", json);
-          final ElasticSearchPerson person = readPerson(json);
+          docId = hit.docId();
+          json = hit.getSourceAsString();
+
+          getLog().info("docId: {}", docId);
+          getLog().trace("json: {}", json);
+
+          person = ElasticSearchPerson.readPerson(json);
           getLog().info("person: {}", person);
         }
-      } catch (NeutronException e) {
-        getLog().warn("whatever", e);
+      } catch (IOException e) {
+        throw JobLogs.buildCheckedException(getLog(), e, "ERROR READING DOCUMENT! doc id: {}",
+            docId);
       }
     }
 
-    // getLog().info("es host: {}", validator.getEsDao().getConfig().getElasticsearchHost());
     getLog().info("total hits: {}", totalHits);
+    return persons;
   }
 
 }
