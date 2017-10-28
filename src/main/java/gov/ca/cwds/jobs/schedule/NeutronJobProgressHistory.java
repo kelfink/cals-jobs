@@ -7,9 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
+import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 
-public class NeutronJobProgressHistory {
+public class NeutronJobProgressHistory implements ApiMarker {
 
   private final Map<Class<?>, CircularFifoQueue<JobProgressTrack>> trackHistory =
       new ConcurrentHashMap<>();

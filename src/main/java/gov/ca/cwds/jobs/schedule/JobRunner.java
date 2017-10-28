@@ -524,6 +524,14 @@ public class JobRunner {
     }
   }
 
+  public NeutronJobProgressHistory getJobHistory() {
+    return jobHistory;
+  }
+
+  public void setJobHistory(NeutronJobProgressHistory jobHistory) {
+    this.jobHistory = jobHistory;
+  }
+
   /**
    * OPTION: configure individual jobs, like Rundeck.
    * <p>
@@ -534,14 +542,6 @@ public class JobRunner {
    */
   public static void main(String[] args) {
     startContinuousMode(args);
-  }
-
-  public NeutronJobProgressHistory getJobHistory() {
-    return jobHistory;
-  }
-
-  public void setJobHistory(NeutronJobProgressHistory jobHistory) {
-    this.jobHistory = jobHistory;
   }
 
 }
