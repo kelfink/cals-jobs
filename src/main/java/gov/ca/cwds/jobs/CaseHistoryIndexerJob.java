@@ -23,6 +23,7 @@ import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
+import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
@@ -53,12 +54,13 @@ public abstract class CaseHistoryIndexerJob
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
+   * @param jobHistory job history
    */
   @Inject
   public CaseHistoryIndexerJob(final ReplicatedPersonCasesDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+      @CmsSessionFactory SessionFactory sessionFactory, NeutronJobProgressHistory jobHistory) {
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
   }
 
   @Override

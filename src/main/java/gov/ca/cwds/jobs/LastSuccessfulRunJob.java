@@ -22,11 +22,11 @@ import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
- * Abstract base class for all batch jobs based on last successful run time.
+ * Abstract base class for all Neutron jobs based on last successful run time.
  * 
  * @author CWDS API Team
  */
@@ -43,12 +43,16 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
 
   private String lastRunTimeFilename;
 
+  private NeutronJobProgressHistory jobHistory;
+
   /**
-   * Default constructor.
+   * Construct from last successful run date-time.
    * 
    * @param lastJobRunTimeFilename location of last run time file
+   * @param jobHistory injected job history
    */
-  public LastSuccessfulRunJob(String lastJobRunTimeFilename) {
+  public LastSuccessfulRunJob(String lastJobRunTimeFilename,
+      final NeutronJobProgressHistory jobHistory) {
     this.lastRunTimeFilename = lastJobRunTimeFilename;
   }
 
@@ -78,7 +82,8 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
       LOGGER.warn(track.toString());
     }
 
-    JobRunner.getInstance().addTrack(getClass(), track);
+    // Only applies in continuous mode.
+    jobHistory.addTrack(getClass(), track);
   }
 
   /**
@@ -213,12 +218,9 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
       try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
         ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
             .parse(br.readLine().trim()); // NOSONAR
-      } catch (IOException e) {
+      } catch (IOException | ParseException e) {
         fail();
-        JobLogs.raiseError(LOGGER, e, "Caught IOException: {}", e.getMessage());
-      } catch (ParseException e) {
-        fail();
-        JobLogs.raiseError(LOGGER, e, "Caught ParseException: {}", e.getMessage());
+        JobLogs.raiseError(LOGGER, e, "ERROR FINDING LAST SUCCESSFUL RUN TIME: {}", e.getMessage());
       }
     }
 
@@ -226,7 +228,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
   }
 
   /**
-   * Write the time stamp IF the job succeeded.
+   * Write the time stamp <strong>IF</strong> the job succeeded.
    * 
    * @param datetime date and time to store
    */

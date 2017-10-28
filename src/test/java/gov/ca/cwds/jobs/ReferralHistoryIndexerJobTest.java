@@ -36,6 +36,7 @@ import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 
@@ -49,8 +50,8 @@ public class ReferralHistoryIndexerJobTest
 
     public TestReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao,
         ElasticsearchDao esDao, String lastJobRunTimeFilename, ObjectMapper mapper,
-        SessionFactory sessionFactory) {
-      super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+        SessionFactory sessionFactory, NeutronJobProgressHistory jobHistory) {
+      super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
     }
 
     public static DB2SystemMonitor monitorStart(final Connection con) {
@@ -89,7 +90,7 @@ public class ReferralHistoryIndexerJobTest
     super.setup();
     dao = new ReplicatedPersonReferralsDao(sessionFactory);
     target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory);
+        sessionFactory, jobHistory);
     target.setOpts(JobOptionsTest.makeGeneric());
   }
 

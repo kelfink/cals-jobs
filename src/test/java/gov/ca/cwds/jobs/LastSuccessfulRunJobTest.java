@@ -17,6 +17,7 @@ import org.junit.Test;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
+import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
@@ -30,8 +31,9 @@ public class LastSuccessfulRunJobTest
 
     final JobProgressTrack track = new JobProgressTrack();
 
-    public TestLastSuccessfulRunJob(String lastJobRunTimeFilename, ElasticsearchDao esDao) {
-      super(lastJobRunTimeFilename);
+    public TestLastSuccessfulRunJob(String lastJobRunTimeFilename, ElasticsearchDao esDao,
+        NeutronJobProgressHistory jobHistory) {
+      super(lastJobRunTimeFilename, jobHistory);
     }
 
     @Override
@@ -63,7 +65,7 @@ public class LastSuccessfulRunJobTest
   @Before
   public void setup() throws Exception {
     super.setup();
-    target = new TestLastSuccessfulRunJob(lastJobRunTimeFilename, esDao);
+    target = new TestLastSuccessfulRunJob(lastJobRunTimeFilename, esDao, jobHistory);
 
     try (BufferedWriter w = new BufferedWriter(new FileWriter(tempFile))) {
       w.write(FIXED_DATETIME);

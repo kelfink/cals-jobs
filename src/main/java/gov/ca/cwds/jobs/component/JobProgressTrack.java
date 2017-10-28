@@ -22,6 +22,11 @@ import gov.ca.cwds.jobs.util.JobDateUtil;
 /**
  * Track job progress and record counts.
  * 
+ * <p>
+ * Class instances represent an individual job run and are not intended for reuse. Hence, some
+ * member variables are {@code final} or effectively non-modifiable.
+ * </p>
+ * 
  * @author CWDS API Team
  */
 public class JobProgressTrack implements ApiMarker, AtomJobControl {
@@ -120,6 +125,14 @@ public class JobProgressTrack implements ApiMarker, AtomJobControl {
 
   // last change only
   private final Queue<String> affectedDocumentIds = new CircularFifoQueue<>();
+
+  public JobProgressTrack() {
+    // default
+  }
+
+  public JobProgressTrack(String jobName) {
+    this.jobName = jobName;
+  }
 
   public int getCurrentQueuedToIndex() {
     return this.recsSentToIndexQueue.get();

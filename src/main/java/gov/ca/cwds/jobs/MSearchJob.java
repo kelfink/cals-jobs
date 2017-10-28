@@ -25,6 +25,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.service.NeutronElasticValidator;
 import gov.ca.cwds.jobs.util.JobLogs;
 
@@ -51,12 +52,14 @@ public class MSearchJob extends
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    * @param validator document validation logic
+   * @param jobHistory job history
    */
   @Inject
   public MSearchJob(final ReplicatedOtherAdultInPlacemtHomeDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, final NeutronElasticValidator validator) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+      @CmsSessionFactory SessionFactory sessionFactory, final NeutronElasticValidator validator,
+      NeutronJobProgressHistory jobHistory) {
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
     this.validator = validator;
   }
 

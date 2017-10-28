@@ -20,7 +20,8 @@ public class MSearchJobTest
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedOtherAdultInPlacemtHomeDao(this.sessionFactory);
-    target = new MSearchJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, null);
+    target = new MSearchJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, null,
+        jobHistory);
   }
 
   @Test

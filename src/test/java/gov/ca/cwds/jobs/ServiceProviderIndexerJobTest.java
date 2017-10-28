@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
+import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 
 /**
  * @author CWDS API Team
@@ -27,14 +28,10 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   private static final class TestServiceProviderIndexerJob extends ServiceProviderIndexerJob {
 
     public TestServiceProviderIndexerJob(ReplicatedServiceProviderDao dao, ElasticsearchDao esDao,
-        String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory) {
-      super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+        String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
+        NeutronJobProgressHistory jobHistory) {
+      super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
     }
-
-    // @Override
-    // protected DB2SystemMonitor monitorStart(final Connection con) {
-    // return new TestDB2SystemMonitor();
-    // }
 
   }
 
@@ -46,8 +43,8 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedServiceProviderDao(sessionFactory);
-    target =
-        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
+    target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+        sessionFactory, jobHistory);
     target.setOpts(JobOptionsTest.makeGeneric());
   }
 
@@ -63,8 +60,8 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
 
   @Test
   public void testInstantiation() throws Exception {
-    target =
-        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
+    target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+        sessionFactory, jobHistory);
     assertThat(target, notNullValue());
   }
 
@@ -87,8 +84,8 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
 
   @Test
   public void getPartitionRanges_Args__() throws Exception {
-    target =
-        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
+    target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+        sessionFactory, jobHistory);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }
@@ -96,8 +93,8 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   @Test
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
-    target =
-        new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
+    target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+        sessionFactory, jobHistory);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }

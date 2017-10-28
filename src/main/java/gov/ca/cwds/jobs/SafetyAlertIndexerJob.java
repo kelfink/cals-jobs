@@ -31,6 +31,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
@@ -60,12 +61,13 @@ public class SafetyAlertIndexerJob
    * @param lastJobRunTimeFilename Last runtime file
    * @param mapper Object mapper
    * @param sessionFactory Session factory
+   * @param jobHistory job history
    */
   @Inject
   public SafetyAlertIndexerJob(ReplicatedSafetyAlertsDao clientDao, ElasticsearchDao esDao,
       @LastRunFile String lastJobRunTimeFilename, ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory) {
-    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+      @CmsSessionFactory SessionFactory sessionFactory, NeutronJobProgressHistory jobHistory) {
+    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
   }
 
   @Override

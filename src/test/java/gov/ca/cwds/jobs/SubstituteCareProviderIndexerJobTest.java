@@ -31,7 +31,7 @@ public class SubstituteCareProviderIndexerJobTest
     super.setup();
     dao = new ReplicatedSubstituteCareProviderDao(sessionFactory);
     target = new SubstituteCareProviderIndexJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory);
+        sessionFactory, jobHistory);
     target.setOpts(opts);
   }
 

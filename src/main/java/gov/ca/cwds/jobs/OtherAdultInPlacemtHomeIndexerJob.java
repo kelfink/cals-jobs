@@ -14,6 +14,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 
 /**
@@ -37,12 +38,14 @@ public class OtherAdultInPlacemtHomeIndexerJob extends
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
+   * @param jobHistory job history
    */
   @Inject
   public OtherAdultInPlacemtHomeIndexerJob(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
-      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
+      NeutronJobProgressHistory jobHistory) {
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
   }
 
   @Override

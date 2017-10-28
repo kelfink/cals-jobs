@@ -30,6 +30,9 @@ public class NeutronJobMgtFacade implements Serializable {
   private transient Scheduler scheduler;
 
   private final NeutronDefaultJobSchedule defaultSchedule;
+
+  private final NeutronJobProgressHistory jobHistory;
+
   private final String jobName;
   private final String triggerName;
   private boolean vetoExecution;
@@ -37,12 +40,16 @@ public class NeutronJobMgtFacade implements Serializable {
   private volatile JobKey jobKey;
   private volatile JobDetail jd;
 
-  public NeutronJobMgtFacade(final Scheduler scheduler, NeutronDefaultJobSchedule sched) {
+  public NeutronJobMgtFacade(final Scheduler scheduler, NeutronDefaultJobSchedule sched,
+      final NeutronJobProgressHistory jobHistory) {
     this.scheduler = scheduler;
     this.defaultSchedule = sched;
+    this.jobHistory = jobHistory;
     this.jobName = defaultSchedule.getName();
     this.triggerName = defaultSchedule.getName();
     this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
+
+    jobHistory.addTrack(sched.getKlazz(), new JobProgressTrack());
   }
 
   @Managed(description = "Run job now, show results immediately")
@@ -102,14 +109,13 @@ public class NeutronJobMgtFacade implements Serializable {
   @Managed(description = "Show job status")
   public String status() {
     LOGGER.debug("Show job status");
-    return JobRunner.getInstance().getLastTrack(this.defaultSchedule.getKlazz()).toString();
+    return jobHistory.getLastTrack(this.defaultSchedule.getKlazz()).toString();
   }
 
   @Managed(description = "Show job history")
   public String history() {
     StringBuilder buf = new StringBuilder();
-    JobRunner.getInstance().getTrackHistory().get(this.defaultSchedule.getKlazz()).stream()
-        .forEach(buf::append);
+    jobHistory.getHistory(this.defaultSchedule.getKlazz()).stream().forEach(buf::append);
     return buf.toString();
   }
 
@@ -128,6 +134,10 @@ public class NeutronJobMgtFacade implements Serializable {
 
   public void setVetoExecution(boolean vetoExecution) {
     this.vetoExecution = vetoExecution;
+  }
+
+  public JobDetail getJd() {
+    return jd;
   }
 
 }

@@ -68,6 +68,7 @@ import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
@@ -164,12 +165,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
+   * @param jobHistory job history
    */
   @Inject
   public BasePersonIndexerJob(final BaseDaoImpl<T> jobDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      SessionFactory sessionFactory) {
-    super(lastJobRunTimeFilename);
+      SessionFactory sessionFactory, NeutronJobProgressHistory jobHistory) {
+    super(lastJobRunTimeFilename, jobHistory);
     this.jobDao = jobDao;
     this.esDao = esDao;
     this.mapper = mapper;

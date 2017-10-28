@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.quartz.ListenerManager;
@@ -66,6 +65,9 @@ public class JobRunner {
    */
   private static boolean continuousMode = false;
 
+  /**
+   * Launch one JVM, run initial load jobs sequentially, and exit.
+   */
   private static boolean initialMode = false;
 
   private Scheduler scheduler;
@@ -85,10 +87,7 @@ public class JobRunner {
 
   private final Map<TriggerKey, NeutronInterruptableJob> executingJobs = new ConcurrentHashMap<>();
 
-  private final Map<Class<?>, CircularFifoQueue<JobProgressTrack>> trackHistory =
-      new ConcurrentHashMap<>();
-
-  private final Map<Class<?>, JobProgressTrack> lastTracks = new ConcurrentHashMap<>();
+  private NeutronJobProgressHistory jobHistory = new NeutronJobProgressHistory();
 
   private JobRunner() {
     // Default, no-op
@@ -240,10 +239,9 @@ public class JobRunner {
           registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
         }
 
-        final NeutronJobMgtFacade nj = new NeutronJobMgtFacade(scheduler, sched);
+        final NeutronJobMgtFacade nj = new NeutronJobMgtFacade(scheduler, sched, jobHistory);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         scheduleRegistry.put(klass, nj);
-        trackHistory.put(sched.getKlazz(), new CircularFifoQueue<JobProgressTrack>(96));
       }
 
       // Expose JobRunner methods to JMX.
@@ -463,19 +461,6 @@ public class JobRunner {
     return initialMode;
   }
 
-  public Map<Class<?>, CircularFifoQueue<JobProgressTrack>> getTrackHistory() {
-    return trackHistory;
-  }
-
-  public void addTrack(Class<?> klazz, JobProgressTrack track) {
-    lastTracks.put(klazz, track);
-
-    if (!trackHistory.containsKey(klazz)) {
-      trackHistory.put(klazz, new CircularFifoQueue<>(96));
-    }
-    trackHistory.get(klazz).add(track);
-  }
-
   public ElasticsearchDao getEsDao() {
     return esDao;
   }
@@ -492,10 +477,6 @@ public class JobRunner {
 
   public void setStartingOpts(JobOptions startingOpts) {
     this.startingOpts = startingOpts;
-  }
-
-  public JobProgressTrack getLastTrack(final Class<?> klazz) {
-    return lastTracks.get(klazz);
   }
 
   public void addExecutingJob(final TriggerKey key, NeutronInterruptableJob job) {
@@ -523,7 +504,7 @@ public class JobRunner {
   }
 
   public NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched) {
-    final NeutronJobMgtFacade nj = new NeutronJobMgtFacade(scheduler, sched);
+    final NeutronJobMgtFacade nj = new NeutronJobMgtFacade(scheduler, sched, jobHistory);
     scheduleRegistry.put(klazz, nj);
     return nj;
   }
@@ -553,6 +534,14 @@ public class JobRunner {
    */
   public static void main(String[] args) {
     startContinuousMode(args);
+  }
+
+  public NeutronJobProgressHistory getJobHistory() {
+    return jobHistory;
+  }
+
+  public void setJobHistory(NeutronJobProgressHistory jobHistory) {
+    this.jobHistory = jobHistory;
   }
 
 }

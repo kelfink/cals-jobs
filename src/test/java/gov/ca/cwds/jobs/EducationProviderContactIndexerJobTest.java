@@ -29,7 +29,7 @@ public class EducationProviderContactIndexerJobTest extends
     super.setup();
     dao = new ReplicatedEducationProviderContactDao(this.sessionFactory);
     target = new EducationProviderContactIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory);
+        sessionFactory, jobHistory);
   }
 
   @Test
@@ -46,7 +46,7 @@ public class EducationProviderContactIndexerJobTest extends
     SessionFactory sessionFactory = null;
     EducationProviderContactIndexerJob target =
         new EducationProviderContactIndexerJob(educationProviderContactDao, elasticsearchDao,
-            lastJobRunTimeFilename, mapper, sessionFactory);
+            lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
     assertThat(target, notNullValue());
   }
 

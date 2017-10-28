@@ -26,6 +26,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
 
 public class RelationshipIndexerJobTest
     extends PersonJobTester<ReplicatedRelationships, EsRelationship> {
+
   ReplicatedRelationshipsDao dao;
   RelationshipIndexerJob target;
 
@@ -34,7 +35,8 @@ public class RelationshipIndexerJobTest
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedRelationshipsDao(sessionFactory);
-    target = new RelationshipIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
+    target = new RelationshipIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
+        jobHistory);
     target.setOpts(opts);
   }
 

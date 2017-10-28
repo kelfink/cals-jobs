@@ -24,8 +24,8 @@ public class ChildCaseHistoryIndexerJobTest
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedPersonCasesDao(this.sessionFactory);
-    target =
-        new ChildCaseHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
+    target = new ChildCaseHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+        sessionFactory, jobHistory);
   }
 
   @Test

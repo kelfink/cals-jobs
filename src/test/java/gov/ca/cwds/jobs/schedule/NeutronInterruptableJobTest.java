@@ -44,8 +44,7 @@ public class NeutronInterruptableJobTest {
     Trigger trg = mock(Trigger.class);
 
     final JobKey jobKey = new JobKey("crap", NeutronSchedulerConstants.GRP_LST_CHG);
-
-    JobDataMap jdm = new JobDataMap();
+    final JobDataMap jdm = new JobDataMap();
     jdm.put("job_class", "crap");
     jdm.put("cmd_line", "--invalid");
 

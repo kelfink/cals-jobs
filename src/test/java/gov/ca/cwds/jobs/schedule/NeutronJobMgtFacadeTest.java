@@ -26,13 +26,15 @@ public class NeutronJobMgtFacadeTest {
 
   Scheduler scheduler;
   NeutronDefaultJobSchedule sched;
+  NeutronJobProgressHistory history;
   NeutronJobMgtFacade target;
 
   @Before
   public void setup() throws Exception {
     scheduler = mock(Scheduler.class);
     sched = NeutronDefaultJobSchedule.CLIENT;
-    target = new NeutronJobMgtFacade(scheduler, sched);
+    history = new NeutronJobProgressHistory();
+    target = new NeutronJobMgtFacade(scheduler, sched, history);
   }
 
   @Test
@@ -96,19 +98,15 @@ public class NeutronJobMgtFacadeTest {
     jdm.put("track", track);
 
     when(jd.getJobDataMap()).thenReturn(jdm);
-    JobRunner.getInstance().addTrack(ClientIndexerJob.class, track);
+    history.addTrack(ClientIndexerJob.class, track);
     target.status();
   }
 
-  @Test
+  @Test(expected = SchedulerException.class)
   @Ignore
   public void status_Args___T__SchedulerException() throws Exception {
-    try {
-      when(scheduler.getJobDetail(any(JobKey.class))).thenThrow(SchedulerException.class);
-      target.status();
-      fail("Expected exception was not thrown!");
-    } catch (SchedulerException e) {
-    }
+    when(scheduler.getJobDetail(any(JobKey.class))).thenThrow(SchedulerException.class);
+    target.status();
   }
 
   @Test

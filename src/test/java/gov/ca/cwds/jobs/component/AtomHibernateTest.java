@@ -24,6 +24,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
+import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -43,8 +44,9 @@ public class AtomHibernateTest
 
     public TestAtomHibernate(final TestNormalizedEntityDao mainDao,
         final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
-        final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-      super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+        final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
+        NeutronJobProgressHistory jobHistory) {
+      super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
     }
 
     @Override
@@ -77,7 +79,8 @@ public class AtomHibernateTest
   public void setup() throws Exception {
     super.setup();
     dao = new TestNormalizedEntityDao(sessionFactory);
-    target = new TestAtomHibernate(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
+    target = new TestAtomHibernate(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
+        jobHistory);
   }
 
   @Test

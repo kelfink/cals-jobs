@@ -37,7 +37,8 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedClientDao(sessionFactory);
-    target = new ClientIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    target = new ClientIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory,
+        jobHistory);
     target.setOpts(opts);
   }
 
@@ -48,7 +49,8 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
 
   @Test
   public void instantiation() throws Exception {
-    target = new ClientIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    target = new ClientIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory,
+        jobHistory);
     assertThat(target, notNullValue());
   }
 

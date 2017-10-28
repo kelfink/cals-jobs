@@ -35,7 +35,7 @@ import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
-public class SafetyAlertIndexerJobTest {
+public class SafetyAlertIndexerJobTest extends PersonJobTester {
 
   private static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
 
@@ -49,6 +49,7 @@ public class SafetyAlertIndexerJobTest {
   ElasticsearchConfiguration esConfig;
   Transaction transaction;
 
+  @Override
   @Before
   public void setup() throws Exception {
     sessionFactory = mock(SessionFactory.class);
@@ -67,8 +68,8 @@ public class SafetyAlertIndexerJobTest {
 
     SimpleTestSystemCodeCache.init();
 
-    target =
-        new SafetyAlertIndexerJob(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory);
+    target = new SafetyAlertIndexerJob(clientDao, esDao, lastJobRunTimeFilename, mapper,
+        sessionFactory, jobHistory);
     target.setOpts(opts);
   }
 

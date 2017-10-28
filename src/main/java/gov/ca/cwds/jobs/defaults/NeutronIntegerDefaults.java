@@ -4,8 +4,11 @@ public enum NeutronIntegerDefaults {
 
   WAIT_BULK_PROCESSOR(25),
 
-  SLEEP_MILLIS(2000),
+  SLEEP_MILLIS(1500),
 
+  /**
+   * Default wait time when polling thread queues. Mostly used in initial load.
+   */
   POLL_MILLIS(1000),
 
   DEFAULT_BUCKETS(1),
@@ -16,6 +19,10 @@ public enum NeutronIntegerDefaults {
    */
   LOOKBACK_MINUTES(-25),
 
+  /**
+   * Default fetch size for Hibernate and JDBC. Pull records in bulk in order to minimize network
+   * calls.
+   */
   FETCH_SIZE(5000)
 
   ;
@@ -26,6 +33,7 @@ public enum NeutronIntegerDefaults {
     this.value = value;
   }
 
+  @SuppressWarnings("javadoc")
   public int getValue() {
     return value;
   }

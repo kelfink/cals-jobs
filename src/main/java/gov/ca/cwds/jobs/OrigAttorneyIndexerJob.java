@@ -11,6 +11,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 
 /**
  * Job to load attorneys from CMS into ElasticSearch.
@@ -28,17 +29,19 @@ public class OrigAttorneyIndexerJob
   /**
    * Construct batch job instance with all required dependencies.
    * 
-   * @param mainDao ReplicatedAttorney DAO
-   * @param elasticsearchDao ElasticSearch DAO
+   * @param dao ReplicatedAttorney DAO
+   * @param esDao ElasticSearch DAO
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
+   * @param jobHistory job history
    */
   @Inject
-  public OrigAttorneyIndexerJob(final ReplicatedAttorneyDao mainDao,
-      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
-      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory) {
-    super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory);
+  public OrigAttorneyIndexerJob(final ReplicatedAttorneyDao dao,
+      final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
+      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
+      NeutronJobProgressHistory jobHistory) {
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
   }
 
   /**

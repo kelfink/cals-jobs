@@ -27,7 +27,8 @@ public class OrigAttorneyIndexerJobTest
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedAttorneyDao(this.sessionFactory);
-    target = new OrigAttorneyIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory);
+    target = new OrigAttorneyIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
+        jobHistory);
   }
 
   @Test

@@ -13,6 +13,12 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 
+/**
+ * Wrapper for scheduled jobs.
+ * 
+ * @author CWDS API Team
+ * @see JobRunner
+ */
 @DisallowConcurrentExecution
 public class NeutronInterruptableJob implements InterruptableJob {
 
@@ -38,10 +44,14 @@ public class NeutronInterruptableJob implements InterruptableJob {
 
     final String jobName = context.getTrigger().getJobKey().getName();
 
+    // QUESTION: does Quartz allow injection??
+    // Is it safe to pass objects via the job data map??
+    // NeutronJobProgressHistory jobHistory = null;
+
     LOGGER.info("Execute {}", className);
     try (final BasePersonIndexerJob job = JobRunner.getInstance().createJob(className,
         StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"))) {
-      track = new JobProgressTrack();
+      track = new JobProgressTrack(); // fresh progress track
       track.setJobName(jobName);
       job.setTrack(track);
 
