@@ -41,9 +41,9 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   protected JobOptions opts;
 
-  private String lastRunTimeFilename;
+  private final String lastRunTimeFilename;
 
-  private NeutronJobProgressHistory jobHistory;
+  private final NeutronJobProgressHistory jobHistory;
 
   /**
    * Construct from last successful run date-time.
@@ -54,6 +54,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
   public LastSuccessfulRunJob(String lastJobRunTimeFilename,
       final NeutronJobProgressHistory jobHistory) {
     this.lastRunTimeFilename = lastJobRunTimeFilename;
+    this.jobHistory = jobHistory;
   }
 
   @Override
