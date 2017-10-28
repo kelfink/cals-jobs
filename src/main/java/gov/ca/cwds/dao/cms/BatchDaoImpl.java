@@ -89,7 +89,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
           .setTimestamp("after", ts);
 
       // Iterate, process, flush.
-      query.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
+      query.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
       final ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
       final ImmutableList.Builder<T> ret = new ImmutableList.Builder<>();
       int cnt = 0;
@@ -100,7 +100,7 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
           ret.add((T) obj);
         }
 
-        if (++cnt % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue() == 0) {
+        if (++cnt % NeutronIntegerDefaults.FETCH_SIZE.getValue() == 0) {
           LOGGER.info("find updated after {}. recs read: {}", ts, cnt);
           session.flush();
         }

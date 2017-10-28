@@ -247,7 +247,7 @@ public class ReferralHistoryIndexerJob
     // Prepare retrieval.
     stmtSelClient.setMaxRows(0);
     stmtSelClient.setQueryTimeout(0);
-    stmtSelClient.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
+    stmtSelClient.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
 
     LOGGER.info("pull client referral keys");
     final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
@@ -260,7 +260,7 @@ public class ReferralHistoryIndexerJob
       final Map<String, EsPersonReferral> mapReferrals) throws SQLException {
     stmtSelReferral.setMaxRows(0);
     stmtSelReferral.setQueryTimeout(0);
-    stmtSelReferral.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
+    stmtSelReferral.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
 
     int cntr = 0;
     EsPersonReferral m;
@@ -278,7 +278,7 @@ public class ReferralHistoryIndexerJob
       final List<EsPersonReferral> listAllegations) throws SQLException {
     stmtSelAllegation.setMaxRows(0);
     stmtSelAllegation.setQueryTimeout(0);
-    stmtSelAllegation.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
+    stmtSelAllegation.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
 
     int cntr = 0;
     EsPersonReferral m;

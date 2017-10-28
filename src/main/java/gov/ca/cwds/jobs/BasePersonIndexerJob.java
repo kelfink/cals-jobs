@@ -462,7 +462,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       bp.flush();
 
       LOGGER.debug("Waiting to close ES bulk processor ...");
-      bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
+      bp.awaitClose(NeutronIntegerDefaults.WAIT_BULK_PROCESSOR.getValue(), TimeUnit.SECONDS);
       LOGGER.debug("Closed ES bulk processor");
     } catch (Exception e) {
       fail();
@@ -559,7 +559,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       validateDocuments();
 
-      return new Date(this.startTime);
+      return new Date(getTrack().getStartTime());
     } catch (Exception e) {
       fail();
       throw JobLogs.buildRuntimeException(LOGGER, e, "General Exception: {}", e.getMessage());
@@ -635,10 +635,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Updating last successful run time to {}",
             new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
-                .format(startTime));
+                .format(getTrack().getStartTime()));
       }
       // CHECKSTYLE:ON
-      ret = new Date(this.startTime);
+      ret = new Date(this.getTrack().getStartTime());
     } catch (Exception e) {
       fail();
       throw JobLogs.buildCheckedException(LOGGER, e, "JOB BOMBED! {}", e.getMessage());
@@ -903,7 +903,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       q.setParameter("min_id", minId, StringType.INSTANCE)
           .setParameter("max_id", maxId, StringType.INSTANCE).setCacheable(false)
           .setFlushMode(FlushMode.MANUAL).setCacheMode(CacheMode.IGNORE)
-          .setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
+          .setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
 
       // No reduction/normalization. Iterate, process, flush.
       final ScrollableResults results = q.scroll(ScrollMode.FORWARD_ONLY);
@@ -916,7 +916,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
           ret.add((T) obj);
         }
 
-        if (((++cnt) % NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()) == 0) {
+        if (((++cnt) % NeutronIntegerDefaults.FETCH_SIZE.getValue()) == 0) {
           LOGGER.info("recs read: {}", cnt);
           session.flush();
         }
@@ -937,7 +937,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   protected void awaitBulkProcessorClose(final BulkProcessor bp) {
     try {
-      bp.awaitClose(NeutronIntegerDefaults.DEFAULT_BATCH_WAIT.getValue(), TimeUnit.SECONDS);
+      bp.awaitClose(NeutronIntegerDefaults.WAIT_BULK_PROCESSOR.getValue(), TimeUnit.SECONDS);
     } catch (Exception e2) {
       fail();
       throw new JobsException("ERROR CLOSING BULK PROCESSOR!", e2);

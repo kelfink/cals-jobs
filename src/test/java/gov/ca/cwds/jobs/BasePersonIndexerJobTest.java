@@ -370,7 +370,6 @@ public class BasePersonIndexerJobTest
 
   @Test(expected = JobsException.class)
   public void finish_Args__error() throws Exception {
-    target.reset();
     target.setFakeMarkDone(true);
     target.setFakeFinish(false);
     doThrow(new JobsException("whatever")).when(esDao).close();
@@ -526,7 +525,6 @@ public class BasePersonIndexerJobTest
   public void threadRetrieveByJdbc_Args__() throws Exception {
     when(rs.next()).thenReturn(true, false);
     runKillThread(target);
-    target.reset();
     target.threadRetrieveByJdbc();
     sleepItOff();
   }

@@ -71,7 +71,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
 
       // SonarQube complains loudly about this "vulnerability."
       statement = statementMaker.apply(con);
-      statement.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
+      statement.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
       statement.setMaxRows(0);
       statement.setQueryTimeout(100000);
       resultSet = statement.executeQuery();

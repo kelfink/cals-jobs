@@ -24,14 +24,46 @@ import gov.ca.cwds.jobs.util.JobDateUtil;
  * 
  * @author CWDS API Team
  */
-public class JobProgressTrack implements ApiMarker {
+public class JobProgressTrack implements ApiMarker, AtomJobControl {
 
   /**
    * Default serialization.
    */
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Runtime job name. Distinguish this job's threads from other running threads.
+   */
   private String jobName;
+
+  /**
+   * Completion flag for fatal errors.
+   * <p>
+   * Volatile guarantees that changes to this flag become visible other threads immediately. In
+   * other words, threads don't cache a copy of this variable in their local memory for performance.
+   * </p>
+   */
+  private volatile boolean fatalError = false;
+
+  /**
+   * Completion flag for data retrieval.
+   */
+  private volatile boolean doneRetrieve = false;
+
+  /**
+   * Completion flag for normalization/transformation.
+   */
+  private volatile boolean doneTransform = false;
+
+  /**
+   * Completion flag for document indexing.
+   */
+  private volatile boolean doneIndex = false;
+
+  /**
+   * Completion flag for whole job.
+   */
+  private volatile boolean doneJob = false;
 
   /**
    * Official start time.
@@ -172,17 +204,27 @@ public class JobProgressTrack implements ApiMarker {
     }
   }
 
+  @Override
   public void fail() {
     if (this.status != NeutronJobExecutionStatus.FAILED) {
       this.status = NeutronJobExecutionStatus.FAILED;
       this.endTime = System.currentTimeMillis();
+
+      this.fatalError = true;
+      this.doneJob = true;
     }
   }
 
+  @Override
   public void done() {
     if (this.status == NeutronJobExecutionStatus.RUNNING) {
       this.status = NeutronJobExecutionStatus.SUCCEEDED;
       this.endTime = System.currentTimeMillis();
+
+      this.doneRetrieve = true;
+      this.doneIndex = true;
+      this.doneTransform = true;
+      this.doneJob = true;
     }
   }
 
@@ -247,6 +289,65 @@ public class JobProgressTrack implements ApiMarker {
   }
 
   @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
+  @Override
+  public boolean isRunning() {
+    return !this.doneJob;
+  }
+
+  @Override
+  public boolean isFailed() {
+    return !this.fatalError;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isRetrieveDone() {
+    return this.doneRetrieve;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isTransformDone() {
+    return this.doneTransform;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isIndexDone() {
+    return this.doneIndex;
+  }
+
+  @Override
+  public void doneIndex() {
+    this.doneIndex = true;
+  }
+
+  @Override
+  public void doneRetrieve() {
+    this.doneRetrieve = true;
+  }
+
+  @Override
+  public void doneTransform() {
+    this.doneTransform = true;
+  }
+
+  @Override
   public String toString() {
     final StringBuilder buf = new StringBuilder();
     buf.append("[\n    JOB STATUS: ").append(status).append(":\t").append(jobName);
@@ -282,16 +383,6 @@ public class JobProgressTrack implements ApiMarker {
 
     buf.append("\n]");
     return buf.toString();
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this, false);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }

@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.defaults;
 
 public enum NeutronIntegerDefaults {
 
-  DEFAULT_BATCH_WAIT(25),
+  WAIT_BULK_PROCESSOR(25),
 
   SLEEP_MILLIS(2000),
 
@@ -10,7 +10,15 @@ public enum NeutronIntegerDefaults {
 
   DEFAULT_BUCKETS(1),
 
-  DEFAULT_FETCH_SIZE(5000);
+  /**
+   * To avoid missing changed records, look N minutes before the last successful run timestamp.
+   * NOTE: make configurable.
+   */
+  LOOKBACK_MINUTES(-25),
+
+  FETCH_SIZE(5000)
+
+  ;
 
   private final int value;
 

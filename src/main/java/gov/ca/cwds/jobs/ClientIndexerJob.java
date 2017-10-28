@@ -199,7 +199,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       JobDB2Utils.enableParallelism(con);
 
       try (Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue()); // faster
+        stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR

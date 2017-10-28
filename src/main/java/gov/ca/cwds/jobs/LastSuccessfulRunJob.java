@@ -20,6 +20,7 @@ import gov.ca.cwds.jobs.component.Job;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
+import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.JobRunner;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -31,48 +32,9 @@ import gov.ca.cwds.jobs.util.JobLogs;
  */
 public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobControl {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LastSuccessfulRunJob.class);
-
-  private static final int LOOKBACK_MINUTES = -25;
-
-  /**
-   * Completion flag for fatal errors.
-   * <p>
-   * Volatile guarantees that changes to this flag become visible other threads immediately. In
-   * other words, threads don't cache a copy of this variable in their local memory for performance.
-   * </p>
-   */
-  private volatile boolean fatalError = false;
-
-  /**
-   * Completion flag for data retrieval.
-   */
-  private volatile boolean doneRetrieve = false;
-
-  /**
-   * Completion flag for normalization/transformation.
-   */
-  private volatile boolean doneTransform = false;
-
-  /**
-   * Completion flag for document indexing.
-   */
-  private volatile boolean doneIndex = false;
-
-  /**
-   * Completion flag for whole job.
-   */
-  private volatile boolean doneJob = false;
-
-  /**
-   * Official start time.
-   */
-  protected final long startTime = System.currentTimeMillis();
 
   /**
    * Command line options for this job.
@@ -108,13 +70,14 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
       LOGGER.error("FAIL JOB!", e);
     }
 
-    // SLF4J does not yet support conditional invocation.
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info(track.toString());
-    }
-
     finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
     track.done();
+
+    // SLF4J does not yet support conditional invocation.
+    if (LOGGER.isWarnEnabled()) {
+      LOGGER.warn(track.toString());
+    }
+
     JobRunner.getInstance().addTrack(getClass(), track);
   }
 
@@ -123,22 +86,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   @Override
   public void done() {
-    this.doneRetrieve = true;
-    this.doneIndex = true;
-    this.doneTransform = true;
-    this.doneJob = true;
     this.getTrack().done();
-  }
-
-  /**
-   * Reset the job's status and start over.
-   */
-  public void reset() {
-    this.doneRetrieve = false;
-    this.doneIndex = false;
-    this.doneTransform = false;
-    this.doneJob = false;
-    this.fatalError = false;
   }
 
   /**
@@ -146,8 +94,6 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   @Override
   public void fail() {
-    this.fatalError = true;
-    this.doneJob = true;
     this.getTrack().fail();
     this.getTrack().done();
   }
@@ -157,7 +103,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   @Override
   public void doneRetrieve() {
-    this.doneRetrieve = true;
+    getTrack().doneRetrieve();
   }
 
   /**
@@ -165,7 +111,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   @Override
   public void doneTransform() {
-    this.doneTransform = true;
+    getTrack().doneTransform();
   }
 
   /**
@@ -173,7 +119,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   @Override
   public void doneIndex() {
-    this.doneIndex = true;
+    getTrack().doneIndex();
   }
 
   /**
@@ -181,7 +127,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   @Override
   public boolean isRunning() {
-    return !doneJob;
+    return getTrack().isRunning();
   }
 
   /**
@@ -189,7 +135,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   @Override
   public boolean isFailed() {
-    return fatalError;
+    return getTrack().isFailed();
   }
 
   /**
@@ -197,7 +143,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   @Override
   public boolean isRetrieveDone() {
-    return doneRetrieve;
+    return getTrack().isRetrieveDone();
   }
 
   /**
@@ -205,7 +151,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   @Override
   public boolean isTransformDone() {
-    return doneTransform;
+    return getTrack().isTransformDone();
   }
 
   /**
@@ -213,12 +159,16 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   @Override
   public boolean isIndexDone() {
-    return doneIndex;
+    return getTrack().isIndexDone();
   }
 
   /**
    * If last run time is provide in options then use it, otherwise use provided
    * lastSuccessfulRunTime.
+   * 
+   * <p>
+   * NOTE: make the look-back period configurable.
+   * </p>
    * 
    * @param lastSuccessfulRunTime last successful run
    * @param opts command line job options
@@ -233,7 +183,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
     } else {
       final Calendar cal = Calendar.getInstance();
       cal.setTime(lastSuccessfulRunTime);
-      cal.add(Calendar.MINUTE, LOOKBACK_MINUTES);
+      cal.add(Calendar.MINUTE, NeutronIntegerDefaults.LOOKBACK_MINUTES.getValue());
       ret = cal.getTime();
     }
 
