@@ -70,20 +70,16 @@ public class JobRunner {
    */
   private static boolean initialMode = false;
 
-  private Scheduler scheduler;
-
   private JobOptions startingOpts;
 
   private ElasticsearchDao esDao;
 
+  /**
+   * REST administration.
+   */
   private NeutronRestServer restServer = new NeutronRestServer();
 
-  /**
-   * Job options by job type.
-   */
-  private final Map<Class<?>, JobOptions> optionsRegistry = new ConcurrentHashMap<>();
-
-  private final Map<Class<?>, NeutronJobMgtFacade> scheduleRegistry = new ConcurrentHashMap<>();
+  private NeutronScheduler neutronScheduler = new NeutronScheduler();
 
   private final Map<TriggerKey, NeutronInterruptableJob> executingJobs = new ConcurrentHashMap<>();
 
@@ -142,7 +138,7 @@ public class JobRunner {
   public void stopScheduler(boolean waitForJobsToComplete) throws NeutronException {
     LOGGER.warn("STOP SCHEDULER! wait for jobs to complete: {}", waitForJobsToComplete);
     try {
-      scheduler.shutdown(waitForJobsToComplete);
+      neutronScheduler.getScheduler().shutdown(waitForJobsToComplete);
     } catch (SchedulerException e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO STOP SCHEDULER! {}",
           e.getMessage());
@@ -153,7 +149,7 @@ public class JobRunner {
   public void startScheduler() throws NeutronException {
     LOGGER.warn("START SCHEDULER!");
     try {
-      scheduler.start();
+      neutronScheduler.getScheduler().start();
     } catch (SchedulerException e) {
       LOGGER.error("FAILED TO START SCHEDULER! {}", e.getMessage(), e);
       throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO START SCHEDULER! {}",
@@ -170,10 +166,10 @@ public class JobRunner {
     p.put("org.quartz.threadPool.threadCount",
         initialMode ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
     final StdSchedulerFactory factory = new StdSchedulerFactory(p);
-    scheduler = factory.getScheduler();
+    neutronScheduler.setScheduler(factory.getScheduler());
 
     // Scheduler listeners.
-    final ListenerManager listenerMgr = scheduler.getListenerManager();
+    final ListenerManager listenerMgr = neutronScheduler.getScheduler().getListenerManager();
     listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
     listenerMgr.addTriggerListener(new NeutronTriggerListener());
     listenerMgr.addJobListener(initialMode ? NeutronDefaultJobSchedule.fullLoadJobChainListener()
@@ -239,9 +235,10 @@ public class JobRunner {
           registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
         }
 
-        final NeutronJobMgtFacade nj = new NeutronJobMgtFacade(scheduler, sched, jobHistory);
+        final NeutronJobMgtFacade nj =
+            new NeutronJobMgtFacade(neutronScheduler.getScheduler(), sched, jobHistory);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
-        scheduleRegistry.put(klass, nj);
+        neutronScheduler.getScheduleRegistry().put(klass, nj);
       }
 
       // Expose JobRunner methods to JMX.
@@ -251,10 +248,11 @@ public class JobRunner {
       Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
 
       // Start last change jobs.
-      for (NeutronJobMgtFacade j : scheduleRegistry.values()) {
+      for (NeutronJobMgtFacade j : neutronScheduler.getScheduleRegistry().values()) {
         j.schedule();
       }
 
+      // NOTE: move this responsibility to another class.
       if (startingOpts.isDropIndex()) {
         final ElasticsearchDao anEsDao = getInstance().esDao;
         anEsDao.deleteIndex(anEsDao.getConfig().getElasticsearchAlias());
@@ -262,7 +260,7 @@ public class JobRunner {
 
       // Start your engines ...
       if (!testMode) {
-        scheduler.start();
+        neutronScheduler.getScheduler().start();
       }
 
       // Jetty for REST administration.
@@ -271,7 +269,7 @@ public class JobRunner {
 
     } catch (IOException | SchedulerException | ParseException e) {
       try {
-        scheduler.shutdown(false);
+        neutronScheduler.getScheduler().shutdown(false);
       } catch (SchedulerException e2) {
         LOGGER.warn("FAILED TO STOP SCHEDULER! {}", e2.getMessage(), e2);
       }
@@ -292,7 +290,7 @@ public class JobRunner {
     LOGGER.info("Register job: {}", klass.getName());
     if (!testMode) {
       try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
-        optionsRegistry.put(klass, job.getOpts());
+        neutronScheduler.getOptionsRegistry().put(klass, job.getOpts());
         getInstance().setEsDao(job.getEsDao());
       } catch (Throwable e) { // NOSONAR
         // Intentionally catch a Throwable, not an Exception or ClassNotFound or the like.
@@ -316,7 +314,7 @@ public class JobRunner {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
       final JobOptions opts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
-          : optionsRegistry.get(klass);
+          : neutronScheduler.getOptionsRegistry().get(klass);
       final BasePersonIndexerJob<?, ?> job =
           (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
       job.setOpts(opts);
@@ -448,15 +446,6 @@ public class JobRunner {
     }
   }
 
-  /**
-   * One scheduler to rule them all. And in the multi-threading ... bind them? :-)
-   * 
-   * @return evil single instance
-   */
-  public static JobRunner getInstance() {
-    return instance;
-  }
-
   public static boolean isInitialMode() {
     return initialMode;
   }
@@ -500,12 +489,13 @@ public class JobRunner {
     } catch (Exception e) {
       throw JobLogs.buildCheckedException(LOGGER, e, "UNKNOWN JOB CLASS! {}", className, e);
     }
-    return scheduleRegistry.get(klazz).isVetoExecution();
+    return neutronScheduler.getScheduleRegistry().get(klazz).isVetoExecution();
   }
 
   public NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched) {
-    final NeutronJobMgtFacade nj = new NeutronJobMgtFacade(scheduler, sched, jobHistory);
-    scheduleRegistry.put(klazz, nj);
+    final NeutronJobMgtFacade nj =
+        new NeutronJobMgtFacade(neutronScheduler.getScheduler(), sched, jobHistory);
+    neutronScheduler.getScheduleRegistry().put(klazz, nj);
     return nj;
   }
 
@@ -538,7 +528,24 @@ public class JobRunner {
    * @param scheduler scheduler implementation
    */
   public void setScheduler(Scheduler scheduler) {
-    this.scheduler = scheduler;
+    this.neutronScheduler.setScheduler(scheduler);
+  }
+
+  public NeutronScheduler getNeutronScheduler() {
+    return neutronScheduler;
+  }
+
+  public void setNeutronScheduler(NeutronScheduler neutronScheduler) {
+    this.neutronScheduler = neutronScheduler;
+  }
+
+  /**
+   * One scheduler to rule them all. And in the multi-threading ... bind them? :-)
+   * 
+   * @return evil single instance
+   */
+  public static JobRunner getInstance() {
+    return instance;
   }
 
   /**
