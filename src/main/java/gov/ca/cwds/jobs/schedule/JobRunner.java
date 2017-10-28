@@ -533,6 +533,15 @@ public class JobRunner {
   }
 
   /**
+   * <strong>FOR TESTING ONLY!</strong>
+   * 
+   * @param scheduler scheduler implementation
+   */
+  public void setScheduler(Scheduler scheduler) {
+    this.scheduler = scheduler;
+  }
+
+  /**
    * OPTION: configure individual jobs, like Rundeck.
    * <p>
    * Best to load a configuration file with settings per job.
@@ -542,10 +551,6 @@ public class JobRunner {
    */
   public static void main(String[] args) {
     startContinuousMode(args);
-  }
-
-  public void setScheduler(Scheduler scheduler) {
-    this.scheduler = scheduler;
   }
 
 }
