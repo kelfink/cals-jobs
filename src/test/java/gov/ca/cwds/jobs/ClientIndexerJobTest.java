@@ -4,18 +4,27 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
+import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
+import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 
 /**
  * 
@@ -23,6 +32,36 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
  */
 @SuppressWarnings("javadoc")
 public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsClientAddress> {
+
+  private static class TestClientIndexerJob extends ClientIndexerJob {
+
+    private Transaction txn;
+
+    public TestClientIndexerJob(ReplicatedClientDao dao, ElasticsearchDao esDao,
+        String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
+        NeutronJobProgressHistory jobHistory) {
+      super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
+    }
+
+    @Override
+    public boolean isLargeDataSet() {
+      return false;
+    }
+
+    @Override
+    public Transaction getOrCreateTransaction() {
+      return txn;
+    }
+
+    public Transaction getTxn() {
+      return txn;
+    }
+
+    public void setTxn(Transaction txn) {
+      this.txn = txn;
+    }
+
+  }
 
   ReplicatedClientDao dao;
   ClientIndexerJob target;
@@ -186,18 +225,24 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     target.iterateRangeResults(rs);
   }
 
-  // @Test
-  // public void validateDocument_Args__ElasticSearchPerson() throws Exception {
-  // final ElasticSearchPerson person = new ElasticSearchPerson();
-  // person.setId(DEFAULT_CLIENT_ID);
-  //
-  // final ReplicatedClient rep = new ReplicatedClient();
-  // // when(dao.find(any(String.class))).thenReturn(rep);
-  //
-  // boolean actual = target.validateDocument(person);
-  // boolean expected = false;
-  // assertThat(actual, is(equalTo(expected)));
-  // }
+  @Test
+  public void validateDocument_Args__ElasticSearchPerson() throws Exception {
+    final ElasticSearchPerson person = new ElasticSearchPerson();
+    person.setId(DEFAULT_CLIENT_ID);
+
+    final ReplicatedClient rep = new ReplicatedClient();
+
+    dao = mock(ReplicatedClientDao.class);
+    TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastJobRunTimeFilename,
+        mapper, sessionFactory, jobHistory);
+    target.setOpts(opts);
+    target.setTxn(transaction);
+    when(dao.find(any())).thenReturn(rep);
+
+    boolean actual = target.validateDocument(person);
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
 
   // @Test
   // public void validateDocument_Args__ElasticSearchPerson_T__NeutronException() throws Exception {
