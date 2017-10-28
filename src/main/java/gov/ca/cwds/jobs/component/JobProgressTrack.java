@@ -230,15 +230,13 @@ public class JobProgressTrack implements ApiMarker, AtomJobControl {
 
   @Override
   public void done() {
-    if (this.status == NeutronJobExecutionStatus.RUNNING) {
-      this.status = NeutronJobExecutionStatus.SUCCEEDED;
-      this.endTime = System.currentTimeMillis();
+    this.status = NeutronJobExecutionStatus.SUCCEEDED;
+    this.endTime = System.currentTimeMillis();
 
-      this.doneRetrieve = true;
-      this.doneIndex = true;
-      this.doneTransform = true;
-      this.doneJob = true;
-    }
+    this.doneRetrieve = true;
+    this.doneIndex = true;
+    this.doneTransform = true;
+    this.doneJob = true;
   }
 
   public List<Pair<String, String>> getInitialLoadRangesStarted() {
@@ -313,7 +311,7 @@ public class JobProgressTrack implements ApiMarker, AtomJobControl {
 
   @Override
   public boolean isRunning() {
-    return !this.doneJob;
+    return !this.doneJob && !this.fatalError;
   }
 
   @Override
