@@ -1,12 +1,9 @@
 package gov.ca.cwds.jobs;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import org.hibernate.Query;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
@@ -41,20 +38,20 @@ public class OrigAttorneyIndexerJobTest
     assertThat(target, notNullValue());
   }
 
-  @Test
-  @Ignore
-  public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-    final Query query =
-        session.getNamedQuery(ReplicatedAttorney.class.getName() + ".findAllUpdatedAfter");
-    assertThat(query, is(notNullValue()));
-  }
+  // @Test
+  // @Ignore
+  // public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
+  // final Query query =
+  // session.getNamedQuery(ReplicatedAttorney.class.getName() + ".findAllUpdatedAfter");
+  // assertThat(query, is(notNullValue()));
+  // }
 
-  @Test
-  @Ignore
-  public void testFindAllByBucketExists() throws Exception {
-    final Query query =
-        session.getNamedQuery(ReplicatedAttorney.class.getName() + ".findAllByBucket");
-    assertThat(query, is(notNullValue()));
-  }
+  // @Test
+  // @Ignore
+  // public void testFindAllByBucketExists() throws Exception {
+  // final Query query =
+  // session.getNamedQuery(ReplicatedAttorney.class.getName() + ".findAllByBucket");
+  // assertThat(query, is(notNullValue()));
+  // }
 
 }

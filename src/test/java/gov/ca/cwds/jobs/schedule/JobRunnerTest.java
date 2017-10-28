@@ -6,17 +6,12 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
-import java.io.IOException;
-
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.quartz.Scheduler;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.PersonJobTester;
-import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
@@ -56,14 +51,14 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
     target.resetTimestamps(initialMode, hoursInPast);
   }
 
-  @Test(expected = IOException.class)
-  @Ignore
-  public void resetTimestamps_Args__boolean__int_T__IOException() throws Exception {
-    boolean initialMode = false;
-    int hoursInPast = 0;
-    opts.setLastRunLoc(".././.././aintthere");
-    target.resetTimestamps(initialMode, hoursInPast);
-  }
+  // @Test(expected = IOException.class)
+  // @Ignore
+  // public void resetTimestamps_Args__boolean__int_T__IOException() throws Exception {
+  // boolean initialMode = false;
+  // int hoursInPast = 0;
+  // opts.setLastRunLoc(".././.././aintthere");
+  // target.resetTimestamps(initialMode, hoursInPast);
+  // }
 
   @Test
   public void resetTimestampsForInitialLoad_Args__() throws Exception {
@@ -83,57 +78,57 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
     target.stopScheduler(waitForJobsToComplete);
   }
 
-  @Test(expected = NeutronException.class)
-  @Ignore
-  public void stopScheduler_Args__boolean_T__NeutronException() throws Exception {
-    boolean waitForJobsToComplete = false;
-    target.stopScheduler(waitForJobsToComplete);
-  }
+  // @Test(expected = NeutronException.class)
+  // @Ignore
+  // public void stopScheduler_Args__boolean_T__NeutronException() throws Exception {
+  // boolean waitForJobsToComplete = false;
+  // target.stopScheduler(waitForJobsToComplete);
+  // }
 
-  @Test
-  @Ignore
-  public void startScheduler_Args__() throws Exception {
-    target.startScheduler();
-  }
+  // @Test
+  // @Ignore
+  // public void startScheduler_Args__() throws Exception {
+  // target.startScheduler();
+  // }
 
-  @Test(expected = NeutronException.class)
-  @Ignore
-  public void startScheduler_Args___T__NeutronException() throws Exception {
-    target.startScheduler();
-  }
+  // @Test(expected = NeutronException.class)
+  // @Ignore
+  // public void startScheduler_Args___T__NeutronException() throws Exception {
+  // target.startScheduler();
+  // }
 
-  @Test
-  @Ignore
-  public void initScheduler_Args__() throws Exception {
-    target.initScheduler();
-  }
+  // @Test
+  // @Ignore
+  // public void initScheduler_Args__() throws Exception {
+  // target.initScheduler();
+  // }
 
-  @Test(expected = NeutronException.class)
-  @Ignore
-  public void initScheduler_Args___T__NeutronException() throws Exception {
-    target.initScheduler();
-  }
+  // @Test(expected = NeutronException.class)
+  // @Ignore
+  // public void initScheduler_Args___T__NeutronException() throws Exception {
+  // target.initScheduler();
+  // }
 
-  @Test
-  @Ignore
-  public void registerJob_Args__Class__JobOptions() throws Exception {
-    target.registerJob(TestIndexerJob.class, opts);
-  }
+  // @Test
+  // @Ignore
+  // public void registerJob_Args__Class__JobOptions() throws Exception {
+  // target.registerJob(TestIndexerJob.class, opts);
+  // }
 
-  @Test(expected = NeutronException.class)
-  @Ignore
-  public void registerJob_Args__Class__JobOptions_T__NeutronException() throws Exception {
-    target.registerJob(TestIndexerJob.class, opts);
-  }
+  // @Test(expected = NeutronException.class)
+  // @Ignore
+  // public void registerJob_Args__Class__JobOptions_T__NeutronException() throws Exception {
+  // target.registerJob(TestIndexerJob.class, opts);
+  // }
 
-  @Test
-  @Ignore
-  public void createJob_Args__Class__StringArray() throws Exception {
-    Class<?> klass = TestIndexerJob.class;
-    String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
-    BasePersonIndexerJob actual = target.createJob(klass, args);
-    assertThat(actual, is(notNullValue()));
-  }
+  // @Test
+  // @Ignore
+  // public void createJob_Args__Class__StringArray() throws Exception {
+  // Class<?> klass = TestIndexerJob.class;
+  // String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
+  // BasePersonIndexerJob actual = target.createJob(klass, args);
+  // assertThat(actual, is(notNullValue()));
+  // }
 
   @Test(expected = NeutronException.class)
   public void createJob_Args__Class__StringArray_T__NeutronException() throws Exception {
@@ -142,23 +137,25 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
     target.createJob(klass, args);
   }
 
-  @Test
-  @Ignore
-  public void createJob_Args__String__StringArray() throws Exception {
-    final String jobName = TestIndexerJob.class.getName();
-    final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
-    final BasePersonIndexerJob actual = target.createJob(jobName, args);
-    assertThat(actual, is(notNullValue()));
-  }
+  // @Test
+  // @Ignore
+  // public void createJob_Args__String__StringArray() throws Exception {
+  // final String jobName = TestIndexerJob.class.getName();
+  // final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/",
+  // "-F"};
+  // final BasePersonIndexerJob actual = target.createJob(jobName, args);
+  // assertThat(actual, is(notNullValue()));
+  // }
 
-  @Test
-  @Ignore
-  public void runScheduledJob_Args__Class__StringArray() throws Exception {
-    final Class<?> klass = TestIndexerJob.class;
-    final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
-    final JobProgressTrack actual = target.runScheduledJob(klass, args);
-    assertThat(actual, is(notNullValue()));
-  }
+  // @Test
+  // @Ignore
+  // public void runScheduledJob_Args__Class__StringArray() throws Exception {
+  // final Class<?> klass = TestIndexerJob.class;
+  // final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/",
+  // "-F"};
+  // final JobProgressTrack actual = target.runScheduledJob(klass, args);
+  // assertThat(actual, is(notNullValue()));
+  // }
 
   @Test(expected = NeutronException.class)
   public void runScheduledJob_Args__Class__StringArray_T__NeutronException() throws Exception {
@@ -167,14 +164,15 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
     target.runScheduledJob(klass, args);
   }
 
-  @Test
-  @Ignore
-  public void runScheduledJob_Args__String__StringArray() throws Exception {
-    final String jobName = TestIndexerJob.class.getName();
-    final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
-    JobProgressTrack actual = target.runScheduledJob(jobName, args);
-    assertThat(actual, is(notNullValue()));
-  }
+  // @Test
+  // @Ignore
+  // public void runScheduledJob_Args__String__StringArray() throws Exception {
+  // final String jobName = TestIndexerJob.class.getName();
+  // final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/",
+  // "-F"};
+  // JobProgressTrack actual = target.runScheduledJob(jobName, args);
+  // assertThat(actual, is(notNullValue()));
+  // }
 
   @Test
   public void isSchedulerMode_Args__() throws Exception {
@@ -196,12 +194,12 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
     JobRunner.setTestMode(mode);
   }
 
-  @Test
-  @Ignore
-  public void runStandalone_Args__Class__StringArray() throws Exception {
-    final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/"};
-    target.runStandalone(TestIndexerJob.class, args);
-  }
+  // @Test
+  // @Ignore
+  // public void runStandalone_Args__Class__StringArray() throws Exception {
+  // final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/"};
+  // target.runStandalone(TestIndexerJob.class, args);
+  // }
 
   @Test
   public void getInstance_Args__() throws Exception {

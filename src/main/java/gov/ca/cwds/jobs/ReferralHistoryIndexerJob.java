@@ -294,8 +294,7 @@ public class ReferralHistoryIndexerJob
     }
   }
 
-  protected int normalizeClientReferrals(int cntr, Map.Entry<String, List<MinClientReferral>> rc,
-      MinClientReferral rc1, final String clientId,
+  protected int normalizeClientReferrals(int cntr, MinClientReferral rc1, final String clientId,
       final Map<String, EsPersonReferral> mapReferrals,
       final List<EsPersonReferral> listReadyToNorm,
       final Map<String, List<MinClientReferral>> mapReferralByClient,
@@ -341,7 +340,7 @@ public class ReferralHistoryIndexerJob
       if (StringUtils.isNotBlank(clientId)) {
         listReadyToNorm.clear();
         for (MinClientReferral rc1 : rc.getValue()) {
-          cntr = normalizeClientReferrals(cntr, rc, rc1, clientId, mapReferrals, listReadyToNorm,
+          cntr = normalizeClientReferrals(cntr, rc1, clientId, mapReferrals, listReadyToNorm,
               mapReferralByClient, mapAllegationByReferral);
         }
       }
