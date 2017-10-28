@@ -474,7 +474,6 @@ public class EsPersonReferralTest extends PersonJobTester {
   }
 
   @Test
-  // @Ignore
   public void hashCode_Args__() throws Exception {
     int actual = target.hashCode();
     assertThat(actual, is(not(0)));

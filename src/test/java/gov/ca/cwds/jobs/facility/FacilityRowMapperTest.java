@@ -1,18 +1,19 @@
 package gov.ca.cwds.jobs.facility;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+
+import gov.ca.cwds.jobs.exception.JobsException;
 
 public class FacilityRowMapperTest {
 
@@ -33,24 +34,19 @@ public class FacilityRowMapperTest {
     assertThat(target, notNullValue());
   }
 
-  @Test
-  @Ignore
+  @Test(expected = JobsException.class)
   public void mapRow_Args__ResultSet() throws Exception {
     ResultSet rs = mock(ResultSet.class);
     FacilityRow actual = target.mapRow(rs);
-    FacilityRow expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
-  @Test
-  @Ignore
+  @Test(expected = JobsException.class)
   public void mapRow_Args__ResultSet_T__SQLException() throws Exception {
     ResultSet rs = mock(ResultSet.class);
-    try {
-      target.mapRow(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    when(rs.next()).thenThrow(SQLException.class);
+    when(rs.getString(any())).thenThrow(SQLException.class);
+    target.mapRow(rs);
   }
 
 }
