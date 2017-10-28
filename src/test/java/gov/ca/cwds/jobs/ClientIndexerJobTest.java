@@ -13,9 +13,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
@@ -26,8 +23,6 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
  */
 @SuppressWarnings("javadoc")
 public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsClientAddress> {
-
-  protected static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
 
   ReplicatedClientDao dao;
   ClientIndexerJob target;
@@ -59,7 +54,6 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     when(rs.getString("CLT_IBMSNAP_OPERATION")).thenReturn("I");
     final EsClientAddress actual = target.extract(rs);
     final EsClientAddress expected = new EsClientAddress();
-
     final short s = (short) 0;
     // expected.setCltBirthCountryCodeType(s);
     // expected.setCltBirthStateCodeType(s);
@@ -80,7 +74,6 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     // expected.setAdrZip4(s);
     // expected.setAdrUnitDesignationCd(s);
     // expected.setAdrPostDirCd(0);
-
     // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, notNullValue());
   }
@@ -168,5 +161,78 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
+
+  @Test
+  public void useTransformThread_Args__() throws Exception {
+    boolean actual = target.useTransformThread();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getPrepLastChangeSQL_Args__() throws Exception {
+    String actual = target.getPrepLastChangeSQL();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void normalizeAndQueueIndex_Args__List() throws Exception {
+    List<EsClientAddress> grpRecs = new ArrayList<EsClientAddress>();
+    target.normalizeAndQueueIndex(grpRecs);
+  }
+
+  @Test
+  public void iterateRangeResults_Args__ResultSet() throws Exception {
+    target.iterateRangeResults(rs);
+  }
+
+  // @Test
+  // public void validateDocument_Args__ElasticSearchPerson() throws Exception {
+  // final ElasticSearchPerson person = new ElasticSearchPerson();
+  // person.setId(DEFAULT_CLIENT_ID);
+  //
+  // final ReplicatedClient rep = new ReplicatedClient();
+  // // when(dao.find(any(String.class))).thenReturn(rep);
+  //
+  // boolean actual = target.validateDocument(person);
+  // boolean expected = false;
+  // assertThat(actual, is(equalTo(expected)));
+  // }
+
+  // @Test
+  // public void validateDocument_Args__ElasticSearchPerson_T__NeutronException() throws Exception {
+  // ElasticSearchPerson person = mock(ElasticSearchPerson.class);
+  // try {
+  // target.validateDocument(person);
+  // fail("Expected exception was not thrown!");
+  // } catch (NeutronException e) {
+  // }
+  // }
+
+  @Test
+  public void threadRetrieveByJdbc_Args__() throws Exception {
+    target.threadRetrieveByJdbc();
+  }
+
+  @Test
+  public void isInitialLoadJdbc_Args__() throws Exception {
+    boolean actual = target.isInitialLoadJdbc();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getPartitionRanges_Args__() throws Exception {
+    List actual = target.getPartitionRanges();
+    List expected = new ArrayList<>();
+    expected.add(Pair.of("aaaaaaaaaa", "9999999999"));
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  // @Test
+  // public void main_Args__StringArray() throws Exception {
+  // String[] args = new String[] {};
+  // ClientIndexerJob.main(args);
+  // }
 
 }

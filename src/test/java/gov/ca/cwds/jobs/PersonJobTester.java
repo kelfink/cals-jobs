@@ -55,6 +55,8 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
   protected static final ObjectMapper MAPPER = ObjectMapperUtils.createObjectMapper();
 
+  protected static final ObjectMapper mapper = MAPPER;
+
   public static final String DEFAULT_CLIENT_ID = "abc1234567";
 
   @BeforeClass
