@@ -43,6 +43,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
+   * @param jobHistory job history
    */
   @Inject
   public ChildCaseHistoryIndexerJob(final ReplicatedPersonCasesDao clientDao,

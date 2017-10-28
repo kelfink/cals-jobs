@@ -59,6 +59,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
+   * @param jobHistory job history
    */
   @Inject
   public IntakeScreeningJob(final IntakeParticipantDao normalizedDao,
