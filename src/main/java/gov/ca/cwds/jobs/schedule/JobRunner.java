@@ -544,4 +544,8 @@ public class JobRunner {
     startContinuousMode(args);
   }
 
+  public void setScheduler(Scheduler scheduler) {
+    this.scheduler = scheduler;
+  }
+
 }

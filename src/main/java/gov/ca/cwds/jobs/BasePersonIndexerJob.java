@@ -42,7 +42,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
@@ -852,16 +851,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINISHING JOB: {}", e.getMessage());
     }
     LOGGER.info("JOB FINISHED!");
-  }
-
-  /**
-   * Build runtime key pairs for initial load.
-   * 
-   * @param table the driver table
-   * @return batch buckets
-   */
-  protected List<BatchBucket> buildBucketList(final String table) {
-    return new ArrayList<>();
   }
 
   /**

@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -62,16 +61,11 @@ public class RelationshipIndexerJobTest
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void extract_Args__ResultSet_T__SQLException() throws Exception {
-    try {
-      when(rs.next()).thenThrow(SQLException.class);
-      when(rs.getString(any(String.class))).thenThrow(SQLException.class);
-      target.extract(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
-
+    when(rs.next()).thenThrow(SQLException.class);
+    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    target.extract(rs);
   }
 
   @Test
@@ -111,17 +105,12 @@ public class RelationshipIndexerJobTest
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = IOException.class)
   @Ignore
   public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedRelationships_T__IOException()
       throws Exception {
     ReplicatedRelationships p = new ReplicatedRelationships(DEFAULT_CLIENT_ID);
-    try {
-      target.prepareUpsertRequest(esp, p);
-      fail("Expected exception was not thrown!");
-    } catch (IOException e) {
-    }
-
+    target.prepareUpsertRequest(esp, p);
   }
 
   @Test
@@ -177,12 +166,6 @@ public class RelationshipIndexerJobTest
     List<ReplicatedRelationships> actual = target.normalize(recs);
     List<ReplicatedRelationships> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  // @Test
-  public void main_Args__StringArray() throws Exception {
-    String[] args = new String[] {};
-    RelationshipIndexerJob.main(args);
   }
 
   @Test

@@ -447,18 +447,6 @@ public class BasePersonIndexerJobTest
   }
 
   @Test
-  public void buildBucketList_Args__String() throws Exception {
-    final javax.persistence.Query q = mock(javax.persistence.Query.class);
-    when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
-    when(q.getResultList()).thenReturn(new ArrayList<TestDenormalizedEntity>());
-    when(q.setParameter(any(String.class), any(String.class))).thenReturn(q);
-
-    final String table = "SOMETBL";
-    final List<BatchBucket> actual = target.buildBucketList(table);
-    assertThat(actual, notNullValue());
-  }
-
-  @Test
   public void doLastRun_Args__Date() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(qn);

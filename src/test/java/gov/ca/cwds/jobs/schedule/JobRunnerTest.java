@@ -4,12 +4,14 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.quartz.Scheduler;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
@@ -36,7 +38,10 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
     target = JobRunner.getInstance();
     target.setStartingOpts(opts);
     target.setEsDao(esDao);
-    target.setTestMode(true);
+    JobRunner.setTestMode(true);
+
+    Scheduler scheduler = mock(Scheduler.class);
+    target.setScheduler(scheduler);
   }
 
   @Test
@@ -72,15 +77,7 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
     target.resetTimestampsForLastChange(hoursInPast);
   }
 
-  @Test(expected = IOException.class)
-  @Ignore
-  public void resetTimestampsForLastChange_Args__int_T__IOException() throws Exception {
-    int hoursInPast = 0;
-    target.resetTimestampsForLastChange(hoursInPast);
-  }
-
   @Test
-  @Ignore
   public void stopScheduler_Args__boolean() throws Exception {
     boolean waitForJobsToComplete = false;
     target.stopScheduler(waitForJobsToComplete);
@@ -140,26 +137,26 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
 
   @Test(expected = NeutronException.class)
   public void createJob_Args__Class__StringArray_T__NeutronException() throws Exception {
-    Class<?> klass = TestIndexerJob.class;
-    String[] args = new String[] {};
+    final Class<?> klass = TestIndexerJob.class;
+    final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
     target.createJob(klass, args);
   }
 
   @Test
   @Ignore
   public void createJob_Args__String__StringArray() throws Exception {
-    String jobName = TestIndexerJob.class.getName();
-    String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
-    BasePersonIndexerJob actual = target.createJob(jobName, args);
+    final String jobName = TestIndexerJob.class.getName();
+    final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
+    final BasePersonIndexerJob actual = target.createJob(jobName, args);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   @Ignore
   public void runScheduledJob_Args__Class__StringArray() throws Exception {
-    Class<?> klass = TestIndexerJob.class;
-    String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
-    JobProgressTrack actual = target.runScheduledJob(klass, args);
+    final Class<?> klass = TestIndexerJob.class;
+    final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
+    final JobProgressTrack actual = target.runScheduledJob(klass, args);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -174,8 +171,7 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
   @Ignore
   public void runScheduledJob_Args__String__StringArray() throws Exception {
     final String jobName = TestIndexerJob.class.getName();
-    final String[] args =
-        new String[] {"-c", "config/local.yaml", "-l", "/Users/CWS-NS3/client_indexer_time.txt"};
+    final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
     JobProgressTrack actual = target.runScheduledJob(jobName, args);
     assertThat(actual, is(notNullValue()));
   }
@@ -203,8 +199,7 @@ public class JobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDen
   @Test
   @Ignore
   public void runStandalone_Args__Class__StringArray() throws Exception {
-    final String[] args =
-        new String[] {"-c", "config/local.yaml", "-l", "/Users/CWS-NS3/client_indexer_time.txt"};
+    final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/"};
     target.runStandalone(TestIndexerJob.class, args);
   }
 

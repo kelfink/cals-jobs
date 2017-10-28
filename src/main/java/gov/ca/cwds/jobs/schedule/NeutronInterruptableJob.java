@@ -35,6 +35,9 @@ public class NeutronInterruptableJob implements InterruptableJob {
     // No-op.
   }
 
+  /**
+   * QUESTION: does Quartz allow injection?? Is it safe to pass objects via the job data map??
+   */
   @SuppressWarnings("rawtypes")
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -43,10 +46,6 @@ public class NeutronInterruptableJob implements InterruptableJob {
     cmdLine = map.getString("cmd_line");
 
     final String jobName = context.getTrigger().getJobKey().getName();
-
-    // QUESTION: does Quartz allow injection??
-    // Is it safe to pass objects via the job data map??
-    // NeutronJobProgressHistory jobHistory = null;
 
     LOGGER.info("Execute {}", className);
     try (final BasePersonIndexerJob job = JobRunner.getInstance().createJob(className,

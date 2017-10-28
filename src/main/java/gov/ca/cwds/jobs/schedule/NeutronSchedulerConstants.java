@@ -12,4 +12,8 @@ public class NeutronSchedulerConstants {
 
   public static final String SCHEDULER_INSTANCE_NAME = "neutron";
 
+  private NeutronSchedulerConstants() {
+    // static constants only
+  }
+
 }

@@ -10,7 +10,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -59,15 +58,11 @@ public class NeutronJobMgtFacadeTest {
     target.schedule();
   }
 
-  @Test
+  @Test(expected = SchedulerException.class)
   public void schedule_Args___T__SchedulerException() throws Exception {
-    try {
-      when(scheduler.checkExists(any(JobKey.class))).thenThrow(SchedulerException.class);
-      when(scheduler.getJobDetail(any(JobKey.class))).thenThrow(SchedulerException.class);
-      target.schedule();
-      fail("Expected exception was not thrown!");
-    } catch (SchedulerException e) {
-    }
+    when(scheduler.checkExists(any(JobKey.class))).thenThrow(SchedulerException.class);
+    when(scheduler.getJobDetail(any(JobKey.class))).thenThrow(SchedulerException.class);
+    target.schedule();
   }
 
   @Test
@@ -75,14 +70,10 @@ public class NeutronJobMgtFacadeTest {
     target.unschedule();
   }
 
-  @Test
+  @Test(expected = SchedulerException.class)
   public void unschedule_Args___T__SchedulerException() throws Exception {
-    try {
-      doThrow(SchedulerException.class).when(scheduler).pauseTrigger(any(TriggerKey.class));
-      target.unschedule();
-      fail("Expected exception was not thrown!");
-    } catch (SchedulerException e) {
-    }
+    doThrow(SchedulerException.class).when(scheduler).pauseTrigger(any(TriggerKey.class));
+    target.unschedule();
   }
 
   @Test
@@ -99,13 +90,6 @@ public class NeutronJobMgtFacadeTest {
 
     when(jd.getJobDataMap()).thenReturn(jdm);
     history.addTrack(ClientIndexerJob.class, track);
-    target.status();
-  }
-
-  @Test(expected = SchedulerException.class)
-  @Ignore
-  public void status_Args___T__SchedulerException() throws Exception {
-    when(scheduler.getJobDetail(any(JobKey.class))).thenThrow(SchedulerException.class);
     target.status();
   }
 
