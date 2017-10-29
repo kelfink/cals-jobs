@@ -121,6 +121,18 @@ public class LastSuccessfulRunJobTest
     target.writeLastSuccessfulRunTime(datetime);
   }
 
+  @Test(expected = JobsException.class)
+  public void writeLastSuccessfulRunTime_Args__bomb() throws Exception {
+    JobProgressTrack track = mock(JobProgressTrack.class);
+    when(track.isFailed()).thenReturn(false);
+    target.track = track;
+
+    target.setLastRunTimeFilename("/does/not/exist/garbage");
+
+    final Date datetime = new Date();
+    target.writeLastSuccessfulRunTime(datetime);
+  }
+
   @Test
   public void getLastJobRunTimeFilename_Args__() throws Exception {
     final String actual = target.getLastJobRunTimeFilename();
