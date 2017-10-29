@@ -195,10 +195,13 @@ public class LastSuccessfulRunJobTest
 
   @Test
   public void calcLastRunDate_Args__Date() throws Exception {
-    JobOptions opts = new JobOptions();
-    target.setOpts(opts);
     Date lastSuccessfulRunTime = new Date();
-    Date actual = target.calcLastRunDate(lastSuccessfulRunTime);
+
+    JobOptions opts = new JobOptions();
+    opts.setLastRunTime(lastSuccessfulRunTime);
+    target.setOpts(opts);
+
+    final Date actual = target.calcLastRunDate(lastSuccessfulRunTime);
     assertThat(actual, is(notNullValue()));
   }
 
