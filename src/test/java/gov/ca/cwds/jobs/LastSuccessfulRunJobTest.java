@@ -33,7 +33,7 @@ public class LastSuccessfulRunJobTest
 
     ElasticsearchDao esDao;
 
-    final JobProgressTrack track = new JobProgressTrack();
+    JobProgressTrack track = new JobProgressTrack();
 
     public TestLastSuccessfulRunJob(String lastJobRunTimeFilename, ElasticsearchDao esDao,
         NeutronJobProgressHistory jobHistory) {
@@ -63,7 +63,7 @@ public class LastSuccessfulRunJobTest
   private static final String FIXED_DATETIME = "2017-06-14 14:09:47";
 
   TestNormalizedEntityDao dao;
-  LastSuccessfulRunJob target;
+  TestLastSuccessfulRunJob target;
 
   @Override
   @Before
@@ -112,10 +112,12 @@ public class LastSuccessfulRunJobTest
   @Test
   public void writeLastSuccessfulRunTime_Args__Date() throws Exception {
     JobProgressTrack track = mock(JobProgressTrack.class);
-    when(track.isFailed()).thenReturn(false, false, true);
+    when(track.isFailed()).thenReturn(false);
+    target.track = track;
+
+    target.setLastRunTimeFilename(tempFile.getAbsolutePath());
 
     final Date datetime = new Date();
-    target.setLastRunTimeFilename(tempFile.getAbsolutePath());
     target.writeLastSuccessfulRunTime(datetime);
   }
 
