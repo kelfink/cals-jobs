@@ -1,6 +1,5 @@
 package gov.ca.cwds.data.es;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -20,6 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
  * A DAO for Elasticsearch.
@@ -106,12 +107,8 @@ public class Elasticsearch5xDao implements Closeable, ApiMarker {
     CreateIndexRequest indexRequest = new CreateIndexRequest(index, indexSettings);
     getClient().admin().indices().create(indexRequest).actionGet();
 
-    final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    IOUtils.copy(
-        this.getClass().getResourceAsStream("/elasticsearch/mapping/map_person_5x_snake.json"),
-        out);
-    out.flush();
-    final String mapping = out.toString();
+    final String mapping = IOUtils.toString(
+        this.getClass().getResourceAsStream("/elasticsearch/mapping/map_person_5x_snake.json"));
     getClient().admin().indices().preparePutMapping(index)
         .setType(getConfig().getElasticsearchDocType()).setSource(mapping, XContentType.JSON).get();
   }
@@ -129,17 +126,19 @@ public class Elasticsearch5xDao implements Closeable, ApiMarker {
    * </p>
    *
    * @param index index name or alias
-   * @throws InterruptedException if thread is interrupted
-   * @throws IOException on disconnect, hang, etc.
+   * @throws NeutronException on thread interrupt, disconnect, hang, etc.
    */
-  public synchronized void createIndexIfNeeded(final String index)
-      throws InterruptedException, IOException {
-    if (!doesIndexExist(index)) {
-      LOGGER.warn("ES INDEX {} DOES NOT EXIST!!", index);
-      createIndex(index, NUMBER_OF_SHARDS, NUMBER_OF_REPLICAS);
+  public synchronized void createIndexIfNeeded(final String index) throws NeutronException {
+    try {
+      if (!doesIndexExist(index)) {
+        LOGGER.warn("ES INDEX {} DOES NOT EXIST!!", index);
+        createIndex(index, NUMBER_OF_SHARDS, NUMBER_OF_REPLICAS);
 
-      // Give Elasticsearch a moment to catch its breath.
-      Thread.sleep(2000); // NOSONAR
+        // Give Elasticsearch a moment to catch its breath.
+        Thread.sleep(2000); // NOSONAR
+      }
+    } catch (InterruptedException | IOException e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "CREATE INDEX FAILED! {}", e.getMessage());
     }
   }
 

@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.util;
 
+import static com.jayway.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -73,7 +75,7 @@ public class AsyncReadWriteJobTest {
         return input.remove(0);
       }
       return null;
-    } , String::valueOf, output::addAll);
+    }, String::valueOf, output::addAll);
     job.run();
 
     Assert.assertEquals(3, output.size());
@@ -89,13 +91,14 @@ public class AsyncReadWriteJobTest {
         return input.remove(0);
       } else {
         try {
+          await().atMost(2, TimeUnit.SECONDS).until(() -> input.remove(0));
           Thread.sleep(1000);
         } catch (InterruptedException e) {
           throw new RuntimeException(e);
         }
         throw new RuntimeException("failed on second!");
       }
-    } , String::valueOf, output::addAll);
+    }, String::valueOf, output::addAll);
 
     job.run();
     Assert.assertEquals(1, output.size());
@@ -183,7 +186,6 @@ public class AsyncReadWriteJobTest {
       fail("Expected exception was not thrown!");
     } catch (Exception e) {
     }
-
   }
 
 }
