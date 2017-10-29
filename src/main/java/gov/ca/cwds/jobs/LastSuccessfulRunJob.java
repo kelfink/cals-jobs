@@ -221,7 +221,8 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
             .parse(br.readLine().trim()); // NOSONAR
       } catch (IOException | ParseException e) {
         fail();
-        JobLogs.raiseError(LOGGER, e, "ERROR FINDING LAST SUCCESSFUL RUN TIME: {}", e.getMessage());
+        throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINDING LAST SUCCESSFUL RUN TIME: {}",
+            e.getMessage());
       }
     }
 
@@ -239,7 +240,8 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
         w.write(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().format(datetime));
       } catch (IOException e) {
         fail();
-        JobLogs.raiseError(LOGGER, e, "Failed to write timestamp file: {}", e.getMessage());
+        throw JobLogs.buildRuntimeException(LOGGER, e, "Failed to write timestamp file: {}",
+            e.getMessage());
       }
     }
   }
