@@ -8,9 +8,6 @@ import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
 import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -34,12 +31,12 @@ public class SystemCodesLoaderModuleTest {
     assertThat(target, notNullValue());
   }
 
-  @Test
-  public void configure_Args__() throws Exception {
-    Injector injector =
-        Guice.createInjector(new SystemCodesLoaderModule("test-h2-cms.xml", "test-h2-ns.xml"));
-    // target.configure(); // Can only call indirectly.
-  }
+  // @Test
+  // public void configure_Args__() throws Exception {
+  // Injector injector =
+  // Guice.createInjector(new SystemCodesLoaderModule("test-h2-cms.xml", "test-h2-ns.xml"));
+  // // target.configure(); // Can only call indirectly.
+  // }
 
   @Test
   public void provideSystemCodeCache_Args__SystemCodeDao__SystemMetaDao() throws Exception {
