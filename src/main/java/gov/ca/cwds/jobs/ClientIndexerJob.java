@@ -135,8 +135,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    */
   protected void normalizeAndQueueIndex(final List<EsClientAddress> grpRecs) {
     grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
-        .collect(Collectors.groupingBy(EsClientAddress::getCltId)).entrySet().stream()
-        .map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
+        .collect(Collectors.groupingBy(EsClientAddress::getNormalizationGroupKey)).entrySet()
+        .stream().map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
   }
 
   /**
@@ -262,7 +262,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
-    // TODO: **short-term** fix for county table in Perf and Prod.
+    // NOTE: **short-term** fix for county table in Perf and Prod.
     EsClientAddress.setUseCounty(isLargeDataSet());
     return JobJdbcUtils.getCommonPartitionRanges64(this);
   }

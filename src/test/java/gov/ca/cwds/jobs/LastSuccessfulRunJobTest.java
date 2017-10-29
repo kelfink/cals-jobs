@@ -13,9 +13,11 @@ import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
@@ -108,6 +110,101 @@ public class LastSuccessfulRunJobTest
     final String actual = target.getLastJobRunTimeFilename();
     final String expected = tempFile.getAbsolutePath();
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void done_Args__() throws Exception {
+    target.done();
+  }
+
+  @Test
+  public void fail_Args__() throws Exception {
+    target.fail();
+  }
+
+  @Test
+  public void doneRetrieve_Args__() throws Exception {
+    target.doneRetrieve();
+  }
+
+  @Test
+  public void doneTransform_Args__() throws Exception {
+    target.doneTransform();
+  }
+
+  @Test
+  public void doneIndex_Args__() throws Exception {
+    target.doneIndex();
+  }
+
+  @Test
+  public void isRunning_Args__() throws Exception {
+    boolean actual = target.isRunning();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isFailed_Args__() throws Exception {
+    boolean actual = target.isFailed();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isRetrieveDone_Args__() throws Exception {
+    boolean actual = target.isRetrieveDone();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isTransformDone_Args__() throws Exception {
+    boolean actual = target.isTransformDone();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isIndexDone_Args__() throws Exception {
+    boolean actual = target.isIndexDone();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void calcLastRunDate_Args__Date__JobOptions() throws Exception {
+    Date lastSuccessfulRunTime = new Date();
+    Date actual = target.calcLastRunDate(lastSuccessfulRunTime, opts);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void calcLastRunDate_Args__Date() throws Exception {
+    JobOptions opts = new JobOptions();
+    target.setOpts(opts);
+    Date lastSuccessfulRunTime = new Date();
+    Date actual = target.calcLastRunDate(lastSuccessfulRunTime);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getOpts_Args__() throws Exception {
+    JobOptions opts = new JobOptions();
+    target.setOpts(opts);
+    JobOptions actual = target.getOpts();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setOpts_Args__JobOptions() throws Exception {
+    target.setOpts(opts);
+  }
+
+  @Test
+  public void getLogger_Args__() throws Exception {
+    Logger actual = target.getLogger();
+    assertThat(actual, is(notNullValue()));
   }
 
 }
