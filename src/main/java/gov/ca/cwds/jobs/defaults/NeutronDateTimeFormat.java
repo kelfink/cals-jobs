@@ -1,5 +1,8 @@
 package gov.ca.cwds.jobs.defaults;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 public enum NeutronDateTimeFormat {
 
   /**
@@ -21,6 +24,11 @@ public enum NeutronDateTimeFormat {
   @SuppressWarnings("javadoc")
   public String getFormat() {
     return format;
+  }
+
+  @SuppressWarnings("javadoc")
+  public DateFormat formatter() {
+    return new SimpleDateFormat(format);
   }
 
 }

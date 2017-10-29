@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -101,7 +103,11 @@ public class LastSuccessfulRunJobTest
 
   @Test
   public void writeLastSuccessfulRunTime_Args__Date() throws Exception {
+    JobProgressTrack track = mock(JobProgressTrack.class);
+    when(track.isFailed()).thenReturn(false, false, true);
+
     final Date datetime = new Date();
+    target.setLastRunTimeFilename(tempFile.getAbsolutePath());
     target.writeLastSuccessfulRunTime(datetime);
   }
 

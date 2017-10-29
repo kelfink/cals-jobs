@@ -41,7 +41,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    */
   protected JobOptions opts;
 
-  private final String lastRunTimeFilename;
+  private String lastRunTimeFilename;
 
   private final NeutronJobProgressHistory jobHistory;
 
@@ -236,8 +236,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
   protected void writeLastSuccessfulRunTime(Date datetime) {
     if (datetime != null && !StringUtils.isBlank(this.lastRunTimeFilename) && !isFailed()) {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) { // NOSONAR
-        w.write(new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
-            .format(datetime));
+        w.write(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().format(datetime));
       } catch (IOException e) {
         fail();
         JobLogs.raiseError(LOGGER, e, "Failed to write timestamp file: {}", e.getMessage());
@@ -291,6 +290,14 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
   @Override
   public Logger getLogger() {
     return LOGGER;
+  }
+
+  public String getLastRunTimeFilename() {
+    return lastRunTimeFilename;
+  }
+
+  public void setLastRunTimeFilename(String lastRunTimeFilename) {
+    this.lastRunTimeFilename = lastRunTimeFilename;
   }
 
 }
