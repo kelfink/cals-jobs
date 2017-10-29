@@ -251,10 +251,10 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     person.setId(DEFAULT_CLIENT_ID);
 
     final ReplicatedClient rep = new ReplicatedClient();
-    rep.setBirthCity("Provo");
     rep.setCommonLastName("Young");
     rep.setCommonFirstName("Angus");
     rep.setCommonMiddleName("McKinnon");
+    rep.setBirthCity("Glasgow");
 
     dao = mock(ReplicatedClientDao.class);
     TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastJobRunTimeFilename,

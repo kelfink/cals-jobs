@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.junit.Before;
@@ -21,6 +20,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
+import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -96,8 +96,16 @@ public class LastSuccessfulRunJobTest
   public void determineLastSuccessfulRunTime_Args__() throws Exception {
     final Date actual = target.determineLastSuccessfulRunTime();
     final Date expected =
-        new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
-            .parse(FIXED_DATETIME);
+        NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().parse(FIXED_DATETIME);
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test(expected = JobsException.class)
+  public void determineLastSuccessfulRunTime_error__() throws Exception {
+    target.setLastRunTimeFilename("zugzug_oompa_loompa");
+    final Date actual = target.determineLastSuccessfulRunTime();
+    final Date expected =
+        NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().parse(FIXED_DATETIME);
     assertThat(actual, is(equalTo(expected)));
   }
 
