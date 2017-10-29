@@ -171,8 +171,8 @@ public class SystemCodesLoaderJob {
       // Initialize system code cache.
       injector.getInstance(SystemCodeCache.class);
 
-      NsSystemCodeDao systemCodeDao = injector.getInstance(NsSystemCodeDao.class);
-      SystemCodesLoaderJob systemCodesJob = new SystemCodesLoaderJob(systemCodeDao);
+      final NsSystemCodeDao systemCodeDao = injector.getInstance(NsSystemCodeDao.class);
+      final SystemCodesLoaderJob systemCodesJob = new SystemCodesLoaderJob(systemCodeDao);
       systemCodesJob.load();
       LOGGER.info("DONE loading system codes from legacy to new system.");
     } catch (Exception e) {

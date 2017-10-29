@@ -14,15 +14,16 @@ import gov.ca.cwds.jobs.SystemCodesLoaderJob.NsSystemCodeDao;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
 
-//
-// ============================================================================
-// System codes loader Guice module
-// ============================================================================
-//
 /**
  * System codes loader Guice module
+ * 
+ * @author CWDS API Team
  */
 public class SystemCodesLoaderModule extends AbstractModule {
+
+  private String cmsHibernateConfig = "jobs-cms-hibernate.cfg.xml";
+
+  private String nsHibernateConfig = "jobs-ns-hibernate.cfg.xml";
 
   /**
    * Default constructor.
@@ -31,19 +32,23 @@ public class SystemCodesLoaderModule extends AbstractModule {
     // Default constructor
   }
 
+  public SystemCodesLoaderModule(String cmsHibernateConfig, String nsHibernateConfig) {
+    this.cmsHibernateConfig = cmsHibernateConfig;
+    this.nsHibernateConfig = nsHibernateConfig;
+  }
+
   @Override
   protected void configure() {
     // DB2 session factory:
     bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
-        .toInstance(new Configuration().configure("jobs-cms-hibernate.cfg.xml")
+        .toInstance(new Configuration().configure(cmsHibernateConfig)
             .addAnnotatedClass(gov.ca.cwds.data.persistence.cms.SystemCode.class)
             .addAnnotatedClass(gov.ca.cwds.data.persistence.cms.SystemMeta.class)
             .buildSessionFactory());
 
     // PostgreSQL session factory:
-    bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)
-        .toInstance(new Configuration().configure("jobs-ns-hibernate.cfg.xml")
-            .addAnnotatedClass(NsSystemCode.class).buildSessionFactory());
+    bind(SessionFactory.class).annotatedWith(NsSessionFactory.class).toInstance(new Configuration()
+        .configure(nsHibernateConfig).addAnnotatedClass(NsSystemCode.class).buildSessionFactory());
 
     // DB2 tables:
     bind(SystemCodeDao.class);
@@ -61,6 +66,22 @@ public class SystemCodesLoaderModule extends AbstractModule {
         new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
     systemCodeCache.register();
     return systemCodeCache;
+  }
+
+  public String getCmsHibernateConfig() {
+    return cmsHibernateConfig;
+  }
+
+  public void setCmsHibernateConfig(String cmsHibernateConfig) {
+    this.cmsHibernateConfig = cmsHibernateConfig;
+  }
+
+  public String getNsHibernateConfig() {
+    return nsHibernateConfig;
+  }
+
+  public void setNsHibernateConfig(String nsHibernateConfig) {
+    this.nsHibernateConfig = nsHibernateConfig;
   }
 
 }
