@@ -112,6 +112,11 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
   }
 
   @Override
+  public String getMQTName() {
+    return getInitialLoadViewName();
+  }
+
+  @Override
   public String getJdbcOrderBy() {
     return " ORDER BY x.clt_identifier ";
   }
@@ -186,6 +191,10 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     // Not intersecting, though keys match.
     // final SetView<Map.Entry<String, ReplicatedAddress>> intersection =
     // Sets.intersection(repAddresses.entrySet(), docAddresses.entrySet());
+
+    // for () {
+    //
+    // }
 
     LOGGER.warn("set size: docAddresses: {}, repAddresses: {}, client addrs: {}, doc addrs: {}",
         docAddresses.size(), repAddresses.size(), client.getClientAddresses().size(),

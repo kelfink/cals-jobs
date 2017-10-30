@@ -48,9 +48,10 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   }
 
   /**
-   * @return the job's main DAO
+   * @return the job's main DAO.
    */
-  public BaseDaoImpl<T> getJobDao();
+  @Override
+  BaseDaoImpl<T> getJobDao();
 
   /**
    * Identifier column for this table. Defaults to "IDENTIFIER", the most common key name in legacy

@@ -14,13 +14,14 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 
 public class AtomInitialLoadTest {
-  private static final class TestAtomInitialLoad
-      implements AtomInitialLoad<TestDenormalizedEntity> {
+
+  private static class TestAtomInitialLoad implements AtomInitialLoad<TestDenormalizedEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestAtomInitialLoad.class);
 
     @Override
@@ -40,6 +41,11 @@ public class AtomInitialLoadTest {
 
     @Override
     public JobOptions getOpts() {
+      return null;
+    }
+
+    @Override
+    public BaseDaoImpl<TestDenormalizedEntity> getJobDao() {
       return null;
     }
 

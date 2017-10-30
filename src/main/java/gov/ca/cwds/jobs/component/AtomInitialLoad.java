@@ -3,8 +3,15 @@ package gov.ca.cwds.jobs.component;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
+import javax.persistence.ParameterMode;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.Session;
+import org.hibernate.procedure.ProcedureCall;
+
+import gov.ca.cwds.data.BaseDaoImpl;
+import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.jobs.config.JobOptions;
@@ -18,6 +25,8 @@ import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
  * @param <T> normalized type
  */
 public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared {
+
+  BaseDaoImpl<T> getJobDao();
 
   /**
    * Restrict initial load key ranges from command line.
@@ -100,6 +109,34 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
    */
   default String getMQTName() {
     return null;
+  }
+
+  default void refreshMQT() {
+    if (getOpts().isRefreshMqt() && StringUtils.isNotBlank(getMQTName())) {
+      final Session session = getJobDao().getSessionFactory().getCurrentSession();
+      final String schema =
+          (String) session.getSessionFactory().getProperties().get("hibernate.default_schema");
+
+      try {
+        final ProcedureCall proc = session.createStoredProcedureCall(schema + ".REFRESHMQT");
+        proc.registerStoredProcedureParameter("MQT_NM", String.class, ParameterMode.IN);
+        proc.registerStoredProcedureParameter("RETCODE", Integer.class, ParameterMode.OUT);
+
+        proc.setParameter("TABLENAME", getMQTName());
+        proc.execute();
+
+        final Integer returnCode = (Integer) proc.getOutputParameterValue("RETCODE");
+        getLogger().info("stored proc: returnCode: {}", returnCode);
+
+        if (returnCode != 0 && returnCode != 1) {
+          getLogger().error("Stored Procedure return code - {}", returnCode);
+          throw new DaoException("Stored Procedure returned with ERROR - {}" + returnCode);
+        }
+
+      } catch (DaoException h) {
+        throw new DaoException("Call to Stored Procedure failed - " + h, h);
+      }
+    }
   }
 
 }
