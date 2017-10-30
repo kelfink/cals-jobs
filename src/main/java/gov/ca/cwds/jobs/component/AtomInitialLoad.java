@@ -8,6 +8,7 @@ import javax.persistence.ParameterMode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.procedure.ProcedureCall;
 
 import gov.ca.cwds.data.BaseDaoImpl;
@@ -102,6 +103,17 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
         : false;
   }
 
+  default Transaction getOrCreateTransaction() {
+    Transaction txn = null;
+    final Session session = getJobDao().getSessionFactory().getCurrentSession();
+    try {
+      txn = session.beginTransaction();
+    } catch (Exception e) { // NOSONAR
+      txn = session.getTransaction();
+    }
+    return txn;
+  }
+
   /**
    * Source Materialized Query Table to be refreshed before running initial load.
    * 
@@ -114,6 +126,7 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
   default void refreshMQT() {
     if (getOpts().isRefreshMqt() && StringUtils.isNotBlank(getMQTName())) {
       final Session session = getJobDao().getSessionFactory().getCurrentSession();
+      getOrCreateTransaction();
       final String schema =
           (String) session.getSessionFactory().getProperties().get("hibernate.default_schema");
 
@@ -122,7 +135,7 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
         proc.registerStoredProcedureParameter("MQT_NM", String.class, ParameterMode.IN);
         proc.registerStoredProcedureParameter("RETCODE", Integer.class, ParameterMode.OUT);
 
-        proc.setParameter("TABLENAME", getMQTName());
+        proc.setParameter("MQT_NM", getMQTName());
         proc.execute();
 
         final Integer returnCode = (Integer) proc.getOutputParameterValue("RETCODE");

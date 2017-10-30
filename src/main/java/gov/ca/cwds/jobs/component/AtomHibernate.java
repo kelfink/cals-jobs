@@ -11,7 +11,6 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -110,17 +109,6 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   @Override
   default M extract(final ResultSet rs) throws SQLException {
     return null;
-  }
-
-  default Transaction getOrCreateTransaction() {
-    Transaction txn = null;
-    final Session session = getJobDao().getSessionFactory().getCurrentSession();
-    try {
-      txn = session.beginTransaction();
-    } catch (Exception e) { // NOSONAR
-      txn = session.getTransaction();
-    }
-    return txn;
   }
 
   /**
