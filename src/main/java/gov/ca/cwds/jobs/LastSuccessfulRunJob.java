@@ -85,6 +85,133 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
   }
 
   /**
+   * If last run time is provide in options then use it, otherwise use provided
+   * lastSuccessfulRunTime.
+   * 
+   * <p>
+   * NOTE: make the look-back period configurable.
+   * </p>
+   * 
+   * @param lastSuccessfulRunTime last successful run
+   * @param opts command line job options
+   * @return appropriate date to detect changes
+   */
+  protected Date calcLastRunDate(final Date lastSuccessfulRunTime, final JobOptions opts) {
+    Date ret;
+    final Date lastSuccessfulRunTimeOverride = opts.getLastRunTime();
+
+    if (lastSuccessfulRunTimeOverride != null) {
+      ret = lastSuccessfulRunTimeOverride;
+    } else {
+      final Calendar cal = Calendar.getInstance();
+      cal.setTime(lastSuccessfulRunTime);
+      cal.add(Calendar.MINUTE, NeutronIntegerDefaults.LOOKBACK_MINUTES.getValue());
+      ret = cal.getTime();
+    }
+
+    return ret;
+  }
+
+  /**
+   * Calculate last successful run date/time, per
+   * {@link LastSuccessfulRunJob#calcLastRunDate(Date, JobOptions)}.
+   * 
+   * @param lastSuccessfulRunTime last successful run
+   * @return appropriate date to detect changes
+   */
+  protected Date calcLastRunDate(final Date lastSuccessfulRunTime) {
+    return calcLastRunDate(lastSuccessfulRunTime, getOpts());
+  }
+
+  /**
+   * Reads the last run file and returns the last run date.
+   * 
+   * @return last successful run date/time as a Java Date.
+   */
+  protected Date determineLastSuccessfulRunTime() {
+    Date ret = null;
+
+    if (!StringUtils.isBlank(this.lastRunTimeFilename)) {
+      try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
+        ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
+            .parse(br.readLine().trim()); // NOSONAR
+      } catch (IOException | ParseException e) {
+        fail();
+        throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINDING LAST SUCCESSFUL RUN TIME: {}",
+            e.getMessage());
+      }
+    }
+
+    return ret;
+  }
+
+  /**
+   * Write the time stamp <strong>IF</strong> the job succeeded.
+   * 
+   * @param datetime date and time to store
+   */
+  protected void writeLastSuccessfulRunTime(Date datetime) {
+    if (!StringUtils.isBlank(this.lastRunTimeFilename) && !isFailed()) {
+      try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) { // NOSONAR
+        w.write(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().format(datetime));
+      } catch (IOException e) {
+        fail();
+        throw JobLogs.buildRuntimeException(LOGGER, e, "Failed to write timestamp file: {}",
+            e.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Execute the batch job. Child classes must provide an implementation.
+   * 
+   * @param lastSuccessfulRunTime The last successful run
+   * @return The time of the latest run if successful.
+   * @throws NeutronException if job fails
+   */
+  public abstract Date executeJob(Date lastSuccessfulRunTime) throws NeutronException;
+
+  /**
+   * Marks the job as completed. Close resources, notify listeners, or even close JVM.
+   */
+  protected abstract void finish();
+
+  /**
+   * Getter for last job run time.
+   * 
+   * @return last time the job ran successfully, in format
+   *         {@link NeutronDateTimeFormat#LAST_RUN_DATE_FORMAT}
+   */
+  public String getLastJobRunTimeFilename() {
+    return lastRunTimeFilename;
+  }
+
+  /**
+   * Getter for this job's options.
+   * 
+   * @return this job's options
+   */
+  @Override
+  public JobOptions getOpts() {
+    return opts;
+  }
+
+  /**
+   * Setter for this job's options.
+   * 
+   * @param opts this job's options
+   */
+  public void setOpts(JobOptions opts) {
+    this.opts = opts;
+  }
+
+  @Override
+  public Logger getLogger() {
+    return LOGGER;
+  }
+
+
+  /**
    * {@inheritDoc}
    */
   @Override
@@ -163,132 +290,6 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
   @Override
   public boolean isIndexDone() {
     return getTrack().isIndexDone();
-  }
-
-  /**
-   * If last run time is provide in options then use it, otherwise use provided
-   * lastSuccessfulRunTime.
-   * 
-   * <p>
-   * NOTE: make the look-back period configurable.
-   * </p>
-   * 
-   * @param lastSuccessfulRunTime last successful run
-   * @param opts command line job options
-   * @return appropriate date to detect changes
-   */
-  protected Date calcLastRunDate(final Date lastSuccessfulRunTime, final JobOptions opts) {
-    Date ret;
-    final Date lastSuccessfulRunTimeOverride = opts.getLastRunTime();
-
-    if (lastSuccessfulRunTimeOverride != null) {
-      ret = lastSuccessfulRunTimeOverride;
-    } else {
-      final Calendar cal = Calendar.getInstance();
-      cal.setTime(lastSuccessfulRunTime);
-      cal.add(Calendar.MINUTE, NeutronIntegerDefaults.LOOKBACK_MINUTES.getValue());
-      ret = cal.getTime();
-    }
-
-    return ret;
-  }
-
-  /**
-   * Calculate last successful run date/time, per
-   * {@link LastSuccessfulRunJob#calcLastRunDate(Date, JobOptions)}.
-   * 
-   * @param lastSuccessfulRunTime last successful run
-   * @return appropriate date to detect changes
-   */
-  protected Date calcLastRunDate(final Date lastSuccessfulRunTime) {
-    return calcLastRunDate(lastSuccessfulRunTime, getOpts());
-  }
-
-  /**
-   * Reads the last run file and returns the last run date.
-   * 
-   * @return last successful run date/time as a Java Date.
-   */
-  protected Date determineLastSuccessfulRunTime() {
-    Date ret = null;
-
-    if (!StringUtils.isBlank(this.lastRunTimeFilename)) {
-      try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
-        ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
-            .parse(br.readLine().trim()); // NOSONAR
-      } catch (IOException | ParseException e) {
-        fail();
-        throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINDING LAST SUCCESSFUL RUN TIME: {}",
-            e.getMessage());
-      }
-    }
-
-    return ret;
-  }
-
-  /**
-   * Write the time stamp <strong>IF</strong> the job succeeded.
-   * 
-   * @param datetime date and time to store
-   */
-  protected void writeLastSuccessfulRunTime(Date datetime) {
-    if (datetime != null && !StringUtils.isBlank(this.lastRunTimeFilename) && !isFailed()) {
-      try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) { // NOSONAR
-        w.write(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().format(datetime));
-      } catch (IOException e) {
-        fail();
-        throw JobLogs.buildRuntimeException(LOGGER, e, "Failed to write timestamp file: {}",
-            e.getMessage());
-      }
-    }
-  }
-
-  /**
-   * Execute the batch job. Child classes must provide an implementation.
-   * 
-   * @param lastSuccessfulRunTime The last successful run
-   * @return The time of the latest run if successful.
-   * @throws NeutronException if job fails
-   */
-  public abstract Date executeJob(Date lastSuccessfulRunTime) throws NeutronException;
-
-  /**
-   * Marks the job as completed. Close resources, notify listeners, or even close JVM.
-   */
-  protected abstract void finish();
-
-  /**
-   * Getter for last job run time.
-   * 
-   * @return last time the job ran successfully, in format
-   *         {@link NeutronDateTimeFormat#LAST_RUN_DATE_FORMAT}
-   */
-  public String getLastJobRunTimeFilename() {
-    return lastRunTimeFilename;
-  }
-
-  /**
-   * Getter for this job's options.
-   * 
-   * @return this job's options
-   */
-  @Override
-  public JobOptions getOpts() {
-    return opts;
-  }
-
-  /**
-   * Setter for this job's options.
-   * 
-   * @param opts this job's options
-   */
-  public void setOpts(JobOptions opts) {
-    this.opts = opts;
-  }
-
-  @Override
-  public Logger getLogger() {
-    return LOGGER;
   }
 
   public String getLastRunTimeFilename() {
