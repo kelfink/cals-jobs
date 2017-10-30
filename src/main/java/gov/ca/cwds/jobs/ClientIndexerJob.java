@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,13 +19,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
@@ -79,7 +84,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       @CmsSessionFactory SessionFactory sessionFactory, NeutronJobProgressHistory jobHistory) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
 
-    // TODO: **short-term** fix for county table in Perf and Prod.
+    // NOTE: **short-term** fix for county table in Perf and Prod.
     EsClientAddress.setUseCounty(isLargeDataSet());
   }
 
@@ -170,9 +175,21 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     LOGGER.info("Validate client: {}", clientId);
 
     // TODO: Initialize transaction. Fix DAO impl instead.
-    final org.hibernate.Transaction txn = getOrCreateTransaction();
-
+    getOrCreateTransaction();
     final ReplicatedClient client = getJobDao().find(clientId);
+
+    final Map<String, ReplicatedAddress> repAddresses =
+        client.getClientAddresses().stream().flatMap(ca -> ca.getAddresses().stream())
+            .collect(Collectors.toMap(ReplicatedAddress::getId, a -> a));
+
+    final Map<String, ElasticSearchPersonAddress> docAddresses = person.getAddresses().stream()
+        .collect(Collectors.toMap(ElasticSearchPersonAddress::getId, a -> a));
+
+    final SetView<Map.Entry<String, ReplicatedAddress>> intersection =
+        Sets.intersection(repAddresses.entrySet(), docAddresses.entrySet());
+
+    LOGGER.info("address intersection size: {}", intersection.size());
+
     return client.getCommonFirstName().equals(person.getFirstName())
         && client.getCommonLastName().equals(person.getLastName())
         && client.getCommonMiddleName().equals(person.getMiddleName());

@@ -361,7 +361,7 @@ public class JobProgressTrack implements ApiMarker, AtomJobControl {
   @Override
   public String toString() {
     final StringBuilder buf = new StringBuilder();
-    buf.append("[\n    JOB STATUS: ").append(status).append(":\t").append(jobName);
+    buf.append("\n[\n    JOB STATUS: ").append(status).append(":\t").append(jobName);
 
     if (initialLoad) {
       buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
@@ -374,7 +374,7 @@ public class JobProgressTrack implements ApiMarker, AtomJobControl {
     buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
     if (endTime > 0L) {
       buf.append("\n\tend:                    ").append(new Date(endTime))
-          .append("\n\telapsed (seconds):      ").append((endTime - startTime) / 1000);
+          .append("\n\ttotal seconds:          ").append((endTime - startTime) / 1000);
     }
 
     buf.append("\n\n    RECORDS RETRIEVED:").append("\n\tdenormalized:    ")
