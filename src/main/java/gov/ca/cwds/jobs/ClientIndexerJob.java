@@ -192,9 +192,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     // final SetView<Map.Entry<String, ReplicatedAddress>> intersection =
     // Sets.intersection(repAddresses.entrySet(), docAddresses.entrySet());
 
-    // for () {
-    //
-    // }
+    for (ElasticSearchPersonAddress docAddr : docAddresses.values()) {
+
+    }
 
     LOGGER.warn("set size: docAddresses: {}, repAddresses: {}, client addrs: {}, doc addrs: {}",
         docAddresses.size(), repAddresses.size(), client.getClientAddresses().size(),

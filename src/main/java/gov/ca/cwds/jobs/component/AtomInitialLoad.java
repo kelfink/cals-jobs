@@ -141,9 +141,9 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
         final Integer returnCode = (Integer) proc.getOutputParameterValue("RETCODE");
         getLogger().info("stored proc: returnCode: {}", returnCode);
 
-        if (returnCode != 0 && returnCode != 1) {
+        if (returnCode != 0) {
           getLogger().error("Stored Procedure return code - {}", returnCode);
-          throw new DaoException("Stored Procedure returned with ERROR - {}" + returnCode);
+          throw new DaoException("Stored Procedure returned with ERROR - " + returnCode);
         }
 
       } catch (DaoException h) {
