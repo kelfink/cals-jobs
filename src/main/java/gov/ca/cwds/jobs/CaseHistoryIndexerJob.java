@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +11,7 @@ import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
@@ -23,6 +23,7 @@ import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
@@ -111,7 +112,7 @@ public abstract class CaseHistoryIndexerJob
 
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonCases cases)
-      throws IOException {
+      throws NeutronException {
     final StringBuilder buf = new StringBuilder();
     buf.append("{\"cases\":[");
 
@@ -130,7 +131,14 @@ public abstract class CaseHistoryIndexerJob
 
     buf.append("]}");
 
-    final String insertJson = mapper.writeValueAsString(esp);
+    String insertJson;
+    try {
+      insertJson = mapper.writeValueAsString(esp);
+    } catch (JsonProcessingException e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}",
+          e.getMessage());
+    }
+
     final String updateJson = buf.toString();
     LOGGER.trace("updateJson: {}", updateJson);
 

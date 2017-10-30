@@ -2,7 +2,6 @@ package gov.ca.cwds.jobs;
 
 import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -16,6 +15,7 @@ import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
@@ -29,9 +29,10 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedSafetyAlerts;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.JobRunner;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
+import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
@@ -120,7 +121,7 @@ public class SafetyAlertIndexerJob
 
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp,
-      ReplicatedSafetyAlerts safetyAlerts) throws IOException {
+      ReplicatedSafetyAlerts safetyAlerts) throws NeutronException {
     final StringBuilder buf = new StringBuilder();
     buf.append("{\"safety_alerts\":[");
 
@@ -132,15 +133,22 @@ public class SafetyAlertIndexerJob
         buf.append(esSafetyAlerts.stream().map(ElasticTransformer::jsonify)
             .sorted(String::compareTo).collect(Collectors.joining(",")));
       } catch (Exception e) {
-        LOGGER.error("ERROR SERIALIZING SAFETY ALERTS", e);
-        throw new JobsException(e);
+        throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR SERIALIZING SAFETY ALERTS: {}",
+            e.getMessage());
       }
     }
 
     buf.append("]}");
 
     final String updateJson = buf.toString();
-    final String insertJson = mapper.writeValueAsString(esp);
+
+    String insertJson;
+    try {
+      insertJson = mapper.writeValueAsString(esp);
+    } catch (JsonProcessingException e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}",
+          e.getMessage());
+    }
 
     final String alias = esDao.getConfig().getElasticsearchAlias();
     final String docType = esDao.getConfig().getElasticsearchDocType();

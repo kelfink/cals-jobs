@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -32,6 +31,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsSafetyAlert;
 import gov.ca.cwds.data.persistence.cms.ReplicatedSafetyAlerts;
 import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
@@ -158,14 +158,14 @@ public class SafetyAlertIndexerJobTest extends PersonJobTester {
   }
 
   @Test
-  public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedSafetyAlerts_T__IOException()
+  public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedSafetyAlerts_T__NeutronException()
       throws Exception {
     ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
     ReplicatedSafetyAlerts safetyAlerts = mock(ReplicatedSafetyAlerts.class);
     try {
       target.prepareUpsertRequest(esp, safetyAlerts);
       fail("Expected exception was not thrown!");
-    } catch (IOException e) {
+    } catch (NeutronException e) {
     }
   }
 

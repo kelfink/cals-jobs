@@ -174,7 +174,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     final String clientId = person.getId();
     LOGGER.info("Validate client: {}", clientId);
 
-    // TODO: Initialize transaction. Fix DAO impl instead.
+    // WARNING: Initialize transaction. Fix DAO impl instead.
     getOrCreateTransaction();
     final ReplicatedClient client = getJobDao().find(clientId);
 
@@ -188,7 +188,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     final SetView<Map.Entry<String, ReplicatedAddress>> intersection =
         Sets.intersection(repAddresses.entrySet(), docAddresses.entrySet());
 
-    LOGGER.info("address intersection size: {}", intersection.size());
+    LOGGER.warn("set size: intersection: {}, docAddresses: {}, repAddresses: {}",
+        intersection.size(), docAddresses.size(), repAddresses.size());
 
     return client.getCommonFirstName().equals(person.getFirstName())
         && client.getCommonLastName().equals(person.getLastName())

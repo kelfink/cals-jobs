@@ -277,11 +277,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param t target ApiPersonAware instance
    * @return left = insert JSON, right = update JSON throws JsonProcessingException on JSON parse
    *         error
-   * @throws IOException on Elasticsearch disconnect
+   * @throws NeutronException on Elasticsearch disconnect
    * @see ElasticTransformer#prepareUpsertRequest(AtomPersonDocPrep, String, String,
    *      ElasticSearchPerson, PersistentObject)
    */
-  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T t) throws IOException {
+  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T t)
+      throws NeutronException {
     if (StringUtils.isNotBlank(getLegacySourceTable())) {
       esp.setLegacySourceTable(getLegacySourceTable());
     }

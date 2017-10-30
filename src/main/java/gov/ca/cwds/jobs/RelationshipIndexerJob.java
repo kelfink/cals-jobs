@@ -21,6 +21,7 @@ import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
@@ -34,6 +35,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.JobRunner;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -267,7 +269,7 @@ public class RelationshipIndexerJob
 
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedRelationships p)
-      throws IOException {
+      throws NeutronException {
     final StringBuilder buf = new StringBuilder();
     buf.append("{\"relationships\":[");
 
@@ -283,7 +285,13 @@ public class RelationshipIndexerJob
 
     buf.append("]}");
 
-    final String insertJson = mapper.writeValueAsString(esp);
+    String insertJson;
+    try {
+      insertJson = mapper.writeValueAsString(esp);
+    } catch (JsonProcessingException e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}",
+          e.getMessage());
+    }
     final String updateJson = buf.toString();
 
     final String alias = esDao.getConfig().getElasticsearchAlias();

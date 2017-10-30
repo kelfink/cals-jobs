@@ -2,7 +2,6 @@ package gov.ca.cwds.jobs.util.transform;
 
 import static gov.ca.cwds.data.persistence.cms.CmsPersistentObject.CMS_ID_LEN;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -50,6 +49,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -133,12 +133,11 @@ public class ElasticTransformer {
    * @param t target ApiPersonAware instance
    * @return left = insert JSON, right = update JSON throws JsonProcessingException on JSON parse
    *         error
-   * @throws JsonProcessingException on JSON parse error
-   * @throws IOException on Elasticsearch disconnect
+   * @throws NeutronException on Elasticsearch disconnect or JSON parse error
    */
   public static <T extends PersistentObject> UpdateRequest prepareUpsertRequest(
       AtomPersonDocPrep<T> docPrep, String alias, String docType, final ElasticSearchPerson esp,
-      T t) throws IOException {
+      T t) throws NeutronException {
     String id = esp.getId();
 
     // Set id and legacy id.
@@ -159,9 +158,13 @@ public class ElasticTransformer {
 
     // Child classes may override these methods as needed.
     // left = update, right = insert.
-    final Pair<String, String> json =
-        ElasticTransformer.prepareUpsertJson(docPrep, esp, t, docPrep.getOptionalElementName(),
-            docPrep.getOptionalCollection(esp, t), docPrep.keepCollections());
+    Pair<String, String> json;
+    try {
+      json = ElasticTransformer.prepareUpsertJson(docPrep, esp, t, docPrep.getOptionalElementName(),
+          docPrep.getOptionalCollection(esp, t), docPrep.keepCollections());
+    } catch (Exception e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "ERROR PREPARING UPSERT: {}", e.getMessage());
+    }
 
     // "Upsert": update if doc exists, insert if it does not.
     return new UpdateRequest(alias, docType, id).doc(json.getLeft(), XContentType.JSON)
