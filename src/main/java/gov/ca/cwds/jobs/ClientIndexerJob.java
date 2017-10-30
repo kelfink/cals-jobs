@@ -19,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
@@ -185,11 +183,13 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     final Map<String, ElasticSearchPersonAddress> docAddresses = person.getAddresses().stream()
         .collect(Collectors.toMap(ElasticSearchPersonAddress::getId, a -> a));
 
-    final SetView<Map.Entry<String, ReplicatedAddress>> intersection =
-        Sets.intersection(repAddresses.entrySet(), docAddresses.entrySet());
+    // Not intersecting, though keys match.
+    // final SetView<Map.Entry<String, ReplicatedAddress>> intersection =
+    // Sets.intersection(repAddresses.entrySet(), docAddresses.entrySet());
 
-    LOGGER.warn("set size: intersection: {}, docAddresses: {}, repAddresses: {}",
-        intersection.size(), docAddresses.size(), repAddresses.size());
+    LOGGER.warn("set size: docAddresses: {}, repAddresses: {}, client addrs: {}, doc addrs: {}",
+        docAddresses.size(), repAddresses.size(), client.getClientAddresses().size(),
+        person.getAddresses().size());
 
     return client.getCommonFirstName().equals(person.getFirstName())
         && client.getCommonLastName().equals(person.getLastName())

@@ -175,7 +175,7 @@ public class LastSuccessfulRunJobTest
   @Test
   public void isFailed_Args__() throws Exception {
     boolean actual = target.isFailed();
-    boolean expected = true;
+    boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 
