@@ -1,0 +1,103 @@
+package gov.ca.cwds.jobs.json;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+
+import java.io.OutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import gov.ca.cwds.jobs.schedule.NeutronJobManagementBean;
+
+public class GsonMessageBodyHandlerTest {
+
+  GsonMessageBodyHandler target;
+
+  NeutronJobManagementBean object;
+  Class<NeutronJobManagementBean> type;
+  Type genericType;
+  Annotation[] annotations;
+  MediaType mediaType;
+  MultivaluedMap<String, Object> httpHeaders;
+  OutputStream entityStream;
+
+  @Before
+  public void setup() throws Exception {
+    target = new GsonMessageBodyHandler();
+
+    object = new NeutronJobManagementBean("client", "stop", "crap");
+    type = NeutronJobManagementBean.class;
+    genericType = mock(Type.class);
+    annotations = new Annotation[] {};
+    mediaType = MediaType.APPLICATION_JSON_TYPE;
+    httpHeaders = new MultivaluedHashMap<String, Object>();
+    entityStream = System.out;
+  }
+
+  @Test
+  public void type() throws Exception {
+    assertThat(GsonMessageBodyHandler.class, notNullValue());
+  }
+
+  @Test
+  public void instantiation() throws Exception {
+    assertThat(target, notNullValue());
+  }
+
+  @Test
+  public void isReadable_Args__Class__Type__javalangannotationAnnotationArray__MediaType()
+      throws Exception {
+    boolean actual = target.isReadable(type, genericType, annotations, mediaType);
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  // @Test
+  // public void
+  // readFrom_Args__Class__Type__AnnotationArray__MediaType__MultivaluedMap__InputStream()
+  // throws Exception {
+  // Class<Object> type = Object.class;
+  // Type genericType = mock(Type.class);
+  // Annotation[] annotations = new Annotation[] {};
+  // MediaType mediaType = mock(MediaType.class);
+  // MultivaluedMap<String, String> httpHeaders = mock(MultivaluedMap.class);
+  //
+  // InputStream entityStream = mock(InputStream.class);
+  // Object actual =
+  // target.readFrom(type, genericType, annotations, mediaType, httpHeaders, entityStream);
+  // Object expected = null;
+  // assertThat(actual, is(equalTo(expected)));
+  // }
+
+  @Test
+  public void isWriteable_Args__Class__Type__AnnotationArray__MediaType() throws Exception {
+    boolean actual = target.isWriteable(type, genericType, annotations, mediaType);
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getSize_Args__Object__Class__Type__AnnotationArray__MediaType() throws Exception {
+    long actual = target.getSize(object, type, genericType, annotations, mediaType);
+    assertThat(actual, is(not(0L)));
+  }
+
+  // @Test
+  // public void
+  // writeTo_Args__Object__Class__Type__AnnotationArray__MediaType__MultivaluedMap__OutputStream()
+  // throws Exception {
+  // target.writeTo(object, type, genericType, annotations, mediaType, httpHeaders, entityStream);
+  // }
+
+}
