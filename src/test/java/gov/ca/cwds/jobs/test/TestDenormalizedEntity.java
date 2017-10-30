@@ -12,9 +12,14 @@ import org.hibernate.annotations.NamedNativeQuery;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
+import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
+import gov.ca.cwds.data.persistence.cms.rep.EmbeddableCmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
  * Denormalized
@@ -74,14 +79,16 @@ import gov.ca.cwds.data.std.ApiPersonAware;
             + "AND (v.THIS_SENSITIVITY_IND = 'N' AND v.RELATED_SENSITIVITY_IND = 'N') "
             + "ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID FOR READ ONLY WITH UR ",
         resultClass = TestDenormalizedEntity.class, readOnly = true)})
-public class TestDenormalizedEntity
-    implements PersistentObject, ApiGroupNormalizer<TestNormalizedEntity>, ApiMultiplePersonAware {
+public class TestDenormalizedEntity implements PersistentObject,
+    ApiGroupNormalizer<TestNormalizedEntity>, ApiMultiplePersonAware, CmsReplicatedEntity {
 
   private String id;
   private String[] names;
 
-  public TestDenormalizedEntity() {
+  private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
+  public TestDenormalizedEntity() {
+    // no-op.
   }
 
   public TestDenormalizedEntity(String id, String... names) {
@@ -130,6 +137,35 @@ public class TestDenormalizedEntity
   public ApiPersonAware[] getPersons() {
     final ApiPersonAware[] ret = {new TestOnlyApiPersonAware()};
     return ret;
+  }
+
+  // =======================
+  // CmsReplicatedEntity:
+  // =======================
+
+  @Override
+  public EmbeddableCmsReplicatedEntity getReplicatedEntity() {
+    return replicatedEntity;
+  }
+
+  // =======================
+  // ApiLegacyAware:
+  // =======================
+
+  @Override
+  public String getLegacyId() {
+    return id;
+  }
+
+  @Override
+  public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
+    return ElasticTransformer.createLegacyDescriptor(getId(), replicatedEntity.getReplicationDate(),
+        LegacyTable.CLIENT);
+  }
+
+  @Override
+  public String getId() {
+    return id;
   }
 
 }

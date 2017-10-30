@@ -9,26 +9,57 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.elasticsearch.action.DocWriteRequest;
+import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonLanguage;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
+import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
+import gov.ca.cwds.data.es.ElasticSearchSystemCode;
+import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
+import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.test.SimpleAddress;
+import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
+import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
+import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.jobs.test.TestOnlyApiPersonAware;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 public class ElasticTransformerTest extends PersonJobTester {
+
+  TestNormalizedEntityDao dao;
+  TestIndexerJob target;
+
+  @Override
+  @Before
+  public void setup() throws Exception {
+    super.setup();
+
+    dao = new TestNormalizedEntityDao(sessionFactory);
+    target =
+        new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, jobHistory);
+    target.setOpts(opts);
+    target.setTrack(track);
+  }
 
   @Test
   public void type() throws Exception {
@@ -55,7 +86,8 @@ public class ElasticTransformerTest extends PersonJobTester {
   @Test
   public void handleAddress_Args__ApiPersonAware() throws Exception {
     final TestOnlyApiPersonAware p = new TestOnlyApiPersonAware();
-    SimpleAddress addr = new SimpleAddress("Provo", "Utah", "UT", "206 Hinckley Center", "84602");
+    final SimpleAddress addr =
+        new SimpleAddress("Provo", "Utah", "UT", "206 Hinckley Center", "84602");
     p.addAddress(addr);
 
     final List<ElasticSearchPersonAddress> actual = ElasticTransformer.handleAddress(p);
@@ -83,11 +115,10 @@ public class ElasticTransformerTest extends PersonJobTester {
   @Test(expected = IllegalArgumentException.class)
   public void buildElasticSearchPersonDoc_Args__ObjectMapper__ApiPersonAware_T__JsonProcessingException()
       throws Exception {
-    ObjectMapper mapper = mock(ObjectMapper.class);
     final ApiPersonAware p = mock(ApiPersonAware.class);
     doThrow(new IllegalArgumentException("whatever")).when(p).getPrimaryKey();
     try {
-      ElasticTransformer.buildElasticSearchPersonDoc(mapper, p);
+      ElasticTransformer.buildElasticSearchPersonDoc(MAPPER, p);
       fail("Expected exception was not thrown!");
     } catch (JsonProcessingException e) {
     }
@@ -98,6 +129,208 @@ public class ElasticTransformerTest extends PersonJobTester {
     final ApiPersonAware p = new TestOnlyApiPersonAware();
     ElasticSearchLegacyDescriptor actual = ElasticTransformer.handleLegacyDescriptor(p);
     assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void jsonify_Args__Object() throws Exception {
+    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    String actual = ElasticTransformer.jsonify(t);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void pushToBulkProcessor_Args__JobProgressTrack__BulkProcessor__DocWriteRequest()
+      throws Exception {
+    JobProgressTrack track = mock(JobProgressTrack.class);
+    BulkProcessor bp = mock(BulkProcessor.class);
+    DocWriteRequest<?> t = mock(DocWriteRequest.class);
+    ElasticTransformer.pushToBulkProcessor(track, bp, t);
+  }
+
+  @Test
+  public void determineId_Args__ApiLegacyAware__ElasticSearchPerson() throws Exception {
+    ApiLegacyAware l = mock(ApiLegacyAware.class);
+    ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
+    String actual = ElasticTransformer.determineId(l, esp);
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void determineId_Args__CmsReplicatedEntity__ElasticSearchPerson() throws Exception {
+    CmsReplicatedEntity l =
+        new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "dave", "jey", "mariam", "jim");
+    ElasticSearchPerson esp = new ElasticSearchPerson();
+    String actual = ElasticTransformer.determineId(l, esp);
+    String expected = DEFAULT_CLIENT_ID;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void prepareUpsertRequest_Args__AtomPersonDocPrep__String__String__ElasticSearchPerson__Object()
+      throws Exception {
+    AtomPersonDocPrep<TestNormalizedEntity> docPrep = target;
+    String alias = null;
+    String docType = null;
+    ElasticSearchPerson esp = new ElasticSearchPerson();
+    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    UpdateRequest actual = ElasticTransformer.<TestNormalizedEntity>prepareUpsertRequest(docPrep,
+        alias, docType, esp, t);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  // @Test
+  // public void
+  // prepareUpsertRequest_Args__AtomPersonDocPrep__String__String__ElasticSearchPerson__Object_T__NeutronException()
+  // throws Exception {
+  // AtomPersonDocPrep<Object> docPrep = mock(AtomPersonDocPrep.class);
+  // String alias = null;
+  // String docType = null;
+  // ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
+  // Object t = null;
+  // try {
+  // ElasticTransformer.prepareUpsertRequest(docPrep, alias, docType, esp, t);
+  // fail("Expected exception was not thrown!");
+  // } catch (NeutronException e) {
+  // }
+  // }
+
+  // @Test
+  // public void
+  // prepareUpsertJson_Args__AtomPersonDocPrep__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray()
+  // throws Exception {
+  // AtomPersonDocPrep<Object> docPrep = mock(AtomPersonDocPrep.class);
+  // ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
+  // Object t = null;
+  // String elementName = null;
+  // List list = new ArrayList();
+  // ESOptionalCollection[] keep = new ESOptionalCollection[] {};
+  // Pair<String, String> actual =
+  // ElasticTransformer.prepareUpsertJson(docPrep, esp, t, elementName, list, keep);
+  // Pair<String, String> expected = null;
+  // assertThat(actual, is(equalTo(expected)));
+  // }
+
+  // @Test
+  // public void
+  // prepareUpsertJson_Args__AtomPersonDocPrep__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray_T__JsonProcessingException()
+  // throws Exception {
+  // AtomPersonDocPrep<Object> docPrep = mock(AtomPersonDocPrep.class);
+  // ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
+  // Object t = null;
+  // String elementName = null;
+  // List list = new ArrayList();
+  // ESOptionalCollection[] keep = new ESOptionalCollection[] {};
+  // try {
+  // ElasticTransformer.prepareUpsertJson(docPrep, esp, t, elementName, list, keep);
+  // fail("Expected exception was not thrown!");
+  // } catch (JsonProcessingException e) {
+  // }
+  // }
+
+  // @Test
+  // public void
+  // prepareInsertCollections_Args__AtomPersonDocPrep__ElasticSearchPerson__Object__List__ESOptionalCollectionArray()
+  // throws Exception {
+  // AtomPersonDocPrep<Object> docPrep = mock(AtomPersonDocPrep.class);
+  // ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
+  // Object t = null;
+  // List list = new ArrayList();
+  // ESOptionalCollection[] keep = new ESOptionalCollection[] {};
+  // ElasticTransformer.prepareInsertCollections(docPrep, esp, t, list, keep);
+  // }
+
+  @Test
+  public void buildElasticSearchPersons_Args__PersistentObject() throws Exception {
+    PersistentObject p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    ElasticSearchPerson[] actual = ElasticTransformer.buildElasticSearchPersons(p);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  // @Test
+  // public void buildElasticSearchPersons_Args__PersistentObject_T__JsonProcessingException()
+  // throws Exception {
+  // PersistentObject p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+  // try {
+  // ElasticTransformer.buildElasticSearchPersons(p);
+  // fail("Expected exception was not thrown!");
+  // } catch (JsonProcessingException e) {
+  // }
+  // }
+
+  @Test
+  public void buildElasticSearchPerson_Args__ApiPersonAware() throws Exception {
+    ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    ElasticSearchPerson actual = ElasticTransformer.buildElasticSearchPerson(p);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  // @Test
+  // public void buildElasticSearchPerson_Args__ApiPersonAware_T__JsonProcessingException()
+  // throws Exception {
+  // ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+  // try {
+  // ElasticTransformer.buildElasticSearchPerson(p);
+  // fail("Expected exception was not thrown!");
+  // } catch (JsonProcessingException e) {
+  // }
+  // }
+
+  @Test
+  public void createLegacyDescriptor_Args__String__Date__LegacyTable() throws Exception {
+    String legacyId = DEFAULT_CLIENT_ID;
+    Date legacyLastUpdated = new Date();
+    LegacyTable legacyTable = LegacyTable.CLIENT;
+    ElasticSearchLegacyDescriptor actual =
+        ElasticTransformer.createLegacyDescriptor(legacyId, legacyLastUpdated, legacyTable);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void handleRaceEthnicity_Args__ApiPersonAware() throws Exception {
+    ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    ElasticSearchRaceAndEthnicity actual = ElasticTransformer.handleRaceEthnicity(p);
+    ElasticSearchRaceAndEthnicity expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void handleClientCountyC_Args__ApiPersonAware() throws Exception {
+    ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    ElasticSearchSystemCode actual = ElasticTransformer.handleClientCountyC(p);
+    ElasticSearchSystemCode expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void buildElasticSearchPersonDoc_Args__ApiPersonAware() throws Exception {
+    ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    ElasticSearchPerson actual = ElasticTransformer.buildElasticSearchPersonDoc(p);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  // @Test
+  // public void buildElasticSearchPersonDoc_Args__ApiPersonAware_T__JsonProcessingException()
+  // throws Exception {
+  // ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+  // try {
+  // ElasticTransformer.buildElasticSearchPersonDoc(p);
+  // fail("Expected exception was not thrown!");
+  // } catch (JsonProcessingException e) {
+  // }
+  // }
+
+  @Test
+  public void getMapper_Args__() throws Exception {
+    ObjectMapper actual = ElasticTransformer.getMapper();
+    ObjectMapper expected = MAPPER;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setMapper_Args__ObjectMapper() throws Exception {
+    ObjectMapper mapper = mock(ObjectMapper.class);
+    ElasticTransformer.setMapper(mapper);
   }
 
 }
