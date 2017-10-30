@@ -18,16 +18,18 @@ import com.google.gson.Gson;
 @Singleton
 public class GsonWriter<T> implements MessageBodyWriter<T> {
 
+  private static final String CONTENT_TYPE = "Content-Type";
+
   @Override
   public void writeTo(T t, Class<?> type, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
       throws IOException {
     final Gson g = new Gson();
 
-    if (!httpHeaders.containsKey("Content-Type")) {
-      httpHeaders.add("Content-Type", "charset=UTF-8");
+    if (!httpHeaders.containsKey(CONTENT_TYPE)) {
+      httpHeaders.add(CONTENT_TYPE, "charset=UTF-8");
     } else {
-      httpHeaders.get("Content-Type").add("charset=UTF-8");
+      httpHeaders.get(CONTENT_TYPE).add("charset=UTF-8");
     }
 
     entityStream.write(g.toJson(t).getBytes(Charset.defaultCharset()));
