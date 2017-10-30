@@ -316,7 +316,7 @@ public class JobProgressTrack implements ApiMarker, AtomJobControl {
 
   @Override
   public boolean isFailed() {
-    return !this.fatalError;
+    return this.fatalError;
   }
 
   /**

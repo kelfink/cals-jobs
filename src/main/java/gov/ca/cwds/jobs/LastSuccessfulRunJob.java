@@ -131,7 +131,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
   protected Date determineLastSuccessfulRunTime() {
     Date ret = null;
 
-    if (!StringUtils.isBlank(this.lastRunTimeFilename)) {
+    if (StringUtils.isNotBlank(this.lastRunTimeFilename)) {
       try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
         ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
             .parse(br.readLine().trim()); // NOSONAR
