@@ -32,7 +32,6 @@ import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
-import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.PersonJobTester;
@@ -43,6 +42,7 @@ import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
+import gov.ca.cwds.jobs.test.TestNormalizedEntry;
 import gov.ca.cwds.jobs.test.TestOnlyApiPersonAware;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -202,8 +202,11 @@ public class ElasticTransformerTest extends PersonJobTester {
       throws Exception {
     final AtomPersonDocPrep<TestNormalizedEntity> docPrep = target;
     final ElasticSearchPerson esp = new ElasticSearchPerson();
+
     final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    String elementName = "relationships";
+    t.addEntry(new TestNormalizedEntry("xyz1234567", "crap"));
+
+    final String elementName = "relationships";
     List list = new ArrayList();
     ESOptionalCollection[] keep = new ESOptionalCollection[] {};
     final Pair<String, String> actual = ElasticTransformer
@@ -242,7 +245,8 @@ public class ElasticTransformerTest extends PersonJobTester {
 
   @Test
   public void buildElasticSearchPersons_Args__PersistentObject() throws Exception {
-    PersistentObject p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    p.addEntry(new TestNormalizedEntry("xyz1234567", "crap"));
     ElasticSearchPerson[] actual = ElasticTransformer.buildElasticSearchPersons(p);
     assertThat(actual, is(notNullValue()));
   }
