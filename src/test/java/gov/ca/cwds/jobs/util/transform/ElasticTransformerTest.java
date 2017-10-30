@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonLanguage;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
@@ -195,21 +197,19 @@ public class ElasticTransformerTest extends PersonJobTester {
   // }
   // }
 
-  // @Test
-  // public void
-  // prepareUpsertJson_Args__AtomPersonDocPrep__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray()
-  // throws Exception {
-  // AtomPersonDocPrep<Object> docPrep = mock(AtomPersonDocPrep.class);
-  // ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
-  // Object t = null;
-  // String elementName = null;
-  // List list = new ArrayList();
-  // ESOptionalCollection[] keep = new ESOptionalCollection[] {};
-  // Pair<String, String> actual =
-  // ElasticTransformer.prepareUpsertJson(docPrep, esp, t, elementName, list, keep);
-  // Pair<String, String> expected = null;
-  // assertThat(actual, is(equalTo(expected)));
-  // }
+  @Test
+  public void prepareUpsertJson_Args__AtomPersonDocPrep__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray()
+      throws Exception {
+    final AtomPersonDocPrep<TestNormalizedEntity> docPrep = target;
+    final ElasticSearchPerson esp = new ElasticSearchPerson();
+    final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    String elementName = "relationships";
+    List list = new ArrayList();
+    ESOptionalCollection[] keep = new ESOptionalCollection[] {};
+    final Pair<String, String> actual = ElasticTransformer
+        .<TestNormalizedEntity>prepareUpsertJson(docPrep, esp, t, elementName, list, keep);
+    assertThat(actual, is(notNullValue()));
+  }
 
   // @Test
   // public void
