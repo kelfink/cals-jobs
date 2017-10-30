@@ -151,7 +151,7 @@ public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobCo
    * @param datetime date and time to store
    */
   protected void writeLastSuccessfulRunTime(Date datetime) {
-    if (!StringUtils.isBlank(this.lastRunTimeFilename) && !isFailed()) {
+    if (StringUtils.isNotBlank(this.lastRunTimeFilename) && !isFailed()) {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) { // NOSONAR
         w.write(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().format(datetime));
       } catch (IOException e) {

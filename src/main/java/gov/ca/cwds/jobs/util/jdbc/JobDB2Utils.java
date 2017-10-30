@@ -96,7 +96,8 @@ public class JobDB2Utils {
 
       ret = meta.getDatabaseProductVersion().startsWith("DSN");
     } catch (Exception e) {
-      JobLogs.raiseError(LOGGER, e, "FAILED TO FIND DB2 PLATFORM! {}", e.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO FIND DB2 PLATFORM! {}",
+          e.getMessage());
     }
 
     return ret;

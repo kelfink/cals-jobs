@@ -130,7 +130,8 @@ public class OtherClientNameIndexerJob
         buf.append(p.getAkas().stream().map(ElasticTransformer::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
-        JobLogs.raiseError(LOGGER, e, "ERROR SERIALIZING OTHER CLIENT NAMES! {}", e.getMessage());
+        throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR SERIALIZING OTHER CLIENT NAMES! {}",
+            e.getMessage());
       }
     }
 

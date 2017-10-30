@@ -129,31 +129,6 @@ public final class JobLogs {
     throw buildCheckedException(LOGGER, e, pattern, args);
   }
 
-  /**
-   * Format message and throw a runtime {@link JobsException}.
-   * 
-   * @param log class logger
-   * @param e any Throwable
-   * @param pattern MessageFormat pattern
-   * @param args error message, excluding throwable message
-   * @throws JobsException runtime exception
-   */
-  public static void raiseError(final Logger log, Throwable e, String pattern, Object... args) {
-    throw buildRuntimeException(log, e, pattern, args);
-  }
-
-  /**
-   * Format message and throw a runtime {@link JobsException}.
-   * 
-   * @param log class logger
-   * @param e any Throwable
-   * @param args error message or throwable message
-   * @throws JobsException runtime exception
-   */
-  public static void raiseError(final Logger log, Throwable e, Object... args) {
-    raiseError(log, e, null, args);
-  }
-
   public static String stackToString(Exception e) {
     return ExceptionUtils.getStackTrace(e);
   }

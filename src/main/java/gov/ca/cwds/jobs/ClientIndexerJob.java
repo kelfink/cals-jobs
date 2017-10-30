@@ -264,7 +264,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
     } catch (Exception e) {
       fail();
-      JobLogs.raiseError(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
     }

@@ -123,7 +123,8 @@ public abstract class CaseHistoryIndexerJob
         buf.append(esPersonCases.stream().map(ElasticTransformer::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
-        JobLogs.raiseError(LOGGER, e, "ERROR SERIALIZING CASES! {}", e.getMessage());
+        throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR SERIALIZING CASES! {}",
+            e.getMessage());
       }
     }
 

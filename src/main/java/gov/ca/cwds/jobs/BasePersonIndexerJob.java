@@ -327,7 +327,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (Exception e) {
       fail();
       Thread.currentThread().interrupt();
-      JobLogs.raiseError(LOGGER, e, "GENERAL EXCEPTION: {}", e);
+      throw JobLogs.buildRuntimeException(LOGGER, e, "GENERAL EXCEPTION: {}", e);
     } finally {
       done();
       this.finish(); // OK for initial load.
@@ -435,7 +435,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (Exception e) {
       fail();
       Thread.currentThread().interrupt();
-      JobLogs.raiseError(LOGGER, e, "Transformer: FATAL ERROR: {}", e.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, e, "Transformer: FATAL ERROR: {}",
+          e.getMessage());
     } finally {
       doneTransform();
     }
@@ -468,7 +469,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (Exception e) {
       fail();
       Thread.currentThread().interrupt();
-      JobLogs.raiseError(LOGGER, e, "Indexer: fatal error {}", e.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, e, "Indexer: fatal error {}", e.getMessage());
     } finally {
       doneIndex();
     }
@@ -509,7 +510,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       prepareDocument(bp, p);
     } catch (IOException e) {
       fail();
-      JobLogs.raiseError(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
     }
   }
 

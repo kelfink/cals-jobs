@@ -39,7 +39,7 @@ public class JobLogsTest {
     Throwable e = new IllegalStateException("hello world");
     String pattern = null;
     Object[] args = new Object[] {};
-    JobLogs.raiseError(log, e, pattern, args);
+    throw JobLogs.buildRuntimeException(log, e, pattern, args);
   }
 
   @Test(expected = JobsException.class)
@@ -47,13 +47,13 @@ public class JobLogsTest {
     Logger log = mock(Logger.class);
     Throwable e = new IllegalStateException("error message");
     String message = "hello world";
-    JobLogs.raiseError(log, e, message);
+    throw JobLogs.buildRuntimeException(log, e, message);
   }
 
   @Test(expected = JobsException.class)
   public void logEvery_Args__Logger__int__String__ObjectArray1() throws Exception {
     Exception e = new Exception();
-    JobLogs.raiseError(JobLogs.LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+    throw JobLogs.buildRuntimeException(JobLogs.LOGGER, e, "BATCH ERROR! {}", e.getMessage());
   }
 
   @Test
@@ -70,15 +70,15 @@ public class JobLogsTest {
     Throwable e = null;
     String pattern = null;
     Object[] args = new Object[] {};
-    JobLogs.raiseError(log, e, pattern, args);
+    throw JobLogs.buildRuntimeException(log, e, pattern, args);
   }
 
   @Test(expected = JobsException.class)
   public void raiseError_Args__Logger__Throwable__ObjectArray3() throws Exception {
     Logger log = mock(Logger.class);
     Throwable e = null;
-    Object[] args = new Object[] {};
-    JobLogs.raiseError(log, e, args);
+    String[] args = new String[] {};
+    throw JobLogs.buildRuntimeException(log, e, "something bad", args);
   }
 
 }
