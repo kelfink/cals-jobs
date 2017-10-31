@@ -23,6 +23,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
+import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.common.ApiFileAssistant;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
@@ -164,6 +165,8 @@ public class JobsGuiceInjector extends AbstractModule {
 
         // Static injection.
         ElasticTransformer.setMapper(injector.getInstance(ObjectMapper.class));
+
+        ElasticSearchPerson.getSystemCodes();
       } catch (Exception e) {
         throw JobLogs.runtime(LOGGER, e, "FAILED TO BUILD INJECTOR! {}", e.getMessage());
       }
@@ -236,7 +239,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(NeutronElasticValidator.class);
 
     // Singleton:
-    bind(ObjectMapper.class).toInstance(ElasticSearchPerson.MAPPER);
+    bind(ObjectMapper.class).toInstance(ObjectMapperUtils.createObjectMapper());
     bind(ElasticsearchDao.class).asEagerSingleton();
     bind(FlightRecorder.class).asEagerSingleton();
     bind(AtomRocketFactory.class).to(RocketFactory.class).asEagerSingleton();
