@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.component.AtomJobControl;
 import gov.ca.cwds.jobs.component.AtomShared;
-import gov.ca.cwds.jobs.component.Job;
+import gov.ca.cwds.jobs.component.Rocket;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
@@ -30,7 +30,7 @@ import gov.ca.cwds.jobs.util.JobLogs;
  * 
  * @author CWDS API Team
  */
-public abstract class LastSuccessfulRunJob implements Job, AtomShared, AtomJobControl {
+public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJobControl {
 
   private static final long serialVersionUID = 1L;
 

@@ -2,8 +2,6 @@ package gov.ca.cwds.jobs.schedule;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -24,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.weakref.jmx.MBeanExporter;
 import org.weakref.jmx.Managed;
 
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
@@ -52,7 +52,7 @@ public class LaunchDirector implements AtomJobScheduler {
   /**
    * Singleton instance. One director to rule them all.
    */
-  private static final LaunchDirector instance = new LaunchDirector();
+  private static LaunchDirector instance;
 
   /**
    * For unit tests where resources either may not close properly or where expensive resources
@@ -91,10 +91,34 @@ public class LaunchDirector implements AtomJobScheduler {
 
   private NeutronJobProgressHistory jobHistory = new NeutronJobProgressHistory();
 
-  private NeutronScheduler neutronScheduler = new NeutronScheduler(jobHistory);
+  private NeutronScheduler neutronScheduler;
 
   private LaunchDirector() {
     // Default, no-op
+  }
+
+  @Inject
+  public LaunchDirector(final NeutronJobProgressHistory jobHistory,
+      final NeutronScheduler neutronScheduler) {
+    this.jobHistory = jobHistory;
+    this.neutronScheduler = neutronScheduler;
+  }
+
+  protected static void startContinuousMode(String[] args) {
+    LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
+    try {
+      final JobOptions globalOpts = JobOptions.parseCommandLine(args);
+      final Injector injector = JobsGuiceInjector.buildInjector(globalOpts);
+      instance = injector.getInstance(LaunchDirector.class);
+
+      LaunchDirector.continuousMode = true;
+      LaunchDirector.initialMode = !instance.startingOpts.isLastRunMode();
+      instance.initScheduler();
+
+      LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
+    } catch (Exception e) {
+      LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
+    }
   }
 
   protected void resetTimestamps(boolean initialMode, int hoursInPast) throws IOException {
@@ -129,10 +153,7 @@ public class LaunchDirector implements AtomJobScheduler {
       LOGGER.error("FAILED TO RESET TIMESTAMPS! {}", e.getMessage(), e);
 
       // Return String output to JMX or other interface.
-      final StringWriter sw = new StringWriter();
-      final PrintWriter w = new PrintWriter(sw);
-      e.printStackTrace(w);
-      return sw.toString();
+      return JobLogs.stackToString(e);
     }
 
     return "Timestamps reset for initial load";
@@ -441,21 +462,6 @@ public class LaunchDirector implements AtomJobScheduler {
   @Override
   public NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched) {
     return this.scheduleJob(klazz, sched);
-  }
-
-  protected static void startContinuousMode(String[] args) {
-    LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
-    try {
-      instance.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
-          : instance.startingOpts;
-      LaunchDirector.continuousMode = true;
-      LaunchDirector.initialMode = !instance.startingOpts.isLastRunMode();
-      instance.initScheduler();
-
-      LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
-    } catch (Exception e) {
-      LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
-    }
   }
 
   public NeutronJobProgressHistory getJobHistory() {

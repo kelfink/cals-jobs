@@ -1,9 +1,11 @@
 package gov.ca.cwds.jobs.component;
 
+import org.quartz.spi.JobFactory;
+
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.exception.NeutronException;
 
-public interface AtomJobCreator {
+public interface AtomRocketFactory extends JobFactory {
 
   /**
    * Build a registered job.

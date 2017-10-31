@@ -32,7 +32,7 @@ import com.google.inject.name.Names;
 import gov.ca.cwds.common.ApiFileAssistant;
 import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.model.facility.es.ESFacility;
-import gov.ca.cwds.jobs.component.Job;
+import gov.ca.cwds.jobs.component.Rocket;
 import gov.ca.cwds.jobs.config.JobConfiguration;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.facility.FacilityProcessor;
@@ -183,7 +183,7 @@ public class FacilityIndexerJob extends AbstractModule {
   @Provides
   @Named("facility-job")
   @Inject
-  public Job lisItemWriter(@Named("facility-reader") JobReader jobReader,
+  public Rocket lisItemWriter(@Named("facility-reader") JobReader jobReader,
       @Named("facility-processor") JobProcessor jobProcessor,
       @Named("facility-writer") JobWriter jobWriter) {
     return new AsyncReadWriteJob(jobReader, jobProcessor, jobWriter);
@@ -197,7 +197,7 @@ public class FacilityIndexerJob extends AbstractModule {
     try {
       final File configFile = new ApiFileAssistant().validateFileLocation(args[0]);
       Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile)); // NOSONAR
-      Job job = injector.getInstance(Key.get(Job.class, Names.named("facility-job")));
+      Rocket job = injector.getInstance(Key.get(Rocket.class, Names.named("facility-job")));
       job.run();
     } catch (Exception e) {
       LOGGER.error("ERROR: {}", e.getMessage(), e);

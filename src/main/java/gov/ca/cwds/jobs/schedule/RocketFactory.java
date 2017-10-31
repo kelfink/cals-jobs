@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.quartz.Job;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.spi.JobFactory;
 import org.quartz.spi.TriggerFiredBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,15 +14,15 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.component.AtomJobCreator;
+import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.util.JobLogs;
 
-public class NeutronJobCreator implements AtomJobCreator, JobFactory {
+public class RocketFactory implements AtomRocketFactory {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJobCreator.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RocketFactory.class);
 
   private final Injector injector;
 
@@ -35,7 +34,7 @@ public class NeutronJobCreator implements AtomJobCreator, JobFactory {
   private final Map<Class<?>, JobOptions> optionsRegistry = new ConcurrentHashMap<>();
 
   @Inject
-  public NeutronJobCreator(final Injector injector, final JobOptions opts) {
+  public RocketFactory(final Injector injector, final JobOptions opts) {
     this.injector = injector;
     this.opts = opts;
   }

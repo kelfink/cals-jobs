@@ -22,7 +22,7 @@ import org.junit.Test;
 import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.jobs.component.Job;
+import gov.ca.cwds.jobs.component.Rocket;
 import gov.ca.cwds.jobs.config.JobConfiguration;
 import gov.ca.cwds.jobs.facility.FacilityProcessor;
 import gov.ca.cwds.jobs.facility.FacilityRowMapper;
@@ -132,7 +132,7 @@ public class FacilityIndexerJobTest
     JobReader jobReader = mock(JobReader.class);
     JobProcessor jobProcessor = mock(JobProcessor.class);
     JobWriter jobWriter = mock(JobWriter.class);
-    Job actual = target.lisItemWriter(jobReader, jobProcessor, jobWriter);
+    Rocket actual = target.lisItemWriter(jobReader, jobProcessor, jobWriter);
     assertThat(actual, is(notNullValue()));
   }
 

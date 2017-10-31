@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.component.AtomJobCreator;
 import gov.ca.cwds.jobs.component.AtomJobScheduler;
+import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -34,7 +34,7 @@ public class NeutronScheduler implements AtomJobScheduler {
 
   private final NeutronJobProgressHistory jobHistory;
 
-  private AtomJobCreator jobCreator;
+  private final AtomRocketFactory rocketFactory;
 
   private JobOptions opts;
 
@@ -51,8 +51,10 @@ public class NeutronScheduler implements AtomJobScheduler {
   private final Map<TriggerKey, NeutronInterruptableJob> executingJobs = new ConcurrentHashMap<>();
 
   @Inject
-  public NeutronScheduler(final NeutronJobProgressHistory jobHistory) {
+  public NeutronScheduler(final NeutronJobProgressHistory jobHistory,
+      final AtomRocketFactory rocketFactory) {
     this.jobHistory = jobHistory;
+    this.rocketFactory = rocketFactory;
   }
 
   /**
@@ -66,7 +68,7 @@ public class NeutronScheduler implements AtomJobScheduler {
   @SuppressWarnings("rawtypes")
   public BasePersonIndexerJob createJob(final Class<?> klass, String... args)
       throws NeutronException {
-    return this.jobCreator.createJob(klass, args);
+    return this.rocketFactory.createJob(klass, args);
   }
 
   /**
@@ -80,7 +82,7 @@ public class NeutronScheduler implements AtomJobScheduler {
   @SuppressWarnings("rawtypes")
   public BasePersonIndexerJob createJob(final String jobName, String... args)
       throws NeutronException {
-    return this.jobCreator.createJob(jobName, args);
+    return this.rocketFactory.createJob(jobName, args);
   }
 
   @Override
@@ -161,12 +163,8 @@ public class NeutronScheduler implements AtomJobScheduler {
     return executingJobs;
   }
 
-  public AtomJobCreator getJobCreator() {
-    return jobCreator;
-  }
-
-  public void setJobCreator(AtomJobCreator jobCreator) {
-    this.jobCreator = jobCreator;
+  public AtomRocketFactory getRocketFactory() {
+    return rocketFactory;
   }
 
   public JobOptions getOpts() {

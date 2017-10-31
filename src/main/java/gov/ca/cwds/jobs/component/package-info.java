@@ -2,7 +2,7 @@
  * 
  */
 /**
- * Component interfaces for {@link gov.ca.cwds.jobs.component.Job} implementations.
+ * Component interfaces for {@link gov.ca.cwds.jobs.component.Rocket} implementations.
  * 
  * @author CWDS API Team
  */

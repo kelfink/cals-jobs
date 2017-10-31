@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.util;
 import java.util.LinkedList;
 import java.util.List;
 
-import gov.ca.cwds.jobs.component.Job;
+import gov.ca.cwds.jobs.component.Rocket;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 
@@ -13,7 +13,7 @@ import gov.ca.cwds.jobs.exception.NeutronException;
  * @param <O> output writer type
  */
 @SuppressWarnings("unchecked")
-public class AsyncReadWriteJob<I, O> extends ProducerConsumer<I> implements Job, JobComponent {
+public class AsyncReadWriteJob<I, O> extends ProducerConsumer<I> implements Rocket, JobComponent {
 
   /**
    * Default serialization.

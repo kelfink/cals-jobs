@@ -71,14 +71,14 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.component.AtomJobCreator;
 import gov.ca.cwds.jobs.component.AtomJobScheduler;
+import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchDirector;
-import gov.ca.cwds.jobs.schedule.NeutronJobCreator;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
+import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.service.NeutronElasticValidator;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
@@ -90,6 +90,11 @@ import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
 /**
  * Guice dependency injection (DI), module which constructs and manages common class instances for
  * batch jobs.
+ * 
+ * <p>
+ * Also known as, "Hypercube", Jimmy's invention to store an infinite number of items in a small
+ * place.
+ * </p>
  * 
  * @author CWDS API Team
  */
@@ -222,24 +227,22 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)
         .toInstance(makeNsSessionFactory());
 
-    bindDao();
-
-    // Instantiate as a singleton, else Guice creates a new instance each time.
-    bind(ObjectMapper.class).toInstance(ElasticSearchPerson.MAPPER);
+    bindDaos();
 
     // Inject annotations.
     bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
 
-    bind(ElasticsearchDao.class).asEagerSingleton(); // one ES DAO.
-
-    bind(NeutronJobProgressHistory.class).asEagerSingleton(); // one job history
-
+    // Miscellaneous:
     bind(NeutronElasticValidator.class);
 
-    bind(AtomJobCreator.class).to(NeutronJobCreator.class).asEagerSingleton();
+    // Singleton:
+    bind(ObjectMapper.class).toInstance(ElasticSearchPerson.MAPPER);
+    bind(ElasticsearchDao.class).asEagerSingleton();
+    bind(NeutronJobProgressHistory.class).asEagerSingleton();
+    bind(AtomRocketFactory.class).to(RocketFactory.class).asEagerSingleton();
   }
 
-  protected void bindDao() {
+  protected void bindDaos() {
     // DB2 replicated tables:
     bind(ReplicatedRelationshipsDao.class);
     bind(ReplicatedClientDao.class);
@@ -292,7 +295,7 @@ public class JobsGuiceInjector extends AbstractModule {
 
   @Provides
   @Singleton
-  public AtomJobScheduler provideJobRunner() {
+  public AtomJobScheduler provideLaunchDirector() {
     return LaunchDirector.getInstance();
   }
 
