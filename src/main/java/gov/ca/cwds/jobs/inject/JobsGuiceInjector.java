@@ -293,33 +293,6 @@ public class JobsGuiceInjector extends AbstractModule {
         .buildSessionFactory();
   }
 
-  // @Provides
-  // @Singleton
-  // protected NeutronScheduler configureQuartz() throws SchedulerException {
-  // // Quartz scheduling:
-  // final Properties p = new Properties();
-  // p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
-  //
-  // // NOTE: make configurable.
-  // p.put("org.quartz.threadPool.threadCount",
-  // initialMode ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
-  // final StdSchedulerFactory factory = new StdSchedulerFactory(p);
-  // final Scheduler scheduler = factory.getScheduler();
-  //
-  // // FINISHME: inject scheduler and rocket factory.
-  // // scheduler.setJobFactory(injector.getInstance(RocketFactory.class));
-  // // neutronScheduler.setScheduler();
-  //
-  // // Scheduler listeners.
-  // final ListenerManager listenerMgr = neutronScheduler.getScheduler().getListenerManager();
-  // listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
-  // listenerMgr.addTriggerListener(new NeutronTriggerListener());
-  // listenerMgr.addJobListener(initialMode ? NeutronDefaultJobSchedule.fullLoadJobChainListener()
-  // : new NeutronJobListener());
-  //
-  // new NeutronScheduler(jobHistory, rocketFactory);
-  // }
-
   @Provides
   @Singleton
   public AtomJobScheduler provideLaunchDirector() {

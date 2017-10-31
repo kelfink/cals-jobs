@@ -89,36 +89,14 @@ public class LaunchDirector implements AtomJobScheduler {
    */
   private NeutronRestServer restServer = new NeutronRestServer();
 
-  private FlightRecorder jobHistory = new FlightRecorder();
+  private FlightRecorder flightRecorder = new FlightRecorder();
 
   private NeutronScheduler neutronScheduler;
 
-  private LaunchDirector() {
-    // Default, no-op
-  }
-
   @Inject
   public LaunchDirector(final FlightRecorder jobHistory, final NeutronScheduler neutronScheduler) {
-    this.jobHistory = jobHistory;
+    this.flightRecorder = jobHistory;
     this.neutronScheduler = neutronScheduler;
-  }
-
-  protected static void startContinuousMode(String[] args) {
-    LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
-    try {
-      final JobOptions globalOpts = JobOptions.parseCommandLine(args);
-      final Injector injector = JobsGuiceInjector.buildInjector(globalOpts);
-      instance = injector.getInstance(LaunchDirector.class);
-      instance.startingOpts = globalOpts;
-
-      LaunchDirector.continuousMode = true;
-      LaunchDirector.initialMode = !instance.startingOpts.isLastRunMode();
-      instance.initScheduler(injector);
-
-      LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
-    } catch (Exception e) {
-      LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
-    }
   }
 
   protected void resetTimestamps(boolean initialMode, int hoursInPast) throws IOException {
@@ -259,7 +237,7 @@ public class LaunchDirector implements AtomJobScheduler {
         }
 
         final NeutronJobMgtFacade nj =
-            new NeutronJobMgtFacade(neutronScheduler.getScheduler(), sched, jobHistory);
+            new NeutronJobMgtFacade(neutronScheduler.getScheduler(), sched, flightRecorder);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         neutronScheduler.getScheduleRegistry().put(klass, nj);
       }
@@ -300,12 +278,6 @@ public class LaunchDirector implements AtomJobScheduler {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gov.ca.cwds.jobs.schedule.AtomJobScheduler#registerJob(java.lang.Class,
-   * gov.ca.cwds.jobs.config.JobOptions)
-   */
   @Override
   public <T extends BasePersonIndexerJob<?, ?>> void registerJob(final Class<T> klass,
       final JobOptions opts) throws NeutronException {
@@ -340,24 +312,12 @@ public class LaunchDirector implements AtomJobScheduler {
     return this.neutronScheduler.createJob(jobName, args);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gov.ca.cwds.jobs.schedule.AtomJobScheduler#runScheduledJob(java.lang.Class,
-   * java.lang.String)
-   */
   @Override
   public FlightRecord runScheduledJob(final Class<?> klass, String... args)
       throws NeutronException {
     return this.neutronScheduler.runScheduledJob(klass, args);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gov.ca.cwds.jobs.schedule.AtomJobScheduler#runScheduledJob(java.lang.String,
-   * java.lang.String)
-   */
   @Override
   public FlightRecord runScheduledJob(final String jobName, String... args)
       throws NeutronException {
@@ -458,12 +418,12 @@ public class LaunchDirector implements AtomJobScheduler {
     return this.scheduleJob(klazz, sched);
   }
 
-  public AtomFlightRecorder getJobHistory() {
-    return jobHistory;
+  public AtomFlightRecorder getFlightRecorder() {
+    return flightRecorder;
   }
 
-  public void setJobHistory(FlightRecorder jobHistory) {
-    this.jobHistory = jobHistory;
+  public void setFlightRecorder(FlightRecorder jobHistory) {
+    this.flightRecorder = jobHistory;
   }
 
   /**
@@ -515,6 +475,24 @@ public class LaunchDirector implements AtomJobScheduler {
    */
   public static LaunchDirector getInstance() {
     return instance;
+  }
+
+  protected static void startContinuousMode(String[] args) {
+    LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
+    try {
+      final JobOptions globalOpts = JobOptions.parseCommandLine(args);
+      final Injector injector = JobsGuiceInjector.buildInjector(globalOpts);
+      instance = injector.getInstance(LaunchDirector.class);
+      instance.startingOpts = globalOpts;
+
+      LaunchDirector.continuousMode = true;
+      LaunchDirector.initialMode = !instance.startingOpts.isLastRunMode();
+      instance.initScheduler(injector);
+
+      LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
+    } catch (Exception e) {
+      LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
+    }
   }
 
   /**
