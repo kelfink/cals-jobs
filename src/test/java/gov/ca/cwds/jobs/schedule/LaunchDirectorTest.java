@@ -27,10 +27,8 @@ public class LaunchDirectorTest
     opts.setBaseDirectory("/var/lib/jenkins/");
     opts.setLastRunLoc(lastJobRunTimeFilename);
 
-    target = new LaunchDirector(jobHistory, neutronScheduler);
-    // target = LaunchDirector.getInstance();
+    target = new LaunchDirector(jobHistory, neutronScheduler, esDao);
     target.setStartingOpts(opts);
-    target.setEsDao(esDao);
     LaunchDirector.setTestMode(true);
   }
 

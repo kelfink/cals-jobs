@@ -95,9 +95,11 @@ public class LaunchDirector implements AtomJobScheduler {
   private NeutronScheduler neutronScheduler;
 
   @Inject
-  public LaunchDirector(final FlightRecorder jobHistory, final NeutronScheduler neutronScheduler) {
+  public LaunchDirector(final FlightRecorder jobHistory, final NeutronScheduler neutronScheduler,
+      final ElasticsearchDao esDao) {
     this.flightRecorder = jobHistory;
     this.neutronScheduler = neutronScheduler;
+    this.esDao = esDao;
   }
 
   protected void resetTimestamps(boolean initialMode, int hoursInPast) throws IOException {
@@ -232,12 +234,11 @@ public class LaunchDirector implements AtomJobScheduler {
       for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
         final Class<?> klass = sched.getKlazz();
         final JobOptions opts = new JobOptions(startingOpts);
-
         handleTimeFile(opts, fmt, now, sched);
 
-        if (!testMode) { // HACK: **inject dependencies**
-          registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
-        }
+        // if (!testMode) {
+        // registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
+        // }
 
         final NeutronJobMgtFacade nj =
             new NeutronJobMgtFacade(neutronScheduler.getScheduler(), sched, flightRecorder);
@@ -406,10 +407,6 @@ public class LaunchDirector implements AtomJobScheduler {
 
   public Scheduler getScheduler() {
     return neutronScheduler.getScheduler();
-  }
-
-  public Map<Class<?>, JobOptions> getOptionsRegistry() {
-    return neutronScheduler.getOptionsRegistry();
   }
 
   public Map<Class<?>, NeutronJobMgtFacade> getScheduleRegistry() {

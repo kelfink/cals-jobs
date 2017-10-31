@@ -17,7 +17,6 @@ import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 public class NeutronScheduler implements AtomJobScheduler {
@@ -37,11 +36,6 @@ public class NeutronScheduler implements AtomJobScheduler {
   private final AtomRocketFactory rocketFactory;
 
   private JobOptions opts;
-
-  /**
-   * Job options by job type.
-   */
-  private final Map<Class<?>, JobOptions> optionsRegistry = new ConcurrentHashMap<>();
 
   /**
    * Scheduled jobs.
@@ -96,15 +90,14 @@ public class NeutronScheduler implements AtomJobScheduler {
   public <T extends BasePersonIndexerJob<?, ?>> void registerJob(Class<T> klass, JobOptions opts)
       throws NeutronException {
     LOGGER.info("Register job: {}", klass.getName());
-    if (!testMode) {
-      try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
-        getOptionsRegistry().put(klass, job.getOpts());
-        LaunchDirector.getInstance().setEsDao(job.getEsDao()); // MORE: **inject** dependencies.
-      } catch (Throwable e) { // NOSONAR
-        // Intentionally catch a Throwable, not an Exception or ClassNotFound or the like.
-        throw JobLogs.checked(LOGGER, e, "JOB REGISTRATION FAILED!: {}", e.getMessage());
-      }
-    }
+    // if (!testMode) {
+    // try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
+    // getOptionsRegistry().put(klass, job.getOpts());
+    // } catch (Throwable e) { // NOSONAR
+    // // Intentionally catch a Throwable, not an Exception or ClassNotFound or the like.
+    // throw JobLogs.checked(LOGGER, e, "JOB REGISTRATION FAILED!: {}", e.getMessage());
+    // }
+    // }
   }
 
   @Override
@@ -189,10 +182,6 @@ public class NeutronScheduler implements AtomJobScheduler {
 
   public void setScheduler(Scheduler scheduler) {
     this.scheduler = scheduler;
-  }
-
-  public Map<Class<?>, JobOptions> getOptionsRegistry() {
-    return optionsRegistry;
   }
 
   public Map<Class<?>, NeutronJobMgtFacade> getScheduleRegistry() {
