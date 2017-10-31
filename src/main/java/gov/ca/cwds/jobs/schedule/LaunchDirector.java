@@ -355,39 +355,6 @@ public class LaunchDirector implements AtomJobScheduler {
     testMode = mode;
   }
 
-  /**
-   * Entry point for standalone batch jobs, typically for initial load. Not used in continuous mode.
-   * 
-   * <p>
-   * This method automatically closes the Hibernate session factory and ElasticSearch DAO and EXITs
-   * the JVM.
-   * </p>
-   * 
-   * @param klass batch job class
-   * @param args command line arguments
-   * @param <T> Person persistence type
-   */
-  public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
-      String... args) {
-    int exitCode = 0;
-    LaunchDirector.continuousMode = false;
-
-    try (final T job = JobsGuiceInjector.newJob(klass, args)) {
-      job.run();
-    } catch (Throwable e) { // NOSONAR
-      // Intentionally catch a Throwable, not an Exception.
-      // Close orphaned resources forcibly, if necessary, by system exit.
-      exitCode = 1;
-      throw JobLogs.buildRuntimeException(LOGGER, e, "STANDALONE JOB FAILED!: {}", e.getMessage());
-    } finally {
-      // WARNING: kills the JVM in testing but may be needed to shutdown resources.
-      if (!isTestMode() && !isSchedulerMode()) {
-        // Shutdown all remaining resources, even those not attached to this job.
-        Runtime.getRuntime().exit(exitCode); // NOSONAR
-      }
-    }
-  }
-
   public static boolean isInitialMode() {
     return initialMode;
   }
@@ -426,15 +393,6 @@ public class LaunchDirector implements AtomJobScheduler {
 
   public void setFlightRecorder(FlightRecorder jobHistory) {
     this.flightRecorder = jobHistory;
-  }
-
-  /**
-   * <strong>FOR TESTING ONLY!</strong>
-   * 
-   * @param scheduler scheduler implementation
-   */
-  public void setScheduler(Scheduler scheduler) {
-    this.neutronScheduler.setScheduler(scheduler);
   }
 
   public NeutronScheduler getNeutronScheduler() {
@@ -494,6 +452,39 @@ public class LaunchDirector implements AtomJobScheduler {
       LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Entry point for standalone batch jobs, typically for initial load. Not used in continuous mode.
+   * 
+   * <p>
+   * This method automatically closes the Hibernate session factory and ElasticSearch DAO and EXITs
+   * the JVM.
+   * </p>
+   * 
+   * @param klass batch job class
+   * @param args command line arguments
+   * @param <T> Person persistence type
+   */
+  public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
+      String... args) {
+    int exitCode = 0;
+    LaunchDirector.continuousMode = false;
+
+    try (final T job = JobsGuiceInjector.newJob(klass, args)) {
+      job.run();
+    } catch (Throwable e) { // NOSONAR
+      // Intentionally catch a Throwable, not an Exception.
+      // Close orphaned resources forcibly, if necessary, by system exit.
+      exitCode = 1;
+      throw JobLogs.buildRuntimeException(LOGGER, e, "STANDALONE JOB FAILED!: {}", e.getMessage());
+    } finally {
+      // WARNING: kills the JVM in testing but may be needed to shutdown resources.
+      if (!isTestMode() && !isSchedulerMode()) {
+        // Shutdown all remaining resources, even those not attached to this job.
+        Runtime.getRuntime().exit(exitCode); // NOSONAR
+      }
     }
   }
 

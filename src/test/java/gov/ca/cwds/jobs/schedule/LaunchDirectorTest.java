@@ -4,11 +4,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.quartz.Scheduler;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.PersonJobTester;
@@ -34,9 +32,6 @@ public class LaunchDirectorTest
     target.setStartingOpts(opts);
     target.setEsDao(esDao);
     LaunchDirector.setTestMode(true);
-
-    Scheduler scheduler = mock(Scheduler.class);
-    target.setScheduler(scheduler);
   }
 
   @Test
