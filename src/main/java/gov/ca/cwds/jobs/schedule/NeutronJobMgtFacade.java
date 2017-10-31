@@ -56,7 +56,7 @@ public class NeutronJobMgtFacade implements Serializable {
   public String run(String cmdLine) throws NeutronException {
     try {
       LOGGER.info("RUN JOB: {}", defaultSchedule.getName());
-      final JobProgressTrack track = JobDirector.getInstance().runScheduledJob(
+      final JobProgressTrack track = LaunchDirector.getInstance().runScheduledJob(
           defaultSchedule.getKlazz(), StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       return track.toString();
     } catch (Exception e) {
@@ -77,7 +77,7 @@ public class NeutronJobMgtFacade implements Serializable {
         .usingJobData("job_class", defaultSchedule.getKlazz().getName()).build();
 
     // Initial mode: run only **once**.
-    final Trigger trg = !JobDirector.isInitialMode()
+    final Trigger trg = !LaunchDirector.isInitialMode()
         ? newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
             .withPriority(defaultSchedule.getLastRunPriority())
             .withSchedule(simpleSchedule().withIntervalInSeconds(defaultSchedule.getPeriodSeconds())

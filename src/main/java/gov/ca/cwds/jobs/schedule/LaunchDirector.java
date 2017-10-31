@@ -45,14 +45,14 @@ import gov.ca.cwds.jobs.util.JobLogs;
  * 
  * @author CWDS API Team
  */
-public class JobDirector implements AtomJobScheduler {
+public class LaunchDirector implements AtomJobScheduler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobDirector.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LaunchDirector.class);
 
   /**
    * Singleton instance. One director to rule them all.
    */
-  private static final JobDirector instance = new JobDirector();
+  private static final LaunchDirector instance = new LaunchDirector();
 
   /**
    * For unit tests where resources either may not close properly or where expensive resources
@@ -93,7 +93,7 @@ public class JobDirector implements AtomJobScheduler {
 
   private NeutronScheduler neutronScheduler = new NeutronScheduler(jobHistory);
 
-  private JobDirector() {
+  private LaunchDirector() {
     // Default, no-op
   }
 
@@ -382,7 +382,7 @@ public class JobDirector implements AtomJobScheduler {
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
     int exitCode = 0;
-    JobDirector.continuousMode = false;
+    LaunchDirector.continuousMode = false;
 
     try (final T job = JobsGuiceInjector.newJob(klass, args)) {
       job.run();
@@ -448,8 +448,8 @@ public class JobDirector implements AtomJobScheduler {
     try {
       instance.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
           : instance.startingOpts;
-      JobDirector.continuousMode = true;
-      JobDirector.initialMode = !instance.startingOpts.isLastRunMode();
+      LaunchDirector.continuousMode = true;
+      LaunchDirector.initialMode = !instance.startingOpts.isLastRunMode();
       instance.initScheduler();
 
       LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
@@ -513,7 +513,7 @@ public class JobDirector implements AtomJobScheduler {
    * 
    * @return evil single instance
    */
-  public static JobDirector getInstance() {
+  public static LaunchDirector getInstance() {
     return instance;
   }
 

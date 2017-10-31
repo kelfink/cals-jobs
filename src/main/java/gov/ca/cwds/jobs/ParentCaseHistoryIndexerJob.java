@@ -19,7 +19,7 @@ import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.schedule.JobDirector;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 
 /**
@@ -135,7 +135,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
    * @param args command line arguments
    */
   public static void main(String... args) {
-    JobDirector.runStandalone(ParentCaseHistoryIndexerJob.class, args);
+    LaunchDirector.runStandalone(ParentCaseHistoryIndexerJob.class, args);
   }
 
 }

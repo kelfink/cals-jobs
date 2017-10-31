@@ -90,7 +90,7 @@ public class NeutronScheduler implements AtomJobScheduler {
     if (!testMode) {
       try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
         getOptionsRegistry().put(klass, job.getOpts());
-        JobDirector.getInstance().setEsDao(job.getEsDao()); // MORE: **inject** dependencies.
+        LaunchDirector.getInstance().setEsDao(job.getEsDao()); // MORE: **inject** dependencies.
       } catch (Throwable e) { // NOSONAR
         // Intentionally catch a Throwable, not an Exception or ClassNotFound or the like.
         throw JobLogs.checked(LOGGER, e, "JOB REGISTRATION FAILED!: {}", e.getMessage());

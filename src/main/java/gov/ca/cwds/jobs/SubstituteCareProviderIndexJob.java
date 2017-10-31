@@ -13,7 +13,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.schedule.JobDirector;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 
@@ -59,7 +59,7 @@ public class SubstituteCareProviderIndexJob extends
    * @param args command line arguments
    */
   public static void main(String... args) {
-    JobDirector.runStandalone(SubstituteCareProviderIndexJob.class, args);
+    LaunchDirector.runStandalone(SubstituteCareProviderIndexJob.class, args);
   }
 
 }

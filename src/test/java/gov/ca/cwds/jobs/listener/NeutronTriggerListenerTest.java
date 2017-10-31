@@ -17,7 +17,7 @@ import org.quartz.Trigger;
 import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.TriggerKey;
 
-import gov.ca.cwds.jobs.schedule.JobDirector;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.NeutronDefaultJobSchedule;
 import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
 import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
@@ -53,7 +53,7 @@ public class NeutronTriggerListenerTest {
     when(trigger.getKey()).thenReturn(triggerKey);
     when(jobDataMap.getString(any(String.class))).thenReturn(TestIndexerJob.class.getName());
 
-    JobDirector.getInstance().scheduleJob(TestIndexerJob.class, NeutronDefaultJobSchedule.CLIENT);
+    LaunchDirector.getInstance().scheduleJob(TestIndexerJob.class, NeutronDefaultJobSchedule.CLIENT);
   }
 
   @Test

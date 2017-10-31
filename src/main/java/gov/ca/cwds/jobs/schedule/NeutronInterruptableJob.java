@@ -17,7 +17,7 @@ import gov.ca.cwds.jobs.component.JobProgressTrack;
  * Wrapper for scheduled jobs.
  * 
  * @author CWDS API Team
- * @see JobDirector
+ * @see LaunchDirector
  */
 @DisallowConcurrentExecution
 public class NeutronInterruptableJob implements InterruptableJob {
@@ -36,7 +36,7 @@ public class NeutronInterruptableJob implements InterruptableJob {
   }
 
   /**
-   * QUESTION: does Quartz allow injection?? Is it safe to pass objects via the job data map??
+   * QUESTION: does Quartz allow injection? Is it safe to pass objects via the job data map??
    */
   @SuppressWarnings("rawtypes")
   @Override
@@ -48,7 +48,7 @@ public class NeutronInterruptableJob implements InterruptableJob {
     final String jobName = context.getTrigger().getJobKey().getName();
 
     LOGGER.info("Execute {}", className);
-    try (final BasePersonIndexerJob job = JobDirector.getInstance().createJob(className,
+    try (final BasePersonIndexerJob job = LaunchDirector.getInstance().createJob(className,
         StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"))) {
       track = new JobProgressTrack(); // fresh progress track
       track.setJobName(jobName);

@@ -13,7 +13,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.schedule.JobDirector;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 
@@ -59,7 +59,7 @@ public final class CollateralIndividualIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    JobDirector.runStandalone(CollateralIndividualIndexerJob.class, args);
+    LaunchDirector.runStandalone(CollateralIndividualIndexerJob.class, args);
   }
 
 }

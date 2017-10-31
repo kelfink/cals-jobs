@@ -76,7 +76,7 @@ import gov.ca.cwds.jobs.component.AtomJobScheduler;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.JobDirector;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.NeutronJobCreator;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.service.NeutronElasticValidator;
@@ -293,7 +293,7 @@ public class JobsGuiceInjector extends AbstractModule {
   @Provides
   @Singleton
   public AtomJobScheduler provideJobRunner() {
-    return JobDirector.getInstance();
+    return LaunchDirector.getInstance();
   }
 
   @Provides

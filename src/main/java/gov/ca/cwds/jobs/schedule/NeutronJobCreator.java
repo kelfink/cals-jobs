@@ -3,6 +3,11 @@ package gov.ca.cwds.jobs.schedule;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.quartz.Job;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.spi.JobFactory;
+import org.quartz.spi.TriggerFiredBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,13 +21,13 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.util.JobLogs;
 
-public class NeutronJobCreator implements AtomJobCreator {
+public class NeutronJobCreator implements AtomJobCreator, JobFactory {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJobCreator.class);
 
   private final Injector injector;
 
-  private final JobOptions opts;
+  private JobOptions opts;
 
   /**
    * Job options by job type.
@@ -62,6 +67,11 @@ public class NeutronJobCreator implements AtomJobCreator {
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!!: {}", e.getMessage());
     }
+  }
+
+  @Override
+  public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler) throws SchedulerException {
+    return injector.getInstance(bundle.getJobDetail().getJobClass());
   }
 
 }
