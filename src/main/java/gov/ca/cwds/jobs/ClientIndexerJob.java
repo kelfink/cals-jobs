@@ -33,10 +33,11 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.component.AtomValidateDocument;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
@@ -75,14 +76,16 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    * @param jobHistory job history
+   * @param opts command line options
    */
   @Inject
   public ClientIndexerJob(final ReplicatedClientDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
+      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
+      JobOptions opts) {
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
 
-    // NOTE: **short-term** fix for county table in Perf and Prod.
+    // HACK: **short-term** fix for county table in Perf and Prod.
     EsClientAddress.setUseCounty(isLargeDataSet());
   }
 

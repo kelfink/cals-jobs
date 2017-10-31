@@ -57,8 +57,8 @@ import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
 import gov.ca.cwds.jobs.component.AtomSecurity;
 import gov.ca.cwds.jobs.component.AtomTransform;
 import gov.ca.cwds.jobs.component.AtomValidateDocument;
-import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronColumn;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
@@ -66,8 +66,8 @@ import gov.ca.cwds.jobs.defaults.NeutronElasticsearchDefaults;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
@@ -103,9 +103,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     implements AutoCloseable, AtomPersonDocPrep<T>, AtomHibernate<T, M>, AtomTransform<T, M>,
     AtomInitialLoad<T>, AtomSecurity, AtomValidateDocument {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BasePersonIndexerJob.class);
@@ -165,12 +162,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    * @param jobHistory job history
+   * @param opts command line options
    */
   @Inject
   public BasePersonIndexerJob(final BaseDaoImpl<T> jobDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      SessionFactory sessionFactory, FlightRecorder jobHistory) {
-    super(lastJobRunTimeFilename, jobHistory);
+      SessionFactory sessionFactory, FlightRecorder jobHistory, JobOptions opts) {
+    super(lastJobRunTimeFilename, jobHistory, opts);
     this.jobDao = jobDao;
     this.esDao = esDao;
     this.mapper = mapper;

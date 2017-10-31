@@ -19,8 +19,9 @@ import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 
 /**
  * Job to load case history from CMS into ElasticSearch for 'parent' person.
@@ -29,9 +30,6 @@ import gov.ca.cwds.jobs.schedule.FlightRecorder;
  */
 public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ParentCaseHistoryIndexerJob.class);
@@ -45,13 +43,14 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    * @param jobHistory job history
+   * @param opts command line options
    */
   @Inject
   public ParentCaseHistoryIndexerJob(final ReplicatedPersonCasesDao dao,
       final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-      FlightRecorder jobHistory) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
+      FlightRecorder jobHistory, JobOptions opts) {
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
   }
 
   @Override

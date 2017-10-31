@@ -89,7 +89,7 @@ public class RelationshipIndexerJob
   public RelationshipIndexerJob(final ReplicatedRelationshipsDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, null);
     EsRelationship.SonarQubeMemoryBloatComplaintCache.getInstance().clearCache();
   }
 

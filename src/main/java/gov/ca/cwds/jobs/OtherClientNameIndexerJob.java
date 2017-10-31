@@ -78,7 +78,7 @@ public class OtherClientNameIndexerJob
       final ReplicatedOtherClientNameDao denormDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, null);
     this.denormDao = denormDao;
   }
 

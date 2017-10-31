@@ -19,8 +19,9 @@ import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 
 /**
  * Job to load case history from CMS into ElasticSearch for 'focus child' person.
@@ -44,13 +45,15 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    * @param jobHistory job history
+   * @param opts command line options
    */
   @Inject
   public ChildCaseHistoryIndexerJob(final ReplicatedPersonCasesDao clientDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-      FlightRecorder jobHistory) {
-    super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
+      FlightRecorder jobHistory, JobOptions opts) {
+    super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory,
+        opts);
   }
 
   @Override

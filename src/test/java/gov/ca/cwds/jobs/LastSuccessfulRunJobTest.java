@@ -35,9 +35,11 @@ public class LastSuccessfulRunJobTest
 
     FlightRecord track = new FlightRecord();
 
+    JobOptions opts;
+
     public TestLastSuccessfulRunJob(String lastJobRunTimeFilename, ElasticsearchDao esDao,
-        FlightRecorder jobHistory) {
-      super(lastJobRunTimeFilename, jobHistory);
+        FlightRecorder jobHistory, final JobOptions opts) {
+      super(lastJobRunTimeFilename, jobHistory, opts);
     }
 
     @Override
@@ -69,7 +71,7 @@ public class LastSuccessfulRunJobTest
   @Before
   public void setup() throws Exception {
     super.setup();
-    target = new TestLastSuccessfulRunJob(lastJobRunTimeFilename, esDao, jobHistory);
+    target = new TestLastSuccessfulRunJob(lastJobRunTimeFilename, esDao, jobHistory, opts);
 
     try (BufferedWriter w = new BufferedWriter(new FileWriter(tempFile))) {
       w.write(FIXED_DATETIME);

@@ -59,7 +59,7 @@ public class MSearchJob extends
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, final NeutronElasticValidator validator,
       FlightRecorder jobHistory) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, null);
     this.validator = validator;
   }
 

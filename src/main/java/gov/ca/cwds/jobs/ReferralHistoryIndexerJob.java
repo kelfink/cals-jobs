@@ -174,7 +174,7 @@ public class ReferralHistoryIndexerJob
   public ReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao, ElasticsearchDao esDao,
       @LastRunFile String lastJobRunTimeFilename, ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
-    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
+    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, null);
   }
 
   @Override

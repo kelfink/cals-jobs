@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.component.AtomJobControl;
 import gov.ca.cwds.jobs.component.AtomShared;
-import gov.ca.cwds.jobs.component.Rocket;
 import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.Rocket;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
@@ -50,11 +50,13 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * 
    * @param lastJobRunTimeFilename location of last run time file
    * @param jobHistory injected job history
+   * @param opts job options
    */
-  public LastSuccessfulRunJob(String lastJobRunTimeFilename,
-      final FlightRecorder jobHistory) {
+  public LastSuccessfulRunJob(String lastJobRunTimeFilename, final FlightRecorder jobHistory,
+      final JobOptions opts) {
     this.lastRunTimeFilename = lastJobRunTimeFilename;
     this.jobHistory = jobHistory;
+    this.opts = opts;
   }
 
   @Override
