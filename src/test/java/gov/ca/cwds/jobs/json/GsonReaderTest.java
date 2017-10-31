@@ -9,32 +9,44 @@ import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
+import gov.ca.cwds.jobs.schedule.NeutronJobManagementBean;
 
 public class GsonReaderTest {
 
   GsonReader target;
-  Class<?> type;
   Type genericType;
   Annotation[] antns;
   MediaType mt;
 
+  NeutronJobManagementBean object;
+  Class<NeutronJobManagementBean> type;
+  MediaType mediaType;
+  MultivaluedMap<String, Object> httpHeaders;
+  OutputStream entityStream;
+
   @Before
   public void setup() throws Exception {
-    type = EsPersonReferral.class;
     genericType = mock(Type.class);
     antns = new Annotation[] {};
     mt = mock(MediaType.class);
+
+    object = new NeutronJobManagementBean("client", "stop", "crap");
+    type = NeutronJobManagementBean.class;
+    genericType = mock(Type.class);
+    mediaType = MediaType.APPLICATION_JSON_TYPE;
+    httpHeaders = new MultivaluedHashMap<String, Object>();
+    entityStream = System.out;
 
     target = new GsonReader();
   }
@@ -46,7 +58,6 @@ public class GsonReaderTest {
 
   @Test
   public void instantiation() throws Exception {
-    GsonReader target = new GsonReader();
     assertThat(target, notNullValue());
   }
 
@@ -58,17 +69,14 @@ public class GsonReaderTest {
   }
 
   @Test
-  @Ignore
+  // @Ignore
   public void readFrom_Args__Class__Type__AnnotationArray__MediaType__MultivaluedMap__InputStream()
       throws Exception {
     MultivaluedMap<String, String> mm = mock(MultivaluedMap.class);
 
-    // fixture("fixtures/domain/legacy/Allegation/valid/abuseFrequencyPeriodCodeD.json");
-
-    InputStream in = mock(InputStream.class);
+    final InputStream in = this.getClass().getResourceAsStream("/fixtures/test.json");
     Object actual = target.readFrom(type, genericType, antns, mt, mm, in);
-    Object expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test(expected = IOException.class)
@@ -76,9 +84,7 @@ public class GsonReaderTest {
       throws Exception {
     MultivaluedMap<String, String> mm = mock(MultivaluedMap.class);
     InputStream in = mock(InputStream.class);
-
     target.readFrom(type, genericType, antns, mt, mm, in);
   }
 
 }
-
