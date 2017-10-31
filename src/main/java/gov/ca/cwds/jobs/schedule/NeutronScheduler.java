@@ -45,7 +45,9 @@ public class NeutronScheduler implements AtomJobScheduler {
 
   @Override
   public <T extends BasePersonIndexerJob<?, ?>> void registerJob(Class<T> klass, JobOptions opts)
-      throws NeutronException {}
+      throws NeutronException {
+    // IMPL ME!
+  }
 
   @Override
   public JobProgressTrack runScheduledJob(Class<?> klass, String... args) throws NeutronException {
