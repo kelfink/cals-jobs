@@ -68,28 +68,28 @@ public class NeutronScheduler implements AtomJobScheduler {
    * Build a registered job.
    * 
    * @param klass batch job class
-   * @param args command line arguments
+   * @param opts command line arguments
    * @return the job
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final Class<?> klass, String... args)
+  public BasePersonIndexerJob createJob(final Class<?> klass, final JobOptions opts)
       throws NeutronException {
-    return this.rocketFactory.createJob(klass, args);
+    return this.rocketFactory.createJob(klass, opts);
   }
 
   /**
    * Build a registered job.
    * 
    * @param jobName batch job class
-   * @param args command line arguments
+   * @param opts command line arguments
    * @return the job
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final String jobName, String... args)
+  public BasePersonIndexerJob createJob(final String jobName, final JobOptions opts)
       throws NeutronException {
-    return this.rocketFactory.createJob(jobName, args);
+    return this.rocketFactory.createJob(jobName, opts);
   }
 
   @Override
@@ -108,10 +108,10 @@ public class NeutronScheduler implements AtomJobScheduler {
   }
 
   @Override
-  public FlightRecord runScheduledJob(Class<?> klass, String... args) throws NeutronException {
+  public FlightRecord runScheduledJob(Class<?> klass, JobOptions opts) throws NeutronException {
     try {
       LOGGER.info("Run registered job: {}", klass.getName());
-      final BasePersonIndexerJob<?, ?> job = createJob(klass, args);
+      final BasePersonIndexerJob<?, ?> job = createJob(klass, opts);
       job.run();
       return job.getTrack();
     } catch (Exception e) {
@@ -120,10 +120,10 @@ public class NeutronScheduler implements AtomJobScheduler {
   }
 
   @Override
-  public FlightRecord runScheduledJob(String jobName, String... args) throws NeutronException {
+  public FlightRecord runScheduledJob(String jobName, JobOptions opts) throws NeutronException {
     try {
       final Class<?> klass = Class.forName(jobName);
-      return runScheduledJob(klass, args);
+      return runScheduledJob(klass, opts);
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "ON-DEMAND JOB RUN FAILED!: {}", e.getMessage());
     }

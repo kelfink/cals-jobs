@@ -1,11 +1,9 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.jobs.component;
 
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
-
-import gov.ca.cwds.jobs.component.FlightRecord;
 
 public interface AtomFlightRecorder {
 

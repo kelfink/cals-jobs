@@ -40,7 +40,8 @@ public class RocketFactory implements AtomRocketFactory {
   }
 
   @Override
-  public BasePersonIndexerJob createJob(Class<?> klass, String... args) throws NeutronException {
+  public BasePersonIndexerJob createJob(Class<?> klass, final JobOptions opts)
+      throws NeutronException {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
       return (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
@@ -50,9 +51,10 @@ public class RocketFactory implements AtomRocketFactory {
   }
 
   @Override
-  public BasePersonIndexerJob createJob(String jobName, String... args) throws NeutronException {
+  public BasePersonIndexerJob createJob(String jobName, final JobOptions opts)
+      throws NeutronException {
     try {
-      return createJob(Class.forName(jobName), args);
+      return createJob(Class.forName(jobName), opts);
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!!: {}", e.getMessage());
     }

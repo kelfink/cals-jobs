@@ -28,6 +28,7 @@ import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
+import gov.ca.cwds.jobs.component.AtomFlightRecorder;
 import gov.ca.cwds.jobs.component.AtomJobScheduler;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
@@ -37,7 +38,7 @@ import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.listener.NeutronJobListener;
 import gov.ca.cwds.jobs.listener.NeutronSchedulerListener;
 import gov.ca.cwds.jobs.listener.NeutronTriggerListener;
-import gov.ca.cwds.jobs.rest.NeutronRestServer;
+import gov.ca.cwds.jobs.manage.rest.NeutronRestServer;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
@@ -290,40 +291,40 @@ public class LaunchDirector implements AtomJobScheduler {
    * Build a registered job.
    * 
    * @param klass batch job class
-   * @param args command line arguments
+   * @param opts command line arguments
    * @return the job
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final Class<?> klass, String... args)
+  public BasePersonIndexerJob createJob(final Class<?> klass, final JobOptions opts)
       throws NeutronException {
-    return this.neutronScheduler.createJob(klass, args);
+    return this.neutronScheduler.createJob(klass, opts);
   }
 
   /**
    * Build a registered job.
    * 
    * @param jobName batch job class
-   * @param args command line arguments
+   * @param opts command line arguments
    * @return the job
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final String jobName, String... args)
+  public BasePersonIndexerJob createJob(final String jobName, final JobOptions opts)
       throws NeutronException {
-    return this.neutronScheduler.createJob(jobName, args);
+    return this.neutronScheduler.createJob(jobName, opts);
   }
 
   @Override
-  public FlightRecord runScheduledJob(final Class<?> klass, String... args)
+  public FlightRecord runScheduledJob(final Class<?> klass, final JobOptions opts)
       throws NeutronException {
-    return this.neutronScheduler.runScheduledJob(klass, args);
+    return this.neutronScheduler.runScheduledJob(klass, opts);
   }
 
   @Override
-  public FlightRecord runScheduledJob(final String jobName, String... args)
+  public FlightRecord runScheduledJob(final String jobName, final JobOptions opts)
       throws NeutronException {
-    return this.runScheduledJob(jobName, args);
+    return this.runScheduledJob(jobName, opts);
   }
 
   /**

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.rest;
+package gov.ca.cwds.jobs.manage.rest;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -6,6 +6,8 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import gov.ca.cwds.jobs.manage.rest.NeutronJobManagerResource;
 
 public class NeutronJobManagerResourceTest {
 

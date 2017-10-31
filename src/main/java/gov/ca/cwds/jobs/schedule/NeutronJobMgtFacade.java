@@ -9,6 +9,7 @@ import java.io.Serializable;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.quartz.JobDetail;
+import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.weakref.jmx.Managed;
 
 import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 
 public class NeutronJobMgtFacade implements Serializable {
@@ -56,8 +58,17 @@ public class NeutronJobMgtFacade implements Serializable {
   public String run(String cmdLine) throws NeutronException {
     try {
       LOGGER.info("RUN JOB: {}", defaultSchedule.getName());
-      final FlightRecord track = LaunchDirector.getInstance().runScheduledJob(
-          defaultSchedule.getKlazz(), StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
+
+      JobOptions opts;
+      try {
+        opts = JobOptions
+            .parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
+      } catch (NeutronException e) {
+        throw new JobExecutionException("UNABLE TO PARSE COMMAND LINE!", e);
+      }
+
+      final FlightRecord track =
+          LaunchDirector.getInstance().runScheduledJob(defaultSchedule.getKlazz(), opts);
       return track.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);

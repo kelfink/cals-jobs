@@ -5,4 +5,4 @@
  * @author CWS-NS3
  *
  */
-package gov.ca.cwds.jobs.rest;
+package gov.ca.cwds.jobs.manage.rest;

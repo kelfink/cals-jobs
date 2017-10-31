@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.component.AtomFlightRecorder;
 import gov.ca.cwds.jobs.component.FlightRecord;
 
 public class FlightRecorder implements ApiMarker, AtomFlightRecorder {

@@ -26,26 +26,18 @@ public interface AtomJobScheduler {
    * Run a registered job.
    * 
    * @param klass batch job class
-   * @param args command line arguments
+   * @param opts command line arguments
    * @return job progress
    * @throws NeutronException unexpected runtime error
    */
-  FlightRecord runScheduledJob(Class<?> klass, String... args) throws NeutronException;
-
-  /**
-   * Run a registered job.
-   * 
-   * @param jobName batch job class
-   * @param args command line arguments
-   * @return job progress
-   * @throws NeutronException unexpected runtime error
-   */
-  FlightRecord runScheduledJob(String jobName, String... args) throws NeutronException;
+  FlightRecord runScheduledJob(Class<?> klass, JobOptions opts) throws NeutronException;
 
   void addExecutingJob(TriggerKey key, NeutronInterruptableJob job);
 
   NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched);
 
   boolean isJobVetoed(String className) throws NeutronException;
+
+  FlightRecord runScheduledJob(String jobName, JobOptions opts) throws NeutronException;
 
 }

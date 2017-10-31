@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.rest;
+package gov.ca.cwds.jobs.manage.rest;
 
 import java.util.ArrayList;
 import java.util.HashSet;

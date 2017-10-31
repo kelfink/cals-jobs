@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.rest;
+package gov.ca.cwds.jobs.manage.rest;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

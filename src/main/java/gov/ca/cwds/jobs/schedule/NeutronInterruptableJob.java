@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.exception.NeutronException;
 
 /**
  * Wrapper for scheduled jobs.
@@ -45,11 +47,18 @@ public class NeutronInterruptableJob implements InterruptableJob {
     className = map.getString("job_class");
     cmdLine = map.getString("cmd_line");
 
+    JobOptions opts;
+    try {
+      opts =
+          JobOptions.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
+    } catch (NeutronException e) {
+      throw new JobExecutionException("UNABLE TO PARSE COMMAND LINE! " + className, e);
+    }
+
     final String jobName = context.getTrigger().getJobKey().getName();
 
     LOGGER.info("Execute {}", className);
-    try (final BasePersonIndexerJob job = LaunchDirector.getInstance().createJob(className,
-        StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"))) {
+    try (final BasePersonIndexerJob job = LaunchDirector.getInstance().createJob(className, opts)) {
       track = new FlightRecord(); // fresh progress track
       track.setJobName(jobName);
       job.setTrack(track);

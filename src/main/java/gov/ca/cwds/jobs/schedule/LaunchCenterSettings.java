@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.schedule;
 
-public class NeutronServerSettings {
+public class LaunchCenterSettings {
 
   /**
    * For unit tests where resources either may not close properly or where expensive resources
