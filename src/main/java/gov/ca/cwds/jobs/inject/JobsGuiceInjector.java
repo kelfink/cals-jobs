@@ -71,11 +71,13 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
+import gov.ca.cwds.jobs.component.AtomJobCreator;
 import gov.ca.cwds.jobs.component.AtomJobScheduler;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.JobDirector;
+import gov.ca.cwds.jobs.schedule.NeutronJobCreator;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.service.NeutronElasticValidator;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -166,26 +168,6 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   /**
-   * Prepare a batch job with all required dependencies for <strong>continuous mode</strong> with
-   * the shared injector.
-   * 
-   * @param klass batch job class
-   * @param opts options for this job execution
-   * @return batch job, ready to run
-   * @param <T> Person persistence type
-   */
-  public static <T extends BasePersonIndexerJob<?, ?>> T newContinuousJob(final Class<T> klass,
-      final JobOptions opts) {
-    try {
-      final T ret = buildInjector(opts).getInstance(klass);
-      ret.setOpts(opts);
-      return ret;
-    } catch (CreationException e) {
-      throw JobLogs.runtime(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
-    }
-  }
-
-  /**
    * Prepare a batch job with all required dependencies.
    * 
    * @param klass batch job class
@@ -240,6 +222,24 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)
         .toInstance(makeNsSessionFactory());
 
+    bindDao();
+
+    // Instantiate as a singleton, else Guice creates a new instance each time.
+    bind(ObjectMapper.class).toInstance(ElasticSearchPerson.MAPPER);
+
+    // Inject annotations.
+    bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
+
+    bind(ElasticsearchDao.class).asEagerSingleton(); // one ES DAO.
+
+    bind(NeutronJobProgressHistory.class).asEagerSingleton(); // one job history
+
+    bind(NeutronElasticValidator.class);
+
+    bind(AtomJobCreator.class).to(NeutronJobCreator.class).asEagerSingleton();
+  }
+
+  protected void bindDao() {
     // DB2 replicated tables:
     bind(ReplicatedRelationshipsDao.class);
     bind(ReplicatedClientDao.class);
@@ -259,21 +259,9 @@ public class JobsGuiceInjector extends AbstractModule {
     // PostgreSQL:
     bind(EsIntakeScreeningDao.class);
 
-    // Instantiate as a singleton, else Guice creates a new instance each time.
-    bind(ObjectMapper.class).toInstance(ElasticSearchPerson.MAPPER);
-
-    // Inject annotations.
-    bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
-
     // CMS system codes.
     bind(SystemCodeDao.class);
     bind(SystemMetaDao.class);
-
-    bind(ElasticsearchDao.class).asEagerSingleton(); // one ES DAO.
-
-    bind(NeutronJobProgressHistory.class).asEagerSingleton(); // one job history
-
-    bind(NeutronElasticValidator.class);
   }
 
   protected SessionFactory makeCmsSessionFactory() {
@@ -369,7 +357,7 @@ public class JobsGuiceInjector extends AbstractModule {
         if (client != null) {
           client.close();
         }
-        throw JobLogs.checked(LOGGER, e,
+        throw JobLogs.buildCheckedException(LOGGER, e,
             "Error initializing Elasticsearch client: " + e.getMessage(), e);
       }
     }
@@ -391,7 +379,8 @@ public class JobsGuiceInjector extends AbstractModule {
         ret = new ObjectMapper(new YAMLFactory()).readValue(esConfig,
             ElasticsearchConfiguration.class);
       } catch (Exception e) {
-        throw JobLogs.checked(LOGGER, e, "ERROR READING ES CONFIG! {}", e.getMessage(), e);
+        throw JobLogs.buildCheckedException(LOGGER, e, "ERROR READING ES CONFIG! {}",
+            e.getMessage(), e);
       }
     }
     return ret;

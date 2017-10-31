@@ -22,7 +22,7 @@ import gov.ca.cwds.jobs.util.JobLogs;
 
 public class NeutronScheduler implements AtomJobScheduler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobDirector.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronScheduler.class);
 
   private Scheduler scheduler;
 
@@ -66,22 +66,7 @@ public class NeutronScheduler implements AtomJobScheduler {
   @SuppressWarnings("rawtypes")
   public BasePersonIndexerJob createJob(final Class<?> klass, String... args)
       throws NeutronException {
-    try {
-      LOGGER.info("Create registered job: {}", klass.getName());
-      final JobOptions jobOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
-          : getOptionsRegistry().get(klass);
-
-      if (this.opts == null) { // HACK: **inject dependencies**
-        this.opts = jobOpts;
-      }
-
-      final BasePersonIndexerJob<?, ?> job =
-          (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
-      job.setOpts(jobOpts);
-      return job;
-    } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!: {}", e.getMessage());
-    }
+    return this.jobCreator.createJob(klass, args);
   }
 
   /**
@@ -95,11 +80,7 @@ public class NeutronScheduler implements AtomJobScheduler {
   @SuppressWarnings("rawtypes")
   public BasePersonIndexerJob createJob(final String jobName, String... args)
       throws NeutronException {
-    try {
-      return createJob(Class.forName(jobName), args);
-    } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!!: {}", e.getMessage());
-    }
+    return this.jobCreator.createJob(jobName, args);
   }
 
   @Override
