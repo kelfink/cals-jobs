@@ -28,6 +28,7 @@ import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
+import gov.ca.cwds.jobs.component.AtomJobScheduler;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
@@ -40,7 +41,7 @@ import gov.ca.cwds.jobs.rest.NeutronRestServer;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
- * Run standalone jobs or serve up jobs with Quartz.
+ * Run stand-alone jobs or serve up jobs with Quartz. The master of ceremonies, AKA, Jimmy Neutron.
  * 
  * @author CWDS API Team
  */
@@ -49,7 +50,7 @@ public class MasterJobRunner implements AtomJobScheduler {
   private static final Logger LOGGER = LoggerFactory.getLogger(MasterJobRunner.class);
 
   /**
-   * Singleton instance. One scheduler to rule them all.
+   * Singleton instance. One director to rule them all.
    */
   private static final MasterJobRunner instance = new MasterJobRunner();
 
@@ -71,6 +72,13 @@ public class MasterJobRunner implements AtomJobScheduler {
 
   private JobOptions startingOpts;
 
+  /**
+   * Only used to drop and create indexes.
+   * 
+   * <p>
+   * MORE: **move to another module**
+   * </p>
+   */
   private ElasticsearchDao esDao;
 
   /**
@@ -78,9 +86,9 @@ public class MasterJobRunner implements AtomJobScheduler {
    */
   private NeutronRestServer restServer = new NeutronRestServer();
 
-  private NeutronScheduler neutronScheduler = new NeutronScheduler();
-
   private NeutronJobProgressHistory jobHistory = new NeutronJobProgressHistory();
+
+  private NeutronScheduler neutronScheduler = new NeutronScheduler(jobHistory);
 
   private MasterJobRunner() {
     // Default, no-op
@@ -133,25 +141,12 @@ public class MasterJobRunner implements AtomJobScheduler {
 
   @Managed(description = "Stop the scheduler")
   public void stopScheduler(boolean waitForJobsToComplete) throws NeutronException {
-    LOGGER.warn("STOP SCHEDULER! wait for jobs to complete: {}", waitForJobsToComplete);
-    try {
-      neutronScheduler.getScheduler().shutdown(waitForJobsToComplete);
-    } catch (SchedulerException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO STOP SCHEDULER! {}",
-          e.getMessage());
-    }
+    this.neutronScheduler.stopScheduler(waitForJobsToComplete);
   }
 
   @Managed(description = "Start the scheduler")
   public void startScheduler() throws NeutronException {
-    LOGGER.warn("START SCHEDULER!");
-    try {
-      neutronScheduler.getScheduler().start();
-    } catch (SchedulerException e) {
-      LOGGER.error("FAILED TO START SCHEDULER! {}", e.getMessage(), e);
-      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO START SCHEDULER! {}",
-          e.getMessage());
-    }
+    this.neutronScheduler.startScheduler();
   }
 
   protected void configureQuartz() throws SchedulerException {
@@ -283,17 +278,7 @@ public class MasterJobRunner implements AtomJobScheduler {
   @Override
   public <T extends BasePersonIndexerJob<?, ?>> void registerJob(final Class<T> klass,
       final JobOptions opts) throws NeutronException {
-    LOGGER.info("Register job: {}", klass.getName());
-    if (!testMode) {
-      try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
-        neutronScheduler.getOptionsRegistry().put(klass, job.getOpts());
-        getInstance().setEsDao(job.getEsDao());
-      } catch (Throwable e) { // NOSONAR
-        // Intentionally catch a Throwable, not an Exception or ClassNotFound or the like.
-        throw JobLogs.buildCheckedException(LOGGER, e, "JOB REGISTRATION FAILED!: {}",
-            e.getMessage());
-      }
-    }
+    this.neutronScheduler.registerJob(klass, opts);
   }
 
   /**
@@ -307,18 +292,7 @@ public class MasterJobRunner implements AtomJobScheduler {
   @SuppressWarnings("rawtypes")
   public BasePersonIndexerJob createJob(final Class<?> klass, String... args)
       throws NeutronException {
-    try {
-      LOGGER.info("Create registered job: {}", klass.getName());
-      final JobOptions opts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
-          : neutronScheduler.getOptionsRegistry().get(klass);
-      final BasePersonIndexerJob<?, ?> job =
-          (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
-      job.setOpts(opts);
-      return job;
-    } catch (Exception e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!: {}",
-          e.getMessage());
-    }
+    return this.neutronScheduler.createJob(klass, args);
   }
 
   /**
@@ -332,12 +306,7 @@ public class MasterJobRunner implements AtomJobScheduler {
   @SuppressWarnings("rawtypes")
   public BasePersonIndexerJob createJob(final String jobName, String... args)
       throws NeutronException {
-    try {
-      return createJob(Class.forName(jobName), args);
-    } catch (Exception e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!!: {}",
-          e.getMessage());
-    }
+    return this.neutronScheduler.createJob(jobName, args);
   }
 
   /*
@@ -349,15 +318,7 @@ public class MasterJobRunner implements AtomJobScheduler {
   @Override
   public JobProgressTrack runScheduledJob(final Class<?> klass, String... args)
       throws NeutronException {
-    try {
-      LOGGER.info("Run registered job: {}", klass.getName());
-      final BasePersonIndexerJob<?, ?> job = createJob(klass, args);
-      job.run();
-      return job.getTrack();
-    } catch (Exception e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "ON-DEMAND JOB RUN FAILED!: {}",
-          e.getMessage());
-    }
+    return this.neutronScheduler.runScheduledJob(klass, args);
   }
 
   /*
@@ -369,13 +330,7 @@ public class MasterJobRunner implements AtomJobScheduler {
   @Override
   public JobProgressTrack runScheduledJob(final String jobName, String... args)
       throws NeutronException {
-    try {
-      final Class<?> klass = Class.forName(jobName);
-      return runScheduledJob(klass, args);
-    } catch (Exception e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "ON-DEMAND JOB RUN FAILED!: {}",
-          e.getMessage());
-    }
+    return this.runScheduledJob(jobName, args);
   }
 
   /**
@@ -480,10 +435,7 @@ public class MasterJobRunner implements AtomJobScheduler {
    */
   @Override
   public NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched) {
-    final NeutronJobMgtFacade nj =
-        new NeutronJobMgtFacade(neutronScheduler.getScheduler(), sched, jobHistory);
-    neutronScheduler.getScheduleRegistry().put(klazz, nj);
-    return nj;
+    return this.scheduleJob(klazz, sched);
   }
 
   protected static void startContinuousMode(String[] args) {
