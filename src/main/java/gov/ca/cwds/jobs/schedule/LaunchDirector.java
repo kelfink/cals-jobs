@@ -276,7 +276,7 @@ public class LaunchDirector implements AtomJobScheduler {
       } catch (SchedulerException e2) {
         LOGGER.warn("FAILED TO STOP SCHEDULER! {}", e2.getMessage(), e2);
       }
-      throw JobLogs.buildCheckedException(LOGGER, e, "INIT ERROR: {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "INIT ERROR: {}", e.getMessage());
     }
   }
 

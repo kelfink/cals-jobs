@@ -43,17 +43,7 @@ public class RocketFactory implements AtomRocketFactory {
   public BasePersonIndexerJob createJob(Class<?> klass, String... args) throws NeutronException {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
-      final JobOptions jobOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
-          : optionsRegistry.get(klass);
-
-      if (this.opts == null) { // HACK: **inject dependencies**
-        this.opts = jobOpts;
-      }
-
-      final BasePersonIndexerJob<?, ?> job =
-          (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
-      job.setOpts(jobOpts);
-      return job;
+      return (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!: {}", e.getMessage());
     }
