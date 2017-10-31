@@ -91,7 +91,6 @@ public class GsonMessageBodyHandlerTest {
   @Test
   public void writeTo_Args__Object__Class__Type__AnnotationArray__MediaType__MultivaluedMap__OutputStream()
       throws Exception {
-    // type = NeutronJobManagementBean.class.getTypeParameters();
     target.writeTo(object, type, genericType, annotations, mediaType, httpHeaders, entityStream);
   }
 
