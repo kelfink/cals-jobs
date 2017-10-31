@@ -44,7 +44,7 @@ import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.MasterJobRunner;
+import gov.ca.cwds.jobs.schedule.JobDirector;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -435,7 +435,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void isTestMode_Args__() throws Exception {
-    boolean actual = MasterJobRunner.isTestMode();
+    boolean actual = JobDirector.isTestMode();
     boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -443,7 +443,7 @@ public class BasePersonIndexerJobTest
   @Test
   public void setTestMode_Args__boolean() throws Exception {
     boolean testMode = false;
-    MasterJobRunner.setTestMode(testMode);
+    JobDirector.setTestMode(testMode);
   }
 
   @Test
@@ -777,7 +777,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void pullBucketRange_Args__String__String() throws Exception {
-    MasterJobRunner.setTestMode(true);
+    JobDirector.setTestMode(true);
 
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(q);

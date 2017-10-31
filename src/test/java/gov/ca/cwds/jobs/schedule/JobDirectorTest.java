@@ -17,9 +17,9 @@ import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 
-public class MasterJobRunnerTest extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
+public class JobDirectorTest extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
 
-  MasterJobRunner target;
+  JobDirector target;
 
   @Override
   @Before
@@ -30,10 +30,10 @@ public class MasterJobRunnerTest extends PersonJobTester<TestNormalizedEntity, T
     opts.setBaseDirectory("/var/lib/jenkins/");
     opts.setLastRunLoc(lastJobRunTimeFilename);
 
-    target = MasterJobRunner.getInstance();
+    target = JobDirector.getInstance();
     target.setStartingOpts(opts);
     target.setEsDao(esDao);
-    MasterJobRunner.setTestMode(true);
+    JobDirector.setTestMode(true);
 
     Scheduler scheduler = mock(Scheduler.class);
     target.setScheduler(scheduler);
@@ -41,7 +41,7 @@ public class MasterJobRunnerTest extends PersonJobTester<TestNormalizedEntity, T
 
   @Test
   public void type() throws Exception {
-    assertThat(MasterJobRunner.class, notNullValue());
+    assertThat(JobDirector.class, notNullValue());
   }
 
   @Test
@@ -176,14 +176,14 @@ public class MasterJobRunnerTest extends PersonJobTester<TestNormalizedEntity, T
 
   @Test
   public void isSchedulerMode_Args__() throws Exception {
-    boolean actual = MasterJobRunner.isSchedulerMode();
+    boolean actual = JobDirector.isSchedulerMode();
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void isTestMode_Args__() throws Exception {
-    boolean actual = MasterJobRunner.isTestMode();
+    boolean actual = JobDirector.isTestMode();
     boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -191,7 +191,7 @@ public class MasterJobRunnerTest extends PersonJobTester<TestNormalizedEntity, T
   @Test
   public void setTestMode_Args__boolean() throws Exception {
     boolean mode = false;
-    MasterJobRunner.setTestMode(mode);
+    JobDirector.setTestMode(mode);
   }
 
   // @Test
@@ -203,13 +203,13 @@ public class MasterJobRunnerTest extends PersonJobTester<TestNormalizedEntity, T
 
   @Test
   public void getInstance_Args__() throws Exception {
-    MasterJobRunner actual = MasterJobRunner.getInstance();
+    JobDirector actual = JobDirector.getInstance();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void isInitialMode_Args__() throws Exception {
-    boolean actual = MasterJobRunner.isInitialMode();
+    boolean actual = JobDirector.isInitialMode();
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }

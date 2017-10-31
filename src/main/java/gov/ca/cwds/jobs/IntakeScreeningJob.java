@@ -25,7 +25,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.schedule.MasterJobRunner;
+import gov.ca.cwds.jobs.schedule.JobDirector;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
@@ -164,7 +164,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    * @param args command line arguments
    */
   public static void main(String... args) {
-    MasterJobRunner.runStandalone(IntakeScreeningJob.class, args);
+    JobDirector.runStandalone(IntakeScreeningJob.class, args);
   }
 
 }

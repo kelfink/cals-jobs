@@ -43,6 +43,7 @@ import gov.ca.cwds.dao.ns.EsIntakeScreeningDao;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
+import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
@@ -74,7 +75,7 @@ import gov.ca.cwds.jobs.component.AtomJobScheduler;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.MasterJobRunner;
+import gov.ca.cwds.jobs.schedule.JobDirector;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.service.NeutronElasticValidator;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -94,14 +95,25 @@ public class JobsGuiceInjector extends AbstractModule {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobsGuiceInjector.class);
 
+  private static final String HIBERNATE_CONFIG_CMS = "jobs-cms-hibernate.cfg.xml";
+
+  private static final String HIBERNATE_CONFIG_NS = "jobs-ns-hibernate.cfg.xml";
+
   /**
-   * Guice Injector used for all Job instances during the life of this batch JVM.
+   * The <strong>singleton</strong> Guice Injector used for all Job instances during the life of
+   * this batch JVM.
    */
   private static Injector injector;
 
   private File esConfig;
+
   private String lastJobRunTimeFilename;
+
   private JobOptions opts;
+
+  private String hibernateConfigCms = HIBERNATE_CONFIG_CMS;
+
+  private String hibernateConfigNs = HIBERNATE_CONFIG_NS;
 
   /**
    * Default constructor.
@@ -146,8 +158,7 @@ public class JobsGuiceInjector extends AbstractModule {
         // Static injection.
         ElasticTransformer.setMapper(injector.getInstance(ObjectMapper.class));
       } catch (Exception e) {
-        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO BUILD INJECTOR! {}",
-            e.getMessage());
+        throw JobLogs.runtime(LOGGER, e, "FAILED TO BUILD INJECTOR! {}", e.getMessage());
       }
     }
 
@@ -170,7 +181,7 @@ public class JobsGuiceInjector extends AbstractModule {
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
-      throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
     }
   }
 
@@ -190,7 +201,7 @@ public class JobsGuiceInjector extends AbstractModule {
       ret.setOpts(opts);
       return ret;
     } catch (CreationException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
     }
   }
 
@@ -210,8 +221,7 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   /**
-   * Register all DB2 replication entity classes and PostgreSQL view entity classes with Hibernate.
-   * Note that method addPackage() is not working as hoped.
+   * Register DB2 and PostgreSQL replication entity classes with Hibernate.
    * 
    * <p>
    * Parent class:
@@ -223,29 +233,12 @@ public class JobsGuiceInjector extends AbstractModule {
   @Override
   protected void configure() {
     // DB2 session factory:
-    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class).toInstance(new Configuration()
-        .configure("jobs-cms-hibernate.cfg.xml").addAnnotatedClass(BatchBucket.class)
-        .addAnnotatedClass(EsClientAddress.class).addAnnotatedClass(EsRelationship.class)
-        .addAnnotatedClass(EsPersonReferral.class).addAnnotatedClass(EsChildPersonCase.class)
-        .addAnnotatedClass(EsParentPersonCase.class).addAnnotatedClass(ReplicatedAttorney.class)
-        .addAnnotatedClass(ReplicatedCollateralIndividual.class)
-        .addAnnotatedClass(ReplicatedEducationProviderContact.class)
-        .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
-        .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
-        .addAnnotatedClass(ReplicatedOtherClientName.class)
-        .addAnnotatedClass(ReplicatedReporter.class)
-        .addAnnotatedClass(ReplicatedServiceProvider.class)
-        .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
-        .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
-        .addAnnotatedClass(ReplicatedAddress.class).addAnnotatedClass(SystemCode.class)
-        .addAnnotatedClass(EsSafetyAlert.class).addAnnotatedClass(SystemMeta.class)
-        .buildSessionFactory());
+    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
+        .toInstance(makeCmsSessionFactory());
 
     // PostgreSQL session factory:
     bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)
-        .toInstance(new Configuration().configure("jobs-ns-hibernate.cfg.xml")
-            .addAnnotatedClass(EsIntakeScreening.class).addAnnotatedClass(IntakeScreening.class)
-            .buildSessionFactory());
+        .toInstance(makeNsSessionFactory());
 
     // DB2 replicated tables:
     bind(ReplicatedRelationshipsDao.class);
@@ -267,27 +260,52 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(EsIntakeScreeningDao.class);
 
     // Instantiate as a singleton, else Guice creates a new instance each time.
-    bind(ObjectMapper.class).asEagerSingleton();
+    bind(ObjectMapper.class).toInstance(ElasticSearchPerson.MAPPER);
 
-    // Required for annotation injection.
+    // Inject annotations.
     bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
 
     // CMS system codes.
     bind(SystemCodeDao.class);
     bind(SystemMetaDao.class);
 
-    // Only one instance of ES DAO.
-    bind(ElasticsearchDao.class).asEagerSingleton();
+    bind(ElasticsearchDao.class).asEagerSingleton(); // one ES DAO.
+
+    bind(NeutronJobProgressHistory.class).asEagerSingleton(); // one job history
 
     bind(NeutronElasticValidator.class);
+  }
 
-    bind(NeutronJobProgressHistory.class).asEagerSingleton();
+  protected SessionFactory makeCmsSessionFactory() {
+    return new Configuration().configure(getHibernateConfigCms())
+        .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsClientAddress.class)
+        .addAnnotatedClass(EsRelationship.class).addAnnotatedClass(EsPersonReferral.class)
+        .addAnnotatedClass(EsChildPersonCase.class).addAnnotatedClass(EsParentPersonCase.class)
+        .addAnnotatedClass(ReplicatedAttorney.class)
+        .addAnnotatedClass(ReplicatedCollateralIndividual.class)
+        .addAnnotatedClass(ReplicatedEducationProviderContact.class)
+        .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
+        .addAnnotatedClass(ReplicatedOtherChildInPlacemtHome.class)
+        .addAnnotatedClass(ReplicatedOtherClientName.class)
+        .addAnnotatedClass(ReplicatedReporter.class)
+        .addAnnotatedClass(ReplicatedServiceProvider.class)
+        .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
+        .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
+        .addAnnotatedClass(ReplicatedAddress.class).addAnnotatedClass(SystemCode.class)
+        .addAnnotatedClass(EsSafetyAlert.class).addAnnotatedClass(SystemMeta.class)
+        .buildSessionFactory();
+  }
+
+  protected SessionFactory makeNsSessionFactory() {
+    return new Configuration().configure(getHibernateConfigNs())
+        .addAnnotatedClass(EsIntakeScreening.class).addAnnotatedClass(IntakeScreening.class)
+        .buildSessionFactory();
   }
 
   @Provides
   @Singleton
   public AtomJobScheduler provideJobRunner() {
-    return MasterJobRunner.getInstance();
+    return JobDirector.getInstance();
   }
 
   @Provides
@@ -351,7 +369,7 @@ public class JobsGuiceInjector extends AbstractModule {
         if (client != null) {
           client.close();
         }
-        throw JobLogs.buildCheckedException(LOGGER, e,
+        throw JobLogs.checked(LOGGER, e,
             "Error initializing Elasticsearch client: " + e.getMessage(), e);
       }
     }
@@ -373,8 +391,7 @@ public class JobsGuiceInjector extends AbstractModule {
         ret = new ObjectMapper(new YAMLFactory()).readValue(esConfig,
             ElasticsearchConfiguration.class);
       } catch (Exception e) {
-        throw JobLogs.buildCheckedException(LOGGER, e, "ERROR READING ES CONFIG! {}",
-            e.getMessage(), e);
+        throw JobLogs.checked(LOGGER, e, "ERROR READING ES CONFIG! {}", e.getMessage(), e);
       }
     }
     return ret;
@@ -393,6 +410,22 @@ public class JobsGuiceInjector extends AbstractModule {
   @SuppressWarnings("javadoc")
   public static Injector getInjector() {
     return injector;
+  }
+
+  public String getHibernateConfigCms() {
+    return hibernateConfigCms;
+  }
+
+  public void setHibernateConfigCms(String hibernateConfigCms) {
+    this.hibernateConfigCms = hibernateConfigCms;
+  }
+
+  public String getHibernateConfigNs() {
+    return hibernateConfigNs;
+  }
+
+  public void setHibernateConfigNs(String hibernateConfigNs) {
+    this.hibernateConfigNs = hibernateConfigNs;
   }
 
 }

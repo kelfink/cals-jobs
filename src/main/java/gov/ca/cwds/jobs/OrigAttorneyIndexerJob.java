@@ -10,7 +10,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.schedule.MasterJobRunner;
+import gov.ca.cwds.jobs.schedule.JobDirector;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 
 /**
@@ -50,7 +50,7 @@ public class OrigAttorneyIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    MasterJobRunner.runStandalone(OrigAttorneyIndexerJob.class, args);
+    JobDirector.runStandalone(OrigAttorneyIndexerJob.class, args);
   }
 
 }

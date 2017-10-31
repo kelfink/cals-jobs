@@ -45,14 +45,14 @@ import gov.ca.cwds.jobs.util.JobLogs;
  * 
  * @author CWDS API Team
  */
-public class MasterJobRunner implements AtomJobScheduler {
+public class JobDirector implements AtomJobScheduler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MasterJobRunner.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(JobDirector.class);
 
   /**
    * Singleton instance. One director to rule them all.
    */
-  private static final MasterJobRunner instance = new MasterJobRunner();
+  private static final JobDirector instance = new JobDirector();
 
   /**
    * For unit tests where resources either may not close properly or where expensive resources
@@ -70,13 +70,16 @@ public class MasterJobRunner implements AtomJobScheduler {
    */
   private static boolean initialMode = false;
 
+  /**
+   * HACK: inject dependencies.
+   */
   private JobOptions startingOpts;
 
   /**
    * Only used to drop and create indexes.
    * 
    * <p>
-   * MORE: **move to another module**
+   * HACK: **move to another module**
    * </p>
    */
   private ElasticsearchDao esDao;
@@ -90,7 +93,7 @@ public class MasterJobRunner implements AtomJobScheduler {
 
   private NeutronScheduler neutronScheduler = new NeutronScheduler(jobHistory);
 
-  private MasterJobRunner() {
+  private JobDirector() {
     // Default, no-op
   }
 
@@ -124,6 +127,8 @@ public class MasterJobRunner implements AtomJobScheduler {
       resetTimestamps(true, 0);
     } catch (IOException e) {
       LOGGER.error("FAILED TO RESET TIMESTAMPS! {}", e.getMessage(), e);
+
+      // Return String output to JMX or other interface.
       final StringWriter sw = new StringWriter();
       final PrintWriter w = new PrintWriter(sw);
       e.printStackTrace(w);
@@ -377,7 +382,7 @@ public class MasterJobRunner implements AtomJobScheduler {
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
     int exitCode = 0;
-    MasterJobRunner.continuousMode = false;
+    JobDirector.continuousMode = false;
 
     try (final T job = JobsGuiceInjector.newJob(klass, args)) {
       job.run();
@@ -443,8 +448,8 @@ public class MasterJobRunner implements AtomJobScheduler {
     try {
       instance.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
           : instance.startingOpts;
-      MasterJobRunner.continuousMode = true;
-      MasterJobRunner.initialMode = !instance.startingOpts.isLastRunMode();
+      JobDirector.continuousMode = true;
+      JobDirector.initialMode = !instance.startingOpts.isLastRunMode();
       instance.initScheduler();
 
       LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
@@ -508,7 +513,7 @@ public class MasterJobRunner implements AtomJobScheduler {
    * 
    * @return evil single instance
    */
-  public static MasterJobRunner getInstance() {
+  public static JobDirector getInstance() {
     return instance;
   }
 

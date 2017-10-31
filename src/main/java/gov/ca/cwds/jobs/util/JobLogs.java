@@ -115,6 +115,16 @@ public final class JobLogs {
     return new NeutronException(msg, e);
   }
 
+  public static NeutronException checked(final Logger log, Throwable e, String pattern,
+      Object... args) {
+    return buildCheckedException(LOGGER, e, pattern, args);
+  }
+
+  public static JobsException runtime(final Logger log, Throwable e, String pattern,
+      Object... args) {
+    return buildRuntimeException(LOGGER, e, pattern, args);
+  }
+
   /**
    * Format message and return a runtime {@link JobsException}.
    * 
