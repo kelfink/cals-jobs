@@ -11,7 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
@@ -45,14 +44,14 @@ import gov.ca.cwds.jobs.util.JobLogs;
  * 
  * @author CWDS API Team
  */
-public class JobRunner {
+public class MasterJobRunner implements AtomJobScheduler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MasterJobRunner.class);
 
   /**
    * Singleton instance. One scheduler to rule them all.
    */
-  private static final JobRunner instance = new JobRunner();
+  private static final MasterJobRunner instance = new MasterJobRunner();
 
   /**
    * For unit tests where resources either may not close properly or where expensive resources
@@ -81,11 +80,9 @@ public class JobRunner {
 
   private NeutronScheduler neutronScheduler = new NeutronScheduler();
 
-  private final Map<TriggerKey, NeutronInterruptableJob> executingJobs = new ConcurrentHashMap<>();
-
   private NeutronJobProgressHistory jobHistory = new NeutronJobProgressHistory();
 
-  private JobRunner() {
+  private MasterJobRunner() {
     // Default, no-op
   }
 
@@ -277,14 +274,13 @@ public class JobRunner {
     }
   }
 
-  /**
-   * Register a continuously running job.
+  /*
+   * (non-Javadoc)
    * 
-   * @param klass batch job class
-   * @param opts command line arguments
-   * @param <T> Person persistence type
-   * @throws NeutronException unexpected runtime error
+   * @see gov.ca.cwds.jobs.schedule.AtomJobScheduler#registerJob(java.lang.Class,
+   * gov.ca.cwds.jobs.config.JobOptions)
    */
+  @Override
   public <T extends BasePersonIndexerJob<?, ?>> void registerJob(final Class<T> klass,
       final JobOptions opts) throws NeutronException {
     LOGGER.info("Register job: {}", klass.getName());
@@ -344,14 +340,13 @@ public class JobRunner {
     }
   }
 
-  /**
-   * Run a registered job.
+  /*
+   * (non-Javadoc)
    * 
-   * @param klass batch job class
-   * @param args command line arguments
-   * @return job progress
-   * @throws NeutronException unexpected runtime error
+   * @see gov.ca.cwds.jobs.schedule.AtomJobScheduler#runScheduledJob(java.lang.Class,
+   * java.lang.String)
    */
+  @Override
   public JobProgressTrack runScheduledJob(final Class<?> klass, String... args)
       throws NeutronException {
     try {
@@ -365,14 +360,13 @@ public class JobRunner {
     }
   }
 
-  /**
-   * Run a registered job.
+  /*
+   * (non-Javadoc)
    * 
-   * @param jobName batch job class
-   * @param args command line arguments
-   * @return job progress
-   * @throws NeutronException unexpected runtime error
+   * @see gov.ca.cwds.jobs.schedule.AtomJobScheduler#runScheduledJob(java.lang.String,
+   * java.lang.String)
    */
+  @Override
   public JobProgressTrack runScheduledJob(final String jobName, String... args)
       throws NeutronException {
     try {
@@ -428,7 +422,7 @@ public class JobRunner {
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
     int exitCode = 0;
-    JobRunner.continuousMode = false;
+    MasterJobRunner.continuousMode = false;
 
     try (final T job = JobsGuiceInjector.newJob(klass, args)) {
       job.run();
@@ -468,20 +462,6 @@ public class JobRunner {
     this.startingOpts = startingOpts;
   }
 
-  public void addExecutingJob(final TriggerKey key, NeutronInterruptableJob job) {
-    executingJobs.put(key, job);
-  }
-
-  public void removeExecutingJob(final TriggerKey key) {
-    if (executingJobs.containsKey(key)) {
-      executingJobs.remove(key);
-    }
-  }
-
-  public Map<TriggerKey, NeutronInterruptableJob> getExecutingJobs() {
-    return executingJobs;
-  }
-
   public boolean isJobVetoed(String className) throws NeutronException {
     Class<?> klazz = null;
     try {
@@ -492,6 +472,13 @@ public class JobRunner {
     return neutronScheduler.getScheduleRegistry().get(klazz).isVetoExecution();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see gov.ca.cwds.jobs.schedule.AtomJobScheduler#scheduleJob(java.lang.Class,
+   * gov.ca.cwds.jobs.schedule.NeutronDefaultJobSchedule)
+   */
+  @Override
   public NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched) {
     final NeutronJobMgtFacade nj =
         new NeutronJobMgtFacade(neutronScheduler.getScheduler(), sched, jobHistory);
@@ -504,8 +491,8 @@ public class JobRunner {
     try {
       instance.startingOpts = args != null && args.length > 1 ? JobOptions.parseCommandLine(args)
           : instance.startingOpts;
-      JobRunner.continuousMode = true;
-      JobRunner.initialMode = !instance.startingOpts.isLastRunMode();
+      MasterJobRunner.continuousMode = true;
+      MasterJobRunner.initialMode = !instance.startingOpts.isLastRunMode();
       instance.initScheduler();
 
       LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
@@ -539,12 +526,37 @@ public class JobRunner {
     this.neutronScheduler = neutronScheduler;
   }
 
+  public Scheduler getScheduler() {
+    return neutronScheduler.getScheduler();
+  }
+
+  public Map<Class<?>, JobOptions> getOptionsRegistry() {
+    return neutronScheduler.getOptionsRegistry();
+  }
+
+  public Map<Class<?>, NeutronJobMgtFacade> getScheduleRegistry() {
+    return neutronScheduler.getScheduleRegistry();
+  }
+
+  @Override
+  public void addExecutingJob(TriggerKey key, NeutronInterruptableJob job) {
+    neutronScheduler.addExecutingJob(key, job);
+  }
+
+  public void removeExecutingJob(TriggerKey key) {
+    neutronScheduler.removeExecutingJob(key);
+  }
+
+  public Map<TriggerKey, NeutronInterruptableJob> getExecutingJobs() {
+    return neutronScheduler.getExecutingJobs();
+  }
+
   /**
    * One scheduler to rule them all. And in the multi-threading ... bind them? :-)
    * 
    * @return evil single instance
    */
-  public static JobRunner getInstance() {
+  public static MasterJobRunner getInstance() {
     return instance;
   }
 

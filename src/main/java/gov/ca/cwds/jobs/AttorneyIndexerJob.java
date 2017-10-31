@@ -1,12 +1,12 @@
 package gov.ca.cwds.jobs;
 
-import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.MasterJobRunner;
 
 /**
  * Original Attorney job now in class {@link OrigAttorneyIndexerJob}.
  * 
  * <p>
- * This job is a temporary facade to test {@link JobRunner}, until DevOps adds a new job.
+ * This job is a temporary facade to test {@link MasterJobRunner}, until DevOps adds a new job.
  * </p>
  * 
  * @author CWDS API Team
@@ -23,7 +23,7 @@ public class AttorneyIndexerJob {
    * @param args command line arguments
    */
   public static void main(String... args) {
-    JobRunner.main(args);
+    MasterJobRunner.main(args);
   }
 
 }

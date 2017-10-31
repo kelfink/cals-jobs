@@ -45,7 +45,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.component.JobProgressTrack;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
-import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.MasterJobRunner;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
@@ -61,7 +61,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
   @BeforeClass
   public static void setupClass() {
-    JobRunner.setTestMode(true);
+    MasterJobRunner.setTestMode(true);
     SimpleTestSystemCodeCache.init();
     ElasticTransformer.setMapper(MAPPER);
   }

@@ -35,7 +35,7 @@ import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.component.AtomValidateDocument;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.MasterJobRunner;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
@@ -320,7 +320,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
    * @param args command line arguments
    */
   public static void main(String... args) {
-    JobRunner.runStandalone(ClientIndexerJob.class, args);
+    MasterJobRunner.runStandalone(ClientIndexerJob.class, args);
   }
 
 }

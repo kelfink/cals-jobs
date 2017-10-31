@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.MasterJobRunner;
 import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
 import gov.ca.cwds.jobs.util.JobLogs;
 
@@ -27,7 +27,7 @@ public class NeutronTriggerListener implements TriggerListener {
   public void triggerFired(Trigger trigger, JobExecutionContext context) {
     final TriggerKey key = trigger.getKey();
     LOGGER.debug("trigger fired: key: {}", key);
-    JobRunner.getInstance().getExecutingJobs().put(key,
+    MasterJobRunner.getInstance().getExecutingJobs().put(key,
         (NeutronInterruptableJob) context.getJobInstance());
   }
 
@@ -41,7 +41,7 @@ public class NeutronTriggerListener implements TriggerListener {
     boolean answer = true;
 
     try {
-      answer = JobRunner.getInstance().isJobVetoed(className);
+      answer = MasterJobRunner.getInstance().isJobVetoed(className);
     } catch (NeutronException e) {
       throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINDING JOB FACADE! job class: {}",
           className, e);
@@ -55,7 +55,7 @@ public class NeutronTriggerListener implements TriggerListener {
   public void triggerMisfired(Trigger trigger) {
     final TriggerKey key = trigger.getKey();
     LOGGER.warn("TRIGGER MISFIRED! key: {}", key);
-    JobRunner.getInstance().removeExecutingJob(key);
+    MasterJobRunner.getInstance().removeExecutingJob(key);
   }
 
   @Override
@@ -63,7 +63,7 @@ public class NeutronTriggerListener implements TriggerListener {
       CompletedExecutionInstruction triggerInstructionCode) {
     final TriggerKey key = trigger.getKey();
     LOGGER.debug("trigger complete: key: {}", key);
-    JobRunner.getInstance().removeExecutingJob(key);
+    MasterJobRunner.getInstance().removeExecutingJob(key);
   }
 
 }

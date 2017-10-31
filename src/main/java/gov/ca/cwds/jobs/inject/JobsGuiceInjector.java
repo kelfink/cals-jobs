@@ -73,7 +73,8 @@ import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.AtomJobScheduler;
+import gov.ca.cwds.jobs.schedule.MasterJobRunner;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.service.NeutronElasticValidator;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -285,8 +286,8 @@ public class JobsGuiceInjector extends AbstractModule {
 
   @Provides
   @Singleton
-  public JobRunner provideJobRunner() {
-    return JobRunner.getInstance();
+  public AtomJobScheduler provideJobRunner() {
+    return MasterJobRunner.getInstance();
   }
 
   @Provides

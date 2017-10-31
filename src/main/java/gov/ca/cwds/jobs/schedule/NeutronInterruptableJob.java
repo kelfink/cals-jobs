@@ -17,7 +17,7 @@ import gov.ca.cwds.jobs.component.JobProgressTrack;
  * Wrapper for scheduled jobs.
  * 
  * @author CWDS API Team
- * @see JobRunner
+ * @see MasterJobRunner
  */
 @DisallowConcurrentExecution
 public class NeutronInterruptableJob implements InterruptableJob {
@@ -48,7 +48,7 @@ public class NeutronInterruptableJob implements InterruptableJob {
     final String jobName = context.getTrigger().getJobKey().getName();
 
     LOGGER.info("Execute {}", className);
-    try (final BasePersonIndexerJob job = JobRunner.getInstance().createJob(className,
+    try (final BasePersonIndexerJob job = MasterJobRunner.getInstance().createJob(className,
         StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"))) {
       track = new JobProgressTrack(); // fresh progress track
       track.setJobName(jobName);

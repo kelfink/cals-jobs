@@ -22,10 +22,6 @@ public interface AtomValidateDocument {
 
   ElasticsearchDao getEsDao();
 
-  default boolean validateDocument(final ElasticSearchPerson person) throws NeutronException {
-    return true;
-  }
-
   default void processDocumentHits(final SearchHits hits) throws NeutronException {
     int docId = 0;
     String json;
@@ -47,6 +43,10 @@ public interface AtomValidateDocument {
       throw JobLogs.buildCheckedException(getLogger(), e, "ERROR READING DOCUMENT! doc id: {}",
           docId);
     }
+  }
+
+  default boolean validateDocument(final ElasticSearchPerson person) throws NeutronException {
+    return true;
   }
 
   default void validateDocuments() throws NeutronException {

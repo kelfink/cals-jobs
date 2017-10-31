@@ -40,7 +40,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.JobRunner;
+import gov.ca.cwds.jobs.schedule.MasterJobRunner;
 import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
@@ -595,7 +595,7 @@ public class ReferralHistoryIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    JobRunner.runStandalone(ReferralHistoryIndexerJob.class, args);
+    MasterJobRunner.runStandalone(ReferralHistoryIndexerJob.class, args);
   }
 
 }
