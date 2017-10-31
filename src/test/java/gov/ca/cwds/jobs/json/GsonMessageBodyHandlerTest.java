@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -62,22 +63,17 @@ public class GsonMessageBodyHandlerTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
-  // public void
-  // readFrom_Args__Class__Type__AnnotationArray__MediaType__MultivaluedMap__InputStream()
-  // throws Exception {
-  // Class<Object> type = Object.class;
-  // Type genericType = mock(Type.class);
-  // Annotation[] annotations = new Annotation[] {};
-  // MediaType mediaType = mock(MediaType.class);
-  // MultivaluedMap<String, String> httpHeaders = mock(MultivaluedMap.class);
-  //
-  // InputStream entityStream = mock(InputStream.class);
-  // Object actual =
-  // target.readFrom(type, genericType, annotations, mediaType, httpHeaders, entityStream);
-  // Object expected = null;
-  // assertThat(actual, is(equalTo(expected)));
-  // }
+  @Test
+  public void readFrom_Args__Class__Type__AnnotationArray__MediaType__MultivaluedMap__InputStream()
+      throws Exception {
+    final InputStream in = this.getClass().getResourceAsStream("/fixtures/test.json");
+    final MultivaluedMap<String, String> httpHeaders = new MultivaluedHashMap<String, String>();
+
+    final Class<Object> type = Object.class;
+    final Object actual =
+        target.readFrom(type, genericType, annotations, mediaType, httpHeaders, in);
+    assertThat(actual, is(notNullValue()));
+  }
 
   @Test
   public void isWriteable_Args__Class__Type__AnnotationArray__MediaType() throws Exception {
