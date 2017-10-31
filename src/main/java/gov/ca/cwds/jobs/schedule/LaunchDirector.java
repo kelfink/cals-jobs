@@ -205,8 +205,10 @@ public class LaunchDirector implements AtomJobScheduler {
   }
 
   /**
-   * Expose job execution operations through JMX.
+   * Too many responsibilities: initialize Quartz, register jobs, expose operations to JMX, even
+   * initialize HTTP ...
    * 
+   * @param injector Guice injector. Soon to be removed.
    * @throws NeutronException on initialization error
    */
   @SuppressWarnings("unchecked")
@@ -232,7 +234,7 @@ public class LaunchDirector implements AtomJobScheduler {
 
         handleTimeFile(opts, fmt, now, sched);
 
-        if (!testMode) {
+        if (!testMode) { // HACK: **inject dependencies**
           registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
         }
 
