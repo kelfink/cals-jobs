@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 
 /**
  * Wrapper for scheduled jobs.
@@ -26,7 +26,7 @@ public class NeutronInterruptableJob implements InterruptableJob {
 
   private String className;
   private String cmdLine;
-  private volatile JobProgressTrack track;
+  private volatile FlightRecord track;
 
   /**
    * Constructor.
@@ -50,7 +50,7 @@ public class NeutronInterruptableJob implements InterruptableJob {
     LOGGER.info("Execute {}", className);
     try (final BasePersonIndexerJob job = LaunchDirector.getInstance().createJob(className,
         StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"))) {
-      track = new JobProgressTrack(); // fresh progress track
+      track = new FlightRecord(); // fresh progress track
       track.setJobName(jobName);
       job.setTrack(track);
 
@@ -87,11 +87,11 @@ public class NeutronInterruptableJob implements InterruptableJob {
     this.cmdLine = cmdLine;
   }
 
-  public JobProgressTrack getTrack() {
+  public FlightRecord getTrack() {
     return track;
   }
 
-  public void setTrack(JobProgressTrack track) {
+  public void setTrack(FlightRecord track) {
     this.track = track;
   }
 

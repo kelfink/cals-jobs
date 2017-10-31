@@ -16,7 +16,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
 
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 
 public class NeutronInterruptableJobTest {
 
@@ -89,14 +89,14 @@ public class NeutronInterruptableJobTest {
 
   @Test
   public void getTrack_Args__() throws Exception {
-    JobProgressTrack actual = target.getTrack();
-    JobProgressTrack expected = null;
+    FlightRecord actual = target.getTrack();
+    FlightRecord expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void setTrack_Args__JobProgressTrack() throws Exception {
-    JobProgressTrack track = mock(JobProgressTrack.class);
+    FlightRecord track = mock(FlightRecord.class);
     target.setTrack(track);
   }
 

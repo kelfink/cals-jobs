@@ -29,7 +29,7 @@ import com.google.inject.tools.jmx.Manager;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomJobScheduler;
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -89,7 +89,7 @@ public class LaunchDirector implements AtomJobScheduler {
    */
   private NeutronRestServer restServer = new NeutronRestServer();
 
-  private NeutronJobProgressHistory jobHistory = new NeutronJobProgressHistory();
+  private FlightRecorder jobHistory = new FlightRecorder();
 
   private NeutronScheduler neutronScheduler;
 
@@ -98,7 +98,7 @@ public class LaunchDirector implements AtomJobScheduler {
   }
 
   @Inject
-  public LaunchDirector(final NeutronJobProgressHistory jobHistory,
+  public LaunchDirector(final FlightRecorder jobHistory,
       final NeutronScheduler neutronScheduler) {
     this.jobHistory = jobHistory;
     this.neutronScheduler = neutronScheduler;
@@ -342,7 +342,7 @@ public class LaunchDirector implements AtomJobScheduler {
    * java.lang.String)
    */
   @Override
-  public JobProgressTrack runScheduledJob(final Class<?> klass, String... args)
+  public FlightRecord runScheduledJob(final Class<?> klass, String... args)
       throws NeutronException {
     return this.neutronScheduler.runScheduledJob(klass, args);
   }
@@ -354,7 +354,7 @@ public class LaunchDirector implements AtomJobScheduler {
    * java.lang.String)
    */
   @Override
-  public JobProgressTrack runScheduledJob(final String jobName, String... args)
+  public FlightRecord runScheduledJob(final String jobName, String... args)
       throws NeutronException {
     return this.runScheduledJob(jobName, args);
   }
@@ -464,11 +464,11 @@ public class LaunchDirector implements AtomJobScheduler {
     return this.scheduleJob(klazz, sched);
   }
 
-  public NeutronJobProgressHistory getJobHistory() {
+  public AtomFlightRecorder getJobHistory() {
     return jobHistory;
   }
 
-  public void setJobHistory(NeutronJobProgressHistory jobHistory) {
+  public void setJobHistory(FlightRecorder jobHistory) {
     this.jobHistory = jobHistory;
   }
 

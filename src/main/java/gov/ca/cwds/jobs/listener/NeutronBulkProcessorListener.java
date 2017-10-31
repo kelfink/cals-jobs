@@ -6,7 +6,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 
 public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
 
@@ -15,9 +15,9 @@ public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
   /**
    * Track job progress.
    */
-  protected final JobProgressTrack track;
+  protected final FlightRecord track;
 
-  public NeutronBulkProcessorListener(JobProgressTrack track) {
+  public NeutronBulkProcessorListener(FlightRecord track) {
     this.track = track;
   }
 

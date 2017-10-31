@@ -18,18 +18,18 @@ import org.junit.Test;
 import gov.ca.cwds.jobs.schedule.NeutronJobExecutionStatus;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
-public class JobProgressTrackTest {
+public class FlightRecordTest {
 
-  JobProgressTrack target;
+  FlightRecord target;
 
   @Before
   public void setup() throws Exception {
-    target = new JobProgressTrack();
+    target = new FlightRecord();
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(JobProgressTrack.class, notNullValue());
+    assertThat(FlightRecord.class, notNullValue());
   }
 
   @Test

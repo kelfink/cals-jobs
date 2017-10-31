@@ -16,10 +16,10 @@ public class AtomSharedTest {
 
   private static class TestAtomShared implements AtomShared {
 
-    private final JobProgressTrack track = new JobProgressTrack();
+    private final FlightRecord track = new FlightRecord();
 
     @Override
-    public JobProgressTrack getTrack() {
+    public FlightRecord getTrack() {
       return track;
     }
 

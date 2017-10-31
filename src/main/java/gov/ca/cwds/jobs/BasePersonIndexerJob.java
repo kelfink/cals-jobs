@@ -58,7 +58,7 @@ import gov.ca.cwds.jobs.component.AtomSecurity;
 import gov.ca.cwds.jobs.component.AtomTransform;
 import gov.ca.cwds.jobs.component.AtomValidateDocument;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronColumn;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
@@ -67,7 +67,7 @@ import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchDirector;
-import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
+import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
@@ -135,7 +135,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Track job progress.
    */
-  protected JobProgressTrack track = new JobProgressTrack();
+  protected FlightRecord track = new FlightRecord();
 
   /**
    * Queue of raw, de-normalized records waiting to be normalized.
@@ -169,7 +169,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Inject
   public BasePersonIndexerJob(final BaseDaoImpl<T> jobDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      SessionFactory sessionFactory, NeutronJobProgressHistory jobHistory) {
+      SessionFactory sessionFactory, FlightRecorder jobHistory) {
     super(lastJobRunTimeFilename, jobHistory);
     this.jobDao = jobDao;
     this.esDao = esDao;
@@ -951,7 +951,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   @Override
-  public JobProgressTrack getTrack() {
+  public FlightRecord getTrack() {
     return track;
   }
 
@@ -983,7 +983,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param track progress tracker
    */
-  public void setTrack(JobProgressTrack track) {
+  public void setTrack(FlightRecord track) {
     this.track = track;
   }
 

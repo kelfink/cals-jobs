@@ -17,12 +17,12 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.jobs.component.AtomJobControl;
 import gov.ca.cwds.jobs.component.AtomShared;
 import gov.ca.cwds.jobs.component.Rocket;
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
+import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
@@ -43,7 +43,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
 
   private String lastRunTimeFilename;
 
-  private final NeutronJobProgressHistory jobHistory;
+  private final FlightRecorder jobHistory;
 
   /**
    * Construct from last successful run date-time.
@@ -52,14 +52,14 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * @param jobHistory injected job history
    */
   public LastSuccessfulRunJob(String lastJobRunTimeFilename,
-      final NeutronJobProgressHistory jobHistory) {
+      final FlightRecorder jobHistory) {
     this.lastRunTimeFilename = lastJobRunTimeFilename;
     this.jobHistory = jobHistory;
   }
 
   @Override
   public final void run() {
-    final JobProgressTrack track = getTrack();
+    final FlightRecord track = getTrack();
     track.start();
 
     final Date lastRunTime = determineLastSuccessfulRunTime();

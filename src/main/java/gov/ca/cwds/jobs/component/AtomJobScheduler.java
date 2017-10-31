@@ -30,7 +30,7 @@ public interface AtomJobScheduler {
    * @return job progress
    * @throws NeutronException unexpected runtime error
    */
-  JobProgressTrack runScheduledJob(Class<?> klass, String... args) throws NeutronException;
+  FlightRecord runScheduledJob(Class<?> klass, String... args) throws NeutronException;
 
   /**
    * Run a registered job.
@@ -40,7 +40,7 @@ public interface AtomJobScheduler {
    * @return job progress
    * @throws NeutronException unexpected runtime error
    */
-  JobProgressTrack runScheduledJob(String jobName, String... args) throws NeutronException;
+  FlightRecord runScheduledJob(String jobName, String... args) throws NeutronException;
 
   void addExecutingJob(TriggerKey key, NeutronInterruptableJob job);
 

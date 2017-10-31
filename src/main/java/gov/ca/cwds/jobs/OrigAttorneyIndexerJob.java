@@ -11,7 +11,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.schedule.LaunchDirector;
-import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
+import gov.ca.cwds.jobs.schedule.FlightRecorder;
 
 /**
  * Job to load attorneys from CMS into ElasticSearch.
@@ -40,7 +40,7 @@ public class OrigAttorneyIndexerJob
   public OrigAttorneyIndexerJob(final ReplicatedAttorneyDao dao,
       final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-      NeutronJobProgressHistory jobHistory) {
+      FlightRecorder jobHistory) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
   }
 

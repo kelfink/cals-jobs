@@ -36,7 +36,7 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.test.SimpleAddress;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
@@ -143,7 +143,7 @@ public class ElasticTransformerTest extends PersonJobTester {
   @Test
   public void pushToBulkProcessor_Args__JobProgressTrack__BulkProcessor__DocWriteRequest()
       throws Exception {
-    JobProgressTrack track = mock(JobProgressTrack.class);
+    FlightRecord track = mock(FlightRecord.class);
     BulkProcessor bp = mock(BulkProcessor.class);
     DocWriteRequest<?> t = mock(DocWriteRequest.class);
     ElasticTransformer.pushToBulkProcessor(track, bp, t);

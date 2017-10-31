@@ -29,7 +29,7 @@ import gov.ca.cwds.jobs.util.JobDateUtil;
  * 
  * @author CWDS API Team
  */
-public class JobProgressTrack implements ApiMarker, AtomJobControl {
+public class FlightRecord implements ApiMarker, AtomJobControl {
 
   /**
    * Default serialization.
@@ -126,11 +126,11 @@ public class JobProgressTrack implements ApiMarker, AtomJobControl {
   // last change only
   private final Queue<String> affectedDocumentIds = new CircularFifoQueue<>();
 
-  public JobProgressTrack() {
+  public FlightRecord() {
     // default
   }
 
-  public JobProgressTrack(String jobName) {
+  public FlightRecord(String jobName) {
     this.jobName = jobName;
   }
 

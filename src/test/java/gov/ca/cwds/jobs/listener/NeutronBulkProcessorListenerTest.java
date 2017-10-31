@@ -9,16 +9,16 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 
 public class NeutronBulkProcessorListenerTest {
 
-  JobProgressTrack track;
+  FlightRecord track;
   NeutronBulkProcessorListener target;
 
   @Before
   public void setup() throws Exception {
-    track = new JobProgressTrack();
+    track = new FlightRecord();
     target = new NeutronBulkProcessorListener(track);
   }
 

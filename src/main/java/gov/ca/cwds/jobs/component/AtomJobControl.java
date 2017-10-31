@@ -6,7 +6,7 @@ import gov.ca.cwds.data.std.ApiMarker;
  * Job control interface.
  * 
  * @author CWDS API Team
- * @see JobProgressTrack
+ * @see FlightRecord
  */
 public interface AtomJobControl extends ApiMarker {
 

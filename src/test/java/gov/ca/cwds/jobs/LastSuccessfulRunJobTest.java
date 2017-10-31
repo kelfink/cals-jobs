@@ -17,11 +17,11 @@ import org.junit.Test;
 import org.slf4j.Logger;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
+import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
@@ -33,10 +33,10 @@ public class LastSuccessfulRunJobTest
 
     ElasticsearchDao esDao;
 
-    JobProgressTrack track = new JobProgressTrack();
+    FlightRecord track = new FlightRecord();
 
     public TestLastSuccessfulRunJob(String lastJobRunTimeFilename, ElasticsearchDao esDao,
-        NeutronJobProgressHistory jobHistory) {
+        FlightRecorder jobHistory) {
       super(lastJobRunTimeFilename, jobHistory);
     }
 
@@ -49,7 +49,7 @@ public class LastSuccessfulRunJobTest
     protected void finish() {}
 
     @Override
-    public JobProgressTrack getTrack() {
+    public FlightRecord getTrack() {
       return track;
     }
 
@@ -111,7 +111,7 @@ public class LastSuccessfulRunJobTest
 
   @Test
   public void writeLastSuccessfulRunTime_Args__Date() throws Exception {
-    JobProgressTrack track = mock(JobProgressTrack.class);
+    FlightRecord track = mock(FlightRecord.class);
     when(track.isFailed()).thenReturn(false);
     target.track = track;
 
@@ -123,7 +123,7 @@ public class LastSuccessfulRunJobTest
 
   @Test(expected = JobsException.class)
   public void writeLastSuccessfulRunTime_Args__bomb() throws Exception {
-    JobProgressTrack track = mock(JobProgressTrack.class);
+    FlightRecord track = mock(FlightRecord.class);
     when(track.isFailed()).thenReturn(false);
     target.track = track;
 

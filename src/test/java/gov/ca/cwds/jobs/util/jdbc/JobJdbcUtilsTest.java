@@ -28,7 +28,7 @@ import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.component.AtomHibernate;
 import gov.ca.cwds.jobs.config.JobOptions;
-import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
+import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -42,7 +42,7 @@ public class JobJdbcUtilsTest
 
     public TestAtomHibernate(final TestNormalizedEntityDao mainDao, final ElasticsearchDao esDao,
         @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-        @CmsSessionFactory SessionFactory sessionFactory, NeutronJobProgressHistory jobHistory) {
+        @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
       super(mainDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
     }
 

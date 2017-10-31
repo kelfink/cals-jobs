@@ -20,7 +20,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.schedule.LaunchDirector;
-import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
+import gov.ca.cwds.jobs.schedule.FlightRecorder;
 
 /**
  * Job to load case history from CMS into ElasticSearch for 'focus child' person.
@@ -49,7 +49,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
   public ChildCaseHistoryIndexerJob(final ReplicatedPersonCasesDao clientDao,
       final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-      NeutronJobProgressHistory jobHistory) {
+      FlightRecorder jobHistory) {
     super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
   }
 

@@ -42,11 +42,11 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.schedule.LaunchDirector;
-import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
+import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
@@ -80,8 +80,8 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   public File esConfileFile;
   public String lastJobRunTimeFilename;
   public java.util.Date lastRunTime = new java.util.Date();
-  public JobProgressTrack track;
-  public NeutronJobProgressHistory jobHistory;
+  public FlightRecord track;
+  public FlightRecorder jobHistory;
 
   public SessionFactory sessionFactory;
   public Session session;
@@ -185,8 +185,8 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     when(nq.setFetchSize(any(Integer.class))).thenReturn(nq);
     when(nq.setCacheable(any(Boolean.class))).thenReturn(nq);
 
-    track = new JobProgressTrack();
-    jobHistory = new NeutronJobProgressHistory();
+    track = new FlightRecord();
+    jobHistory = new FlightRecorder();
   }
 
   public Thread runKillThread(final BasePersonIndexerJob<T, M> target, long sleepMillis) {

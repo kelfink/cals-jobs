@@ -8,20 +8,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 
-public class NeutronJobProgressHistory implements ApiMarker {
+public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
 
-  private final Map<Class<?>, CircularFifoQueue<JobProgressTrack>> trackHistory =
+  private final Map<Class<?>, CircularFifoQueue<FlightRecord>> trackHistory =
       new ConcurrentHashMap<>();
 
-  private final Map<Class<?>, JobProgressTrack> lastTracks = new ConcurrentHashMap<>();
+  private final Map<Class<?>, FlightRecord> lastTracks = new ConcurrentHashMap<>();
 
-  public Map<Class<?>, CircularFifoQueue<JobProgressTrack>> getTrackHistory() {
+  public Map<Class<?>, CircularFifoQueue<FlightRecord>> getTrackHistory() {
     return trackHistory;
   }
 
-  public void addTrack(Class<?> klazz, JobProgressTrack track) {
+  public void addTrack(Class<?> klazz, FlightRecord track) {
     lastTracks.put(klazz, track);
 
     if (!trackHistory.containsKey(klazz)) {
@@ -30,11 +30,11 @@ public class NeutronJobProgressHistory implements ApiMarker {
     trackHistory.get(klazz).add(track);
   }
 
-  public JobProgressTrack getLastTrack(final Class<?> klazz) {
+  public FlightRecord getLastTrack(final Class<?> klazz) {
     return lastTracks.get(klazz);
   }
 
-  public List<JobProgressTrack> getHistory(final Class<?> klazz) {
+  public List<FlightRecord> getHistory(final Class<?> klazz) {
     return new ArrayList<>(trackHistory.get(klazz));
   }
 

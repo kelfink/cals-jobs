@@ -18,7 +18,7 @@ public interface AtomValidateDocument {
 
   Logger getLogger();
 
-  JobProgressTrack getTrack();
+  FlightRecord getTrack();
 
   ElasticsearchDao getEsDao();
 

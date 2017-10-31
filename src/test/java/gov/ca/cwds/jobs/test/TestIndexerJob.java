@@ -19,7 +19,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
+import gov.ca.cwds.jobs.schedule.FlightRecorder;
 
 public class TestIndexerJob
     extends BasePersonIndexerJob<TestNormalizedEntity, TestDenormalizedEntity>
@@ -33,7 +33,7 @@ public class TestIndexerJob
   @Inject
   public TestIndexerJob(final TestNormalizedEntityDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, NeutronJobProgressHistory jobHistory) {
+      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
   }
 

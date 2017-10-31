@@ -40,7 +40,7 @@ import org.junit.Test;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -672,7 +672,7 @@ public class BasePersonIndexerJobTest
     final BulkProcessor bp = mock(BulkProcessor.class);
     final TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
 
-    final JobProgressTrack track = mock(JobProgressTrack.class);
+    final FlightRecord track = mock(FlightRecord.class);
     when(track.trackBulkPrepared()).thenThrow(IOException.class);
 
     target.setTrack(track);

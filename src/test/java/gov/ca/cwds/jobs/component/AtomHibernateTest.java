@@ -24,7 +24,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
+import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -40,17 +40,17 @@ public class AtomHibernateTest
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestAtomHibernate.class);
 
-    private final JobProgressTrack track = new JobProgressTrack();
+    private final FlightRecord track = new FlightRecord();
 
     public TestAtomHibernate(final TestNormalizedEntityDao mainDao,
         final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
         final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-        NeutronJobProgressHistory jobHistory) {
+        FlightRecorder jobHistory) {
       super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
     }
 
     @Override
-    public JobProgressTrack getTrack() {
+    public FlightRecord getTrack() {
       return track;
     }
 

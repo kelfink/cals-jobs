@@ -19,20 +19,20 @@ import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.ClientIndexerJob;
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 
 public class NeutronJobMgtFacadeTest {
 
   Scheduler scheduler;
   NeutronDefaultJobSchedule sched;
-  NeutronJobProgressHistory history;
+  FlightRecorder history;
   NeutronJobMgtFacade target;
 
   @Before
   public void setup() throws Exception {
     scheduler = mock(Scheduler.class);
     sched = NeutronDefaultJobSchedule.CLIENT;
-    history = new NeutronJobProgressHistory();
+    history = new FlightRecorder();
     target = new NeutronJobMgtFacade(scheduler, sched, history);
   }
 
@@ -85,7 +85,7 @@ public class NeutronJobMgtFacadeTest {
     jdm.put("job_class", "TestNeutronJob");
     jdm.put("cmd_line", "--invalid");
 
-    final JobProgressTrack track = new JobProgressTrack();
+    final FlightRecord track = new FlightRecord();
     jdm.put("track", track);
 
     when(jd.getJobDataMap()).thenReturn(jdm);

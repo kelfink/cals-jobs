@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomJobScheduler;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
@@ -32,7 +32,7 @@ public class NeutronScheduler implements AtomJobScheduler {
    */
   private boolean testMode = false;
 
-  private final NeutronJobProgressHistory jobHistory;
+  private final FlightRecorder jobHistory;
 
   private final AtomRocketFactory rocketFactory;
 
@@ -48,10 +48,18 @@ public class NeutronScheduler implements AtomJobScheduler {
    */
   private final Map<Class<?>, NeutronJobMgtFacade> scheduleRegistry = new ConcurrentHashMap<>();
 
+  /**
+   * Possibly not necessary. Listeners and running jobs should handle this, but we still need a
+   * single place to track rockets in flight.
+   * 
+   * <p>
+   * OPTION: Quartz scheduler can track this too. Obsolete implementation?
+   * </p>
+   */
   private final Map<TriggerKey, NeutronInterruptableJob> executingJobs = new ConcurrentHashMap<>();
 
   @Inject
-  public NeutronScheduler(final NeutronJobProgressHistory jobHistory,
+  public NeutronScheduler(final FlightRecorder jobHistory,
       final AtomRocketFactory rocketFactory) {
     this.jobHistory = jobHistory;
     this.rocketFactory = rocketFactory;
@@ -101,7 +109,7 @@ public class NeutronScheduler implements AtomJobScheduler {
   }
 
   @Override
-  public JobProgressTrack runScheduledJob(Class<?> klass, String... args) throws NeutronException {
+  public FlightRecord runScheduledJob(Class<?> klass, String... args) throws NeutronException {
     try {
       LOGGER.info("Run registered job: {}", klass.getName());
       final BasePersonIndexerJob<?, ?> job = createJob(klass, args);
@@ -113,7 +121,7 @@ public class NeutronScheduler implements AtomJobScheduler {
   }
 
   @Override
-  public JobProgressTrack runScheduledJob(String jobName, String... args) throws NeutronException {
+  public FlightRecord runScheduledJob(String jobName, String... args) throws NeutronException {
     try {
       final Class<?> klass = Class.forName(jobName);
       return runScheduledJob(klass, args);

@@ -11,7 +11,7 @@ import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 
 /**
- * Logging utilities for Neutron job classes.
+ * Logging utilities for Neutron.
  * 
  * @author CWDS API Team
  */
@@ -123,20 +123,6 @@ public final class JobLogs {
   public static JobsException runtime(final Logger log, Throwable e, String pattern,
       Object... args) {
     return buildRuntimeException(LOGGER, e, pattern, args);
-  }
-
-  /**
-   * Format message and return a runtime {@link JobsException}.
-   * 
-   * @param log class logger
-   * @param e any Throwable
-   * @param pattern MessageFormat pattern
-   * @param args error message, excluding throwable message
-   * @throws NeutronException checked exception
-   */
-  public static void raiseCheckedException(final Logger log, Throwable e, String pattern,
-      Object... args) throws NeutronException {
-    throw buildCheckedException(LOGGER, e, pattern, args);
   }
 
   public static String stackToString(Exception e) {

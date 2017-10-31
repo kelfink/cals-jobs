@@ -20,7 +20,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
-import gov.ca.cwds.jobs.schedule.NeutronJobProgressHistory;
+import gov.ca.cwds.jobs.schedule.FlightRecorder;
 
 public class CaseHistoryIndexerJobTest extends PersonJobTester {
 
@@ -28,7 +28,7 @@ public class CaseHistoryIndexerJobTest extends PersonJobTester {
 
     public TestCaseHistoryIndexerJob(ReplicatedPersonCasesDao dao, ElasticsearchDao esDao,
         String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
-        NeutronJobProgressHistory jobHistory) {
+        FlightRecorder jobHistory) {
       super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
     }
 

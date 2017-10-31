@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weakref.jmx.Managed;
 
-import gov.ca.cwds.jobs.component.JobProgressTrack;
+import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.exception.NeutronException;
 
 public class NeutronJobMgtFacade implements Serializable {
@@ -31,7 +31,7 @@ public class NeutronJobMgtFacade implements Serializable {
 
   private final NeutronDefaultJobSchedule defaultSchedule;
 
-  private final NeutronJobProgressHistory jobHistory;
+  private final FlightRecorder jobHistory;
 
   private final String jobName;
   private final String triggerName;
@@ -41,7 +41,7 @@ public class NeutronJobMgtFacade implements Serializable {
   private volatile JobDetail jd;
 
   public NeutronJobMgtFacade(final Scheduler scheduler, NeutronDefaultJobSchedule sched,
-      final NeutronJobProgressHistory jobHistory) {
+      final FlightRecorder jobHistory) {
     this.scheduler = scheduler;
     this.defaultSchedule = sched;
     this.jobHistory = jobHistory;
@@ -49,14 +49,14 @@ public class NeutronJobMgtFacade implements Serializable {
     this.triggerName = defaultSchedule.getName();
     this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
 
-    jobHistory.addTrack(sched.getKlazz(), new JobProgressTrack());
+    jobHistory.addTrack(sched.getKlazz(), new FlightRecord());
   }
 
   @Managed(description = "Run job now, show results immediately")
   public String run(String cmdLine) throws NeutronException {
     try {
       LOGGER.info("RUN JOB: {}", defaultSchedule.getName());
-      final JobProgressTrack track = LaunchDirector.getInstance().runScheduledJob(
+      final FlightRecord track = LaunchDirector.getInstance().runScheduledJob(
           defaultSchedule.getKlazz(), StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       return track.toString();
     } catch (Exception e) {
