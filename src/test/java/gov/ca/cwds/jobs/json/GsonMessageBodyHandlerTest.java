@@ -5,7 +5,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
@@ -38,7 +37,7 @@ public class GsonMessageBodyHandlerTest {
 
     object = new NeutronJobManagementBean("client", "stop", "crap");
     type = NeutronJobManagementBean.class;
-    genericType = mock(Type.class);
+    genericType = NeutronJobManagementBean.class;
     annotations = new Annotation[] {};
     mediaType = MediaType.APPLICATION_JSON_TYPE;
     httpHeaders = new MultivaluedHashMap<String, Object>();
@@ -93,11 +92,11 @@ public class GsonMessageBodyHandlerTest {
     assertThat(actual, is(not(0L)));
   }
 
-  // @Test
-  // public void
-  // writeTo_Args__Object__Class__Type__AnnotationArray__MediaType__MultivaluedMap__OutputStream()
-  // throws Exception {
-  // target.writeTo(object, type, genericType, annotations, mediaType, httpHeaders, entityStream);
-  // }
+  @Test
+  public void writeTo_Args__Object__Class__Type__AnnotationArray__MediaType__MultivaluedMap__OutputStream()
+      throws Exception {
+    // type = NeutronJobManagementBean.class.getTypeParameters();
+    target.writeTo(object, type, genericType, annotations, mediaType, httpHeaders, entityStream);
+  }
 
 }
