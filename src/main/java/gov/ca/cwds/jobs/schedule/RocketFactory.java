@@ -44,7 +44,7 @@ public class RocketFactory implements AtomRocketFactory {
   protected JobOptions getRocketOptions(String jobName, Class<?> klazz) {
     if (optionsRegistry.containsKey(klazz)) {
       JobOptions opts = new JobOptions(baseOpts);
-      opts.setLastRunLoc(opts.getBaseDirectory() + File.separator + jobName);
+      opts.setLastRunLoc(opts.getBaseDirectory() + File.separator + jobName + ".time");
     }
 
     return optionsRegistry.get(klazz);
