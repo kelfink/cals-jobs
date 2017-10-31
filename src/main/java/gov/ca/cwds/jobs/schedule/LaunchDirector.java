@@ -285,12 +285,6 @@ public class LaunchDirector implements AtomJobScheduler {
     }
   }
 
-  @Override
-  public <T extends BasePersonIndexerJob<?, ?>> void registerJob(final Class<T> klass,
-      final JobOptions opts) throws NeutronException {
-    this.neutronScheduler.registerJob(klass, opts);
-  }
-
   /**
    * Build a registered job.
    * 

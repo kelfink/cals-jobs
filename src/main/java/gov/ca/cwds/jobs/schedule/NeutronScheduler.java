@@ -87,23 +87,9 @@ public class NeutronScheduler implements AtomJobScheduler {
   }
 
   @Override
-  public <T extends BasePersonIndexerJob<?, ?>> void registerJob(Class<T> klass, JobOptions opts)
-      throws NeutronException {
-    LOGGER.info("Register job: {}", klass.getName());
-    // if (!testMode) {
-    // try (final T job = JobsGuiceInjector.newJob(klass, opts)) {
-    // getOptionsRegistry().put(klass, job.getOpts());
-    // } catch (Throwable e) { // NOSONAR
-    // // Intentionally catch a Throwable, not an Exception or ClassNotFound or the like.
-    // throw JobLogs.checked(LOGGER, e, "JOB REGISTRATION FAILED!: {}", e.getMessage());
-    // }
-    // }
-  }
-
-  @Override
   public FlightRecord runScheduledJob(Class<?> klass, JobOptions opts) throws NeutronException {
     try {
-      LOGGER.info("Run registered job: {}", klass.getName());
+      LOGGER.info("Run scheduled job: {}", klass.getName());
       final BasePersonIndexerJob<?, ?> job = createJob(klass, opts);
       job.run();
       return job.getTrack();
