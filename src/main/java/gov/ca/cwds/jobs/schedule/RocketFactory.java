@@ -1,9 +1,11 @@
 package gov.ca.cwds.jobs.schedule;
 
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.quartz.Job;
+import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.spi.TriggerFiredBundle;
@@ -26,7 +28,7 @@ public class RocketFactory implements AtomRocketFactory {
 
   private final Injector injector;
 
-  private JobOptions opts;
+  private final JobOptions baseOpts;
 
   /**
    * Job options by job type.
@@ -36,7 +38,16 @@ public class RocketFactory implements AtomRocketFactory {
   @Inject
   public RocketFactory(final Injector injector, final JobOptions opts) {
     this.injector = injector;
-    this.opts = opts;
+    this.baseOpts = opts;
+  }
+
+  protected JobOptions getRocketOptions(String jobName, Class<?> klazz) {
+    if (optionsRegistry.containsKey(klazz)) {
+      JobOptions opts = new JobOptions(baseOpts);
+      opts.setLastRunLoc(opts.getBaseDirectory() + File.separator + jobName);
+    }
+
+    return optionsRegistry.get(klazz);
   }
 
   @Override
@@ -62,7 +73,12 @@ public class RocketFactory implements AtomRocketFactory {
 
   @Override
   public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler) throws SchedulerException {
-    return injector.getInstance(bundle.getJobDetail().getJobClass());
+    final JobDetail jd = bundle.getJobDetail();
+    final NeutronInterruptableJob job =
+        (NeutronInterruptableJob) injector.getInstance(bundle.getJobDetail().getJobClass());
+    job.setOpts(getRocketOptions(jd.getKey().getName(), jd.getJobClass()));
+
+    return job;
   }
 
 }

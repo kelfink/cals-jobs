@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs.schedule;
 
-import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.InterruptableJob;
 import org.quartz.JobDataMap;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
-import gov.ca.cwds.jobs.exception.NeutronException;
 
 /**
  * Wrapper for scheduled jobs.
@@ -28,6 +26,7 @@ public class NeutronInterruptableJob implements InterruptableJob {
 
   private String className;
   private String cmdLine;
+  private JobOptions opts;
   private volatile FlightRecord track;
 
   /**
@@ -45,16 +44,6 @@ public class NeutronInterruptableJob implements InterruptableJob {
   public void execute(JobExecutionContext context) throws JobExecutionException {
     final JobDataMap map = context.getJobDetail().getJobDataMap();
     className = map.getString("job_class");
-    cmdLine = map.getString("cmd_line");
-
-    JobOptions opts;
-    try {
-      opts =
-          JobOptions.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
-    } catch (NeutronException e) {
-      throw new JobExecutionException("UNABLE TO PARSE COMMAND LINE! " + className, e);
-    }
-
     final String jobName = context.getTrigger().getJobKey().getName();
 
     LOGGER.info("Execute {}", className);
@@ -102,6 +91,14 @@ public class NeutronInterruptableJob implements InterruptableJob {
 
   public void setTrack(FlightRecord track) {
     this.track = track;
+  }
+
+  public JobOptions getOpts() {
+    return opts;
+  }
+
+  public void setOpts(JobOptions opts) {
+    this.opts = opts;
   }
 
 }

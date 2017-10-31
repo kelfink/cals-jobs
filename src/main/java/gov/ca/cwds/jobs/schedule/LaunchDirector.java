@@ -71,6 +71,8 @@ public class LaunchDirector implements AtomJobScheduler {
    */
   private static boolean initialMode = false;
 
+  private LaunchCenterSettings settings = new LaunchCenterSettings();
+
   /**
    * HACK: inject dependencies.
    */
@@ -265,6 +267,7 @@ public class LaunchDirector implements AtomJobScheduler {
 
       // Start your engines ...
       if (!testMode) {
+        LOGGER.warn("start scheduler ...");
         neutronScheduler.getScheduler().start();
       }
 
