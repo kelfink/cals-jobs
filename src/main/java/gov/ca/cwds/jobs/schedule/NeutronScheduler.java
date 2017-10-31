@@ -59,8 +59,7 @@ public class NeutronScheduler implements AtomJobScheduler {
   private final Map<TriggerKey, NeutronInterruptableJob> executingJobs = new ConcurrentHashMap<>();
 
   @Inject
-  public NeutronScheduler(final FlightRecorder jobHistory,
-      final AtomRocketFactory rocketFactory) {
+  public NeutronScheduler(final FlightRecorder jobHistory, final AtomRocketFactory rocketFactory) {
     this.jobHistory = jobHistory;
     this.rocketFactory = rocketFactory;
   }

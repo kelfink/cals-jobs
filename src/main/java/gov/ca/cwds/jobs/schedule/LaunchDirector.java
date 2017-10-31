@@ -98,8 +98,7 @@ public class LaunchDirector implements AtomJobScheduler {
   }
 
   @Inject
-  public LaunchDirector(final FlightRecorder jobHistory,
-      final NeutronScheduler neutronScheduler) {
+  public LaunchDirector(final FlightRecorder jobHistory, final NeutronScheduler neutronScheduler) {
     this.jobHistory = jobHistory;
     this.neutronScheduler = neutronScheduler;
   }
@@ -110,10 +109,11 @@ public class LaunchDirector implements AtomJobScheduler {
       final JobOptions globalOpts = JobOptions.parseCommandLine(args);
       final Injector injector = JobsGuiceInjector.buildInjector(globalOpts);
       instance = injector.getInstance(LaunchDirector.class);
+      instance.startingOpts = globalOpts;
 
       LaunchDirector.continuousMode = true;
       LaunchDirector.initialMode = !instance.startingOpts.isLastRunMode();
-      instance.initScheduler();
+      instance.initScheduler(injector);
 
       LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
     } catch (Exception e) {
@@ -175,7 +175,7 @@ public class LaunchDirector implements AtomJobScheduler {
     this.neutronScheduler.startScheduler();
   }
 
-  protected void configureQuartz() throws SchedulerException {
+  protected void configureQuartz(final Injector injector) throws SchedulerException {
     // Quartz scheduling:
     final Properties p = new Properties();
     p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
@@ -184,7 +184,11 @@ public class LaunchDirector implements AtomJobScheduler {
     p.put("org.quartz.threadPool.threadCount",
         initialMode ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
     final StdSchedulerFactory factory = new StdSchedulerFactory(p);
-    neutronScheduler.setScheduler(factory.getScheduler());
+    final Scheduler scheduler = factory.getScheduler();
+
+    // FINISHME: inject scheduler and rocket factory.
+    scheduler.setJobFactory(injector.getInstance(RocketFactory.class));
+    neutronScheduler.setScheduler(scheduler);
 
     // Scheduler listeners.
     final ListenerManager listenerMgr = neutronScheduler.getScheduler().getListenerManager();
@@ -227,9 +231,9 @@ public class LaunchDirector implements AtomJobScheduler {
    * @throws NeutronException on initialization error
    */
   @SuppressWarnings("unchecked")
-  protected void initScheduler() throws NeutronException {
+  protected void initScheduler(final Injector injector) throws NeutronException {
     try {
-      configureQuartz();
+      configureQuartz(injector);
 
       // JMX:
       final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());

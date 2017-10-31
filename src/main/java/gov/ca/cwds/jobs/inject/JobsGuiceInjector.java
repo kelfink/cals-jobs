@@ -76,8 +76,8 @@ import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.service.NeutronElasticValidator;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -292,6 +292,33 @@ public class JobsGuiceInjector extends AbstractModule {
         .addAnnotatedClass(EsIntakeScreening.class).addAnnotatedClass(IntakeScreening.class)
         .buildSessionFactory();
   }
+
+  // @Provides
+  // @Singleton
+  // protected NeutronScheduler configureQuartz() throws SchedulerException {
+  // // Quartz scheduling:
+  // final Properties p = new Properties();
+  // p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
+  //
+  // // NOTE: make configurable.
+  // p.put("org.quartz.threadPool.threadCount",
+  // initialMode ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
+  // final StdSchedulerFactory factory = new StdSchedulerFactory(p);
+  // final Scheduler scheduler = factory.getScheduler();
+  //
+  // // FINISHME: inject scheduler and rocket factory.
+  // // scheduler.setJobFactory(injector.getInstance(RocketFactory.class));
+  // // neutronScheduler.setScheduler();
+  //
+  // // Scheduler listeners.
+  // final ListenerManager listenerMgr = neutronScheduler.getScheduler().getListenerManager();
+  // listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
+  // listenerMgr.addTriggerListener(new NeutronTriggerListener());
+  // listenerMgr.addJobListener(initialMode ? NeutronDefaultJobSchedule.fullLoadJobChainListener()
+  // : new NeutronJobListener());
+  //
+  // new NeutronScheduler(jobHistory, rocketFactory);
+  // }
 
   @Provides
   @Singleton
