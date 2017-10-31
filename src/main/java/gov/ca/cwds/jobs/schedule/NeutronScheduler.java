@@ -32,7 +32,7 @@ public class NeutronScheduler implements AtomJobScheduler {
    */
   private boolean testMode = false;
 
-  private final FlightRecorder jobHistory;
+  private final FlightRecorder flightRecorder;
 
   private final AtomRocketFactory rocketFactory;
 
@@ -60,7 +60,7 @@ public class NeutronScheduler implements AtomJobScheduler {
 
   @Inject
   public NeutronScheduler(final FlightRecorder jobHistory, final AtomRocketFactory rocketFactory) {
-    this.jobHistory = jobHistory;
+    this.flightRecorder = jobHistory;
     this.rocketFactory = rocketFactory;
   }
 
@@ -131,7 +131,8 @@ public class NeutronScheduler implements AtomJobScheduler {
 
   @Override
   public NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched) {
-    final NeutronJobMgtFacade nj = new NeutronJobMgtFacade(this.getScheduler(), sched, jobHistory);
+    final NeutronJobMgtFacade nj =
+        new NeutronJobMgtFacade(this.getScheduler(), sched, flightRecorder);
     this.getScheduleRegistry().put(klazz, nj);
     return nj;
   }
@@ -196,6 +197,17 @@ public class NeutronScheduler implements AtomJobScheduler {
 
   public Map<Class<?>, NeutronJobMgtFacade> getScheduleRegistry() {
     return scheduleRegistry;
+  }
+
+  @Override
+  public boolean isJobVetoed(String className) throws NeutronException {
+    Class<?> klazz = null;
+    try {
+      klazz = Class.forName(className);
+    } catch (Exception e) {
+      throw JobLogs.buildCheckedException(LOGGER, e, "UNKNOWN JOB CLASS! {}", className, e);
+    }
+    return this.getScheduleRegistry().get(klazz).isVetoExecution();
   }
 
 }

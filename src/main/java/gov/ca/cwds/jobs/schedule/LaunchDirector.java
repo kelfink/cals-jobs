@@ -175,7 +175,7 @@ public class LaunchDirector implements AtomJobScheduler {
     this.neutronScheduler.startScheduler();
   }
 
-  protected void configureQuartz(final Injector injector) throws SchedulerException {
+  protected NeutronScheduler configureQuartz(final Injector injector) throws SchedulerException {
     // Quartz scheduling:
     final Properties p = new Properties();
     p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
@@ -193,9 +193,10 @@ public class LaunchDirector implements AtomJobScheduler {
     // Scheduler listeners.
     final ListenerManager listenerMgr = neutronScheduler.getScheduler().getListenerManager();
     listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
-    listenerMgr.addTriggerListener(new NeutronTriggerListener());
+    listenerMgr.addTriggerListener(new NeutronTriggerListener(neutronScheduler));
     listenerMgr.addJobListener(initialMode ? NeutronDefaultJobSchedule.fullLoadJobChainListener()
         : new NeutronJobListener());
+    return neutronScheduler;
   }
 
   protected void handleTimeFile(final JobOptions opts, final DateFormat fmt, final Date now,
@@ -447,22 +448,11 @@ public class LaunchDirector implements AtomJobScheduler {
     this.startingOpts = startingOpts;
   }
 
+  @Override
   public boolean isJobVetoed(String className) throws NeutronException {
-    Class<?> klazz = null;
-    try {
-      klazz = Class.forName(className);
-    } catch (Exception e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "UNKNOWN JOB CLASS! {}", className, e);
-    }
-    return neutronScheduler.getScheduleRegistry().get(klazz).isVetoExecution();
+    return this.neutronScheduler.isJobVetoed(className);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gov.ca.cwds.jobs.schedule.AtomJobScheduler#scheduleJob(java.lang.Class,
-   * gov.ca.cwds.jobs.schedule.NeutronDefaultJobSchedule)
-   */
   @Override
   public NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched) {
     return this.scheduleJob(klazz, sched);

@@ -46,4 +46,6 @@ public interface AtomJobScheduler {
 
   NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched);
 
+  boolean isJobVetoed(String className) throws NeutronException;
+
 }

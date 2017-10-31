@@ -17,9 +17,9 @@ import org.quartz.Trigger;
 import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.TriggerKey;
 
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.NeutronDefaultJobSchedule;
 import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
+import gov.ca.cwds.jobs.schedule.NeutronScheduler;
 import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 
@@ -27,6 +27,7 @@ public class NeutronTriggerListenerTest {
 
   NeutronTriggerListener target;
   NeutronInterruptableJob job;
+  NeutronScheduler neutronScheduler;
 
   JobExecutionContext context_;
   JobDataMap jobDataMap;
@@ -37,13 +38,13 @@ public class NeutronTriggerListenerTest {
 
   @Before
   public void setup() throws Exception {
-    target = new NeutronTriggerListener();
     job = new NeutronInterruptableJob();
     context_ = mock(JobExecutionContext.class);
     triggerKey = new TriggerKey("fakejob", NeutronSchedulerConstants.GRP_LST_CHG);
     trigger = mock(Trigger.class);
     jobDataMap = mock(JobDataMap.class);
     jobDetail = mock(JobDetail.class);
+    neutronScheduler = mock(NeutronScheduler.class);
 
     when(context_.getJobInstance()).thenReturn(job);
     when(context_.getJobDetail()).thenReturn(jobDetail);
@@ -53,7 +54,9 @@ public class NeutronTriggerListenerTest {
     when(trigger.getKey()).thenReturn(triggerKey);
     when(jobDataMap.getString(any(String.class))).thenReturn(TestIndexerJob.class.getName());
 
-    LaunchDirector.getInstance().scheduleJob(TestIndexerJob.class, NeutronDefaultJobSchedule.CLIENT);
+    neutronScheduler.scheduleJob(TestIndexerJob.class, NeutronDefaultJobSchedule.CLIENT);
+
+    target = new NeutronTriggerListener(neutronScheduler);
   }
 
   @Test

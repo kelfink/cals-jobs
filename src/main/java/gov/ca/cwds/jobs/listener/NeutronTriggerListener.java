@@ -9,14 +9,23 @@ import org.quartz.TriggerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
+
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
+import gov.ca.cwds.jobs.schedule.NeutronScheduler;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 public class NeutronTriggerListener implements TriggerListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronTriggerListener.class);
+
+  private final NeutronScheduler neutronScheduler;
+
+  @Inject
+  public NeutronTriggerListener(final NeutronScheduler neutronScheduler) {
+    this.neutronScheduler = neutronScheduler;
+  }
 
   @Override
   public String getName() {
@@ -27,7 +36,7 @@ public class NeutronTriggerListener implements TriggerListener {
   public void triggerFired(Trigger trigger, JobExecutionContext context) {
     final TriggerKey key = trigger.getKey();
     LOGGER.debug("trigger fired: key: {}", key);
-    LaunchDirector.getInstance().getExecutingJobs().put(key,
+    neutronScheduler.getExecutingJobs().put(key,
         (NeutronInterruptableJob) context.getJobInstance());
   }
 
@@ -41,7 +50,7 @@ public class NeutronTriggerListener implements TriggerListener {
     boolean answer = true;
 
     try {
-      answer = LaunchDirector.getInstance().isJobVetoed(className);
+      answer = neutronScheduler.isJobVetoed(className);
     } catch (NeutronException e) {
       throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINDING JOB FACADE! job class: {}",
           className, e);
@@ -55,7 +64,7 @@ public class NeutronTriggerListener implements TriggerListener {
   public void triggerMisfired(Trigger trigger) {
     final TriggerKey key = trigger.getKey();
     LOGGER.warn("TRIGGER MISFIRED! key: {}", key);
-    LaunchDirector.getInstance().removeExecutingJob(key);
+    neutronScheduler.removeExecutingJob(key);
   }
 
   @Override
@@ -63,7 +72,7 @@ public class NeutronTriggerListener implements TriggerListener {
       CompletedExecutionInstruction triggerInstructionCode) {
     final TriggerKey key = trigger.getKey();
     LOGGER.debug("trigger complete: key: {}", key);
-    LaunchDirector.getInstance().removeExecutingJob(key);
+    neutronScheduler.removeExecutingJob(key);
   }
 
 }
