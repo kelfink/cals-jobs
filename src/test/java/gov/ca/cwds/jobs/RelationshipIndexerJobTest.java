@@ -35,8 +35,7 @@ public class RelationshipIndexerJobTest
     super.setup();
     dao = new ReplicatedRelationshipsDao(sessionFactory);
     target = new RelationshipIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
-        jobHistory);
-    target.setOpts(opts);
+        jobHistory, opts);
   }
 
   @Test

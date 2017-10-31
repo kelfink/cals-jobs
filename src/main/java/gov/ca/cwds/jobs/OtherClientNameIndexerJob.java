@@ -29,9 +29,10 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
@@ -47,9 +48,6 @@ public class OtherClientNameIndexerJob
     extends BasePersonIndexerJob<ReplicatedAkas, ReplicatedOtherClientName>
     implements JobResultSetAware<ReplicatedOtherClientName> {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OtherClientNameIndexerJob.class);
@@ -72,13 +70,15 @@ public class OtherClientNameIndexerJob
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    * @param jobHistory job history
+   * @param opts command line options
    */
   @Inject
   public OtherClientNameIndexerJob(final ReplicatedAkaDao dao,
       final ReplicatedOtherClientNameDao denormDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, null);
+      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
+      JobOptions opts) {
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
     this.denormDao = denormDao;
   }
 

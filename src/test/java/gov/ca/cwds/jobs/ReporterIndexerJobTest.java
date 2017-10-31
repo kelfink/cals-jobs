@@ -33,8 +33,7 @@ public class ReporterIndexerJobTest
     super.setup();
     dao = new ReplicatedReporterDao(sessionFactory);
     target = new ReporterIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
-        jobHistory);
-    target.setOpts(opts);
+        jobHistory, opts);
   }
 
   @Test

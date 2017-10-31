@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
+import gov.ca.cwds.jobs.rocket.referral.MinClientReferral;
 
 public class MinClientReferralTest
     extends PersonJobTester<ReplicatedPersonReferrals, EsPersonReferral> {

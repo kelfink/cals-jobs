@@ -38,10 +38,13 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
+import gov.ca.cwds.jobs.rocket.referral.MinClientReferral;
+import gov.ca.cwds.jobs.rocket.referral.ReferralJobRanges;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
@@ -169,12 +172,14 @@ public class ReferralHistoryIndexerJob
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    * @param jobHistory job history
+   * @param opts command line options
    */
   @Inject
   public ReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao, ElasticsearchDao esDao,
       @LastRunFile String lastJobRunTimeFilename, ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
-    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, null);
+      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
+      JobOptions opts) {
+    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
   }
 
   @Override
@@ -301,7 +306,7 @@ public class ReferralHistoryIndexerJob
       final Map<String, List<MinClientReferral>> mapReferralByClient,
       final Map<String, List<EsPersonReferral>> mapAllegationByReferral) {
     int ret = cntr;
-    final String referralId = rc1.referralId;
+    final String referralId = rc1.getReferralId();
     final EsPersonReferral ref = mapReferrals.get(referralId);
 
     // Sealed and sensitive may be excluded.

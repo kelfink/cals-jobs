@@ -20,6 +20,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 
 public class CaseHistoryIndexerJobTest extends PersonJobTester {
@@ -28,8 +29,8 @@ public class CaseHistoryIndexerJobTest extends PersonJobTester {
 
     public TestCaseHistoryIndexerJob(ReplicatedPersonCasesDao dao, ElasticsearchDao esDao,
         String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
-        FlightRecorder jobHistory) {
-      super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
+        FlightRecorder jobHistory, JobOptions opts) {
+      super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
     }
 
   }
@@ -43,8 +44,7 @@ public class CaseHistoryIndexerJobTest extends PersonJobTester {
     super.setup();
     dao = new ReplicatedPersonCasesDao(sessionFactory);
     target = new TestCaseHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory);
-    target.setOpts(opts);
+        sessionFactory, jobHistory, opts);
   }
 
   @Test

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.rocket.referral;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -15,6 +15,8 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
+import gov.ca.cwds.jobs.BasePersonIndexerJob;
+import gov.ca.cwds.jobs.PersonJobTester;
 
 public class ReferralJobRangesTest extends PersonJobTester {
 

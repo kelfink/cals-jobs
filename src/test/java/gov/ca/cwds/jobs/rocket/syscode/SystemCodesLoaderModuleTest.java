@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.rocket.syscode;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
+import gov.ca.cwds.jobs.rocket.syscode.SystemCodesLoaderModule;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 public class SystemCodesLoaderModuleTest {

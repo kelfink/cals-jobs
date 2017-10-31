@@ -34,8 +34,10 @@ import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.rocket.referral.MinClientReferral;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
@@ -50,8 +52,8 @@ public class ReferralHistoryIndexerJobTest
 
     public TestReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao,
         ElasticsearchDao esDao, String lastJobRunTimeFilename, ObjectMapper mapper,
-        SessionFactory sessionFactory, FlightRecorder jobHistory) {
-      super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
+        SessionFactory sessionFactory, FlightRecorder jobHistory, JobOptions opts) {
+      super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
     }
 
     public static DB2SystemMonitor monitorStart(final Connection con) {
@@ -90,8 +92,7 @@ public class ReferralHistoryIndexerJobTest
     super.setup();
     dao = new ReplicatedPersonReferralsDao(sessionFactory);
     target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory);
-    target.setOpts(JobOptionsTest.makeGeneric());
+        sessionFactory, jobHistory, JobOptionsTest.makeGeneric());
   }
 
   @Test

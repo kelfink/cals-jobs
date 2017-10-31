@@ -69,8 +69,7 @@ public class SafetyAlertIndexerJobTest extends PersonJobTester {
     SimpleTestSystemCodeCache.init();
 
     target = new SafetyAlertIndexerJob(clientDao, esDao, lastJobRunTimeFilename, mapper,
-        sessionFactory, jobHistory);
-    target.setOpts(opts);
+        sessionFactory, jobHistory, opts);
   }
 
   @Test

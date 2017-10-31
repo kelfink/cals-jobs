@@ -24,9 +24,10 @@ import gov.ca.cwds.data.persistence.ns.IntakeParticipant;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
@@ -60,13 +61,14 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    * @param jobHistory job history
+   * @param opts command line options
    */
   @Inject
   public IntakeScreeningJob(final IntakeParticipantDao normalizedDao,
       final EsIntakeScreeningDao viewDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @NsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
-    super(normalizedDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, null);
+      @NsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory, JobOptions opts) {
+    super(normalizedDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
     this.viewDao = viewDao;
   }
 

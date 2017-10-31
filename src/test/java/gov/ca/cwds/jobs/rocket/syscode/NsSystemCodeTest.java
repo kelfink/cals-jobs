@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.rocket.syscode;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -9,6 +9,8 @@ import static org.junit.Assert.assertThat;
 import java.io.Serializable;
 
 import org.junit.Test;
+
+import gov.ca.cwds.jobs.rocket.syscode.NsSystemCode;
 
 public class NsSystemCodeTest {
 

@@ -37,7 +37,7 @@ public class IntakeScreeningJobTest extends PersonJobTester<IntakeParticipant, E
     normalizedDao = new IntakeParticipantDao(sessionFactory);
     viewDao = new EsIntakeScreeningDao(sessionFactory);
     target = new IntakeScreeningJob(normalizedDao, viewDao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory);
+        sessionFactory, jobHistory, opts);
   }
 
   @Test

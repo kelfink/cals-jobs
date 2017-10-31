@@ -25,7 +25,7 @@ public class ChildCaseHistoryIndexerJobTest
     super.setup();
     dao = new ReplicatedPersonCasesDao(this.sessionFactory);
     target = new ChildCaseHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory);
+        sessionFactory, jobHistory, opts);
   }
 
   @Test

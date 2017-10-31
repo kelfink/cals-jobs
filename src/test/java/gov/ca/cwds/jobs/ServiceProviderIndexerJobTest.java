@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.config.JobOptionsTest;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 
@@ -29,8 +30,8 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
 
     public TestServiceProviderIndexerJob(ReplicatedServiceProviderDao dao, ElasticsearchDao esDao,
         String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
-        FlightRecorder jobHistory) {
-      super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
+        FlightRecorder jobHistory, JobOptions opts) {
+      super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
     }
 
   }
@@ -44,7 +45,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
     super.setup();
     dao = new ReplicatedServiceProviderDao(sessionFactory);
     target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory);
+        sessionFactory, jobHistory, opts);
     target.setOpts(JobOptionsTest.makeGeneric());
   }
 
@@ -61,7 +62,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   @Test
   public void testInstantiation() throws Exception {
     target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory);
+        sessionFactory, jobHistory, opts);
     assertThat(target, notNullValue());
   }
 
@@ -85,7 +86,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   @Test
   public void getPartitionRanges_Args__() throws Exception {
     target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory);
+        sessionFactory, jobHistory, opts);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }
@@ -94,7 +95,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
     target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory);
+        sessionFactory, jobHistory, opts);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }

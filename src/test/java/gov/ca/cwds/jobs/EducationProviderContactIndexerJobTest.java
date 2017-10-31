@@ -3,14 +3,10 @@ package gov.ca.cwds.jobs;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import gov.ca.cwds.dao.cms.ReplicatedEducationProviderContactDao;
-import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedEducationProviderContact;
 
 /**
@@ -29,7 +25,7 @@ public class EducationProviderContactIndexerJobTest extends
     super.setup();
     dao = new ReplicatedEducationProviderContactDao(this.sessionFactory);
     target = new EducationProviderContactIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory);
+        sessionFactory, jobHistory, opts);
   }
 
   @Test
@@ -39,14 +35,6 @@ public class EducationProviderContactIndexerJobTest extends
 
   @Test
   public void testInstantiation() throws Exception {
-    ReplicatedEducationProviderContactDao educationProviderContactDao = null;
-    ElasticsearchDao elasticsearchDao = null;
-    String lastJobRunTimeFilename = null;
-    ObjectMapper mapper = null;
-    SessionFactory sessionFactory = null;
-    EducationProviderContactIndexerJob target =
-        new EducationProviderContactIndexerJob(educationProviderContactDao, elasticsearchDao,
-            lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
     assertThat(target, notNullValue());
   }
 

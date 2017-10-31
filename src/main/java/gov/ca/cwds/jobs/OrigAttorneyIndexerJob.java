@@ -10,8 +10,9 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 
 /**
  * Job to load attorneys from CMS into ElasticSearch.
@@ -21,9 +22,6 @@ import gov.ca.cwds.jobs.schedule.FlightRecorder;
 public class OrigAttorneyIndexerJob
     extends BasePersonIndexerJob<ReplicatedAttorney, ReplicatedAttorney> {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -35,13 +33,14 @@ public class OrigAttorneyIndexerJob
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    * @param jobHistory job history
+   * @param opts command line options
    */
   @Inject
-  public OrigAttorneyIndexerJob(final ReplicatedAttorneyDao dao,
-      final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
-      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-      FlightRecorder jobHistory) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, null);
+  public OrigAttorneyIndexerJob(final ReplicatedAttorneyDao dao, final ElasticsearchDao esDao,
+      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
+      JobOptions opts) {
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
   }
 
   /**

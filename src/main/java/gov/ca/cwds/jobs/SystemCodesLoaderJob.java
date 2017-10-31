@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
@@ -20,8 +19,10 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.data.CrudsDaoImpl;
-import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.rocket.syscode.NsSystemCode;
+import gov.ca.cwds.jobs.rocket.syscode.NsSystemCodeDao;
+import gov.ca.cwds.jobs.rocket.syscode.SystemCodesLoaderModule;
 import gov.ca.cwds.rest.api.domain.cms.SystemCode;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.api.domain.cms.SystemMeta;
@@ -181,36 +182,5 @@ public class SystemCodesLoaderJob {
     }
 
     System.exit(0);
-  }
-
-  //
-  // ============================================================================
-  // System codes DAO for new system
-  // ============================================================================
-  //
-  /**
-   * System codes DAO for new system
-   */
-  static class NsSystemCodeDao extends CrudsDaoImpl<NsSystemCode> {
-
-    /**
-     * Constructor
-     * 
-     * @param sessionFactory The PostgreSQL sessionFactory
-     */
-    @Inject
-    public NsSystemCodeDao(@NsSessionFactory SessionFactory sessionFactory) {
-      super(sessionFactory);
-    }
-
-    /**
-     * Create or update system code record.
-     * 
-     * @param systemCode System code
-     * @return Created or updated system code.
-     */
-    public NsSystemCode createOrUpdate(NsSystemCode systemCode) {
-      return persist(systemCode);
-    }
   }
 }

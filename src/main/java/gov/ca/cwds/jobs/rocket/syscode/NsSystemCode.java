@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.rocket.syscode;
 
 import java.io.Serializable;
 
@@ -24,7 +24,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
  */
 @Entity
 @Table(name = "system_codes")
-class NsSystemCode implements PersistentObject {
+public class NsSystemCode implements PersistentObject {
 
   private static final long serialVersionUID = 8370500764130606101L;
 

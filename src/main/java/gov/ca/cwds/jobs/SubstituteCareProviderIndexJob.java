@@ -13,8 +13,9 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 
 /**
@@ -25,9 +26,6 @@ import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 public class SubstituteCareProviderIndexJob extends
     BasePersonIndexerJob<ReplicatedSubstituteCareProvider, ReplicatedSubstituteCareProvider> {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -39,13 +37,14 @@ public class SubstituteCareProviderIndexJob extends
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    * @param jobHistory job history
+   * @param opts command line options
    */
   @Inject
   public SubstituteCareProviderIndexJob(final ReplicatedSubstituteCareProviderDao dao,
       final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-      FlightRecorder jobHistory) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, null);
+      FlightRecorder jobHistory, JobOptions opts) {
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
   }
 
   @Override

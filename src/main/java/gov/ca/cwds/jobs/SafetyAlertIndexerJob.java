@@ -29,9 +29,10 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedSafetyAlerts;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
+import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
@@ -47,9 +48,6 @@ public class SafetyAlertIndexerJob
     extends BasePersonIndexerJob<ReplicatedSafetyAlerts, EsSafetyAlert>
     implements JobResultSetAware<EsSafetyAlert> {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SafetyAlertIndexerJob.class);
@@ -63,12 +61,14 @@ public class SafetyAlertIndexerJob
    * @param mapper Object mapper
    * @param sessionFactory Session factory
    * @param jobHistory job history
+   * @param opts command line opts
    */
   @Inject
   public SafetyAlertIndexerJob(ReplicatedSafetyAlertsDao clientDao, ElasticsearchDao esDao,
       @LastRunFile String lastJobRunTimeFilename, ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
-    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, null);
+      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
+      JobOptions opts) {
+    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
   }
 
   @Override

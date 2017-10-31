@@ -21,7 +21,7 @@ public class MSearchJobTest
     super.setup();
     dao = new ReplicatedOtherAdultInPlacemtHomeDao(this.sessionFactory);
     target = new MSearchJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, null,
-        jobHistory);
+        jobHistory, opts);
   }
 
   @Test

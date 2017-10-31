@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.jobs.rocket.referral;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
