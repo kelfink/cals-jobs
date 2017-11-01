@@ -11,6 +11,8 @@ import org.quartz.UnableToInterruptJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.FlightRecord;
 
@@ -33,8 +35,11 @@ public class NeutronInterruptableJob implements InterruptableJob {
 
   /**
    * Constructor.
+   * 
+   * @param rocket launch me!
    */
-  public NeutronInterruptableJob(final BasePersonIndexerJob rocket) {
+  public <T extends PersistentObject, M extends ApiGroupNormalizer<?>> NeutronInterruptableJob(
+      final BasePersonIndexerJob<T, M> rocket) {
     this.rocket = rocket;
   }
 

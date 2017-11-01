@@ -41,7 +41,6 @@ public class NeutronTriggerListenerTest extends PersonJobTester {
   TestNormalizedEntityDao dao;
   TestIndexerJob rocket;
 
-
   @Override
   @Before
   public void setup() throws Exception {
