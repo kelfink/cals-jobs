@@ -44,6 +44,7 @@ public class NeutronTriggerListenerTest extends PersonJobTester {
   @Override
   @Before
   public void setup() throws Exception {
+    super.setup();
     dao = new TestNormalizedEntityDao(sessionFactory);
     rocket =
         new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, jobHistory);
