@@ -8,20 +8,16 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 
 public class JetPackLoggerTest {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(JetPackLoggerTest.class);
 
   JetPackLogger target;
   String msg;
 
   @Before
   public void setup() throws Exception {
-    target = new JetPackLogger(LOGGER);
+    target = new JetPackLogger(JetPackLoggerTest.class);
     msg = "well that was fun";
   }
 

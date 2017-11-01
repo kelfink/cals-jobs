@@ -5,14 +5,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 
 public class JetPackLogger implements Flex4JLogger {
 
   private final Logger logger;
 
-  public JetPackLogger(final Logger logger) {
-    this.logger = logger;
+  public JetPackLogger(Class klass) {
+    this.logger = LoggerFactory.getLogger(klass);
   }
 
   private Object[] collect(Supplier<Object>... args) {

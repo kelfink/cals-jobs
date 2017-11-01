@@ -9,7 +9,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
@@ -29,8 +28,7 @@ import gov.ca.cwds.jobs.schedule.NeutronRocket;
 
 public class NeutronElasticValidator implements AtomValidateDocument {
 
-  private static final Logger LOGGER =
-      new JetPackLogger(LoggerFactory.getLogger(NeutronRocket.class));
+  private static final Logger LOGGER = new JetPackLogger(NeutronRocket.class);
 
   private final ElasticsearchDao esDao;
 
