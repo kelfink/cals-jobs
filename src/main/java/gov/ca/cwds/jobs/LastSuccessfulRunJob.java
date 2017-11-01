@@ -58,9 +58,6 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
         StringUtils.isBlank(lastJobRunTimeFilename) ? opts.getLastRunLoc() : lastJobRunTimeFilename;
     this.jobHistory = jobHistory;
     this.opts = opts;
-
-    // LOGGER.warn("LastSuccessfulRunJob.ctor: lastRunTimeFilename: {}", lastRunTimeFilename);
-    // LOGGER.warn("LastSuccessfulRunJob.ctor: opts.getLastRunLoc(): {}", opts.getLastRunLoc());
   }
 
   /**
@@ -73,9 +70,6 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
     this.lastRunTimeFilename =
         StringUtils.isBlank(lastJobRunTimeFilename) ? opts.getLastRunLoc() : lastJobRunTimeFilename;
     this.opts = opts;
-
-    LOGGER.warn("LastSuccessfulRunJob.ctor: lastRunTimeFilename: {}", lastRunTimeFilename);
-    LOGGER.warn("LastSuccessfulRunJob.ctor: opts.getLastRunLoc(): {}", opts.getLastRunLoc());
   }
 
   @Override
@@ -84,10 +78,10 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
     final FlightRecord track = getTrack();
     track.start();
 
-    final Date lastRunTime = determineLastSuccessfulRunTime();
-    track.setLastChangeSince(lastRunTime);
-
     try {
+      final Date lastRunTime = determineLastSuccessfulRunTime();
+      track.setLastChangeSince(lastRunTime);
+
       writeLastSuccessfulRunTime(executeJob(lastRunTime));
     } catch (Exception e) {
       fail();
@@ -150,18 +144,14 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * 
    * @return last successful run date/time as a Java Date.
    */
-  protected Date determineLastSuccessfulRunTime() {
+  protected Date determineLastSuccessfulRunTime() throws NeutronException {
     Date ret = null;
-    LOGGER.debug("LastSuccessfulRunJob.determineLastSuccessfulRunTime(): LAST CHANGE LOCATION: {}",
-        lastRunTimeFilename);
-
     try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
       ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
           .parse(br.readLine().trim()); // NOSONAR
     } catch (IOException | ParseException e) {
       fail();
-      throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINDING LAST SUCCESSFUL RUN TIME: {}",
-          e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "ERROR FINDING LAST RUN TIME: {}", e.getMessage());
     }
 
     return ret;
@@ -172,14 +162,13 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * 
    * @param datetime date and time to store
    */
-  protected void writeLastSuccessfulRunTime(Date datetime) {
+  protected void writeLastSuccessfulRunTime(Date datetime) throws NeutronException {
     if (!isFailed()) {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) { // NOSONAR
         w.write(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().format(datetime));
       } catch (IOException e) {
         fail();
-        throw JobLogs.buildRuntimeException(LOGGER, e, "Failed to write timestamp file: {}",
-            e.getMessage());
+        throw JobLogs.checked(LOGGER, e, "ERROR WRITING TIMESTAMP FILE: {}", e.getMessage());
       }
     }
   }
