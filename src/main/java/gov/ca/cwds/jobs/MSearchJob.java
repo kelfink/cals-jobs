@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import java.io.IOException;
 import java.util.Date;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -28,7 +27,6 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.service.NeutronElasticValidator;
-import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
  * Job to load Other Adult In Placement Home from CMS into ElasticSearch.
@@ -63,15 +61,6 @@ public class MSearchJob extends
       FlightRecorder jobHistory, JobOptions opts) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
     this.validator = validator;
-  }
-
-  protected ElasticSearchPerson readPerson(String json) throws NeutronException {
-    try {
-      return ElasticSearchPerson.MAPPER.readValue(json, ElasticSearchPerson.class);
-    } catch (IOException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO READ PERSON DOC! {}",
-          e.getMessage(), e);
-    }
   }
 
   @Override

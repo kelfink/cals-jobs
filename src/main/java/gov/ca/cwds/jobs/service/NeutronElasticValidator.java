@@ -1,5 +1,13 @@
 package gov.ca.cwds.jobs.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,15 +19,18 @@ import gov.ca.cwds.dao.cms.ReplicatedClientRelationshipDao;
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
+import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.component.AtomValidateDocument;
 import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.log.JetPackLogger;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
-import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 public class NeutronElasticValidator implements AtomValidateDocument {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronRocket.class);
+  private static final Logger LOGGER =
+      new JetPackLogger(LoggerFactory.getLogger(NeutronRocket.class));
 
   private final ElasticsearchDao esDao;
 
@@ -48,11 +59,28 @@ public class NeutronElasticValidator implements AtomValidateDocument {
     this.repClientRelationshipDao = repClientRelationshipDao;
   }
 
-  public String fetchESPerson(String docId) {
-    final ElasticsearchConfiguration config = esDao.getConfig();
-    return esDao.searchIndexByQuery(config.getElasticsearchAlias(), "",
-        config.getElasticsearchHost(), Integer.parseInt(config.getElasticsearchPort()),
-        config.getElasticsearchDocType());
+  public List<ElasticSearchPerson> fetchPersonDocuments(String... docIds) throws NeutronException {
+    List<ElasticSearchPerson> ret = new ArrayList<>();
+
+    final Client esClient = this.esDao.getClient();
+    final MultiSearchResponse sr = esClient.prepareMultiSearch()
+        .add(esClient.prepareSearch().setQuery(QueryBuilders.idsQuery().addIds(docIds))).get();
+
+    long totalHits = 0;
+    for (MultiSearchResponse.Item item : sr.getResponses()) {
+      final SearchHits hits = item.getResponse().getHits();
+      totalHits += hits.getTotalHits();
+
+      for (SearchHit hit : hits.getHits()) {
+        final String json = hit.getSourceAsString();
+        LOGGER.trace("json: {}", json);
+        final ElasticSearchPerson person = readPerson(json);
+        LOGGER.info("person: {}", person);
+      }
+    }
+
+    LOGGER.info("total hits: {}", totalHits);
+    return ret;
   }
 
   @Override
@@ -91,7 +119,6 @@ public class NeutronElasticValidator implements AtomValidateDocument {
 
   @Override
   public FlightRecord getTrack() {
-    // TODO Auto-generated method stub
     return null;
   }
 

@@ -22,6 +22,15 @@ public interface AtomValidateDocument {
 
   ElasticsearchDao getEsDao();
 
+  default ElasticSearchPerson readPerson(String json) throws NeutronException {
+    try {
+      return ElasticSearchPerson.MAPPER.readValue(json, ElasticSearchPerson.class);
+    } catch (IOException e) {
+      throw JobLogs.buildCheckedException(getLogger(), e, "FAILED TO READ PERSON DOC! {}",
+          e.getMessage(), e);
+    }
+  }
+
   default void processDocumentHits(final SearchHits hits) throws NeutronException {
     int docId = 0;
     String json;
