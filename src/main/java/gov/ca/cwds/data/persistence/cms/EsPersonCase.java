@@ -460,7 +460,7 @@ public abstract class EsPersonCase
         SystemCodeCache.global().getSystemCodeShortDescription(this.parentRelationship));
     parent.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.parentId,
         this.parentLastUpdated, LegacyTable.CLIENT));
-    // parent.setSensitivityIndicator(this.parentSensitivityIndicator);
+    parent.setSensitivityIndicator(this.parentSensitivityIndicator);
 
     cases.addCase(esPersonCase, parent);
     return cases;

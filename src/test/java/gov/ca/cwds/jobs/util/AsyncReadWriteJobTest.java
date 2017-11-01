@@ -90,12 +90,7 @@ public class AsyncReadWriteJobTest {
       if (input.size() == 3) {
         return input.remove(0);
       } else {
-        try {
-          await().atMost(2, TimeUnit.SECONDS).until(() -> input.remove(0));
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        }
+        await().atMost(2, TimeUnit.SECONDS).until(() -> input.remove(0));
         throw new RuntimeException("failed on second!");
       }
     }, String::valueOf, output::addAll);
