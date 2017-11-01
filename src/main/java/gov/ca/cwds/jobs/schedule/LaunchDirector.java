@@ -323,7 +323,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
   @Override
   public FlightRecord runScheduledJob(final String jobName, final JobOptions opts)
       throws NeutronException {
-    return this.runScheduledJob(jobName, opts);
+    return this.neutronScheduler.runScheduledJob(jobName, opts);
   }
 
   /**
@@ -384,7 +384,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
 
   @Override
   public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched) {
-    return this.scheduleJob(klazz, sched);
+    return this.neutronScheduler.scheduleJob(klazz, sched);
   }
 
   public AtomFlightRecorder getFlightRecorder() {

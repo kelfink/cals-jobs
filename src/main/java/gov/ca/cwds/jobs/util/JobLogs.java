@@ -117,12 +117,12 @@ public final class JobLogs {
 
   public static NeutronException checked(final Logger log, Throwable e, String pattern,
       Object... args) {
-    return buildCheckedException(LOGGER, e, pattern, args);
+    return buildCheckedException(log, e, pattern, args);
   }
 
   public static JobsException runtime(final Logger log, Throwable e, String pattern,
       Object... args) {
-    return buildRuntimeException(LOGGER, e, pattern, args);
+    return buildRuntimeException(log, e, pattern, args);
   }
 
   public static String stackToString(Exception e) {
