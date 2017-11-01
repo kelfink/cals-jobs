@@ -134,15 +134,13 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
   protected Date determineLastSuccessfulRunTime() {
     Date ret = null;
 
-    if (StringUtils.isNotBlank(this.lastRunTimeFilename)) {
-      try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
-        ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
-            .parse(br.readLine().trim()); // NOSONAR
-      } catch (IOException | ParseException e) {
-        fail();
-        throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINDING LAST SUCCESSFUL RUN TIME: {}",
-            e.getMessage());
-      }
+    try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
+      ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
+          .parse(br.readLine().trim()); // NOSONAR
+    } catch (IOException | ParseException e) {
+      fail();
+      throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINDING LAST SUCCESSFUL RUN TIME: {}",
+          e.getMessage());
     }
 
     return ret;
@@ -154,7 +152,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * @param datetime date and time to store
    */
   protected void writeLastSuccessfulRunTime(Date datetime) {
-    if (StringUtils.isNotBlank(this.lastRunTimeFilename) && !isFailed()) {
+    if (!isFailed()) {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) { // NOSONAR
         w.write(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().format(datetime));
       } catch (IOException e) {
