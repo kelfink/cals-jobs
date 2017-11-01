@@ -336,7 +336,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
    * @return true if running in continuous mode
    */
   public static boolean isSchedulerMode() {
-    return instance.settings.isContinuousMode();
+    return getInstance().settings.isContinuousMode();
   }
 
   /**
@@ -346,7 +346,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
    * @return whether in test mode
    */
   public static boolean isTestMode() {
-    return instance.settings.isTestMode();
+    return getInstance().settings.isTestMode();
   }
 
   /**
@@ -356,11 +356,11 @@ public class LaunchDirector implements AtomLaunchScheduler {
    * @param mode whether in test mode
    */
   public static void setTestMode(boolean mode) {
-    instance.settings.setTestMode(mode);
+    getInstance().settings.setTestMode(mode);
   }
 
   public static boolean isInitialMode() {
-    return instance.settings.isInitialMode();
+    return getInstance().settings.isInitialMode();
   }
 
   public ElasticsearchDao getEsDao() {
@@ -434,10 +434,35 @@ public class LaunchDirector implements AtomLaunchScheduler {
    * @return evil single instance
    */
   public static LaunchDirector getInstance() {
+    if (instance == null) {
+      startSingleLaunchMode();
+    }
     return instance;
   }
 
-  protected static void startContinuousMode(String[] args) {
+  protected static synchronized LaunchDirector startSingleLaunchMode() {
+    LOGGER.info("STARTING SINGLE LAUNCH MODE ...");
+    try {
+      final JobOptions globalOpts = new JobOptions();
+      globalOpts.setBaseDirectory("config");
+      globalOpts.setEsConfigLoc("config/local.yaml");
+
+      final Injector injector = JobsGuiceInjector.buildInjector(globalOpts);
+      instance = injector.getInstance(LaunchDirector.class);
+      instance.startingOpts = globalOpts;
+
+      instance.settings.setContinuousMode(false);
+      instance.settings.setInitialMode(!instance.startingOpts.isLastRunMode());
+
+      LOGGER.info("SINGLE LAUNCH MODE READY");
+    } catch (Exception e) {
+      throw JobLogs.runtime(LOGGER, e, "FAILED TO START DIRECTOR: {}", e.getMessage());
+    }
+
+    return instance;
+  }
+
+  protected static synchronized LaunchDirector startContinuousMode(String[] args) {
     LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
     try {
       final JobOptions globalOpts = JobOptions.parseCommandLine(args);
@@ -453,6 +478,8 @@ public class LaunchDirector implements AtomLaunchScheduler {
     } catch (Exception e) {
       LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
     }
+
+    return instance;
   }
 
   /**
