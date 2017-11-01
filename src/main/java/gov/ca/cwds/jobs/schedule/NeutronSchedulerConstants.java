@@ -2,6 +2,8 @@ package gov.ca.cwds.jobs.schedule;
 
 public class NeutronSchedulerConstants {
 
+  public static final String ROCKET_CLASS = "job_class";
+
   public static final String GRP_LST_CHG = "last_chg";
 
   public static final String GRP_FULL_LOAD = "full_load";

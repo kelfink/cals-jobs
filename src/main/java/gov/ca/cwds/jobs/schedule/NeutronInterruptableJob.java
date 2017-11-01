@@ -47,7 +47,7 @@ public class NeutronInterruptableJob implements InterruptableJob {
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
     final JobDataMap map = context.getJobDetail().getJobDataMap();
-    className = map.getString("job_class");
+    className = map.getString(NeutronSchedulerConstants.ROCKET_CLASS);
     final String jobName = context.getTrigger().getJobKey().getName();
 
     LOGGER.info("Execute {}, instance # ", className, instanceCounter.incrementAndGet());

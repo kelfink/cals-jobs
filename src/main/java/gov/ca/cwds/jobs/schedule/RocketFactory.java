@@ -51,6 +51,7 @@ public class RocketFactory implements AtomRocketFactory {
     }
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public BasePersonIndexerJob createJob(String jobName, final JobOptions opts)
       throws NeutronException {
@@ -67,7 +68,7 @@ public class RocketFactory implements AtomRocketFactory {
 
     Class<?> klazz;
     try {
-      klazz = Class.forName(jd.getJobDataMap().getString("job_class"));
+      klazz = Class.forName(jd.getJobDataMap().getString(NeutronSchedulerConstants.ROCKET_CLASS));
     } catch (ClassNotFoundException e) {
       throw new SchedulerException(e);
     }

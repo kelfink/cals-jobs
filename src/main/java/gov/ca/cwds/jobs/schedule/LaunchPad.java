@@ -81,7 +81,8 @@ public class LaunchPad implements Serializable {
 
     jd = newJob(NeutronInterruptableJob.class)
         .withIdentity(jobName, NeutronSchedulerConstants.GRP_LST_CHG)
-        .usingJobData("job_class", flightSchedule.getKlazz().getName()).build();
+        .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS, flightSchedule.getKlazz().getName())
+        .build();
 
     // Initial mode: run only **once**.
     final Trigger trg = !LaunchDirector.isInitialMode()
