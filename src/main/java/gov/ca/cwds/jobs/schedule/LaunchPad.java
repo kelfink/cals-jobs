@@ -36,19 +36,24 @@ public class LaunchPad implements Serializable {
 
   private final String jobName;
   private final String triggerName;
+
+  private JobOptions opts;
+
+
   private boolean vetoExecution;
 
   private volatile JobKey jobKey;
   private volatile JobDetail jd;
 
   public LaunchPad(final Scheduler scheduler, DefaultFlightSchedule sched,
-      final FlightRecorder jobHistory) {
+      final FlightRecorder jobHistory, final JobOptions opts) {
     this.scheduler = scheduler;
     this.flightSchedule = sched;
     this.jobHistory = jobHistory;
     this.jobName = flightSchedule.getName();
     this.triggerName = flightSchedule.getName();
     this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
+    this.opts = opts;
 
     jobHistory.addTrack(sched.getKlazz(), new FlightRecord());
   }
@@ -57,10 +62,10 @@ public class LaunchPad implements Serializable {
   public String run(String cmdLine) throws NeutronException {
     try {
       LOGGER.info("RUN JOB: {}", flightSchedule.getName());
-      final JobOptions opts =
+      final JobOptions runOnceOpts =
           JobOptions.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       final FlightRecord track =
-          LaunchDirector.getInstance().runScheduledJob(flightSchedule.getKlazz(), opts);
+          LaunchDirector.getInstance().runScheduledJob(flightSchedule.getKlazz(), runOnceOpts);
       return track.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);

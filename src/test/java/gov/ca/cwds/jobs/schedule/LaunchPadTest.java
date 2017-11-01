@@ -19,21 +19,23 @@ import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.ClientIndexerJob;
+import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.component.FlightRecord;
 
-public class LaunchPadTest {
+public class LaunchPadTest extends PersonJobTester {
 
   Scheduler scheduler;
   DefaultFlightSchedule sched;
   FlightRecorder history;
   LaunchPad target;
 
+  @Override
   @Before
   public void setup() throws Exception {
     scheduler = mock(Scheduler.class);
     sched = DefaultFlightSchedule.CLIENT;
     history = new FlightRecorder();
-    target = new LaunchPad(scheduler, sched, history);
+    target = new LaunchPad(scheduler, sched, history, opts);
   }
 
   @Test

@@ -107,8 +107,9 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched) {
-    final LaunchPad nj = new LaunchPad(this.getScheduler(), sched, flightRecorder);
+  public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, JobOptions opts) {
+    // MORE: remember this job's starting options.
+    final LaunchPad nj = new LaunchPad(this.getScheduler(), sched, flightRecorder, opts);
     this.getScheduleRegistry().put(klazz, nj);
     return nj;
   }
@@ -180,6 +181,10 @@ public class LaunchScheduler implements AtomLaunchScheduler {
       throw JobLogs.buildCheckedException(LOGGER, e, "UNKNOWN JOB CLASS! {}", className, e);
     }
     return this.getScheduleRegistry().get(klazz).isVetoExecution();
+  }
+
+  public AtomRocketOptions getRocketOptions() {
+    return rocketOptions;
   }
 
 }

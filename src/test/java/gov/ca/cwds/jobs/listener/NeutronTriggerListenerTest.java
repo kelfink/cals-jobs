@@ -17,13 +17,14 @@ import org.quartz.Trigger;
 import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.TriggerKey;
 
+import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
-import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
+import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
 import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 
-public class NeutronTriggerListenerTest {
+public class NeutronTriggerListenerTest extends PersonJobTester {
 
   NeutronTriggerListener target;
   NeutronInterruptableJob job;
@@ -36,6 +37,7 @@ public class NeutronTriggerListenerTest {
   TriggerKey triggerKey;
   Trigger trigger;
 
+  @Override
   @Before
   public void setup() throws Exception {
     job = new NeutronInterruptableJob();
@@ -54,7 +56,7 @@ public class NeutronTriggerListenerTest {
     when(trigger.getKey()).thenReturn(triggerKey);
     when(jobDataMap.getString(any(String.class))).thenReturn(TestIndexerJob.class.getName());
 
-    neutronScheduler.scheduleJob(TestIndexerJob.class, DefaultFlightSchedule.CLIENT);
+    neutronScheduler.scheduleJob(TestIndexerJob.class, DefaultFlightSchedule.CLIENT, opts);
 
     target = new NeutronTriggerListener(neutronScheduler);
   }

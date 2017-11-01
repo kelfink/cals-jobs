@@ -229,7 +229,8 @@ public class LaunchDirector implements AtomLaunchScheduler {
         final JobOptions opts = new JobOptions(startingOpts);
         handleTimeFile(opts, fmt, now, sched);
 
-        final LaunchPad nj = new LaunchPad(neutronScheduler.getScheduler(), sched, flightRecorder);
+        final LaunchPad nj =
+            new LaunchPad(neutronScheduler.getScheduler(), sched, flightRecorder, opts);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         neutronScheduler.getScheduleRegistry().put(klass, nj);
       }
@@ -367,8 +368,8 @@ public class LaunchDirector implements AtomLaunchScheduler {
   }
 
   @Override
-  public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched) {
-    return this.neutronScheduler.scheduleJob(klazz, sched);
+  public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, JobOptions opts) {
+    return this.neutronScheduler.scheduleJob(klazz, sched, opts);
   }
 
   public AtomFlightRecorder getFlightRecorder() {
