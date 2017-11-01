@@ -53,7 +53,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
   /**
    * Singleton instance. One director to rule them all.
    */
-  private static LaunchCommand instance = new LaunchCommand(null, null, null);
+  private static LaunchCommand instance = new LaunchCommand();
 
   private LaunchCenterSettings settings = new LaunchCenterSettings();
 
@@ -438,9 +438,6 @@ public class LaunchCommand implements AtomLaunchScheduler {
    * @return evil single instance
    */
   public static LaunchCommand getInstance() {
-    if (instance == null) {
-      instance = new LaunchCommand();
-    }
     return instance;
   }
 

@@ -54,7 +54,7 @@ public class NeutronRocket implements InterruptableJob {
     final JobDataMap map = context.getJobDetail().getJobDataMap();
     final String jobName = context.getTrigger().getJobKey().getName();
 
-    LOGGER.info("Execute {}, instance # ", rocket.getClass().getName(),
+    LOGGER.info("Execute {}, instance # {}", rocket.getClass().getName(),
         instanceCounter.incrementAndGet());
 
     try (final BasePersonIndexerJob job = rocket) {
