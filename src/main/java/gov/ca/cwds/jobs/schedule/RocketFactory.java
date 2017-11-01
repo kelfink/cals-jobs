@@ -47,7 +47,7 @@ public class RocketFactory implements AtomRocketFactory {
       ret.setOpts(opts);
       return ret;
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO CREATE ROCKET!: {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!: {}", e.getMessage());
     }
   }
 
@@ -77,8 +77,8 @@ public class RocketFactory implements AtomRocketFactory {
 
     NeutronInterruptableJob ret;
     try {
-      ret = new NeutronInterruptableJob(
-          createJob(klazz, rocketOptions.getFlightSettings(klazz, jd.getKey().getName())));
+      final JobOptions opts = rocketOptions.getFlightSettings(klazz, jd.getKey().getName());
+      ret = new NeutronInterruptableJob(createJob(klazz, opts));
     } catch (NeutronException e) {
       throw new SchedulerException("NO ROCKET SETTINGS!", e);
     }

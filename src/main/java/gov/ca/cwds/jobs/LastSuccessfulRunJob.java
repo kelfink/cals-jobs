@@ -54,7 +54,8 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   public LastSuccessfulRunJob(String lastJobRunTimeFilename, final FlightRecorder jobHistory,
       final JobOptions opts) {
-    this.lastRunTimeFilename = lastJobRunTimeFilename;
+    this.lastRunTimeFilename = StringUtils.isNotBlank(lastJobRunTimeFilename)
+        ? lastJobRunTimeFilename : opts.getLastRunLoc();
     this.jobHistory = jobHistory;
     this.opts = opts;
   }
