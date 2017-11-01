@@ -12,24 +12,18 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.component.AtomJobScheduler;
+import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 
-public class NeutronScheduler implements AtomJobScheduler {
+public class LaunchScheduler implements AtomLaunchScheduler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronScheduler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LaunchScheduler.class);
 
   private Scheduler scheduler;
-
-  /**
-   * For unit tests where resources either may not close properly or where expensive resources
-   * should be mocked.
-   */
-  private boolean testMode = false;
 
   private final FlightRecorder flightRecorder;
 
@@ -53,7 +47,7 @@ public class NeutronScheduler implements AtomJobScheduler {
   private final Map<TriggerKey, NeutronInterruptableJob> executingJobs = new ConcurrentHashMap<>();
 
   @Inject
-  public NeutronScheduler(final FlightRecorder jobHistory, final AtomRocketFactory rocketFactory) {
+  public LaunchScheduler(final FlightRecorder jobHistory, final AtomRocketFactory rocketFactory) {
     this.flightRecorder = jobHistory;
     this.rocketFactory = rocketFactory;
   }

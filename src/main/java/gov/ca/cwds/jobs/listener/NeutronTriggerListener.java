@@ -13,17 +13,17 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
-import gov.ca.cwds.jobs.schedule.NeutronScheduler;
+import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 public class NeutronTriggerListener implements TriggerListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronTriggerListener.class);
 
-  private final NeutronScheduler neutronScheduler;
+  private final LaunchScheduler neutronScheduler;
 
   @Inject
-  public NeutronTriggerListener(final NeutronScheduler neutronScheduler) {
+  public NeutronTriggerListener(final LaunchScheduler neutronScheduler) {
     this.neutronScheduler = neutronScheduler;
   }
 

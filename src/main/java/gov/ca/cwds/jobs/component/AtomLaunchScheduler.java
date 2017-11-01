@@ -8,7 +8,7 @@ import gov.ca.cwds.jobs.schedule.NeutronDefaultJobSchedule;
 import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
 import gov.ca.cwds.jobs.schedule.NeutronJobMgtFacade;
 
-public interface AtomJobScheduler {
+public interface AtomLaunchScheduler {
 
   /**
    * Run a registered job.

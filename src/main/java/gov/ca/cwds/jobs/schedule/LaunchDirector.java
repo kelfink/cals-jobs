@@ -29,7 +29,7 @@ import com.google.inject.tools.jmx.Manager;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomFlightRecorder;
-import gov.ca.cwds.jobs.component.AtomJobScheduler;
+import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
@@ -46,7 +46,7 @@ import gov.ca.cwds.jobs.util.JobLogs;
  * 
  * @author CWDS API Team
  */
-public class LaunchDirector implements AtomJobScheduler {
+public class LaunchDirector implements AtomLaunchScheduler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LaunchDirector.class);
 
@@ -94,10 +94,10 @@ public class LaunchDirector implements AtomJobScheduler {
 
   private FlightRecorder flightRecorder = new FlightRecorder();
 
-  private NeutronScheduler neutronScheduler;
+  private LaunchScheduler neutronScheduler;
 
   @Inject
-  public LaunchDirector(final FlightRecorder jobHistory, final NeutronScheduler neutronScheduler,
+  public LaunchDirector(final FlightRecorder jobHistory, final LaunchScheduler neutronScheduler,
       final ElasticsearchDao esDao) {
     this.flightRecorder = jobHistory;
     this.neutronScheduler = neutronScheduler;
@@ -158,7 +158,7 @@ public class LaunchDirector implements AtomJobScheduler {
     this.neutronScheduler.startScheduler();
   }
 
-  protected NeutronScheduler configureQuartz(final Injector injector) throws SchedulerException {
+  protected LaunchScheduler configureQuartz(final Injector injector) throws SchedulerException {
     // Quartz scheduling:
     final Properties p = new Properties();
     p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
@@ -182,9 +182,17 @@ public class LaunchDirector implements AtomJobScheduler {
     return neutronScheduler;
   }
 
+  /**
+   * Find the job's time file under the base directory.
+   * 
+   * @param opts base options
+   * @param fmt reusable date format
+   * @param now current datetime
+   * @param sched this schedule
+   * @throws IOException on file error
+   */
   protected void handleTimeFile(final JobOptions opts, final DateFormat fmt, final Date now,
       NeutronDefaultJobSchedule sched) throws IOException {
-    // Find the job's time file under the base directory:
     final StringBuilder buf = new StringBuilder();
     buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
         .append(".time");
@@ -216,7 +224,6 @@ public class LaunchDirector implements AtomJobScheduler {
    * @param injector Guice injector. Soon to be removed.
    * @throws NeutronException on initialization error
    */
-  @SuppressWarnings("unchecked")
   protected void initScheduler(final Injector injector) throws NeutronException {
     try {
       configureQuartz(injector);
@@ -238,10 +245,6 @@ public class LaunchDirector implements AtomJobScheduler {
         final JobOptions opts = new JobOptions(startingOpts);
         handleTimeFile(opts, fmt, now, sched);
 
-        // if (!testMode) {
-        // registerJob((Class<? extends BasePersonIndexerJob<?, ?>>) klass, opts);
-        // }
-
         final NeutronJobMgtFacade nj =
             new NeutronJobMgtFacade(neutronScheduler.getScheduler(), sched, flightRecorder);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
@@ -254,15 +257,15 @@ public class LaunchDirector implements AtomJobScheduler {
       // Expose Guice bean attributes to JMX.
       Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
 
-      // Start last change jobs.
-      for (NeutronJobMgtFacade j : neutronScheduler.getScheduleRegistry().values()) {
-        j.schedule();
-      }
-
-      // NOTE: move this responsibility to another class.
+      // HACK: move this responsibility to another class.
       if (startingOpts.isDropIndex()) {
         final ElasticsearchDao anEsDao = getInstance().esDao;
         anEsDao.deleteIndex(anEsDao.getConfig().getElasticsearchAlias());
+      }
+
+      // Start last change jobs.
+      for (NeutronJobMgtFacade j : neutronScheduler.getScheduleRegistry().values()) {
+        j.schedule();
       }
 
       // Start your engines ...
@@ -394,11 +397,11 @@ public class LaunchDirector implements AtomJobScheduler {
     this.flightRecorder = jobHistory;
   }
 
-  public NeutronScheduler getNeutronScheduler() {
+  public LaunchScheduler getNeutronScheduler() {
     return neutronScheduler;
   }
 
-  public void setNeutronScheduler(NeutronScheduler neutronScheduler) {
+  public void setNeutronScheduler(LaunchScheduler neutronScheduler) {
     this.neutronScheduler = neutronScheduler;
   }
 

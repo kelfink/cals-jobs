@@ -72,7 +72,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.component.AtomJobScheduler;
+import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
@@ -298,7 +298,7 @@ public class JobsGuiceInjector extends AbstractModule {
 
   @Provides
   @Singleton
-  public AtomJobScheduler provideLaunchDirector() {
+  public AtomLaunchScheduler provideLaunchDirector() {
     return LaunchDirector.getInstance();
   }
 

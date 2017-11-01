@@ -47,7 +47,7 @@ import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchDirector;
-import gov.ca.cwds.jobs.schedule.NeutronScheduler;
+import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
@@ -70,7 +70,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  public NeutronScheduler neutronScheduler;
+  public LaunchScheduler neutronScheduler;
 
   public ElasticsearchConfiguration esConfig;
   public ElasticsearchDao esDao;
@@ -191,7 +191,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     // Job track:
     track = new FlightRecord();
     jobHistory = new FlightRecorder();
-    neutronScheduler = mock(NeutronScheduler.class);
+    neutronScheduler = mock(LaunchScheduler.class);
   }
 
   public Thread runKillThread(final BasePersonIndexerJob<T, M> target, long sleepMillis) {
