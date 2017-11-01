@@ -142,18 +142,28 @@ public class LaunchDirector implements AtomLaunchScheduler {
     this.neutronScheduler.startScheduler();
   }
 
+  /**
+   * Configure Quartz scheduling.
+   * 
+   * <p>
+   * MORE: inject this dependency.
+   * </p>
+   * 
+   * @param injector Guice injector
+   * @return prepare launch scheduler
+   * @throws SchedulerException
+   */
   protected LaunchScheduler configureQuartz(final Injector injector) throws SchedulerException {
-    // Quartz scheduling:
     final Properties p = new Properties();
     p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
 
-    // NOTE: make configurable.
+    // MORE: make configurable.
     p.put("org.quartz.threadPool.threadCount",
         instance.settings.isInitialMode() ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
     final StdSchedulerFactory factory = new StdSchedulerFactory(p);
     final Scheduler scheduler = factory.getScheduler();
 
-    // FINISHME: inject scheduler and rocket factory.
+    // MORE: inject scheduler and rocket factory.
     scheduler.setJobFactory(injector.getInstance(RocketFactory.class));
     neutronScheduler.setScheduler(scheduler);
 
@@ -178,10 +188,14 @@ public class LaunchDirector implements AtomLaunchScheduler {
   protected void handleTimeFile(final JobOptions opts, final DateFormat fmt, final Date now,
       final DefaultFlightSchedule sched) throws IOException {
     final StringBuilder buf = new StringBuilder();
+
     buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
         .append(".time");
-    final String timeFileLoc = buf.toString();
+    final String timeFileLoc =
+        buf.toString().replaceAll(File.separator + File.separator, File.separator);
     opts.setLastRunLoc(timeFileLoc);
+    LOGGER.warn("base directory: {}, job name: {}, last run loc: {}", opts.getBaseDirectory(),
+        sched.getName(), opts.getLastRunLoc());
 
     // If timestamp file doesn't exist, create it.
     final File f = new File(timeFileLoc); // NOSONAR
@@ -231,8 +245,9 @@ public class LaunchDirector implements AtomLaunchScheduler {
 
         final LaunchPad nj =
             new LaunchPad(neutronScheduler.getScheduler(), sched, flightRecorder, opts);
-        exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         neutronScheduler.getScheduleRegistry().put(klass, nj);
+        neutronScheduler.getRocketOptions().addRocketOptions(klass, sched.getName(), opts);;
+        exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
       }
 
       // Expose JobRunner methods to JMX.
