@@ -6,10 +6,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +64,9 @@ public class DocumentMetadataDaoImpl implements DocumentMetadataDao {
     final Session session = sessionFactory.getCurrentSession();
     Transaction txn = session.beginTransaction();
     try {
-      final Query query = session.getNamedQuery("findByLastJobRunTimeMinusOneMinute")
-          .setParameter("lastJobRunTime", dateFormat.format(lastJobRunTime), StringType.INSTANCE);
+      final NativeQuery<DocumentMetadata> query =
+          session.getNamedNativeQuery("findByLastJobRunTimeMinusOneMinute").setParameter(
+              "lastJobRunTime", dateFormat.format(lastJobRunTime), StringType.INSTANCE);
       final ImmutableList.Builder<DocumentMetadata> documentMetadatas =
           new ImmutableList.Builder<>();
       documentMetadatas.addAll(query.list());
@@ -77,6 +78,6 @@ public class DocumentMetadataDaoImpl implements DocumentMetadataDao {
     } finally {
       session.close();
     }
-
   }
+
 }
