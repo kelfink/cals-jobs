@@ -64,7 +64,14 @@ public class RocketFactory implements AtomRocketFactory {
   @Override
   public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler) throws SchedulerException {
     final JobDetail jd = bundle.getJobDetail();
-    final Class<?> klazz = jd.getJobClass();
+
+    Class<?> klazz;
+    try {
+      klazz = Class.forName(jd.getJobDataMap().getString("job_class"));
+    } catch (ClassNotFoundException e) {
+      throw new SchedulerException(e);
+    }
+
     LOGGER.warn("LAUNCH! {}", klazz);
     final NeutronInterruptableJob ret = (NeutronInterruptableJob) injector.getInstance(klazz);
     ret.setOpts(rocketOptions.getFlightSettings(klazz, jd.getKey().getName()));

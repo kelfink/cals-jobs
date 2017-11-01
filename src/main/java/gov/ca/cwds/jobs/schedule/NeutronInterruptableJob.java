@@ -56,6 +56,7 @@ public class NeutronInterruptableJob implements InterruptableJob {
       track.setJobName(jobName);
       job.setTrack(track);
 
+      map.put("opts", opts);
       map.put("track", track);
       context.setResult(track);
 
