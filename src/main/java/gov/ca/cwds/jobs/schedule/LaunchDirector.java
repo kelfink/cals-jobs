@@ -55,22 +55,6 @@ public class LaunchDirector implements AtomLaunchScheduler {
    */
   private static LaunchDirector instance;
 
-  /**
-   * For unit tests where resources either may not close properly or where expensive resources
-   * should be mocked.
-   */
-  private static boolean testMode = false;
-
-  /**
-   * Run a single server for all jobs. Launch one JVM, serve many jobs.
-   */
-  private static boolean continuousMode = false;
-
-  /**
-   * Launch one JVM, run initial load jobs sequentially, and exit.
-   */
-  private static boolean initialMode = false;
-
   private LaunchCenterSettings settings = new LaunchCenterSettings();
 
   /**
@@ -165,7 +149,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
 
     // NOTE: make configurable.
     p.put("org.quartz.threadPool.threadCount",
-        initialMode ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
+        instance.settings.isInitialMode() ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
     final StdSchedulerFactory factory = new StdSchedulerFactory(p);
     final Scheduler scheduler = factory.getScheduler();
 
@@ -177,8 +161,8 @@ public class LaunchDirector implements AtomLaunchScheduler {
     final ListenerManager listenerMgr = neutronScheduler.getScheduler().getListenerManager();
     listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
     listenerMgr.addTriggerListener(new NeutronTriggerListener(neutronScheduler));
-    listenerMgr.addJobListener(
-        initialMode ? DefaultFlightSchedule.fullLoadJobChainListener() : new NeutronJobListener());
+    listenerMgr.addJobListener(instance.settings.isInitialMode()
+        ? DefaultFlightSchedule.fullLoadJobChainListener() : new NeutronJobListener());
     return neutronScheduler;
   }
 
@@ -204,13 +188,13 @@ public class LaunchDirector implements AtomLaunchScheduler {
     final boolean fileExists = f.exists();
     final boolean overrideLastRunTime = opts.getLastRunTime() != null;
 
-    if (!fileExists || initialMode) {
+    if (!fileExists || settings.isInitialMode()) {
       FileUtils.writeStringToFile(f, fmt.format(overrideLastRunTime ? opts.getLastRunTime() : now));
     }
   }
 
   protected void configureInitialMode(final Date now) {
-    if (initialMode) {
+    if (settings.isInitialMode()) {
       startingOpts.setLastRunTime(now);
       startingOpts.setLastRunMode(false);
       LOGGER.warn("\n\n\n\n>>>>>>> INITIAL, FULL LOAD! <<<<<<<\n\n\n\n");
@@ -234,7 +218,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
       // NOTE: make last change window configurable.
       final DateFormat fmt =
           new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
-      final Date now = initialMode ? fmt.parse("1917-10-31 10:11:12.000")
+      final Date now = settings.isInitialMode() ? fmt.parse("1917-10-31 10:11:12.000")
           : new DateTime().minusHours(NeutronSchedulerConstants.LAST_CHG_WINDOW_HOURS).toDate();
 
       configureInitialMode(now);
@@ -267,7 +251,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
       }
 
       // Start your engines ...
-      if (!testMode) {
+      if (!this.settings.isTestMode()) {
         LOGGER.warn("start scheduler ...");
         neutronScheduler.getScheduler().start();
       }
@@ -332,7 +316,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
    * @return true if running in continuous mode
    */
   public static boolean isSchedulerMode() {
-    return continuousMode;
+    return instance.settings.isContinuousMode();
   }
 
   /**
@@ -342,7 +326,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
    * @return whether in test mode
    */
   public static boolean isTestMode() {
-    return testMode;
+    return instance.settings.isTestMode();
   }
 
   /**
@@ -352,11 +336,11 @@ public class LaunchDirector implements AtomLaunchScheduler {
    * @param mode whether in test mode
    */
   public static void setTestMode(boolean mode) {
-    testMode = mode;
+    instance.settings.setTestMode(mode);
   }
 
   public static boolean isInitialMode() {
-    return initialMode;
+    return instance.settings.isInitialMode();
   }
 
   public ElasticsearchDao getEsDao() {
@@ -441,8 +425,8 @@ public class LaunchDirector implements AtomLaunchScheduler {
       instance = injector.getInstance(LaunchDirector.class);
       instance.startingOpts = globalOpts;
 
-      LaunchDirector.continuousMode = true;
-      LaunchDirector.initialMode = !instance.startingOpts.isLastRunMode();
+      instance.settings.setContinuousMode(true);
+      instance.settings.setInitialMode(!instance.startingOpts.isLastRunMode());
       instance.initScheduler(injector);
 
       LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
@@ -466,7 +450,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
     int exitCode = 0;
-    LaunchDirector.continuousMode = false;
+    instance.settings.setContinuousMode(false);
 
     try (final T job = JobsGuiceInjector.newJob(klass, args)) {
       job.run();
