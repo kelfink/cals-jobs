@@ -29,6 +29,7 @@ public class NeutronRocket implements InterruptableJob {
 
   private static final AtomicInteger instanceCounter = new AtomicInteger(0);
 
+  @SuppressWarnings("rawtypes")
   private final BasePersonIndexerJob rocket;
 
   private volatile FlightRecord track;
@@ -45,9 +46,6 @@ public class NeutronRocket implements InterruptableJob {
     this.rocket = rocket;
   }
 
-  /**
-   * QUESTION: does Quartz allow injection? Is it safe to pass objects via the job data map??
-   */
   @SuppressWarnings("rawtypes")
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
