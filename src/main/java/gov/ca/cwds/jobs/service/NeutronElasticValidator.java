@@ -1,5 +1,8 @@
 package gov.ca.cwds.jobs.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientAddressDao;
@@ -9,9 +12,14 @@ import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherClientNameDao;
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.jobs.component.AtomValidateDocument;
+import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
-public class NeutronElasticValidator {
+public class NeutronElasticValidator implements AtomValidateDocument {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronRocket.class);
 
   private final ElasticsearchDao esDao;
 
@@ -47,6 +55,7 @@ public class NeutronElasticValidator {
         config.getElasticsearchDocType());
   }
 
+  @Override
   public ElasticsearchDao getEsDao() {
     return esDao;
   }
@@ -73,6 +82,17 @@ public class NeutronElasticValidator {
 
   public ReplicatedClientRelationshipDao getRepClientRelationshipDao() {
     return repClientRelationshipDao;
+  }
+
+  @Override
+  public Logger getLogger() {
+    return LOGGER;
+  }
+
+  @Override
+  public FlightRecord getTrack() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }
