@@ -4,8 +4,8 @@ import gov.ca.cwds.jobs.config.JobOptions;
 
 public interface AtomRocketOptions {
 
-  JobOptions getRocketOptions(String jobName, Class<?> klazz);
+  JobOptions getRocketOptions(Class<?> klazz, String jobName);
 
-  void addRocketOptions(Class<?> klazz, JobOptions opts);
+  void addRocketOptions(Class<?> klazz, String jobName, JobOptions inOpts);
 
 }

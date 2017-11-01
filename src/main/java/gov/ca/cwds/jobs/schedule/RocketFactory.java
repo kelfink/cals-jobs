@@ -1,9 +1,5 @@
 package gov.ca.cwds.jobs.schedule;
 
-import java.io.File;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -14,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
@@ -21,6 +18,7 @@ import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 
+@Singleton
 public class RocketFactory implements AtomRocketFactory {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RocketFactory.class);
@@ -29,24 +27,14 @@ public class RocketFactory implements AtomRocketFactory {
 
   private final JobOptions baseOpts;
 
-  /**
-   * Job options by job type.
-   */
-  private final Map<Class<?>, JobOptions> optionsRegistry = new ConcurrentHashMap<>();
+  private final RocketOptions rocketOptions;
 
   @Inject
-  public RocketFactory(final Injector injector, final JobOptions opts) {
+  public RocketFactory(final Injector injector, final JobOptions opts,
+      final RocketOptions rocketOptions) {
     this.injector = injector;
     this.baseOpts = opts;
-  }
-
-  protected JobOptions getRocketOptions(String jobName, Class<?> klazz) {
-    if (optionsRegistry.containsKey(klazz)) {
-      final JobOptions opts = new JobOptions(baseOpts);
-      opts.setLastRunLoc(opts.getBaseDirectory() + File.separator + jobName + ".time");
-    }
-
-    return optionsRegistry.get(klazz);
+    this.rocketOptions = rocketOptions;
   }
 
   @Override
@@ -75,7 +63,7 @@ public class RocketFactory implements AtomRocketFactory {
     final JobDetail jd = bundle.getJobDetail();
     final NeutronInterruptableJob job =
         (NeutronInterruptableJob) injector.getInstance(bundle.getJobDetail().getJobClass());
-    job.setOpts(getRocketOptions(jd.getKey().getName(), jd.getJobClass()));
+    job.setOpts(rocketOptions.getRocketOptions(jd.getJobClass(), jd.getKey().getName()));
     return job;
   }
 
