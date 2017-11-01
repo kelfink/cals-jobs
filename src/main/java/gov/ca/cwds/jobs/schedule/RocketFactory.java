@@ -77,7 +77,8 @@ public class RocketFactory implements AtomRocketFactory {
 
     NeutronInterruptableJob ret;
     try {
-      final JobOptions opts = rocketOptions.getFlightSettings(klazz, jd.getKey().getName());
+      final JobOptions opts = rocketOptions.getFlightSettings(klazz);
+      LOGGER.warn("ROCKET FACTORY: LAST CHANGE LOCATION: {}", opts.getLastRunLoc());
       ret = new NeutronInterruptableJob(createJob(klazz, opts));
     } catch (NeutronException e) {
       throw new SchedulerException("NO ROCKET SETTINGS!", e);

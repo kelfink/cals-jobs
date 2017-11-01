@@ -4,8 +4,8 @@ import gov.ca.cwds.jobs.config.JobOptions;
 
 public interface AtomFlightSettings {
 
-  JobOptions getFlightSettings(Class<?> klazz, String jobName);
+  JobOptions getFlightSettings(Class<?> klazz);
 
-  void addFlightSettings(Class<?> klazz, String jobName, JobOptions opts);
+  void addFlightSettings(Class<?> klazz, JobOptions opts);
 
 }

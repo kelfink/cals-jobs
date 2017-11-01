@@ -11,7 +11,7 @@ import gov.ca.cwds.jobs.config.JobOptions;
 @Singleton
 public class RocketOptions implements AtomFlightSettings {
 
-  private final JobOptions baseOpts;
+  private final JobOptions globalOpts;
 
   /**
    * Job options by job type.
@@ -20,21 +20,23 @@ public class RocketOptions implements AtomFlightSettings {
 
   @Inject
   public RocketOptions(final JobOptions baseOpts) {
-    this.baseOpts = baseOpts;
+    this.globalOpts = baseOpts;
   }
 
   @Override
-  public JobOptions getFlightSettings(Class<?> klazz, String jobName) {
+  public JobOptions getFlightSettings(Class<?> klazz) {
     return optionsRegistry.get(klazz);
   }
 
   @Override
-  public void addFlightSettings(Class<?> klazz, String jobName, JobOptions opts) {
-    optionsRegistry.put(klazz, opts);
+  public void addFlightSettings(Class<?> klazz, JobOptions opts) {
+    if (!optionsRegistry.containsKey(klazz)) {
+      optionsRegistry.put(klazz, opts);
+    }
   }
 
-  public JobOptions getBaseOpts() {
-    return baseOpts;
+  public JobOptions getGlobalOpts() {
+    return globalOpts;
   }
 
 }

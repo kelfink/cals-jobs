@@ -246,7 +246,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
         final LaunchPad nj =
             new LaunchPad(neutronScheduler.getScheduler(), sched, flightRecorder, opts);
         neutronScheduler.getScheduleRegistry().put(klass, nj);
-        neutronScheduler.getRocketOptions().addFlightSettings(klass, sched.getName(), opts);
+        neutronScheduler.getRocketOptions().addFlightSettings(klass, opts);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
       }
 

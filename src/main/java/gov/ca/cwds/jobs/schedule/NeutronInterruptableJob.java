@@ -64,6 +64,8 @@ public class NeutronInterruptableJob implements InterruptableJob {
       map.put("track", track);
       context.setResult(track);
 
+      LOGGER.warn("ABORTABLE ROCKET: LAST CHANGE LOCATION: {}", job.getOpts().getLastRunLoc());
+
       job.run();
     } catch (Exception e) {
       LOGGER.error("FAILED TO LAUNCH! {}", rocket.getClass().getName(), e);
