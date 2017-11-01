@@ -53,7 +53,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
   /**
    * Singleton instance. One director to rule them all.
    */
-  private static LaunchDirector instance;
+  private static LaunchDirector instance = new LaunchDirector(null, null, null);
 
   private LaunchCenterSettings settings = new LaunchCenterSettings();
 
@@ -79,6 +79,10 @@ public class LaunchDirector implements AtomLaunchScheduler {
   private FlightRecorder flightRecorder = new FlightRecorder();
 
   private LaunchScheduler neutronScheduler;
+
+  private LaunchDirector() {
+    // no-op
+  }
 
   @Inject
   public LaunchDirector(final FlightRecorder jobHistory, final LaunchScheduler neutronScheduler,
@@ -435,30 +439,8 @@ public class LaunchDirector implements AtomLaunchScheduler {
    */
   public static LaunchDirector getInstance() {
     if (instance == null) {
-      startSingleLaunchMode();
+      instance = new LaunchDirector();
     }
-    return instance;
-  }
-
-  protected static synchronized LaunchDirector startSingleLaunchMode() {
-    LOGGER.info("STARTING SINGLE LAUNCH MODE ...");
-    try {
-      final JobOptions globalOpts = new JobOptions();
-      globalOpts.setBaseDirectory("config");
-      globalOpts.setEsConfigLoc("config/local.yaml");
-
-      final Injector injector = JobsGuiceInjector.buildInjector(globalOpts);
-      instance = injector.getInstance(LaunchDirector.class);
-      instance.startingOpts = globalOpts;
-
-      instance.settings.setContinuousMode(false);
-      instance.settings.setInitialMode(!instance.startingOpts.isLastRunMode());
-
-      LOGGER.info("SINGLE LAUNCH MODE READY");
-    } catch (Exception e) {
-      throw JobLogs.runtime(LOGGER, e, "FAILED TO START DIRECTOR: {}", e.getMessage());
-    }
-
     return instance;
   }
 
