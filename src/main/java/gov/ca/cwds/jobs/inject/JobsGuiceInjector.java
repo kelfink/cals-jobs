@@ -249,6 +249,7 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   protected void bindDaos() {
+    LOGGER.info("make DAOs");
     // DB2 replicated tables:
     bind(ReplicatedRelationshipsDao.class);
     bind(ReplicatedClientDao.class);
@@ -274,6 +275,7 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   protected SessionFactory makeCmsSessionFactory() {
+    LOGGER.info("make CMS session factory");
     return new Configuration().configure(getHibernateConfigCms())
         .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsClientAddress.class)
         .addAnnotatedClass(EsRelationship.class).addAnnotatedClass(EsPersonReferral.class)
@@ -294,6 +296,7 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   protected SessionFactory makeNsSessionFactory() {
+    LOGGER.info("make NS session factory");
     return new Configuration().configure(getHibernateConfigNs())
         .addAnnotatedClass(EsIntakeScreening.class).addAnnotatedClass(IntakeScreening.class)
         .buildSessionFactory();
