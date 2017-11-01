@@ -59,8 +59,8 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
     this.jobHistory = jobHistory;
     this.opts = opts;
 
-    LOGGER.warn("LastSuccessfulRunJob.ctor: lastRunTimeFilename: {}", lastRunTimeFilename);
-    LOGGER.warn("LastSuccessfulRunJob.ctor: opts.getLastRunLoc(): {}", opts.getLastRunLoc());
+    // LOGGER.warn("LastSuccessfulRunJob.ctor: lastRunTimeFilename: {}", lastRunTimeFilename);
+    // LOGGER.warn("LastSuccessfulRunJob.ctor: opts.getLastRunLoc(): {}", opts.getLastRunLoc());
   }
 
   /**
