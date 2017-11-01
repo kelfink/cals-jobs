@@ -26,7 +26,7 @@ public class RocketOptions implements AtomRocketOptions {
 
   @Override
   public JobOptions getRocketOptions(Class<?> klazz, String jobName) {
-    if (optionsRegistry.containsKey(klazz)) {
+    if (!optionsRegistry.containsKey(klazz)) {
       addRocketOptions(klazz, jobName, null);
     }
 

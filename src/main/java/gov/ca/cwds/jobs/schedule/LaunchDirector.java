@@ -177,8 +177,8 @@ public class LaunchDirector implements AtomLaunchScheduler {
     final ListenerManager listenerMgr = neutronScheduler.getScheduler().getListenerManager();
     listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
     listenerMgr.addTriggerListener(new NeutronTriggerListener(neutronScheduler));
-    listenerMgr.addJobListener(initialMode ? DefaultFlightSchedule.fullLoadJobChainListener()
-        : new NeutronJobListener());
+    listenerMgr.addJobListener(
+        initialMode ? DefaultFlightSchedule.fullLoadJobChainListener() : new NeutronJobListener());
     return neutronScheduler;
   }
 
@@ -245,8 +245,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
         final JobOptions opts = new JobOptions(startingOpts);
         handleTimeFile(opts, fmt, now, sched);
 
-        final LaunchPad nj =
-            new LaunchPad(neutronScheduler.getScheduler(), sched, flightRecorder);
+        final LaunchPad nj = new LaunchPad(neutronScheduler.getScheduler(), sched, flightRecorder);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         neutronScheduler.getScheduleRegistry().put(klass, nj);
       }
@@ -257,10 +256,9 @@ public class LaunchDirector implements AtomLaunchScheduler {
       // Expose Guice bean attributes to JMX.
       Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
 
-      // HACK: move this responsibility to another class.
+      // MOVE: move this responsibility to another class.
       if (startingOpts.isDropIndex()) {
-        final ElasticsearchDao anEsDao = getInstance().esDao;
-        anEsDao.deleteIndex(anEsDao.getConfig().getElasticsearchAlias());
+        esDao.deleteIndex(esDao.getConfig().getElasticsearchAlias());
       }
 
       // Start last change jobs.
