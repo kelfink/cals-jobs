@@ -247,8 +247,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
     } catch (SQLException e) {
       fail();
-      throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PULL RANGE! {}-{} : {}",
-          p.getLeft(), p.getRight(), e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(),
+          p.getRight(), e.getMessage());
     }
 
     getTrack().trackRangeComplete(p);
@@ -283,7 +283,7 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
 
     } catch (Exception e) {
       fail();
-      throw JobLogs.buildRuntimeException(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
     }

@@ -138,8 +138,7 @@ public abstract class CaseHistoryIndexerJob
     try {
       insertJson = mapper.writeValueAsString(esp);
     } catch (JsonProcessingException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}",
-          e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}", e.getMessage());
     }
 
     final String updateJson = buf.toString();
