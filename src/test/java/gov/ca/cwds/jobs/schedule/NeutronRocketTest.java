@@ -12,12 +12,12 @@ import org.junit.Test;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
 
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
@@ -31,10 +31,13 @@ public class NeutronRocketTest extends PersonJobTester {
   @Before
   public void setup() throws Exception {
     super.setup();
+
     dao = new TestNormalizedEntityDao(sessionFactory);
     rocket =
         new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, jobHistory);
     rocket.setOpts(opts);
+    rocket.init(this.tempFile.getAbsolutePath(), opts);
+
     rocket.setTrack(track);
     target = new NeutronRocket(rocket);
   }
@@ -49,8 +52,8 @@ public class NeutronRocketTest extends PersonJobTester {
     assertThat(target, notNullValue());
   }
 
-  @Test(expected = JobExecutionException.class)
-  public void execute_Args__JobExecutionContext_T__JobExecutionException() throws Exception {
+  @Test(expected = JobsException.class)
+  public void execute_Args__JobExecutionContext_T__JobException() throws Exception {
     JobExecutionContext context_ = mock(JobExecutionContext.class);
     JobDetail jd = mock(JobDetail.class);
     Trigger trg = mock(Trigger.class);
