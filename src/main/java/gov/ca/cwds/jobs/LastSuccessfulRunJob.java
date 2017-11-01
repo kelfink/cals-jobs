@@ -59,11 +59,28 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
     this.jobHistory = jobHistory;
     this.opts = opts;
 
-    LOGGER.warn("LastSuccessfulRunJob.ctor: LAST CHANGE LOCATION: {}", lastRunTimeFilename);
+    LOGGER.warn("LastSuccessfulRunJob.ctor: lastRunTimeFilename: {}", lastRunTimeFilename);
+    LOGGER.warn("LastSuccessfulRunJob.ctor: opts.getLastRunLoc(): {}", opts.getLastRunLoc());
+  }
+
+  /**
+   * HACK for dependency injection issue. (re-?) initialize the job.
+   * 
+   * @param lastJobRunTimeFilename last run file location
+   * @param opts launch options
+   */
+  public void init(String lastJobRunTimeFilename, final JobOptions opts) {
+    this.lastRunTimeFilename =
+        StringUtils.isBlank(lastJobRunTimeFilename) ? opts.getLastRunLoc() : lastJobRunTimeFilename;
+    this.opts = opts;
+
+    LOGGER.warn("LastSuccessfulRunJob.ctor: lastRunTimeFilename: {}", lastRunTimeFilename);
+    LOGGER.warn("LastSuccessfulRunJob.ctor: opts.getLastRunLoc(): {}", opts.getLastRunLoc());
   }
 
   @Override
   public final void run() {
+    LOGGER.warn("LastSuccessfulRunJob.run(): lastRunTimeFilename: {}", lastRunTimeFilename);
     final FlightRecord track = getTrack();
     track.start();
 

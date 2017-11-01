@@ -43,11 +43,13 @@ public class RocketFactory implements AtomRocketFactory {
       throws NeutronException {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
+
+      // QUESTION: is there a cleaner way to call this??
       final BasePersonIndexerJob ret = (BasePersonIndexerJob<?, ?>) injector.getInstance(klass);
-      ret.setOpts(opts);
+      ret.init(opts.getLastRunLoc(), opts);
       return ret;
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!: {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO CREATE ROCKET!: {}", e.getMessage());
     }
   }
 
