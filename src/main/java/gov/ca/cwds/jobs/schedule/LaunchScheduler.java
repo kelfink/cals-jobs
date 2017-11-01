@@ -108,8 +108,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   @Override
   public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, JobOptions opts) {
-    LOGGER.warn("LAUNCH COORDINATOR: LAST CHANGE LOCATION: {}", opts.getLastRunLoc());
-
+    LOGGER.debug("LAUNCH COORDINATOR: LAST CHANGE LOCATION: {}", opts.getLastRunLoc());
     final LaunchPad nj = new LaunchPad(this.getScheduler(), sched, flightRecorder, opts);
     rocketOptions.addFlightSettings(klazz, opts);
     scheduleRegistry.put(klazz, nj);

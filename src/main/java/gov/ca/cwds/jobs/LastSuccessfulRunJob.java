@@ -152,7 +152,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   protected Date determineLastSuccessfulRunTime() {
     Date ret = null;
-    LOGGER.warn("LastSuccessfulRunJob.determineLastSuccessfulRunTime(): LAST CHANGE LOCATION: {}",
+    LOGGER.debug("LastSuccessfulRunJob.determineLastSuccessfulRunTime(): LAST CHANGE LOCATION: {}",
         lastRunTimeFilename);
 
     try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR

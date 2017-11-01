@@ -64,6 +64,7 @@ public class RocketFactory implements AtomRocketFactory {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler) throws SchedulerException {
     final JobDetail jd = bundle.getJobDetail();
@@ -80,7 +81,7 @@ public class RocketFactory implements AtomRocketFactory {
     NeutronRocket ret;
     try {
       final JobOptions opts = rocketOptions.getFlightSettings(klazz);
-      LOGGER.warn("ROCKET FACTORY: LAST CHANGE LOCATION: {}", opts.getLastRunLoc());
+      LOGGER.debug("ROCKET FACTORY: LAST CHANGE LOCATION: {}", opts.getLastRunLoc());
       ret = new NeutronRocket(createJob(klazz, opts));
     } catch (NeutronException e) {
       throw new SchedulerException("NO ROCKET SETTINGS!", e);
