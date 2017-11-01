@@ -150,8 +150,7 @@ public class FacilityIndexerJob extends AbstractModule {
       try {
         return c.prepareStatement(jobConfig.getJobLisReaderQuery()); // NOSONAR
       } catch (SQLException e) {
-        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PREPARE STATEMENT!",
-            e.getMessage());
+        throw JobLogs.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT!", e.getMessage());
       }
     };
   }
@@ -159,8 +158,7 @@ public class FacilityIndexerJob extends AbstractModule {
   @Provides
   @Named("facility-reader")
   @Inject
-  public JobReader lisItemReader(JobConfiguration jobConfiguration,
-      FacilityRowMapper facilityRowMapper,
+  public JobReader lisItemReader(JobConfiguration jobConfiguration, RowMapper facilityRowMapper,
       @Named(LIS_SESSION_FACTORY_NM) SessionFactory sessionFactory,
       Function<Connection, PreparedStatement> createPreparedStatementMaker) {
     return new JdbcJobReader<>(sessionFactory, facilityRowMapper, createPreparedStatementMaker);

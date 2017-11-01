@@ -124,7 +124,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    */
   @Override
   public ESOptionalCollection[] keepCollections() {
-    return KEEP_COLLECTIONS;
+    return KEEP_COLLECTIONS.clone();
   }
 
   @Override
