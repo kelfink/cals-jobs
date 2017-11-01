@@ -61,11 +61,19 @@ public class RocketFactory implements AtomRocketFactory {
   @Override
   public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler) throws SchedulerException {
     final JobDetail jd = bundle.getJobDetail();
-    LOGGER.warn("LAUNCH! {}", bundle.getJobDetail().getJobClass());
-    final NeutronInterruptableJob job =
-        (NeutronInterruptableJob) injector.getInstance(bundle.getJobDetail().getJobClass());
-    job.setOpts(rocketOptions.getRocketOptions(jd.getJobClass(), jd.getKey().getName()));
-    return job;
+    final Class<?> klazz = jd.getJobClass();
+    LOGGER.warn("LAUNCH! {}", klazz);
+    final NeutronInterruptableJob ret = (NeutronInterruptableJob) injector.getInstance(klazz);
+    ret.setOpts(rocketOptions.getRocketOptions(klazz, jd.getKey().getName()));
+    return ret;
+  }
+
+  public JobOptions getBaseOpts() {
+    return baseOpts;
+  }
+
+  public RocketOptions getRocketOptions() {
+    return rocketOptions;
   }
 
 }

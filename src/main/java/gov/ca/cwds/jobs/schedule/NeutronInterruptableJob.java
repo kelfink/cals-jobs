@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs.schedule;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.InterruptableJob;
 import org.quartz.JobDataMap;
@@ -24,6 +26,8 @@ public class NeutronInterruptableJob implements InterruptableJob {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronInterruptableJob.class);
 
+  private static final AtomicInteger instanceCounter = new AtomicInteger(0);
+
   private String className;
   private String cmdLine;
   private JobOptions opts;
@@ -46,7 +50,7 @@ public class NeutronInterruptableJob implements InterruptableJob {
     className = map.getString("job_class");
     final String jobName = context.getTrigger().getJobKey().getName();
 
-    LOGGER.info("Execute {}", className);
+    LOGGER.info("Execute {}, instance # ", className, instanceCounter.incrementAndGet());
     try (final BasePersonIndexerJob job = LaunchDirector.getInstance().createJob(className, opts)) {
       track = new FlightRecord(); // fresh progress track
       track.setJobName(jobName);
