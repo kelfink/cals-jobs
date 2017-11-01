@@ -57,7 +57,6 @@ public class NeutronTriggerListenerTest extends PersonJobTester {
     when(jobDataMap.getString(any(String.class))).thenReturn(TestIndexerJob.class.getName());
 
     neutronScheduler.scheduleJob(TestIndexerJob.class, DefaultFlightSchedule.CLIENT, opts);
-
     target = new NeutronTriggerListener(neutronScheduler);
   }
 

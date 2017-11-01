@@ -39,7 +39,6 @@ public class LaunchPad implements Serializable {
 
   private JobOptions opts;
 
-
   private boolean vetoExecution;
 
   private volatile JobKey jobKey;
@@ -146,6 +145,14 @@ public class LaunchPad implements Serializable {
 
   public JobDetail getJd() {
     return jd;
+  }
+
+  public JobOptions getOpts() {
+    return opts;
+  }
+
+  public void setOpts(JobOptions opts) {
+    this.opts = opts;
   }
 
 }

@@ -622,7 +622,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
       if (autoInitialLoad) {
         refreshMQT();
-
         if (isInitialLoadJdbc()) {
           doInitialLoadJdbc();
         } else {

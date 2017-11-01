@@ -176,7 +176,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
    * @throws IOException on file error
    */
   protected void handleTimeFile(final JobOptions opts, final DateFormat fmt, final Date now,
-      DefaultFlightSchedule sched) throws IOException {
+      final DefaultFlightSchedule sched) throws IOException {
     final StringBuilder buf = new StringBuilder();
     buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
         .append(".time");
@@ -451,6 +451,17 @@ public class LaunchDirector implements AtomLaunchScheduler {
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
     int exitCode = 0;
+
+    JobOptions globalOpts;
+    try {
+      globalOpts = JobOptions.parseCommandLine(args);
+    } catch (Exception e) {
+      throw JobLogs.runtime(LOGGER, e, "CMD LINE ERROR! {}", e.getMessage());
+    }
+
+    final Injector injector = JobsGuiceInjector.buildInjector(globalOpts);
+    instance = injector.getInstance(LaunchDirector.class);
+    instance.startingOpts = globalOpts;
     instance.settings.setContinuousMode(false);
 
     try (final T job = JobsGuiceInjector.newJob(klass, args)) {
