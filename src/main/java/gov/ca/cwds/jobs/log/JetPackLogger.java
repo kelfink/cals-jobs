@@ -1,5 +1,9 @@
 package gov.ca.cwds.jobs.log;
 
+import java.util.Arrays;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 
@@ -9,6 +13,13 @@ public class JetPackLogger implements Flex4JLogger {
 
   public JetPackLogger(final Logger logger) {
     this.logger = logger;
+  }
+
+  public void info(String format, Supplier<Object>... args) {
+    if (isInfoEnabled()) {
+      logger.info(format, Arrays.stream(args).map(Supplier::get).collect(Collectors.toList())
+          .toArray(new Object[0]));
+    }
   }
 
   @Override

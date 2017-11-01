@@ -26,6 +26,11 @@ public class JetPackLoggerTest {
   }
 
   @Test
+  public void info_Args__String__SupplierArray() throws Exception {
+    target.info("first name: {}, last name: {}", () -> "fred", () -> "meyer");
+  }
+
+  @Test
   public void type() throws Exception {
     assertThat(JetPackLogger.class, notNullValue());
   }
