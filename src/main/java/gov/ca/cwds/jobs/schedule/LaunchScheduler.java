@@ -29,7 +29,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   private final AtomRocketFactory rocketFactory;
 
-  private final AtomRocketOptions rocketOptions;
+  private final AtomFlightSettings rocketOptions;
 
   private JobOptions opts;
 
@@ -50,7 +50,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   @Inject
   public LaunchScheduler(final FlightRecorder jobHistory, final AtomRocketFactory rocketFactory,
-      final AtomRocketOptions rocketOptions) {
+      final AtomFlightSettings rocketOptions) {
     this.flightRecorder = jobHistory;
     this.rocketFactory = rocketFactory;
     this.rocketOptions = rocketOptions;
@@ -108,9 +108,9 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   @Override
   public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, JobOptions opts) {
-    this.rocketOptions.addRocketOptions(klazz, sched.getName(), opts);
     final LaunchPad nj = new LaunchPad(this.getScheduler(), sched, flightRecorder, opts);
-    this.getScheduleRegistry().put(klazz, nj);
+    rocketOptions.addFlightSettings(klazz, sched.getName(), opts);
+    scheduleRegistry.put(klazz, nj);
     return nj;
   }
 
@@ -183,7 +183,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     return this.getScheduleRegistry().get(klazz).isVetoExecution();
   }
 
-  public AtomRocketOptions getRocketOptions() {
+  public AtomFlightSettings getRocketOptions() {
     return rocketOptions;
   }
 

@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs.schedule;
 
-import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,7 +9,7 @@ import com.google.inject.Singleton;
 import gov.ca.cwds.jobs.config.JobOptions;
 
 @Singleton
-public class RocketOptions implements AtomRocketOptions {
+public class RocketOptions implements AtomFlightSettings {
 
   private final JobOptions baseOpts;
 
@@ -25,21 +24,17 @@ public class RocketOptions implements AtomRocketOptions {
   }
 
   @Override
-  public JobOptions getRocketOptions(Class<?> klazz, String jobName) {
-    if (!optionsRegistry.containsKey(klazz)) {
-      addRocketOptions(klazz, jobName, null);
-    }
-
+  public JobOptions getFlightSettings(Class<?> klazz, String jobName) {
     return optionsRegistry.get(klazz);
   }
 
   @Override
-  public void addRocketOptions(Class<?> klazz, String jobName, JobOptions inOpts) {
-    if (!optionsRegistry.containsKey(klazz)) {
-      final JobOptions opts = inOpts != null ? inOpts : new JobOptions(baseOpts);
-      opts.setLastRunLoc(opts.getBaseDirectory() + File.separator + jobName + ".time");
-      optionsRegistry.put(klazz, opts);
-    }
+  public void addFlightSettings(Class<?> klazz, String jobName, JobOptions opts) {
+    optionsRegistry.put(klazz, opts);
+  }
+
+  public JobOptions getBaseOpts() {
+    return baseOpts;
   }
 
 }

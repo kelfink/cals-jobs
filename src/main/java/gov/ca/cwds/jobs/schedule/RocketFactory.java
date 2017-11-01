@@ -37,12 +37,15 @@ public class RocketFactory implements AtomRocketFactory {
     this.rocketOptions = rocketOptions;
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public BasePersonIndexerJob createJob(Class<?> klass, final JobOptions opts)
       throws NeutronException {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
-      return (BasePersonIndexerJob<?, ?>) injector.getInstance(klass);
+      final BasePersonIndexerJob ret = (BasePersonIndexerJob<?, ?>) injector.getInstance(klass);
+      ret.setOpts(opts);
+      return ret;
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!: {}", e.getMessage());
     }
@@ -64,7 +67,7 @@ public class RocketFactory implements AtomRocketFactory {
     final Class<?> klazz = jd.getJobClass();
     LOGGER.warn("LAUNCH! {}", klazz);
     final NeutronInterruptableJob ret = (NeutronInterruptableJob) injector.getInstance(klazz);
-    ret.setOpts(rocketOptions.getRocketOptions(klazz, jd.getKey().getName()));
+    ret.setOpts(rocketOptions.getFlightSettings(klazz, jd.getKey().getName()));
     return ret;
   }
 
