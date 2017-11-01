@@ -26,8 +26,28 @@ public class JetPackLoggerTest {
   }
 
   @Test
+  public void trace_Args__String__SupplierArray() throws Exception {
+    target.trace("{} {}", () -> "Shrink", () -> "Ray");
+  }
+
+  @Test
+  public void debug_Args__String__SupplierArray() throws Exception {
+    target.debug("{} {}", () -> "Hyper", () -> "Cube");
+  }
+
+  @Test
   public void info_Args__String__SupplierArray() throws Exception {
-    target.info("first name: {}, last name: {}", () -> "fred", () -> "meyer");
+    target.info("first name: {}, last name: {}", () -> "Jimmy", () -> "Neutron");
+  }
+
+  @Test
+  public void warn_Args__String__SupplierArray() throws Exception {
+    target.warn("{} {}", () -> "Burping", () -> "Soda");
+  }
+
+  @Test
+  public void error_Args__String__SupplierArray() throws Exception {
+    target.error("{} {}", () -> "X-Ray", () -> "Specs");
   }
 
   @Test

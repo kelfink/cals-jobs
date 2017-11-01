@@ -15,10 +15,38 @@ public class JetPackLogger implements Flex4JLogger {
     this.logger = logger;
   }
 
+  private Object[] collect(Supplier<Object>... args) {
+    return Arrays.stream(args).map(Supplier::get).collect(Collectors.toList())
+        .toArray(new Object[0]);
+  }
+
+  public void trace(String format, Supplier<Object>... args) {
+    if (isTraceEnabled()) {
+      logger.trace(format, collect(args));
+    }
+  }
+
+  public void debug(String format, Supplier<Object>... args) {
+    if (isDebugEnabled()) {
+      logger.debug(format, collect(args));
+    }
+  }
+
   public void info(String format, Supplier<Object>... args) {
     if (isInfoEnabled()) {
-      logger.info(format, Arrays.stream(args).map(Supplier::get).collect(Collectors.toList())
-          .toArray(new Object[0]));
+      logger.info(format, collect(args));
+    }
+  }
+
+  public void warn(String format, Supplier<Object>... args) {
+    if (isWarnEnabled()) {
+      logger.warn(format, collect(args));
+    }
+  }
+
+  public void error(String format, Supplier<Object>... args) {
+    if (isErrorEnabled()) {
+      logger.error(format, collect(args));
     }
   }
 
