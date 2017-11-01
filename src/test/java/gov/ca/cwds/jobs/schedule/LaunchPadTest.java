@@ -21,24 +21,24 @@ import org.quartz.TriggerKey;
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.component.FlightRecord;
 
-public class NeutronJobMgtFacadeTest {
+public class LaunchPadTest {
 
   Scheduler scheduler;
-  NeutronDefaultJobSchedule sched;
+  DefaultFlightSchedule sched;
   FlightRecorder history;
-  NeutronJobMgtFacade target;
+  LaunchPad target;
 
   @Before
   public void setup() throws Exception {
     scheduler = mock(Scheduler.class);
-    sched = NeutronDefaultJobSchedule.CLIENT;
+    sched = DefaultFlightSchedule.CLIENT;
     history = new FlightRecorder();
-    target = new NeutronJobMgtFacade(scheduler, sched, history);
+    target = new LaunchPad(scheduler, sched, history);
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(NeutronJobMgtFacade.class, notNullValue());
+    assertThat(LaunchPad.class, notNullValue());
   }
 
   @Test

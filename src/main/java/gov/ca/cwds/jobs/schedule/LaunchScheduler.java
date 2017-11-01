@@ -34,7 +34,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   /**
    * Scheduled jobs.
    */
-  private final Map<Class<?>, NeutronJobMgtFacade> scheduleRegistry = new ConcurrentHashMap<>();
+  private final Map<Class<?>, LaunchPad> scheduleRegistry = new ConcurrentHashMap<>();
 
   /**
    * Possibly not necessary. Listeners and running jobs should handle this, but we still need a
@@ -103,9 +103,9 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched) {
-    final NeutronJobMgtFacade nj =
-        new NeutronJobMgtFacade(this.getScheduler(), sched, flightRecorder);
+  public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched) {
+    final LaunchPad nj =
+        new LaunchPad(this.getScheduler(), sched, flightRecorder);
     this.getScheduleRegistry().put(klazz, nj);
     return nj;
   }
@@ -164,7 +164,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     this.scheduler = scheduler;
   }
 
-  public Map<Class<?>, NeutronJobMgtFacade> getScheduleRegistry() {
+  public Map<Class<?>, LaunchPad> getScheduleRegistry() {
     return scheduleRegistry;
   }
 

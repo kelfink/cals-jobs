@@ -19,7 +19,6 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 public class RocketFactory implements AtomRocketFactory {
@@ -43,7 +42,7 @@ public class RocketFactory implements AtomRocketFactory {
 
   protected JobOptions getRocketOptions(String jobName, Class<?> klazz) {
     if (optionsRegistry.containsKey(klazz)) {
-      JobOptions opts = new JobOptions(baseOpts);
+      final JobOptions opts = new JobOptions(baseOpts);
       opts.setLastRunLoc(opts.getBaseDirectory() + File.separator + jobName + ".time");
     }
 
@@ -55,7 +54,7 @@ public class RocketFactory implements AtomRocketFactory {
       throws NeutronException {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
-      return (BasePersonIndexerJob<?, ?>) JobsGuiceInjector.getInjector().getInstance(klass);
+      return (BasePersonIndexerJob<?, ?>) injector.getInstance(klass);
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!: {}", e.getMessage());
     }
@@ -66,7 +65,7 @@ public class RocketFactory implements AtomRocketFactory {
       throws NeutronException {
     try {
       return createJob(Class.forName(jobName), opts);
-    } catch (Exception e) {
+    } catch (ClassNotFoundException e) {
       throw JobLogs.checked(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!!: {}", e.getMessage());
     }
   }
@@ -77,7 +76,6 @@ public class RocketFactory implements AtomRocketFactory {
     final NeutronInterruptableJob job =
         (NeutronInterruptableJob) injector.getInstance(bundle.getJobDetail().getJobClass());
     job.setOpts(getRocketOptions(jd.getKey().getName(), jd.getJobClass()));
-
     return job;
   }
 

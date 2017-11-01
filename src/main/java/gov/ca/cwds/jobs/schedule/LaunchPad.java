@@ -9,7 +9,6 @@ import java.io.Serializable;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.quartz.JobDetail;
-import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -23,15 +22,15 @@ import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 
-public class NeutronJobMgtFacade implements Serializable {
+public class LaunchPad implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJobMgtFacade.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPad.class);
 
   private transient Scheduler scheduler;
 
-  private final NeutronDefaultJobSchedule defaultSchedule;
+  private final DefaultFlightSchedule flightSchedule;
 
   private final FlightRecorder jobHistory;
 
@@ -42,13 +41,13 @@ public class NeutronJobMgtFacade implements Serializable {
   private volatile JobKey jobKey;
   private volatile JobDetail jd;
 
-  public NeutronJobMgtFacade(final Scheduler scheduler, NeutronDefaultJobSchedule sched,
+  public LaunchPad(final Scheduler scheduler, DefaultFlightSchedule sched,
       final FlightRecorder jobHistory) {
     this.scheduler = scheduler;
-    this.defaultSchedule = sched;
+    this.flightSchedule = sched;
     this.jobHistory = jobHistory;
-    this.jobName = defaultSchedule.getName();
-    this.triggerName = defaultSchedule.getName();
+    this.jobName = flightSchedule.getName();
+    this.triggerName = flightSchedule.getName();
     this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
 
     jobHistory.addTrack(sched.getKlazz(), new FlightRecord());
@@ -57,18 +56,11 @@ public class NeutronJobMgtFacade implements Serializable {
   @Managed(description = "Run job now, show results immediately")
   public String run(String cmdLine) throws NeutronException {
     try {
-      LOGGER.info("RUN JOB: {}", defaultSchedule.getName());
-
-      JobOptions opts;
-      try {
-        opts = JobOptions
-            .parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
-      } catch (NeutronException e) {
-        throw new JobExecutionException("UNABLE TO PARSE COMMAND LINE!", e);
-      }
-
+      LOGGER.info("RUN JOB: {}", flightSchedule.getName());
+      final JobOptions opts =
+          JobOptions.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       final FlightRecord track =
-          LaunchDirector.getInstance().runScheduledJob(defaultSchedule.getKlazz(), opts);
+          LaunchDirector.getInstance().runScheduledJob(flightSchedule.getKlazz(), opts);
       return track.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);
@@ -85,19 +77,19 @@ public class NeutronJobMgtFacade implements Serializable {
 
     jd = newJob(NeutronInterruptableJob.class)
         .withIdentity(jobName, NeutronSchedulerConstants.GRP_LST_CHG)
-        .usingJobData("job_class", defaultSchedule.getKlazz().getName()).build();
+        .usingJobData("job_class", flightSchedule.getKlazz().getName()).build();
 
     // Initial mode: run only **once**.
     final Trigger trg = !LaunchDirector.isInitialMode()
         ? newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
-            .withPriority(defaultSchedule.getLastRunPriority())
-            .withSchedule(simpleSchedule().withIntervalInSeconds(defaultSchedule.getPeriodSeconds())
+            .withPriority(flightSchedule.getLastRunPriority())
+            .withSchedule(simpleSchedule().withIntervalInSeconds(flightSchedule.getPeriodSeconds())
                 .repeatForever())
-            .startAt(DateTime.now().plusSeconds(defaultSchedule.getStartDelaySeconds()).toDate())
+            .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
             .build()
         : newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_FULL_LOAD)
-            .withPriority(defaultSchedule.getLastRunPriority())
-            .startAt(DateTime.now().plusSeconds(defaultSchedule.getStartDelaySeconds()).toDate())
+            .withPriority(flightSchedule.getLastRunPriority())
+            .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
             .build();
 
     scheduler.scheduleJob(jd, trg);
@@ -120,13 +112,13 @@ public class NeutronJobMgtFacade implements Serializable {
   @Managed(description = "Show job status")
   public String status() {
     LOGGER.debug("Show job status");
-    return jobHistory.getLastTrack(this.defaultSchedule.getKlazz()).toString();
+    return jobHistory.getLastTrack(this.flightSchedule.getKlazz()).toString();
   }
 
   @Managed(description = "Show job history")
   public String history() {
     StringBuilder buf = new StringBuilder();
-    jobHistory.getHistory(this.defaultSchedule.getKlazz()).stream().forEach(buf::append);
+    jobHistory.getHistory(this.flightSchedule.getKlazz()).stream().forEach(buf::append);
     return buf.toString();
   }
 

@@ -109,7 +109,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
         new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
     final Date now = new DateTime().minusHours(initialMode ? 876000 : hoursInPast).toDate();
 
-    for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
+    for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
       final JobOptions opts = new JobOptions(startingOpts);
 
       // Find the job's time file under the base directory:
@@ -177,7 +177,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
     final ListenerManager listenerMgr = neutronScheduler.getScheduler().getListenerManager();
     listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
     listenerMgr.addTriggerListener(new NeutronTriggerListener(neutronScheduler));
-    listenerMgr.addJobListener(initialMode ? NeutronDefaultJobSchedule.fullLoadJobChainListener()
+    listenerMgr.addJobListener(initialMode ? DefaultFlightSchedule.fullLoadJobChainListener()
         : new NeutronJobListener());
     return neutronScheduler;
   }
@@ -192,7 +192,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
    * @throws IOException on file error
    */
   protected void handleTimeFile(final JobOptions opts, final DateFormat fmt, final Date now,
-      NeutronDefaultJobSchedule sched) throws IOException {
+      DefaultFlightSchedule sched) throws IOException {
     final StringBuilder buf = new StringBuilder();
     buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
         .append(".time");
@@ -240,13 +240,13 @@ public class LaunchDirector implements AtomLaunchScheduler {
       configureInitialMode(now);
 
       // Schedule jobs.
-      for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
+      for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
         final Class<?> klass = sched.getKlazz();
         final JobOptions opts = new JobOptions(startingOpts);
         handleTimeFile(opts, fmt, now, sched);
 
-        final NeutronJobMgtFacade nj =
-            new NeutronJobMgtFacade(neutronScheduler.getScheduler(), sched, flightRecorder);
+        final LaunchPad nj =
+            new LaunchPad(neutronScheduler.getScheduler(), sched, flightRecorder);
         exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
         neutronScheduler.getScheduleRegistry().put(klass, nj);
       }
@@ -264,7 +264,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
       }
 
       // Start last change jobs.
-      for (NeutronJobMgtFacade j : neutronScheduler.getScheduleRegistry().values()) {
+      for (LaunchPad j : neutronScheduler.getScheduleRegistry().values()) {
         j.schedule();
       }
 
@@ -385,7 +385,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
   }
 
   @Override
-  public NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched) {
+  public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched) {
     return this.scheduleJob(klazz, sched);
   }
 
@@ -409,7 +409,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
     return neutronScheduler.getScheduler();
   }
 
-  public Map<Class<?>, NeutronJobMgtFacade> getScheduleRegistry() {
+  public Map<Class<?>, LaunchPad> getScheduleRegistry() {
     return neutronScheduler.getScheduleRegistry();
   }
 

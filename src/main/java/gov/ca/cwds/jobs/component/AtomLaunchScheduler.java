@@ -4,9 +4,9 @@ import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.NeutronDefaultJobSchedule;
+import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
-import gov.ca.cwds.jobs.schedule.NeutronJobMgtFacade;
+import gov.ca.cwds.jobs.schedule.LaunchPad;
 
 public interface AtomLaunchScheduler {
 
@@ -22,7 +22,7 @@ public interface AtomLaunchScheduler {
 
   void addExecutingJob(TriggerKey key, NeutronInterruptableJob job);
 
-  NeutronJobMgtFacade scheduleJob(Class<?> klazz, NeutronDefaultJobSchedule sched);
+  LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched);
 
   boolean isJobVetoed(String className) throws NeutronException;
 

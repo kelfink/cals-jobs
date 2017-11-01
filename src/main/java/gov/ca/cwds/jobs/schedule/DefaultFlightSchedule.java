@@ -24,7 +24,7 @@ import gov.ca.cwds.jobs.SafetyAlertIndexerJob;
 import gov.ca.cwds.jobs.ServiceProviderIndexerJob;
 import gov.ca.cwds.jobs.SubstituteCareProviderIndexJob;
 
-public enum NeutronDefaultJobSchedule {
+public enum DefaultFlightSchedule {
 
   //
   // Person document roots.
@@ -116,15 +116,15 @@ public enum NeutronDefaultJobSchedule {
 
   private final String jsonElement;
 
-  private static final Map<String, NeutronDefaultJobSchedule> mapName = new ConcurrentHashMap<>();
+  private static final Map<String, DefaultFlightSchedule> mapName = new ConcurrentHashMap<>();
 
   static {
-    for (NeutronDefaultJobSchedule sched : NeutronDefaultJobSchedule.values()) {
+    for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
       mapName.put(sched.name, sched);
     }
   }
 
-  private NeutronDefaultJobSchedule(Class<?> klazz, boolean newDocument, String name,
+  private DefaultFlightSchedule(Class<?> klazz, boolean newDocument, String name,
       int initialLoadOrder, int startDelaySeconds, int periodSeconds, int lastRunPriority,
       String jsonElement) {
     this.klazz = klazz;
@@ -140,11 +140,11 @@ public enum NeutronDefaultJobSchedule {
   public static JobChainingJobListener fullLoadJobChainListener() {
     final JobChainingJobListener ret = new JobChainingJobListener("initial_load");
 
-    final NeutronDefaultJobSchedule[] arr = Arrays.copyOf(NeutronDefaultJobSchedule.values(),
-        NeutronDefaultJobSchedule.values().length);
+    final DefaultFlightSchedule[] arr = Arrays.copyOf(DefaultFlightSchedule.values(),
+        DefaultFlightSchedule.values().length);
     Arrays.sort(arr, (o1, o2) -> Integer.compare(o1.initialLoadOrder, o2.initialLoadOrder));
 
-    NeutronDefaultJobSchedule sched;
+    DefaultFlightSchedule sched;
     final int len = arr.length;
     for (int i = 0; i < len; i++) {
       sched = arr[i];
@@ -184,7 +184,7 @@ public enum NeutronDefaultJobSchedule {
     return jsonElement;
   }
 
-  public static NeutronDefaultJobSchedule lookupByJobName(String key) {
+  public static DefaultFlightSchedule lookupByJobName(String key) {
     return mapName.get(key);
   }
 
