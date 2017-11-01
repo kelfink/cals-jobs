@@ -77,9 +77,11 @@ import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.schedule.AtomRocketOptions;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
+import gov.ca.cwds.jobs.schedule.RocketOptions;
 import gov.ca.cwds.jobs.service.NeutronElasticValidator;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
@@ -242,6 +244,7 @@ public class JobsGuiceInjector extends AbstractModule {
     bind(ObjectMapper.class).toInstance(ObjectMapperUtils.createObjectMapper());
     bind(ElasticsearchDao.class).asEagerSingleton();
     bind(FlightRecorder.class).asEagerSingleton();
+    bind(AtomRocketOptions.class).to(RocketOptions.class).asEagerSingleton();
     bind(AtomRocketFactory.class).to(RocketFactory.class).asEagerSingleton();
   }
 
