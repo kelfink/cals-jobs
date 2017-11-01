@@ -642,7 +642,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       ret = new Date(this.getTrack().getStartTime());
     } catch (Exception e) {
       fail();
-      throw JobLogs.buildCheckedException(LOGGER, e, "JOB BOMBED! {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "JOB BOMBED! {}", e.getMessage());
     } finally {
       done();
       try {
