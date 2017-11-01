@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.FlightRecord;
-import gov.ca.cwds.jobs.config.JobOptions;
 
 /**
  * Wrapper for scheduled jobs.
@@ -28,16 +27,15 @@ public class NeutronInterruptableJob implements InterruptableJob {
 
   private static final AtomicInteger instanceCounter = new AtomicInteger(0);
 
-  private String className;
-  private String cmdLine;
-  private JobOptions opts;
+  private final BasePersonIndexerJob rocket;
+
   private volatile FlightRecord track;
 
   /**
    * Constructor.
    */
-  public NeutronInterruptableJob() {
-    // No-op.
+  public NeutronInterruptableJob(final BasePersonIndexerJob rocket) {
+    this.rocket = rocket;
   }
 
   /**
@@ -47,48 +45,32 @@ public class NeutronInterruptableJob implements InterruptableJob {
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
     final JobDataMap map = context.getJobDetail().getJobDataMap();
-    className = map.getString(NeutronSchedulerConstants.ROCKET_CLASS);
     final String jobName = context.getTrigger().getJobKey().getName();
 
-    LOGGER.info("Execute {}, instance # ", className, instanceCounter.incrementAndGet());
-    try (final BasePersonIndexerJob job = LaunchDirector.getInstance().createJob(className, opts)) {
+    LOGGER.info("Execute {}, instance # ", rocket.getClass().getName(),
+        instanceCounter.incrementAndGet());
+
+    try (final BasePersonIndexerJob job = rocket) {
       track = new FlightRecord(); // fresh progress track
       track.setJobName(jobName);
       job.setTrack(track);
 
-      map.put("opts", opts);
+      map.put("opts", job.getOpts());
       map.put("track", track);
       context.setResult(track);
 
-      job.setOpts(opts);
       job.run();
     } catch (Exception e) {
-      LOGGER.error("SCHEDULED JOB FAILED! {}", className, e);
-      throw new JobExecutionException("SCHEDULED JOB FAILED!", e);
+      LOGGER.error("FAILED TO LAUNCH! {}", rocket.getClass().getName(), e);
+      throw new JobExecutionException("FAILED TO LAUNCH!", e);
     }
 
-    LOGGER.info("Executed {}", className);
+    LOGGER.info("Executed {}", rocket.getClass().getName());
   }
 
   @Override
   public void interrupt() throws UnableToInterruptJobException {
     LOGGER.warn("INTERRUPT RUNNING JOB!");
-  }
-
-  public String getClassName() {
-    return className;
-  }
-
-  public void setClassName(String className) {
-    this.className = className;
-  }
-
-  public String getCmdLine() {
-    return cmdLine;
-  }
-
-  public void setCmdLine(String cmdLine) {
-    this.cmdLine = cmdLine;
   }
 
   public FlightRecord getTrack() {
@@ -97,14 +79,6 @@ public class NeutronInterruptableJob implements InterruptableJob {
 
   public void setTrack(FlightRecord track) {
     this.track = track;
-  }
-
-  public JobOptions getOpts() {
-    return opts;
-  }
-
-  public void setOpts(JobOptions opts) {
-    this.opts = opts;
   }
 
 }

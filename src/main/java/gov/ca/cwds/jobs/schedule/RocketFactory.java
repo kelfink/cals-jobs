@@ -47,7 +47,7 @@ public class RocketFactory implements AtomRocketFactory {
       ret.setOpts(opts);
       return ret;
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!: {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO CREATE ROCKET!: {}", e.getMessage());
     }
   }
 
@@ -58,7 +58,7 @@ public class RocketFactory implements AtomRocketFactory {
     try {
       return createJob(Class.forName(jobName), opts);
     } catch (ClassNotFoundException e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO SPAWN ON-DEMAND JOB!!: {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO CREATE ROCKET!: {}", e.getMessage());
     }
   }
 
@@ -70,12 +70,19 @@ public class RocketFactory implements AtomRocketFactory {
     try {
       klazz = Class.forName(jd.getJobDataMap().getString(NeutronSchedulerConstants.ROCKET_CLASS));
     } catch (ClassNotFoundException e) {
-      throw new SchedulerException(e);
+      throw new SchedulerException("NO SUCH ROCKET CLASS!", e);
     }
 
     LOGGER.warn("LAUNCH! {}", klazz);
-    final NeutronInterruptableJob ret = (NeutronInterruptableJob) injector.getInstance(klazz);
-    ret.setOpts(rocketOptions.getFlightSettings(klazz, jd.getKey().getName()));
+
+    NeutronInterruptableJob ret;
+    try {
+      ret = new NeutronInterruptableJob(
+          createJob(klazz, rocketOptions.getFlightSettings(klazz, jd.getKey().getName())));
+    } catch (NeutronException e) {
+      throw new SchedulerException("NO ROCKET SETTINGS!", e);
+    }
+
     return ret;
   }
 

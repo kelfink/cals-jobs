@@ -16,15 +16,26 @@ import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
 
+import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.test.TestIndexerJob;
+import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
-public class NeutronInterruptableJobTest {
+public class NeutronInterruptableJobTest extends PersonJobTester {
 
   NeutronInterruptableJob target;
+  TestNormalizedEntityDao dao;
+  TestIndexerJob rocket;
 
+  @Override
   @Before
   public void setup() throws Exception {
-    target = new NeutronInterruptableJob();
+    dao = new TestNormalizedEntityDao(sessionFactory);
+    rocket =
+        new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, jobHistory);
+    rocket.setOpts(opts);
+    rocket.setTrack(track);
+    target = new NeutronInterruptableJob(rocket);
   }
 
   @Test
@@ -59,32 +70,6 @@ public class NeutronInterruptableJobTest {
   @Test
   public void interrupt_Args__() throws Exception {
     target.interrupt();
-  }
-
-  @Test
-  public void getClassName_Args__() throws Exception {
-    String actual = target.getClassName();
-    String expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void setClassName_Args__String() throws Exception {
-    String className = null;
-    target.setClassName(className);
-  }
-
-  @Test
-  public void getCmdLine_Args__() throws Exception {
-    String actual = target.getCmdLine();
-    String expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void setCmdLine_Args__String() throws Exception {
-    String cmdLine = null;
-    target.setCmdLine(cmdLine);
   }
 
   @Test
