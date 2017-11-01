@@ -21,7 +21,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
 
 /**
  * Job to load case history from CMS into ElasticSearch for 'parent' person.
@@ -134,7 +134,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchDirector.runStandalone(ParentCaseHistoryIndexerJob.class, args);
+    LaunchCommand.runStandalone(ParentCaseHistoryIndexerJob.class, args);
   }
 
 }

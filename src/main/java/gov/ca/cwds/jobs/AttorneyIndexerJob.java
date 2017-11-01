@@ -1,12 +1,12 @@
 package gov.ca.cwds.jobs;
 
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
 
 /**
  * Original Attorney job now in class {@link OrigAttorneyIndexerJob}.
  * 
  * <p>
- * This job is a temporary facade to test {@link LaunchDirector}, until DevOps adds a new job.
+ * This job is a temporary facade to test {@link LaunchCommand}, until DevOps adds a new job.
  * </p>
  * 
  * @author CWDS API Team
@@ -23,7 +23,7 @@ public class AttorneyIndexerJob {
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchDirector.main(args);
+    LaunchCommand.main(args);
   }
 
 }

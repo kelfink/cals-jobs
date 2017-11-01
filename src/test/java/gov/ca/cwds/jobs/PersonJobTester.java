@@ -46,7 +46,7 @@ import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
@@ -62,7 +62,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
   @BeforeClass
   public static void setupClass() {
-    LaunchDirector.setTestMode(true);
+    LaunchCommand.setTestMode(true);
     SimpleTestSystemCodeCache.init();
     ElasticTransformer.setMapper(MAPPER);
   }

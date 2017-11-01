@@ -20,12 +20,12 @@ import gov.ca.cwds.jobs.component.FlightRecord;
  * Wrapper for scheduled jobs.
  * 
  * @author CWDS API Team
- * @see LaunchDirector
+ * @see LaunchCommand
  */
 @DisallowConcurrentExecution
-public class NeutronInterruptableJob implements InterruptableJob {
+public class NeutronRocket implements InterruptableJob {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronInterruptableJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronRocket.class);
 
   private static final AtomicInteger instanceCounter = new AtomicInteger(0);
 
@@ -40,7 +40,7 @@ public class NeutronInterruptableJob implements InterruptableJob {
    * @param <M> MQT entity class, if any, or T
    * @param rocket launch me!
    */
-  public <T extends PersistentObject, M extends ApiGroupNormalizer<?>> NeutronInterruptableJob(
+  public <T extends PersistentObject, M extends ApiGroupNormalizer<?>> NeutronRocket(
       final BasePersonIndexerJob<T, M> rocket) {
     this.rocket = rocket;
   }

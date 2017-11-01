@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.schedule;
 
-public enum NeutronJobExecutionStatus {
+public enum FlightStatus {
 
   NOT_STARTED,
 

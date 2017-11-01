@@ -20,7 +20,7 @@ import org.quartz.TriggerKey;
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
-import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
+import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
@@ -28,7 +28,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 public class NeutronTriggerListenerTest extends PersonJobTester {
 
   NeutronTriggerListener target;
-  NeutronInterruptableJob job;
+  NeutronRocket job;
   LaunchScheduler neutronScheduler;
 
   JobExecutionContext context_;
@@ -50,7 +50,7 @@ public class NeutronTriggerListenerTest extends PersonJobTester {
         new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, jobHistory);
     rocket.setOpts(opts);
     rocket.setTrack(track);
-    job = new NeutronInterruptableJob(rocket);
+    job = new NeutronRocket(rocket);
 
     context_ = mock(JobExecutionContext.class);
     triggerKey = new TriggerKey("fakejob", NeutronSchedulerConstants.GRP_LST_CHG);

@@ -64,7 +64,7 @@ public class LaunchPad implements Serializable {
       final JobOptions runOnceOpts =
           JobOptions.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       final FlightRecord track =
-          LaunchDirector.getInstance().runScheduledJob(flightSchedule.getKlazz(), runOnceOpts);
+          LaunchCommand.getInstance().runScheduledJob(flightSchedule.getKlazz(), runOnceOpts);
       return track.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);
@@ -79,13 +79,13 @@ public class LaunchPad implements Serializable {
       return;
     }
 
-    jd = newJob(NeutronInterruptableJob.class)
+    jd = newJob(NeutronRocket.class)
         .withIdentity(jobName, NeutronSchedulerConstants.GRP_LST_CHG)
         .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS, flightSchedule.getKlazz().getName())
         .build();
 
     // Initial mode: run only **once**.
-    final Trigger trg = !LaunchDirector.isInitialMode()
+    final Trigger trg = !LaunchCommand.isInitialMode()
         ? newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
             .withPriority(flightSchedule.getLastRunPriority())
             .withSchedule(simpleSchedule().withIntervalInSeconds(flightSchedule.getPeriodSeconds())

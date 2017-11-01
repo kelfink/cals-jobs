@@ -32,7 +32,7 @@ import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
@@ -200,7 +200,7 @@ public class SafetyAlertIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchDirector.runStandalone(SafetyAlertIndexerJob.class, args);
+    LaunchCommand.runStandalone(SafetyAlertIndexerJob.class, args);
   }
 
 }

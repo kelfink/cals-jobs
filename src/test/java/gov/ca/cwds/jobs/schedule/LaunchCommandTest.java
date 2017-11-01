@@ -13,10 +13,10 @@ import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 
-public class LaunchDirectorTest
+public class LaunchCommandTest
     extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
 
-  LaunchDirector target;
+  LaunchCommand target;
 
   @Override
   @Before
@@ -27,14 +27,14 @@ public class LaunchDirectorTest
     opts.setBaseDirectory("/var/lib/jenkins/");
     opts.setLastRunLoc(lastJobRunTimeFilename);
 
-    target = new LaunchDirector(jobHistory, neutronScheduler, esDao);
+    target = new LaunchCommand(jobHistory, neutronScheduler, esDao);
     target.setStartingOpts(opts);
-    LaunchDirector.setTestMode(true);
+    LaunchCommand.setTestMode(true);
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(LaunchDirector.class, notNullValue());
+    assertThat(LaunchCommand.class, notNullValue());
   }
 
   @Test
@@ -172,14 +172,14 @@ public class LaunchDirectorTest
 
   @Test
   public void isSchedulerMode_Args__() throws Exception {
-    boolean actual = LaunchDirector.isSchedulerMode();
+    boolean actual = LaunchCommand.isSchedulerMode();
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void isTestMode_Args__() throws Exception {
-    boolean actual = LaunchDirector.isTestMode();
+    boolean actual = LaunchCommand.isTestMode();
     boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -187,7 +187,7 @@ public class LaunchDirectorTest
   @Test
   public void setTestMode_Args__boolean() throws Exception {
     boolean mode = false;
-    LaunchDirector.setTestMode(mode);
+    LaunchCommand.setTestMode(mode);
   }
 
   // @Test
@@ -205,7 +205,7 @@ public class LaunchDirectorTest
 
   @Test
   public void isInitialMode_Args__() throws Exception {
-    boolean actual = LaunchDirector.isInitialMode();
+    boolean actual = LaunchCommand.isInitialMode();
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }

@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
+import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.util.JobLogs;
 
@@ -37,11 +37,11 @@ public class NeutronTriggerListener implements TriggerListener {
     final TriggerKey key = trigger.getKey();
     LOGGER.debug("trigger fired: key: {}", key);
     neutronScheduler.getExecutingJobs().put(key,
-        (NeutronInterruptableJob) context.getJobInstance());
+        (NeutronRocket) context.getJobInstance());
   }
 
   /**
-   * Job instance type is {@link NeutronInterruptableJob}.
+   * Job instance type is {@link NeutronRocket}.
    */
   @Override
   public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {

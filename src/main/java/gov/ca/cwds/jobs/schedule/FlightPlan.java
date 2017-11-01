@@ -9,7 +9,7 @@ import com.google.inject.Singleton;
 import gov.ca.cwds.jobs.config.JobOptions;
 
 @Singleton
-public class RocketOptions implements AtomFlightSettings {
+public class FlightPlan implements AtomFlightPlan {
 
   private final JobOptions globalOpts;
 
@@ -19,7 +19,7 @@ public class RocketOptions implements AtomFlightSettings {
   private final Map<Class<?>, JobOptions> optionsRegistry = new ConcurrentHashMap<>();
 
   @Inject
-  public RocketOptions(final JobOptions baseOpts) {
+  public FlightPlan(final JobOptions baseOpts) {
     this.globalOpts = baseOpts;
   }
 

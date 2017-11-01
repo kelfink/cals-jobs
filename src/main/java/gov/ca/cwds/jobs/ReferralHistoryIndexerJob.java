@@ -44,7 +44,7 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.rocket.referral.MinClientReferral;
 import gov.ca.cwds.jobs.rocket.referral.ReferralJobRanges;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
@@ -600,7 +600,7 @@ public class ReferralHistoryIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchDirector.runStandalone(ReferralHistoryIndexerJob.class, args);
+    LaunchCommand.runStandalone(ReferralHistoryIndexerJob.class, args);
   }
 
 }

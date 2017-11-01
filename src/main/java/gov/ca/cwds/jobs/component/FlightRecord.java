@@ -16,7 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.collect.ImmutableList;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.schedule.NeutronJobExecutionStatus;
+import gov.ca.cwds.jobs.schedule.FlightStatus;
 import gov.ca.cwds.jobs.util.JobDateUtil;
 
 /**
@@ -84,7 +84,7 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
 
   private Date lastChangeSince; // last change only
 
-  private NeutronJobExecutionStatus status = NeutronJobExecutionStatus.NOT_STARTED;
+  private FlightStatus status = FlightStatus.NOT_STARTED;
 
   private final AtomicInteger recsSentToIndexQueue = new AtomicInteger(0);
 
@@ -211,16 +211,16 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
   }
 
   public void start() {
-    if (this.status == NeutronJobExecutionStatus.NOT_STARTED) {
-      this.status = NeutronJobExecutionStatus.RUNNING;
+    if (this.status == FlightStatus.NOT_STARTED) {
+      this.status = FlightStatus.RUNNING;
       startTime = System.currentTimeMillis();
     }
   }
 
   @Override
   public void fail() {
-    if (this.status != NeutronJobExecutionStatus.FAILED) {
-      this.status = NeutronJobExecutionStatus.FAILED;
+    if (this.status != FlightStatus.FAILED) {
+      this.status = FlightStatus.FAILED;
       this.endTime = System.currentTimeMillis();
 
       this.fatalError = true;
@@ -230,7 +230,7 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
 
   @Override
   public void done() {
-    this.status = NeutronJobExecutionStatus.SUCCEEDED;
+    this.status = FlightStatus.SUCCEEDED;
     this.endTime = System.currentTimeMillis();
 
     this.doneRetrieve = true;
@@ -291,7 +291,7 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
     return endTime;
   }
 
-  public NeutronJobExecutionStatus getStatus() {
+  public FlightStatus getStatus() {
     return status;
   }
 

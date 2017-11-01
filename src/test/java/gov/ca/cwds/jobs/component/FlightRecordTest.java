@@ -15,7 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.schedule.NeutronJobExecutionStatus;
+import gov.ca.cwds.jobs.schedule.FlightStatus;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 public class FlightRecordTest {
@@ -212,8 +212,8 @@ public class FlightRecordTest {
 
   @Test
   public void getStatus_Args__() throws Exception {
-    NeutronJobExecutionStatus actual = target.getStatus();
-    NeutronJobExecutionStatus expected = NeutronJobExecutionStatus.NOT_STARTED;
+    FlightStatus actual = target.getStatus();
+    FlightStatus expected = FlightStatus.NOT_STARTED;
     assertThat(actual, is(equalTo(expected)));
   }
 

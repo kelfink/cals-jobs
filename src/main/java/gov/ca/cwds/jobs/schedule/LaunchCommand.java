@@ -46,14 +46,14 @@ import gov.ca.cwds.jobs.util.JobLogs;
  * 
  * @author CWDS API Team
  */
-public class LaunchDirector implements AtomLaunchScheduler {
+public class LaunchCommand implements AtomLaunchScheduler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(LaunchDirector.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LaunchCommand.class);
 
   /**
    * Singleton instance. One director to rule them all.
    */
-  private static LaunchDirector instance = new LaunchDirector(null, null, null);
+  private static LaunchCommand instance = new LaunchCommand(null, null, null);
 
   private LaunchCenterSettings settings = new LaunchCenterSettings();
 
@@ -80,12 +80,12 @@ public class LaunchDirector implements AtomLaunchScheduler {
 
   private LaunchScheduler neutronScheduler;
 
-  private LaunchDirector() {
+  private LaunchCommand() {
     // no-op
   }
 
   @Inject
-  public LaunchDirector(final FlightRecorder jobHistory, final LaunchScheduler neutronScheduler,
+  public LaunchCommand(final FlightRecorder jobHistory, final LaunchScheduler neutronScheduler,
       final ElasticsearchDao esDao) {
     this.flightRecorder = jobHistory;
     this.neutronScheduler = neutronScheduler;
@@ -420,7 +420,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
   }
 
   @Override
-  public void addExecutingJob(TriggerKey key, NeutronInterruptableJob job) {
+  public void addExecutingJob(TriggerKey key, NeutronRocket job) {
     neutronScheduler.addExecutingJob(key, job);
   }
 
@@ -428,7 +428,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
     neutronScheduler.removeExecutingJob(key);
   }
 
-  public Map<TriggerKey, NeutronInterruptableJob> getExecutingJobs() {
+  public Map<TriggerKey, NeutronRocket> getExecutingJobs() {
     return neutronScheduler.getExecutingJobs();
   }
 
@@ -437,19 +437,19 @@ public class LaunchDirector implements AtomLaunchScheduler {
    * 
    * @return evil single instance
    */
-  public static LaunchDirector getInstance() {
+  public static LaunchCommand getInstance() {
     if (instance == null) {
-      instance = new LaunchDirector();
+      instance = new LaunchCommand();
     }
     return instance;
   }
 
-  protected static synchronized LaunchDirector startContinuousMode(String[] args) {
+  protected static synchronized LaunchCommand startContinuousMode(String[] args) {
     LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
     try {
       final JobOptions globalOpts = JobOptions.parseCommandLine(args);
       final Injector injector = JobsGuiceInjector.buildInjector(globalOpts);
-      instance = injector.getInstance(LaunchDirector.class);
+      instance = injector.getInstance(LaunchCommand.class);
       instance.startingOpts = globalOpts;
 
       instance.settings.setContinuousMode(true);
@@ -488,7 +488,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
     }
 
     final Injector injector = JobsGuiceInjector.buildInjector(globalOpts);
-    instance = injector.getInstance(LaunchDirector.class);
+    instance = injector.getInstance(LaunchCommand.class);
     instance.startingOpts = globalOpts;
     instance.settings.setContinuousMode(false);
 

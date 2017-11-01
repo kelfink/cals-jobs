@@ -6,7 +6,7 @@ import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 import gov.ca.cwds.jobs.schedule.LaunchPad;
-import gov.ca.cwds.jobs.schedule.NeutronInterruptableJob;
+import gov.ca.cwds.jobs.schedule.NeutronRocket;
 
 public interface AtomLaunchScheduler {
 
@@ -20,7 +20,7 @@ public interface AtomLaunchScheduler {
    */
   FlightRecord runScheduledJob(Class<?> klass, JobOptions opts) throws NeutronException;
 
-  void addExecutingJob(TriggerKey key, NeutronInterruptableJob job);
+  void addExecutingJob(TriggerKey key, NeutronRocket job);
 
   LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, JobOptions opts);
 

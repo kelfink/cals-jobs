@@ -29,7 +29,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   private final AtomRocketFactory rocketFactory;
 
-  private final AtomFlightSettings rocketOptions;
+  private final AtomFlightPlan rocketOptions;
 
   private JobOptions opts;
 
@@ -46,11 +46,11 @@ public class LaunchScheduler implements AtomLaunchScheduler {
    * OPTION: Quartz scheduler can track this too. Obsolete implementation?
    * </p>
    */
-  private final Map<TriggerKey, NeutronInterruptableJob> executingJobs = new ConcurrentHashMap<>();
+  private final Map<TriggerKey, NeutronRocket> executingJobs = new ConcurrentHashMap<>();
 
   @Inject
   public LaunchScheduler(final FlightRecorder jobHistory, final AtomRocketFactory rocketFactory,
-      final AtomFlightSettings rocketOptions) {
+      final AtomFlightPlan rocketOptions) {
     this.flightRecorder = jobHistory;
     this.rocketFactory = rocketFactory;
     this.rocketOptions = rocketOptions;
@@ -136,7 +136,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public void addExecutingJob(final TriggerKey key, NeutronInterruptableJob job) {
+  public void addExecutingJob(final TriggerKey key, NeutronRocket job) {
     executingJobs.put(key, job);
   }
 
@@ -146,7 +146,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     }
   }
 
-  public Map<TriggerKey, NeutronInterruptableJob> getExecutingJobs() {
+  public Map<TriggerKey, NeutronRocket> getExecutingJobs() {
     return executingJobs;
   }
 
@@ -185,7 +185,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     return this.getScheduleRegistry().get(klazz).isVetoExecution();
   }
 
-  public AtomFlightSettings getRocketOptions() {
+  public AtomFlightPlan getRocketOptions() {
     return rocketOptions;
   }
 

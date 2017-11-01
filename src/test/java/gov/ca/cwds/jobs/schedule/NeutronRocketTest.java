@@ -21,9 +21,9 @@ import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
-public class NeutronInterruptableJobTest extends PersonJobTester {
+public class NeutronRocketTest extends PersonJobTester {
 
-  NeutronInterruptableJob target;
+  NeutronRocket target;
   TestNormalizedEntityDao dao;
   TestIndexerJob rocket;
 
@@ -36,12 +36,12 @@ public class NeutronInterruptableJobTest extends PersonJobTester {
         new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, jobHistory);
     rocket.setOpts(opts);
     rocket.setTrack(track);
-    target = new NeutronInterruptableJob(rocket);
+    target = new NeutronRocket(rocket);
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(NeutronInterruptableJob.class, notNullValue());
+    assertThat(NeutronRocket.class, notNullValue());
   }
 
   @Test

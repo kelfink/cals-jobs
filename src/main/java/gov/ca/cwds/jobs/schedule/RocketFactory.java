@@ -27,11 +27,11 @@ public class RocketFactory implements AtomRocketFactory {
 
   private final JobOptions baseOpts;
 
-  private final RocketOptions rocketOptions;
+  private final FlightPlan rocketOptions;
 
   @Inject
   public RocketFactory(final Injector injector, final JobOptions opts,
-      final RocketOptions rocketOptions) {
+      final FlightPlan rocketOptions) {
     this.injector = injector;
     this.baseOpts = opts;
     this.rocketOptions = rocketOptions;
@@ -77,11 +77,11 @@ public class RocketFactory implements AtomRocketFactory {
 
     LOGGER.warn("LAUNCH! {}", klazz);
 
-    NeutronInterruptableJob ret;
+    NeutronRocket ret;
     try {
       final JobOptions opts = rocketOptions.getFlightSettings(klazz);
       LOGGER.warn("ROCKET FACTORY: LAST CHANGE LOCATION: {}", opts.getLastRunLoc());
-      ret = new NeutronInterruptableJob(createJob(klazz, opts));
+      ret = new NeutronRocket(createJob(klazz, opts));
     } catch (NeutronException e) {
       throw new SchedulerException("NO ROCKET SETTINGS!", e);
     }
@@ -93,7 +93,7 @@ public class RocketFactory implements AtomRocketFactory {
     return baseOpts;
   }
 
-  public RocketOptions getRocketOptions() {
+  public FlightPlan getRocketOptions() {
     return rocketOptions;
   }
 

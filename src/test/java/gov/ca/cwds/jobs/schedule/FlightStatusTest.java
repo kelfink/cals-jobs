@@ -5,11 +5,11 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-public class NeutronJobExecutionStatusTest {
+public class FlightStatusTest {
 
   @Test
   public void type() throws Exception {
-    assertThat(NeutronJobExecutionStatus.class, notNullValue());
+    assertThat(FlightStatus.class, notNullValue());
   }
 
 }

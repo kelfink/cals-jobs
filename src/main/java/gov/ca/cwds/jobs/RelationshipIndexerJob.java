@@ -38,7 +38,7 @@ import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
@@ -323,7 +323,7 @@ public class RelationshipIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchDirector.runStandalone(RelationshipIndexerJob.class, args);
+    LaunchCommand.runStandalone(RelationshipIndexerJob.class, args);
   }
 
 }
