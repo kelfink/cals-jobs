@@ -29,6 +29,8 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   private final AtomRocketFactory rocketFactory;
 
+  private final AtomRocketOptions rocketOptions;
+
   private JobOptions opts;
 
   /**
@@ -47,9 +49,11 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   private final Map<TriggerKey, NeutronInterruptableJob> executingJobs = new ConcurrentHashMap<>();
 
   @Inject
-  public LaunchScheduler(final FlightRecorder jobHistory, final AtomRocketFactory rocketFactory) {
+  public LaunchScheduler(final FlightRecorder jobHistory, final AtomRocketFactory rocketFactory,
+      final AtomRocketOptions rocketOptions) {
     this.flightRecorder = jobHistory;
     this.rocketFactory = rocketFactory;
+    this.rocketOptions = rocketOptions;
   }
 
   /**
@@ -97,15 +101,14 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     try {
       final Class<?> klass = Class.forName(jobName);
       return runScheduledJob(klass, opts);
-    } catch (Exception e) {
+    } catch (ClassNotFoundException e) {
       throw JobLogs.checked(LOGGER, e, "ON-DEMAND JOB RUN FAILED!: {}", e.getMessage());
     }
   }
 
   @Override
   public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched) {
-    final LaunchPad nj =
-        new LaunchPad(this.getScheduler(), sched, flightRecorder);
+    final LaunchPad nj = new LaunchPad(this.getScheduler(), sched, flightRecorder);
     this.getScheduleRegistry().put(klazz, nj);
     return nj;
   }

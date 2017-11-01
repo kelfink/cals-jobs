@@ -77,8 +77,7 @@ public class JobLogsTest {
   public void raiseError_Args__Logger__Throwable__ObjectArray3() throws Exception {
     Logger log = mock(Logger.class);
     Throwable e = null;
-    String[] args = new String[] {};
-    throw JobLogs.buildRuntimeException(log, e, "something bad", args);
+    throw JobLogs.buildRuntimeException(log, e, "something bad", "who", "cares");
   }
 
 }
