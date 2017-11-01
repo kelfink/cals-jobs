@@ -54,10 +54,12 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   public LastSuccessfulRunJob(String lastJobRunTimeFilename, final FlightRecorder jobHistory,
       final JobOptions opts) {
-    this.lastRunTimeFilename = StringUtils.isNotBlank(lastJobRunTimeFilename)
-        ? lastJobRunTimeFilename : opts.getLastRunLoc();
+    this.lastRunTimeFilename =
+        StringUtils.isBlank(lastJobRunTimeFilename) ? opts.getLastRunLoc() : lastJobRunTimeFilename;
     this.jobHistory = jobHistory;
     this.opts = opts;
+
+    LOGGER.warn("LastSuccessfulRunJob.ctor: LAST CHANGE LOCATION: {}", lastRunTimeFilename);
   }
 
   @Override
@@ -133,6 +135,8 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   protected Date determineLastSuccessfulRunTime() {
     Date ret = null;
+    LOGGER.warn("LastSuccessfulRunJob.determineLastSuccessfulRunTime(): LAST CHANGE LOCATION: {}",
+        lastRunTimeFilename);
 
     try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
       ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
