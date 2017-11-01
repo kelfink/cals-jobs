@@ -296,7 +296,11 @@ public class LaunchDirector implements AtomLaunchScheduler {
   @SuppressWarnings("rawtypes")
   public BasePersonIndexerJob createJob(final String jobName, final JobOptions opts)
       throws NeutronException {
-    return this.neutronScheduler.createJob(jobName, opts);
+    final BasePersonIndexerJob ret = this.neutronScheduler.createJob(jobName, opts);
+    ret.setOpts(opts);
+
+    LOGGER.warn("CREATE JOB: {}", opts.getLastRunLoc());
+    return ret;
   }
 
   @Override

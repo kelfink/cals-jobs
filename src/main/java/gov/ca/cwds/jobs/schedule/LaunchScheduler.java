@@ -108,7 +108,6 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   @Override
   public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, JobOptions opts) {
-    // MORE: remember this job's starting options.
     this.rocketOptions.addRocketOptions(klazz, sched.getName(), opts);
     final LaunchPad nj = new LaunchPad(this.getScheduler(), sched, flightRecorder, opts);
     this.getScheduleRegistry().put(klazz, nj);
