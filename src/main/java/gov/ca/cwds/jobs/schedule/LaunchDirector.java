@@ -155,7 +155,7 @@ public class LaunchDirector implements AtomLaunchScheduler {
    * 
    * @param injector Guice injector
    * @return prepare launch scheduler
-   * @throws SchedulerException
+   * @throws SchedulerException Quartz error
    */
   protected LaunchScheduler configureQuartz(final Injector injector) throws SchedulerException {
     final Properties p = new Properties();

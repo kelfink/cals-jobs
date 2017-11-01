@@ -36,6 +36,8 @@ public class NeutronInterruptableJob implements InterruptableJob {
   /**
    * Constructor.
    * 
+   * @param <T> ES replicated Person persistence class
+   * @param <M> MQT entity class, if any, or T
    * @param rocket launch me!
    */
   public <T extends PersistentObject, M extends ApiGroupNormalizer<?>> NeutronInterruptableJob(
@@ -86,6 +88,10 @@ public class NeutronInterruptableJob implements InterruptableJob {
 
   public void setTrack(FlightRecord track) {
     this.track = track;
+  }
+
+  public BasePersonIndexerJob getRocket() {
+    return rocket;
   }
 
 }

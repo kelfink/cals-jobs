@@ -94,7 +94,7 @@ import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
  * </pre>
  * 
  * @author CWDS API Team
- * @param <T> ES storable, replicated Person persistence class
+ * @param <T> ES replicated Person persistence class
  * @param <M> MQT entity class, if any, or T
  * @see JobOptions
  */
