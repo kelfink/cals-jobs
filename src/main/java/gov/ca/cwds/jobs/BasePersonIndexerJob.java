@@ -304,11 +304,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @throws NeutronException bombed
    */
   protected void doInitialLoadJdbc() throws NeutronException {
-    nameThread("initial_load");
-    LOGGER.info("INITIAL LOAD WITH JDBC!");
     List<Thread> threads = new ArrayList<>();
 
     try {
+      nameThread("initial_load");
+      LOGGER.info("INITIAL LOAD WITH JDBC!");
       addThread(true, this::threadIndex, threads);
       addThread(useTransformThread(), this::threadNormalize, threads);
       addThread(true, this::threadRetrieveByJdbc, threads);

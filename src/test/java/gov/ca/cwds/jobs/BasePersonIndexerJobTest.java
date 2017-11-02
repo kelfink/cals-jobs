@@ -277,7 +277,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void threadNormalize_Args__() throws Exception {
-    runKillThread(target);
+    runKillThread(target, 1500L);
     target.threadNormalize();
     sleepItOff();
   }
@@ -585,7 +585,7 @@ public class BasePersonIndexerJobTest
     sleepItOff();
   }
 
-  @Test(expected = JobsException.class)
+  @Test(expected = NeutronException.class)
   public void doInitialLoadJdbc_Args__error() throws Exception {
     when(rs.next()).thenReturn(true, false);
     target.setBlowUpNameThread(true);
