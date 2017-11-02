@@ -143,6 +143,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * Reads the last run file and returns the last run date.
    * 
    * @return last successful run date/time as a Java Date.
+   * @throws NeutronException I/O or parse error
    */
   protected Date determineLastSuccessfulRunTime() throws NeutronException {
     Date ret = null;
@@ -161,6 +162,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * Write the time stamp <strong>IF</strong> the job succeeded.
    * 
    * @param datetime date and time to store
+   * @throws NeutronException I/O or parse error
    */
   protected void writeLastSuccessfulRunTime(Date datetime) throws NeutronException {
     if (!isFailed()) {
