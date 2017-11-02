@@ -582,7 +582,7 @@ public class JobOptions implements ApiMarker {
   }
 
   public void setLastRunTime(Date lastRunTime) {
-    this.lastRunTime = lastRunTime;
+    this.lastRunTime = JobDateUtil.freshDate(lastRunTime);
   }
 
   public boolean isRefreshMqt() {
