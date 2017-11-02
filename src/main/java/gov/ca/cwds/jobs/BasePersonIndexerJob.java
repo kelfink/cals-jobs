@@ -419,7 +419,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   /**
    * The "transform" part of ETL. Single-thread consumer, second stage of initial load. Convert
-   * de-normalized view records to normalized ones and pass to the index queue.
+   * de-normalized records to normalized ones and pass to the index queue.
    */
   protected void threadNormalize() {
     nameThread("normalize");

@@ -40,6 +40,7 @@ import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -206,7 +207,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void prepareDocument_Args__BulkProcessor__Object() throws Exception {
-    BulkProcessor bp = mock(BulkProcessor.class);
+    final BulkProcessor bp = mock(BulkProcessor.class);
     TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     target.prepareDocument(bp, t);
   }
@@ -277,9 +278,16 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void threadNormalize_Args__() throws Exception {
-    runKillThread(target, 1600L);
-    target.threadNormalize();
-    markTestDone();
+    try {
+      runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 800L);
+      final TestDenormalizedEntity m = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "1", "2", "3");
+      target.queueNormalize.push(m);
+      target.threadNormalize();
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      markTestDone();
+    }
   }
 
   @Test
@@ -597,15 +605,22 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void bulkPrepare_Args__BulkProcessor__int() throws Exception {
-    TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    final TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     target.queueIndex.add(entity);
 
-    BulkProcessor bp = mock(BulkProcessor.class);
+    final BulkProcessor bp = mock(BulkProcessor.class);
     int cntr = 0;
-    int actual = target.bulkPrepare(bp, cntr);
-    int expected = 1;
-    markTestDone();
-    assertThat(actual, is(equalTo(expected)));
+
+    try {
+      runKillThread(target, 4000L);
+      int actual = target.bulkPrepare(bp, cntr);
+      int expected = 1;
+      assertThat(actual, is(equalTo(expected)));
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      markTestDone();
+    }
   }
 
   @Test
@@ -617,7 +632,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void prepLastRunDoc_Args__BulkProcessor__Object() throws Exception {
-    BulkProcessor bp = mock(BulkProcessor.class);
+    final BulkProcessor bp = mock(BulkProcessor.class);
     final TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     target.prepareDocumentTrapIO(bp, p);
   }
@@ -803,7 +818,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void awaitBulkProcessorClose() throws Exception {
-    BulkProcessor bp = mock(BulkProcessor.class);
+    final BulkProcessor bp = mock(BulkProcessor.class);
     target.setFakeBulkProcessor(false);
     target.awaitBulkProcessorClose(bp);
   }

@@ -302,16 +302,6 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
   }
 
   @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this, false);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj, false);
-  }
-
-  @Override
   public boolean isRunning() {
     return !this.doneJob && !this.fatalError;
   }
@@ -360,6 +350,9 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
     this.doneTransform = true;
   }
 
+  /**
+   * Format for JMX console.
+   */
   @Override
   public String toString() {
     final StringBuilder buf = new StringBuilder();
@@ -396,6 +389,16 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
 
     buf.append("\n]");
     return buf.toString();
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }

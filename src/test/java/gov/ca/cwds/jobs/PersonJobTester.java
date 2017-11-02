@@ -200,15 +200,20 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     jobHistory = new FlightRecorder();
     neutronScheduler = mock(LaunchScheduler.class);
 
-    isRunwayClear.set(true);
+    markTestDone();
   }
 
   public Thread runKillThread(final BasePersonIndexerJob<T, M> target, long sleepMillis) {
     final Thread t = new Thread(() -> {
-      lock.lock();
-      await("kill kill kill").atMost(sleepMillis, TimeUnit.MILLISECONDS);
-      target.done();
-      lock.unlock();
+      try {
+        lock.lockInterruptibly();
+        await("kill thread").atMost(sleepMillis, TimeUnit.MILLISECONDS).untilTrue(isRunwayClear);
+        target.done();
+      } catch (Exception e) {
+        e.printStackTrace();
+      } finally {
+        lock.unlock();
+      }
     });
 
     t.start();
@@ -220,12 +225,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   }
 
   public void markTestDone() {
-    try {
-      Thread.yield();
-      isRunwayClear.set(true);
-      // Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
-    } catch (Exception e) {
-    }
+    isRunwayClear.set(true);
   }
 
 }
