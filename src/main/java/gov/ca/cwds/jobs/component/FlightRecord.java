@@ -230,9 +230,11 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
 
   @Override
   public void done() {
-    this.status = FlightStatus.SUCCEEDED;
-    this.endTime = System.currentTimeMillis();
+    if (this.status != FlightStatus.FAILED) {
+      this.status = FlightStatus.SUCCEEDED;
+    }
 
+    this.endTime = System.currentTimeMillis();
     this.doneRetrieve = true;
     this.doneIndex = true;
     this.doneTransform = true;

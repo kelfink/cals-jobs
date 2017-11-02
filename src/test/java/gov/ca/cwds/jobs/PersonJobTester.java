@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import static com.jayway.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.mock;
@@ -13,6 +14,10 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.persistence.EntityManager;
 
@@ -44,7 +49,6 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
@@ -60,6 +64,10 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
   public static final String DEFAULT_CLIENT_ID = "abc1234567";
 
+  public static final AtomicBoolean isRunwayClear = new AtomicBoolean(false);
+
+  public static final Lock lock = new ReentrantLock();
+
   @BeforeClass
   public static void setupClass() {
     LaunchCommand.setTestMode(true);
@@ -71,7 +79,6 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
   public LaunchScheduler neutronScheduler;
-
   public ElasticsearchConfiguration esConfig;
   public ElasticsearchDao esDao;
   public Client client;
@@ -192,18 +199,16 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     track = new FlightRecord();
     jobHistory = new FlightRecorder();
     neutronScheduler = mock(LaunchScheduler.class);
+
+    isRunwayClear.set(true);
   }
 
   public Thread runKillThread(final BasePersonIndexerJob<T, M> target, long sleepMillis) {
     final Thread t = new Thread(() -> {
-      try {
-        Thread.sleep(sleepMillis); // NOSONAR
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      } finally {
-        target.done();
-      }
-
+      lock.lock();
+      await("kill kill kill").atMost(sleepMillis, TimeUnit.MILLISECONDS);
+      target.done();
+      lock.unlock();
     });
 
     t.start();
@@ -214,10 +219,11 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     return runKillThread(target, 1100L);
   }
 
-  public void sleepItOff() {
+  public void markTestDone() {
     try {
       Thread.yield();
-      Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
+      isRunwayClear.set(true);
+      // Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
     } catch (Exception e) {
     }
   }

@@ -277,9 +277,9 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void threadNormalize_Args__() throws Exception {
-    runKillThread(target, 1500L);
+    runKillThread(target, 1600L);
     target.threadNormalize();
-    sleepItOff();
+    markTestDone();
   }
 
   @Test
@@ -508,7 +508,7 @@ public class BasePersonIndexerJobTest
     when(rs.next()).thenReturn(true, false);
     runKillThread(target);
     target.threadRetrieveByJdbc();
-    sleepItOff();
+    markTestDone();
   }
 
   @Test
@@ -582,7 +582,7 @@ public class BasePersonIndexerJobTest
   public void doInitialLoadJdbc_Args__() throws Exception {
     runKillThread(target);
     target.doInitialLoadJdbc();
-    sleepItOff();
+    markTestDone();
   }
 
   @Test(expected = NeutronException.class)
@@ -592,7 +592,7 @@ public class BasePersonIndexerJobTest
 
     runKillThread(target);
     target.doInitialLoadJdbc();
-    sleepItOff();
+    markTestDone();
   }
 
   @Test
@@ -604,7 +604,7 @@ public class BasePersonIndexerJobTest
     int cntr = 0;
     int actual = target.bulkPrepare(bp, cntr);
     int expected = 1;
-    sleepItOff();
+    markTestDone();
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -612,7 +612,7 @@ public class BasePersonIndexerJobTest
   public void threadIndex_Args__() throws Exception {
     runKillThread(target);
     target.threadIndex();
-    sleepItOff();
+    markTestDone();
   }
 
   @Test
