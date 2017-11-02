@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -34,7 +33,6 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
@@ -120,7 +118,7 @@ public class BasePersonIndexerJobTest
   // @Test
   // public void buildElasticSearchPerson_Args__Object() throws Exception {
   // final String key = DEFAULT_CLIENT_ID;
-  // TestNormalizedEntity p = new TestNormalizedEntity(key);
+  // final TestNormalizedEntity p = new TestNormalizedEntity(key);
   // ElasticSearchPerson actual = target.buildElasticSearchPerson(p);
   // ElasticSearchPerson expected = new ElasticSearchPerson();
   // expected.setId(key);
@@ -353,15 +351,10 @@ public class BasePersonIndexerJobTest
     target.close();
   }
 
-  @Test
+  @Test(expected = IOException.class)
   public void close_Args___T__IOException() throws Exception {
     doThrow(new IOException()).when(esDao).close();
-    try {
-      target.close();
-      target.fail();
-      fail("Expected exception was not thrown!");
-    } catch (IOException e) {
-    }
+    target.close();
   }
 
   @Test
@@ -585,44 +578,6 @@ public class BasePersonIndexerJobTest
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
-  // public void newJob_Args__Class__StringArray() throws Exception {
-  // Class<Object> klass = mock(Class.class);
-  // String[] args = new String[] {};
-  // Object actual = BasePersonIndexerJob.newJob(klass, args);
-  // Object expected = null;
-  // assertThat(actual, is(equalTo(expected)));
-  // }
-  //
-  // @Test
-  // public void newJob_Args__Class__StringArray_T__JobsException() throws Exception {
-  // Class<Object> klass = mock(Class.class);
-  // String[] args = new String[] {};
-  // try {
-  // BasePersonIndexerJob.newJob(klass, args);
-  // fail("Expected exception was not thrown!");
-  // } catch (JobsException e) {
-  // }
-  // }
-
-  // @Test
-  // public void runJob_Args__Class__StringArray() throws Exception {
-  // Class<Object> klass = mock(Class.class);
-  // String[] args = new String[] {};
-  // BasePersonIndexerJob.runJob(klass, args);
-  // }
-  //
-  // @Test
-  // public void runJob_Args__Class__StringArray_T__JobsException() throws Exception {
-  // Class<Object> klass = mock(Class.class);
-  // String[] args = new String[] {};
-  // try {
-  // BasePersonIndexerJob.runJob(klass, args);
-  // fail("Expected exception was not thrown!");
-  // } catch (JobsException e) {
-  // }
-  // }
-
   @Test
   public void doInitialLoadJdbc_Args__() throws Exception {
     runKillThread(target);
@@ -631,9 +586,9 @@ public class BasePersonIndexerJobTest
   }
 
   @Test(expected = JobsException.class)
-  @Ignore
   public void doInitialLoadJdbc_Args__error() throws Exception {
     when(rs.next()).thenReturn(true, false);
+    target.setBlowUpNameThread(true);
 
     runKillThread(target);
     target.doInitialLoadJdbc();
@@ -663,7 +618,7 @@ public class BasePersonIndexerJobTest
   @Test
   public void prepLastRunDoc_Args__BulkProcessor__Object() throws Exception {
     BulkProcessor bp = mock(BulkProcessor.class);
-    TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    final TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     target.prepareDocumentTrapIO(bp, p);
   }
 
@@ -790,12 +745,6 @@ public class BasePersonIndexerJobTest
     when(q.setFetchSize(any(Integer.class))).thenReturn(q);
     when(q.setCacheable(any(Boolean.class))).thenReturn(q);
 
-    // q.setParameter("min_id", minId, StringType.INSTANCE)
-    // .setParameter("max_id", maxId, StringType.INSTANCE).setCacheable(false)
-    // .setFlushMode(FlushMode.MANUAL).setCacheMode(CacheMode.IGNORE)
-    // .setFetchSize(NeutronIntegerDefaults.DEFAULT_FETCH_SIZE.getValue());
-
-
     final ScrollableResults results = mock(ScrollableResults.class);
     when(q.scroll(any(ScrollMode.class))).thenReturn(results);
     when(results.next()).thenReturn(true).thenReturn(false);
@@ -826,13 +775,6 @@ public class BasePersonIndexerJobTest
     target.normalizeLoop(grpRecs, lastId, cntr);
   }
 
-  @Test(expected = SQLException.class)
-  @Ignore
-  public void prepHibernatePull_Args__Session__Transaction__Date_T__SQLException()
-      throws Exception {
-    target.prepHibernateLastChange(session, lastRunTime);
-  }
-
   @Test
   public void refreshMQT() throws Exception {
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
@@ -846,7 +788,7 @@ public class BasePersonIndexerJobTest
     when(q.setFetchSize(any(Integer.class))).thenReturn(q);
     when(q.setCacheable(any(Boolean.class))).thenReturn(q);
 
-    FlightPlan opts = new FlightPlan();
+    final FlightPlan opts = new FlightPlan();
     opts.setRefreshMqt(true);
     opts.setEsConfigLoc("config/local.yaml");
     target.setOpts(opts);

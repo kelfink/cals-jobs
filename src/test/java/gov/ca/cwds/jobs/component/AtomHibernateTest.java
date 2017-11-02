@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,7 +11,6 @@ import java.util.Date;
 import java.util.function.Function;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -170,7 +168,6 @@ public class AtomHibernateTest
 
   @Test
   public void prepHibernateLastChange_Args__Session__Transaction__Date() throws Exception {
-    Transaction txn = mock(Transaction.class);
     Date lastRunTime = new Date();
     target.prepHibernateLastChange(session, lastRunTime);
   }

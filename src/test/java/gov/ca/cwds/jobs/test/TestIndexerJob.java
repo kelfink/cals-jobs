@@ -29,6 +29,7 @@ public class TestIndexerJob
   private boolean fakeFinish = true;
   private boolean fakeBulkProcessor = true;
   private boolean fakeRanges = false;
+  private boolean blowUpNameThread = false;
 
   @Inject
   public TestIndexerJob(final TestNormalizedEntityDao dao, final ElasticsearchDao esDao,
@@ -93,6 +94,15 @@ public class TestIndexerJob
   }
 
   @Override
+  public void nameThread(String title) {
+    if (blowUpNameThread) {
+      throw new JobsException("test bombing");
+    }
+
+    super.nameThread(title);
+  }
+
+  @Override
   public synchronized void finish() {
     if (!fakeFinish) {
       super.finish();
@@ -140,6 +150,14 @@ public class TestIndexerJob
 
   public void setFakeRanges(boolean fakeRanges) {
     this.fakeRanges = fakeRanges;
+  }
+
+  public boolean isBlowUpNameThread() {
+    return blowUpNameThread;
+  }
+
+  public void setBlowUpNameThread(boolean blowUpThreadIndex) {
+    this.blowUpNameThread = blowUpThreadIndex;
   }
 
 }
