@@ -40,7 +40,7 @@ public class TestIndexerJob
 
   @Override
   public String getLegacySourceTable() {
-    return super.getLegacySourceTable();
+    return "CRAP_T";
   }
 
   @Override

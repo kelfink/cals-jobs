@@ -689,7 +689,7 @@ public class BasePersonIndexerJobTest
   @Test
   public void getLegacySourceTable_Args__() throws Exception {
     final String actual = target.getLegacySourceTable();
-    String expected = null;
+    String expected = "CRAP_T";
     assertThat(actual, is(equalTo(expected)));
   }
 
