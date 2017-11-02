@@ -303,7 +303,6 @@ public class ReferralHistoryIndexerJob
   protected int normalizeClientReferrals(int cntr, MinClientReferral rc1, final String clientId,
       final Map<String, EsPersonReferral> mapReferrals,
       final List<EsPersonReferral> listReadyToNorm,
-      final Map<String, List<MinClientReferral>> mapReferralByClient,
       final Map<String, List<EsPersonReferral>> mapAllegationByReferral) {
     int ret = cntr;
     final String referralId = rc1.getReferralId();
@@ -347,7 +346,7 @@ public class ReferralHistoryIndexerJob
         listReadyToNorm.clear();
         for (MinClientReferral rc1 : rc.getValue()) {
           cntr = normalizeClientReferrals(cntr, rc1, clientId, mapReferrals, listReadyToNorm,
-              mapReferralByClient, mapAllegationByReferral);
+              mapAllegationByReferral);
         }
       }
     }
