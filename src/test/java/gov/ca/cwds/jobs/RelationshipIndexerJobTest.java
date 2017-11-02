@@ -7,7 +7,6 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,6 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedRelationshipsDao;
@@ -102,14 +100,6 @@ public class RelationshipIndexerJobTest
 
     UpdateRequest actual = target.prepareUpsertRequest(esp, p);
     assertThat(actual, is(notNullValue()));
-  }
-
-  @Test(expected = IOException.class)
-  @Ignore
-  public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedRelationships_T__IOException()
-      throws Exception {
-    ReplicatedRelationships p = new ReplicatedRelationships(DEFAULT_CLIENT_ID);
-    target.prepareUpsertRequest(esp, p);
   }
 
   @Test

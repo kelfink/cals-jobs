@@ -201,8 +201,8 @@ public class RelationshipIndexerJob
 
     } catch (Exception e) {
       fail();
-      throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PULL RANGE! {}-{} : {}",
-          p.getLeft(), p.getRight(), e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(),
+          p.getRight(), e.getMessage());
     }
 
     getTrack().trackRangeComplete(p);
@@ -238,7 +238,7 @@ public class RelationshipIndexerJob
 
     } catch (Exception e) {
       fail();
-      throw JobLogs.buildRuntimeException(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
       EsRelationship.SonarQubeMemoryBloatComplaintCache.getInstance().clearCache();
@@ -278,8 +278,7 @@ public class RelationshipIndexerJob
         buf.append(p.getRelations().stream().map(ElasticTransformer::jsonify)
             .sorted(String::compareTo).collect(Collectors.joining(",")));
       } catch (Exception e) {
-        throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR SERIALIZING RELATIONSHIPS! {}",
-            e.getMessage());
+        throw JobLogs.runtime(LOGGER, e, "ERROR SERIALIZING RELATIONSHIPS! {}", e.getMessage());
       }
     }
 
@@ -289,8 +288,7 @@ public class RelationshipIndexerJob
     try {
       insertJson = mapper.writeValueAsString(esp);
     } catch (JsonProcessingException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}",
-          e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}", e.getMessage());
     }
     final String updateJson = buf.toString();
 

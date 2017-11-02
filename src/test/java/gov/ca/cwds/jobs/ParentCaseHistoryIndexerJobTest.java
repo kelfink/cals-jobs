@@ -4,12 +4,12 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
@@ -48,14 +48,10 @@ public class ParentCaseHistoryIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  @Test
-  @Ignore
+  @Test(expected = SQLException.class)
   public void extract_Args__ResultSet_T__SQLException() throws Exception {
-    try {
-      target.extract(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    target.extract(rs);
   }
 
   @Test
