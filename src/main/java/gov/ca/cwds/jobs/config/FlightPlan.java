@@ -96,15 +96,6 @@ public class FlightPlan implements ApiMarker {
   private long endBucket = 1L;
 
   /**
-   * When running in "initial load" mode, specifies the total number buckets for all related batch
-   * runs.
-   * <p>
-   * Required for "initial load" mode.
-   * </p>
-   */
-  private long totalBuckets = 1L;
-
-  /**
    * Total threads to allocate to this batch run. Defaults to all available cores.
    */
   private long threadCount;
@@ -143,7 +134,6 @@ public class FlightPlan implements ApiMarker {
    * @param lastRunMode is last run mode or not
    * @param startBucket starting bucket number
    * @param endBucket ending bucket number
-   * @param totalBuckets total buckets
    * @param threadCount number of simultaneous threads
    * @param minId initial load -- minimum range
    * @param maxId initial load -- maximum range
@@ -154,9 +144,9 @@ public class FlightPlan implements ApiMarker {
    * @param dropIndex drop the index before start (full load only)
    */
   public FlightPlan(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
-      boolean lastRunMode, long startBucket, long endBucket, long totalBuckets, long threadCount,
-      String minId, String maxId, boolean loadSealedAndSensitive, boolean rangeGiven,
-      String baseDirectory, boolean refreshMqt, boolean dropIndex) {
+      boolean lastRunMode, long startBucket, long endBucket, long threadCount, String minId,
+      String maxId, boolean loadSealedAndSensitive, boolean rangeGiven, String baseDirectory,
+      boolean refreshMqt, boolean dropIndex) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
     this.lastRunTime = JobDateUtil.freshDate(lastRunTime);
@@ -164,7 +154,6 @@ public class FlightPlan implements ApiMarker {
     this.lastRunMode = lastRunMode;
     this.startBucket = startBucket;
     this.endBucket = endBucket;
-    this.totalBuckets = totalBuckets;
     this.threadCount = threadCount;
     this.minId = minId;
     this.maxId = maxId;
@@ -188,7 +177,6 @@ public class FlightPlan implements ApiMarker {
     this.lastRunMode = opts.lastRunMode;
     this.startBucket = opts.startBucket;
     this.endBucket = opts.endBucket;
-    this.totalBuckets = opts.totalBuckets;
     this.threadCount = opts.threadCount;
     this.minId = opts.minId;
     this.maxId = opts.maxId;
@@ -266,15 +254,6 @@ public class FlightPlan implements ApiMarker {
    */
   public long getEndBucket() {
     return endBucket;
-  }
-
-  /**
-   * Getter for total buckets.
-   * 
-   * @return total buckets
-   */
-  public long getTotalBuckets() {
-    return totalBuckets;
   }
 
   /**
@@ -513,7 +492,7 @@ public class FlightPlan implements ApiMarker {
     }
 
     return new FlightPlan(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode,
-        bucketRange.getLeft(), bucketRange.getRight(), totalBuckets, threadCount, minId, maxId,
+        bucketRange.getLeft(), bucketRange.getRight(), threadCount, minId, maxId,
         loadSealedAndSensitive, rangeGiven, baseDirectory, refreshMqt, dropIndex);
   }
 
@@ -535,10 +514,6 @@ public class FlightPlan implements ApiMarker {
 
   public void setMaxId(String maxId) {
     this.maxId = maxId;
-  }
-
-  public void setTotalBuckets(long totalBuckets) {
-    this.totalBuckets = totalBuckets;
   }
 
   public void setIndexName(String indexName) {
