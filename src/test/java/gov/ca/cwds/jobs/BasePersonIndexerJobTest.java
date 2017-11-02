@@ -255,8 +255,6 @@ public class BasePersonIndexerJobTest
   public void extractLastRunRecsFromTable_Args__Date__error() throws Exception {
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenThrow(HibernateException.class);
-    // when(session.beginTransaction()).thenThrow(HibernateException.class);
-    // when(session.getTransaction()).thenThrow(HibernateException.class);
 
     final List<TestNormalizedEntity> actual = target.extractLastRunRecsFromTable(lastRunTime);
     assertThat(actual, notNullValue());
