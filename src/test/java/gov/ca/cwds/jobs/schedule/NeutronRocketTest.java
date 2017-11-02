@@ -17,7 +17,6 @@ import org.quartz.Trigger;
 
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.component.FlightRecord;
-import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
@@ -52,7 +51,7 @@ public class NeutronRocketTest extends PersonJobTester {
     assertThat(target, notNullValue());
   }
 
-  @Test(expected = JobsException.class)
+  @Test
   public void execute_Args__JobExecutionContext_T__JobException() throws Exception {
     JobExecutionContext context_ = mock(JobExecutionContext.class);
     JobDetail jd = mock(JobDetail.class);

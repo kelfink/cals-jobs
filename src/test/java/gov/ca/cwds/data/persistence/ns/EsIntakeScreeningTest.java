@@ -456,8 +456,7 @@ public class EsIntakeScreeningTest {
   @Test
   public void getRoles_Args__() throws Exception {
     final String[] actual = target.getRoles();
-    String[] expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test

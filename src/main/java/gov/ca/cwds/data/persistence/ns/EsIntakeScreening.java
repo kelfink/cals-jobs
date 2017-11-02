@@ -592,11 +592,13 @@ public class EsIntakeScreening extends CommonScreening
   }
 
   public String[] getRoles() {
-    return roles.clone();
+    return roles != null ? roles.clone() : new String[0];
   }
 
   public void setRoles(String[] roles) {
-    this.roles = Arrays.copyOf(roles, roles.length);
+    if (roles != null) {
+      this.roles = Arrays.copyOf(roles, roles.length);
+    }
   }
 
   public boolean isFlgReporter() {

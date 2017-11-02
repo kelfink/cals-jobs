@@ -20,7 +20,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
-import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -102,7 +102,7 @@ public class LastSuccessfulRunJobTest
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test(expected = JobsException.class)
+  @Test(expected = NeutronException.class)
   public void determineLastSuccessfulRunTime_error__() throws Exception {
     target.setLastRunTimeFilename("zugzug_oompa_loompa");
     final Date actual = target.determineLastSuccessfulRunTime();
@@ -123,7 +123,7 @@ public class LastSuccessfulRunJobTest
     target.writeLastSuccessfulRunTime(datetime);
   }
 
-  @Test(expected = JobsException.class)
+  @Test(expected = NeutronException.class)
   public void writeLastSuccessfulRunTime_Args__bomb() throws Exception {
     FlightRecord track = mock(FlightRecord.class);
     when(track.isFailed()).thenReturn(false);
