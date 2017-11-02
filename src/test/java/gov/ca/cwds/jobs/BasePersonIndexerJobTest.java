@@ -44,6 +44,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
+import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
@@ -250,12 +251,12 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  @Test(expected = HibernateException.class)
+  @Test(expected = DaoException.class)
   public void extractLastRunRecsFromTable_Args__Date__error() throws Exception {
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenThrow(HibernateException.class);
-    when(session.beginTransaction()).thenThrow(HibernateException.class);
-    when(session.getTransaction()).thenThrow(HibernateException.class);
+    // when(session.beginTransaction()).thenThrow(HibernateException.class);
+    // when(session.getTransaction()).thenThrow(HibernateException.class);
 
     final List<TestNormalizedEntity> actual = target.extractLastRunRecsFromTable(lastRunTime);
     assertThat(actual, notNullValue());
