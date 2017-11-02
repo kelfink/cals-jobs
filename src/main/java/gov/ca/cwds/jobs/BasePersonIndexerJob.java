@@ -515,6 +515,25 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
+   * Forcibly remove sealed or sensitive documents.
+   * 
+   * @param deletionResults documents to remove from Elasticsearch
+   * @param bp bulk processor
+   */
+  protected void handleDeletes(final Set<String> deletionResults, final BulkProcessor bp) {
+    if (!deletionResults.isEmpty()) {
+      LOGGER.warn("Found {} people to delete, IDs: {}", deletionResults.size(), deletionResults);
+
+      for (String deletionId : deletionResults) {
+        bp.add(new DeleteRequest(getOpts().getIndexName(),
+            esDao.getConfig().getElasticsearchDocType(), deletionId));
+      }
+
+      track.addToBulkDeleted(deletionResults.size());
+    }
+  }
+
+  /**
    * <strong>ENTRY POINT FOR LAST RUN.</strong>
    *
    * <p>
@@ -546,18 +565,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         });
       }
 
-      // Delete records identified for deletion...
-      if (!deletionResults.isEmpty()) {
-        LOGGER.warn("Found {} people to delete, IDs: {}", deletionResults.size(), deletionResults);
-
-        for (String deletionId : deletionResults) {
-          bp.add(new DeleteRequest(getOpts().getIndexName(),
-              esDao.getConfig().getElasticsearchDocType(), deletionId));
-        }
-
-        track.addToBulkDeleted(deletionResults.size());
-      }
-
+      handleDeletes(deletionResults, bp);
       awaitBulkProcessorClose(bp);
       validateDocuments();
       return new Date(getTrack().getStartTime());

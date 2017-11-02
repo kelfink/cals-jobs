@@ -107,7 +107,6 @@ public class BasePersonIndexerJobTest
   @Test
   public void extract_Args__ResultSet() throws Exception {
     final Object actual = target.extract(rs);
-    // You survived. Good enough.
   }
 
   @Test
@@ -151,17 +150,6 @@ public class BasePersonIndexerJobTest
   // ElasticSearchPerson expected = MAPPER.readValue(json, ElasticSearchPerson.class);
   // // assertThat(actual, is(equalTo(expected)));
   // assertThat(actual, notNullValue());
-  // }
-
-  // @Test
-  // public void buildElasticSearchPersonDoc_Args__ApiPersonAware_T__JsonProcessingException()
-  // throws Exception {
-  // ApiPersonAware p = mock(ApiPersonAware.class);
-  // try {
-  // target.buildElasticSearchPersonDoc(p);
-  // fail("Expected exception was not thrown!");
-  // } catch (JsonProcessingException e) {
-  // }
   // }
 
   @Test
@@ -868,6 +856,14 @@ public class BasePersonIndexerJobTest
     final BulkProcessor bp = mock(BulkProcessor.class);
     target.setFakeBulkProcessor(false);
     target.awaitBulkProcessorClose(bp);
+  }
+
+  @Test
+  public void handleDeletes_Args__Set__BulkProcessor() throws Exception {
+    final Set<String> deletionResults = new HashSet<>();
+    deletionResults.add(DEFAULT_CLIENT_ID);
+    final BulkProcessor bp = mock(BulkProcessor.class);
+    target.handleDeletes(deletionResults, bp);
   }
 
 }
