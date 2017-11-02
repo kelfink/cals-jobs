@@ -23,7 +23,6 @@ import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
 import gov.ca.cwds.data.persistence.ns.IntakeParticipant;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.NsSessionFactory;
-import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
@@ -39,9 +38,6 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, EsIntakeScreening>
     implements JobResultSetAware<EsIntakeScreening> {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IntakeScreeningJob.class);
@@ -57,7 +53,6 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    * @param normalizedDao Intake Screening DAO
    * @param viewDao view Dao
    * @param esDao ElasticSearch DAO
-   * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    * @param jobHistory job history
@@ -65,10 +60,9 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
    */
   @Inject
   public IntakeScreeningJob(final IntakeParticipantDao normalizedDao,
-      final EsIntakeScreeningDao viewDao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
+      final EsIntakeScreeningDao viewDao, final ElasticsearchDao esDao, final ObjectMapper mapper,
       @NsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory, FlightPlan opts) {
-    super(normalizedDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
+    super(normalizedDao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, jobHistory, opts);
     this.viewDao = viewDao;
   }
 
