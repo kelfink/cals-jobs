@@ -41,7 +41,7 @@ import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.jobs.component.FlightRecord;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -424,7 +424,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void getOpts_Args__() throws Exception {
-    JobOptions actual = target.getOpts();
+    FlightPlan actual = target.getOpts();
     assertThat(actual, notNullValue());
   }
 
@@ -846,7 +846,7 @@ public class BasePersonIndexerJobTest
     when(q.setFetchSize(any(Integer.class))).thenReturn(q);
     when(q.setCacheable(any(Boolean.class))).thenReturn(q);
 
-    JobOptions opts = new JobOptions();
+    FlightPlan opts = new FlightPlan();
     opts.setRefreshMqt(true);
     opts.setEsConfigLoc("config/local.yaml");
     target.setOpts(opts);

@@ -22,7 +22,7 @@ import org.junit.Test;
 import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.jobs.PersonJobTester;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -637,7 +637,7 @@ public class EsPersonReferralTest extends PersonJobTester {
 
   @Test
   public void setOpts_Args__JobOptions() throws Exception {
-    JobOptions opts = mock(JobOptions.class);
+    FlightPlan opts = mock(FlightPlan.class);
     EsPersonReferral.setOpts(opts);
   }
 

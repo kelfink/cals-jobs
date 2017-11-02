@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 
 public class AtomInitialLoadTest {
@@ -40,7 +40,7 @@ public class AtomInitialLoadTest {
     }
 
     @Override
-    public JobOptions getOpts() {
+    public FlightPlan getOpts() {
       return null;
     }
 

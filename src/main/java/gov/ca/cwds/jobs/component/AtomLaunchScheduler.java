@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.component;
 
 import org.quartz.TriggerKey;
 
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 import gov.ca.cwds.jobs.schedule.LaunchPad;
@@ -18,14 +18,14 @@ public interface AtomLaunchScheduler {
    * @return job progress
    * @throws NeutronException unexpected runtime error
    */
-  FlightRecord runScheduledJob(Class<?> klass, JobOptions opts) throws NeutronException;
+  FlightRecord runScheduledJob(Class<?> klass, FlightPlan opts) throws NeutronException;
 
   void addExecutingJob(TriggerKey key, NeutronRocket job);
 
-  LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, JobOptions opts);
+  LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts);
 
   boolean isJobVetoed(String className) throws NeutronException;
 
-  FlightRecord runScheduledJob(String jobName, JobOptions opts) throws NeutronException;
+  FlightRecord runScheduledJob(String jobName, FlightPlan opts) throws NeutronException;
 
 }

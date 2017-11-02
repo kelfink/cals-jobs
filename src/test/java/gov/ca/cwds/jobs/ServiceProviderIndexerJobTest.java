@@ -16,8 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.config.JobOptions;
-import gov.ca.cwds.jobs.config.JobOptionsTest;
+import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.config.FlightPlanTest;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 
 /**
@@ -30,7 +30,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
 
     public TestServiceProviderIndexerJob(ReplicatedServiceProviderDao dao, ElasticsearchDao esDao,
         String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
-        FlightRecorder jobHistory, JobOptions opts) {
+        FlightRecorder jobHistory, FlightPlan opts) {
       super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
     }
 
@@ -46,7 +46,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
     dao = new ReplicatedServiceProviderDao(sessionFactory);
     target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
         sessionFactory, jobHistory, opts);
-    target.setOpts(JobOptionsTest.makeGeneric());
+    target.setOpts(FlightPlanTest.makeGeneric());
   }
 
   @After

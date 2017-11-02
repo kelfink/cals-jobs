@@ -10,7 +10,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 
@@ -39,7 +39,7 @@ public class OrigAttorneyIndexerJob
   public OrigAttorneyIndexerJob(final ReplicatedAttorneyDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
-      JobOptions opts) {
+      FlightPlan opts) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
   }
 

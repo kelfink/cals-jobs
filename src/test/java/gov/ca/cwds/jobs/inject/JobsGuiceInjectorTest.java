@@ -15,7 +15,7 @@ import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.jobs.PersonJobTester;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
@@ -31,7 +31,7 @@ public class JobsGuiceInjectorTest
   public void setup() throws Exception {
     super.setup();
 
-    opts = new JobOptions();
+    opts = new FlightPlan();
     opts.setEsConfigLoc("config/local.yaml");
 
     target = new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()), lastJobRunTimeFilename);
@@ -139,7 +139,7 @@ public class JobsGuiceInjectorTest
 
   @Test
   public void getOpts_Args__() throws Exception {
-    JobOptions actual = target.getOpts();
+    FlightPlan actual = target.getOpts();
     assertThat(actual, is(notNullValue()));
   }
 

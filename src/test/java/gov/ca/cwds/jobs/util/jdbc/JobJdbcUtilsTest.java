@@ -27,7 +27,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.component.AtomHibernate;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
@@ -109,7 +109,7 @@ public class JobJdbcUtilsTest
 
   @Test
   public void calcReaderThreads_Args__JobOptions() throws Exception {
-    JobOptions opts = mock(JobOptions.class);
+    FlightPlan opts = mock(FlightPlan.class);
     when(opts.getThreadCount()).thenReturn(4L);
 
     int actual = JobJdbcUtils.calcReaderThreads(opts);

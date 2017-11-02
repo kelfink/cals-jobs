@@ -14,7 +14,7 @@ import com.google.inject.Singleton;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 
@@ -25,12 +25,12 @@ public class RocketFactory implements AtomRocketFactory {
 
   private final Injector injector;
 
-  private final JobOptions baseOpts;
+  private final FlightPlan baseOpts;
 
   private final FlightPlanLog rocketOptions;
 
   @Inject
-  public RocketFactory(final Injector injector, final JobOptions opts,
+  public RocketFactory(final Injector injector, final FlightPlan opts,
       final FlightPlanLog rocketOptions) {
     this.injector = injector;
     this.baseOpts = opts;
@@ -39,7 +39,7 @@ public class RocketFactory implements AtomRocketFactory {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public BasePersonIndexerJob createJob(Class<?> klass, final JobOptions opts)
+  public BasePersonIndexerJob createJob(Class<?> klass, final FlightPlan opts)
       throws NeutronException {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
@@ -55,7 +55,7 @@ public class RocketFactory implements AtomRocketFactory {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public BasePersonIndexerJob createJob(String jobName, final JobOptions opts)
+  public BasePersonIndexerJob createJob(String jobName, final FlightPlan opts)
       throws NeutronException {
     try {
       return createJob(Class.forName(jobName), opts);
@@ -80,7 +80,7 @@ public class RocketFactory implements AtomRocketFactory {
 
     NeutronRocket ret;
     try {
-      final JobOptions opts = rocketOptions.getFlightSettings(klazz);
+      final FlightPlan opts = rocketOptions.getFlightSettings(klazz);
       LOGGER.debug("ROCKET FACTORY: LAST CHANGE LOCATION: {}", opts.getLastRunLoc());
       ret = new NeutronRocket(createJob(klazz, opts));
     } catch (NeutronException e) {
@@ -90,7 +90,7 @@ public class RocketFactory implements AtomRocketFactory {
     return ret;
   }
 
-  public JobOptions getBaseOpts() {
+  public FlightPlan getBaseOpts() {
     return baseOpts;
   }
 

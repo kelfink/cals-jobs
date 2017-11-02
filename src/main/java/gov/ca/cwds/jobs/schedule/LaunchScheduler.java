@@ -15,7 +15,7 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.component.FlightRecord;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 
@@ -31,7 +31,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   private final AtomFlightPlanLog rocketOptions;
 
-  private JobOptions opts;
+  private FlightPlan opts;
 
   /**
    * Scheduled jobs.
@@ -65,7 +65,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final Class<?> klass, final JobOptions opts)
+  public BasePersonIndexerJob createJob(final Class<?> klass, final FlightPlan opts)
       throws NeutronException {
     return this.rocketFactory.createJob(klass, opts);
   }
@@ -79,13 +79,13 @@ public class LaunchScheduler implements AtomLaunchScheduler {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final String jobName, final JobOptions opts)
+  public BasePersonIndexerJob createJob(final String jobName, final FlightPlan opts)
       throws NeutronException {
     return this.rocketFactory.createJob(jobName, opts);
   }
 
   @Override
-  public FlightRecord runScheduledJob(Class<?> klass, JobOptions opts) throws NeutronException {
+  public FlightRecord runScheduledJob(Class<?> klass, FlightPlan opts) throws NeutronException {
     try {
       LOGGER.info("Run scheduled job: {}", klass.getName());
       final BasePersonIndexerJob<?, ?> job = createJob(klass, opts);
@@ -97,7 +97,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightRecord runScheduledJob(String jobName, JobOptions opts) throws NeutronException {
+  public FlightRecord runScheduledJob(String jobName, FlightPlan opts) throws NeutronException {
     try {
       final Class<?> klass = Class.forName(jobName);
       return runScheduledJob(klass, opts);
@@ -107,7 +107,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, JobOptions opts) {
+  public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts) {
     LOGGER.debug("LAUNCH COORDINATOR: LAST CHANGE LOCATION: {}", opts.getLastRunLoc());
     final LaunchPad nj = new LaunchPad(this.getScheduler(), sched, flightRecorder, opts);
     rocketOptions.addFlightSettings(klazz, opts);
@@ -153,11 +153,11 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     return rocketFactory;
   }
 
-  public JobOptions getOpts() {
+  public FlightPlan getOpts() {
     return opts;
   }
 
-  public void setOpts(JobOptions opts) {
+  public void setOpts(FlightPlan opts) {
     this.opts = opts;
   }
 

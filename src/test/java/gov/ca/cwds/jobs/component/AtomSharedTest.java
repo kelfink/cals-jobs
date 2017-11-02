@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 
 public class AtomSharedTest {
 
@@ -34,7 +34,7 @@ public class AtomSharedTest {
     }
 
     @Override
-    public JobOptions getOpts() {
+    public FlightPlan getOpts() {
       return null;
     }
 

@@ -7,7 +7,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 
 public class JobTask<N extends PersistentObject, D extends ApiGroupNormalizer<?>>
     extends ApiObjectIdentity {
@@ -23,7 +23,7 @@ public class JobTask<N extends PersistentObject, D extends ApiGroupNormalizer<?>
 
   private transient BasePersonIndexerJob<N, D> job;
 
-  private final JobOptions opts;
+  private final FlightPlan opts;
 
   private final boolean continuousMode;
 
@@ -35,7 +35,7 @@ public class JobTask<N extends PersistentObject, D extends ApiGroupNormalizer<?>
 
   private Date endTime;
 
-  public JobTask(BasePersonIndexerJob<N, D> job, boolean continuousMode, JobOptions opts,
+  public JobTask(BasePersonIndexerJob<N, D> job, boolean continuousMode, FlightPlan opts,
       String description) {
     this.job = job;
     this.continuousMode = continuousMode;

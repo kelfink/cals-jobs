@@ -74,7 +74,7 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.AtomFlightPlanLog;
@@ -119,7 +119,7 @@ public class JobsGuiceInjector extends AbstractModule {
 
   private String lastJobRunTimeFilename;
 
-  private JobOptions opts;
+  private FlightPlan opts;
 
   private String hibernateConfigCms = HIBERNATE_CONFIG_CMS;
 
@@ -139,7 +139,7 @@ public class JobsGuiceInjector extends AbstractModule {
    * @param esConfigFile location of Elasticsearch configuration file
    * @param lastJobRunTimeFilename location of last run file
    */
-  public JobsGuiceInjector(final JobOptions opts, final File esConfigFile,
+  public JobsGuiceInjector(final FlightPlan opts, final File esConfigFile,
       String lastJobRunTimeFilename) {
     this.esConfig = esConfigFile;
     this.lastJobRunTimeFilename =
@@ -155,7 +155,7 @@ public class JobsGuiceInjector extends AbstractModule {
    * @return Guice Injector
    * @throws JobsException if unable to construct dependencies
    */
-  public static synchronized Injector buildInjector(final JobOptions opts) {
+  public static synchronized Injector buildInjector(final FlightPlan opts) {
     if (injector == null) {
       try {
         injector = Guice.createInjector(new JobsGuiceInjector(opts,
@@ -187,7 +187,7 @@ public class JobsGuiceInjector extends AbstractModule {
    * @throws NeutronException checked exception
    */
   public static <T extends BasePersonIndexerJob<?, ?>> T newJob(final Class<T> klass,
-      final JobOptions opts) throws NeutronException {
+      final FlightPlan opts) throws NeutronException {
     try {
       final T ret = buildInjector(opts).getInstance(klass);
       ret.setOpts(opts);
@@ -208,7 +208,7 @@ public class JobsGuiceInjector extends AbstractModule {
    */
   public static <T extends BasePersonIndexerJob<?, ?>> T newJob(final Class<T> klass,
       String... args) throws NeutronException {
-    final JobOptions opts = JobOptions.parseCommandLine(args);
+    final FlightPlan opts = FlightPlan.parseCommandLine(args);
     return newJob(klass, opts);
   }
 
@@ -399,12 +399,12 @@ public class JobsGuiceInjector extends AbstractModule {
   }
 
   @SuppressWarnings("javadoc")
-  public JobOptions getOpts() {
+  public FlightPlan getOpts() {
     return opts;
   }
 
   @SuppressWarnings("javadoc")
-  public void setOpts(JobOptions opts) {
+  public void setOpts(FlightPlan opts) {
     this.opts = opts;
   }
 

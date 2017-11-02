@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.component.FlightRecord;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
@@ -35,10 +35,10 @@ public class LastSuccessfulRunJobTest
 
     FlightRecord track = new FlightRecord();
 
-    JobOptions opts;
+    FlightPlan opts;
 
     public TestLastSuccessfulRunJob(String lastJobRunTimeFilename, ElasticsearchDao esDao,
-        FlightRecorder jobHistory, final JobOptions opts) {
+        FlightRecorder jobHistory, final FlightPlan opts) {
       super(lastJobRunTimeFilename, jobHistory, opts);
     }
 
@@ -213,7 +213,7 @@ public class LastSuccessfulRunJobTest
   public void calcLastRunDate_Args__Date() throws Exception {
     Date lastSuccessfulRunTime = new Date();
 
-    JobOptions opts = new JobOptions();
+    FlightPlan opts = new FlightPlan();
     opts.setLastRunTime(lastSuccessfulRunTime);
     target.setOpts(opts);
 
@@ -223,9 +223,9 @@ public class LastSuccessfulRunJobTest
 
   @Test
   public void getOpts_Args__() throws Exception {
-    JobOptions opts = new JobOptions();
+    FlightPlan opts = new FlightPlan();
     target.setOpts(opts);
-    JobOptions actual = target.getOpts();
+    FlightPlan actual = target.getOpts();
     assertThat(actual, is(notNullValue()));
   }
 

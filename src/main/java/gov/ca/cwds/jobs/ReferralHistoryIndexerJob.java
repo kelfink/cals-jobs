@@ -38,7 +38,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.rocket.referral.MinClientReferral;
@@ -178,7 +178,7 @@ public class ReferralHistoryIndexerJob
   public ReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao, ElasticsearchDao esDao,
       @LastRunFile String lastJobRunTimeFilename, ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
-      JobOptions opts) {
+      FlightPlan opts) {
     super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
   }
 

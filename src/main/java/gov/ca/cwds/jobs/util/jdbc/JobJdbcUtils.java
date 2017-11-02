@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.component.AtomHibernate;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 
 /**
@@ -85,7 +85,7 @@ public class JobJdbcUtils {
    * @param opts job options
    * @return number of reader threads to run
    */
-  public static int calcReaderThreads(final JobOptions opts) {
+  public static int calcReaderThreads(final FlightPlan opts) {
     final int ret = opts.getThreadCount() != 0L ? (int) opts.getThreadCount()
         : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
     LOGGER.info(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);

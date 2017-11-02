@@ -22,7 +22,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -58,7 +58,7 @@ public class MSearchJob extends
   public MSearchJob(final ReplicatedOtherAdultInPlacemtHomeDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, final NeutronElasticValidator validator,
-      FlightRecorder jobHistory, JobOptions opts) {
+      FlightRecorder jobHistory, FlightPlan opts) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
     this.validator = validator;
   }

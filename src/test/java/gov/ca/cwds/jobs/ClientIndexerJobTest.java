@@ -25,7 +25,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 
@@ -42,7 +42,7 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
 
     public TestClientIndexerJob(ReplicatedClientDao dao, ElasticsearchDao esDao,
         String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
-        FlightRecorder jobHistory, JobOptions opts) {
+        FlightRecorder jobHistory, FlightPlan opts) {
       super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
     }
 

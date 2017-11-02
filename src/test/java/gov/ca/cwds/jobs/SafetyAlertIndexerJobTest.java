@@ -30,7 +30,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsSafetyAlert;
 import gov.ca.cwds.data.persistence.cms.ReplicatedSafetyAlerts;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
@@ -45,7 +45,7 @@ public class SafetyAlertIndexerJobTest extends PersonJobTester {
   ReplicatedSafetyAlertsDao clientDao;
   String lastJobRunTimeFilename = null;
   SafetyAlertIndexerJob target;
-  JobOptions opts;
+  FlightPlan opts;
   ElasticsearchConfiguration esConfig;
   Transaction transaction;
 
@@ -56,7 +56,7 @@ public class SafetyAlertIndexerJobTest extends PersonJobTester {
     session = mock(Session.class);
     esDao = mock(ElasticsearchDao.class);
     esConfig = mock(ElasticsearchConfiguration.class);
-    opts = mock(JobOptions.class);
+    opts = mock(FlightPlan.class);
     transaction = mock(Transaction.class);
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);

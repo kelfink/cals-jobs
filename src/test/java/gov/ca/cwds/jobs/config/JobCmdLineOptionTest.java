@@ -25,7 +25,7 @@ public class JobCmdLineOptionTest {
   @Test
   public void getOpt_Args__() throws Exception {
     Option actual = JobCmdLineOption.BUCKET_RANGE.getOpt();
-    Option expected = JobOptions.makeOpt("r", JobOptions.CMD_LINE_BUCKET_RANGE,
+    Option expected = FlightPlan.makeOpt("r", FlightPlan.CMD_LINE_BUCKET_RANGE,
         "bucket range (-r 20-24)", false, 2, Integer.class, '-');
     assertThat(actual, is(equalTo(expected)));
   }

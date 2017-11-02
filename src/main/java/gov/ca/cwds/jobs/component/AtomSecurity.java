@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.component;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 
 /**
  * Common security features for Elasticsearch indexing jobs, especially legacy CMS.
@@ -26,7 +26,7 @@ public interface AtomSecurity extends ApiMarker {
    * @param indicator CMS client sensitivity or case/referral limited access indicator
    * @return true if Job is not loading sealed/sensitive OR record is not restricted
    */
-  static boolean isNotSealedSensitive(final JobOptions opts, final String indicator) {
+  static boolean isNotSealedSensitive(final FlightPlan opts, final String indicator) {
     return opts.isLoadSealedAndSensitive()
         || (indicator == null || "N".equalsIgnoreCase(indicator));
   }

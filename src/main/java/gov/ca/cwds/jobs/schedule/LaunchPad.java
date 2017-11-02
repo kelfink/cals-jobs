@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.weakref.jmx.Managed;
 
 import gov.ca.cwds.jobs.component.FlightRecord;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 
 public class LaunchPad implements Serializable {
@@ -37,7 +37,7 @@ public class LaunchPad implements Serializable {
   private final String jobName;
   private final String triggerName;
 
-  private JobOptions opts;
+  private FlightPlan opts;
 
   private boolean vetoExecution;
 
@@ -45,7 +45,7 @@ public class LaunchPad implements Serializable {
   private volatile JobDetail jd;
 
   public LaunchPad(final Scheduler scheduler, DefaultFlightSchedule sched,
-      final FlightRecorder jobHistory, final JobOptions opts) {
+      final FlightRecorder jobHistory, final FlightPlan opts) {
     this.scheduler = scheduler;
     this.flightSchedule = sched;
     this.jobHistory = jobHistory;
@@ -61,8 +61,8 @@ public class LaunchPad implements Serializable {
   public String run(String cmdLine) throws NeutronException {
     try {
       LOGGER.info("RUN JOB: {}", flightSchedule.getName());
-      final JobOptions runOnceOpts =
-          JobOptions.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
+      final FlightPlan runOnceOpts =
+          FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       final FlightRecord track =
           LaunchCommand.getInstance().runScheduledJob(flightSchedule.getKlazz(), runOnceOpts);
       return track.toString();
@@ -148,11 +148,11 @@ public class LaunchPad implements Serializable {
     return jd;
   }
 
-  public JobOptions getOpts() {
+  public FlightPlan getOpts() {
     return opts;
   }
 
-  public void setOpts(JobOptions opts) {
+  public void setOpts(FlightPlan opts) {
     this.opts = opts;
   }
 

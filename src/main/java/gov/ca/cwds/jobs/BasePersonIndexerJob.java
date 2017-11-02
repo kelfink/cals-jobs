@@ -59,7 +59,7 @@ import gov.ca.cwds.jobs.component.AtomTransform;
 import gov.ca.cwds.jobs.component.AtomValidateDocument;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronColumn;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.defaults.NeutronElasticsearchDefaults;
@@ -96,7 +96,7 @@ import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
  * @author CWDS API Team
  * @param <T> ES replicated Person persistence class
  * @param <M> MQT entity class, if any, or T
- * @see JobOptions
+ * @see FlightPlan
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends LastSuccessfulRunJob
@@ -167,7 +167,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   @Inject
   public BasePersonIndexerJob(final BaseDaoImpl<T> jobDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      SessionFactory sessionFactory, FlightRecorder jobHistory, JobOptions opts) {
+      SessionFactory sessionFactory, FlightRecorder jobHistory, FlightPlan opts) {
     super(lastJobRunTimeFilename, jobHistory, opts);
     this.jobDao = jobDao;
     this.esDao = esDao;

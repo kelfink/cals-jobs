@@ -19,7 +19,7 @@ import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 
@@ -49,7 +49,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
   public ParentCaseHistoryIndexerJob(final ReplicatedPersonCasesDao dao,
       final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-      FlightRecorder jobHistory, JobOptions opts) {
+      FlightRecorder jobHistory, FlightPlan opts) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
   }
 

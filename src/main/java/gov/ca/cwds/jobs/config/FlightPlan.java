@@ -29,14 +29,11 @@ import gov.ca.cwds.jobs.util.JobLogs;
  * 
  * @author CWDS API Team
  */
-public class JobOptions implements ApiMarker {
+public class FlightPlan implements ApiMarker {
 
-  /**
-   * Base serialization version. Increment by class change.
-   */
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobOptions.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(FlightPlan.class);
 
   public static final String CMD_LINE_ES_CONFIG = "config";
   public static final String CMD_LINE_INDEX_NAME = "index-name";
@@ -132,7 +129,7 @@ public class JobOptions implements ApiMarker {
   /**
    * Default constructor.
    */
-  public JobOptions() {
+  public FlightPlan() {
     // Default contructor
   }
 
@@ -156,7 +153,7 @@ public class JobOptions implements ApiMarker {
    * @param refreshMqt refresh materialized query tables (full load only)
    * @param dropIndex drop the index before start (full load only)
    */
-  public JobOptions(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
+  public FlightPlan(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
       boolean lastRunMode, long startBucket, long endBucket, long totalBuckets, long threadCount,
       String minId, String maxId, boolean loadSealedAndSensitive, boolean rangeGiven,
       String baseDirectory, boolean refreshMqt, boolean dropIndex) {
@@ -183,7 +180,7 @@ public class JobOptions implements ApiMarker {
    * 
    * @param opts other job options
    */
-  public JobOptions(final JobOptions opts) {
+  public FlightPlan(final FlightPlan opts) {
     this.esConfigLoc = opts.esConfigLoc;
     this.indexName = StringUtils.isBlank(opts.indexName) ? null : opts.indexName;
     this.lastRunTime = opts.lastRunTime;
@@ -418,7 +415,7 @@ public class JobOptions implements ApiMarker {
    * @return JobOptions defining this job
    * @throws NeutronException if unable to parse command line
    */
-  public static JobOptions parseCommandLine(final String[] args) throws NeutronException {
+  public static FlightPlan parseCommandLine(final String[] args) throws NeutronException {
     String esConfigLoc = null;
     String indexName = null;
     Date lastRunTime = null;
@@ -515,7 +512,7 @@ public class JobOptions implements ApiMarker {
       throw JobLogs.checked(LOGGER, e, "INVALID ARGS", e.getMessage(), e);
     }
 
-    return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode,
+    return new FlightPlan(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode,
         bucketRange.getLeft(), bucketRange.getRight(), totalBuckets, threadCount, minId, maxId,
         loadSealedAndSensitive, rangeGiven, baseDirectory, refreshMqt, dropIndex);
   }

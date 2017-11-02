@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual;
-import gov.ca.cwds.jobs.config.JobOptionsTest;
+import gov.ca.cwds.jobs.config.FlightPlanTest;
 
 /**
  * @author CWDS API Team
@@ -31,7 +31,7 @@ public class CollateralIndividualIndexerJobTest
     dao = new ReplicatedCollateralIndividualDao(sessionFactory);
     target = new CollateralIndividualIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
         sessionFactory, jobHistory, opts);
-    target.setOpts(JobOptionsTest.makeGeneric());
+    target.setOpts(FlightPlanTest.makeGeneric());
   }
 
   @Test

@@ -1,11 +1,11 @@
 package gov.ca.cwds.jobs.schedule;
 
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 
 public interface AtomFlightPlanLog {
 
-  JobOptions getFlightSettings(Class<?> klazz);
+  FlightPlan getFlightSettings(Class<?> klazz);
 
-  void addFlightSettings(Class<?> klazz, JobOptions opts);
+  void addFlightSettings(Class<?> klazz, FlightPlan opts);
 
 }

@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
@@ -41,7 +41,7 @@ public class ReferralJobRanges {
       BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job,
       final List<Pair<String, String>> allKeyPairs) {
     List<Pair<String, String>> ret = new ArrayList<>();
-    final JobOptions opts = job.getOpts();
+    final FlightPlan opts = job.getOpts();
     if (opts.isRangeGiven()) {
       final List<Pair<String, String>> list = new ArrayList<>();
 

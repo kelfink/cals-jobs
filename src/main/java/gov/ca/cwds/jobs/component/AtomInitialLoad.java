@@ -15,7 +15,7 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 
 /**
@@ -37,7 +37,7 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
    */
   default List<Pair<String, String>> limitRange(final List<Pair<String, String>> allKeyPairs) {
     List<Pair<String, String>> ret;
-    final JobOptions opts = getOpts();
+    final FlightPlan opts = getOpts();
     if (opts != null && opts.isRangeGiven()) {
       final List<Pair<String, String>> list = new ArrayList<>();
 

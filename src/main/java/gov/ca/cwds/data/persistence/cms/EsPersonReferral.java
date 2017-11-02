@@ -32,7 +32,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.component.AtomSecurity;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
@@ -78,7 +78,7 @@ public class EsPersonReferral
 
   private static final String COLUMN_REFERRAL_ID = "REFERRAL_ID";
 
-  private static JobOptions opts; // WARNING: not a good idea. Try another way
+  private static FlightPlan opts; // WARNING: not a good idea. Try another way
 
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)
@@ -835,7 +835,7 @@ public class EsPersonReferral
    * 
    * @param opts job options
    */
-  public static void setOpts(JobOptions opts) {
+  public static void setOpts(FlightPlan opts) {
     EsPersonReferral.opts = opts;
   }
 

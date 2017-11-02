@@ -18,7 +18,7 @@ import gov.ca.cwds.jobs.component.AtomJobControl;
 import gov.ca.cwds.jobs.component.AtomShared;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.component.Rocket;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -39,7 +39,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
   /**
    * Command line options for this job.
    */
-  protected JobOptions opts;
+  protected FlightPlan opts;
 
   private String lastRunTimeFilename;
 
@@ -53,7 +53,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * @param opts job options
    */
   public LastSuccessfulRunJob(String lastJobRunTimeFilename, final FlightRecorder jobHistory,
-      final JobOptions opts) {
+      final FlightPlan opts) {
     this.lastRunTimeFilename =
         StringUtils.isBlank(lastJobRunTimeFilename) ? opts.getLastRunLoc() : lastJobRunTimeFilename;
     this.jobHistory = jobHistory;
@@ -66,7 +66,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * @param lastJobRunTimeFilename last run file location
    * @param opts launch options
    */
-  public void init(String lastJobRunTimeFilename, final JobOptions opts) {
+  public void init(String lastJobRunTimeFilename, final FlightPlan opts) {
     this.lastRunTimeFilename =
         StringUtils.isBlank(lastJobRunTimeFilename) ? opts.getLastRunLoc() : lastJobRunTimeFilename;
     this.opts = opts;
@@ -112,7 +112,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * @param opts command line job options
    * @return appropriate date to detect changes
    */
-  protected Date calcLastRunDate(final Date lastSuccessfulRunTime, final JobOptions opts) {
+  protected Date calcLastRunDate(final Date lastSuccessfulRunTime, final FlightPlan opts) {
     Date ret;
     final Date lastSuccessfulRunTimeOverride = opts.getLastRunTime();
 
@@ -130,7 +130,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
 
   /**
    * Calculate last successful run date/time, per
-   * {@link LastSuccessfulRunJob#calcLastRunDate(Date, JobOptions)}.
+   * {@link LastSuccessfulRunJob#calcLastRunDate(Date, FlightPlan)}.
    * 
    * @param lastSuccessfulRunTime last successful run
    * @return appropriate date to detect changes
@@ -205,7 +205,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * @return this job's options
    */
   @Override
-  public JobOptions getOpts() {
+  public FlightPlan getOpts() {
     return opts;
   }
 
@@ -214,7 +214,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * 
    * @param opts this job's options
    */
-  public void setOpts(JobOptions opts) {
+  public void setOpts(FlightPlan opts) {
     this.opts = opts;
   }
 

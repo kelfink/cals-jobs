@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 
 /**
  * Common features of all Elasticsearch indexing jobs.
@@ -35,7 +35,7 @@ public interface AtomShared extends ApiMarker {
    * 
    * @return this job's options
    */
-  JobOptions getOpts();
+  FlightPlan getOpts();
 
   /**
    * Common method sets the thread's name.

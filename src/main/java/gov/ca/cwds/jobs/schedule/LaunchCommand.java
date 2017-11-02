@@ -31,7 +31,7 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomFlightRecorder;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.FlightRecord;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
@@ -60,7 +60,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
   /**
    * HACK: inject dependencies.
    */
-  private JobOptions startingOpts;
+  private FlightPlan startingOpts;
 
   /**
    * Only used to drop and create indexes.
@@ -98,7 +98,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
     final Date now = new DateTime().minusHours(initialMode ? 876000 : hoursInPast).toDate();
 
     for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
-      final JobOptions opts = new JobOptions(startingOpts);
+      final FlightPlan opts = new FlightPlan(startingOpts);
 
       // Find the job's time file under the base directory:
       final StringBuilder buf = new StringBuilder();
@@ -189,7 +189,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
    * @param sched this schedule
    * @throws IOException on file error
    */
-  protected void handleTimeFile(final JobOptions opts, final DateFormat fmt, final Date now,
+  protected void handleTimeFile(final FlightPlan opts, final DateFormat fmt, final Date now,
       final DefaultFlightSchedule sched) throws IOException {
     final StringBuilder buf = new StringBuilder();
 
@@ -244,7 +244,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
       // Schedule jobs.
       for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
         final Class<?> klass = sched.getKlazz();
-        final JobOptions opts = new JobOptions(startingOpts);
+        final FlightPlan opts = new FlightPlan(startingOpts);
         handleTimeFile(opts, fmt, now, sched);
 
         final LaunchPad nj =
@@ -299,7 +299,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final Class<?> klass, final JobOptions opts)
+  public BasePersonIndexerJob createJob(final Class<?> klass, final FlightPlan opts)
       throws NeutronException {
     return this.neutronScheduler.createJob(klass, opts);
   }
@@ -313,7 +313,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final String jobName, final JobOptions opts)
+  public BasePersonIndexerJob createJob(final String jobName, final FlightPlan opts)
       throws NeutronException {
     final BasePersonIndexerJob ret = this.neutronScheduler.createJob(jobName, opts);
     ret.setOpts(opts);
@@ -323,13 +323,13 @@ public class LaunchCommand implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightRecord runScheduledJob(final Class<?> klass, final JobOptions opts)
+  public FlightRecord runScheduledJob(final Class<?> klass, final FlightPlan opts)
       throws NeutronException {
     return this.neutronScheduler.runScheduledJob(klass, opts);
   }
 
   @Override
-  public FlightRecord runScheduledJob(final String jobName, final JobOptions opts)
+  public FlightRecord runScheduledJob(final String jobName, final FlightPlan opts)
       throws NeutronException {
     return this.neutronScheduler.runScheduledJob(jobName, opts);
   }
@@ -377,11 +377,11 @@ public class LaunchCommand implements AtomLaunchScheduler {
     }
   }
 
-  public JobOptions getStartingOpts() {
+  public FlightPlan getStartingOpts() {
     return startingOpts;
   }
 
-  public void setStartingOpts(JobOptions startingOpts) {
+  public void setStartingOpts(FlightPlan startingOpts) {
     this.startingOpts = startingOpts;
   }
 
@@ -391,7 +391,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
   }
 
   @Override
-  public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, JobOptions opts) {
+  public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts) {
     return this.neutronScheduler.scheduleJob(klazz, sched, opts);
   }
 
@@ -444,7 +444,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
   protected static synchronized LaunchCommand startContinuousMode(String[] args) {
     LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
     try {
-      final JobOptions globalOpts = JobOptions.parseCommandLine(args);
+      final FlightPlan globalOpts = FlightPlan.parseCommandLine(args);
       final Injector injector = JobsGuiceInjector.buildInjector(globalOpts);
       instance = injector.getInstance(LaunchCommand.class);
       instance.startingOpts = globalOpts;
@@ -477,9 +477,9 @@ public class LaunchCommand implements AtomLaunchScheduler {
       String... args) {
     int exitCode = 0;
 
-    JobOptions globalOpts;
+    FlightPlan globalOpts;
     try {
-      globalOpts = JobOptions.parseCommandLine(args);
+      globalOpts = FlightPlan.parseCommandLine(args);
     } catch (Exception e) {
       throw JobLogs.runtime(LOGGER, e, "CMD LINE ERROR! {}", e.getMessage());
     }

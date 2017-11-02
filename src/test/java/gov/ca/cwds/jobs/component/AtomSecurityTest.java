@@ -8,7 +8,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 
 public class AtomSecurityTest {
 
@@ -41,7 +41,7 @@ public class AtomSecurityTest {
 
   @Test
   public void isNotSealedSensitive_Args__JobOptions__N() throws Exception {
-    JobOptions opts = new JobOptions();
+    FlightPlan opts = new FlightPlan();
     String indicator = "N";
     boolean actual = AtomSecurity.isNotSealedSensitive(opts, indicator);
     boolean expected = true;
@@ -50,7 +50,7 @@ public class AtomSecurityTest {
 
   @Test
   public void isNotSealedSensitive_Args__JobOptions__Y() throws Exception {
-    JobOptions opts = new JobOptions();
+    FlightPlan opts = new FlightPlan();
     opts.setLoadSealedAndSensitive(true);
     String indicator = "R";
     boolean actual = AtomSecurity.isNotSealedSensitive(opts, indicator);

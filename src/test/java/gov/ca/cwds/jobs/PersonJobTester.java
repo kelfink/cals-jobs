@@ -43,7 +43,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.component.FlightRecord;
-import gov.ca.cwds.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -77,7 +77,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   public Client client;
   public ElasticSearchPerson esp;
 
-  public JobOptions opts;
+  public FlightPlan opts;
   public File tempFile;
   public File jobConfigFile;
   public File esConfileFile;
@@ -170,7 +170,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
     // Job options:
     esConfileFile = tempFolder.newFile("es.yml");
-    opts = mock(JobOptions.class);
+    opts = mock(FlightPlan.class);
     esp = new ElasticSearchPerson();
 
     when(opts.isLoadSealedAndSensitive()).thenReturn(false);
