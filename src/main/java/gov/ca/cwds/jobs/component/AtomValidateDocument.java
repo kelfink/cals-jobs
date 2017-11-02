@@ -26,8 +26,7 @@ public interface AtomValidateDocument {
     try {
       return ElasticSearchPerson.MAPPER.readValue(json, ElasticSearchPerson.class);
     } catch (IOException e) {
-      throw JobLogs.buildCheckedException(getLogger(), e, "FAILED TO READ PERSON DOC! {}",
-          e.getMessage(), e);
+      throw JobLogs.checked(getLogger(), e, "FAILED TO READ PERSON DOC! {}", e.getMessage(), e);
     }
   }
 
@@ -49,8 +48,7 @@ public interface AtomValidateDocument {
         validateDocument(person);
       }
     } catch (IOException e) {
-      throw JobLogs.buildCheckedException(getLogger(), e, "ERROR READING DOCUMENT! doc id: {}",
-          docId);
+      throw JobLogs.checked(getLogger(), e, "ERROR READING DOCUMENT! doc id: {}", docId);
     }
   }
 
@@ -63,16 +61,18 @@ public interface AtomValidateDocument {
     long totalHits = 0;
 
     if (docIds != null && docIds.length > 0) {
-      final Client esClient = getEsDao().getClient();
-      final MultiSearchResponse multiResponse = esClient.prepareMultiSearch()
-          .add(esClient.prepareSearch()
-              .setQuery(QueryBuilders.idsQuery().addIds(getTrack().getAffectedDocumentIds())))
-          .get();
+      final String[] affectedDocIds = getTrack().getAffectedDocumentIds();
+      if (affectedDocIds != null && affectedDocIds.length > 0) {
+        final Client esClient = getEsDao().getClient();
+        final MultiSearchResponse multiResponse = esClient.prepareMultiSearch()
+            .add(esClient.prepareSearch().setQuery(QueryBuilders.idsQuery().addIds(affectedDocIds)))
+            .get();
 
-      for (MultiSearchResponse.Item item : multiResponse.getResponses()) {
-        final SearchHits hits = item.getResponse().getHits();
-        totalHits += hits.getTotalHits();
-        processDocumentHits(hits);
+        for (MultiSearchResponse.Item item : multiResponse.getResponses()) {
+          final SearchHits hits = item.getResponse().getHits();
+          totalHits += hits.getTotalHits();
+          processDocumentHits(hits);
+        }
       }
     }
 

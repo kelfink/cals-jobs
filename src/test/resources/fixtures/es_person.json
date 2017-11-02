@@ -1,0 +1,70 @@
+{
+	"id": "1",
+	"first_name": "Bart",
+	"middle_name": "What",
+	"last_name": "Simpson",
+	"gender": "male",
+	"date_of_birth": "2005-12-02",
+	"ssn": "112224444",
+	"name_suffix": "ii",
+	"addresses": [
+		{
+			"city": "Perth",
+			"id": "2",
+			"state": "AL",
+			"street_address": "123 Fake St",
+			"zip": "11222",
+			"type": 32
+		},
+		{
+			"city": "Melbourne",
+			"id": "3",
+			"state": "AK",
+			"street_address": "12 Camden St",
+			"zip": "22333",
+			"type": 32
+		}
+	],
+	"phone_numbers": [
+		{
+			"id": "1",
+			"number": "9129889934",
+			"type": "Cell"
+		},
+		{
+			"id": "2",
+			"number": "912-990-1234",
+			"type": "Work"
+		}
+	],
+	"languages": [
+		{
+			"id": "111",
+			"name": "Arabic",
+			"primary": true
+		},
+		{
+			"id": "222",
+			"name": "Cantonese",
+			"primary": false
+		},
+		{
+			"id": "333",
+			"name": "Filipino",
+			"primary": false
+		}
+	],
+	"races": [
+		{
+			"race": "White",
+			"race_detail": "Central American"
+		},
+		{
+			"race": "Native Hawaiian or Other Pacific Islander"
+		}
+	],
+	"ethnicity": {
+		"hispanic_latino_origin": "Yes",
+		"ethnicity_detail": "Mexican"
+	}
+}
