@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -100,7 +101,11 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   private transient List<Short> clientRaces = new ArrayList<>();
 
-  private transient Short clientCountyId;
+  /**
+   * Only set to transient to prevent Hibernate from loading it.
+   */
+  @Transient
+  private Short clientCountyId;
 
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
