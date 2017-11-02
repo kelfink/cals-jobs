@@ -64,9 +64,9 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
   public static final String DEFAULT_CLIENT_ID = "abc1234567";
 
-  public static final AtomicBoolean isRunwayClear = new AtomicBoolean(false);
+  public final AtomicBoolean isRunwayClear = new AtomicBoolean(false);
 
-  public static final Lock lock = new ReentrantLock();
+  public final Lock lock = new ReentrantLock();
 
   @BeforeClass
   public static void setupClass() {
