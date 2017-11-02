@@ -27,11 +27,11 @@ public class RocketFactory implements AtomRocketFactory {
 
   private final JobOptions baseOpts;
 
-  private final FlightPlan rocketOptions;
+  private final FlightPlanLog rocketOptions;
 
   @Inject
   public RocketFactory(final Injector injector, final JobOptions opts,
-      final FlightPlan rocketOptions) {
+      final FlightPlanLog rocketOptions) {
     this.injector = injector;
     this.baseOpts = opts;
     this.rocketOptions = rocketOptions;
@@ -94,7 +94,7 @@ public class RocketFactory implements AtomRocketFactory {
     return baseOpts;
   }
 
-  public FlightPlan getRocketOptions() {
+  public FlightPlanLog getRocketOptions() {
     return rocketOptions;
   }
 

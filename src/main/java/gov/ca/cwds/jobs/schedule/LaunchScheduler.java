@@ -29,7 +29,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   private final AtomRocketFactory rocketFactory;
 
-  private final AtomFlightPlan rocketOptions;
+  private final AtomFlightPlanLog rocketOptions;
 
   private JobOptions opts;
 
@@ -50,7 +50,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   @Inject
   public LaunchScheduler(final FlightRecorder jobHistory, final AtomRocketFactory rocketFactory,
-      final AtomFlightPlan rocketOptions) {
+      final AtomFlightPlanLog rocketOptions) {
     this.flightRecorder = jobHistory;
     this.rocketFactory = rocketFactory;
     this.rocketOptions = rocketOptions;
@@ -184,7 +184,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     return this.getScheduleRegistry().get(klazz).isVetoExecution();
   }
 
-  public AtomFlightPlan getRocketOptions() {
+  public AtomFlightPlanLog getRocketOptions() {
     return rocketOptions;
   }
 

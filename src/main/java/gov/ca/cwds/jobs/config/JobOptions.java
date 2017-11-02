@@ -13,6 +13,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -509,9 +510,9 @@ public class JobOptions implements ApiMarker {
             throw new IllegalArgumentException(opt.getArgName());
         }
       }
-    } catch (Exception e) {
+    } catch (IllegalArgumentException | java.text.ParseException | ParseException e) {
       printUsage();
-      throw JobLogs.buildCheckedException(LOGGER, e, "INVALID ARGS", e.getMessage(), e);
+      throw JobLogs.checked(LOGGER, e, "INVALID ARGS", e.getMessage(), e);
     }
 
     return new JobOptions(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode,
