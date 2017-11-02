@@ -49,8 +49,8 @@ public class LaunchPad implements Serializable {
     this.scheduler = scheduler;
     this.flightSchedule = sched;
     this.jobHistory = jobHistory;
-    this.jobName = flightSchedule.getName();
-    this.triggerName = flightSchedule.getName();
+    this.jobName = flightSchedule.getShortName();
+    this.triggerName = flightSchedule.getShortName();
     this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
     this.opts = opts;
 
@@ -60,7 +60,7 @@ public class LaunchPad implements Serializable {
   @Managed(description = "Run job now, show results immediately")
   public String run(String cmdLine) throws NeutronException {
     try {
-      LOGGER.info("RUN JOB: {}", flightSchedule.getName());
+      LOGGER.info("RUN JOB: {}", flightSchedule.getShortName());
       final FlightPlan runOnceOpts =
           FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       final FlightRecord track =
@@ -88,7 +88,7 @@ public class LaunchPad implements Serializable {
     final Trigger trg = !LaunchCommand.isInitialMode()
         ? newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
             .withPriority(flightSchedule.getLastRunPriority())
-            .withSchedule(simpleSchedule().withIntervalInSeconds(flightSchedule.getPeriodSeconds())
+            .withSchedule(simpleSchedule().withIntervalInSeconds(flightSchedule.getWaitPeriodSeconds())
                 .repeatForever())
             .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
             .build()

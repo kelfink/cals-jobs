@@ -102,7 +102,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
 
       // Find the job's time file under the base directory:
       final StringBuilder buf = new StringBuilder();
-      buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
+      buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getShortName())
           .append(".time");
       opts.setLastRunLoc(buf.toString());
 
@@ -176,7 +176,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
     listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
     listenerMgr.addTriggerListener(new NeutronTriggerListener(neutronScheduler));
     listenerMgr.addJobListener(instance.settings.isInitialMode()
-        ? DefaultFlightSchedule.fullLoadJobChainListener() : new NeutronJobListener());
+        ? DefaultFlightSchedule.buildFullLoadJobChainListener() : new NeutronJobListener());
     return neutronScheduler;
   }
 
@@ -193,13 +193,13 @@ public class LaunchCommand implements AtomLaunchScheduler {
       final DefaultFlightSchedule sched) throws IOException {
     final StringBuilder buf = new StringBuilder();
 
-    buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getName())
+    buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getShortName())
         .append(".time");
     final String timeFileLoc =
         buf.toString().replaceAll(File.separator + File.separator, File.separator);
     opts.setLastRunLoc(timeFileLoc);
     LOGGER.warn("base directory: {}, job name: {}, last run loc: {}", opts.getBaseDirectory(),
-        sched.getName(), opts.getLastRunLoc());
+        sched.getShortName(), opts.getLastRunLoc());
 
     // If timestamp file doesn't exist, create it.
     final File f = new File(timeFileLoc); // NOSONAR
@@ -251,7 +251,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
             new LaunchPad(neutronScheduler.getScheduler(), sched, flightRecorder, opts);
         neutronScheduler.getScheduleRegistry().put(klass, nj);
         neutronScheduler.getRocketOptions().addFlightSettings(klass, opts);
-        exporter.export("Neutron:last_run_jobs=" + sched.getName(), nj);
+        exporter.export("Neutron:last_run_jobs=" + sched.getShortName(), nj);
       }
 
       // Expose JobRunner methods to JMX.

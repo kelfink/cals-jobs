@@ -18,7 +18,7 @@ public class DefaultFlightScheduleTest {
   @Test
   public void getName_Args__() throws Exception {
     DefaultFlightSchedule target = DefaultFlightSchedule.CHILD_CASE;
-    String actual = target.getName();
+    String actual = target.getShortName();
     assertThat(actual, is(notNullValue()));
   }
 
@@ -40,7 +40,7 @@ public class DefaultFlightScheduleTest {
   @Test
   public void getPeriodSeconds_Args__() throws Exception {
     DefaultFlightSchedule target = DefaultFlightSchedule.PARENT_CASE;
-    int actual = target.getPeriodSeconds();
+    int actual = target.getWaitPeriodSeconds();
     int expected = 0;
     assertThat(actual, is(not(expected)));
   }
