@@ -295,6 +295,11 @@ public class BasePersonIndexerJobTest
     final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(q);
 
+    final List<TestDenormalizedEntity> list = new ArrayList<>();
+    TestDenormalizedEntity t = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "1", "2", "3");
+    list.add(t);
+    when(q.list()).thenReturn(list);
+
     final List<TestNormalizedEntity> actual = target.extractLastRunRecsFromTable(lastRunTime);
     assertThat(actual, notNullValue());
   }
@@ -450,14 +455,22 @@ public class BasePersonIndexerJobTest
   @Test
   public void doLastRun_Args__Date() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
-    when(session.getNamedNativeQuery(any(String.class))).thenReturn(qn);
+    when(session.getNamedNativeQuery(any())).thenReturn(qn);
+
+    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any())).thenReturn(q);
 
     final List<TestDenormalizedEntity> recs = new ArrayList<>();
-    TestDenormalizedEntity rec = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "one", "two");
+    final TestDenormalizedEntity rec = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "one", "two");
     recs.add(rec);
 
+    final List<TestDenormalizedEntity> list = new ArrayList<>();
+    TestDenormalizedEntity t = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "1", "2", "3");
+    list.add(t);
+    when(q.list()).thenReturn(list);
+
     final Set<String> deletionSet = new HashSet<>();
-    deletionSet.add(DEFAULT_CLIENT_ID);
+    deletionSet.add("xyz1234567");
 
     final Date actual = target.doLastRun(lastRunTime);
     assertThat(actual, notNullValue());
