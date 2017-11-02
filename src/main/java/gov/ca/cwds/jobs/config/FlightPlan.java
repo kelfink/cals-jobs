@@ -100,10 +100,6 @@ public class FlightPlan implements ApiMarker {
    */
   private long threadCount;
 
-  private String minId;
-
-  private String maxId;
-
   /**
    * If true then load sealed and sensitive data.
    */
@@ -135,8 +131,6 @@ public class FlightPlan implements ApiMarker {
    * @param startBucket starting bucket number
    * @param endBucket ending bucket number
    * @param threadCount number of simultaneous threads
-   * @param minId initial load -- minimum range
-   * @param maxId initial load -- maximum range
    * @param loadSealedAndSensitive If true then load sealed and sensitive data
    * @param rangeGiven initial load -- provided range (full load only)
    * @param baseDirectory base folder for job execution (full load only)
@@ -144,9 +138,9 @@ public class FlightPlan implements ApiMarker {
    * @param dropIndex drop the index before start (full load only)
    */
   public FlightPlan(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
-      boolean lastRunMode, long startBucket, long endBucket, long threadCount, String minId,
-      String maxId, boolean loadSealedAndSensitive, boolean rangeGiven, String baseDirectory,
-      boolean refreshMqt, boolean dropIndex) {
+      boolean lastRunMode, long startBucket, long endBucket, long threadCount,
+      boolean loadSealedAndSensitive, boolean rangeGiven, String baseDirectory, boolean refreshMqt,
+      boolean dropIndex) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
     this.lastRunTime = JobDateUtil.freshDate(lastRunTime);
@@ -155,8 +149,6 @@ public class FlightPlan implements ApiMarker {
     this.startBucket = startBucket;
     this.endBucket = endBucket;
     this.threadCount = threadCount;
-    this.minId = minId;
-    this.maxId = maxId;
     this.loadSealedAndSensitive = loadSealedAndSensitive;
     this.rangeGiven = rangeGiven;
     this.baseDirectory = baseDirectory;
@@ -178,8 +170,6 @@ public class FlightPlan implements ApiMarker {
     this.startBucket = opts.startBucket;
     this.endBucket = opts.endBucket;
     this.threadCount = opts.threadCount;
-    this.minId = opts.minId;
-    this.maxId = opts.maxId;
     this.loadSealedAndSensitive = opts.loadSealedAndSensitive;
     this.rangeGiven = opts.rangeGiven;
     this.baseDirectory = opts.baseDirectory;
@@ -263,24 +253,6 @@ public class FlightPlan implements ApiMarker {
    */
   public long getThreadCount() {
     return threadCount;
-  }
-
-  /**
-   * Getter for minimum key value for this batch run
-   * 
-   * @return minimum key value for this batch run
-   */
-  public String getMinId() {
-    return minId;
-  }
-
-  /**
-   * Getter for maximum key value for this batch run
-   * 
-   * @return maximum key value for this batch run
-   */
-  public String getMaxId() {
-    return maxId;
   }
 
   /**
@@ -492,8 +464,8 @@ public class FlightPlan implements ApiMarker {
     }
 
     return new FlightPlan(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode,
-        bucketRange.getLeft(), bucketRange.getRight(), threadCount, minId, maxId,
-        loadSealedAndSensitive, rangeGiven, baseDirectory, refreshMqt, dropIndex);
+        bucketRange.getLeft(), bucketRange.getRight(), threadCount, loadSealedAndSensitive,
+        rangeGiven, baseDirectory, refreshMqt, dropIndex);
   }
 
   public void setStartBucket(long startBucket) {
@@ -506,14 +478,6 @@ public class FlightPlan implements ApiMarker {
 
   public void setThreadCount(long threadCount) {
     this.threadCount = threadCount;
-  }
-
-  public void setMinId(String minId) {
-    this.minId = minId;
-  }
-
-  public void setMaxId(String maxId) {
-    this.maxId = maxId;
   }
 
   public void setIndexName(String indexName) {
