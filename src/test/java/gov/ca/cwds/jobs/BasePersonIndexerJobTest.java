@@ -92,18 +92,6 @@ public class BasePersonIndexerJobTest
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
-  // public void jsonify_Args__Object() throws Exception {
-  // TestNormalizedEntity obj = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-  // obj.setName("whatever");
-  // obj.setLastName("whatever");
-  // String actual = target.jsonify(obj);
-  // final String expected =
-  // "{\"birthDate\":null,\"firstName\":\"whatever\",\"gender\":null,\"id\":\"abc1234567\",\"lastName\":\"whatever\",\"legacyDescriptor\":{},\"legacyId\":\"abc1234567\",\"middleName\":null,\"name\":\"whatever\",\"nameSuffix\":null,\"primaryKey\":\"abc1234567\",\"sensitivityIndicator\":null,\"soc158SealedClientIndicator\":null,\"ssn\":null,\"title\":null}";
-  // // assertThat(actual, is(equalTo(expected)));
-  // assertThat(actual, is(notNullValue()));
-  // }
-
   @Test
   public void extract_Args__ResultSet() throws Exception {
     final Object actual = target.extract(rs);
@@ -114,43 +102,6 @@ public class BasePersonIndexerJobTest
     final BulkProcessor actual = target.buildBulkProcessor();
     assertThat(actual, notNullValue());
   }
-
-  // @Test
-  // public void buildElasticSearchPersons_Args__Object() throws Exception {
-  // final TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-  // ElasticSearchPerson[] actual = target.buildElasticSearchPersons(p);
-  // assertThat(actual, is(notNullValue()));
-  // }
-
-  // @Test
-  // public void buildElasticSearchPerson_Args__Object() throws Exception {
-  // final String key = DEFAULT_CLIENT_ID;
-  // final TestNormalizedEntity p = new TestNormalizedEntity(key);
-  // ElasticSearchPerson actual = target.buildElasticSearchPerson(p);
-  // ElasticSearchPerson expected = new ElasticSearchPerson();
-  // expected.setId(key);
-  // // assertThat(actual, is(equalTo(expected)));
-  // assertThat(actual, is(notNullValue()));
-  // }
-
-  // @Test
-  // public void buildElasticSearchPersonDoc_Args__ApiPersonAware() throws Exception {
-  // ApiPersonAware p = new TestNormalizedEntity("abc123");
-  // ElasticSearchPerson actual = target.buildElasticSearchPersonDoc(p);
-  // final String json =
-  // "{\"first_name\":null,\"middle_name\":null,\"last_name\":null,\"name_suffix\":null,"
-  // +
-  // "\"date_of_birth\":null,\"gender\":null,\"ssn\":null,\"type\":\"gov.ca.cwds.jobs.BasePersonIndexerJobTest$TestNormalizedEntity\","
-  // +
-  // "\"source\":\"{\\\"id\\\":\\\"abc123\\\",\\\"name\\\":null,\\\"middleName\\\":null,\\\"firstName\\\":null,\\\"ssn\\\":null,\\\"lastName\\\":null,"
-  // +
-  // "\\\"gender\\\":null,\\\"birthDate\\\":null,\\\"nameSuffix\\\":null,\\\"primaryKey\\\":\\\"abc123\\\"}"
-  // +
-  // "\",\"legacy_source_table\":null,\"legacy_id\":null,\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"screenings\":[],\"referrals\":[],\"relationships\":[],\"cases\":[],\"id\":\"abc123\"}";
-  // ElasticSearchPerson expected = MAPPER.readValue(json, ElasticSearchPerson.class);
-  // // assertThat(actual, is(equalTo(expected)));
-  // assertThat(actual, notNullValue());
-  // }
 
   @Test
   public void getIdColumn_Args__() throws Exception {
