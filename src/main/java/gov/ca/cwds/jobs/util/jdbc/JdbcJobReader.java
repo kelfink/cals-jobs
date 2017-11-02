@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
-import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.JobReader;
 
 /**
@@ -77,7 +77,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
       resultSet = statement.executeQuery();
     } catch (SQLException e) {
       destroy();
-      throw new JobsException(e);
+      throw JobLogs.runtime(LOGGER, e, "JDBC READ INIT ERROR! {}", e.getMessage());
     }
   }
 
@@ -86,7 +86,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
     try {
       return resultSet.next() ? rowMapper.mapRow(resultSet) : null;
     } catch (SQLException e) {
-      throw new JobsException(e);
+      throw JobLogs.runtime(LOGGER, e, "JDBC READ ERROR! {}", e.getMessage());
     }
   }
 
@@ -98,7 +98,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
         statement = null;
       }
     } catch (SQLException e) {
-      LOGGER.error(e.getMessage(), e);
+      throw JobLogs.runtime(LOGGER, e, "JDBC DESTROY ERROR! {}", e.getMessage());
     } finally {
       sessionFactory.close();
     }
