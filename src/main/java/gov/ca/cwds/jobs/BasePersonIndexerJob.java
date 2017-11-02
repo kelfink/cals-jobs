@@ -288,6 +288,12 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         esDao.getConfig().getElasticsearchDocType(), esp, t);
   }
 
+  protected void addThread(boolean make, Runnable target, List<Thread> threads) {
+    if (make) {
+      threads.add(new Thread(target));
+    }
+  }
+
   /**
    * ENTRY POINT FOR INITIAL LOAD.
    * 
@@ -300,26 +306,21 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected void doInitialLoadJdbc() throws NeutronException {
     nameThread("initial_load");
     LOGGER.info("INITIAL LOAD WITH JDBC!");
+    List<Thread> threads = new ArrayList<>();
 
     try {
-      final Thread threadIndexer = new Thread(this::threadIndex); // Index
-      threadIndexer.start();
+      addThread(true, this::threadIndex, threads);
+      addThread(useTransformThread(), this::threadNormalize, threads);
+      addThread(true, this::threadRetrieveByJdbc, threads);
 
-      Thread threadTransformer = null;
-      if (useTransformThread()) {
-        threadTransformer = new Thread(this::threadNormalize); // Transform
-        threadTransformer.start();
+      for (Thread t : threads) {
+        t.start();
       }
 
-      final Thread threadJdbc = new Thread(this::threadRetrieveByJdbc); // Extract
-      threadJdbc.start();
-      threadJdbc.join();
-
-      if (threadTransformer != null) {
-        threadTransformer.join();
+      for (Thread t : threads) {
+        t.join();
       }
 
-      threadIndexer.join();
       Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue());
 
       // Sorry SonarQube, SLF4J does not yet support conditional invocation.
