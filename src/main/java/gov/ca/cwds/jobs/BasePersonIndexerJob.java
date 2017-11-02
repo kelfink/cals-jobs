@@ -294,8 +294,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * <p>
    * Run threads to extract, transform, and index.
    * </p>
+   * 
+   * @throws NeutronException bombed
    */
-  protected void doInitialLoadJdbc() {
+  protected void doInitialLoadJdbc() throws NeutronException {
     nameThread("initial_load");
     LOGGER.info("INITIAL LOAD WITH JDBC!");
 
@@ -325,7 +327,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     } catch (Exception e) {
       fail();
       Thread.currentThread().interrupt();
-      throw JobLogs.runtime(LOGGER, e, "GENERAL EXCEPTION: {}", e);
+      throw JobLogs.checked(LOGGER, e, "GENERAL EXCEPTION: {}", e);
     } finally {
       done();
       this.finish(); // OK for initial load.
@@ -523,9 +525,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param lastRunDt last time the batch ran successfully.
    * @return List of results to process
+   * @throws NeutronException oops!
    * @see gov.ca.cwds.jobs.LastSuccessfulRunJob#executeJob(java.util.Date)
    */
-  protected Date doLastRun(Date lastRunDt) {
+  protected Date doLastRun(Date lastRunDt) throws NeutronException {
     LOGGER.info("LAST RUN MODE!");
     try {
       final BulkProcessor bp = buildBulkProcessor();
@@ -555,13 +558,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       awaitBulkProcessorClose(bp);
-
       validateDocuments();
-
       return new Date(getTrack().getStartTime());
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(LOGGER, e, "General Exception: {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "General Exception: {}", e.getMessage());
     } finally {
       done();
     }

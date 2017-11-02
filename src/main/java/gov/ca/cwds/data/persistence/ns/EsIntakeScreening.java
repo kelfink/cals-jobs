@@ -3,6 +3,7 @@ package gov.ca.cwds.data.persistence.ns;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
@@ -591,11 +592,11 @@ public class EsIntakeScreening extends CommonScreening
   }
 
   public String[] getRoles() {
-    return roles;
+    return roles.clone();
   }
 
   public void setRoles(String[] roles) {
-    this.roles = roles;
+    this.roles = Arrays.copyOf(roles, roles.length);
   }
 
   public boolean isFlgReporter() {
