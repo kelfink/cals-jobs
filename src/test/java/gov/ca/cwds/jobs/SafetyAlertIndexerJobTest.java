@@ -4,22 +4,15 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.action.update.UpdateRequest;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,37 +20,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.dao.cms.ReplicatedSafetyAlertsDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsSafetyAlert;
 import gov.ca.cwds.data.persistence.cms.ReplicatedSafetyAlerts;
-import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
-import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 public class SafetyAlertIndexerJobTest extends PersonJobTester {
 
   private static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
 
-  SessionFactory sessionFactory;
-  Session session;
-  ElasticsearchDao esDao;
   ReplicatedSafetyAlertsDao clientDao;
-  String lastJobRunTimeFilename = null;
   SafetyAlertIndexerJob target;
-  FlightPlan opts;
-  ElasticsearchConfiguration esConfig;
-  Transaction transaction;
 
   @Override
   @Before
   public void setup() throws Exception {
-    sessionFactory = mock(SessionFactory.class);
-    session = mock(Session.class);
-    esDao = mock(ElasticsearchDao.class);
-    esConfig = mock(ElasticsearchConfiguration.class);
-    opts = mock(FlightPlan.class);
-    transaction = mock(Transaction.class);
+    super.setup();
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(session.beginTransaction()).thenReturn(transaction);
@@ -152,50 +129,20 @@ public class SafetyAlertIndexerJobTest extends PersonJobTester {
     ReplicatedSafetyAlerts safetyAlerts = new ReplicatedSafetyAlerts();
     UpdateRequest actual = target.prepareUpsertRequest(esp, safetyAlerts);
     UpdateRequest expected = new UpdateRequest();
-    // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, notNullValue());
   }
 
   @Test
-  public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedSafetyAlerts_T__NeutronException()
-      throws Exception {
-    ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
-    ReplicatedSafetyAlerts safetyAlerts = mock(ReplicatedSafetyAlerts.class);
-    try {
-      target.prepareUpsertRequest(esp, safetyAlerts);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
-  }
-
-  @Test
   public void extract_Args__ResultSet() throws Exception {
-    final ResultSet rs = mock(ResultSet.class);
     final EsSafetyAlert actual = target.extract(rs);
-    final EsSafetyAlert expected = new EsSafetyAlert();
-    expected.setActivationReasonCode(0);
-    expected.setActivationCountyCode(0);
-    expected.setDeactivationCountyCode(0);
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void extract_Args__ResultSet_T__SQLException() throws Exception {
-    final ResultSet rs = mock(ResultSet.class);
     when(rs.next()).thenThrow(new SQLException());
     when(rs.getString(any(String.class))).thenThrow(new SQLException());
-    try {
-      target.extract(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
-  }
-
-  @Test
-  @Ignore
-  public void main_Args__StringArray() throws Exception {
-    String[] args = new String[] {};
-    SafetyAlertIndexerJob.main(args);
+    target.extract(rs);
   }
 
 }

@@ -219,21 +219,21 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
         LegacyTable.CLIENT);
   }
 
-  // =======================
+  // ==================================
   // ApiClientRaceAndEthnicityAware:
-  // =======================
+  // ==================================
 
   @Override
   public ElasticSearchRaceAndEthnicity getRaceAndEthnicity() {
-    ElasticSearchRaceAndEthnicity racesEthnicity = new ElasticSearchRaceAndEthnicity();
+    final ElasticSearchRaceAndEthnicity racesEthnicity = new ElasticSearchRaceAndEthnicity();
     racesEthnicity.setHispanicOriginCode(getHispanicOriginCode());
     racesEthnicity.setHispanicUnableToDetermineCode(getHispUnableToDetReasonCode());
     racesEthnicity.setUnableToDetermineCode(getEthUnableToDetReasonCode());
 
-    List<ElasticSearchSystemCode> raceCodes = new ArrayList<>();
+    final List<ElasticSearchSystemCode> raceCodes = new ArrayList<>();
     racesEthnicity.setRaceCodes(raceCodes);
 
-    List<ElasticSearchSystemCode> hispanicCodes = new ArrayList<>();
+    final List<ElasticSearchSystemCode> hispanicCodes = new ArrayList<>();
     racesEthnicity.setHispanicCodes(hispanicCodes);
 
     // Add primary race
@@ -247,8 +247,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     return racesEthnicity;
   }
 
-  private static void addRaceAndEthnicity(Short codeId, List<ElasticSearchSystemCode> raceCodes,
-      List<ElasticSearchSystemCode> hispanicCodes) {
+  private static void addRaceAndEthnicity(Short codeId,
+      final List<ElasticSearchSystemCode> raceCodes,
+      final List<ElasticSearchSystemCode> hispanicCodes) {
     if (codeId != null && codeId != 0) {
       String description = null;
       boolean isHispanicCode = false;

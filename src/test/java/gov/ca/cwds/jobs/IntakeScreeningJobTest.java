@@ -5,12 +5,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.ns.EsIntakeScreeningDao;
@@ -49,21 +49,6 @@ public class IntakeScreeningJobTest extends PersonJobTester<IntakeParticipant, E
   public void instantiation() throws Exception {
     assertThat(target, notNullValue());
   }
-
-  // TODO: devise plan to test threads.
-  // @Test
-  // public void threadExtractJdbc_Args__() throws Exception {
-  // IntakeParticipantDao normalizedDao = null;
-  // EsIntakeScreeningDao viewDao = null;
-  // ElasticsearchDao esDao = null;
-  // String lastJobRunTimeFilename = null;
-  // ObjectMapper mapper = null;
-  // SessionFactory sessionFactory = null;
-  // final IntakeScreeningJob target = new IntakeScreeningJob(normalizedDao, viewDao, esDao,
-  // lastJobRunTimeFilename, mapper, sessionFactory);
-  //
-  // target.threadExtractJdbc();
-  // }
 
   @Test
   public void getDenormalizedClass_Args__() throws Exception {
@@ -122,8 +107,17 @@ public class IntakeScreeningJobTest extends PersonJobTester<IntakeParticipant, E
   }
 
   @Test
-  @Ignore
   public void threadExtractJdbc_Args__() throws Exception {
+    EsIntakeScreening es = new EsIntakeScreening();
+    es.setScreeningId(DEFAULT_CLIENT_ID);
+    List<EsIntakeScreening> results = new ArrayList<>();
+
+    viewDao = mock(EsIntakeScreeningDao.class);
+    when(viewDao.findAll()).thenReturn(results);
+
+    target = new IntakeScreeningJob(normalizedDao, viewDao, esDao, lastJobRunTimeFilename, MAPPER,
+        sessionFactory, jobHistory, opts);
+
     target.threadRetrieveByJdbc();
   }
 
