@@ -141,8 +141,7 @@ public class AtomHibernateTest
   @Test
   public void extract_Args__ResultSet() throws Exception {
     Object actual = target.extract(rs);
-    Object expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
