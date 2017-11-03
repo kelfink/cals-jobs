@@ -490,6 +490,10 @@ public class LaunchCommand implements AtomLaunchScheduler {
       throw JobLogs.runtime(LOGGER, e, "CMD LINE ERROR! {}", e.getMessage());
     }
 
+    if (globalOpts.isSimulateLaunch()) {
+      return; // Test "main" methods
+    }
+
     final Injector injector = HyperCubeDependencyManager.buildInjector(globalOpts);
     instance = injector.getInstance(LaunchCommand.class);
     instance.startingOpts = globalOpts;
