@@ -104,4 +104,12 @@ public class MSearchJob extends
     LaunchCommand.runStandalone(MSearchJob.class, args);
   }
 
+  public NeutronElasticValidator getValidator() {
+    return validator;
+  }
+
+  public void setValidator(NeutronElasticValidator validator) {
+    this.validator = validator;
+  }
+
 }
