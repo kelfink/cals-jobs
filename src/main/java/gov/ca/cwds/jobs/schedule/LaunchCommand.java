@@ -34,7 +34,7 @@ import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.inject.JobsGuiceInjector;
+import gov.ca.cwds.jobs.inject.HyperCubeDependencyManager;
 import gov.ca.cwds.jobs.listener.NeutronJobListener;
 import gov.ca.cwds.jobs.listener.NeutronSchedulerListener;
 import gov.ca.cwds.jobs.listener.NeutronTriggerListener;
@@ -207,7 +207,8 @@ public class LaunchCommand implements AtomLaunchScheduler {
     final boolean overrideLastRunTime = opts.getOverrideLastRunTime() != null;
 
     if (!fileExists || settings.isInitialMode()) {
-      FileUtils.writeStringToFile(f, fmt.format(overrideLastRunTime ? opts.getOverrideLastRunTime() : now));
+      FileUtils.writeStringToFile(f,
+          fmt.format(overrideLastRunTime ? opts.getOverrideLastRunTime() : now));
     }
   }
 
@@ -258,7 +259,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
       exporter.export("Neutron:runner=master", this);
 
       // Expose Guice bean attributes to JMX.
-      Manager.manage("Neutron_Guice", JobsGuiceInjector.getInjector());
+      Manager.manage("Neutron_Guice", HyperCubeDependencyManager.getInjector());
 
       // MOVE: move this responsibility to another class.
       if (startingOpts.isDropIndex()) {
@@ -445,7 +446,12 @@ public class LaunchCommand implements AtomLaunchScheduler {
     LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
     try {
       final FlightPlan globalOpts = FlightPlan.parseCommandLine(args);
-      final Injector injector = JobsGuiceInjector.buildInjector(globalOpts);
+      if (globalOpts.isSimulateLaunch()) {
+        instance.startingOpts = globalOpts;
+        return instance;
+      }
+
+      final Injector injector = HyperCubeDependencyManager.buildInjector(globalOpts);
       instance = injector.getInstance(LaunchCommand.class);
       instance.startingOpts = globalOpts;
 
@@ -484,12 +490,12 @@ public class LaunchCommand implements AtomLaunchScheduler {
       throw JobLogs.runtime(LOGGER, e, "CMD LINE ERROR! {}", e.getMessage());
     }
 
-    final Injector injector = JobsGuiceInjector.buildInjector(globalOpts);
+    final Injector injector = HyperCubeDependencyManager.buildInjector(globalOpts);
     instance = injector.getInstance(LaunchCommand.class);
     instance.startingOpts = globalOpts;
     instance.settings.setContinuousMode(false);
 
-    try (final T job = JobsGuiceInjector.newJob(klass, args)) {
+    try (final T job = HyperCubeDependencyManager.newJob(klass, args)) {
       job.run();
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.

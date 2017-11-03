@@ -3,11 +3,11 @@ package gov.ca.cwds.jobs.config;
 import org.apache.commons.cli.Option;
 
 /**
- * Definitions of Neutron job command line options.
+ * Neutron command line options.
  * 
  * @author CWDS API Team
  */
-public enum JobCmdLineOption {
+public enum CmdLineOption {
 
   /**
    * ElasticSearch configuration file.
@@ -79,11 +79,16 @@ public enum JobCmdLineOption {
    */
   DROP_INDEX(FlightPlan.makeOpt("D", FlightPlan.CMD_LINE_DROP_INDEX, "Drop index for full (initial) load", false, 0, Boolean.class, ',')),
 
+  /**
+   * Test mode!
+   */
+  SIMULATE_LAUNCH(FlightPlan.makeOpt("S", FlightPlan.CMD_LINE_SIMULATE_LAUNCH, "Simulate launch (test mode)", false, 0, Boolean.class, ','))
+
   ;
 
   private final Option opt;
 
-  JobCmdLineOption(Option opt) {
+  CmdLineOption(Option opt) {
     this.opt = opt;
   }
 

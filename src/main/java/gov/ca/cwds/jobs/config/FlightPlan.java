@@ -50,6 +50,7 @@ public class FlightPlan implements ApiMarker {
   public static final String CMD_LINE_INITIAL_LOAD = "initial_load";
   public static final String CMD_LINE_REFRESH_MQT = "refresh_mqt";
   public static final String CMD_LINE_DROP_INDEX = "drop_index";
+  public static final String CMD_LINE_SIMULATE_LAUNCH = "simulate_launch";
 
   /**
    * Location of Elasticsearch configuration file.
@@ -60,6 +61,8 @@ public class FlightPlan implements ApiMarker {
    * Name of index to create or use. If this is not provided then alias is used from ES Config file.
    */
   private String indexName;
+
+  private boolean simulateLaunch;
 
   /**
    * Last time job was executed in format 'yyyy-MM-dd HH.mm.ss' If this is provided then time stamp
@@ -136,11 +139,12 @@ public class FlightPlan implements ApiMarker {
    * @param baseDirectory base folder for job execution (full load only)
    * @param refreshMqt refresh materialized query tables (full load only)
    * @param dropIndex drop the index before start (full load only)
+   * @param simulateLaunch simulate launch (test mode!)
    */
   public FlightPlan(String esConfigLoc, String indexName, Date lastRunTime, String lastRunLoc,
       boolean lastRunMode, long startBucket, long endBucket, long threadCount,
       boolean loadSealedAndSensitive, boolean rangeGiven, String baseDirectory, boolean refreshMqt,
-      boolean dropIndex) {
+      boolean dropIndex, boolean simulateLaunch) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
     this.overrideLastRunTime = JobDateUtil.freshDate(lastRunTime);
@@ -154,6 +158,7 @@ public class FlightPlan implements ApiMarker {
     this.baseDirectory = baseDirectory;
     this.refreshMqt = refreshMqt;
     this.dropIndex = dropIndex;
+    this.simulateLaunch = simulateLaunch;
   }
 
   /**
@@ -175,6 +180,7 @@ public class FlightPlan implements ApiMarker {
     this.baseDirectory = opts.baseDirectory;
     this.refreshMqt = opts.refreshMqt;
     this.dropIndex = opts.dropIndex;
+    this.simulateLaunch = opts.simulateLaunch;
   }
 
   /**
@@ -303,24 +309,27 @@ public class FlightPlan implements ApiMarker {
   protected static Options buildCmdLineOptions() {
     Options ret = new Options();
 
-    ret.addOption(JobCmdLineOption.ES_CONFIG.getOpt());
-    ret.addOption(JobCmdLineOption.INDEX_NAME.getOpt());
-    ret.addOption(JobCmdLineOption.LAST_RUN_TIME.getOpt());
-    ret.addOption(JobCmdLineOption.THREADS.getOpt());
-    ret.addOption(JobCmdLineOption.BUCKET_RANGE.getOpt());
-    ret.addOption(JobCmdLineOption.MIN_ID.getOpt());
-    ret.addOption(JobCmdLineOption.MAX_ID.getOpt());
-    ret.addOption(JobCmdLineOption.LOAD_SEALED_SENSITIVE.getOpt());
-    ret.addOption(JobCmdLineOption.FULL_LOAD.getOpt());
-    ret.addOption(JobCmdLineOption.REFRESH_MQT.getOpt());
-    ret.addOption(JobCmdLineOption.DROP_INDEX.getOpt());
+    ret.addOption(CmdLineOption.SIMULATE_LAUNCH.getOpt());
+    ret.addOption(CmdLineOption.ES_CONFIG.getOpt());
+    ret.addOption(CmdLineOption.INDEX_NAME.getOpt());
+    ret.addOption(CmdLineOption.LAST_RUN_TIME.getOpt());
+    ret.addOption(CmdLineOption.THREADS.getOpt());
+    ret.addOption(CmdLineOption.LOAD_SEALED_SENSITIVE.getOpt());
+
+    ret.addOption(CmdLineOption.FULL_LOAD.getOpt());
+    ret.addOption(CmdLineOption.REFRESH_MQT.getOpt());
+    ret.addOption(CmdLineOption.DROP_INDEX.getOpt());
+
+    ret.addOption(CmdLineOption.BUCKET_RANGE.getOpt());
+    ret.addOption(CmdLineOption.BUCKET_TOTAL.getOpt());
+    ret.addOption(CmdLineOption.MIN_ID.getOpt());
+    ret.addOption(CmdLineOption.MAX_ID.getOpt());
 
     // RUN MODE: mutually exclusive choice.
     OptionGroup group = new OptionGroup();
     group.setRequired(true);
-    group.addOption(JobCmdLineOption.LAST_RUN_FILE.getOpt());
-    group.addOption(JobCmdLineOption.BASE_DIRECTORY.getOpt());
-    group.addOption(JobCmdLineOption.BUCKET_TOTAL.getOpt());
+    group.addOption(CmdLineOption.LAST_RUN_FILE.getOpt());
+    group.addOption(CmdLineOption.BASE_DIRECTORY.getOpt());
     ret.addOptionGroup(group);
 
     return ret;
@@ -378,6 +387,7 @@ public class FlightPlan implements ApiMarker {
     String baseDirectory = null;
     boolean refreshMqt = false;
     boolean dropIndex = false;
+    boolean simulateLaunch = false;
 
     // CHECKSTYLE:OFF
     Pair<Long, Long> bucketRange = Pair.of(-1L, 0L);
@@ -442,6 +452,10 @@ public class FlightPlan implements ApiMarker {
             dropIndex = true;
             break;
 
+          case CMD_LINE_SIMULATE_LAUNCH:
+            simulateLaunch = true;
+            break;
+
           default:
             throw new IllegalArgumentException(opt.getArgName());
         }
@@ -453,7 +467,7 @@ public class FlightPlan implements ApiMarker {
 
     return new FlightPlan(esConfigLoc, indexName, lastRunTime, lastRunLoc, lastRunMode,
         bucketRange.getLeft(), bucketRange.getRight(), threadCount, loadSealedAndSensitive,
-        rangeGiven, baseDirectory, refreshMqt, dropIndex);
+        rangeGiven, baseDirectory, refreshMqt, dropIndex, simulateLaunch);
   }
 
   public void setStartBucket(long startBucket) {
@@ -527,6 +541,14 @@ public class FlightPlan implements ApiMarker {
 
   public void setEsConfigLoc(String esConfigLoc) {
     this.esConfigLoc = esConfigLoc;
+  }
+
+  public boolean isSimulateLaunch() {
+    return simulateLaunch;
+  }
+
+  public void setSimulateLaunch(boolean testMode) {
+    this.simulateLaunch = testMode;
   }
 
 }

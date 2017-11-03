@@ -101,9 +101,9 @@ import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
  * 
  * @author CWDS API Team
  */
-public class JobsGuiceInjector extends AbstractModule {
+public class HyperCubeDependencyManager extends AbstractModule {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobsGuiceInjector.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(HyperCubeDependencyManager.class);
 
   private static final String HIBERNATE_CONFIG_CMS = "jobs-cms-hibernate.cfg.xml";
 
@@ -128,7 +128,7 @@ public class JobsGuiceInjector extends AbstractModule {
   /**
    * Default constructor.
    */
-  public JobsGuiceInjector() {
+  public HyperCubeDependencyManager() {
     this.opts = null;
   }
 
@@ -139,7 +139,7 @@ public class JobsGuiceInjector extends AbstractModule {
    * @param esConfigFile location of Elasticsearch configuration file
    * @param lastJobRunTimeFilename location of last run file
    */
-  public JobsGuiceInjector(final FlightPlan opts, final File esConfigFile,
+  public HyperCubeDependencyManager(final FlightPlan opts, final File esConfigFile,
       String lastJobRunTimeFilename) {
     this.esConfig = esConfigFile;
     this.lastJobRunTimeFilename =
@@ -158,7 +158,7 @@ public class JobsGuiceInjector extends AbstractModule {
   public static synchronized Injector buildInjector(final FlightPlan opts) {
     if (injector == null) {
       try {
-        injector = Guice.createInjector(new JobsGuiceInjector(opts,
+        injector = Guice.createInjector(new HyperCubeDependencyManager(opts,
             new ApiFileAssistant().validateFileLocation(opts.getEsConfigLoc()),
             opts.getLastRunLoc()));
 

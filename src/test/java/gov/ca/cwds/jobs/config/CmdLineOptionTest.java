@@ -8,23 +8,23 @@ import static org.junit.Assert.assertThat;
 import org.apache.commons.cli.Option;
 import org.junit.Test;
 
-public class JobCmdLineOptionTest {
+public class CmdLineOptionTest {
 
   @Test
   public void type() throws Exception {
-    assertThat(JobCmdLineOption.class, notNullValue());
+    assertThat(CmdLineOption.class, notNullValue());
   }
 
   @Test
   public void test_valueof() throws Exception {
-    JobCmdLineOption actual = JobCmdLineOption.valueOf("BUCKET_RANGE");
-    JobCmdLineOption expected = JobCmdLineOption.BUCKET_RANGE;
+    CmdLineOption actual = CmdLineOption.valueOf("BUCKET_RANGE");
+    CmdLineOption expected = CmdLineOption.BUCKET_RANGE;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getOpt_Args__() throws Exception {
-    Option actual = JobCmdLineOption.BUCKET_RANGE.getOpt();
+    Option actual = CmdLineOption.BUCKET_RANGE.getOpt();
     Option expected = FlightPlan.makeOpt("r", FlightPlan.CMD_LINE_BUCKET_RANGE,
         "bucket range (-r 20-24)", false, 2, Integer.class, '-');
     assertThat(actual, is(equalTo(expected)));

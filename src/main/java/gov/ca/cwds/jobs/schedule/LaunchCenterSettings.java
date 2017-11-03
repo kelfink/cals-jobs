@@ -9,6 +9,11 @@ public class LaunchCenterSettings {
   private boolean testMode;
 
   /**
+   * Test without starting Launch Center services.
+   */
+  private boolean minimalTestMode;
+
+  /**
    * Run a single server for all jobs. Launch one JVM, serve many jobs.
    */
   private boolean continuousMode;
@@ -44,6 +49,14 @@ public class LaunchCenterSettings {
 
   public void setInitialMode(boolean initialMode) {
     this.initialMode = initialMode;
+  }
+
+  public boolean isMinimalTestMode() {
+    return minimalTestMode;
+  }
+
+  public void setMinimalTestMode(boolean minimalTestMode) {
+    this.minimalTestMode = minimalTestMode;
   }
 
 }

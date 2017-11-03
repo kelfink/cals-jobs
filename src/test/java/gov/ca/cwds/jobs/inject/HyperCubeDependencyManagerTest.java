@@ -21,10 +21,10 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
-public class JobsGuiceInjectorTest
+public class HyperCubeDependencyManagerTest
     extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
 
-  JobsGuiceInjector target;
+  HyperCubeDependencyManager target;
 
   @Override
   @Before
@@ -34,12 +34,12 @@ public class JobsGuiceInjectorTest
     opts = new FlightPlan();
     opts.setEsConfigLoc("config/local.yaml");
 
-    target = new JobsGuiceInjector(opts, new File(opts.getEsConfigLoc()), lastJobRunTimeFilename);
+    target = new HyperCubeDependencyManager(opts, new File(opts.getEsConfigLoc()), lastJobRunTimeFilename);
   }
 
   @Test
   public void type() throws Exception {
-    assertNotNull(JobsGuiceInjector.class);
+    assertNotNull(HyperCubeDependencyManager.class);
   }
 
   @Test
