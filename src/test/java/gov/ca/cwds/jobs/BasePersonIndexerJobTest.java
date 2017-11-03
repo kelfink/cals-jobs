@@ -550,7 +550,7 @@ public class BasePersonIndexerJobTest
   @Test
   public void mustDeleteLimitedAccessRecords_Args__() throws Exception {
     boolean actual = target.mustDeleteLimitedAccessRecords();
-    boolean expected = false;
+    boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
