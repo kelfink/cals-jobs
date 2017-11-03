@@ -66,9 +66,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * Get the legacy source table for this job, if any.
    * 
    * @return legacy source table
-   * @deprecated Logic moved to ApiLegacyAware implementation classes
    */
-  @Deprecated
   default String getLegacySourceTable() {
     return null;
   }
