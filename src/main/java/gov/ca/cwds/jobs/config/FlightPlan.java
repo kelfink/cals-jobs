@@ -65,7 +65,7 @@ public class FlightPlan implements ApiMarker {
    * Last time job was executed in format 'yyyy-MM-dd HH.mm.ss' If this is provided then time stamp
    * given in last run time file is ignored.
    */
-  private Date lastRunTime;
+  private Date overrideLastRunTime;
 
   /**
    * Location of last run file.
@@ -143,7 +143,7 @@ public class FlightPlan implements ApiMarker {
       boolean dropIndex) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
-    this.lastRunTime = JobDateUtil.freshDate(lastRunTime);
+    this.overrideLastRunTime = JobDateUtil.freshDate(lastRunTime);
     this.lastRunLoc = lastRunLoc;
     this.lastRunMode = lastRunMode;
     this.startBucket = startBucket;
@@ -164,7 +164,7 @@ public class FlightPlan implements ApiMarker {
   public FlightPlan(final FlightPlan opts) {
     this.esConfigLoc = opts.esConfigLoc;
     this.indexName = StringUtils.isBlank(opts.indexName) ? null : opts.indexName;
-    this.lastRunTime = opts.lastRunTime;
+    this.overrideLastRunTime = opts.overrideLastRunTime;
     this.lastRunLoc = opts.lastRunLoc;
     this.lastRunMode = opts.lastRunMode;
     this.startBucket = opts.startBucket;
@@ -201,8 +201,8 @@ public class FlightPlan implements ApiMarker {
    * 
    * @return Last run time
    */
-  public Date getLastRunTime() {
-    return lastRunTime != null ? new Date(lastRunTime.getTime()) : null;
+  public Date getOverrideLastRunTime() {
+    return overrideLastRunTime != null ? new Date(overrideLastRunTime.getTime()) : null;
   }
 
   /**
@@ -372,7 +372,6 @@ public class FlightPlan implements ApiMarker {
     Date lastRunTime = null;
     String lastRunLoc = null;
     boolean lastRunMode = true;
-    long totalBuckets = 0L;
     long threadCount = 0L;
     boolean loadSealedAndSensitive = false;
     boolean rangeGiven = false;
@@ -383,9 +382,6 @@ public class FlightPlan implements ApiMarker {
     // CHECKSTYLE:OFF
     Pair<Long, Long> bucketRange = Pair.of(-1L, 0L);
     // CHECKSTYLE:ON
-
-    String minId = " ";
-    String maxId = "9999999999";
 
     try {
       final Options options = buildCmdLineOptions();
@@ -430,14 +426,6 @@ public class FlightPlan implements ApiMarker {
 
           case CMD_LINE_THREADS:
             threadCount = Long.parseLong(opt.getValue());
-            break;
-
-          case CMD_LINE_MIN_ID:
-            minId = opt.getValue().trim();
-            break;
-
-          case CMD_LINE_MAX_ID:
-            maxId = opt.getValue().trim();
             break;
 
           case CMD_LINE_LOAD_SEALED_AND_SENSITIVE:
@@ -517,8 +505,8 @@ public class FlightPlan implements ApiMarker {
     this.baseDirectory = baseDirectory;
   }
 
-  public void setLastRunTime(Date lastRunTime) {
-    this.lastRunTime = JobDateUtil.freshDate(lastRunTime);
+  public void setOverrideLastRunTime(Date lastRunTime) {
+    this.overrideLastRunTime = JobDateUtil.freshDate(lastRunTime);
   }
 
   public boolean isRefreshMqt() {

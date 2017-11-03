@@ -169,30 +169,6 @@ public class BasePersonIndexerJobTest
     target.setInsertCollections(esp, t, list);
   }
 
-  // @Test
-  // public void
-  // prepareInsertCollections_Args__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray()
-  // throws Exception {
-  // TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-  // String elementName = "slop";
-  // List list = new ArrayList();
-  // ESOptionalCollection[] keep = new ESOptionalCollection[] {};
-  // target.prepareInsertCollections(esp, t, elementName, list, keep);
-  // }
-
-  // @Test
-  // public void
-  // prepareUpsertJson_Args__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray()
-  // throws Exception {
-  // TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-  // String elementName = "slop";
-  // List list = new ArrayList();
-  // ESOptionalCollection[] keep = new ESOptionalCollection[] {};
-  // final Pair<String, String> actual =
-  // target.prepareUpsertJson(target, esp, t, elementName, list, keep);
-  // assertThat(actual, notNullValue());
-  // }
-
   @Test
   public void prepareUpsertRequestNoChecked_Args__ElasticSearchPerson__Object() throws Exception {
     final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
@@ -675,6 +651,7 @@ public class BasePersonIndexerJobTest
 
     final FlightRecord track = mock(FlightRecord.class);
     when(track.trackBulkPrepared()).thenThrow(IOException.class);
+    when(track.trackQueuedToIndex()).thenThrow(IOException.class);
 
     target.setTrack(track);
     target.prepareDocumentTrapException(bp, p);

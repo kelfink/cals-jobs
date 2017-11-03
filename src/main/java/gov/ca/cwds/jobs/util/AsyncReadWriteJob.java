@@ -85,7 +85,7 @@ public class AsyncReadWriteJob<I, O> extends ProducerConsumer<I> implements Rock
     }
   }
 
-  private void flush() throws NeutronException {
+  private void flush() {
     writer.write(chunk); // NOSONAR
     chunk.clear();
   }

@@ -185,4 +185,9 @@ public class TestIndexerJob
     this.baseRanges = baseRanges;
   }
 
+  @Override
+  public boolean isDelete(TestNormalizedEntity t) {
+    return true;
+  }
+
 }

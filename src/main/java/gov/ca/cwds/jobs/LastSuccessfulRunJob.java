@@ -114,7 +114,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   protected Date calcLastRunDate(final Date lastSuccessfulRunTime, final FlightPlan opts) {
     Date ret;
-    final Date lastSuccessfulRunTimeOverride = opts.getLastRunTime();
+    final Date lastSuccessfulRunTimeOverride = opts.getOverrideLastRunTime();
 
     if (lastSuccessfulRunTimeOverride != null) {
       ret = lastSuccessfulRunTimeOverride;

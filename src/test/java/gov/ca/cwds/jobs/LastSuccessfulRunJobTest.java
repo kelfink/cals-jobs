@@ -214,7 +214,7 @@ public class LastSuccessfulRunJobTest
     Date lastSuccessfulRunTime = new Date();
 
     FlightPlan opts = new FlightPlan();
-    opts.setLastRunTime(lastSuccessfulRunTime);
+    opts.setOverrideLastRunTime(lastSuccessfulRunTime);
     target.setOpts(opts);
 
     final Date actual = target.calcLastRunDate(lastSuccessfulRunTime);

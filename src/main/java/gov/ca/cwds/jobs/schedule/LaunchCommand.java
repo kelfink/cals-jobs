@@ -204,16 +204,16 @@ public class LaunchCommand implements AtomLaunchScheduler {
     // If timestamp file doesn't exist, create it.
     final File f = new File(timeFileLoc); // NOSONAR
     final boolean fileExists = f.exists();
-    final boolean overrideLastRunTime = opts.getLastRunTime() != null;
+    final boolean overrideLastRunTime = opts.getOverrideLastRunTime() != null;
 
     if (!fileExists || settings.isInitialMode()) {
-      FileUtils.writeStringToFile(f, fmt.format(overrideLastRunTime ? opts.getLastRunTime() : now));
+      FileUtils.writeStringToFile(f, fmt.format(overrideLastRunTime ? opts.getOverrideLastRunTime() : now));
     }
   }
 
   protected void configureInitialMode(final Date now) {
     if (settings.isInitialMode()) {
-      startingOpts.setLastRunTime(now);
+      startingOpts.setOverrideLastRunTime(now);
       startingOpts.setLastRunMode(false);
       LOGGER.warn("\n\n\n\n>>>>>>> INITIAL, FULL LOAD! <<<<<<<\n\n\n\n");
     }
