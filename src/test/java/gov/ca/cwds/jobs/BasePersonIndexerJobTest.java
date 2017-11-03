@@ -213,10 +213,11 @@ public class BasePersonIndexerJobTest
   @Test
   public void threadNormalize_Args__() throws Exception {
     try {
-      final TestDenormalizedEntity m = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "1", "2", "3");
-      target.queueNormalize.push(m);
+      target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "1", "2", "3"));
+      target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "4", "5", "6"));
+      target.queueNormalize.push(new TestDenormalizedEntity("xyz1234567", "1", "2", "3"));
 
-      runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 800L);
+      runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 1800L);
       target.threadNormalize();
     } catch (Exception e) {
       e.printStackTrace();
