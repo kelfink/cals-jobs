@@ -16,10 +16,10 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.NeutronGuiceModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
@@ -95,13 +95,13 @@ import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
  * batch jobs.
  * 
  * <p>
- * Also known as, "Hypercube", Jimmy's invention to store an infinite number of items in a small
+ * Also known as, "Hyper Cube", Jimmy's invention to store an infinite number of items in a small
  * place.
  * </p>
  * 
  * @author CWDS API Team
  */
-public class HyperCubeDependencyManager extends AbstractModule {
+public class HyperCubeDependencyManager extends NeutronGuiceModule {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(HyperCubeDependencyManager.class);
 
