@@ -229,9 +229,10 @@ public class BasePersonIndexerJobTest
   @Test
   public void threadNormalize_Args__() throws Exception {
     try {
-      runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 800L);
       final TestDenormalizedEntity m = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "1", "2", "3");
       target.queueNormalize.push(m);
+
+      runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 800L);
       target.threadNormalize();
     } catch (Exception e) {
       e.printStackTrace();
@@ -631,7 +632,7 @@ public class BasePersonIndexerJobTest
     int cntr = 0;
 
     try {
-      runKillThread(target, 3000L);
+      runKillThread(target, 2500L);
       int actual = target.bulkPrepare(bp, cntr);
       assertThat(actual, is(not(0)));
     } catch (Exception e) {
