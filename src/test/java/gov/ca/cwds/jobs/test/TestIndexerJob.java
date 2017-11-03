@@ -40,6 +40,11 @@ public class TestIndexerJob
   }
 
   @Override
+  public boolean mustDeleteLimitedAccessRecords() {
+    return true;
+  }
+
+  @Override
   public String getLegacySourceTable() {
     return "CRAP_T";
   }

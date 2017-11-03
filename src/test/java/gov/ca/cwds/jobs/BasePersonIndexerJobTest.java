@@ -268,8 +268,12 @@ public class BasePersonIndexerJobTest
     when(session.getNamedNativeQuery(any())).thenReturn(qn);
 
     final List<TestDenormalizedEntity> recs = new ArrayList<>();
-    final TestDenormalizedEntity rec = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "one", "two");
-    recs.add(rec);
+    recs.add(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "one", "two"));
+    recs.add(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "2", "3"));
+    recs.add(new TestDenormalizedEntity("xyz1234567", "1", "2"));
+    recs.add(new TestDenormalizedEntity("xyz1234567", "3", "4"));
+    recs.add(new TestDenormalizedEntity("abc1234567", "1", "2"));
+    recs.add(new TestDenormalizedEntity(null, "1", "2"));
     when(qn.list()).thenReturn(recs);
 
     final List<TestNormalizedEntity> actual =
