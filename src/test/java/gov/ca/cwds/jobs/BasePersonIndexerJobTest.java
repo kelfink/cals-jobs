@@ -634,6 +634,18 @@ public class BasePersonIndexerJobTest
   @Test
   public void threadIndex_Args__() throws Exception {
     runKillThread(target);
+    final BulkProcessor bp = mock(BulkProcessor.class);
+    target.threadIndex();
+    markTestDone();
+  }
+
+  @Test(expected = JobsException.class)
+  public void threadIndex_Args__error() throws Exception {
+    final FlightRecord track = mock(FlightRecord.class);
+    when(track.isFailed()).thenThrow(IllegalStateException.class);
+    target.setTrack(track);
+
+    runKillThread(target);
     target.threadIndex();
     markTestDone();
   }
