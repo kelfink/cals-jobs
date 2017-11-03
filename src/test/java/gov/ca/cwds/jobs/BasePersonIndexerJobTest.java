@@ -771,6 +771,39 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
+  @Test(expected = DaoException.class)
+  public void pullBucketRange_Args__error() throws Exception {
+    LaunchCommand.setTestMode(true);
+
+    final NativeQuery<TestDenormalizedEntity> q = mock(NativeQuery.class);
+    when(session.getNamedNativeQuery(any(String.class))).thenThrow(HibernateException.class);
+
+    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
+    when(q.setParameter(any(String.class), any(String.class), any(StringType.class))).thenReturn(q);
+    when(q.setFlushMode(any(FlushMode.class))).thenReturn(q);
+    when(q.setHibernateFlushMode(any(FlushMode.class))).thenReturn(q);
+    when(q.setReadOnly(any(Boolean.class))).thenReturn(q);
+    when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
+    when(q.setFetchSize(any(Integer.class))).thenReturn(q);
+    when(q.setCacheable(any(Boolean.class))).thenReturn(q);
+
+    final ScrollableResults results = mock(ScrollableResults.class);
+    when(q.scroll(any(ScrollMode.class))).thenReturn(results);
+    when(results.next()).thenReturn(true).thenReturn(false);
+
+    final TestNormalizedEntity[] entities = new TestNormalizedEntity[1];
+    TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    entity.setFirstName("Fred");
+    entity.setLastName("Meyer");
+    entities[0] = entity;
+    when(results.get()).thenReturn(entities);
+
+    final String minId = "1";
+    final String maxId = "2";
+    final List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
+    assertThat(actual, notNullValue());
+  }
+
   @Test
   public void testNormalizeLoop() throws Exception {
     final List<TestDenormalizedEntity> grpRecs = new ArrayList<>();
