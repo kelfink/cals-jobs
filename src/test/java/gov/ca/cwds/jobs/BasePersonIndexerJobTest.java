@@ -640,7 +640,7 @@ public class BasePersonIndexerJobTest
   public void prepLastRunDoc_Args__BulkProcessor__Object() throws Exception {
     final BulkProcessor bp = mock(BulkProcessor.class);
     final TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    target.prepareDocumentTrapIO(bp, p);
+    target.prepareDocumentTrapException(bp, p);
   }
 
   @Test(expected = JobsException.class)
@@ -652,7 +652,7 @@ public class BasePersonIndexerJobTest
     when(track.trackBulkPrepared()).thenThrow(IOException.class);
 
     target.setTrack(track);
-    target.prepareDocumentTrapIO(bp, p);
+    target.prepareDocumentTrapException(bp, p);
   }
 
   @Test

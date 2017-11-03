@@ -505,10 +505,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param bp bulk processor
    * @param p ApiPersonAware object
    */
-  protected void prepareDocumentTrapIO(BulkProcessor bp, T p) {
+  protected void prepareDocumentTrapException(BulkProcessor bp, T p) {
     try {
       prepareDocument(bp, p);
-    } catch (IOException e) {
+    } catch (Exception e) {
       fail();
       throw JobLogs.runtime(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
     }
@@ -561,7 +561,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         LOGGER.info("Found {} people to index", results.size());
         results.stream().forEach(p -> { // NOSONAR
           getTrack().addAffectedDocumentId(p.getPrimaryKey().toString());
-          prepareDocumentTrapIO(bp, p);
+          prepareDocumentTrapException(bp, p);
         });
       }
 
@@ -935,7 +935,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       if (results != null && !results.isEmpty()) {
         final BulkProcessor bp = buildBulkProcessor();
         results.stream().forEach(p -> { // NOSONAR
-          prepareDocumentTrapIO(bp, p);
+          prepareDocumentTrapException(bp, p);
         });
 
         awaitBulkProcessorClose(bp);
