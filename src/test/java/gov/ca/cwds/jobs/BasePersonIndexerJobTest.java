@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -612,16 +613,17 @@ public class BasePersonIndexerJobTest
   @Test
   public void bulkPrepare_Args__BulkProcessor__int() throws Exception {
     final TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    target.queueIndex.add(entity);
+    for (int i = 0; i < 10; i++) {
+      target.queueIndex.add(entity);
+    }
 
     final BulkProcessor bp = mock(BulkProcessor.class);
     int cntr = 0;
 
     try {
-      runKillThread(target, 4000L);
+      runKillThread(target, 3000L);
       int actual = target.bulkPrepare(bp, cntr);
-      int expected = 1;
-      assertThat(actual, is(equalTo(expected)));
+      assertThat(actual, is(not(0)));
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
