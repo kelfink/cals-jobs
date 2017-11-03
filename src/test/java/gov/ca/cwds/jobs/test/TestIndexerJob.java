@@ -33,6 +33,7 @@ public class TestIndexerJob
   private boolean fakeRanges = false;
   private boolean baseRanges = false;
   private boolean blowUpNameThread = false;
+  private boolean shouldDelete = false;
 
   @Inject
   public TestIndexerJob(final TestNormalizedEntityDao dao, final ElasticsearchDao esDao,
@@ -187,7 +188,15 @@ public class TestIndexerJob
 
   @Override
   public boolean isDelete(TestNormalizedEntity t) {
-    return true;
+    return shouldDelete;
+  }
+
+  public boolean isShouldDelete() {
+    return shouldDelete;
+  }
+
+  public void setShouldDelete(boolean shouldDelete) {
+    this.shouldDelete = shouldDelete;
   }
 
 }
