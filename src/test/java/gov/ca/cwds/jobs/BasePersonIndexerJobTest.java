@@ -320,6 +320,12 @@ public class BasePersonIndexerJobTest
     target.close();
   }
 
+  @Test
+  public void close__interrupted() throws Exception {
+    target.fail();
+    target.close();
+  }
+
   @Test(expected = IOException.class)
   public void close_Args___T__IOException() throws Exception {
     doThrow(new IOException()).when(esDao).close();

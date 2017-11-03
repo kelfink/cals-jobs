@@ -813,12 +813,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         this.sessionFactory.close();
       }
 
-      try {
-        Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        LOGGER.warn("INTERRUPTED!");
-      }
+      catchYourBreath();
     }
   }
 
@@ -830,7 +825,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       close();
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(LOGGER, e, "ERROR FINISHING JOB: {}", e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "ERROR FINISHING JOB! {}", e.getMessage());
     }
     LOGGER.info("JOB FINISHED!");
   }
