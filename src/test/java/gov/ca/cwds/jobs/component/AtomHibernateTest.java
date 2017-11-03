@@ -115,8 +115,7 @@ public class AtomHibernateTest
   @Test
   public void getLegacySourceTable_Args__() throws Exception {
     String actual = target.getLegacySourceTable();
-    String expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
