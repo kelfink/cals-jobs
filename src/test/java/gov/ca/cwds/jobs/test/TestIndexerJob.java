@@ -1,6 +1,8 @@
 package gov.ca.cwds.jobs.test;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,11 @@ public class TestIndexerJob
   @Override
   public boolean mustDeleteLimitedAccessRecords() {
     return true;
+  }
+
+  @Override
+  public TestDenormalizedEntity extract(final ResultSet rs) throws SQLException {
+    return new TestDenormalizedEntity("abc1234567", "1", "2", "3");
   }
 
   @Override

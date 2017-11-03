@@ -519,8 +519,8 @@ public class BasePersonIndexerJobTest
   }
 
   @Test
-  public void threadRetrieveByJdbc_Args__() throws Exception {
-    when(rs.next()).thenReturn(true, false);
+  public void threadRetrieveByJdbc_Args() throws Exception {
+    when(rs.next()).thenReturn(true, true, false);
     runKillThread(target);
     target.threadRetrieveByJdbc();
     markTestDone();
