@@ -642,7 +642,7 @@ public class BasePersonIndexerJobTest
   }
 
   @Test
-  public void threadIndex_Args__() throws Exception {
+  public void threadIndex_Args() throws Exception {
     runKillThread(target);
     final BulkProcessor bp = mock(BulkProcessor.class);
     target.threadIndex();
