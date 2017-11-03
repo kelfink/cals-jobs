@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Query;
 
@@ -853,6 +854,14 @@ public class BasePersonIndexerJobTest
   @Test
   public void awaitBulkProcessorClose() throws Exception {
     final BulkProcessor bp = mock(BulkProcessor.class);
+    target.setFakeBulkProcessor(false);
+    target.awaitBulkProcessorClose(bp);
+  }
+
+  @Test(expected = JobsException.class)
+  public void awaitBulkProcessorClose_error() throws Exception {
+    final BulkProcessor bp = mock(BulkProcessor.class);
+    when(bp.awaitClose(any(Integer.class), any(TimeUnit.class)));
     target.setFakeBulkProcessor(false);
     target.awaitBulkProcessorClose(bp);
   }
