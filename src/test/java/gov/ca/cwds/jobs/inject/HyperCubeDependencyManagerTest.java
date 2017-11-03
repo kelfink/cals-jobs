@@ -1,40 +1,50 @@
 package gov.ca.cwds.jobs.inject;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
+import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.inject.Injector;
+
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
-import gov.ca.cwds.data.cms.SystemCodeDao;
-import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
+import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 public class HyperCubeDependencyManagerTest
     extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
-
   HyperCubeDependencyManager target;
 
   @Override
   @Before
   public void setup() throws Exception {
     super.setup();
-
     opts = new FlightPlan();
     opts.setEsConfigLoc("config/local.yaml");
+    target = new HyperCubeDependencyManager(opts, new File(opts.getEsConfigLoc()),
+        lastJobRunTimeFilename);
 
-    target = new HyperCubeDependencyManager(opts, new File(opts.getEsConfigLoc()), lastJobRunTimeFilename);
+    target.setHibernateConfigCms("/test-h2-cms.xml");
+    target.setHibernateConfigNs("/test-h2-ns.xml");
+    HyperCubeDependencyManager.setInstance(target);
   }
 
   @Test
@@ -108,15 +118,14 @@ public class HyperCubeDependencyManagerTest
   // Class<? extends BasePersonIndexerJob<TestNormalizedEntity, TestDenormalizedEntity>> klass =
   // TestIndexerJob.class;
   // final String[] args =
-  // new String[] {"-c", "config/local.yaml", "-l", "/Users/CWS-NS3/client_indexer_time.txt"};
+  // new String[] {"-c", "config/local.yaml", "-l", "/Users/CWS-NS3/client_indexer_time.txt"}
+  ;
   // Object actual = JobsGuiceInjector.newJob(klass, args);
   // assertThat(actual, is(notNullValue()));
   // }
 
   @Test
   public void provideSystemCodeCache_Args__SystemCodeDao__SystemMetaDao() throws Exception {
-    SystemCodeDao systemCodeDao = mock(SystemCodeDao.class);
-    SystemMetaDao systemMetaDao = mock(SystemMetaDao.class);
     SystemCodeCache actual = target.provideSystemCodeCache(systemCodeDao, systemMetaDao);
     assertThat(actual, is(notNullValue()));
   }
@@ -148,14 +157,114 @@ public class HyperCubeDependencyManagerTest
     target.setOpts(opts);
   }
 
-  // @Test
-  // @Ignore
-  // public void getInjector_Args__() throws Exception {
-  // final Path path = Paths.get(this.getClass().getResource("/es-test.yaml").getFile());
-  // final Injector injector =
-  // Guice.createInjector(new JobsGuiceInjector(null, path.toFile(), "last time file"));
-  // Injector actual = JobsGuiceInjector.getInjector();
-  // assertThat(actual, is(notNullValue()));
-  // }
+  @Test
+  public void buildInjector_Args__FlightPlan() throws Exception {
+    FlightPlan opts = mock(FlightPlan.class);
+    Injector actual = HyperCubeDependencyManager.buildInjector(opts);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void newJob_Args__Class__FlightPlan() throws Exception {
+    final Class klass = TestIndexerJob.class;
+    FlightPlan opts = mock(FlightPlan.class);
+    Object actual = HyperCubeDependencyManager.newJob(klass, opts);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test(expected = NeutronException.class)
+  public void newJob_Args__Class__FlightPlan_T__NeutronException() throws Exception {
+    final Class klass = TestIndexerJob.class;
+    when(opts.isSimulateLaunch()).thenReturn(true);
+    HyperCubeDependencyManager.newJob(klass, opts);
+  }
+
+  @Test
+  public void newJob_Args__Class__StringArray() throws Exception {
+    final Class klass = TestIndexerJob.class;
+    final String[] args = new String[] {"-c", "config/local.yaml", "-l",
+        "/Users/CWS-NS3/client_indexer_time.txt", "-t", "4", "-S"};
+    Object actual = HyperCubeDependencyManager.newJob(klass, args);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void configure_Args__() throws Exception {
+    target.configure();
+  }
+
+  @Test
+  public void bindDaos_Args__() throws Exception {
+    target.bindDaos();
+  }
+
+  @Test
+  public void makeCmsSessionFactory_Args__() throws Exception {
+    final SessionFactory actual = target.makeCmsSessionFactory();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void makeNsSessionFactory_Args__() throws Exception {
+    final SessionFactory actual = target.makeNsSessionFactory();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void provideLaunchDirector_Args__() throws Exception {
+    AtomLaunchScheduler actual = target.provideLaunchDirector();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void makeTransportClient_Args__ElasticsearchConfiguration__boolean() throws Exception {
+    ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
+    boolean es55 = false;
+    TransportClient actual = target.makeTransportClient(config, es55);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void elasticsearchClient_Args__() throws Exception {
+    Client actual = target.elasticsearchClient();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setOpts_Args__FlightPlan() throws Exception {
+    FlightPlan opts = mock(FlightPlan.class);
+    target.setOpts(opts);
+  }
+
+  @Test
+  public void getInjector_Args__() throws Exception {
+    Injector actual = HyperCubeDependencyManager.getInjector();
+    Injector expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getHibernateConfigCms_Args__() throws Exception {
+    String actual = target.getHibernateConfigCms();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setHibernateConfigCms_Args__String() throws Exception {
+    String hibernateConfigCms = null;
+    target.setHibernateConfigCms(hibernateConfigCms);
+  }
+
+  @Test
+  public void getHibernateConfigNs_Args__() throws Exception {
+    String actual = target.getHibernateConfigNs();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setHibernateConfigNs_Args__String() throws Exception {
+    String hibernateConfigNs = null;
+    target.setHibernateConfigNs(hibernateConfigNs);
+  }
 
 }

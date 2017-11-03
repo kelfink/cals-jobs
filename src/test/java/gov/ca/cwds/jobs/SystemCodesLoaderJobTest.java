@@ -91,7 +91,7 @@ public class SystemCodesLoaderJobTest {
   }
 
   private NsSystemCode createNsSystemCode(SystemCode systemCode, String categoryDesc) {
-    NsSystemCode nsc = new NsSystemCode();
+    final NsSystemCode nsc = new NsSystemCode();
     nsc.setId(systemCode.getSystemId().intValue());
     nsc.setDescription(systemCode.getShortDescription());
     nsc.setCategoryId(systemCode.getForeignKeyMetaTable());

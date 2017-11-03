@@ -50,6 +50,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.db2.jcc.am.DatabaseMetaData;
 
 import gov.ca.cwds.ObjectMapperUtils;
+import gov.ca.cwds.data.cms.SystemCodeDao;
+import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -112,6 +114,10 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   public ResultSet rs;
   public DatabaseMetaData meta;
   public NativeQuery<M> nq;
+
+  public SystemCodeDao systemCodeDao;
+  public SystemMetaDao systemMetaDao;
+
 
   @Before
   public void setup() throws Exception {
@@ -233,6 +239,9 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     when(hit.docId()).thenReturn(12345);
     when(hit.getSourceAsString())
         .thenReturn(IOUtils.toString(getClass().getResourceAsStream("/fixtures/es_person.json")));
+
+    systemCodeDao = mock(SystemCodeDao.class);
+    systemMetaDao = mock(SystemMetaDao.class);
 
     markTestDone();
   }

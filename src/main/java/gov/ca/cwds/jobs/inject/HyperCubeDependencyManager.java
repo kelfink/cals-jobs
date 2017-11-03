@@ -78,10 +78,10 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.AtomFlightPlanLog;
+import gov.ca.cwds.jobs.schedule.FlightPlanLog;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
-import gov.ca.cwds.jobs.schedule.FlightPlanLog;
 import gov.ca.cwds.jobs.service.NeutronElasticValidator;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
@@ -125,6 +125,8 @@ public class HyperCubeDependencyManager extends AbstractModule {
 
   private String hibernateConfigNs = HIBERNATE_CONFIG_NS;
 
+  private static HyperCubeDependencyManager instance;
+
   /**
    * Default constructor.
    */
@@ -147,6 +149,19 @@ public class HyperCubeDependencyManager extends AbstractModule {
     this.opts = opts;
   }
 
+  private static synchronized HyperCubeDependencyManager buildCube(final FlightPlan opts) {
+    HyperCubeDependencyManager ret;
+
+    if (instance != null) {
+      ret = instance;
+    } else {
+      ret = new HyperCubeDependencyManager(opts,
+          new ApiFileAssistant().validateFileLocation(opts.getEsConfigLoc()), opts.getLastRunLoc());
+    }
+
+    return ret;
+  }
+
   /**
    * Build the Guice Injector once and use it for all Job instances during the life of this batch
    * JVM.
@@ -158,9 +173,7 @@ public class HyperCubeDependencyManager extends AbstractModule {
   public static synchronized Injector buildInjector(final FlightPlan opts) {
     if (injector == null) {
       try {
-        injector = Guice.createInjector(new HyperCubeDependencyManager(opts,
-            new ApiFileAssistant().validateFileLocation(opts.getEsConfigLoc()),
-            opts.getLastRunLoc()));
+        injector = Guice.createInjector(buildCube(opts));
 
         // Initialize system code cache.
         injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
@@ -250,6 +263,7 @@ public class HyperCubeDependencyManager extends AbstractModule {
 
   protected void bindDaos() {
     LOGGER.info("make DAOs");
+
     // DB2 replicated tables:
     bind(ReplicatedRelationshipsDao.class);
     bind(ReplicatedClientDao.class);
@@ -313,7 +327,7 @@ public class HyperCubeDependencyManager extends AbstractModule {
   public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
       SystemMetaDao systemMetaDao) {
     final long secondsToRefreshCache = 15 * 24 * 60 * (long) 60; // 15 days
-    SystemCodeCache systemCodeCache =
+    final SystemCodeCache systemCodeCache =
         new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, false);
     systemCodeCache.register();
     return systemCodeCache;
@@ -352,7 +366,6 @@ public class HyperCubeDependencyManager extends AbstractModule {
    * @throws NeutronException on ES connection error
    */
   @Provides
-  // @Singleton
   public Client elasticsearchClient() throws NeutronException {
     TransportClient client = null;
     if (esConfig != null) {
@@ -369,7 +382,7 @@ public class HyperCubeDependencyManager extends AbstractModule {
         if (client != null) {
           client.close();
         }
-        throw JobLogs.buildCheckedException(LOGGER, e,
+        throw JobLogs.checked(LOGGER, e,
             "Error initializing Elasticsearch client: " + e.getMessage(), e);
       }
     }
@@ -391,8 +404,7 @@ public class HyperCubeDependencyManager extends AbstractModule {
         ret = new ObjectMapper(new YAMLFactory()).readValue(esConfig,
             ElasticsearchConfiguration.class);
       } catch (Exception e) {
-        throw JobLogs.buildCheckedException(LOGGER, e, "ERROR READING ES CONFIG! {}",
-            e.getMessage(), e);
+        throw JobLogs.checked(LOGGER, e, "ERROR READING ES CONFIG! {}", e.getMessage(), e);
       }
     }
     return ret;
@@ -427,6 +439,14 @@ public class HyperCubeDependencyManager extends AbstractModule {
 
   public void setHibernateConfigNs(String hibernateConfigNs) {
     this.hibernateConfigNs = hibernateConfigNs;
+  }
+
+  public static HyperCubeDependencyManager getInstance() {
+    return instance;
+  }
+
+  public static void setInstance(HyperCubeDependencyManager instance) {
+    HyperCubeDependencyManager.instance = instance;
   }
 
 }
