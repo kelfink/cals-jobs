@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -758,11 +759,14 @@ public class BasePersonIndexerJobTest
     when(q.scroll(any(ScrollMode.class))).thenReturn(results);
     when(results.next()).thenReturn(true).thenReturn(false);
 
-    final TestNormalizedEntity[] entities = new TestNormalizedEntity[1];
+    final TestNormalizedEntity[] entities = new TestNormalizedEntity[6000];
+
     TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     entity.setFirstName("Fred");
     entity.setLastName("Meyer");
     entities[0] = entity;
+    Arrays.fill(entities, 0, entities.length, entity);
+
     when(results.get()).thenReturn(entities);
 
     final String minId = "1";
