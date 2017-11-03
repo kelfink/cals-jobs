@@ -270,6 +270,7 @@ public class BasePersonIndexerJobTest
     final List<TestDenormalizedEntity> recs = new ArrayList<>();
     final TestDenormalizedEntity rec = new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "one", "two");
     recs.add(rec);
+    when(qn.list()).thenReturn(recs);
 
     final List<TestNormalizedEntity> actual =
         target.extractLastRunRecsFromView(lastRunTime, new HashSet<String>());
