@@ -533,6 +533,11 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     }
   }
 
+  protected List<T> fetchLastRunResults(final Date lastRunDt, final Set<String> deletionResults) {
+    return this.isViewNormalizer() ? extractLastRunRecsFromView(lastRunDt, deletionResults)
+        : extractLastRunRecsFromTable(lastRunDt);
+  }
+
   /**
    * <strong>ENTRY POINT FOR LAST RUN.</strong>
    *
@@ -553,9 +558,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       final BulkProcessor bp = buildBulkProcessor();
       final Set<String> deletionResults = new HashSet<>();
-      final List<T> results =
-          this.isViewNormalizer() ? extractLastRunRecsFromView(lastRunDt, deletionResults)
-              : extractLastRunRecsFromTable(lastRunDt);
+      final List<T> results = fetchLastRunResults(lastRunDt, deletionResults);
 
       if (results != null && !results.isEmpty()) {
         LOGGER.info("Found {} people to index", results.size());

@@ -216,9 +216,11 @@ public class BasePersonIndexerJobTest
       target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "1", "2", "3"));
       target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "4", "5", "6"));
       target.queueNormalize.push(new TestDenormalizedEntity("xyz1234567", "1", "2", "3"));
+      target.catchYourBreath();
 
       runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 2500L);
       target.threadNormalize();
+      target.catchYourBreath();
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
@@ -620,6 +622,7 @@ public class BasePersonIndexerJobTest
     try {
       runKillThread(target, 3500L);
       int actual = target.bulkPrepare(bp, cntr);
+      target.catchYourBreath();
       assertThat(actual, is(not(0)));
     } catch (Exception e) {
       e.printStackTrace();
