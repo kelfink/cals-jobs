@@ -29,6 +29,7 @@ public class TestIndexerJob
   private boolean fakeFinish = true;
   private boolean fakeBulkProcessor = true;
   private boolean fakeRanges = false;
+  private boolean baseRanges = false;
   private boolean blowUpNameThread = false;
 
   @Inject
@@ -111,6 +112,10 @@ public class TestIndexerJob
 
   @Override
   public List<Pair<String, String>> getPartitionRanges() {
+    if (baseRanges) {
+      return super.getPartitionRanges();
+    }
+
     final List<Pair<String, String>> ret = new ArrayList<>();
 
     if (fakeRanges) {
@@ -158,6 +163,14 @@ public class TestIndexerJob
 
   public void setBlowUpNameThread(boolean blowUpThreadIndex) {
     this.blowUpNameThread = blowUpThreadIndex;
+  }
+
+  public boolean isBaseRanges() {
+    return baseRanges;
+  }
+
+  public void setBaseRanges(boolean baseRanges) {
+    this.baseRanges = baseRanges;
   }
 
 }

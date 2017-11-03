@@ -307,6 +307,13 @@ public class BasePersonIndexerJobTest
   }
 
   @Test
+  public void getPartitionRanges_Args__base() throws Exception {
+    target.setBaseRanges(true);
+    final List<?> actual = target.getPartitionRanges();
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
   public void close_Args__() throws Exception {
     target.close();
   }
