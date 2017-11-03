@@ -43,10 +43,11 @@ public class MSearchJobTest
     assertThat(actual, is(notNullValue()));
   }
 
-  // @Test
-  // public void main_Args__StringArray() throws Exception {
-  // String[] args = new String[] {};
-  // MSearchJob.main(args);
-  // }
+  @Test
+  public void main_Args__StringArray() throws Exception {
+    final String[] args = new String[] {"-c", "config/local.yaml", "-l",
+        "/Users/CWS-NS3/client_indexer_time.txt", "-S"};
+    MSearchJob.main(args);
+  }
 
 }

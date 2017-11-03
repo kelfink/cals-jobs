@@ -449,4 +449,11 @@ public class ReferralHistoryIndexerJobTest
     assertThat(actual, is(equalTo(expected)));
   }
 
+  @Test
+  public void main_Args__StringArray() throws Exception {
+    final String[] args = new String[] {"-c", "config/local.yaml", "-l",
+        "/Users/CWS-NS3/client_indexer_time.txt", "-S"};
+    TestReferralHistoryIndexerJob.main(args);
+  }
+
 }
