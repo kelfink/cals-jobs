@@ -296,10 +296,11 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
-  // public void main_Args__StringArray() throws Exception {
-  // String[] args = new String[] {};
-  // ClientIndexerJob.main(args);
-  // }
+  @Test
+  public void main_Args__StringArray() throws Exception {
+    final String[] args = new String[] {"-c", "config/local.yaml", "-l",
+        "/Users/CWS-NS3/client_indexer_time.txt", "-S"};
+    ClientIndexerJob.main(args);
+  }
 
 }
