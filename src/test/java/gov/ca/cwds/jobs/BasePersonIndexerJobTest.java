@@ -613,6 +613,7 @@ public class BasePersonIndexerJobTest
       target.queueIndex.add(entity);
     }
 
+    target.catchYourBreath();
     final BulkProcessor bp = mock(BulkProcessor.class);
     int cntr = 0;
 

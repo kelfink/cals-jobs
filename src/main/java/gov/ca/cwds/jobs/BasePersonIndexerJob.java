@@ -491,7 +491,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     int i = cntr;
     T t;
 
-    while ((t = queueIndex.pollFirst(NeutronIntegerDefaults.POLL_MILLIS.getValue(),
+    while (isRunning() && (t = queueIndex.pollFirst(NeutronIntegerDefaults.POLL_MILLIS.getValue(),
         TimeUnit.MILLISECONDS)) != null) {
       JobLogs.logEvery(++i, "Indexed", "recs to ES");
       prepareDocument(bp, t);
