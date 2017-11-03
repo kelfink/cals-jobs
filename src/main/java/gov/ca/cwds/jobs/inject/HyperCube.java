@@ -101,9 +101,9 @@ import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
  * 
  * @author CWDS API Team
  */
-public class HyperCubeDependencyManager extends NeutronGuiceModule {
+public class HyperCube extends NeutronGuiceModule {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(HyperCubeDependencyManager.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(HyperCube.class);
 
   private static final String HIBERNATE_CONFIG_CMS = "jobs-cms-hibernate.cfg.xml";
 
@@ -125,12 +125,12 @@ public class HyperCubeDependencyManager extends NeutronGuiceModule {
 
   private String hibernateConfigNs = HIBERNATE_CONFIG_NS;
 
-  private static HyperCubeDependencyManager instance;
+  private static HyperCube instance;
 
   /**
    * Default constructor.
    */
-  public HyperCubeDependencyManager() {
+  public HyperCube() {
     this.opts = null;
   }
 
@@ -141,7 +141,7 @@ public class HyperCubeDependencyManager extends NeutronGuiceModule {
    * @param esConfigFile location of Elasticsearch configuration file
    * @param lastJobRunTimeFilename location of last run file
    */
-  public HyperCubeDependencyManager(final FlightPlan opts, final File esConfigFile,
+  public HyperCube(final FlightPlan opts, final File esConfigFile,
       String lastJobRunTimeFilename) {
     this.esConfig = esConfigFile;
     this.lastJobRunTimeFilename =
@@ -149,13 +149,13 @@ public class HyperCubeDependencyManager extends NeutronGuiceModule {
     this.opts = opts;
   }
 
-  private static synchronized HyperCubeDependencyManager buildCube(final FlightPlan opts) {
-    HyperCubeDependencyManager ret;
+  private static synchronized HyperCube buildCube(final FlightPlan opts) {
+    HyperCube ret;
 
     if (instance != null) {
       ret = instance;
     } else {
-      ret = new HyperCubeDependencyManager(opts,
+      ret = new HyperCube(opts,
           new ApiFileAssistant().validateFileLocation(opts.getEsConfigLoc()), opts.getLastRunLoc());
     }
 
@@ -441,12 +441,12 @@ public class HyperCubeDependencyManager extends NeutronGuiceModule {
     this.hibernateConfigNs = hibernateConfigNs;
   }
 
-  public static HyperCubeDependencyManager getInstance() {
+  public static HyperCube getInstance() {
     return instance;
   }
 
-  public static void setInstance(HyperCubeDependencyManager instance) {
-    HyperCubeDependencyManager.instance = instance;
+  public static void setInstance(HyperCube instance) {
+    HyperCube.instance = instance;
   }
 
 }

@@ -7,13 +7,13 @@ import java.lang.annotation.Target;
 
 import com.google.inject.BindingAnnotation;
 
-import gov.ca.cwds.jobs.inject.HyperCubeDependencyManager;
+import gov.ca.cwds.jobs.inject.HyperCube;
 
 /**
  * Alternative input file.
  * 
  * @author CWDS API Team
- * @see HyperCubeDependencyManager
+ * @see HyperCube
  */
 @BindingAnnotation
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})

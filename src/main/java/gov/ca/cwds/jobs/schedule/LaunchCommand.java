@@ -34,7 +34,7 @@ import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.inject.HyperCubeDependencyManager;
+import gov.ca.cwds.jobs.inject.HyperCube;
 import gov.ca.cwds.jobs.listener.NeutronJobListener;
 import gov.ca.cwds.jobs.listener.NeutronSchedulerListener;
 import gov.ca.cwds.jobs.listener.NeutronTriggerListener;
@@ -259,7 +259,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
       exporter.export("Neutron:runner=master", this);
 
       // Expose Guice bean attributes to JMX.
-      Manager.manage("Neutron_Guice", HyperCubeDependencyManager.getInjector());
+      Manager.manage("Neutron_Guice", HyperCube.getInjector());
 
       // MOVE: move this responsibility to another class.
       if (startingOpts.isDropIndex()) {
@@ -451,7 +451,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
         return instance;
       }
 
-      final Injector injector = HyperCubeDependencyManager.buildInjector(globalOpts);
+      final Injector injector = HyperCube.buildInjector(globalOpts);
       instance = injector.getInstance(LaunchCommand.class);
       instance.startingOpts = globalOpts;
 
@@ -494,12 +494,12 @@ public class LaunchCommand implements AtomLaunchScheduler {
       return; // Test "main" methods
     }
 
-    final Injector injector = HyperCubeDependencyManager.buildInjector(globalOpts);
+    final Injector injector = HyperCube.buildInjector(globalOpts);
     instance = injector.getInstance(LaunchCommand.class);
     instance.startingOpts = globalOpts;
     instance.settings.setContinuousMode(false);
 
-    try (final T job = HyperCubeDependencyManager.newJob(klass, args)) {
+    try (final T job = HyperCube.newJob(klass, args)) {
       job.run();
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
