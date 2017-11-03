@@ -213,10 +213,15 @@ public class BasePersonIndexerJobTest
   @Test
   public void threadNormalize_Args__() throws Exception {
     try {
-      target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "1", "2", "3"));
-      target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "4", "5", "6"));
-      target.queueNormalize.push(new TestDenormalizedEntity("xyz1234567", "1", "2", "3"));
+      for (int i = 0; i < 100; i++) {
+        target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "1", "2", "3"));
+        target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "4", "5", "6"));
+        target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "7", "8", "9"));
+        target.queueNormalize.push(new TestDenormalizedEntity("xyz1234567", "1", "2", "3"));
+        target.queueNormalize.push(new TestDenormalizedEntity("xyz1234567", "4", "5", "6"));
+      }
       target.catchYourBreath();
+      target.getTrack().start();
 
       runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 2500L);
       target.threadNormalize();
