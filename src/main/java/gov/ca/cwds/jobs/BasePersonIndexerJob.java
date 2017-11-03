@@ -35,7 +35,6 @@ import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
-import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -66,6 +65,7 @@ import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.log.JetPackLogger;
+import gov.ca.cwds.jobs.log.NeutronConditionalLogger;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -105,7 +105,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = new JetPackLogger(BasePersonIndexerJob.class);
+  private static final NeutronConditionalLogger LOGGER =
+      new JetPackLogger(BasePersonIndexerJob.class);
 
   /**
    * Jackson ObjectMapper.

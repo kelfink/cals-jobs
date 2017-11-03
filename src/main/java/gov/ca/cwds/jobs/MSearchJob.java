@@ -91,9 +91,7 @@ public class MSearchJob extends
       }
     }
 
-    LOGGER.info("es host: {}", validator.getEsDao().getConfig().getElasticsearchHost());
     LOGGER.info("total hits: {}", totalHits);
-
     return lastSuccessfulRunTime;
   }
 

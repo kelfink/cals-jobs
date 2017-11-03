@@ -24,17 +24,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Query;
 
-import org.apache.commons.io.IOUtils;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.search.MultiSearchRequestBuilder;
-import org.elasticsearch.action.search.MultiSearchResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
@@ -433,33 +426,6 @@ public class BasePersonIndexerJobTest
 
     final Set<String> deletionSet = new HashSet<>();
     deletionSet.add("xyz1234567");
-
-    final MultiSearchRequestBuilder mBuilder = mock(MultiSearchRequestBuilder.class);
-    final MultiSearchResponse multiResponse = mock(MultiSearchResponse.class);
-    final SearchRequestBuilder sBuilder = mock(SearchRequestBuilder.class);
-    final MultiSearchResponse.Item item = mock(MultiSearchResponse.Item.class);
-    final MultiSearchResponse.Item[] items = new MultiSearchResponse.Item[1];
-    items[0] = item;
-
-    final SearchHits hits = mock(SearchHits.class);
-    final SearchHit hit = mock(SearchHit.class);
-    final SearchHit[] hitArray = {hit};
-    final SearchResponse sr = mock(SearchResponse.class);
-
-    when(client.prepareMultiSearch()).thenReturn(mBuilder);
-    when(client.prepareSearch()).thenReturn(sBuilder);
-
-    when(mBuilder.add(any(SearchRequestBuilder.class))).thenReturn(mBuilder);
-    when(mBuilder.get()).thenReturn(multiResponse);
-    when(sBuilder.setQuery(any())).thenReturn(sBuilder);
-    when(multiResponse.getResponses()).thenReturn(items);
-    when(item.getResponse()).thenReturn(sr);
-    when(sr.getHits()).thenReturn(hits);
-    when(hits.getHits()).thenReturn(hitArray);
-
-    when(hit.docId()).thenReturn(12345);
-    when(hit.getSourceAsString())
-        .thenReturn(IOUtils.toString(getClass().getResourceAsStream("/fixtures/es_person.json")));
 
     final Date actual = target.doLastRun(lastRunTime);
     assertThat(actual, notNullValue());
