@@ -8,14 +8,35 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 
-public class JetPackLogger implements Flex4JLogger {
+/**
+ * Adds conditional logging to SLF4J. Supplied arguments are not invoked unless the log level
+ * threshold is met. Reduces object churn of optional logging.
+ * 
+ * <p>
+ * The name refers to Jimmy Neutron's iconic
+ * <a href="http://jimmyneutron.wikia.com/wiki/Jet_Pack">jet pack</a>.
+ * </p>
+ * 
+ * @author CWDS API Team
+ * @see Logger
+ */
+public class JetPackLogger implements NeutronConditionalLogger {
 
+  /**
+   * Delegate SLF4J Logger.
+   */
   private final Logger logger;
 
   public JetPackLogger(Class klass) {
     this.logger = LoggerFactory.getLogger(klass);
   }
 
+  /**
+   * Convert lambda Supplier arguments to Object array for the SLF4J method signatures.
+   * 
+   * @param args
+   * @return
+   */
   private Object[] collect(Supplier<Object>... args) {
     return Arrays.stream(args).map(Supplier::get).collect(Collectors.toList())
         .toArray(new Object[0]);

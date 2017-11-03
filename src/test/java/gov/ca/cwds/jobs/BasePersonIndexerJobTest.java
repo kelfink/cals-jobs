@@ -463,6 +463,7 @@ public class BasePersonIndexerJobTest
 
     final Date actual = target.doLastRun(lastRunTime);
     assertThat(actual, notNullValue());
+    markTestDone();
   }
 
   @Test(expected = NeutronException.class)
@@ -470,6 +471,7 @@ public class BasePersonIndexerJobTest
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenThrow(JobsException.class);
     final Date actual = target.doLastRun(lastRunTime);
+    markTestDone();
   }
 
   @Test
@@ -483,6 +485,7 @@ public class BasePersonIndexerJobTest
 
     final Date actual = target.executeJob(lastRunTime);
     assertThat(actual, notNullValue());
+    markTestDone();
   }
 
   @Test
@@ -499,6 +502,7 @@ public class BasePersonIndexerJobTest
 
     final Date actual = target.executeJob(lastRunTime);
     assertThat(actual, notNullValue());
+    markTestDone();
   }
 
   @Test(expected = NeutronException.class)
@@ -508,12 +512,14 @@ public class BasePersonIndexerJobTest
     when(esDao.getConfig()).thenThrow(JobsException.class);
 
     final Date actual = target.executeJob(lastRunTime);
+    markTestDone();
     assertThat(actual, notNullValue());
   }
 
   @Test
   public void threadRetrieveByJdbc_Args() throws Exception {
     when(rs.next()).thenReturn(true, true, false);
+    target.getTrack().start();
     runKillThread(target);
     target.threadRetrieveByJdbc();
     markTestDone();
