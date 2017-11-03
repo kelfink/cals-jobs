@@ -12,7 +12,7 @@ public class TestNormalizedEntry implements Serializable {
   private String shazbat;
 
   public TestNormalizedEntry() {
-
+    // default, no-op
   }
 
   public TestNormalizedEntry(String id, String shazbat) {

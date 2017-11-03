@@ -49,6 +49,13 @@ public class TestNormalizedEntity extends ApiObjectIdentity implements Persisten
     this.id = id;
   }
 
+  public TestNormalizedEntity(String id, String... ids) {
+    this.id = id;
+    for (int i = 0; i < ids.length; i++) {
+      entries.add(new TestNormalizedEntry(ids[i], "whatever"));
+    }
+  }
+
   @Override
   public Serializable getPrimaryKey() {
     return id;

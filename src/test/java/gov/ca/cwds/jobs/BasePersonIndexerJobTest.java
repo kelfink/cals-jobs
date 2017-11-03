@@ -217,7 +217,7 @@ public class BasePersonIndexerJobTest
       target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "4", "5", "6"));
       target.queueNormalize.push(new TestDenormalizedEntity("xyz1234567", "1", "2", "3"));
 
-      runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 1800L);
+      runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 2500L);
       target.threadNormalize();
     } catch (Exception e) {
       e.printStackTrace();
@@ -609,7 +609,7 @@ public class BasePersonIndexerJobTest
   @Test
   public void bulkPrepare_Args__BulkProcessor__int() throws Exception {
     final TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10000; i++) {
       target.queueIndex.add(entity);
     }
 
@@ -617,7 +617,7 @@ public class BasePersonIndexerJobTest
     int cntr = 0;
 
     try {
-      runKillThread(target, 2500L);
+      runKillThread(target, 3500L);
       int actual = target.bulkPrepare(bp, cntr);
       assertThat(actual, is(not(0)));
     } catch (Exception e) {
