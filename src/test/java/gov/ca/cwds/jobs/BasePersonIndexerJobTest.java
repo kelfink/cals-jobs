@@ -177,6 +177,14 @@ public class BasePersonIndexerJobTest
   }
 
   @Test
+  public void prepareUpsertRequestNoChecked_Args__ElasticSearchPerson__2() throws Exception {
+    final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    target.setShouldDelete(true);
+    final DocWriteRequest actual = target.prepareUpsertRequestNoChecked(esp, t);
+    assertThat(actual, notNullValue());
+  }
+
+  @Test
   public void prepareUpsertRequest_Args__ElasticSearchPerson__Object() throws Exception {
     final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     final UpdateRequest actual = target.prepareUpsertRequest(esp, t);
