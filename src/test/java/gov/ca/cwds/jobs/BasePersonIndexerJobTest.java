@@ -526,6 +526,16 @@ public class BasePersonIndexerJobTest
     markTestDone();
   }
 
+  @Test(expected = JobsException.class)
+  public void threadRetrieveByJdbc_Args__bomb() throws Exception {
+    when(rs.next()).thenReturn(true, false);
+    when(con.createStatement()).thenThrow(SQLException.class);
+
+    runKillThread(target);
+    target.threadRetrieveByJdbc();
+    markTestDone();
+  }
+
   @Test
   public void getInitialLoadViewName_Args__() throws Exception {
     String actual = target.getInitialLoadViewName();
