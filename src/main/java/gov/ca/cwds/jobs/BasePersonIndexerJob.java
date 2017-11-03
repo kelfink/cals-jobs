@@ -891,7 +891,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
         if (((++cnt) % NeutronIntegerDefaults.FETCH_SIZE.getValue()) == 0) {
           LOGGER.info("recs read: {}", cnt);
-          session.flush();
+          session.flush(); // Flush every N records
         }
       }
 

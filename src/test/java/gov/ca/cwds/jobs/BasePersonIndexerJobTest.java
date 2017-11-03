@@ -757,9 +757,12 @@ public class BasePersonIndexerJobTest
 
     final ScrollableResults results = mock(ScrollableResults.class);
     when(q.scroll(any(ScrollMode.class))).thenReturn(results);
+
+    boolean[] rsNext = new boolean[10000];
+    Arrays.fill(rsNext, 0, rsNext.length, true);
     when(results.next()).thenReturn(true).thenReturn(false);
 
-    final TestNormalizedEntity[] entities = new TestNormalizedEntity[6000];
+    final TestNormalizedEntity[] entities = new TestNormalizedEntity[10000];
 
     TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     entity.setFirstName("Fred");
