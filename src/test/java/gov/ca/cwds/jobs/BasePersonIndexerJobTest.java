@@ -334,6 +334,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void finish_Args__() throws Exception {
+    target.setFakeFinish(false);
     target.finish();
   }
 
@@ -765,16 +766,14 @@ public class BasePersonIndexerJobTest
     final ScrollableResults results = mock(ScrollableResults.class);
     when(q.scroll(any(ScrollMode.class))).thenReturn(results);
 
-    boolean[] rsNext = new boolean[10000];
+    final Boolean[] rsNext = new Boolean[10000];
     Arrays.fill(rsNext, 0, rsNext.length, true);
-    when(results.next()).thenReturn(true).thenReturn(false);
+    when(results.next()).thenReturn(true, rsNext).thenReturn(false);
 
-    final TestNormalizedEntity[] entities = new TestNormalizedEntity[10000];
-
+    final TestNormalizedEntity[] entities = new TestNormalizedEntity[10];
     TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     entity.setFirstName("Fred");
     entity.setLastName("Meyer");
-    entities[0] = entity;
     Arrays.fill(entities, 0, entities.length, entity);
 
     when(results.get()).thenReturn(entities);
