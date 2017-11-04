@@ -96,13 +96,23 @@ public class SystemCodesLoaderJobTest extends PersonJobTester {
 
     when(systemCode.getLogicalId()).thenReturn("07");
 
-    target.handleLogicalId(nsc, systemCode);;
+    target.handleLogicalId(nsc, systemCode);
     assertThat(target, notNullValue());
   }
 
   @Test
   public void deleteNsSystemCodes() throws Exception {
     target.deleteNsSystemCodes(con);
+    assertThat(target, notNullValue());
+  }
+
+  @Test
+  public void handleSubCategory() throws Exception {
+    final Map<Short, SystemCode> systemCodeMap = new HashMap<>();
+    final NsSystemCode nsc = mock(NsSystemCode.class);
+    final SystemCode systemCode = mock(SystemCode.class);
+
+    target.handleSubCategory(systemCodeMap, nsc, systemCode);
     assertThat(target, notNullValue());
   }
 
