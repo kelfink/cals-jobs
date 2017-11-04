@@ -303,4 +303,11 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     ClientIndexerJob.main(args);
   }
 
+  @Test
+  public void getMQTName_Args__() throws Exception {
+    String actual = target.getMQTName();
+    String expected = "MQT_CLIENT_ADDRESS";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
 }
