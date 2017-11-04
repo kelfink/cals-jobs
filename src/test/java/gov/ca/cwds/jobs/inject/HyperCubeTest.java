@@ -201,6 +201,7 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
   }
 
   @Test
+  @Ignore
   public void bindDaos_Args__() throws Exception {
     target.bindDaos();
   }
