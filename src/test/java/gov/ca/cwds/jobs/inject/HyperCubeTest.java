@@ -18,12 +18,8 @@ import org.junit.Test;
 
 import com.google.inject.Binder;
 import com.google.inject.Injector;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
 
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
-import gov.ca.cwds.data.cms.SystemCodeDao;
-import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.config.FlightPlan;
@@ -63,12 +59,22 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
     }
 
     @Override
-    @Provides
-    @Singleton
-    public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
-        SystemMetaDao systemMetaDao) {
+    protected boolean isScaffoldSystemCodeCache() {
+      return true;
+    }
+
+    @Override
+    protected SystemCodeCache scaffoldSystemCodeCache() {
       return mock(SystemCodeCache.class);
     }
+
+    // @Override
+    // @Provides
+    // @Singleton
+    // public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
+    // SystemMetaDao systemMetaDao) {
+    // return mock(SystemCodeCache.class);
+    // }
 
   }
 
@@ -91,8 +97,8 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
 
-    // final Binder binder = mock(Binder.class);
-    // target.setTestBinder(binder);
+    final Binder binder = mock(Binder.class);
+    target.setTestBinder(binder);
 
     HyperCube.setCubeMaker(opts -> this.makeOurOwnCube(opts));
 

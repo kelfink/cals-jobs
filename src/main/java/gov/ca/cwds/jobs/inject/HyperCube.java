@@ -336,11 +336,23 @@ public class HyperCube extends NeutronGuiceModule {
   @Singleton
   public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
       SystemMetaDao systemMetaDao) {
-    final long secondsToRefreshCache = 15 * 24 * 60 * (long) 60; // 15 days
-    final SystemCodeCache systemCodeCache =
-        new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, false);
-    systemCodeCache.register();
-    return systemCodeCache;
+    if (isScaffoldSystemCodeCache()) {
+      return scaffoldSystemCodeCache();
+    } else {
+      final long secondsToRefreshCache = 15 * 24 * 60 * (long) 60; // 15 days
+      final SystemCodeCache ret =
+          new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, false);
+      ret.register();
+      return ret;
+    }
+  }
+
+  protected boolean isScaffoldSystemCodeCache() {
+    return false;
+  }
+
+  protected SystemCodeCache scaffoldSystemCodeCache() {
+    return null;
   }
 
   @Provides
