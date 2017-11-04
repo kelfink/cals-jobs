@@ -17,6 +17,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.quartz.Scheduler;
 import org.quartz.TriggerKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
@@ -34,9 +36,10 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 public class LaunchCommandTest
     extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(LaunchCommandTest.class);
+
   LaunchCommand target;
   TriggerKey key;
-
 
   @Override
   @Before
@@ -173,7 +176,6 @@ public class LaunchCommandTest
   @Test
   public void createJob_Args__String__FlightPlan() throws Exception {
     final String rocketName = Mach1TestRocket.class.getName();
-    target.setLaunchScheduler(launchScheduler);
     final BasePersonIndexerJob actual = target.createJob(rocketName, opts);
     assertThat(actual, is(notNullValue()));
   }

@@ -316,10 +316,10 @@ public class LaunchCommand implements AtomLaunchScheduler {
   @SuppressWarnings("rawtypes")
   public BasePersonIndexerJob createJob(final String rocketName, final FlightPlan opts)
       throws NeutronException {
-    final BasePersonIndexerJob ret = this.launchScheduler.createJob(rocketName, opts);
+    final BasePersonIndexerJob ret = launchScheduler.createJob(rocketName, opts);
     ret.setOpts(opts);
 
-    LOGGER.warn("CREATE JOB: {}", opts.getLastRunLoc());
+    LOGGER.warn("CREATED ROCKET: {}", opts.getLastRunLoc());
     return ret;
   }
 
@@ -510,7 +510,8 @@ public class LaunchCommand implements AtomLaunchScheduler {
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
       exitCode = 1;
-      throw JobLogs.buildRuntimeException(LOGGER, e, "STANDALONE JOB FAILED!: {}", e.getMessage());
+      throw JobLogs.buildRuntimeException(LOGGER, e, "STANDALONE ROCKET FAILED!: {}",
+          e.getMessage());
     } finally {
       // WARNING: kills the JVM in testing but may be needed to shutdown resources.
       if (!isTestMode() && !isSchedulerMode()) {

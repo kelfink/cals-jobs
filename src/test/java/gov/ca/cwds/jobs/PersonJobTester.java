@@ -255,7 +255,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     systemMetaDao = mock(SystemMetaDao.class);
 
     // Command and control.
-    when(launchScheduler.createJob(any(Class.class), any(FlightPlan.class)))
+    when(launchScheduler.createJob(any(String.class), any(FlightPlan.class)))
         .thenReturn(mach1Rocket);
     when(launchScheduler.runScheduledJob(any(Class.class), any(FlightPlan.class)))
         .thenReturn(flightRecord);
