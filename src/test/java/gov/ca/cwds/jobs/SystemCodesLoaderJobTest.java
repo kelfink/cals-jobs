@@ -111,6 +111,7 @@ public class SystemCodesLoaderJobTest extends PersonJobTester {
     final Map<Short, SystemCode> systemCodeMap = new HashMap<>();
     final NsSystemCode nsc = mock(NsSystemCode.class);
     final SystemCode systemCode = mock(SystemCode.class);
+    when(systemCode.getCategoryId()).thenReturn((short) 1);
 
     target.handleSubCategory(systemCodeMap, nsc, systemCode);
     assertThat(target, notNullValue());
