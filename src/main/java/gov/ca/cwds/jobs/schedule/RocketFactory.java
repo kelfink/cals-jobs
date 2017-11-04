@@ -81,7 +81,6 @@ public class RocketFactory implements AtomRocketFactory {
     NeutronRocket ret;
     try {
       final FlightPlan opts = rocketOptions.getFlightSettings(klazz);
-      LOGGER.debug("ROCKET FACTORY: LAST CHANGE LOCATION: {}", opts.getLastRunLoc());
       ret = new NeutronRocket(createJob(klazz, opts));
     } catch (NeutronException e) {
       throw new SchedulerException("NO ROCKET SETTINGS!", e);
