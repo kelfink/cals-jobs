@@ -112,7 +112,7 @@ public class JobJdbcUtilsTest
     FlightPlan opts = mock(FlightPlan.class);
     when(opts.getThreadCount()).thenReturn(4L);
 
-    int actual = JobJdbcUtils.calcReaderThreads(opts);
+    int actual = NeutronThreadUtils.calcReaderThreads(opts);
     int expected = 4;
     assertThat(actual, is(equalTo(expected)));
   }

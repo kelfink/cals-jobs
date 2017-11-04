@@ -16,15 +16,15 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
- * Miscellaneous DB2 utilities for Neutron jobs.
+ * Miscellaneous DB2 utilities for Neutron rockets.
  * 
  * @author CWDS API Team
  */
-public class JobDB2Utils {
+public class NeutronDB2Utils {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobDB2Utils.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronDB2Utils.class);
 
-  private JobDB2Utils() {
+  private NeutronDB2Utils() {
     // Default no-op.
   }
 
@@ -110,6 +110,7 @@ public class JobDB2Utils {
    * @return DB2 monitor
    */
   public static DB2SystemMonitor monitorStart(final Connection con) {
+    DB2SystemMonitor ret = null;
     try {
       final com.ibm.db2.jcc.t4.b nativeCon =
           (com.ibm.db2.jcc.t4.b) ((com.mchange.v2.c3p0.impl.NewProxyConnection) con)
@@ -118,15 +119,15 @@ public class JobDB2Utils {
       LOGGER.info("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
           nativeCon.enableRowsetSupport_);
 
-      final DB2SystemMonitor monitor = db2Con.getDB2SystemMonitor();
-      monitor.enable(true);
-      monitor.start(DB2SystemMonitor.RESET_TIMES);
-      return monitor;
+      ret = db2Con.getDB2SystemMonitor();
+      ret.enable(true);
+      ret.start(DB2SystemMonitor.RESET_TIMES);
+      return ret;
     } catch (Exception e) {
       LOGGER.warn("UNABLE TO GRAB DB2 MONITOR: {}", e.getMessage(), e);
     }
 
-    return null;
+    return ret;
   }
 
   /**
@@ -138,13 +139,18 @@ public class JobDB2Utils {
   public static void monitorStopAndReport(final DB2SystemMonitor monitor) throws SQLException {
     if (monitor != null) {
       monitor.stop();
-      LOGGER.info("Server elapsed time (microseconds)={}", monitor.getServerTimeMicros());
-      LOGGER.info("Network I/O elapsed time (microseconds)={}", monitor.getNetworkIOTimeMicros());
-      LOGGER.info("Core driver elapsed time (microseconds)={}", monitor.getCoreDriverTimeMicros());
-      LOGGER.info("Application elapsed time (milliseconds)={}", monitor.getApplicationTimeMillis());
-      LOGGER.info("monitor.moreData: 0: {}", monitor.moreData(0));
-      LOGGER.info("monitor.moreData: 1: {}", monitor.moreData(1));
-      LOGGER.info("monitor.moreData: 2: {}", monitor.moreData(2));
+      final StringBuilder buf = new StringBuilder();
+
+      buf.append("Server elapsed time (microseconds)=").append(monitor.getServerTimeMicros())
+          .append("Network I/O elapsed time (microseconds)=")
+          .append(monitor.getNetworkIOTimeMicros())
+          .append("Core driver elapsed time (microseconds)=")
+          .append(monitor.getCoreDriverTimeMicros())
+          .append("Application elapsed time (milliseconds)=")
+          .append(monitor.getApplicationTimeMillis()).append("monitor.moreData: 0: ")
+          .append(monitor.moreData(0)).append("monitor.moreData: 1: ").append(monitor.moreData(1))
+          .append("monitor.moreData: 2: ").append(monitor.moreData(2));
+      LOGGER.info(buf.toString());
     }
   }
 

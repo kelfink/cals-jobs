@@ -68,7 +68,7 @@ import gov.ca.cwds.jobs.log.NeutronConditionalLogger;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
-import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
@@ -304,7 +304,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @throws NeutronException bombed
    */
   protected void doInitialLoadJdbc() throws NeutronException {
-    List<Thread> threads = new ArrayList<>();
+    final List<Thread> threads = new ArrayList<>();
 
     try {
       nameThread("initial_load");
@@ -313,18 +313,18 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       addThread(useTransformThread(), this::threadNormalize, threads);
       addThread(true, this::threadRetrieveByJdbc, threads);
 
+      // Start 'em up.
       for (Thread t : threads) {
         t.start();
       }
 
+      // Wait for 'em to finish.
       for (Thread t : threads) {
         t.join();
       }
 
-      Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue());
-
-      // Sorry SonarQube, SLF4J does not yet support conditional invocation.
-      LOGGER.info("PROGRESS TRACK: {}", this.getTrack().toString()); // NOSONAR
+      Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // WARN: threading practices
+      LOGGER.info("PROGRESS TRACK: {}", () -> this.getTrack().toString());
     } catch (Exception e) {
       fail();
       Thread.currentThread().interrupt();
@@ -348,7 +348,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      // con.setReadOnly(true); // WARNING: fails with Postgres.
 
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Either detect platform or force ORDER BY clause.
@@ -356,7 +355,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.info("query: {}", query);
 
       // Enable parallelism for underlying database.
-      JobDB2Utils.enableParallelism(con);
+      NeutronDB2Utils.enableParallelism(con);
 
       M m;
       try (final Statement stmt = con.createStatement()) {

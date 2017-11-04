@@ -43,7 +43,7 @@ public class PrepSQLWork implements Work {
   public void execute(Connection con) throws SQLException {
     con.setSchema(JobJdbcUtils.getDBSchemaName());
     con.setAutoCommit(false);
-    JobDB2Utils.enableParallelism(con);
+    NeutronDB2Utils.enableParallelism(con);
 
     final String strLastRunTime = JobJdbcUtils.makeSimpleTimestampString(lastRunTime);
 

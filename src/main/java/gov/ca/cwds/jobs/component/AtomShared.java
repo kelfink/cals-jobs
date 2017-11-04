@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
+import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 
 /**
  * Common features of all Elasticsearch indexing jobs.
@@ -44,16 +44,11 @@ public interface AtomShared extends ApiMarker {
    * @param title title of thread
    */
   default void nameThread(final String title) {
-    Thread.currentThread().setName(getClass().getSimpleName() + "_" + title);
+    NeutronThreadUtils.nameThread(title, this);
   }
 
   default void catchYourBreath() {
-    try {
-      Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      getLogger().warn("SLEEP INTERRUPTED!");
-    }
+    NeutronThreadUtils.catchYourBreath();
   }
 
 }

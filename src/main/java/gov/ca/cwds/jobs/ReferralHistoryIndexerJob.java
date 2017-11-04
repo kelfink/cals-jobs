@@ -46,9 +46,9 @@ import gov.ca.cwds.jobs.rocket.referral.ReferralJobRanges;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
-import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
-import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
+import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
@@ -424,9 +424,9 @@ public class ReferralHistoryIndexerJob
     try (final Connection con = getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      JobDB2Utils.enableParallelism(con);
+      NeutronDB2Utils.enableParallelism(con);
 
-      final DB2SystemMonitor monitor = JobDB2Utils.monitorStart(con);
+      final DB2SystemMonitor monitor = NeutronDB2Utils.monitorStart(con);
       final String schema = getDBSchemaName();
 
       try (
@@ -445,7 +445,7 @@ public class ReferralHistoryIndexerJob
         readAllegations(stmtSelAllegation, listAllegations);
 
         // Retrieved all data.
-        JobDB2Utils.monitorStopAndReport(monitor);
+        NeutronDB2Utils.monitorStopAndReport(monitor);
         con.commit();
       }
     } catch (Exception e) {
@@ -480,7 +480,7 @@ public class ReferralHistoryIndexerJob
       final List<Pair<String, String>> ranges = getPartitionRanges();
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
-      final ForkJoinPool threadPool = new ForkJoinPool(JobJdbcUtils.calcReaderThreads(getOpts()));
+      final ForkJoinPool threadPool = new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getOpts()));
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {

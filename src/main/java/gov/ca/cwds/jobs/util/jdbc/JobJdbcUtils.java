@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -20,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.component.AtomHibernate;
-import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
-import gov.ca.cwds.jobs.exception.NeutronException;
 
 /**
  * JDBC utilities for Neutron jobs.
@@ -74,38 +71,9 @@ public class JobJdbcUtils {
   }
 
   public static void prepHibernateLastChange(final Session session, final Date lastRunTime,
-      final String sqlPrepLastChange, final Function<Connection, PreparedStatement> func)
-      throws NeutronException {
+      final String sqlPrepLastChange, final Function<Connection, PreparedStatement> func) {
     final Work work = new PrepSQLWork(lastRunTime, sqlPrepLastChange, func);
     session.doWork(work);
-  }
-
-  /**
-   * Calculate the number of reader threads to run from incoming job options and available
-   * processors.
-   * 
-   * @param opts job options
-   * @return number of reader threads to run
-   */
-  public static int calcReaderThreads(final FlightPlan opts) {
-    final int ret = opts.getThreadCount() != 0L ? (int) opts.getThreadCount()
-        : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
-    LOGGER.info(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
-    return ret;
-  }
-
-  private static <T> Function<T, Stream<T>> everyNth(int n) {
-    return new Function<T, Stream<T>>() {
-      int i = 0;
-
-      @Override
-      public Stream<T> apply(T t) {
-        if (i++ % n == 0) {
-          return Stream.of(t);
-        }
-        return Stream.empty();
-      }
-    };
   }
 
   private static List<Pair<String, String>> buildPartitionsRanges(int partitions) {
@@ -113,14 +81,15 @@ public class JobJdbcUtils {
     final int skip = (len / partitions);
     LOGGER.info("len: {}, skip: {}", len, skip);
 
-    final Integer[] positions = IntStream.rangeClosed(0, len - 1).boxed().flatMap(everyNth(skip))
-        .sorted().sequential().collect(Collectors.toList()).toArray(new Integer[0]);
+    final Integer[] positions =
+        IntStream.rangeClosed(0, len - 1).boxed().flatMap(NeutronStreamUtils.everyNth(skip))
+            .sorted().sequential().collect(Collectors.toList()).toArray(new Integer[0]);
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info(ToStringBuilder.reflectionToString(positions, ToStringStyle.MULTI_LINE_STYLE));
     }
 
-    List<Pair<String, String>> ret = new ArrayList<>();
+    final List<Pair<String, String>> ret = new ArrayList<>();
     for (int i = 0; i < positions.length; i++) {
       ret.add(Pair.of(i > 0 ? BASE_PARTITIONS[positions[i - 1]] : Z_OS_START,
           i == positions.length - 1 ? Z_OS_END : BASE_PARTITIONS[positions[i]]));
@@ -142,7 +111,7 @@ public class JobJdbcUtils {
   }
 
   @SuppressWarnings("unchecked")
-  private static List<Pair<String, String>> getCommonPartitionRanges(
+  public static List<Pair<String, String>> getCommonPartitionRanges(
       @SuppressWarnings("rawtypes") AtomHibernate initialLoad, int numPartitions) {
     List<Pair<String, String>> ret = new ArrayList<>(numPartitions);
     if (initialLoad.isLargeDataSet()) {
