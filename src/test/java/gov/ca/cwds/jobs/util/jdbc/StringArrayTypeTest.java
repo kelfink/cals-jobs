@@ -174,16 +174,6 @@ public class StringArrayTypeTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
-  public void deepCopy_Args__Object_T__HibernateException() throws Exception {
-    Object value = null;
-    try {
-      target.deepCopy(value);
-      fail("Expected exception was not thrown!");
-    } catch (HibernateException e) {
-    }
-  }
-
   @Test
   public void isMutable_Args__() throws Exception {
     boolean actual = target.isMutable();
@@ -199,37 +189,7 @@ public class StringArrayTypeTest {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
-  public void disassemble_Args__Object_T__HibernateException() throws Exception {
-    Object value = null;
-    try {
-      target.disassemble(value);
-      fail("Expected exception was not thrown!");
-    } catch (HibernateException e) {
-    }
-  }
-
-  // @Test
-  public void assemble_Args__Serializable__Object() throws Exception {
-    Serializable cached = mock(Serializable.class);
-    Object owner = null;
-    Object actual = target.assemble(cached, owner);
-    Object expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  // @Test
-  public void assemble_Args__Serializable__Object_T__HibernateException() throws Exception {
-    Serializable cached = mock(Serializable.class);
-    Object owner = null;
-    try {
-      target.assemble(cached, owner);
-      fail("Expected exception was not thrown!");
-    } catch (HibernateException e) {
-    }
-  }
-
-  // @Test
+  @Test
   public void replace_Args__Object__Object__Object() throws Exception {
     Object original = null;
     Object target_ = null;
@@ -237,18 +197,6 @@ public class StringArrayTypeTest {
     Object actual = target.replace(original, target_, owner);
     Object expected = null;
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  // @Test
-  public void replace_Args__Object__Object__Object_T__HibernateException() throws Exception {
-    Object original = null;
-    Object target_ = null;
-    Object owner = null;
-    try {
-      target.replace(original, target_, owner);
-      fail("Expected exception was not thrown!");
-    } catch (HibernateException e) {
-    }
   }
 
 }
