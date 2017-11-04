@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -92,6 +93,8 @@ public class SystemCodesLoaderJobTest extends PersonJobTester {
     final Map<String, SystemMeta> systemMetaMap = new HashMap<>();
     final NsSystemCode nsc = mock(NsSystemCode.class);
     final SystemCode systemCode = mock(SystemCode.class);
+
+    when(systemCode.getLogicalId()).thenReturn("07");
 
     target.handleLogicalId(nsc, systemCode);;
     assertThat(target, notNullValue());
