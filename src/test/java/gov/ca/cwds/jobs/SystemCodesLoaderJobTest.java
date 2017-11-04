@@ -101,6 +101,12 @@ public class SystemCodesLoaderJobTest extends PersonJobTester {
   }
 
   @Test
+  public void deleteNsSystemCodes() throws Exception {
+    target.deleteNsSystemCodes(con);
+    assertThat(target, notNullValue());
+  }
+
+  @Test
   public void testLoading() throws Exception {
     Map<Integer, NsSystemCode> loadedSystemCode = target.load();
     Assert.assertNotNull(loadedSystemCode);
