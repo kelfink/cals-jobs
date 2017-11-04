@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,13 @@ public class ReplicatedClientRelationshipTest
 
   @Test
   public void instantiation() throws Exception {
+    assertThat(target, notNullValue());
+  }
+
+  @Test
+  public void instantiation2() throws Exception {
+    target = new ReplicatedClientRelationship("A", (short) 0, new Date(), "xyz1234567",
+        DEFAULT_CLIENT_ID, DEFAULT_CLIENT_ID, "XYZ", new Date());
     assertThat(target, notNullValue());
   }
 
