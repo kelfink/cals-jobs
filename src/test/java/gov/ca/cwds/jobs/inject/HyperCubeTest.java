@@ -27,7 +27,9 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
+import gov.ca.cwds.jobs.test.TestJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
+import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
@@ -51,14 +53,14 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
 
     @Override
     protected SessionFactory makeCmsSessionFactory() {
-      // return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
-      return lastTest.sessionFactory;
+      return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
+      // return lastTest.sessionFactory;
     }
 
     @Override
     protected SessionFactory makeNsSessionFactory() {
-      // return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
-      return lastTest.sessionFactory;
+      return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
+      // return lastTest.sessionFactory;
     }
 
     @Override
@@ -71,14 +73,14 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
       return mock(SystemCodeCache.class);
     }
 
-    // @Override
-    // protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-    // return mock(AnnotatedBindingBuilder.class);
-    // }
-
     @Override
     public Configuration makeHibernateConfiguration() {
       return configuration;
+    }
+
+    @Override
+    protected Configuration additionalDaos(Configuration config) {
+      return config.addAnnotatedClass(TestNormalizedEntityDao.class);
     }
 
   }
@@ -102,8 +104,8 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
 
-    final Binder binder = mock(Binder.class);
-    target.setTestBinder(binder);
+    // final Binder binder = mock(Binder.class);
+    // target.setTestBinder(binder);
 
     HyperCube.setCubeMaker(opts -> this.makeOurOwnCube(opts));
     lastTester = this;
@@ -159,12 +161,7 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
   @Test
   // @Ignore
   public void newJob_Args__Class__FlightPlan() throws Exception {
-    target = new HyperCube(opts, new File(opts.getEsConfigLoc()), lastJobRunTimeFilename);
-
-    target.setHibernateConfigCms("test-h2-cms.xml");
-    target.setHibernateConfigNs("test-h2-ns.xml");
-
-    final Class klass = TestIndexerJob.class;
+    final Class klass = TestJob.class;
     Object actual = HyperCube.newJob(klass, opts);
     assertThat(actual, is(notNullValue()));
   }

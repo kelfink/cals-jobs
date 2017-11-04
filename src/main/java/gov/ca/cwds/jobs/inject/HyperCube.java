@@ -298,9 +298,13 @@ public class HyperCube extends NeutronGuiceModule {
     bind(SystemMetaDao.class);
   }
 
+  protected Configuration additionalDaos(Configuration config) {
+    return config;
+  }
+
   protected SessionFactory makeCmsSessionFactory() {
     LOGGER.info("make CMS session factory");
-    return makeHibernateConfiguration().configure(getHibernateConfigCms())
+    Configuration config = makeHibernateConfiguration().configure(getHibernateConfigCms())
         .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsClientAddress.class)
         .addAnnotatedClass(EsRelationship.class).addAnnotatedClass(EsPersonReferral.class)
         .addAnnotatedClass(EsChildPersonCase.class).addAnnotatedClass(EsParentPersonCase.class)
@@ -315,8 +319,8 @@ public class HyperCube extends NeutronGuiceModule {
         .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
         .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
         .addAnnotatedClass(ReplicatedAddress.class).addAnnotatedClass(SystemCode.class)
-        .addAnnotatedClass(EsSafetyAlert.class).addAnnotatedClass(SystemMeta.class)
-        .buildSessionFactory();
+        .addAnnotatedClass(EsSafetyAlert.class).addAnnotatedClass(SystemMeta.class);
+    return additionalDaos(config).buildSessionFactory();
   }
 
   protected SessionFactory makeNsSessionFactory() {
