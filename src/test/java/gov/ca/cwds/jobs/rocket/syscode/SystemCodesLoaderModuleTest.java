@@ -33,6 +33,12 @@ public class SystemCodesLoaderModuleTest extends PersonJobTester {
   }
 
   @Test
+  public void instantiation_ctor() throws Exception {
+    target = new SystemCodesLoaderModule("one.xml", "two.xml");
+    assertThat(target, notNullValue());
+  }
+
+  @Test
   public void provideSystemCodeCache_Args__SystemCodeDao__SystemMetaDao() throws Exception {
     SystemCodeCache actual = target.provideSystemCodeCache(systemCodeDao, systemMetaDao);
     assertThat(actual, is(notNullValue()));
