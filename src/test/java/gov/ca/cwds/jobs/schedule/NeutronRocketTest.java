@@ -33,7 +33,7 @@ public class NeutronRocketTest extends PersonJobTester {
 
     dao = new TestNormalizedEntityDao(sessionFactory);
     rocket =
-        new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, jobHistory);
+        new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, flightRecorder);
     rocket.setOpts(opts);
     rocket.init(this.tempFile.getAbsolutePath(), opts);
 

@@ -24,7 +24,7 @@ import com.google.inject.Injector;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.test.TestJob;
+import gov.ca.cwds.jobs.test.Mach1TestRocket;
 
 public class RocketFactoryTest extends PersonJobTester {
 
@@ -53,9 +53,9 @@ public class RocketFactoryTest extends PersonJobTester {
 
     when(bundle.getJobDetail()).thenReturn(jd);
     when(jd.getJobDataMap()).thenReturn(jobDataMap);
-    when(jobDataMap.getString(any())).thenReturn(TestJob.class.getName());
+    when(jobDataMap.getString(any())).thenReturn(Mach1TestRocket.class.getName());
 
-    rocket = new TestJob(esDao, lastJobRunTimeFilename, MAPPER, jobHistory);
+    rocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
     when(injector.getInstance(any(Class.class))).thenReturn(rocket);
     // opts = new FlightPlan();
 
@@ -75,7 +75,7 @@ public class RocketFactoryTest extends PersonJobTester {
 
   @Test
   public void createJob_Args__Class__FlightPlan() throws Exception {
-    Class<?> klass = TestJob.class;
+    Class<?> klass = Mach1TestRocket.class;
     FlightPlan opts_ = mock(FlightPlan.class);
     BasePersonIndexerJob actual = target.createJob(klass, opts_);
     assertThat(actual, is(notNullValue()));
@@ -83,7 +83,7 @@ public class RocketFactoryTest extends PersonJobTester {
 
   @Test
   public void createJob_Args__String__FlightPlan() throws Exception {
-    String jobName = TestJob.class.getName();
+    String jobName = Mach1TestRocket.class.getName();
     FlightPlan opts_ = mock(FlightPlan.class);
     BasePersonIndexerJob actual = target.createJob(jobName, opts_);
     assertThat(actual, is(notNullValue()));

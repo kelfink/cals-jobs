@@ -78,7 +78,7 @@ public class AtomHibernateTest
     super.setup();
     dao = new TestNormalizedEntityDao(sessionFactory);
     target = new TestAtomHibernate(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
-        jobHistory);
+        flightRecorder);
   }
 
   @Test

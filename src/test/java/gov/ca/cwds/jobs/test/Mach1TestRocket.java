@@ -21,7 +21,8 @@ import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 
-public class TestJob extends BasePersonIndexerJob<TestNormalizedEntity, TestDenormalizedEntity>
+public class Mach1TestRocket
+    extends BasePersonIndexerJob<TestNormalizedEntity, TestDenormalizedEntity>
     implements ApiGroupNormalizer<TestDenormalizedEntity> {
 
   private boolean fakeMarkDone;
@@ -33,10 +34,10 @@ public class TestJob extends BasePersonIndexerJob<TestNormalizedEntity, TestDeno
   private boolean shouldDelete = false;
 
   @Inject
-  public TestJob(final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
-      final ObjectMapper mapper, FlightRecorder jobHistory) {
+  public Mach1TestRocket(final ElasticsearchDao esDao,
+      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
+      FlightRecorder jobHistory) {
     super(null, esDao, lastJobRunTimeFilename, mapper, null, jobHistory, null);
-    // final TestNormalizedEntityDao dao = Mockito.mock(TestNormalizedEntityDao.class);
   }
 
   @Override

@@ -92,7 +92,7 @@ public class ReferralHistoryIndexerJobTest
     super.setup();
     dao = new ReplicatedPersonReferralsDao(sessionFactory);
     target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory, FlightPlanTest.makeGeneric());
+        sessionFactory, flightRecorder, FlightPlanTest.makeGeneric());
   }
 
   @Test

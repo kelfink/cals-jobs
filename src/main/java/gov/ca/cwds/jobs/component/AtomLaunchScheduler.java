@@ -20,12 +20,12 @@ public interface AtomLaunchScheduler {
    */
   FlightRecord runScheduledJob(Class<?> klass, FlightPlan opts) throws NeutronException;
 
-  void addExecutingJob(TriggerKey key, NeutronRocket job);
+  void trackRocketInFlight(TriggerKey key, NeutronRocket rocket);
 
-  LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts);
+  LaunchPad scheduleLaunch(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts);
 
-  boolean isJobVetoed(String className) throws NeutronException;
+  boolean isLaunchVetoed(String className) throws NeutronException;
 
-  FlightRecord runScheduledJob(String jobName, FlightPlan opts) throws NeutronException;
+  FlightRecord runScheduledLaunch(String jobName, FlightPlan opts) throws NeutronException;
 
 }

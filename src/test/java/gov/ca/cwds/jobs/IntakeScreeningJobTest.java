@@ -37,7 +37,7 @@ public class IntakeScreeningJobTest extends PersonJobTester<IntakeParticipant, E
     normalizedDao = new IntakeParticipantDao(sessionFactory);
     viewDao = new EsIntakeScreeningDao(sessionFactory);
     target = new IntakeScreeningJob(normalizedDao, viewDao, esDao, MAPPER, sessionFactory,
-        jobHistory, opts);
+        flightRecorder, opts);
   }
 
   @Test
@@ -117,7 +117,7 @@ public class IntakeScreeningJobTest extends PersonJobTester<IntakeParticipant, E
     when(viewDao.findAll()).thenReturn(results);
 
     target = new IntakeScreeningJob(normalizedDao, viewDao, esDao, MAPPER, sessionFactory,
-        jobHistory, opts);
+        flightRecorder, opts);
 
     target.threadRetrieveByJdbc();
   }

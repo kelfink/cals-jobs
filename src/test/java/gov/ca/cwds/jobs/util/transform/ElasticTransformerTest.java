@@ -58,7 +58,7 @@ public class ElasticTransformerTest extends PersonJobTester {
 
     dao = new TestNormalizedEntityDao(sessionFactory);
     target =
-        new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, jobHistory);
+        new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, flightRecorder);
     target.setOpts(opts);
     target.setTrack(track);
   }

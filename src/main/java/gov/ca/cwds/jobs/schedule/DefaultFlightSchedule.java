@@ -151,7 +151,7 @@ public enum DefaultFlightSchedule {
     return ret;
   }
 
-  public Class<?> getKlazz() {
+  public Class<?> getRocketClass() {
     return klazz;
   }
 

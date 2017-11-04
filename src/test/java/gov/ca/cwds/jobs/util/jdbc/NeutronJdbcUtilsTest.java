@@ -65,7 +65,7 @@ public class NeutronJdbcUtilsTest
   public void setup() throws Exception {
     super.setup();
     initialLoad = new TestAtomHibernate(null, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
-        jobHistory);
+        flightRecorder);
   }
 
   @Test

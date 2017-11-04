@@ -47,7 +47,7 @@ public class NeutronTriggerListenerTest extends PersonJobTester {
     super.setup();
     dao = new TestNormalizedEntityDao(sessionFactory);
     rocket =
-        new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, jobHistory);
+        new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, flightRecorder);
     rocket.setOpts(opts);
     rocket.setTrack(track);
     job = new NeutronRocket(rocket);
@@ -67,7 +67,7 @@ public class NeutronTriggerListenerTest extends PersonJobTester {
     when(trigger.getKey()).thenReturn(triggerKey);
     when(jobDataMap.getString(any(String.class))).thenReturn(TestIndexerJob.class.getName());
 
-    neutronScheduler.scheduleJob(TestIndexerJob.class, DefaultFlightSchedule.CLIENT, opts);
+    neutronScheduler.scheduleLaunch(TestIndexerJob.class, DefaultFlightSchedule.CLIENT, opts);
     target = new NeutronTriggerListener(neutronScheduler);
   }
 

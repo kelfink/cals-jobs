@@ -78,17 +78,17 @@ public class LaunchCommand implements AtomLaunchScheduler {
 
   private FlightRecorder flightRecorder = new FlightRecorder();
 
-  private LaunchScheduler neutronScheduler;
+  private LaunchScheduler launchScheduler;
 
   private LaunchCommand() {
     // no-op
   }
 
   @Inject
-  public LaunchCommand(final FlightRecorder jobHistory, final LaunchScheduler neutronScheduler,
+  public LaunchCommand(final FlightRecorder jobHistory, final LaunchScheduler launchScheduler,
       final ElasticsearchDao esDao) {
     this.flightRecorder = jobHistory;
-    this.neutronScheduler = neutronScheduler;
+    this.launchScheduler = launchScheduler;
     this.esDao = esDao;
   }
 
@@ -138,12 +138,12 @@ public class LaunchCommand implements AtomLaunchScheduler {
 
   @Managed(description = "Stop the scheduler")
   public void stopScheduler(boolean waitForJobsToComplete) throws NeutronException {
-    this.neutronScheduler.stopScheduler(waitForJobsToComplete);
+    this.launchScheduler.stopScheduler(waitForJobsToComplete);
   }
 
   @Managed(description = "Start the scheduler")
   public void startScheduler() throws NeutronException {
-    this.neutronScheduler.startScheduler();
+    this.launchScheduler.startScheduler();
   }
 
   /**
@@ -169,15 +169,15 @@ public class LaunchCommand implements AtomLaunchScheduler {
 
     // MORE: inject scheduler and rocket factory.
     scheduler.setJobFactory(injector.getInstance(RocketFactory.class));
-    neutronScheduler.setScheduler(scheduler);
+    launchScheduler.setScheduler(scheduler);
 
     // Scheduler listeners.
-    final ListenerManager listenerMgr = neutronScheduler.getScheduler().getListenerManager();
+    final ListenerManager listenerMgr = launchScheduler.getScheduler().getListenerManager();
     listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
-    listenerMgr.addTriggerListener(new NeutronTriggerListener(neutronScheduler));
+    listenerMgr.addTriggerListener(new NeutronTriggerListener(launchScheduler));
     listenerMgr.addJobListener(instance.settings.isInitialMode()
         ? DefaultFlightSchedule.buildFullLoadJobChainListener() : new NeutronJobListener());
-    return neutronScheduler;
+    return launchScheduler;
   }
 
   /**
@@ -244,14 +244,14 @@ public class LaunchCommand implements AtomLaunchScheduler {
 
       // Schedule jobs.
       for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
-        final Class<?> klass = sched.getKlazz();
+        final Class<?> klass = sched.getRocketClass();
         final FlightPlan opts = new FlightPlan(startingOpts);
         handleTimeFile(opts, fmt, now, sched);
 
         final LaunchPad nj =
-            new LaunchPad(neutronScheduler.getScheduler(), sched, flightRecorder, opts);
-        neutronScheduler.getScheduleRegistry().put(klass, nj);
-        neutronScheduler.getRocketOptions().addFlightSettings(klass, opts);
+            new LaunchPad(launchScheduler.getScheduler(), sched, flightRecorder, opts);
+        launchScheduler.getScheduleRegistry().put(klass, nj);
+        launchScheduler.getRocketOptions().addFlightSettings(klass, opts);
         exporter.export("Neutron:last_run_jobs=" + sched.getShortName(), nj);
       }
 
@@ -267,14 +267,14 @@ public class LaunchCommand implements AtomLaunchScheduler {
       }
 
       // Start last change jobs.
-      for (LaunchPad j : neutronScheduler.getScheduleRegistry().values()) {
+      for (LaunchPad j : launchScheduler.getScheduleRegistry().values()) {
         j.schedule();
       }
 
       // Start your engines ...
       if (!this.settings.isTestMode()) {
         LOGGER.warn("start scheduler ...");
-        neutronScheduler.getScheduler().start();
+        launchScheduler.getScheduler().start();
       }
 
       // Jetty for REST administration.
@@ -283,7 +283,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
 
     } catch (IOException | SchedulerException | ParseException e) {
       try {
-        neutronScheduler.getScheduler().shutdown(false);
+        launchScheduler.getScheduler().shutdown(false);
       } catch (SchedulerException e2) {
         LOGGER.warn("FAILED TO STOP SCHEDULER! {}", e2.getMessage(), e2);
       }
@@ -302,21 +302,21 @@ public class LaunchCommand implements AtomLaunchScheduler {
   @SuppressWarnings("rawtypes")
   public BasePersonIndexerJob createJob(final Class<?> klass, final FlightPlan opts)
       throws NeutronException {
-    return this.neutronScheduler.createJob(klass, opts);
+    return this.launchScheduler.createJob(klass, opts);
   }
 
   /**
    * Build a registered job.
    * 
-   * @param jobName batch job class
+   * @param rocketName batch job class
    * @param opts command line arguments
    * @return the job
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final String jobName, final FlightPlan opts)
+  public BasePersonIndexerJob createJob(final String rocketName, final FlightPlan opts)
       throws NeutronException {
-    final BasePersonIndexerJob ret = this.neutronScheduler.createJob(jobName, opts);
+    final BasePersonIndexerJob ret = this.launchScheduler.createJob(rocketName, opts);
     ret.setOpts(opts);
 
     LOGGER.warn("CREATE JOB: {}", opts.getLastRunLoc());
@@ -326,13 +326,13 @@ public class LaunchCommand implements AtomLaunchScheduler {
   @Override
   public FlightRecord runScheduledJob(final Class<?> klass, final FlightPlan opts)
       throws NeutronException {
-    return this.neutronScheduler.runScheduledJob(klass, opts);
+    return this.launchScheduler.runScheduledJob(klass, opts);
   }
 
   @Override
-  public FlightRecord runScheduledJob(final String jobName, final FlightPlan opts)
+  public FlightRecord runScheduledLaunch(final String jobName, final FlightPlan opts)
       throws NeutronException {
-    return this.neutronScheduler.runScheduledJob(jobName, opts);
+    return this.launchScheduler.runScheduledLaunch(jobName, opts);
   }
 
   /**
@@ -387,13 +387,13 @@ public class LaunchCommand implements AtomLaunchScheduler {
   }
 
   @Override
-  public boolean isJobVetoed(String className) throws NeutronException {
-    return this.neutronScheduler.isJobVetoed(className);
+  public boolean isLaunchVetoed(String className) throws NeutronException {
+    return this.launchScheduler.isLaunchVetoed("x*&^%$#");
   }
 
   @Override
-  public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts) {
-    return this.neutronScheduler.scheduleJob(klazz, sched, opts);
+  public LaunchPad scheduleLaunch(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts) {
+    return this.launchScheduler.scheduleLaunch(klazz, sched, opts);
   }
 
   public AtomFlightRecorder getFlightRecorder() {
@@ -405,32 +405,32 @@ public class LaunchCommand implements AtomLaunchScheduler {
   }
 
   public LaunchScheduler getNeutronScheduler() {
-    return neutronScheduler;
+    return launchScheduler;
   }
 
-  public void setNeutronScheduler(LaunchScheduler neutronScheduler) {
-    this.neutronScheduler = neutronScheduler;
+  public void setLaunchScheduler(LaunchScheduler neutronScheduler) {
+    this.launchScheduler = neutronScheduler;
   }
 
   public Scheduler getScheduler() {
-    return neutronScheduler.getScheduler();
+    return launchScheduler.getScheduler();
   }
 
   public Map<Class<?>, LaunchPad> getScheduleRegistry() {
-    return neutronScheduler.getScheduleRegistry();
+    return launchScheduler.getScheduleRegistry();
   }
 
   @Override
-  public void addExecutingJob(TriggerKey key, NeutronRocket job) {
-    neutronScheduler.addExecutingJob(key, job);
+  public void trackRocketInFlight(TriggerKey key, NeutronRocket rocket) {
+    launchScheduler.trackRocketInFlight(key, rocket);
   }
 
   public void removeExecutingJob(TriggerKey key) {
-    neutronScheduler.removeExecutingJob(key);
+    launchScheduler.removeExecutingJob(key);
   }
 
   public Map<TriggerKey, NeutronRocket> getExecutingJobs() {
-    return neutronScheduler.getExecutingJobs();
+    return launchScheduler.getExecutingJobs();
   }
 
   /**

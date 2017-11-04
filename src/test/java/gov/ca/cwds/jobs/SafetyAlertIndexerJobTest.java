@@ -48,7 +48,7 @@ public class SafetyAlertIndexerJobTest extends PersonJobTester {
     SimpleTestSystemCodeCache.init();
 
     target = new SafetyAlertIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory,
-        jobHistory, opts);
+        flightRecorder, opts);
   }
 
   @Test

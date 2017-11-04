@@ -29,7 +29,7 @@ public class ParentCaseHistoryIndexerJobTest
     super.setup();
     dao = new ReplicatedPersonCasesDao(this.sessionFactory);
     target = new ParentCaseHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory, opts);
+        sessionFactory, flightRecorder, opts);
   }
 
   @Test

@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mock;
 import org.junit.Test;
 
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.test.TestJob;
+import gov.ca.cwds.jobs.test.Mach1TestRocket;
 
 public class FlightPlanLogTest {
 
@@ -29,7 +29,7 @@ public class FlightPlanLogTest {
   public void getFlightSettings_Args__Class() throws Exception {
     FlightPlan baseOpts = null;
     FlightPlanLog target = new FlightPlanLog(baseOpts);
-    Class<?> klazz = TestJob.class;
+    Class<?> klazz = Mach1TestRocket.class;
     FlightPlan actual = target.getFlightSettings(klazz);
     FlightPlan expected = null;
     assertThat(actual, is(equalTo(expected)));
@@ -39,7 +39,7 @@ public class FlightPlanLogTest {
   public void addFlightSettings_Args__Class__FlightPlan() throws Exception {
     FlightPlan baseOpts = null;
     FlightPlanLog target = new FlightPlanLog(baseOpts);
-    Class<?> klazz = TestJob.class;
+    Class<?> klazz = Mach1TestRocket.class;
     FlightPlan opts = mock(FlightPlan.class);
     target.addFlightSettings(klazz, opts);
   }

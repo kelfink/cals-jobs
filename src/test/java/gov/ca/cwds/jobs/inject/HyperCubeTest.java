@@ -27,7 +27,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
-import gov.ca.cwds.jobs.test.TestJob;
+import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
@@ -161,7 +161,7 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
   @Test
   @Ignore
   public void newJob_Args__Class__FlightPlan() throws Exception {
-    final Class klass = TestJob.class;
+    final Class klass = Mach1TestRocket.class;
     Object actual = HyperCube.newJob(klass, opts);
     assertThat(actual, is(notNullValue()));
   }

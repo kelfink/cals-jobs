@@ -45,7 +45,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
     super.setup();
     dao = new ReplicatedServiceProviderDao(sessionFactory);
     target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory, opts);
+        sessionFactory, flightRecorder, opts);
     target.setOpts(FlightPlanTest.makeGeneric());
   }
 
@@ -62,7 +62,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   @Test
   public void testInstantiation() throws Exception {
     target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory, opts);
+        sessionFactory, flightRecorder, opts);
     assertThat(target, notNullValue());
   }
 
@@ -86,7 +86,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   @Test
   public void getPartitionRanges_Args__() throws Exception {
     target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory, opts);
+        sessionFactory, flightRecorder, opts);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }
@@ -95,7 +95,7 @@ public class ServiceProviderIndexerJobTest extends PersonJobTester {
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
     target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory, opts);
+        sessionFactory, flightRecorder, opts);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }

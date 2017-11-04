@@ -80,7 +80,7 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     super.setup();
     dao = new ReplicatedClientDao(sessionFactory);
     target = new ClientIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory,
-        jobHistory, opts);
+        flightRecorder, opts);
   }
 
   @Test
@@ -91,7 +91,7 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
   @Test
   public void instantiation() throws Exception {
     target = new ClientIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory,
-        jobHistory, opts);
+        flightRecorder, opts);
     assertThat(target, notNullValue());
   }
 
@@ -193,7 +193,7 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
 
     TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastJobRunTimeFilename,
-        mapper, sessionFactory, jobHistory, opts);
+        mapper, sessionFactory, flightRecorder, opts);
     target.setTxn(transaction);
     target.pullRange(p);
   }
@@ -257,7 +257,7 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
 
     dao = mock(ReplicatedClientDao.class);
     TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastJobRunTimeFilename,
-        mapper, sessionFactory, jobHistory, opts);
+        mapper, sessionFactory, flightRecorder, opts);
     target.setTxn(transaction);
     when(dao.find(any())).thenReturn(rep);
 

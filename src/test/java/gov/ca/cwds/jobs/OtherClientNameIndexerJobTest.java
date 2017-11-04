@@ -46,7 +46,7 @@ public class OtherClientNameIndexerJobTest extends PersonJobTester {
     normDao = new ReplicatedAkaDao(sessionFactory);
     denormDao = new ReplicatedOtherClientNameDao(sessionFactory);
     target = new OtherClientNameIndexerJob(normDao, denormDao, esDao, MAPPER,
-        sessionFactory, jobHistory, opts);
+        sessionFactory, flightRecorder, opts);
   }
 
   @Test

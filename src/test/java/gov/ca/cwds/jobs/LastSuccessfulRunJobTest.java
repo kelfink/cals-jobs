@@ -71,7 +71,7 @@ public class LastSuccessfulRunJobTest
   @Before
   public void setup() throws Exception {
     super.setup();
-    target = new TestLastSuccessfulRunJob(lastJobRunTimeFilename, esDao, jobHistory, opts);
+    target = new TestLastSuccessfulRunJob(lastJobRunTimeFilename, esDao, flightRecorder, opts);
 
     try (BufferedWriter w = new BufferedWriter(new FileWriter(tempFile))) {
       w.write(FIXED_DATETIME);

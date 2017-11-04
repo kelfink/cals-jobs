@@ -50,7 +50,7 @@ public class NeutronTriggerListener implements TriggerListener {
     boolean answer = true;
 
     try {
-      answer = neutronScheduler.isJobVetoed(className);
+      answer = neutronScheduler.isLaunchVetoed(className);
     } catch (NeutronException e) {
       throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINDING JOB FACADE! job class: {}",
           className, e);

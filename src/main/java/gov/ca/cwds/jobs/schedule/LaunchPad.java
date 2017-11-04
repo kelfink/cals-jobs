@@ -54,7 +54,7 @@ public class LaunchPad implements Serializable {
     this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
     this.opts = opts;
 
-    jobHistory.addTrack(sched.getKlazz(), new FlightRecord());
+    jobHistory.addTrack(sched.getRocketClass(), new FlightRecord());
   }
 
   @Managed(description = "Run job now, show results immediately")
@@ -64,7 +64,7 @@ public class LaunchPad implements Serializable {
       final FlightPlan runOnceOpts =
           FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       final FlightRecord track =
-          LaunchCommand.getInstance().runScheduledJob(flightSchedule.getKlazz(), runOnceOpts);
+          LaunchCommand.getInstance().runScheduledJob(flightSchedule.getRocketClass(), runOnceOpts);
       return track.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);
@@ -81,7 +81,7 @@ public class LaunchPad implements Serializable {
 
     jd = newJob(NeutronRocket.class)
         .withIdentity(jobName, NeutronSchedulerConstants.GRP_LST_CHG)
-        .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS, flightSchedule.getKlazz().getName())
+        .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS, flightSchedule.getRocketClass().getName())
         .build();
 
     // Initial mode: run only **once**.
@@ -117,13 +117,13 @@ public class LaunchPad implements Serializable {
   @Managed(description = "Show job status")
   public String status() {
     LOGGER.debug("Show job status");
-    return jobHistory.getLastTrack(this.flightSchedule.getKlazz()).toString();
+    return jobHistory.getLastTrack(this.flightSchedule.getRocketClass()).toString();
   }
 
   @Managed(description = "Show job history")
   public String history() {
     StringBuilder buf = new StringBuilder();
-    jobHistory.getHistory(this.flightSchedule.getKlazz()).stream().forEach(buf::append);
+    jobHistory.getHistory(this.flightSchedule.getRocketClass()).stream().forEach(buf::append);
     return buf.toString();
   }
 

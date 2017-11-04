@@ -97,7 +97,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightRecord runScheduledJob(String jobName, FlightPlan opts) throws NeutronException {
+  public FlightRecord runScheduledLaunch(String jobName, FlightPlan opts) throws NeutronException {
     try {
       final Class<?> klass = Class.forName(jobName);
       return runScheduledJob(klass, opts);
@@ -107,7 +107,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public LaunchPad scheduleJob(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts) {
+  public LaunchPad scheduleLaunch(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts) {
     LOGGER.debug("LAUNCH COORDINATOR: LAST CHANGE LOCATION: {}", opts.getLastRunLoc());
     final LaunchPad nj = new LaunchPad(this.getScheduler(), sched, flightRecorder, opts);
     rocketOptions.addFlightSettings(klazz, opts);
@@ -135,7 +135,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public void addExecutingJob(final TriggerKey key, NeutronRocket job) {
+  public void trackRocketInFlight(final TriggerKey key, NeutronRocket job) {
     executingJobs.put(key, job);
   }
 
@@ -174,7 +174,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public boolean isJobVetoed(String className) throws NeutronException {
+  public boolean isLaunchVetoed(String className) throws NeutronException {
     Class<?> klazz = null;
     try {
       klazz = Class.forName(className);

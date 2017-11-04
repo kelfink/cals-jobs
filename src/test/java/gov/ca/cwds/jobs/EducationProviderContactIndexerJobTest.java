@@ -25,7 +25,7 @@ public class EducationProviderContactIndexerJobTest extends
     super.setup();
     dao = new ReplicatedEducationProviderContactDao(this.sessionFactory);
     target = new EducationProviderContactIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, jobHistory, opts);
+        sessionFactory, flightRecorder, opts);
   }
 
   @Test

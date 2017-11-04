@@ -4,12 +4,30 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.quartz.Scheduler;
+import org.quartz.TriggerKey;
+
+import com.google.inject.Injector;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.component.AtomFlightRecorder;
+import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 
@@ -17,6 +35,8 @@ public class LaunchCommandTest
     extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
 
   LaunchCommand target;
+  TriggerKey key;
+
 
   @Override
   @Before
@@ -26,9 +46,10 @@ public class LaunchCommandTest
     opts.setEsConfigLoc("config/local.yaml");
     opts.setBaseDirectory("/var/lib/jenkins/");
     opts.setLastRunLoc(lastJobRunTimeFilename);
-
-    target = new LaunchCommand(jobHistory, neutronScheduler, esDao);
+    target = new LaunchCommand(flightRecorder, launchScheduler, esDao);
     target.setStartingOpts(opts);
+
+    key = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
     LaunchCommand.setTestMode(true);
   }
 
@@ -43,15 +64,6 @@ public class LaunchCommandTest
     int hoursInPast = 0;
     target.resetTimestamps(initialMode, hoursInPast);
   }
-
-  // @Test(expected = IOException.class)
-  // @Ignore
-  // public void resetTimestamps_Args__boolean__int_T__IOException() throws Exception {
-  // boolean initialMode = false;
-  // int hoursInPast = 0;
-  // opts.setLastRunLoc(".././.././aintthere");
-  // target.resetTimestamps(initialMode, hoursInPast);
-  // }
 
   @Test
   public void resetTimestampsForInitialLoad_Args__() throws Exception {
@@ -70,105 +82,6 @@ public class LaunchCommandTest
     boolean waitForJobsToComplete = false;
     target.stopScheduler(waitForJobsToComplete);
   }
-
-  // @Test(expected = NeutronException.class)
-  // @Ignore
-  // public void stopScheduler_Args__boolean_T__NeutronException() throws Exception {
-  // boolean waitForJobsToComplete = false;
-  // target.stopScheduler(waitForJobsToComplete);
-  // }
-
-  // @Test
-  // @Ignore
-  // public void startScheduler_Args__() throws Exception {
-  // target.startScheduler();
-  // }
-
-  // @Test(expected = NeutronException.class)
-  // @Ignore
-  // public void startScheduler_Args___T__NeutronException() throws Exception {
-  // target.startScheduler();
-  // }
-
-  // @Test
-  // @Ignore
-  // public void initScheduler_Args__() throws Exception {
-  // target.initScheduler();
-  // }
-
-  // @Test(expected = NeutronException.class)
-  // @Ignore
-  // public void initScheduler_Args___T__NeutronException() throws Exception {
-  // target.initScheduler();
-  // }
-
-  // @Test
-  // @Ignore
-  // public void registerJob_Args__Class__JobOptions() throws Exception {
-  // target.registerJob(TestIndexerJob.class, opts);
-  // }
-
-  // @Test(expected = NeutronException.class)
-  // @Ignore
-  // public void registerJob_Args__Class__JobOptions_T__NeutronException() throws Exception {
-  // target.registerJob(TestIndexerJob.class, opts);
-  // }
-
-  // @Test
-  // @Ignore
-  // public void createJob_Args__Class__StringArray() throws Exception {
-  // Class<?> klass = TestIndexerJob.class;
-  // String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
-  // BasePersonIndexerJob actual = target.createJob(klass, args);
-  // assertThat(actual, is(notNullValue()));
-  // }
-
-  // @Test(expected = NeutronException.class)
-  // public void createJob_Args__Class__StringArray_T__NeutronException() throws Exception {
-  // final Class<?> klass = TestIndexerJob.class;
-  // final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/",
-  // "-F"};
-  // target.createJob(klass, args);
-  // }
-
-  // @Test
-  // @Ignore
-  // public void createJob_Args__String__StringArray() throws Exception {
-  // final String jobName = TestIndexerJob.class.getName();
-  // final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/",
-  // "-F"};
-  // final BasePersonIndexerJob actual = target.createJob(jobName, args);
-  // assertThat(actual, is(notNullValue()));
-  // }
-
-  // @Test
-  // @Ignore
-  // public void runScheduledJob_Args__Class__StringArray() throws Exception {
-  // final Class<?> klass = TestIndexerJob.class;
-  // final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/",
-  // "-F"};
-  // final JobProgressTrack actual = target.runScheduledJob(klass, args);
-  // assertThat(actual, is(notNullValue()));
-  // }
-
-  // @Test(expected = NeutronException.class)
-  // public void runScheduledJob_Args__Class__StringArray_T__NeutronException() throws Exception {
-  // when(neutronScheduler.runScheduledJob(any(Class.class), any(String[].class)));
-  //
-  // Class<?> klass = TestIndexerJob.class;
-  // String[] args = new String[] {};
-  // target.runScheduledJob(klass, args);
-  // }
-
-  // @Test
-  // @Ignore
-  // public void runScheduledJob_Args__String__StringArray() throws Exception {
-  // final String jobName = TestIndexerJob.class.getName();
-  // final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/",
-  // "-F"};
-  // JobProgressTrack actual = target.runScheduledJob(jobName, args);
-  // assertThat(actual, is(notNullValue()));
-  // }
 
   @Test
   public void isSchedulerMode_Args__() throws Exception {
@@ -190,19 +103,6 @@ public class LaunchCommandTest
     LaunchCommand.setTestMode(mode);
   }
 
-  // @Test
-  // @Ignore
-  // public void runStandalone_Args__Class__StringArray() throws Exception {
-  // final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/"};
-  // target.runStandalone(TestIndexerJob.class, args);
-  // }
-
-  // @Test
-  // public void getInstance_Args__() throws Exception {
-  // LaunchDirector actual = LaunchDirector.getInstance();
-  // assertThat(actual, is(notNullValue()));
-  // }
-
   @Test
   public void isInitialMode_Args__() throws Exception {
     boolean actual = LaunchCommand.isInitialMode();
@@ -221,10 +121,178 @@ public class LaunchCommandTest
     target.setEsDao(esDao);
   }
 
+  @Test
+  public void instantiation() throws Exception {
+    assertThat(target, notNullValue());
+  }
+
+  @Test
+  public void startScheduler_Args__() throws Exception {
+    target.startScheduler();
+  }
+
+  @Test
+  public void handleTimeFile_Args__FlightPlan__DateFormat__Date__DefaultFlightSchedule()
+      throws Exception {
+    final DateFormat fmt = new SimpleDateFormat("yyyy-mm-dd");
+    final Date now = new Date();
+    final DefaultFlightSchedule sched = DefaultFlightSchedule.CLIENT;
+    target.handleTimeFile(opts, fmt, now, sched);
+  }
+
+  @Test
+  public void configureInitialMode_Args__Date() throws Exception {
+    final Date now = new Date();
+    target.configureInitialMode(now);
+  }
+
+  @Test
+  public void initScheduler_Args__Injector() throws Exception {
+    final Injector injector = mock(Injector.class);
+    when(injector.getInstance(RocketFactory.class)).thenReturn(rocketFactory);
+    target.initScheduler(injector);
+  }
+
+  @Test
+  public void initScheduler_Args__Injector_T__NeutronException() throws Exception {
+    Injector injector = mock(Injector.class);
+    try {
+      target.initScheduler(injector);
+      fail("Expected exception was not thrown!");
+    } catch (NeutronException e) {
+    }
+  }
+
+  @Test
+  public void createJob_Args__Class__FlightPlan() throws Exception {
+    final Class<?> klass = Mach1TestRocket.class;
+    final BasePersonIndexerJob actual = target.createJob(klass, opts);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void createJob_Args__String__FlightPlan() throws Exception {
+    final String jobName = DefaultFlightSchedule.CLIENT.getShortName();
+    final BasePersonIndexerJob actual = target.createJob(jobName, opts);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void runScheduledJob_Args__Class__FlightPlan() throws Exception {
+    final Class<?> klass = Mach1TestRocket.class;
+    final FlightRecord actual = target.runScheduledJob(klass, opts);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void runScheduledJob_Args__String__FlightPlan() throws Exception {
+    final String jobName = DefaultFlightSchedule.CLIENT.getShortName();
+    FlightRecord actual = target.runScheduledLaunch(jobName, opts);
+  }
+
+  @Test
+  public void getStartingOpts_Args__() throws Exception {
+    final FlightPlan actual = target.getStartingOpts();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setStartingOpts_Args__FlightPlan() throws Exception {
+    target.setStartingOpts(opts);
+  }
+
+  @Test
+  public void isJobVetoed_Args__String() throws Exception {
+    final String className = DefaultFlightSchedule.CLIENT.getRocketClass().getName();
+    final boolean actual = target.isLaunchVetoed(className);
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void scheduleJob_Args__Class__DefaultFlightSchedule__FlightPlan() throws Exception {
+    final DefaultFlightSchedule sched = DefaultFlightSchedule.CLIENT;
+    final Class<?> klazz = sched.getRocketClass();
+    LaunchPad actual = target.scheduleLaunch(klazz, sched, opts);
+  }
+
+  @Test
+  public void getFlightRecorder_Args__() throws Exception {
+    AtomFlightRecorder actual = target.getFlightRecorder();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setFlightRecorder_Args__FlightRecorder() throws Exception {
+    target.setFlightRecorder(flightRecorder);
+  }
+
+  @Test
+  public void getNeutronScheduler_Args__() throws Exception {
+    LaunchScheduler actual = target.getNeutronScheduler();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setNeutronScheduler_Args__LaunchScheduler() throws Exception {
+    target.setLaunchScheduler(launchScheduler);
+  }
+
+  @Test
+  public void getScheduler_Args__() throws Exception {
+    final Scheduler actual = target.getScheduler();
+  }
+
+  @Test
+  public void addExecutingJob_Args__TriggerKey__NeutronRocket() throws Exception {
+    final NeutronRocket job = mock(NeutronRocket.class);
+    target.trackRocketInFlight(key, job);
+  }
+
+  @Test
+  public void removeExecutingJob_Args__TriggerKey() throws Exception {
+    target.removeExecutingJob(key);
+  }
+
+  @Test
+  public void getExecutingJobs_Args__() throws Exception {
+    final Map<TriggerKey, NeutronRocket> actual = target.getExecutingJobs();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getInstance_Args__() throws Exception {
+    LaunchCommand actual = LaunchCommand.getInstance();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void startContinuousMode_Args__StringArray() throws Exception {
+    final String[] args = new String[] {};
+    LaunchCommand actual = LaunchCommand.startContinuousMode(args);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void runStandalone_Args__Class__StringArray() throws Exception {
+    final Class<Mach1TestRocket> klass = Mach1TestRocket.class;
+    final String[] args = new String[] {};
+    LaunchCommand.runStandalone(klass, args);
+  }
+
+  @Test
+  public void main_Args__StringArray() throws Exception {
+    final String[] args = new String[] {};
+    LaunchCommand.main(args);
+  }
+
   // @Test
-  // public void main_Args__StringArray() throws Exception {
-  // String[] args = new String[] {};
-  // JobRunner.main(args);
+  // @Ignore
+  // public void createJob_Args__Class__StringArray() throws Exception {
+  // Class<?> klass = TestIndexerJob.class;
+  // String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"}
+  // BasePersonIndexerJob actual = target.createJob(klass, args);
+  // assertThat(actual, is(notNullValue()));
   // }
 
 }
