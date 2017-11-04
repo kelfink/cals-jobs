@@ -97,6 +97,8 @@ dependencies {
     testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
     testCompile 'org.ow2.asm:asm-all:5.2'
 	testCompile group: 'com.jayway.awaitility', name: 'awaitility', version: '1.7.0'
+	testCompile 'io.exemplary.guice:guice-behave:1.0.0'
+	
     // testCompile 'org.jacoco:jacoco:0.7.9'
 }
 

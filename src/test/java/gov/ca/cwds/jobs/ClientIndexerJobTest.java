@@ -266,16 +266,6 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
-  // public void validateDocument_Args__ElasticSearchPerson_T__NeutronException() throws Exception {
-  // ElasticSearchPerson person = mock(ElasticSearchPerson.class);
-  // try {
-  // target.validateDocument(person);
-  // fail("Expected exception was not thrown!");
-  // } catch (NeutronException e) {
-  // }
-  // }
-
   @Test
   public void threadRetrieveByJdbc_Args__() throws Exception {
     target.threadRetrieveByJdbc();
@@ -290,8 +280,8 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
 
   @Test
   public void getPartitionRanges_Args__() throws Exception {
-    List actual = target.getPartitionRanges();
-    List expected = new ArrayList<>();
+    final List actual = target.getPartitionRanges();
+    final List expected = new ArrayList<>();
     expected.add(Pair.of("aaaaaaaaaa", "9999999999"));
     assertThat(actual, is(equalTo(expected)));
   }
@@ -305,8 +295,8 @@ public class ClientIndexerJobTest extends PersonJobTester<ReplicatedClient, EsCl
 
   @Test
   public void getMQTName_Args__() throws Exception {
-    String actual = target.getMQTName();
-    String expected = "MQT_CLIENT_ADDRESS";
+    final String actual = target.getMQTName();
+    final String expected = "MQT_CLIENT_ADDRESS";
     assertThat(actual, is(equalTo(expected)));
   }
 
