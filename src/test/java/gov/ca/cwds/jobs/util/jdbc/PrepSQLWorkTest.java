@@ -55,13 +55,14 @@ public class PrepSQLWorkTest extends PersonJobTester<ReplicatedPersonCases, EsPe
   @Test
   public void execute_Args__Connection_function() throws Exception {
     final Date lastRunTime = new Date();
-    final String sql = "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > :ts";
+    final String sql =
+        "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > :ts and current timestamp > ?";
 
     target = new PrepSQLWork(lastRunTime, sql, c -> {
       try {
         return c.prepareStatement(sql);
       } catch (SQLException e) {
-        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
+        throw JobLogs.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
       }
     });
     target.execute(con);
@@ -70,14 +71,15 @@ public class PrepSQLWorkTest extends PersonJobTester<ReplicatedPersonCases, EsPe
   @Test(expected = SQLException.class)
   public void execute_Args__Connection_T__SQLException() throws Exception {
     final Date lastRunTime = new Date();
-    final String sql = "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > '2017-08-28 11:54:40'";
+    final String sql =
+        "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > '2017-08-28 11:54:40' and current timestamp > ?";
     when(prepStmt.executeUpdate()).thenThrow(SQLException.class);
 
     target = new PrepSQLWork(lastRunTime, sql, c -> {
       try {
         return c.prepareStatement(sql);
       } catch (SQLException e) {
-        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
+        throw JobLogs.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
       }
     });
     target.execute(con);

@@ -711,8 +711,16 @@ public class BasePersonIndexerJobTest
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
+  @Test(expected = JobsException.class)
   public void isDB2OnZOS_Args__() throws Exception {
+    when(con.getMetaData()).thenThrow(JobsException.class);
+    boolean actual = target.isDB2OnZOS();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isDB2OnZOS_Args__error() throws Exception {
     boolean actual = target.isDB2OnZOS();
     boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
