@@ -36,10 +36,12 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
   public static class TestHyperCube extends HyperCube {
 
     PersonJobTester lastTest;
+    Configuration configuration;
 
     public TestHyperCube(final FlightPlan opts, final File esConfigFile,
         String lastJobRunTimeFilename) {
       super(opts, esConfigFile, lastJobRunTimeFilename);
+      configuration = mock(Configuration.class);
     }
 
     @Override
@@ -49,14 +51,14 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
 
     @Override
     protected SessionFactory makeCmsSessionFactory() {
-      return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
-      // return lastTest.sessionFactory;
+      // return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
+      return lastTest.sessionFactory;
     }
 
     @Override
     protected SessionFactory makeNsSessionFactory() {
-      return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
-      // return lastTest.sessionFactory;
+      // return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
+      return lastTest.sessionFactory;
     }
 
     @Override
@@ -70,12 +72,14 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
     }
 
     // @Override
-    // @Provides
-    // @Singleton
-    // public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
-    // SystemMetaDao systemMetaDao) {
-    // return mock(SystemCodeCache.class);
+    // protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
+    // return mock(AnnotatedBindingBuilder.class);
     // }
+
+    @Override
+    public Configuration makeHibernateConfiguration() {
+      return configuration;
+    }
 
   }
 
@@ -102,7 +106,6 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
     target.setTestBinder(binder);
 
     HyperCube.setCubeMaker(opts -> this.makeOurOwnCube(opts));
-
     lastTester = this;
   }
 
@@ -154,8 +157,13 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
   }
 
   @Test
-  @Ignore
+  // @Ignore
   public void newJob_Args__Class__FlightPlan() throws Exception {
+    target = new HyperCube(opts, new File(opts.getEsConfigLoc()), lastJobRunTimeFilename);
+
+    target.setHibernateConfigCms("test-h2-cms.xml");
+    target.setHibernateConfigNs("test-h2-ns.xml");
+
     final Class klass = TestIndexerJob.class;
     Object actual = HyperCube.newJob(klass, opts);
     assertThat(actual, is(notNullValue()));
