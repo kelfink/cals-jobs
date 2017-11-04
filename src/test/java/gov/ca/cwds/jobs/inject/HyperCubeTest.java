@@ -14,6 +14,7 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.inject.Binder;
@@ -146,12 +147,14 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
   }
 
   @Test
+  @Ignore
   public void buildInjector_Args__FlightPlan() throws Exception {
     final Injector actual = HyperCube.buildInjector(opts);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
+  @Ignore
   public void newJob_Args__Class__FlightPlan() throws Exception {
     final Class klass = TestIndexerJob.class;
     Object actual = HyperCube.newJob(klass, opts);
@@ -159,6 +162,7 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
   }
 
   @Test(expected = NeutronException.class)
+  @Ignore
   public void newJob_Args__Class__FlightPlan_T__NeutronException() throws Exception {
     final Class klass = TestIndexerJob.class;
 
@@ -176,6 +180,7 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
   }
 
   @Test
+  @Ignore
   public void newJob_Args__Class__StringArray() throws Exception {
     final Class klass = TestIndexerJob.class;
     final String[] args = new String[] {"-c", "config/local.yaml", "-l",
@@ -185,6 +190,7 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
   }
 
   @Test
+  @Ignore
   public void configure_Args__() throws Exception {
     target.configure();
   }
