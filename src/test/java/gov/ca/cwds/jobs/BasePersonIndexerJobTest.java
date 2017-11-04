@@ -676,7 +676,7 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  @Test(expected = JobsException.class)
+  @Test(expected = SQLException.class)
   public void extractLastRunRecsFromView_Args__sql_error() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenThrow(SQLException.class);
