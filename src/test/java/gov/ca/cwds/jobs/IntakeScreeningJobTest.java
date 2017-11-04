@@ -111,6 +111,7 @@ public class IntakeScreeningJobTest extends PersonJobTester<IntakeParticipant, E
     EsIntakeScreening es = new EsIntakeScreening();
     es.setScreeningId(DEFAULT_CLIENT_ID);
     List<EsIntakeScreening> results = new ArrayList<>();
+    results.add(es);
 
     viewDao = mock(EsIntakeScreeningDao.class);
     when(viewDao.findAll()).thenReturn(results);
