@@ -35,4 +35,11 @@ public class NeutronExceptionTest {
     assertThat(target, notNullValue());
   }
 
+  @Test
+  public void instantiation() throws Exception {
+    String message = null;
+    NeutronException target = new NeutronException(message);
+    assertThat(target, notNullValue());
+  }
+
 }
