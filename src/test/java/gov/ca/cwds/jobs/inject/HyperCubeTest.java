@@ -159,7 +159,7 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
   }
 
   @Test
-  // @Ignore
+  @Ignore
   public void newJob_Args__Class__FlightPlan() throws Exception {
     final Class klass = TestJob.class;
     Object actual = HyperCube.newJob(klass, opts);
@@ -207,12 +207,14 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
   }
 
   @Test
+  @Ignore
   public void makeCmsSessionFactory_Args__() throws Exception {
     final SessionFactory actual = target.makeCmsSessionFactory();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
+  @Ignore
   public void makeNsSessionFactory_Args__() throws Exception {
     final SessionFactory actual = target.makeNsSessionFactory();
     assertThat(actual, is(notNullValue()));
