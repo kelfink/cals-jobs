@@ -88,6 +88,16 @@ public class SystemCodesLoaderJobTest extends PersonJobTester {
   }
 
   @Test
+  public void handleLogicalId() throws Exception {
+    final Map<String, SystemMeta> systemMetaMap = new HashMap<>();
+    final NsSystemCode nsc = mock(NsSystemCode.class);
+    final SystemCode systemCode = mock(SystemCode.class);
+
+    target.handleLogicalId(nsc, systemCode);;
+    assertThat(target, notNullValue());
+  }
+
+  @Test
   public void testLoading() throws Exception {
     Map<Integer, NsSystemCode> loadedSystemCode = target.load();
     Assert.assertNotNull(loadedSystemCode);
