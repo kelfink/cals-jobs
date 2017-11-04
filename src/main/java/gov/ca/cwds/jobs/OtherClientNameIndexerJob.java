@@ -28,7 +28,6 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
@@ -66,7 +65,6 @@ public class OtherClientNameIndexerJob
    * @param dao Relationship View DAO
    * @param denormDao de-normalized DAO
    * @param esDao ElasticSearch DAO
-   * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
    * @param jobHistory job history
@@ -75,10 +73,9 @@ public class OtherClientNameIndexerJob
   @Inject
   public OtherClientNameIndexerJob(final ReplicatedAkaDao dao,
       final ReplicatedOtherClientNameDao denormDao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
-      FlightPlan opts) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
+      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
+      FlightRecorder jobHistory, FlightPlan opts) {
+    super(dao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, jobHistory, opts);
     this.denormDao = denormDao;
   }
 

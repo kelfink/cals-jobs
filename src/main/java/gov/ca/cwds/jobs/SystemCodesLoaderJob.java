@@ -18,10 +18,11 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.rocket.syscode.NsSystemCode;
 import gov.ca.cwds.jobs.rocket.syscode.NsSystemCodeDao;
 import gov.ca.cwds.jobs.rocket.syscode.SystemCodesLoaderModule;
+import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.rest.api.domain.cms.SystemCode;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.api.domain.cms.SystemMeta;
@@ -86,8 +87,9 @@ public class SystemCodesLoaderJob {
    * Delete and load system codes into new system.
    * 
    * @return Map of newly loaded system codes.
+   * @throws NeutronException oops!
    */
-  public Map<Integer, NsSystemCode> load() {
+  public Map<Integer, NsSystemCode> load() throws NeutronException {
     Map<Integer, NsSystemCode> loadedSystemCodes = new HashMap<>();
 
     Set<SystemMeta> allSystemMetas = SystemCodeCache.global().getAllSystemMetas();
@@ -139,8 +141,8 @@ public class SystemCodesLoaderJob {
       }
     } catch (Exception e) {
       tx.rollback();
-      LOGGER.error("ERROR loading system codes, rolling back...");
-      throw new JobsException(e);
+      throw JobLogs.checked(LOGGER, e, "ERROR loading system codes, rolling back...",
+          e.getMessage());
     }
 
     tx.commit();

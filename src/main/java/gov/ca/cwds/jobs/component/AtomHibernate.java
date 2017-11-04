@@ -16,6 +16,7 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.JobDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
@@ -164,10 +165,10 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * 
    * @param session current Hibernate session
    * @param lastRunTime last successful run datetime
-   * @throws SQLException on disconnect, invalid parameters, etc.
+   * @throws NeutronException on disconnect, invalid parameters, etc.
    */
   default void prepHibernateLastChange(final Session session, final Date lastRunTime)
-      throws SQLException {
+      throws NeutronException {
     final String sql = getPrepLastChangeSQL();
     if (StringUtils.isNotBlank(sql)) {
       JobJdbcUtils.prepHibernateLastChange(session, lastRunTime, sql, getPreparedStatementMaker());

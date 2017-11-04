@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.jobs.component.AtomHibernate;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
+import gov.ca.cwds.jobs.exception.NeutronException;
 
 /**
  * JDBC utilities for Neutron jobs.
@@ -73,7 +74,8 @@ public class JobJdbcUtils {
   }
 
   public static void prepHibernateLastChange(final Session session, final Date lastRunTime,
-      final String sqlPrepLastChange, final Function<Connection, PreparedStatement> func) {
+      final String sqlPrepLastChange, final Function<Connection, PreparedStatement> func)
+      throws NeutronException {
     final Work work = new PrepSQLWork(lastRunTime, sqlPrepLastChange, func);
     session.doWork(work);
   }

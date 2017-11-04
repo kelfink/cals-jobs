@@ -45,8 +45,8 @@ public class OtherClientNameIndexerJobTest extends PersonJobTester {
     super.setup();
     normDao = new ReplicatedAkaDao(sessionFactory);
     denormDao = new ReplicatedOtherClientNameDao(sessionFactory);
-    target = new OtherClientNameIndexerJob(normDao, denormDao, esDao, lastJobRunTimeFilename,
-        MAPPER, sessionFactory, jobHistory, opts);
+    target = new OtherClientNameIndexerJob(normDao, denormDao, esDao, MAPPER,
+        sessionFactory, jobHistory, opts);
   }
 
   @Test

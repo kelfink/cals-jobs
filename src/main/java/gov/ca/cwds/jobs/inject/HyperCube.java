@@ -156,7 +156,9 @@ public class HyperCube extends NeutronGuiceModule {
     return new Configuration();
   }
 
-  protected void init() {}
+  protected void init() {
+    // Optional initialization, mostly for testing.
+  }
 
   public static synchronized HyperCube buildCube(final FlightPlan opts) {
     HyperCube ret;
