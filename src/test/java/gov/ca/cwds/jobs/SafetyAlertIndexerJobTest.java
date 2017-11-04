@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
@@ -28,7 +29,7 @@ public class SafetyAlertIndexerJobTest extends PersonJobTester {
 
   private static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
 
-  ReplicatedSafetyAlertsDao clientDao;
+  ReplicatedSafetyAlertsDao dao;
   SafetyAlertIndexerJob target;
 
   @Override
@@ -43,10 +44,11 @@ public class SafetyAlertIndexerJobTest extends PersonJobTester {
     when(esConfig.getElasticsearchAlias()).thenReturn("people");
     when(esConfig.getElasticsearchDocType()).thenReturn("person");
 
+    dao = new ReplicatedSafetyAlertsDao(sessionFactory);
     SimpleTestSystemCodeCache.init();
 
-    target = new SafetyAlertIndexerJob(clientDao, esDao, lastJobRunTimeFilename, mapper,
-        sessionFactory, jobHistory, opts);
+    target = new SafetyAlertIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory,
+        jobHistory, opts);
   }
 
   @Test
@@ -150,6 +152,30 @@ public class SafetyAlertIndexerJobTest extends PersonJobTester {
     final String[] args = new String[] {"-c", "config/local.yaml", "-l",
         "/Users/CWS-NS3/client_indexer_time.txt", "-S"};
     SafetyAlertIndexerJob.main(args);
+  }
+
+  @Test
+  public void isInitialLoadJdbc_Args__() throws Exception {
+    boolean actual = target.isInitialLoadJdbc();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getPartitionRanges_Args__() throws Exception {
+    final javax.persistence.Query q = mock(javax.persistence.Query.class);
+    when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
+    when(q.setParameter(any(String.class), any(String.class))).thenReturn(q);
+
+    List actual = target.getPartitionRanges();
+    assertThat(actual.size(), is(1));
+  }
+
+  @Test
+  public void getOptionalElementName_Args__() throws Exception {
+    String actual = target.getOptionalElementName();
+    String expected = "safety_alerts";
+    assertThat(actual, is(equalTo(expected)));
   }
 
 }
