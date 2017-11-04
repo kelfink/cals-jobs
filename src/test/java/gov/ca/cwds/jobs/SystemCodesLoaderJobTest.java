@@ -1,17 +1,13 @@
 package gov.ca.cwds.jobs;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.jobs.rocket.syscode.NsSystemCode;
@@ -20,21 +16,18 @@ import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.rest.api.domain.cms.SystemCode;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
-public class SystemCodesLoaderJobTest {
+public class SystemCodesLoaderJobTest extends PersonJobTester {
 
-  private static SystemCodesLoaderJob job;
+  SystemCodesLoaderJob target;
+  NsSystemCodeDao dao;
 
-  @BeforeClass
-  public static void setupClass() throws Exception {
-    SessionFactory sessionFactory = mock(SessionFactory.class);
-    Session session = mock(Session.class);
+  @Override
+  @Before
+  public void setup() throws Exception {
+    super.setup();
 
-    Transaction transaction = mock(Transaction.class);
-    when(sessionFactory.getCurrentSession()).thenReturn(session);
-    when(session.beginTransaction()).thenReturn(transaction);
-
-    NsSystemCodeDao dao = new NsSystemCodeDao(sessionFactory);
-    job = new SystemCodesLoaderJob(dao);
+    dao = new NsSystemCodeDao(sessionFactory);
+    target = new SystemCodesLoaderJob(dao);
     SimpleTestSystemCodeCache.init();
   }
 
@@ -45,12 +38,12 @@ public class SystemCodesLoaderJobTest {
 
   @Test
   public void instantiation() throws Exception {
-    assertThat(job, notNullValue());
+    assertThat(target, notNullValue());
   }
 
   @Test
   public void testLoading() throws Exception {
-    Map<Integer, NsSystemCode> loadedSystemCode = job.load();
+    Map<Integer, NsSystemCode> loadedSystemCode = target.load();
     Assert.assertNotNull(loadedSystemCode);
     Assert.assertEquals(6, loadedSystemCode.size());
     Assert.assertTrue(loadedSystemCode.containsKey(1));
@@ -98,5 +91,17 @@ public class SystemCodesLoaderJobTest {
     nsc.setCategoryDescription(categoryDesc);
     return nsc;
   }
+
+  @Test
+  public void load_Args__() throws Exception {
+    Map<Integer, NsSystemCode> actual = target.load();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  // @Test
+  // public void main_Args__StringArray() throws Exception {
+  // String[] args = new String[] {};
+  // SystemCodesLoaderJob.main(args);
+  // }
 
 }
