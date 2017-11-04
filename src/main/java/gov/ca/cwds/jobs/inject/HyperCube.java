@@ -169,7 +169,6 @@ public class HyperCube extends NeutronGuiceModule {
           opts.getLastRunLoc());
     }
 
-    ret.init();
     return ret;
   }
 
