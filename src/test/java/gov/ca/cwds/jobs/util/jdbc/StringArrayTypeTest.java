@@ -5,7 +5,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.sql.PreparedStatement;
@@ -135,6 +137,22 @@ public class StringArrayTypeTest {
     Object value = null;
     int index = 0;
     SharedSessionContractImplementor session = mock(SharedSessionContractImplementor.class);
+    target.nullSafeSet(st, value, index, session);
+  }
+
+  @Test
+  public void nullSafeSet_2() throws Exception {
+    PreparedStatement st = mock(PreparedStatement.class);
+    String[] whatever = {"well isn't that special"};
+    Object value = whatever;
+    int index = 0;
+    SharedSessionContractImplementor session = mock(SharedSessionContractImplementor.class);
+    java.sql.Connection con = mock(java.sql.Connection.class);
+    java.sql.Array arr = mock(java.sql.Array.class);
+
+    when(session.connection()).thenReturn(con);
+    when(con.createArrayOf(any(String.class), any(String[].class))).thenReturn(arr);
+
     target.nullSafeSet(st, value, index, session);
   }
 
