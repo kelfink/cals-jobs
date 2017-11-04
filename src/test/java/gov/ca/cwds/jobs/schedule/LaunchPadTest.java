@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.schedule;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -21,9 +22,9 @@ import org.quartz.TriggerKey;
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.config.FlightPlan;
 
 public class LaunchPadTest extends PersonJobTester {
-
   Scheduler scheduler;
   DefaultFlightSchedule sched;
   FlightRecorder history;
@@ -82,14 +83,11 @@ public class LaunchPadTest extends PersonJobTester {
   public void status_Args__() throws Exception {
     JobDetail jd = mock(JobDetail.class);
     when(scheduler.getJobDetail(any(JobKey.class))).thenReturn(jd);
-
     JobDataMap jdm = new JobDataMap();
     jdm.put("job_class", "TestNeutronJob");
     jdm.put("cmd_line", "--invalid");
-
     final FlightRecord track = new FlightRecord();
     jdm.put("track", track);
-
     when(jd.getJobDataMap()).thenReturn(jdm);
     history.addTrack(ClientIndexerJob.class, track);
     target.status();
@@ -108,6 +106,50 @@ public class LaunchPadTest extends PersonJobTester {
       fail("Expected exception was not thrown!");
     } catch (SchedulerException e) {
     }
+  }
+
+  @Test
+  public void vetoScheduledJob_Args__() throws Exception {
+    target.vetoScheduledJob();
+  }
+
+  @Test
+  public void history_Args__() throws Exception {
+    String actual = target.history();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void isVetoExecution_Args__() throws Exception {
+    boolean actual = target.isVetoExecution();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setVetoExecution_Args__boolean() throws Exception {
+    boolean vetoExecution = false;
+    target.setVetoExecution(vetoExecution);
+  }
+
+  @Test
+  public void getJd_Args__() throws Exception {
+    JobDetail actual = target.getJd();
+    JobDetail expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getOpts_Args__() throws Exception {
+    FlightPlan actual = target.getOpts();
+    FlightPlan expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setOpts_Args__FlightPlan() throws Exception {
+    FlightPlan opts_ = mock(FlightPlan.class);
+    target.setOpts(opts_);
   }
 
 }
