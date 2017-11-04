@@ -27,7 +27,12 @@ public class LaunchSchedulerTest extends PersonJobTester {
   FlightRecorder jobHistory;
   RocketFactory rocketFactory;
   FlightPlanLog rocketOptions;
+  TriggerKey key;
+  Scheduler scheduler;
+  LaunchPad launchPad;
+
   LaunchScheduler target;
+
 
   @Override
   @Before
@@ -36,8 +41,15 @@ public class LaunchSchedulerTest extends PersonJobTester {
     jobHistory = mock(FlightRecorder.class);
     rocketFactory = mock(RocketFactory.class);
     rocketOptions = mock(FlightPlanLog.class);
+    scheduler = mock(Scheduler.class);
+    launchPad = mock(LaunchPad.class);
 
+    key = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
     target = new LaunchScheduler(jobHistory, rocketFactory, rocketOptions);
+    target.setScheduler(scheduler);
+    target.setOpts(opts);
+
+    target.getScheduleRegistry().put(TestJob.class, launchPad);
   }
 
   @Test
@@ -59,16 +71,6 @@ public class LaunchSchedulerTest extends PersonJobTester {
   }
 
   @Test
-  public void createJob_Args__Class__FlightPlan_T__NeutronException() throws Exception {
-    Class<?> klass = TestJob.class;
-    try {
-      target.createJob(klass, opts);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
-  }
-
-  @Test
   public void createJob_Args__String__FlightPlan() throws Exception {
     String jobName = null;
     BasePersonIndexerJob actual = target.createJob(jobName, opts);
@@ -76,7 +78,7 @@ public class LaunchSchedulerTest extends PersonJobTester {
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
+  @Test(expected = NeutronException.class)
   public void runScheduledJob_Args__Class__FlightPlan() throws Exception {
     Class<?> klass = TestJob.class;
     FlightRecord actual = target.runScheduledJob(klass, opts);
@@ -94,9 +96,9 @@ public class LaunchSchedulerTest extends PersonJobTester {
     }
   }
 
-  @Test
+  @Test(expected = NeutronException.class)
   public void runScheduledJob_Args__String__FlightPlan() throws Exception {
-    String jobName = null;
+    String jobName = TestJob.class.getName();
     FlightRecord actual = target.runScheduledJob(jobName, opts);
     FlightRecord expected = null;
     assertThat(actual, is(equalTo(expected)));
@@ -104,11 +106,10 @@ public class LaunchSchedulerTest extends PersonJobTester {
 
   @Test
   public void scheduleJob_Args__Class__DefaultFlightSchedule__FlightPlan() throws Exception {
-    Class<?> klazz = mock(Class.class);
+    Class<?> klass = TestJob.class;
     DefaultFlightSchedule sched = DefaultFlightSchedule.CLIENT;
-    LaunchPad actual = target.scheduleJob(klazz, sched, opts);
-    LaunchPad expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    LaunchPad actual = target.scheduleJob(klass, sched, opts);
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -118,39 +119,18 @@ public class LaunchSchedulerTest extends PersonJobTester {
   }
 
   @Test
-  public void stopScheduler_Args__boolean_T__NeutronException() throws Exception {
-    boolean waitForJobsToComplete = false;
-    try {
-      target.stopScheduler(waitForJobsToComplete);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
-  }
-
-  @Test
   public void startScheduler_Args__() throws Exception {
     target.startScheduler();
   }
 
   @Test
-  public void startScheduler_Args___T__NeutronException() throws Exception {
-    try {
-      target.startScheduler();
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
-  }
-
-  @Test
   public void addExecutingJob_Args__TriggerKey__NeutronRocket() throws Exception {
-    TriggerKey key = mock(TriggerKey.class);
     NeutronRocket job = mock(NeutronRocket.class);
     target.addExecutingJob(key, job);
   }
 
   @Test
   public void removeExecutingJob_Args__TriggerKey() throws Exception {
-    TriggerKey key = mock(TriggerKey.class);
     target.removeExecutingJob(key);
   }
 
@@ -169,8 +149,7 @@ public class LaunchSchedulerTest extends PersonJobTester {
   @Test
   public void getOpts_Args__() throws Exception {
     FlightPlan actual = target.getOpts();
-    FlightPlan expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    // assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -181,8 +160,7 @@ public class LaunchSchedulerTest extends PersonJobTester {
   @Test
   public void getScheduler_Args__() throws Exception {
     Scheduler actual = target.getScheduler();
-    Scheduler expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -197,16 +175,6 @@ public class LaunchSchedulerTest extends PersonJobTester {
     boolean actual = target.isJobVetoed(className);
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void isJobVetoed_Args__String_T__NeutronException() throws Exception {
-    String className = TestJob.class.getName();
-    try {
-      target.isJobVetoed(className);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
   }
 
   @Test
