@@ -20,7 +20,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.schedule.NeutronJobManagementBean;
+import gov.ca.cwds.jobs.schedule.RocketCommandInstruction;
 
 public class GsonReaderTest {
 
@@ -29,8 +29,8 @@ public class GsonReaderTest {
   Annotation[] antns;
   MediaType mt;
 
-  NeutronJobManagementBean object;
-  Class<NeutronJobManagementBean> type;
+  RocketCommandInstruction object;
+  Class<RocketCommandInstruction> type;
   MediaType mediaType;
   MultivaluedMap<String, Object> httpHeaders;
   OutputStream entityStream;
@@ -41,8 +41,8 @@ public class GsonReaderTest {
     antns = new Annotation[] {};
     mt = mock(MediaType.class);
 
-    object = new NeutronJobManagementBean("client", "stop", "crap");
-    type = NeutronJobManagementBean.class;
+    object = new RocketCommandInstruction("client", "stop", "crap");
+    type = RocketCommandInstruction.class;
     genericType = mock(Type.class);
     mediaType = MediaType.APPLICATION_JSON_TYPE;
     httpHeaders = new MultivaluedHashMap<String, Object>();

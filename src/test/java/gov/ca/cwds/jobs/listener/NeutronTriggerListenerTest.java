@@ -49,7 +49,7 @@ public class NeutronTriggerListenerTest extends PersonJobTester {
     rocket =
         new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, flightRecorder);
     rocket.setOpts(opts);
-    rocket.setTrack(track);
+    rocket.setTrack(flightRecord);
     job = new NeutronRocket(rocket);
 
     context_ = mock(JobExecutionContext.class);

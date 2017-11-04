@@ -37,7 +37,7 @@ public class NeutronRocketTest extends PersonJobTester {
     rocket.setOpts(opts);
     rocket.init(this.tempFile.getAbsolutePath(), opts);
 
-    rocket.setTrack(track);
+    rocket.setTrack(flightRecord);
     target = new NeutronRocket(rocket);
   }
 

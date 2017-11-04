@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.schedule.NeutronJobManagementBean;
+import gov.ca.cwds.jobs.schedule.RocketCommandInstruction;
 
 @Path("/neutron")
 public class NeutronJobManagerResource implements ApiMarker {
@@ -54,7 +54,7 @@ public class NeutronJobManagerResource implements ApiMarker {
     buf.append("{\"result\":\"ACK\",\"job_name\":\"").append(jobName).append("\",\"command\":\"")
         .append(command).append("\"}");
 
-    final NeutronJobManagementBean cmd = new NeutronJobManagementBean(jobName, command, body);
+    final RocketCommandInstruction cmd = new RocketCommandInstruction(jobName, command, body);
     LOGGER.info("cmd: {}", cmd);
 
     // NOTE: Handle command.

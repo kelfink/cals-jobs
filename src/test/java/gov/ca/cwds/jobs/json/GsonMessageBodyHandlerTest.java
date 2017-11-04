@@ -18,14 +18,14 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.schedule.NeutronJobManagementBean;
+import gov.ca.cwds.jobs.schedule.RocketCommandInstruction;
 
 public class GsonMessageBodyHandlerTest {
 
   GsonMessageBodyHandler target;
 
-  NeutronJobManagementBean object;
-  Class<NeutronJobManagementBean> type;
+  RocketCommandInstruction object;
+  Class<RocketCommandInstruction> type;
   Type genericType;
   Annotation[] annotations;
   MediaType mediaType;
@@ -36,9 +36,9 @@ public class GsonMessageBodyHandlerTest {
   public void setup() throws Exception {
     target = new GsonMessageBodyHandler();
 
-    object = new NeutronJobManagementBean("client", "stop", "crap");
-    type = NeutronJobManagementBean.class;
-    genericType = NeutronJobManagementBean.class;
+    object = new RocketCommandInstruction("client", "stop", "crap");
+    type = RocketCommandInstruction.class;
+    genericType = RocketCommandInstruction.class;
     annotations = new Annotation[] {};
     mediaType = MediaType.APPLICATION_JSON_TYPE;
     httpHeaders = new MultivaluedHashMap<String, Object>();

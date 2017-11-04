@@ -2,22 +2,22 @@ package gov.ca.cwds.jobs.schedule;
 
 import gov.ca.cwds.data.std.ApiMarker;
 
-public class NeutronJobManagementBean implements ApiMarker {
+public class RocketCommandInstruction implements ApiMarker {
 
   private static final long serialVersionUID = 1L;
 
-  private final String jobName;
+  private final String rocketName;
   private final String command;
   private final String config;
 
-  public NeutronJobManagementBean(String jobName, String command, String body) {
-    this.jobName = jobName;
+  public RocketCommandInstruction(String rocketName, String command, String body) {
+    this.rocketName = rocketName;
     this.command = command;
     this.config = body;
   }
 
-  public String getJobName() {
-    return jobName;
+  public String getRocketName() {
+    return rocketName;
   }
 
   public String getCommand() {
@@ -30,7 +30,7 @@ public class NeutronJobManagementBean implements ApiMarker {
 
   @Override
   public String toString() {
-    return "NeutronJobManagementBean [jobName=" + jobName + ", command=" + command + ", config="
+    return "RocketCommandInstruction [jobName=" + rocketName + ", command=" + command + ", config="
         + config + "]";
   }
 

@@ -7,11 +7,11 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-public class NeutronJobManagementBeanTest {
+public class RocketCommandInstructionTest {
 
   @Test
   public void type() throws Exception {
-    assertThat(NeutronJobManagementBean.class, notNullValue());
+    assertThat(RocketCommandInstruction.class, notNullValue());
   }
 
   @Test
@@ -19,7 +19,7 @@ public class NeutronJobManagementBeanTest {
     String jobName = null;
     String command = null;
     String body = null;
-    NeutronJobManagementBean target = new NeutronJobManagementBean(jobName, command, body);
+    RocketCommandInstruction target = new RocketCommandInstruction(jobName, command, body);
     assertThat(target, notNullValue());
   }
 
@@ -28,8 +28,8 @@ public class NeutronJobManagementBeanTest {
     String jobName = "xyz";
     String command = null;
     String body = null;
-    NeutronJobManagementBean target = new NeutronJobManagementBean(jobName, command, body);
-    String actual = target.getJobName();
+    RocketCommandInstruction target = new RocketCommandInstruction(jobName, command, body);
+    String actual = target.getRocketName();
     String expected = "xyz";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -39,7 +39,7 @@ public class NeutronJobManagementBeanTest {
     String jobName = null;
     String command = null;
     String body = null;
-    NeutronJobManagementBean target = new NeutronJobManagementBean(jobName, command, body);
+    RocketCommandInstruction target = new RocketCommandInstruction(jobName, command, body);
     String actual = target.getCommand();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
@@ -50,7 +50,7 @@ public class NeutronJobManagementBeanTest {
     String jobName = null;
     String command = null;
     String body = null;
-    NeutronJobManagementBean target = new NeutronJobManagementBean(jobName, command, body);
+    RocketCommandInstruction target = new RocketCommandInstruction(jobName, command, body);
     String actual = target.getConfig();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));

@@ -60,7 +60,7 @@ public class ElasticTransformerTest extends PersonJobTester {
     target =
         new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, flightRecorder);
     target.setOpts(opts);
-    target.setTrack(track);
+    target.setTrack(flightRecord);
   }
 
   @Test

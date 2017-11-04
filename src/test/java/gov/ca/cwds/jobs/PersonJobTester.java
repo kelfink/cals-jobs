@@ -102,7 +102,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   public File esConfileFile;
   public String lastJobRunTimeFilename;
   public java.util.Date lastRunTime = new java.util.Date();
-  public FlightRecord track;
+  public FlightRecord flightRecord;
   public FlightRecorder flightRecorder;
 
   public SessionFactory sessionFactory;
@@ -124,7 +124,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   public Configuration hibernationConfiguration;
 
   public RocketFactory rocketFactory;
-  public BasePersonIndexerJob standbyRocket;
+  public BasePersonIndexerJob mach1Rocket;
 
   @Before
   public void setup() throws Exception {
@@ -151,8 +151,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     client = mock(Client.class);
     hibernationConfiguration = mock(Configuration.class);
     rocketFactory = mock(RocketFactory.class);
-
-    standbyRocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
+    mach1Rocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(sessionFactory.createEntityManager()).thenReturn(em);
@@ -220,12 +219,11 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     when(nq.setCacheable(any(Boolean.class))).thenReturn(nq);
 
     // Job track:
-    track = new FlightRecord();
+    flightRecord = new FlightRecord();
     flightRecorder = new FlightRecorder();
     launchScheduler = mock(LaunchScheduler.class);
-    when(launchScheduler.createJob(any(Class.class), any(FlightPlan.class)))
-        .thenReturn(standbyRocket);
 
+    // Elasticsearch msearch.
     final MultiSearchRequestBuilder mBuilder = mock(MultiSearchRequestBuilder.class);
     final MultiSearchResponse multiResponse = mock(MultiSearchResponse.class);
     final SearchRequestBuilder sBuilder = mock(SearchRequestBuilder.class);
@@ -255,6 +253,14 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
     systemCodeDao = mock(SystemCodeDao.class);
     systemMetaDao = mock(SystemMetaDao.class);
+
+    // Command and control.
+    when(launchScheduler.createJob(any(Class.class), any(FlightPlan.class)))
+        .thenReturn(mach1Rocket);
+    when(launchScheduler.runScheduledJob(any(Class.class), any(FlightPlan.class)))
+        .thenReturn(flightRecord);
+    when(rocketFactory.createJob(any(Class.class), any(FlightPlan.class))).thenReturn(mach1Rocket);
+    when(rocketFactory.createJob(any(String.class), any(FlightPlan.class))).thenReturn(mach1Rocket);
 
     markTestDone();
   }

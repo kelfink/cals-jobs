@@ -18,7 +18,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.schedule.NeutronJobManagementBean;
+import gov.ca.cwds.jobs.schedule.RocketCommandInstruction;
 
 public class GsonWriterTest {
 
@@ -42,8 +42,8 @@ public class GsonWriterTest {
   @Test
   public void writeTo_Args__Object__Class__Type__AnnotationArray__MediaType__MultivaluedMap__OutputStream()
       throws Exception {
-    NeutronJobManagementBean t = new NeutronJobManagementBean("client", "stop", "crap");
-    Class<?> type = NeutronJobManagementBean.class;
+    RocketCommandInstruction t = new RocketCommandInstruction("client", "stop", "crap");
+    Class<?> type = RocketCommandInstruction.class;
     Type genericType = mock(Type.class);
     Annotation[] annotations = new Annotation[] {};
     MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
@@ -68,8 +68,8 @@ public class GsonWriterTest {
 
   @Test
   public void getSize_Args__Object__Class__Type__AnnotationArray__MediaType() throws Exception {
-    NeutronJobManagementBean t = new NeutronJobManagementBean("client", "stop", "crap");
-    Class<?> type = NeutronJobManagementBean.class;
+    RocketCommandInstruction t = new RocketCommandInstruction("client", "stop", "crap");
+    Class<?> type = RocketCommandInstruction.class;
     Type genericType = mock(Type.class);
     Annotation[] annotations = new Annotation[] {};
     MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
@@ -82,8 +82,8 @@ public class GsonWriterTest {
 
   @Test
   public void isWriteable_Args__Class__Type__AnnotationArray__MediaType() throws Exception {
-    NeutronJobManagementBean t = new NeutronJobManagementBean("client", "stop", "crap");
-    Class<?> type = NeutronJobManagementBean.class;
+    RocketCommandInstruction t = new RocketCommandInstruction("client", "stop", "crap");
+    Class<?> type = RocketCommandInstruction.class;
     Type genericType = mock(Type.class);
     Annotation[] annotations = new Annotation[] {};
     MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
