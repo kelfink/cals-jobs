@@ -53,13 +53,13 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
 
     @Override
     protected SessionFactory makeCmsSessionFactory() {
-      return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
+      return new Configuration().configure("test-h2-cms.xml").buildSessionFactory();
       // return lastTest.sessionFactory;
     }
 
     @Override
     protected SessionFactory makeNsSessionFactory() {
-      return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
+      return new Configuration().configure("test-h2-ns.xml").buildSessionFactory();
       // return lastTest.sessionFactory;
     }
 
