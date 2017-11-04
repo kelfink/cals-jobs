@@ -1,6 +1,7 @@
 package com.google.inject;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -8,6 +9,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Message;
@@ -16,7 +18,7 @@ import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
 
-public class TestBinder implements Binder {
+public class TestBinder<T> implements Binder, AnnotatedBindingBuilder<T> {
 
   @Override
   public void bindInterceptor(Matcher<? super Class<?>> classMatcher,
@@ -136,5 +138,94 @@ public class TestBinder implements Binder {
 
   @Override
   public void scanModulesForAnnotatedMethods(ModuleAnnotatedMethodScanner scanner) {}
+
+  @Override
+  public ScopedBindingBuilder to(Class<? extends T> implementation) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ScopedBindingBuilder to(TypeLiteral<? extends T> implementation) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ScopedBindingBuilder to(Key<? extends T> targetKey) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void toInstance(T instance) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public ScopedBindingBuilder toProvider(Provider<? extends T> provider) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ScopedBindingBuilder toProvider(javax.inject.Provider<? extends T> provider) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ScopedBindingBuilder toProvider(
+      Class<? extends javax.inject.Provider<? extends T>> providerType) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ScopedBindingBuilder toProvider(
+      TypeLiteral<? extends javax.inject.Provider<? extends T>> providerType) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ScopedBindingBuilder toProvider(
+      Key<? extends javax.inject.Provider<? extends T>> providerKey) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public <S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor) {
+    return null;
+  }
+
+  @Override
+  public <S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor,
+      TypeLiteral<? extends S> type) {
+    return null;
+  }
+
+  @Override
+  public void in(Class<? extends Annotation> scopeAnnotation) {}
+
+  @Override
+  public void in(Scope scope) {}
+
+  @Override
+  public void asEagerSingleton() {}
+
+  @Override
+  public LinkedBindingBuilder<T> annotatedWith(Class<? extends Annotation> annotationType) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public LinkedBindingBuilder<T> annotatedWith(Annotation annotation) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

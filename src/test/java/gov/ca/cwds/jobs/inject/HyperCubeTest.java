@@ -15,10 +15,14 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.inject.Binder;
 import com.google.inject.Injector;
-import com.google.inject.TestBinder;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
+import gov.ca.cwds.data.cms.SystemCodeDao;
+import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.config.FlightPlan;
@@ -30,6 +34,45 @@ import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
+
+  public static class TestHyperCube extends HyperCube {
+
+    PersonJobTester lastTest;
+
+    public TestHyperCube(final FlightPlan opts, final File esConfigFile,
+        String lastJobRunTimeFilename) {
+      super(opts, esConfigFile, lastJobRunTimeFilename);
+    }
+
+    @Override
+    public void init() {
+      this.lastTest = HyperCubeTest.lastTester;
+    }
+
+    @Override
+    protected SessionFactory makeCmsSessionFactory() {
+      // return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
+      return lastTest.sessionFactory;
+    }
+
+    @Override
+    protected SessionFactory makeNsSessionFactory() {
+      // return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
+      return lastTest.sessionFactory;
+    }
+
+    @Override
+    @Provides
+    @Singleton
+    public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
+        SystemMetaDao systemMetaDao) {
+      return mock(SystemCodeCache.class);
+    }
+
+  }
+
+  public static PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> lastTester;
+
   HyperCube target;
 
   @Override
@@ -38,12 +81,18 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
     super.setup();
     opts = new FlightPlan();
     opts.setEsConfigLoc("config/local.yaml");
-    target = new HyperCube(opts, new File(opts.getEsConfigLoc()), lastJobRunTimeFilename);
+    target = new TestHyperCube(opts, new File(opts.getEsConfigLoc()), lastJobRunTimeFilename);
 
-    target.setHibernateConfigCms("/test-h2-cms.xml");
-    target.setHibernateConfigNs("/test-h2-ns.xml");
-    target.setTestBinder(new TestBinder());
+    target.setHibernateConfigCms("test-h2-cms.xml");
+    target.setHibernateConfigNs("test-h2-ns.xml");
+
+    final Binder binder = mock(Binder.class);
+
+    target.setTestBinder(binder);
+    // target.setTestBinder(new TestBinder());
     HyperCube.setInstance(target);
+
+    lastTester = this;
   }
 
   @Test
@@ -106,11 +155,11 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
     opts = new FlightPlan();
     opts.setEsConfigLoc("config/local.yaml");
     opts.setSimulateLaunch(true);
-    target = new HyperCube(opts, new File(opts.getEsConfigLoc()), lastJobRunTimeFilename);
+    target = new TestHyperCube(opts, new File(opts.getEsConfigLoc()), lastJobRunTimeFilename);
 
     target.setHibernateConfigCms("/test-h2-cms.xml");
     target.setHibernateConfigNs("/test-h2-ns.xml");
-    target.setTestBinder(new TestBinder());
+    target.setTestBinder(mock(Binder.class));
     HyperCube.setInstance(target);
 
     HyperCube.newJob(klass, opts);

@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.inject;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
@@ -127,6 +128,8 @@ public class HyperCube extends NeutronGuiceModule {
 
   private static HyperCube instance;
 
+  private static Function<FlightPlan, HyperCube> cubeMaker = opts -> HyperCube.buildCube(opts);
+
   /**
    * Default constructor.
    */
@@ -141,13 +144,19 @@ public class HyperCube extends NeutronGuiceModule {
    * @param esConfigFile location of Elasticsearch configuration file
    * @param lastJobRunTimeFilename location of last run file
    */
-  public HyperCube(final FlightPlan opts, final File esConfigFile,
-      String lastJobRunTimeFilename) {
+  public HyperCube(final FlightPlan opts, final File esConfigFile, String lastJobRunTimeFilename) {
     this.esConfig = esConfigFile;
     this.lastJobRunTimeFilename =
         !StringUtils.isBlank(lastJobRunTimeFilename) ? lastJobRunTimeFilename : "";
     this.opts = opts;
+    init();
   }
+
+  public Configuration makeHibernateConfiguration() {
+    return new Configuration();
+  }
+
+  protected void init() {}
 
   private static synchronized HyperCube buildCube(final FlightPlan opts) {
     HyperCube ret;
@@ -155,10 +164,11 @@ public class HyperCube extends NeutronGuiceModule {
     if (instance != null) {
       ret = instance;
     } else {
-      ret = new HyperCube(opts,
-          new ApiFileAssistant().validateFileLocation(opts.getEsConfigLoc()), opts.getLastRunLoc());
+      ret = new HyperCube(opts, new ApiFileAssistant().validateFileLocation(opts.getEsConfigLoc()),
+          opts.getLastRunLoc());
     }
 
+    ret.init();
     return ret;
   }
 
@@ -447,6 +457,14 @@ public class HyperCube extends NeutronGuiceModule {
 
   public static void setInstance(HyperCube instance) {
     HyperCube.instance = instance;
+  }
+
+  public static Function<FlightPlan, HyperCube> getCubeMaker() {
+    return cubeMaker;
+  }
+
+  public static void setCubeMaker(Function<FlightPlan, HyperCube> cubeMaker) {
+    HyperCube.cubeMaker = cubeMaker;
   }
 
 }

@@ -37,6 +37,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.spi.SessionFactoryOptions;
+import org.hibernate.cfg.Configuration;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
@@ -118,6 +119,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   public SystemCodeDao systemCodeDao;
   public SystemMetaDao systemMetaDao;
 
+  public Configuration hibernationConfiguration;
 
   @Before
   public void setup() throws Exception {
@@ -142,6 +144,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     stmt = mock(Statement.class);
     em = mock(EntityManager.class);
     client = mock(Client.class);
+    hibernationConfiguration = mock(Configuration.class);
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(sessionFactory.createEntityManager()).thenReturn(em);

@@ -40,8 +40,7 @@ public class FacilityIndexerJobTest
 
     @Override
     protected TransportClient produceTransportClient(Settings settings) {
-      TransportClient client = mock(TransportClient.class);
-      return client;
+      return mock(TransportClient.class);
     }
 
   }
@@ -119,7 +118,6 @@ public class FacilityIndexerJobTest
   }
 
   @Test
-  // @Ignore
   public void lisItemWriter_Args__Elasticsearch5xDao__ObjectMapper() throws Exception {
     Elasticsearch5xDao elasticsearchDao = mock(Elasticsearch5xDao.class);
     when(elasticsearchDao.getClient()).thenReturn(client);
