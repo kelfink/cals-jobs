@@ -71,8 +71,9 @@ import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 /**
- * <a href="http://jimmyneutron.wikia.com/wiki/Goddard">Goddard</a> is Jimmy's mechanical dog and
- * side kick.
+ * <a href="http://jimmyneutron.wikia.com/wiki/Goddard">Goddard</a> is Jimmy's mechanical dog. He is
+ * loyal, intelligent, resourceful, playful, friendly, and has a seemingly unlimited supply of
+ * gadgets, whatever you need, whenever you need.
  * 
  * @param <T> normalized type
  * @param <M> de-normalized type

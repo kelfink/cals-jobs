@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.schedule;
 
-public class LaunchCenterSettings {
+public class LaunchCommandSettings {
 
   /**
    * For unit tests where resources either may not close properly or where expensive resources
@@ -9,7 +9,7 @@ public class LaunchCenterSettings {
   private boolean testMode;
 
   /**
-   * Test without starting Launch Center services.
+   * Test without starting Command Center services.
    */
   private boolean minimalTestMode;
 
@@ -18,12 +18,16 @@ public class LaunchCenterSettings {
    */
   private boolean continuousMode;
 
+  private boolean exposeJmx;
+
+  private boolean exposeRest;
+
   /**
    * Launch one JVM, run initial load jobs sequentially, and exit.
    */
   private boolean initialMode;
 
-  public LaunchCenterSettings() {
+  public LaunchCommandSettings() {
     // default
   }
 
@@ -57,6 +61,22 @@ public class LaunchCenterSettings {
 
   public void setMinimalTestMode(boolean minimalTestMode) {
     this.minimalTestMode = minimalTestMode;
+  }
+
+  public boolean isExposeJmx() {
+    return exposeJmx;
+  }
+
+  public void setExposeJmx(boolean exposeJmx) {
+    this.exposeJmx = exposeJmx;
+  }
+
+  public boolean isExposeRest() {
+    return exposeRest;
+  }
+
+  public void setExposeRest(boolean exposeRest) {
+    this.exposeRest = exposeRest;
   }
 
 }

@@ -55,7 +55,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
    */
   private static LaunchCommand instance = new LaunchCommand();
 
-  private LaunchCenterSettings settings = new LaunchCenterSettings();
+  private LaunchCommandSettings settings = new LaunchCommandSettings();
 
   /**
    * HACK: inject dependencies.
@@ -240,8 +240,12 @@ public class LaunchCommand implements AtomLaunchScheduler {
   }
 
   protected void initializeCommandCenter() {
-    exposeJmx();
-    exposeRest();
+    if (this.settings.isExposeJmx()) {
+      exposeJmx();
+    }
+    if (this.settings.isExposeRest()) {
+      exposeRest();
+    }
   }
 
   /**
