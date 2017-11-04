@@ -69,7 +69,7 @@ import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
-import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 
 /**
@@ -686,7 +686,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-          JobJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
+          NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
@@ -712,7 +712,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
     final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
     q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-        JobJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
+        NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
     final List<M> deletionRecs = q.list();
 
@@ -757,7 +757,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       prepHibernateLastChange(session, lastRunTime);
       final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-          JobJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
+          NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<M> recs = q.list();

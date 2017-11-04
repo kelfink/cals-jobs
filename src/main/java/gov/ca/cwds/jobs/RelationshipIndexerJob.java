@@ -41,7 +41,7 @@ import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
-import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
@@ -260,7 +260,7 @@ public class RelationshipIndexerJob
 
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
-    return JobJdbcUtils.getCommonPartitionRanges64(this);
+    return NeutronJdbcUtils.getCommonPartitionRanges64(this);
   }
 
   @Override

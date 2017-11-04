@@ -19,7 +19,7 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
-import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 
 /**
@@ -171,7 +171,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
       throws NeutronException {
     final String sql = getPrepLastChangeSQL();
     if (StringUtils.isNotBlank(sql)) {
-      JobJdbcUtils.prepHibernateLastChange(session, lastRunTime, sql, getPreparedStatementMaker());
+      NeutronJdbcUtils.prepHibernateLastChange(session, lastRunTime, sql, getPreparedStatementMaker());
     }
   }
 

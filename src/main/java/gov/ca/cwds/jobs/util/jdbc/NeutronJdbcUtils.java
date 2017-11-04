@@ -22,13 +22,13 @@ import gov.ca.cwds.jobs.component.AtomHibernate;
 import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
 
 /**
- * JDBC utilities for Neutron jobs.
+ * JDBC utilities for Neutron rockets.
  * 
  * @author CWDS API Team
  */
-public class JobJdbcUtils {
+public class NeutronJdbcUtils {
 
-  static final Logger LOGGER = LoggerFactory.getLogger(JobJdbcUtils.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJdbcUtils.class);
 
   private static final String Z_OS_START = "aaaaaaaaaa";
   private static final String Z_OS_END = "9999999999";
@@ -45,7 +45,7 @@ public class JobJdbcUtils {
       "4u0U0MECwr", "4YRF9Dd70O", "5rOfwNO3gC", "5T7PS2j37S", "6oipPRSKDX", "6R6kaia0SL",
       "7ki4MYoAzi", "7NYwtxJ7Lu", "8guC2hG4ak", "8JpJrxB37S", "9cRG3VmH6i", "9GwwRzY7D3", Z_OS_END};
 
-  private JobJdbcUtils() {
+  private NeutronJdbcUtils() {
     // Default, no-op. Static utility class.
   }
 

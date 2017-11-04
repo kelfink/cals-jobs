@@ -8,6 +8,8 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.jdbc.Work;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Execute SQL prior to retrieving records, typically for last change runs. Examples include
@@ -16,6 +18,8 @@ import org.hibernate.jdbc.Work;
  * @author CWDS API Team
  */
 public class PrepSQLWork implements Work {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(PrepSQLWork.class);
 
   private final Date lastRunTime;
   private final String sql;
@@ -41,20 +45,20 @@ public class PrepSQLWork implements Work {
 
   @Override
   public void execute(Connection con) throws SQLException {
-    con.setSchema(JobJdbcUtils.getDBSchemaName());
+    con.setSchema(NeutronJdbcUtils.getDBSchemaName());
     con.setAutoCommit(false);
     NeutronDB2Utils.enableParallelism(con);
 
-    final String strLastRunTime = JobJdbcUtils.makeSimpleTimestampString(lastRunTime);
+    final String strLastRunTime = NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime);
 
     try (final PreparedStatement stmt = createPreparedStatement(con)) {
       for (int i = 1; i <= StringUtils.countMatches(sql, "?"); i++) {
         stmt.setString(i, strLastRunTime);
       }
 
-      JobJdbcUtils.LOGGER.info("Find keys new/changed since {}", lastRunTime);
+      LOGGER.info("Find keys new/changed since {}", lastRunTime);
       final int cntNewChanged = stmt.executeUpdate();
-      JobJdbcUtils.LOGGER.info("Total keys new/changed: {}", cntNewChanged);
+      LOGGER.info("Total keys new/changed: {}", cntNewChanged);
     }
   }
 

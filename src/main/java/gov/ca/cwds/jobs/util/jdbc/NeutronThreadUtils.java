@@ -1,9 +1,14 @@
 package gov.ca.cwds.jobs.util.jdbc;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 
 public class NeutronThreadUtils {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronThreadUtils.class);
 
   /**
    * Calculate the number of reader threads to run from incoming job options and available
@@ -15,7 +20,7 @@ public class NeutronThreadUtils {
   public static int calcReaderThreads(final FlightPlan opts) {
     final int ret = opts.getThreadCount() != 0L ? (int) opts.getThreadCount()
         : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
-    JobJdbcUtils.LOGGER.info(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
+    LOGGER.info(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
     return ret;
   }
 
@@ -23,6 +28,7 @@ public class NeutronThreadUtils {
    * Common method sets the thread's name.
    * 
    * @param title title of thread
+   * @param obj calling object
    */
   public static void nameThread(final String title, final Object obj) {
     Thread.currentThread().setName(obj.getClass().getSimpleName() + "_" + title);

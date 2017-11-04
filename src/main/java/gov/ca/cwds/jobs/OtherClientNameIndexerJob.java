@@ -33,7 +33,7 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
-import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
@@ -173,7 +173,7 @@ public class OtherClientNameIndexerJob
 
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
-    return JobJdbcUtils.getCommonPartitionRanges16(this);
+    return NeutronJdbcUtils.getCommonPartitionRanges16(this);
   }
 
   @Override

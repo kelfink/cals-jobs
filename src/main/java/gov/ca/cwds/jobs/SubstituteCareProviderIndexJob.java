@@ -16,7 +16,7 @@ import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.JobJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 
 /**
  * Job to load Substitute Care Providers from CMS into ElasticSearch.
@@ -49,7 +49,7 @@ public class SubstituteCareProviderIndexJob extends
 
   @Override
   protected List<Pair<String, String>> getPartitionRanges() {
-    return JobJdbcUtils.getCommonPartitionRanges16(this);
+    return NeutronJdbcUtils.getCommonPartitionRanges16(this);
   }
 
   /**
