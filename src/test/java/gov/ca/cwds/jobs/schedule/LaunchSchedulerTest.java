@@ -81,7 +81,7 @@ public class LaunchSchedulerTest extends PersonJobTester {
   @Test(expected = NeutronException.class)
   public void runScheduledJob_Args__Class__FlightPlan() throws Exception {
     Class<?> klass = Mach1TestRocket.class;
-    FlightRecord actual = target.runScheduledJob(klass, opts);
+    FlightRecord actual = target.launchScheduledFlight(klass, opts);
     FlightRecord expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -90,7 +90,7 @@ public class LaunchSchedulerTest extends PersonJobTester {
   public void runScheduledJob_Args__Class__FlightPlan_T__NeutronException() throws Exception {
     Class<?> klass = Mach1TestRocket.class;
     try {
-      target.runScheduledJob(klass, opts);
+      target.launchScheduledFlight(klass, opts);
       fail("Expected exception was not thrown!");
     } catch (NeutronException e) {
     }
@@ -99,7 +99,7 @@ public class LaunchSchedulerTest extends PersonJobTester {
   @Test(expected = NeutronException.class)
   public void runScheduledJob_Args__String__FlightPlan() throws Exception {
     String jobName = Mach1TestRocket.class.getName();
-    FlightRecord actual = target.runScheduledLaunch(jobName, opts);
+    FlightRecord actual = target.launchScheduled(jobName, opts);
     FlightRecord expected = null;
     assertThat(actual, is(equalTo(expected)));
   }

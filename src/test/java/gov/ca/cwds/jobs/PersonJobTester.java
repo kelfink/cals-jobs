@@ -45,6 +45,8 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.MockitoAnnotations;
+import org.quartz.ListenerManager;
+import org.quartz.Scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.db2.jcc.am.DatabaseMetaData;
@@ -122,9 +124,13 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   public FlightRecord flightRecord;
   public FlightRecorder flightRecorder;
 
+  public Scheduler scheduler;
   public LaunchScheduler launchScheduler;
+  public ListenerManager listenerManager;
+
   public RocketFactory rocketFactory;
   public BasePersonIndexerJob mach1Rocket;
+
 
   @Before
   public void setup() throws Exception {
@@ -151,6 +157,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     client = mock(Client.class);
     hibernationConfiguration = mock(Configuration.class);
     rocketFactory = mock(RocketFactory.class);
+    scheduler = mock(Scheduler.class);
     mach1Rocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
@@ -257,8 +264,17 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     // Command and control.
     when(launchScheduler.createJob(any(String.class), any(FlightPlan.class)))
         .thenReturn(mach1Rocket);
-    when(launchScheduler.runScheduledJob(any(Class.class), any(FlightPlan.class)))
+    when(launchScheduler.createJob(any(Class.class), any(FlightPlan.class)))
+        .thenReturn(mach1Rocket);
+
+    when(launchScheduler.getScheduler()).thenReturn(scheduler);
+    when(scheduler.getListenerManager()).thenReturn(listenerManager);
+
+    when(launchScheduler.launchScheduledFlight(any(Class.class), any(FlightPlan.class)))
         .thenReturn(flightRecord);
+    when(launchScheduler.launchScheduled(any(String.class), any(FlightPlan.class)))
+        .thenReturn(flightRecord);
+
     when(rocketFactory.createJob(any(Class.class), any(FlightPlan.class))).thenReturn(mach1Rocket);
     when(rocketFactory.createJob(any(String.class), any(FlightPlan.class))).thenReturn(mach1Rocket);
 

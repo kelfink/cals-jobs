@@ -64,7 +64,7 @@ public class LaunchPad implements Serializable {
       final FlightPlan runOnceOpts =
           FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       final FlightRecord track =
-          LaunchCommand.getInstance().runScheduledJob(flightSchedule.getRocketClass(), runOnceOpts);
+          LaunchCommand.getInstance().launchScheduledFlight(flightSchedule.getRocketClass(), runOnceOpts);
       return track.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);

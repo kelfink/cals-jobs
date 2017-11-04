@@ -85,7 +85,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightRecord runScheduledJob(Class<?> klass, FlightPlan opts) throws NeutronException {
+  public FlightRecord launchScheduledFlight(Class<?> klass, FlightPlan opts) throws NeutronException {
     try {
       LOGGER.info("Run scheduled job: {}", klass.getName());
       final BasePersonIndexerJob<?, ?> job = createJob(klass, opts);
@@ -97,10 +97,10 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightRecord runScheduledLaunch(String jobName, FlightPlan opts) throws NeutronException {
+  public FlightRecord launchScheduled(String jobName, FlightPlan opts) throws NeutronException {
     try {
       final Class<?> klass = Class.forName(jobName);
-      return runScheduledJob(klass, opts);
+      return launchScheduledFlight(klass, opts);
     } catch (ClassNotFoundException e) {
       throw JobLogs.checked(LOGGER, e, "ON-DEMAND JOB RUN FAILED!: {}", e.getMessage());
     }

@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +27,6 @@ import gov.ca.cwds.jobs.PersonJobTester;
 import gov.ca.cwds.jobs.component.AtomFlightRecorder;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -157,16 +155,6 @@ public class LaunchCommandTest
   }
 
   @Test
-  public void initScheduler_Args__Injector_T__NeutronException() throws Exception {
-    Injector injector = mock(Injector.class);
-    try {
-      target.initScheduler(injector);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
-  }
-
-  @Test
   public void createJob_Args__Class__FlightPlan() throws Exception {
     final Class<?> klass = Mach1TestRocket.class;
     final BasePersonIndexerJob actual = target.createJob(klass, opts);
@@ -183,7 +171,7 @@ public class LaunchCommandTest
   @Test
   public void runScheduledJob_Args__Class__FlightPlan() throws Exception {
     final Class<?> klass = Mach1TestRocket.class;
-    final FlightRecord actual = target.runScheduledJob(klass, opts);
+    final FlightRecord actual = target.launchScheduledFlight(klass, opts);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -191,7 +179,7 @@ public class LaunchCommandTest
   public void runScheduledJob_Args__String__FlightPlan() throws Exception {
     final String rocketName = Mach1TestRocket.class.getName();
     target.setLaunchScheduler(launchScheduler);
-    FlightRecord actual = target.runScheduledLaunch(rocketName, opts);
+    FlightRecord actual = target.launchScheduled(rocketName, opts);
   }
 
   @Test
@@ -280,7 +268,7 @@ public class LaunchCommandTest
   @Test
   public void runStandalone_Args__Class__StringArray() throws Exception {
     final Class<Mach1TestRocket> klass = Mach1TestRocket.class;
-    final String[] args = new String[] {};
+    final String[] args = new String[] {"--simulate_launch"};
     LaunchCommand.runStandalone(klass, args);
   }
 

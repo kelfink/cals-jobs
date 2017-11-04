@@ -18,14 +18,14 @@ public interface AtomLaunchScheduler {
    * @return job progress
    * @throws NeutronException unexpected runtime error
    */
-  FlightRecord runScheduledJob(Class<?> klass, FlightPlan opts) throws NeutronException;
+  FlightRecord launchScheduledFlight(Class<?> klass, FlightPlan opts) throws NeutronException;
+
+  FlightRecord launchScheduled(String jobName, FlightPlan opts) throws NeutronException;
 
   void trackInFlightRocket(TriggerKey key, NeutronRocket rocket);
 
   LaunchPad scheduleLaunch(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts);
 
   boolean isLaunchVetoed(String className) throws NeutronException;
-
-  FlightRecord runScheduledLaunch(String jobName, FlightPlan opts) throws NeutronException;
 
 }

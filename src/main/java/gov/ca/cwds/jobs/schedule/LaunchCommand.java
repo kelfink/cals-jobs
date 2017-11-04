@@ -324,15 +324,15 @@ public class LaunchCommand implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightRecord runScheduledJob(final Class<?> klass, final FlightPlan opts)
+  public FlightRecord launchScheduledFlight(final Class<?> klass, final FlightPlan opts)
       throws NeutronException {
-    return this.launchScheduler.runScheduledJob(klass, opts);
+    return this.launchScheduler.launchScheduledFlight(klass, opts);
   }
 
   @Override
-  public FlightRecord runScheduledLaunch(final String jobName, final FlightPlan opts)
+  public FlightRecord launchScheduled(final String jobName, final FlightPlan opts)
       throws NeutronException {
-    return this.launchScheduler.runScheduledLaunch(jobName, opts);
+    return this.launchScheduler.launchScheduled(jobName, opts);
   }
 
   /**
