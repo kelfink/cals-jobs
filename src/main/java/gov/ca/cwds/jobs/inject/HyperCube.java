@@ -128,7 +128,7 @@ public class HyperCube extends NeutronGuiceModule {
 
   private static HyperCube instance;
 
-  private static Function<FlightPlan, HyperCube> cubeMaker = opts -> HyperCube.buildCube(opts);
+  private static Function<FlightPlan, HyperCube> cubeMaker = o -> HyperCube.buildCube(o);
 
   /**
    * Default constructor.
@@ -158,7 +158,7 @@ public class HyperCube extends NeutronGuiceModule {
 
   protected void init() {}
 
-  private static synchronized HyperCube buildCube(final FlightPlan opts) {
+  public static synchronized HyperCube buildCube(final FlightPlan opts) {
     HyperCube ret;
 
     if (instance != null) {
@@ -183,7 +183,7 @@ public class HyperCube extends NeutronGuiceModule {
   public static synchronized Injector buildInjector(final FlightPlan opts) {
     if (injector == null) {
       try {
-        injector = Guice.createInjector(buildCube(opts));
+        injector = Guice.createInjector(cubeMaker.apply(opts));
 
         // Initialize system code cache.
         injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);

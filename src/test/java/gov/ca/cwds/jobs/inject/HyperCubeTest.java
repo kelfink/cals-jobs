@@ -12,6 +12,7 @@ import java.io.File;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,14 +52,14 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
 
     @Override
     protected SessionFactory makeCmsSessionFactory() {
-      // return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
-      return lastTest.sessionFactory;
+      return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
+      // return lastTest.sessionFactory;
     }
 
     @Override
     protected SessionFactory makeNsSessionFactory() {
-      // return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
-      return lastTest.sessionFactory;
+      return new Configuration().configure("test-lis-hibernate.cfg.xml").buildSessionFactory();
+      // return lastTest.sessionFactory;
     }
 
     @Override
@@ -75,6 +76,10 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
 
   HyperCube target;
 
+  public HyperCube makeOurOwnCube(FlightPlan plan) {
+    return target;
+  }
+
   @Override
   @Before
   public void setup() throws Exception {
@@ -86,11 +91,10 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
 
-    final Binder binder = mock(Binder.class);
+    // final Binder binder = mock(Binder.class);
+    // target.setTestBinder(binder);
 
-    target.setTestBinder(binder);
-    // target.setTestBinder(new TestBinder());
-    HyperCube.setInstance(target);
+    HyperCube.setCubeMaker(opts -> this.makeOurOwnCube(opts));
 
     lastTester = this;
   }
