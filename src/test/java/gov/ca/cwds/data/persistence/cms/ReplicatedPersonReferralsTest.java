@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 
 public class ReplicatedPersonReferralsTest {
 
@@ -41,11 +41,11 @@ public class ReplicatedPersonReferralsTest {
   public void addReferral_Args__ElasticSearchPersonReferral__ElasticSearchPersonAllegation()
       throws Exception {
     ReplicatedPersonReferrals target =
-        new ReplicatedPersonReferrals(PersonJobTester.DEFAULT_CLIENT_ID);
-    target.setClientId(PersonJobTester.DEFAULT_CLIENT_ID);
+        new ReplicatedPersonReferrals(Goddard.DEFAULT_CLIENT_ID);
+    target.setClientId(Goddard.DEFAULT_CLIENT_ID);
 
     ElasticSearchPersonReferral referral = new ElasticSearchPersonReferral();
-    referral.setId(PersonJobTester.DEFAULT_CLIENT_ID);
+    referral.setId(Goddard.DEFAULT_CLIENT_ID);
 
     ElasticSearchPersonAllegation allegation = new ElasticSearchPersonAllegation();
     allegation.setId("xyz1234567");

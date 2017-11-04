@@ -17,7 +17,7 @@ import org.quartz.Trigger;
 import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.TriggerKey;
 
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
@@ -25,7 +25,7 @@ import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
-public class NeutronTriggerListenerTest extends PersonJobTester {
+public class NeutronTriggerListenerTest extends Goddard {
 
   NeutronTriggerListener target;
   NeutronRocket job;

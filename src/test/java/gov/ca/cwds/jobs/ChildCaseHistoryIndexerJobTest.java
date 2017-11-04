@@ -14,7 +14,7 @@ import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 
 public class ChildCaseHistoryIndexerJobTest
-    extends PersonJobTester<ReplicatedPersonCases, EsPersonCase> {
+    extends Goddard<ReplicatedPersonCases, EsPersonCase> {
 
   ReplicatedPersonCasesDao dao;
   ChildCaseHistoryIndexerJob target;

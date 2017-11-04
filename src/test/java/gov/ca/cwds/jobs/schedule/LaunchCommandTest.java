@@ -23,7 +23,7 @@ import com.google.inject.Injector;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.AtomFlightRecorder;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
@@ -32,7 +32,7 @@ import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 
 public class LaunchCommandTest
-    extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
+    extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LaunchCommandTest.class);
 

@@ -15,12 +15,12 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
 
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
-public class NeutronRocketTest extends PersonJobTester {
+public class NeutronRocketTest extends Goddard {
 
   NeutronRocket target;
   TestNormalizedEntityDao dao;

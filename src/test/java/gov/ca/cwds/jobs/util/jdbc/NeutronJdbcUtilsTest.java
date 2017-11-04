@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.component.AtomHibernate;
 import gov.ca.cwds.jobs.config.FlightPlan;
@@ -35,7 +35,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
 public class NeutronJdbcUtilsTest
-    extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
+    extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   private static final class TestAtomHibernate extends TestIndexerJob
       implements AtomHibernate<TestNormalizedEntity, TestDenormalizedEntity> {

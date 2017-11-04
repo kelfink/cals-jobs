@@ -14,10 +14,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 
 public class ReplicatedClientRelationshipTest
-    extends PersonJobTester<ReplicatedClientRelationship, ReplicatedClientRelationship> {
+    extends Goddard<ReplicatedClientRelationship, ReplicatedClientRelationship> {
 
   ReplicatedClientRelationship target;
 

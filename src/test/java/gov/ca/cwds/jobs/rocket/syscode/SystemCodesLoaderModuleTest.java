@@ -8,10 +8,10 @@ import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
-public class SystemCodesLoaderModuleTest extends PersonJobTester {
+public class SystemCodesLoaderModuleTest extends Goddard {
 
   SystemCodesLoaderModule target;
 

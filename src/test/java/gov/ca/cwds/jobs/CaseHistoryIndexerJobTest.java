@@ -23,7 +23,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 
-public class CaseHistoryIndexerJobTest extends PersonJobTester {
+public class CaseHistoryIndexerJobTest extends Goddard {
 
   private static class TestCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
 

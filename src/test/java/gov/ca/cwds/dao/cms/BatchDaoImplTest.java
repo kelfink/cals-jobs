@@ -23,12 +23,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 
 public class BatchDaoImplTest
-    extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
+    extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   private static final class TestBatchDaoImpl extends BatchDaoImpl<TestDenormalizedEntity> {
 

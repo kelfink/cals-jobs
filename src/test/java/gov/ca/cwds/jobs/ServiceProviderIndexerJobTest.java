@@ -24,7 +24,7 @@ import gov.ca.cwds.jobs.schedule.FlightRecorder;
  * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
-public class ServiceProviderIndexerJobTest extends PersonJobTester {
+public class ServiceProviderIndexerJobTest extends Goddard {
 
   private static final class TestServiceProviderIndexerJob extends ServiceProviderIndexerJob {
 

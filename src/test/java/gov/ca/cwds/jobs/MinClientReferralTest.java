@@ -18,7 +18,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.rocket.referral.MinClientReferral;
 
 public class MinClientReferralTest
-    extends PersonJobTester<ReplicatedPersonReferrals, EsPersonReferral> {
+    extends Goddard<ReplicatedPersonReferrals, EsPersonReferral> {
 
   String clientId = DEFAULT_CLIENT_ID;
   String referralId = "ref1234567";

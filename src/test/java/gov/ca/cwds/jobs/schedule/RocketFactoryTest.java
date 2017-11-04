@@ -22,11 +22,11 @@ import org.quartz.spi.TriggerFiredBundle;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 
-public class RocketFactoryTest extends PersonJobTester {
+public class RocketFactoryTest extends Goddard {
 
   RocketFactory target;
   Injector injector;

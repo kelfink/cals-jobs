@@ -30,7 +30,7 @@ public class FlightPlanLogTest {
     FlightPlan baseOpts = null;
     FlightPlanLog target = new FlightPlanLog(baseOpts);
     Class<?> klazz = Mach1TestRocket.class;
-    FlightPlan actual = target.getFlightSettings(klazz);
+    FlightPlan actual = target.getFlightPlan(klazz);
     FlightPlan expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -41,7 +41,7 @@ public class FlightPlanLogTest {
     FlightPlanLog target = new FlightPlanLog(baseOpts);
     Class<?> klazz = Mach1TestRocket.class;
     FlightPlan opts = mock(FlightPlan.class);
-    target.addFlightSettings(klazz, opts);
+    target.addFlightPlan(klazz, opts);
   }
 
   @Test

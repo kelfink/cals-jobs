@@ -36,7 +36,7 @@ public class NeutronTriggerListener implements TriggerListener {
   public void triggerFired(Trigger trigger, JobExecutionContext context) {
     final TriggerKey key = trigger.getKey();
     LOGGER.debug("trigger fired: key: {}", key);
-    neutronScheduler.getExecutingJobs().put(key,
+    neutronScheduler.getRocketsInFlight().put(key,
         (NeutronRocket) context.getJobInstance());
   }
 

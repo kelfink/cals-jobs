@@ -22,7 +22,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCode;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.api.domain.cms.SystemMeta;
 
-public class SystemCodesLoaderJobTest extends PersonJobTester {
+public class SystemCodesLoaderJobTest extends Goddard {
 
   public static class TestSystemCodesLoaderJob extends SystemCodesLoaderJob {
 

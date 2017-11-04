@@ -43,7 +43,7 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 
 public class ReferralHistoryIndexerJobTest
-    extends PersonJobTester<ReplicatedPersonReferrals, EsPersonReferral> {
+    extends Goddard<ReplicatedPersonReferrals, EsPersonReferral> {
 
   public static class TestReferralHistoryIndexerJob extends ReferralHistoryIndexerJob {
 

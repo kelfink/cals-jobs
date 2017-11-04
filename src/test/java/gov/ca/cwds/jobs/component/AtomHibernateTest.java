@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
@@ -29,7 +29,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
 public class AtomHibernateTest
-    extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
+    extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   private static final class TestAtomHibernate extends TestIndexerJob
       implements AtomHibernate<TestNormalizedEntity, TestDenormalizedEntity> {

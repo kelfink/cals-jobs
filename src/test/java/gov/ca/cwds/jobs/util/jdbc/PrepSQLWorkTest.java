@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.util.JobLogs;
 
-public class PrepSQLWorkTest extends PersonJobTester<ReplicatedPersonCases, EsPersonCase> {
+public class PrepSQLWorkTest extends Goddard<ReplicatedPersonCases, EsPersonCase> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PrepSQLWorkTest.class);
 

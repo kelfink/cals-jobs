@@ -9,7 +9,7 @@ import com.google.inject.Singleton;
 import gov.ca.cwds.jobs.config.FlightPlan;
 
 @Singleton
-public class FlightPlanLog implements AtomFlightPlanLog {
+public class FlightPlanLog implements AtomFlightPlanManager {
 
   private final FlightPlan globalOpts;
 
@@ -24,12 +24,12 @@ public class FlightPlanLog implements AtomFlightPlanLog {
   }
 
   @Override
-  public FlightPlan getFlightSettings(Class<?> klazz) {
+  public FlightPlan getFlightPlan(Class<?> klazz) {
     return optionsRegistry.get(klazz);
   }
 
   @Override
-  public void addFlightSettings(Class<?> klazz, FlightPlan opts) {
+  public void addFlightPlan(Class<?> klazz, FlightPlan opts) {
     if (!optionsRegistry.containsKey(klazz)) {
       optionsRegistry.put(klazz, opts);
     }

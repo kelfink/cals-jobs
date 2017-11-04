@@ -31,7 +31,7 @@ import gov.ca.cwds.jobs.util.JobReader;
 import gov.ca.cwds.jobs.util.JobWriter;
 
 public class FacilityIndexerJobTest
-    extends PersonJobTester<PersistentObject, ApiGroupNormalizer<?>> {
+    extends Goddard<PersistentObject, ApiGroupNormalizer<?>> {
 
   private static class TestFacilityIndexerJob extends FacilityIndexerJob {
     public TestFacilityIndexerJob(File config) {

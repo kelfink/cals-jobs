@@ -60,6 +60,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.schedule.AtomFlightPlanManager;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
@@ -69,11 +70,18 @@ import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
-public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNormalizer<?>> {
+/**
+ * <a href="http://jimmyneutron.wikia.com/wiki/Goddard">Goddard</a> is Jimmy's mechanical dog and
+ * side kick.
+ * 
+ * @param <T> normalized type
+ * @param <M> de-normalized type
+ * 
+ * @author CWDS API Team
+ */
+public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>> {
 
   protected static final ObjectMapper MAPPER = ObjectMapperUtils.createObjectMapper();
-
-  protected static final ObjectMapper mapper = MAPPER;
 
   public static final String DEFAULT_CLIENT_ID = "abc1234567";
 
@@ -130,6 +138,9 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
   public RocketFactory rocketFactory;
   public BasePersonIndexerJob mach1Rocket;
+  public AtomFlightPlanManager flightPlanManager;
+
+  public ObjectMapper mapper;
 
 
   @Before
@@ -141,6 +152,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     tempFile = tempFolder.newFile("tempFile.txt");
     jobConfigFile = tempFolder.newFile("jobConfigFile.yml");
     lastJobRunTimeFilename = tempFile.getAbsolutePath();
+    mapper = MAPPER;
 
     // JDBC:
     sessionFactory = mock(SessionFactory.class);
@@ -158,6 +170,9 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     hibernationConfiguration = mock(Configuration.class);
     rocketFactory = mock(RocketFactory.class);
     scheduler = mock(Scheduler.class);
+    listenerManager = mock(ListenerManager.class);
+    flightPlanManager = mock(AtomFlightPlanManager.class);
+
     mach1Rocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
@@ -269,6 +284,7 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
     when(launchScheduler.getScheduler()).thenReturn(scheduler);
     when(scheduler.getListenerManager()).thenReturn(listenerManager);
+    when(launchScheduler.getFlightPlanManger()).thenReturn(flightPlanManager);
 
     when(launchScheduler.launchScheduledFlight(any(Class.class), any(FlightPlan.class)))
         .thenReturn(flightRecord);

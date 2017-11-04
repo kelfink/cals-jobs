@@ -15,14 +15,14 @@ import org.quartz.Scheduler;
 import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 
-public class LaunchSchedulerTest extends PersonJobTester {
+public class LaunchSchedulerTest extends Goddard {
 
   FlightRecorder jobHistory;
   RocketFactory rocketFactory;
@@ -136,7 +136,7 @@ public class LaunchSchedulerTest extends PersonJobTester {
 
   @Test
   public void getExecutingJobs_Args__() throws Exception {
-    Map<TriggerKey, NeutronRocket> actual = target.getExecutingJobs();
+    Map<TriggerKey, NeutronRocket> actual = target.getRocketsInFlight();
     assertThat(actual, is(notNullValue()));
   }
 
@@ -179,7 +179,7 @@ public class LaunchSchedulerTest extends PersonJobTester {
 
   @Test
   public void getRocketOptions_Args__() throws Exception {
-    AtomFlightPlanLog actual = target.getRocketOptions();
+    AtomFlightPlanManager actual = target.getFlightPlanManger();
     assertThat(actual, is(notNullValue()));
   }
 

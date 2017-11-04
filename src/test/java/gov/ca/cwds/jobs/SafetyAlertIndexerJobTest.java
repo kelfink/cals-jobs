@@ -25,7 +25,7 @@ import gov.ca.cwds.data.persistence.cms.EsSafetyAlert;
 import gov.ca.cwds.data.persistence.cms.ReplicatedSafetyAlerts;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 
-public class SafetyAlertIndexerJobTest extends PersonJobTester {
+public class SafetyAlertIndexerJobTest extends Goddard {
 
   private static final ObjectMapper mapper = ObjectMapperUtils.createObjectMapper();
 

@@ -15,7 +15,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 
 public class EsIntakeScreeningTest {
 
@@ -26,7 +26,7 @@ public class EsIntakeScreeningTest {
   @Before
   public void setup() {
     target = new EsIntakeScreening();
-    target.setThisLegacyId(PersonJobTester.DEFAULT_CLIENT_ID);
+    target.setThisLegacyId(Goddard.DEFAULT_CLIENT_ID);
     target.setThisParticipantId("1");
   }
 
@@ -51,14 +51,14 @@ public class EsIntakeScreeningTest {
   public void fillParticipant_Args__IntakeParticipant__boolean() throws Exception {
     IntakeParticipant p = new IntakeParticipant();
     p.setId("1");
-    p.setLegacyId(PersonJobTester.DEFAULT_CLIENT_ID);
+    p.setLegacyId(Goddard.DEFAULT_CLIENT_ID);
 
     boolean isOther = false;
     IntakeParticipant actual = target.fillParticipant(p, isOther);
 
     IntakeParticipant expected = new IntakeParticipant();
     expected.setId("1");
-    expected.setLegacyId(PersonJobTester.DEFAULT_CLIENT_ID);
+    expected.setLegacyId(Goddard.DEFAULT_CLIENT_ID);
 
     // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, notNullValue());
@@ -97,7 +97,7 @@ public class EsIntakeScreeningTest {
   @Test
   public void getNormalizationGroupKey_Args__() throws Exception {
     Object actual = target.getNormalizationGroupKey();
-    Object expected = PersonJobTester.DEFAULT_CLIENT_ID;
+    Object expected = Goddard.DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -157,7 +157,7 @@ public class EsIntakeScreeningTest {
   @Test
   public void getThisLegacyId_Args__() throws Exception {
     final String actual = target.getThisLegacyId();
-    final String expected = PersonJobTester.DEFAULT_CLIENT_ID;
+    final String expected = Goddard.DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 

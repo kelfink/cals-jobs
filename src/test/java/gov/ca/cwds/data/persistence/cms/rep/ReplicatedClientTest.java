@@ -23,9 +23,9 @@ import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 
-public class ReplicatedClientTest extends PersonJobTester<ReplicatedClient, EsClientAddress> {
+public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddress> {
   ReplicatedClient target;
 
   @Override

@@ -13,9 +13,9 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import gov.ca.cwds.data.model.cms.DocumentMetadata;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 
-public class DocumentMetadataDaoImplTest extends PersonJobTester {
+public class DocumentMetadataDaoImplTest extends Goddard {
 
   DocumentMetadataDaoImpl target;
 

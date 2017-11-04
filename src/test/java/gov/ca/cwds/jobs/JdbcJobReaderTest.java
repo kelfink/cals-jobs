@@ -30,7 +30,7 @@ import gov.ca.cwds.jobs.util.jdbc.RowMapper;
 /**
  * @author CWDS Elasticsearch Team
  */
-public class JdbcJobReaderTest extends PersonJobTester {
+public class JdbcJobReaderTest extends Goddard {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JdbcJobReaderTest.class);
 

@@ -18,13 +18,13 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPersonAwareWritable;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.data.std.ApiPhoneAwareWritable;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 
 public class TestOnlyApiPersonAware implements ApiPersonAwareWritable, ApiPhoneAwareWritable,
     ApiAddressAwareWritable, ApiMultiplePersonAware, ApiMultipleAddressesAware,
     ApiMultipleLanguagesAware, ApiMultiplePhonesAware, ApiLegacyAware {
 
-  private String id = PersonJobTester.DEFAULT_CLIENT_ID;
+  private String id = Goddard.DEFAULT_CLIENT_ID;
   private String firstName = "Albert";
   private String lastName = "Einstein";
   private String middleName;

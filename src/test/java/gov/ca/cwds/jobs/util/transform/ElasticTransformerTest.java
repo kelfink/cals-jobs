@@ -34,7 +34,7 @@ import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.test.SimpleAddress;
@@ -46,7 +46,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntry;
 import gov.ca.cwds.jobs.test.TestOnlyApiPersonAware;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
-public class ElasticTransformerTest extends PersonJobTester {
+public class ElasticTransformerTest extends Goddard {
 
   TestNormalizedEntityDao dao;
   TestIndexerJob target;

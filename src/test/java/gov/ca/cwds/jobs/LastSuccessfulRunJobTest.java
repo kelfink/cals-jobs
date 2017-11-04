@@ -27,7 +27,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
 public class LastSuccessfulRunJobTest
-    extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
+    extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   private static class TestLastSuccessfulRunJob extends LastSuccessfulRunJob {
 

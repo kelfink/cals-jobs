@@ -6,9 +6,9 @@ import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 
-public class EsIntakeScreeningDaoTest extends PersonJobTester {
+public class EsIntakeScreeningDaoTest extends Goddard {
 
   private EsIntakeScreeningDao target;
 

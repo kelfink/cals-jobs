@@ -21,7 +21,7 @@ import com.google.inject.Binder;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -33,11 +33,11 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
-public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
+public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   public static class TestHyperCube extends HyperCube {
 
-    PersonJobTester lastTest;
+    Goddard lastTest;
     Configuration configuration;
 
     public TestHyperCube(final FlightPlan opts, final File esConfigFile,
@@ -85,7 +85,7 @@ public class HyperCubeTest extends PersonJobTester<TestNormalizedEntity, TestDen
 
   }
 
-  public static PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> lastTester;
+  public static Goddard<TestNormalizedEntity, TestDenormalizedEntity> lastTester;
 
   HyperCube target;
 

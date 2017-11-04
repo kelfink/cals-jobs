@@ -8,9 +8,9 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 
-public class NeutronGuiceModuleTest extends PersonJobTester {
+public class NeutronGuiceModuleTest extends Goddard {
   public static class TestNeutronGuiceModule extends NeutronGuiceModule {
 
     @Override

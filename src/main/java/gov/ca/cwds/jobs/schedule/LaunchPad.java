@@ -63,8 +63,8 @@ public class LaunchPad implements Serializable {
       LOGGER.info("RUN JOB: {}", flightSchedule.getShortName());
       final FlightPlan runOnceOpts =
           FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
-      final FlightRecord track =
-          LaunchCommand.getInstance().launchScheduledFlight(flightSchedule.getRocketClass(), runOnceOpts);
+      final FlightRecord track = LaunchCommand.getInstance()
+          .launchScheduledFlight(flightSchedule.getRocketClass(), runOnceOpts);
       return track.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);
@@ -79,17 +79,17 @@ public class LaunchPad implements Serializable {
       return;
     }
 
-    jd = newJob(NeutronRocket.class)
-        .withIdentity(jobName, NeutronSchedulerConstants.GRP_LST_CHG)
-        .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS, flightSchedule.getRocketClass().getName())
+    jd = newJob(NeutronRocket.class).withIdentity(jobName, NeutronSchedulerConstants.GRP_LST_CHG)
+        .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS,
+            flightSchedule.getRocketClass().getName())
         .build();
 
     // Initial mode: run only **once**.
     final Trigger trg = !LaunchCommand.isInitialMode()
         ? newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
             .withPriority(flightSchedule.getLastRunPriority())
-            .withSchedule(simpleSchedule().withIntervalInSeconds(flightSchedule.getWaitPeriodSeconds())
-                .repeatForever())
+            .withSchedule(simpleSchedule()
+                .withIntervalInSeconds(flightSchedule.getWaitPeriodSeconds()).repeatForever())
             .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
             .build()
         : newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_FULL_LOAD)
@@ -154,6 +154,26 @@ public class LaunchPad implements Serializable {
 
   public void setOpts(FlightPlan opts) {
     this.opts = opts;
+  }
+
+  public DefaultFlightSchedule getFlightSchedule() {
+    return flightSchedule;
+  }
+
+  public FlightRecorder getJobHistory() {
+    return jobHistory;
+  }
+
+  public String getJobName() {
+    return jobName;
+  }
+
+  public String getTriggerName() {
+    return triggerName;
+  }
+
+  public JobKey getJobKey() {
+    return jobKey;
   }
 
 }

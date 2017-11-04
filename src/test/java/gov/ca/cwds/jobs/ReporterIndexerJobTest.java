@@ -22,7 +22,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider;
  */
 @SuppressWarnings("javadoc")
 public class ReporterIndexerJobTest
-    extends PersonJobTester<ReplicatedSubstituteCareProvider, ReplicatedSubstituteCareProvider> {
+    extends Goddard<ReplicatedSubstituteCareProvider, ReplicatedSubstituteCareProvider> {
 
   private ReplicatedReporterDao dao;
   private ReporterIndexerJob target;

@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -115,10 +115,10 @@ public class IntakeAllegationTest {
 
   @Test
   public void getVictim_Args__() throws Exception {
-    target.setId(PersonJobTester.DEFAULT_CLIENT_ID);
+    target.setId(Goddard.DEFAULT_CLIENT_ID);
     IntakeParticipant actual = target.getVictim();
     IntakeParticipant expected = new IntakeParticipant();
-    expected.setId(PersonJobTester.DEFAULT_CLIENT_ID);
+    expected.setId(Goddard.DEFAULT_CLIENT_ID);
     // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, notNullValue());
   }
@@ -131,7 +131,7 @@ public class IntakeAllegationTest {
 
   @Test
   public void getPerpetrator_Args__() throws Exception {
-    target.setId(PersonJobTester.DEFAULT_CLIENT_ID);
+    target.setId(Goddard.DEFAULT_CLIENT_ID);
     IntakeParticipant actual = target.getPerpetrator();
     IntakeParticipant expected = new IntakeParticipant();
     // expected.setId(PersonJobTester.DEFAULT_CLIENT_ID);

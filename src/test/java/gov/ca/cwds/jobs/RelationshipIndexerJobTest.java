@@ -22,7 +22,7 @@ import gov.ca.cwds.data.persistence.cms.EsRelationship;
 import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
 
 public class RelationshipIndexerJobTest
-    extends PersonJobTester<ReplicatedRelationships, EsRelationship> {
+    extends Goddard<ReplicatedRelationships, EsRelationship> {
 
   ReplicatedRelationshipsDao dao;
   RelationshipIndexerJob target;

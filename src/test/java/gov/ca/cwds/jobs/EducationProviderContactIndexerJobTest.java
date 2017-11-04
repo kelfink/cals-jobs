@@ -14,7 +14,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedEducationProviderContact;
  */
 @SuppressWarnings("javadoc")
 public class EducationProviderContactIndexerJobTest extends
-    PersonJobTester<ReplicatedEducationProviderContact, ReplicatedEducationProviderContact> {
+    Goddard<ReplicatedEducationProviderContact, ReplicatedEducationProviderContact> {
 
   ReplicatedEducationProviderContactDao dao;
   EducationProviderContactIndexerJob target;

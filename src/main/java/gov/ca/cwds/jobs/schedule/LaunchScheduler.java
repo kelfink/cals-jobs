@@ -29,7 +29,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   private final AtomRocketFactory rocketFactory;
 
-  private final AtomFlightPlanLog rocketOptions;
+  private final AtomFlightPlanManager flightPlanManger;
 
   private FlightPlan opts;
 
@@ -46,14 +46,14 @@ public class LaunchScheduler implements AtomLaunchScheduler {
    * OPTION: Quartz scheduler can track this too. Obsolete implementation?
    * </p>
    */
-  private final Map<TriggerKey, NeutronRocket> executingJobs = new ConcurrentHashMap<>();
+  private final Map<TriggerKey, NeutronRocket> rocketsInFlight = new ConcurrentHashMap<>();
 
   @Inject
-  public LaunchScheduler(final FlightRecorder jobHistory, final AtomRocketFactory rocketFactory,
-      final AtomFlightPlanLog rocketOptions) {
-    this.flightRecorder = jobHistory;
+  public LaunchScheduler(final FlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
+      final AtomFlightPlanManager flightPlanMgr) {
+    this.flightRecorder = flightRecorder;
     this.rocketFactory = rocketFactory;
-    this.rocketOptions = rocketOptions;
+    this.flightPlanManger = flightPlanMgr;
   }
 
   /**
@@ -110,7 +110,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   public LaunchPad scheduleLaunch(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts) {
     LOGGER.debug("LAUNCH COORDINATOR: LAST CHANGE LOCATION: {}", opts.getLastRunLoc());
     final LaunchPad nj = new LaunchPad(this.getScheduler(), sched, flightRecorder, opts);
-    rocketOptions.addFlightSettings(klazz, opts);
+    flightPlanManger.addFlightPlan(klazz, opts);
     scheduleRegistry.put(klazz, nj);
     return nj;
   }
@@ -136,17 +136,17 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   @Override
   public void trackInFlightRocket(final TriggerKey key, NeutronRocket job) {
-    executingJobs.put(key, job);
+    rocketsInFlight.put(key, job);
   }
 
   public void removeExecutingJob(final TriggerKey key) {
-    if (executingJobs.containsKey(key)) {
-      executingJobs.remove(key);
+    if (rocketsInFlight.containsKey(key)) {
+      rocketsInFlight.remove(key);
     }
   }
 
-  public Map<TriggerKey, NeutronRocket> getExecutingJobs() {
-    return executingJobs;
+  public Map<TriggerKey, NeutronRocket> getRocketsInFlight() {
+    return rocketsInFlight;
   }
 
   public AtomRocketFactory getRocketFactory() {
@@ -184,8 +184,8 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     return this.getScheduleRegistry().get(klazz).isVetoExecution();
   }
 
-  public AtomFlightPlanLog getRocketOptions() {
-    return rocketOptions;
+  public AtomFlightPlanManager getFlightPlanManger() {
+    return flightPlanManger;
   }
 
 }

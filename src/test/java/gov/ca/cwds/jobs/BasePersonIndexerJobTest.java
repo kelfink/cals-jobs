@@ -55,7 +55,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 
 public class BasePersonIndexerJobTest
-    extends PersonJobTester<TestNormalizedEntity, TestDenormalizedEntity> {
+    extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   TestNormalizedEntityDao dao;
   TestIndexerJob target;

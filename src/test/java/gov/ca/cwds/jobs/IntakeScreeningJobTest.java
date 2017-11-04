@@ -22,7 +22,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
 import gov.ca.cwds.data.persistence.ns.IntakeParticipant;
 
-public class IntakeScreeningJobTest extends PersonJobTester<IntakeParticipant, EsIntakeScreening> {
+public class IntakeScreeningJobTest extends Goddard<IntakeParticipant, EsIntakeScreening> {
 
   IntakeParticipantDao normalizedDao;
   EsIntakeScreeningDao viewDao;

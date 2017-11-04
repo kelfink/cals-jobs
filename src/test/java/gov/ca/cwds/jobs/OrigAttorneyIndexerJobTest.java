@@ -14,7 +14,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
  */
 @SuppressWarnings("javadoc")
 public class OrigAttorneyIndexerJobTest
-    extends PersonJobTester<ReplicatedAttorney, ReplicatedAttorney> {
+    extends Goddard<ReplicatedAttorney, ReplicatedAttorney> {
 
   ReplicatedAttorneyDao dao;
   OrigAttorneyIndexerJob target;

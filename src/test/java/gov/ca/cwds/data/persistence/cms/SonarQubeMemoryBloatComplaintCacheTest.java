@@ -22,10 +22,10 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 
-public class SonarQubeMemoryBloatComplaintCacheTest extends PersonJobTester<ReplicatedRelationships, EsRelationship> {
+public class SonarQubeMemoryBloatComplaintCacheTest extends Goddard<ReplicatedRelationships, EsRelationship> {
 
   EsRelationship target = new EsRelationship();
 

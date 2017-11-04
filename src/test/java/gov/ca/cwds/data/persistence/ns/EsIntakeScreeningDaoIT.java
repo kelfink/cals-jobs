@@ -6,13 +6,13 @@ import java.text.SimpleDateFormat;
 import org.junit.Before;
 
 import gov.ca.cwds.dao.ns.EsIntakeScreeningDao;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 
 /**
  * 
  * @author CWDS API Team
  */
-public class EsIntakeScreeningDaoIT extends PersonJobTester {
+public class EsIntakeScreeningDaoIT extends Goddard {
 
   private static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

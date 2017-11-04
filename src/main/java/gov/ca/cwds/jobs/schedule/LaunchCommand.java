@@ -220,6 +220,30 @@ public class LaunchCommand implements AtomLaunchScheduler {
     }
   }
 
+  protected void exposeRest() {
+    // Jetty for REST administration.
+    Thread jettyServer = new Thread(restServer::run);
+    jettyServer.start();
+  }
+
+  protected void exposeJmx() {
+    final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
+    for (LaunchPad pad : launchScheduler.getScheduleRegistry().values()) {
+      exporter.export("Neutron:last_run_jobs=" + pad.getFlightSchedule().getShortName(), pad);
+    }
+
+    // Expose Command Center methods to JMX.
+    exporter.export("Neutron:runner=master", this);
+
+    // Expose Guice bean attributes to JMX.
+    Manager.manage("Neutron_Guice", HyperCube.getInjector());
+  }
+
+  protected void initializeCommandCenter() {
+    exposeJmx();
+    exposeRest();
+  }
+
   /**
    * Too many responsibilities: initialize Quartz, register jobs, expose operations to JMX, even
    * initialize HTTP ...
@@ -230,9 +254,6 @@ public class LaunchCommand implements AtomLaunchScheduler {
   protected void initScheduler(final Injector injector) throws NeutronException {
     try {
       configureQuartz(injector);
-
-      // JMX:
-      final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
 
       // NOTE: make last change window configurable.
       final DateFormat fmt =
@@ -251,15 +272,8 @@ public class LaunchCommand implements AtomLaunchScheduler {
         final LaunchPad nj =
             new LaunchPad(launchScheduler.getScheduler(), sched, flightRecorder, opts);
         launchScheduler.getScheduleRegistry().put(klass, nj);
-        launchScheduler.getRocketOptions().addFlightSettings(klass, opts);
-        exporter.export("Neutron:last_run_jobs=" + sched.getShortName(), nj);
+        launchScheduler.getFlightPlanManger().addFlightPlan(klass, opts);
       }
-
-      // Expose JobRunner methods to JMX.
-      exporter.export("Neutron:runner=master", this);
-
-      // Expose Guice bean attributes to JMX.
-      Manager.manage("Neutron_Guice", HyperCube.getInjector());
 
       // MOVE: move this responsibility to another class.
       if (startingOpts.isDropIndex()) {
@@ -277,10 +291,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
         launchScheduler.getScheduler().start();
       }
 
-      // Jetty for REST administration.
-      Thread jettyServer = new Thread(restServer::run);
-      jettyServer.start();
-
+      initializeCommandCenter();
     } catch (IOException | SchedulerException | ParseException e) {
       try {
         launchScheduler.getScheduler().shutdown(false);
@@ -430,7 +441,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
   }
 
   public Map<TriggerKey, NeutronRocket> getInFlightRockets() {
-    return launchScheduler.getExecutingJobs();
+    return launchScheduler.getRocketsInFlight();
   }
 
   /**

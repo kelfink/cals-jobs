@@ -80,7 +80,7 @@ public class RocketFactory implements AtomRocketFactory {
 
     NeutronRocket ret;
     try {
-      final FlightPlan opts = rocketOptions.getFlightSettings(klazz);
+      final FlightPlan opts = rocketOptions.getFlightPlan(klazz);
       ret = new NeutronRocket(createJob(klazz, opts));
     } catch (NeutronException e) {
       throw new SchedulerException("NO ROCKET SETTINGS!", e);

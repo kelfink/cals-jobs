@@ -14,7 +14,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherChildInPlacemtHome;
  */
 @SuppressWarnings("javadoc")
 public class OtherChildInPlacemtHomeIndexerJobTest
-    extends PersonJobTester<ReplicatedOtherChildInPlacemtHome, ReplicatedOtherChildInPlacemtHome> {
+    extends Goddard<ReplicatedOtherChildInPlacemtHome, ReplicatedOtherChildInPlacemtHome> {
 
   ReplicatedOtherChildInPlacemtHomeDao dao;
   OtherChildInPlacemtHomeIndexerJob target;

@@ -18,7 +18,7 @@ import gov.ca.cwds.jobs.config.FlightPlanTest;
  */
 @SuppressWarnings("javadoc")
 public class CollateralIndividualIndexerJobTest
-    extends PersonJobTester<ReplicatedCollateralIndividual, ReplicatedCollateralIndividual> {
+    extends Goddard<ReplicatedCollateralIndividual, ReplicatedCollateralIndividual> {
 
   ReplicatedCollateralIndividualDao dao;
   CollateralIndividualIndexerJob target;

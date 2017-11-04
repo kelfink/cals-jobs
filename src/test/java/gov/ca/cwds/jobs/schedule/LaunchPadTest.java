@@ -20,11 +20,11 @@ import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.ClientIndexerJob;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
 
-public class LaunchPadTest extends PersonJobTester {
+public class LaunchPadTest extends Goddard {
   Scheduler scheduler;
   DefaultFlightSchedule sched;
   FlightRecorder history;

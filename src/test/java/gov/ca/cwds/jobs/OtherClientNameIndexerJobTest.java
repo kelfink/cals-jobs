@@ -33,7 +33,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
  * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
-public class OtherClientNameIndexerJobTest extends PersonJobTester {
+public class OtherClientNameIndexerJobTest extends Goddard {
 
   ReplicatedAkaDao normDao;
   ReplicatedOtherClientNameDao denormDao;

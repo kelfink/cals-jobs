@@ -18,9 +18,9 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 
-public class IntakeScreeningTest extends PersonJobTester {
+public class IntakeScreeningTest extends Goddard {
 
   IntakeScreening target;
 

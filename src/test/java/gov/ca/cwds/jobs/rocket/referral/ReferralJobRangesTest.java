@@ -16,9 +16,9 @@ import org.junit.Test;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 
-public class ReferralJobRangesTest extends PersonJobTester {
+public class ReferralJobRangesTest extends Goddard {
 
   ReferralJobRanges target = new ReferralJobRanges();
 

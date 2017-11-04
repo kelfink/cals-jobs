@@ -19,9 +19,9 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
-import gov.ca.cwds.jobs.PersonJobTester;
+import gov.ca.cwds.jobs.Goddard;
 
-public class EsClientAddressTest extends PersonJobTester<ReplicatedClient, EsClientAddress> {
+public class EsClientAddressTest extends Goddard<ReplicatedClient, EsClientAddress> {
 
   private static final String TEST_CLIENT_ID = "abc12340x8";
   EsClientAddress target;
