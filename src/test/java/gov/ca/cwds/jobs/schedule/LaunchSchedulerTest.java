@@ -126,7 +126,7 @@ public class LaunchSchedulerTest extends PersonJobTester {
   @Test
   public void addExecutingJob_Args__TriggerKey__NeutronRocket() throws Exception {
     NeutronRocket job = mock(NeutronRocket.class);
-    target.trackRocketInFlight(key, job);
+    target.trackInFlightRocket(key, job);
   }
 
   @Test

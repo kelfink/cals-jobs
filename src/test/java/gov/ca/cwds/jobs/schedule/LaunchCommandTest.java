@@ -172,8 +172,9 @@ public class LaunchCommandTest
 
   @Test
   public void createJob_Args__String__FlightPlan() throws Exception {
-    final String jobName = DefaultFlightSchedule.CLIENT.getShortName();
-    final BasePersonIndexerJob actual = target.createJob(jobName, opts);
+    final String rocketName = Mach1TestRocket.class.getName();
+    target.setLaunchScheduler(launchScheduler);
+    final BasePersonIndexerJob actual = target.createJob(rocketName, opts);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -186,8 +187,9 @@ public class LaunchCommandTest
 
   @Test
   public void runScheduledJob_Args__String__FlightPlan() throws Exception {
-    final String jobName = DefaultFlightSchedule.CLIENT.getShortName();
-    FlightRecord actual = target.runScheduledLaunch(jobName, opts);
+    final String rocketName = Mach1TestRocket.class.getName();
+    target.setLaunchScheduler(launchScheduler);
+    FlightRecord actual = target.runScheduledLaunch(rocketName, opts);
   }
 
   @Test
@@ -246,17 +248,17 @@ public class LaunchCommandTest
   @Test
   public void addExecutingJob_Args__TriggerKey__NeutronRocket() throws Exception {
     final NeutronRocket job = mock(NeutronRocket.class);
-    target.trackRocketInFlight(key, job);
+    target.trackInFlightRocket(key, job);
   }
 
   @Test
   public void removeExecutingJob_Args__TriggerKey() throws Exception {
-    target.removeExecutingJob(key);
+    target.removeInFlightRocket(key);
   }
 
   @Test
   public void getExecutingJobs_Args__() throws Exception {
-    final Map<TriggerKey, NeutronRocket> actual = target.getExecutingJobs();
+    final Map<TriggerKey, NeutronRocket> actual = target.getInFlightRockets();
     assertThat(actual, is(notNullValue()));
   }
 
@@ -269,7 +271,7 @@ public class LaunchCommandTest
   @Test
   public void startContinuousMode_Args__StringArray() throws Exception {
     final String[] args = new String[] {};
-    LaunchCommand actual = LaunchCommand.startContinuousMode(args);
+    LaunchCommand actual = LaunchCommand.startSchedulerMode(args);
     assertThat(actual, is(notNullValue()));
   }
 

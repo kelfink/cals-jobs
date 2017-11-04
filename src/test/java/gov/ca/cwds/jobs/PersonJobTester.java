@@ -13,7 +13,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -90,20 +89,16 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  public LaunchScheduler launchScheduler;
   public ElasticsearchConfiguration esConfig;
   public ElasticsearchDao esDao;
   public Client client;
   public ElasticSearchPerson esp;
 
-  public FlightPlan opts;
   public File tempFile;
   public File jobConfigFile;
   public File esConfileFile;
   public String lastJobRunTimeFilename;
   public java.util.Date lastRunTime = new java.util.Date();
-  public FlightRecord flightRecord;
-  public FlightRecorder flightRecorder;
 
   public SessionFactory sessionFactory;
   public Session session;
@@ -123,6 +118,11 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
 
   public Configuration hibernationConfiguration;
 
+  public FlightPlan opts;
+  public FlightRecord flightRecord;
+  public FlightRecorder flightRecorder;
+
+  public LaunchScheduler launchScheduler;
   public RocketFactory rocketFactory;
   public BasePersonIndexerJob mach1Rocket;
 
@@ -184,15 +184,15 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     when(meta.getDatabaseProductName()).thenReturn("DB2");
     when(meta.getDatabaseProductVersion()).thenReturn("DSN11010");
 
-    // Elasticsearch:
+    // Elasticsearch basics:
+    esp = new ElasticSearchPerson();
     esDao = mock(ElasticsearchDao.class);
     esConfig = mock(ElasticsearchConfiguration.class);
 
     when(esDao.getConfig()).thenReturn(esConfig);
     when(esDao.getClient()).thenReturn(client);
 
-    final Map<String, String> mapSettings = new HashMap<>();
-    final Settings settings = Settings.builder().put(mapSettings).build();
+    final Settings settings = Settings.builder().put(new HashMap<String, String>()).build();
     when(client.settings()).thenReturn(settings);
 
     when(esConfig.getElasticsearchAlias()).thenReturn("people");
@@ -201,11 +201,11 @@ public class PersonJobTester<T extends PersistentObject, M extends ApiGroupNorma
     // Job options:
     esConfileFile = tempFolder.newFile("es.yml");
     opts = mock(FlightPlan.class);
-    esp = new ElasticSearchPerson();
 
     when(opts.isLoadSealedAndSensitive()).thenReturn(false);
     when(opts.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
 
+    // Queries.
     nq = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(nq);
     when(nq.setString(any(String.class), any(String.class))).thenReturn(nq);

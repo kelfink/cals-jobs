@@ -408,8 +408,8 @@ public class LaunchCommand implements AtomLaunchScheduler {
     return launchScheduler;
   }
 
-  public void setLaunchScheduler(LaunchScheduler neutronScheduler) {
-    this.launchScheduler = neutronScheduler;
+  public void setLaunchScheduler(LaunchScheduler launchScheduler) {
+    this.launchScheduler = launchScheduler;
   }
 
   public Scheduler getScheduler() {
@@ -421,28 +421,28 @@ public class LaunchCommand implements AtomLaunchScheduler {
   }
 
   @Override
-  public void trackRocketInFlight(TriggerKey key, NeutronRocket rocket) {
-    launchScheduler.trackRocketInFlight(key, rocket);
+  public void trackInFlightRocket(TriggerKey key, NeutronRocket rocket) {
+    launchScheduler.trackInFlightRocket(key, rocket);
   }
 
-  public void removeExecutingJob(TriggerKey key) {
+  public void removeInFlightRocket(TriggerKey key) {
     launchScheduler.removeExecutingJob(key);
   }
 
-  public Map<TriggerKey, NeutronRocket> getExecutingJobs() {
+  public Map<TriggerKey, NeutronRocket> getInFlightRockets() {
     return launchScheduler.getExecutingJobs();
   }
 
   /**
    * One scheduler to rule them all. And in the multi-threading ... bind them? :-)
    * 
-   * @return evil single instance
+   * @return evil singleton instance
    */
   public static LaunchCommand getInstance() {
     return instance;
   }
 
-  protected static synchronized LaunchCommand startContinuousMode(String[] args) {
+  protected static synchronized LaunchCommand startSchedulerMode(String[] args) {
     LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
     try {
       final FlightPlan globalOpts = FlightPlan.parseCommandLine(args);
@@ -529,7 +529,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
    * @param args command line
    */
   public static void main(String[] args) {
-    startContinuousMode(args);
+    startSchedulerMode(args);
   }
 
 }

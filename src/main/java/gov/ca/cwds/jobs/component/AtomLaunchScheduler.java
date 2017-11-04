@@ -20,7 +20,7 @@ public interface AtomLaunchScheduler {
    */
   FlightRecord runScheduledJob(Class<?> klass, FlightPlan opts) throws NeutronException;
 
-  void trackRocketInFlight(TriggerKey key, NeutronRocket rocket);
+  void trackInFlightRocket(TriggerKey key, NeutronRocket rocket);
 
   LaunchPad scheduleLaunch(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts);
 

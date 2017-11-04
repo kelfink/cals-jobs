@@ -135,7 +135,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public void trackRocketInFlight(final TriggerKey key, NeutronRocket job) {
+  public void trackInFlightRocket(final TriggerKey key, NeutronRocket job) {
     executingJobs.put(key, job);
   }
 
