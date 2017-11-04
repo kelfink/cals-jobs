@@ -128,4 +128,25 @@ public class IntakeScreeningJobTest extends PersonJobTester<IntakeParticipant, E
     IntakeScreeningJob.main(args);
   }
 
+  @Test
+  public void getInitialLoadViewName_Args__() throws Exception {
+    String actual = target.getInitialLoadViewName();
+    String expected = "VW_SCREENING_HISTORY";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getInitialLoadQuery_Args__String() throws Exception {
+    String dbSchemaName = null;
+    String actual = target.getInitialLoadQuery(dbSchemaName);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void isInitialLoadJdbc_Args__() throws Exception {
+    boolean actual = target.isInitialLoadJdbc();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
 }
