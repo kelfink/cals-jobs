@@ -3,7 +3,11 @@ package gov.ca.cwds.jobs;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -15,8 +19,39 @@ import gov.ca.cwds.jobs.rocket.syscode.NsSystemCodeDao;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.rest.api.domain.cms.SystemCode;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
+import gov.ca.cwds.rest.api.domain.cms.SystemMeta;
 
 public class SystemCodesLoaderJobTest extends PersonJobTester {
+
+  public static class TestSystemCodesLoaderJob extends SystemCodesLoaderJob {
+
+    public TestSystemCodesLoaderJob(NsSystemCodeDao systemCodeDao) {
+      super(systemCodeDao);
+    }
+
+    @Override
+    public void handleSystemMeta(Map<String, SystemMeta> systemMetaMap, NsSystemCode nsc,
+        String categoryId, SystemCode systemCode) {
+      super.handleSystemMeta(systemMetaMap, nsc, categoryId, systemCode);
+    }
+
+    @Override
+    public void handleLogicalId(NsSystemCode nsc, SystemCode systemCode) {
+      super.handleLogicalId(nsc, systemCode);
+    }
+
+    @Override
+    public void handleSubCategory(Map<Short, SystemCode> systemCodeMap, NsSystemCode nsc,
+        SystemCode systemCode) {
+      super.handleSubCategory(systemCodeMap, nsc, systemCode);
+    }
+
+    @Override
+    public void deleteNsSystemCodes(Connection conn) throws SQLException {
+      super.deleteNsSystemCodes(conn);
+    }
+
+  }
 
   SystemCodesLoaderJob target;
   NsSystemCodeDao dao;
@@ -27,7 +62,7 @@ public class SystemCodesLoaderJobTest extends PersonJobTester {
     super.setup();
 
     dao = new NsSystemCodeDao(sessionFactory);
-    target = new SystemCodesLoaderJob(dao);
+    target = new TestSystemCodesLoaderJob(dao);
     SimpleTestSystemCodeCache.init();
   }
 
@@ -38,6 +73,17 @@ public class SystemCodesLoaderJobTest extends PersonJobTester {
 
   @Test
   public void instantiation() throws Exception {
+    assertThat(target, notNullValue());
+  }
+
+  @Test
+  public void handleSystemMeta() throws Exception {
+    final Map<String, SystemMeta> systemMetaMap = new HashMap<>();
+    final NsSystemCode nsc = mock(NsSystemCode.class);
+    final String categoryId = DEFAULT_CLIENT_ID;
+    final SystemCode systemCode = mock(SystemCode.class);
+
+    target.handleSystemMeta(systemMetaMap, nsc, categoryId, systemCode);
     assertThat(target, notNullValue());
   }
 
@@ -94,6 +140,11 @@ public class SystemCodesLoaderJobTest extends PersonJobTester {
 
   @Test
   public void load_Args__() throws Exception {
+    Map<Integer, NsSystemCode> actual = target.load();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  public void load_Args__error() throws Exception {
     Map<Integer, NsSystemCode> actual = target.load();
     assertThat(actual, is(notNullValue()));
   }

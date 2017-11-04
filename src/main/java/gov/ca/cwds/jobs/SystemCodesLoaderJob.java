@@ -18,7 +18,6 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import gov.ca.cwds.data.CrudsDaoImpl;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.rocket.syscode.NsSystemCode;
 import gov.ca.cwds.jobs.rocket.syscode.NsSystemCodeDao;
@@ -48,7 +47,7 @@ public class SystemCodesLoaderJob {
     this.systemCodeDao = systemCodeDao;
   }
 
-  private void handleSystemMeta(Map<String, SystemMeta> systemMetaMap, NsSystemCode nsc,
+  protected void handleSystemMeta(Map<String, SystemMeta> systemMetaMap, NsSystemCode nsc,
       String categoryId, final SystemCode systemCode) {
     SystemMeta systemMeta = systemMetaMap.get(categoryId);
     if (systemMeta != null) {
@@ -59,7 +58,7 @@ public class SystemCodesLoaderJob {
     }
   }
 
-  private void handleLogicalId(final NsSystemCode nsc, final SystemCode systemCode) {
+  protected void handleLogicalId(final NsSystemCode nsc, final SystemCode systemCode) {
     String logicalId = StringUtils.trim(systemCode.getLogicalId());
     if (!StringUtils.isBlank(logicalId)) {
       nsc.setLogicalId(logicalId);
@@ -68,7 +67,7 @@ public class SystemCodesLoaderJob {
     }
   }
 
-  private void handleSubCategory(Map<Short, SystemCode> systemCodeMap, final NsSystemCode nsc,
+  protected void handleSubCategory(Map<Short, SystemCode> systemCodeMap, final NsSystemCode nsc,
       final SystemCode systemCode) {
     Short subCategoryId = systemCode.getCategoryId();
     if (subCategoryId != null && subCategoryId != 0) {
@@ -150,7 +149,7 @@ public class SystemCodesLoaderJob {
     return loadedSystemCodes;
   }
 
-  private void deleteNsSystemCodes(Connection conn) throws SQLException {
+  protected void deleteNsSystemCodes(Connection conn) throws SQLException {
     try (Statement stmt = conn.createStatement()) {
       LOGGER.info("Deleting system codes from new system...");
       stmt.execute("DELETE FROM SYSTEM_CODES");
