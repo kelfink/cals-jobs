@@ -31,8 +31,7 @@ import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 
-public class LaunchCommandTest
-    extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
+public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LaunchCommandTest.class);
 
@@ -268,7 +267,8 @@ public class LaunchCommandTest
   @Test
   public void runStandalone_Args__Class__StringArray() throws Exception {
     final Class<Mach1TestRocket> klass = Mach1TestRocket.class;
-    final String[] args = new String[] {"--simulate_launch"};
+    final String[] args =
+        new String[] {"--simulate_launch", "-b", "/var/lib/jenkins", "-c", "config/local.yaml"};
     LaunchCommand.runStandalone(klass, args);
   }
 
