@@ -76,7 +76,6 @@ import gov.ca.cwds.jobs.annotation.LastRunFile;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.AtomFlightPlanLog;
 import gov.ca.cwds.jobs.schedule.FlightPlanLog;
@@ -180,9 +179,9 @@ public class HyperCube extends NeutronGuiceModule {
    * 
    * @param opts command line options
    * @return Guice Injector
-   * @throws JobsException if unable to construct dependencies
+   * @throws NeutronException if unable to construct dependencies
    */
-  public static synchronized Injector buildInjector(final FlightPlan opts) {
+  public static synchronized Injector buildInjector(final FlightPlan opts) throws NeutronException {
     if (injector == null) {
       try {
         injector = Guice.createInjector(cubeMaker.apply(opts));
@@ -195,7 +194,7 @@ public class HyperCube extends NeutronGuiceModule {
 
         ElasticSearchPerson.getSystemCodes();
       } catch (Exception e) {
-        throw JobLogs.runtime(LOGGER, e, "FAILED TO BUILD INJECTOR! {}", e.getMessage());
+        throw JobLogs.checked(LOGGER, e, "FAILED TO BUILD INJECTOR! {}", e.getMessage());
       }
     }
 

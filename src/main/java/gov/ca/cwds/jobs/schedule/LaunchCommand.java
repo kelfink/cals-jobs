@@ -494,10 +494,15 @@ public class LaunchCommand implements AtomLaunchScheduler {
       return; // Test "main" methods
     }
 
-    final Injector injector = HyperCube.buildInjector(globalOpts);
-    instance = injector.getInstance(LaunchCommand.class);
-    instance.startingOpts = globalOpts;
-    instance.settings.setContinuousMode(false);
+    Injector injector;
+    try {
+      injector = HyperCube.buildInjector(globalOpts);
+      instance = injector.getInstance(LaunchCommand.class);
+      instance.startingOpts = globalOpts;
+      instance.settings.setContinuousMode(false);
+    } catch (NeutronException e) {
+      throw JobLogs.runtime(LOGGER, e, "Rethrow", e.getMessage());
+    }
 
     try (final T job = HyperCube.newJob(klass, args)) {
       job.run();
