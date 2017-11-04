@@ -179,7 +179,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     try {
       klazz = Class.forName(className);
     } catch (Exception e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "UNKNOWN JOB CLASS! {}", className, e);
+      throw JobLogs.checked(LOGGER, e, "UNKNOWN JOB CLASS! {}", className, e);
     }
     return this.getScheduleRegistry().get(klazz).isVetoExecution();
   }
