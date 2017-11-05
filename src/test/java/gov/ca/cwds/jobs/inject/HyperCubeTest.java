@@ -271,13 +271,25 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     target.bindDaos();
   }
 
+  /**
+   * <strong>ERROR: H2 credentials.</strong>
+   * 
+   * @throws Exception test error
+   */
   @Test
+  @Ignore
   public void makeCmsSessionFactory_Args__() throws Exception {
     final SessionFactory actual = target.makeCmsSessionFactory();
     assertThat(actual, is(notNullValue()));
   }
 
+  /**
+   * <strong>ERROR: H2 credentials.</strong>
+   * 
+   * @throws Exception test error
+   */
   @Test
+  @Ignore
   public void makeNsSessionFactory_Args__() throws Exception {
     final SessionFactory actual = target.makeNsSessionFactory();
     assertThat(actual, is(notNullValue()));
