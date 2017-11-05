@@ -34,12 +34,12 @@ import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.inject.HyperCube;
-import gov.ca.cwds.jobs.listener.NeutronJobListener;
-import gov.ca.cwds.jobs.listener.NeutronSchedulerListener;
-import gov.ca.cwds.jobs.listener.NeutronTriggerListener;
 import gov.ca.cwds.jobs.manage.rest.NeutronRestServer;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
+import gov.ca.cwds.neutron.listener.NeutronJobListener;
+import gov.ca.cwds.neutron.listener.NeutronSchedulerListener;
+import gov.ca.cwds.neutron.listener.NeutronTriggerListener;
 
 /**
  * Run stand-alone jobs or serve up jobs with Quartz. The master of ceremonies, AKA, Jimmy Neutron.
@@ -525,8 +525,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
       exitCode = 1;
-      throw JobLogs.buildRuntimeException(LOGGER, e, "STANDALONE ROCKET FAILED!: {}",
-          e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "STANDALONE ROCKET FAILED!: {}", e.getMessage());
     } finally {
       // WARNING: kills the JVM in testing but may be needed to shutdown resources.
       if (!isTestMode() && !isSchedulerMode()) {

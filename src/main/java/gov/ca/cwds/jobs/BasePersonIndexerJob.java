@@ -59,8 +59,8 @@ import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.log.JetPackLogger;
 import gov.ca.cwds.jobs.log.ConditionalLogger;
+import gov.ca.cwds.jobs.log.JetPackLogger;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
@@ -104,8 +104,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   private static final long serialVersionUID = 1L;
 
-  private static final ConditionalLogger LOGGER =
-      new JetPackLogger(BasePersonIndexerJob.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(BasePersonIndexerJob.class);
 
   /**
    * Jackson ObjectMapper.

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.listener;
+package gov.ca.cwds.neutron.listener;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.neutron.listener.NeutronBulkProcessorListener;
 
 public class NeutronBulkProcessorListenerTest {
 

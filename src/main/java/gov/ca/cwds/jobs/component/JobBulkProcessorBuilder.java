@@ -6,7 +6,7 @@ import org.elasticsearch.common.unit.ByteSizeValue;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.listener.NeutronBulkProcessorListener;
+import gov.ca.cwds.neutron.listener.NeutronBulkProcessorListener;
 
 /**
  * Builds and executes Elasticsearch bulk processor for bulk loading.

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.listener;
+package gov.ca.cwds.neutron.listener;
 
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
+import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 public class NeutronTriggerListener implements TriggerListener {
@@ -36,8 +36,7 @@ public class NeutronTriggerListener implements TriggerListener {
   public void triggerFired(Trigger trigger, JobExecutionContext context) {
     final TriggerKey key = trigger.getKey();
     LOGGER.debug("trigger fired: key: {}", key);
-    neutronScheduler.getRocketsInFlight().put(key,
-        (NeutronRocket) context.getJobInstance());
+    neutronScheduler.getRocketsInFlight().put(key, (NeutronRocket) context.getJobInstance());
   }
 
   /**
@@ -52,8 +51,7 @@ public class NeutronTriggerListener implements TriggerListener {
     try {
       answer = neutronScheduler.isLaunchVetoed(className);
     } catch (NeutronException e) {
-      throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR FINDING JOB FACADE! job class: {}",
-          className, e);
+      throw JobLogs.runtime(LOGGER, e, "ERROR FINDING JOB FACADE! job class: {}", className, e);
     }
 
     LOGGER.info("veto job execution: {}", answer);

@@ -450,8 +450,8 @@ public class ReferralHistoryIndexerJob
       }
     } catch (Exception e) {
       fail();
-      throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR HANDING RANGE {} - {}: {}", p.getLeft(),
-          p.getRight(), e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "ERROR HANDING RANGE {} - {}: {}", p.getLeft(), p.getRight(),
+          e.getMessage());
     }
 
     int cntr = mapReduce(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
@@ -480,7 +480,8 @@ public class ReferralHistoryIndexerJob
       final List<Pair<String, String>> ranges = getPartitionRanges();
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
-      final ForkJoinPool threadPool = new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getOpts()));
+      final ForkJoinPool threadPool =
+          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getOpts()));
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
@@ -494,7 +495,7 @@ public class ReferralHistoryIndexerJob
 
     } catch (Exception e) {
       fail();
-      throw JobLogs.buildRuntimeException(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
     }
@@ -567,8 +568,7 @@ public class ReferralHistoryIndexerJob
     try {
       insertJson = mapper.writeValueAsString(esp);
     } catch (JsonProcessingException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}",
-          e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}", e.getMessage());
     }
 
     final String alias = esDao.getConfig().getElasticsearchAlias();

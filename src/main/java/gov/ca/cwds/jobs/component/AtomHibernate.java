@@ -17,9 +17,9 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.util.JobLogs;
-import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 
 /**
  * Common functions and features for Hibernate calls.
@@ -138,8 +138,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
       try {
         return c.prepareStatement(getPrepLastChangeSQL());
       } catch (SQLException e) {
-        throw JobLogs.buildRuntimeException(getLogger(), e, "FAILED TO PREPARE STATEMENT",
-            e.getMessage());
+        throw JobLogs.runtime(getLogger(), e, "FAILED TO PREPARE STATEMENT", e.getMessage());
       }
     };
   }

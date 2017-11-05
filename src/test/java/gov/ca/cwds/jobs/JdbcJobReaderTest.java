@@ -62,8 +62,7 @@ public class JdbcJobReaderTest extends Goddard {
       try {
         return c.prepareStatement("select * from test order by a");
       } catch (SQLException e) {
-        throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO PREPARE STATEMENT!",
-            e.getMessage());
+        throw JobLogs.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT!", e.getMessage());
       }
     };
   }

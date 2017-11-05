@@ -35,9 +35,9 @@ import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
-import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 
 /**
  * Job to load person referrals from CMS into ElasticSearch.
@@ -133,21 +133,18 @@ public class SafetyAlertIndexerJob
         buf.append(esSafetyAlerts.stream().map(ElasticTransformer::jsonify)
             .sorted(String::compareTo).collect(Collectors.joining(",")));
       } catch (Exception e) {
-        throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR SERIALIZING SAFETY ALERTS: {}",
-            e.getMessage());
+        throw JobLogs.runtime(LOGGER, e, "ERROR SERIALIZING SAFETY ALERTS: {}", e.getMessage());
       }
     }
 
     buf.append("]}");
-
     final String updateJson = buf.toString();
 
     String insertJson;
     try {
       insertJson = mapper.writeValueAsString(esp);
     } catch (JsonProcessingException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}",
-          e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}", e.getMessage());
     }
 
     final String alias = esDao.getConfig().getElasticsearchAlias();

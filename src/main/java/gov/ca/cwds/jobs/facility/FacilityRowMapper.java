@@ -43,7 +43,7 @@ public class FacilityRowMapper implements RowMapper<FacilityRow> {
         descriptor.getWriteMethod().invoke(object, value);
       }
     } catch (Exception e) {
-      throw JobLogs.buildRuntimeException(LOGGER, e, e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, e.getMessage());
     }
   }
 

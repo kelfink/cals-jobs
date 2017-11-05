@@ -34,9 +34,9 @@ import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
-import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 
 /**
  * Job to load Other Client Name from CMS into ElasticSearch.
@@ -119,7 +119,6 @@ public class OtherClientNameIndexerJob
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedAkas p)
       throws NeutronException {
 
-    // If at first you don't succeed, cheat. :-)
     final StringBuilder buf = new StringBuilder();
     buf.append("{\"akas\":[");
 
@@ -128,8 +127,7 @@ public class OtherClientNameIndexerJob
         buf.append(p.getAkas().stream().map(ElasticTransformer::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
-        throw JobLogs.buildRuntimeException(LOGGER, e, "ERROR SERIALIZING OTHER CLIENT NAMES! {}",
-            e.getMessage());
+        throw JobLogs.runtime(LOGGER, e, "ERROR SERIALIZING CLIENT ALIASES! {}", e.getMessage());
       }
     }
 
@@ -139,8 +137,7 @@ public class OtherClientNameIndexerJob
     try {
       insertJson = mapper.writeValueAsString(esp);
     } catch (JsonProcessingException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}",
-          e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}", e.getMessage());
     }
     final String updateJson = buf.toString();
 

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.listener;
+package gov.ca.cwds.neutron.listener;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import gov.ca.cwds.jobs.listener.NeutronJobListener;
+import gov.ca.cwds.neutron.listener.NeutronJobListener;
 
 public class NeutronJobListenerTest {
 

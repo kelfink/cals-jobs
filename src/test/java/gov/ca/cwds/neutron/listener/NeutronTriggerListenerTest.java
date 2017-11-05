@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.listener;
+package gov.ca.cwds.neutron.listener;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -24,6 +24,7 @@ import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
+import gov.ca.cwds.neutron.listener.NeutronTriggerListener;
 
 public class NeutronTriggerListenerTest extends Goddard {
 

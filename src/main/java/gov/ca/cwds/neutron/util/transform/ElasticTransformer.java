@@ -60,7 +60,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * 
  * @author CWDS API Team
  */
-public class ElasticTransformer {
+public final class ElasticTransformer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticTransformer.class);
 
