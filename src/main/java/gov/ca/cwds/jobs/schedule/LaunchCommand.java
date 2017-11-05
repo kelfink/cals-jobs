@@ -498,22 +498,22 @@ public class LaunchCommand implements AtomLaunchScheduler {
       String... args) {
     int exitCode = 0;
 
-    FlightPlan globalOpts;
+    FlightPlan standardFlightPlan;
     try {
-      globalOpts = FlightPlan.parseCommandLine(args);
+      standardFlightPlan = FlightPlan.parseCommandLine(args);
     } catch (Exception e) {
       throw JobLogs.runtime(LOGGER, e, "CMD LINE ERROR! {}", e.getMessage());
     }
 
-    if (globalOpts.isSimulateLaunch()) {
+    if (standardFlightPlan.isSimulateLaunch()) {
       return; // Test "main" methods
     }
 
     Injector injector;
     try {
-      injector = HyperCube.buildInjector(globalOpts);
+      injector = HyperCube.buildInjector(standardFlightPlan);
       instance = injector.getInstance(LaunchCommand.class);
-      instance.startingOpts = globalOpts;
+      instance.startingOpts = standardFlightPlan;
       instance.settings.setContinuousMode(false);
     } catch (NeutronException e) {
       throw JobLogs.runtime(LOGGER, e, "Rethrow", e.getMessage());
@@ -524,7 +524,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
-      exitCode = 1;
+      exitCode = -1;
       throw JobLogs.runtime(LOGGER, e, "STANDALONE ROCKET FAILED!: {}", e.getMessage());
     } finally {
       // WARNING: kills the JVM in testing but may be needed to shutdown resources.

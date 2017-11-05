@@ -32,17 +32,12 @@ import gov.ca.cwds.jobs.util.JobDateUtil;
  * @author CWDS API Team
  */
 @SuppressWarnings("serial")
-// @Entity
-// @Table(name = "screenings")
 public class IntakeScreening extends CommonScreening
     implements PersistentObject, ApiMultiplePersonAware, ApiScreeningAware {
 
   private static final Set<String> EMPTY_SET_STRING = new LinkedHashSet<>();
 
   @Id
-  // @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "screenings_id_seq")
-  // @SequenceGenerator(name = "screenings_id_seq", sequenceName = "screenings_id_seq",
-  // allocationSize = 10)
   @Column(name = "SCREENING_ID")
   private String id;
 
@@ -53,11 +48,9 @@ public class IntakeScreening extends CommonScreening
   private String reference;
 
   @Column(name = "STARTED_AT")
-  // @Type(type = "timestamp")
   private Date startedAt;
 
   @Column(name = "ENDED_AT")
-  // @Type(type = "timestamp")
   private Date endedAt;
 
   @JsonIgnore
