@@ -221,6 +221,14 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
   }
 
   @Test
+  public void mustDeleteLimitedAccessRecords_Args__2() throws Exception {
+    when(opts.isLoadSealedAndSensitive()).thenReturn(true);
+    boolean actual = target.mustDeleteLimitedAccessRecords();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
   public void useTransformThread_Args__() throws Exception {
     boolean actual = target.useTransformThread();
     boolean expected = false;
