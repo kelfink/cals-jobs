@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 
@@ -25,6 +26,7 @@ import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
@@ -219,7 +221,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Ignore
   public void newJob_Args__Class__FlightPlan() throws Exception {
     final Class klass = Mach1TestRocket.class;
-    Object actual = HyperCube.newJob(klass, flightPlan);
+    Object actual = HyperCube.newRocket(klass, flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -239,16 +241,21 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     target.setTestBinder(mock(Binder.class));
     HyperCube.setInstance(target);
 
-    HyperCube.newJob(klass, flightPlan);
+    HyperCube.newRocket(klass, flightPlan);
   }
 
   @Test
-  // @Ignore
   public void newJob_Args__Class__StringArray() throws Exception {
-    final Class klass = TestIndexerJob.class;
+    final Class klass = Mach1TestRocket.class;
     final String[] args = new String[] {"-c", "config/local.yaml", "-l",
         "/Users/CWS-NS3/client_indexer_time.txt", "-t", "4", "-S"};
-    Object actual = HyperCube.newJob(klass, args);
+
+    final Injector injector = mock(Injector.class);
+    when(injector.getInstance(RocketFactory.class)).thenReturn(rocketFactory);
+    when(injector.getInstance(Mach1TestRocket.class)).thenReturn((Mach1TestRocket) mach1Rocket);
+    HyperCube.setInjector(injector);
+
+    final Object actual = HyperCube.newRocket(klass, args);
     assertThat(actual, is(notNullValue()));
   }
 

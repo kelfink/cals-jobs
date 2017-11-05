@@ -64,14 +64,11 @@ public class TestSingletonModule extends AbstractModule {
   }
 
   public static void main(String[] args) {
-
     final Injector createInjector = Guice.createInjector(new TestSingletonModule());
-
     for (int i = 0; i < 10; i++) {
       TestMessenger instance = createInjector.getInstance(TestMessenger.class);
       instance.spitItOutAlready();
     }
-
   }
 
 }

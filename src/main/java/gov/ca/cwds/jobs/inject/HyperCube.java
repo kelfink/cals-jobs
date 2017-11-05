@@ -175,14 +175,14 @@ public class HyperCube extends NeutronGuiceModule {
    * Build the Guice Injector once and use it for all Job instances during the life of this batch
    * JVM.
    * 
-   * @param opts command line options
+   * @param flightPlan command line options
    * @return Guice Injector
    * @throws NeutronException if unable to construct dependencies
    */
-  public static synchronized Injector buildInjector(final FlightPlan opts) throws NeutronException {
+  public static synchronized Injector buildInjector(final FlightPlan flightPlan) throws NeutronException {
     if (injector == null) {
       try {
-        injector = Guice.createInjector(cubeMaker.apply(opts));
+        injector = Guice.createInjector(cubeMaker.apply(flightPlan));
 
         // Initialize system code cache.
         injector.getInstance(gov.ca.cwds.rest.api.domain.cms.SystemCodeCache.class);
@@ -203,16 +203,16 @@ public class HyperCube extends NeutronGuiceModule {
    * Prepare a batch job with all required dependencies.
    * 
    * @param klass batch job class
-   * @param opts command line options
+   * @param flightPlan command line options
    * @return batch job, ready to run
    * @param <T> Person persistence type
    * @throws NeutronException checked exception
    */
-  public static <T extends BasePersonIndexerJob<?, ?>> T newJob(final Class<T> klass,
-      final FlightPlan opts) throws NeutronException {
+  public static <T extends BasePersonIndexerJob<?, ?>> T newRocket(final Class<T> klass,
+      final FlightPlan flightPlan) throws NeutronException {
     try {
-      final T ret = buildInjector(opts).getInstance(klass);
-      ret.setOpts(opts);
+      final T ret = buildInjector(flightPlan).getInstance(klass);
+      ret.setOpts(flightPlan);
       return ret;
     } catch (CreationException e) {
       throw JobLogs.checked(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
@@ -228,10 +228,10 @@ public class HyperCube extends NeutronGuiceModule {
    * @param <T> Person persistence type
    * @throws NeutronException checked exception
    */
-  public static <T extends BasePersonIndexerJob<?, ?>> T newJob(final Class<T> klass,
+  public static <T extends BasePersonIndexerJob<?, ?>> T newRocket(final Class<T> klass,
       String... args) throws NeutronException {
-    final FlightPlan opts = FlightPlan.parseCommandLine(args);
-    return newJob(klass, opts);
+    final FlightPlan flightPlan = FlightPlan.parseCommandLine(args);
+    return newRocket(klass, flightPlan);
   }
 
   /**
@@ -480,6 +480,10 @@ public class HyperCube extends NeutronGuiceModule {
 
   public static void setCubeMaker(Function<FlightPlan, HyperCube> cubeMaker) {
     HyperCube.cubeMaker = cubeMaker;
+  }
+
+  public static void setInjector(Injector injector) {
+    HyperCube.injector = injector;
   }
 
 }

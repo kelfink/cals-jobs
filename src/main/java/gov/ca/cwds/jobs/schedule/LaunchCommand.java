@@ -519,7 +519,7 @@ public class LaunchCommand implements AtomLaunchScheduler {
       throw JobLogs.runtime(LOGGER, e, "Rethrow", e.getMessage());
     }
 
-    try (final T job = HyperCube.newJob(klass, args)) {
+    try (final T job = HyperCube.newRocket(klass, args)) {
       job.run();
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
