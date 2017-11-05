@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 import java.util.Map;
@@ -12,6 +14,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
@@ -116,6 +119,13 @@ public class LaunchSchedulerTest extends Goddard {
   public void stopScheduler_Args__boolean() throws Exception {
     boolean waitForJobsToComplete = false;
     target.stopScheduler(waitForJobsToComplete);
+  }
+
+  @Test(expected = NeutronException.class)
+  public void stopScheduler_Args__boolean__boom() throws Exception {
+    doThrow(new SchedulerException()).when(scheduler).shutdown();
+    doThrow(new SchedulerException()).when(scheduler).shutdown(any(Boolean.class));
+    target.stopScheduler(false);
   }
 
   @Test

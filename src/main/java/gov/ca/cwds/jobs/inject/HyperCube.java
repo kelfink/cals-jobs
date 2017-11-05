@@ -148,7 +148,6 @@ public class HyperCube extends NeutronGuiceModule {
     this.lastJobRunTimeFilename =
         !StringUtils.isBlank(lastJobRunTimeFilename) ? lastJobRunTimeFilename : "";
     this.opts = opts;
-    init();
   }
 
   public Configuration makeHibernateConfiguration() {
