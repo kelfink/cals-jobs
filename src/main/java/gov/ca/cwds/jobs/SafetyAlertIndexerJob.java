@@ -36,6 +36,7 @@ import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
+import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
@@ -45,7 +46,7 @@ import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
  * @author CWDS API Team
  */
 public class SafetyAlertIndexerJob
-    extends BasePersonIndexerJob<ReplicatedSafetyAlerts, EsSafetyAlert>
+    extends InitialLoadJdbcRocket<ReplicatedSafetyAlerts, EsSafetyAlert>
     implements NeutronRowMapper<EsSafetyAlert> {
 
   private static final long serialVersionUID = 1L;
@@ -77,11 +78,6 @@ public class SafetyAlertIndexerJob
   }
 
   @Override
-  public String getInitialLoadViewName() {
-    return "VW_LST_SAFETY_ALERT";
-  }
-
-  @Override
   public String getJdbcOrderBy() {
     return " ORDER BY CLIENT_ID ";
   }
@@ -98,6 +94,11 @@ public class SafetyAlertIndexerJob
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
+  }
+
+  @Override
+  public String getInitialLoadViewName() {
+    return "VW_LST_SAFETY_ALERT";
   }
 
   /**

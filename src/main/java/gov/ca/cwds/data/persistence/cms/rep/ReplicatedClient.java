@@ -99,7 +99,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "fkClient")
   private Set<ReplicatedClientAddress> clientAddresses = new LinkedHashSet<>();
 
-  private transient List<Short> clientRaces = new ArrayList<>();
+  @Transient
+  private List<Short> clientRaces = new ArrayList<>();
 
   /**
    * Only set to transient to prevent Hibernate from loading it.

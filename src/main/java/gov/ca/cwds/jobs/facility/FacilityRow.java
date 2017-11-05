@@ -14,9 +14,6 @@ import gov.ca.cwds.jobs.util.JobDateUtil;
  */
 public class FacilityRow implements PersistentObject {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private String id;

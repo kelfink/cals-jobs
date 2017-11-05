@@ -44,6 +44,7 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
@@ -53,7 +54,7 @@ import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
  * @author CWDS API Team
  */
 public class RelationshipIndexerJob
-    extends BasePersonIndexerJob<ReplicatedRelationships, EsRelationship>
+    extends InitialLoadJdbcRocket<ReplicatedRelationships, EsRelationship>
     implements NeutronRowMapper<EsRelationship> {
 
   private static final long serialVersionUID = 1L;
@@ -100,23 +101,23 @@ public class RelationshipIndexerJob
   }
 
   @Override
-  public EsRelationship extract(ResultSet rs) throws SQLException {
-    return EsRelationship.mapRow(rs);
-  }
-
-  @Override
-  public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
-    return EsRelationship.class;
-  }
-
-  @Override
   public String getInitialLoadViewName() {
     return "VW_MQT_BI_DIR_RELATION";
   }
 
   @Override
+  public EsRelationship extract(ResultSet rs) throws SQLException {
+    return EsRelationship.mapRow(rs);
+  }
+
+  @Override
   public String getJdbcOrderBy() {
     return " ORDER BY THIS_LEGACY_ID, RELATED_LEGACY_ID ";
+  }
+
+  @Override
+  public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
+    return EsRelationship.class;
   }
 
   @Override
@@ -225,7 +226,8 @@ public class RelationshipIndexerJob
       final List<Pair<String, String>> ranges = getPartitionRanges();
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
-      final ForkJoinPool threadPool = new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getOpts()));
+      final ForkJoinPool threadPool =
+          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getOpts()));
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {

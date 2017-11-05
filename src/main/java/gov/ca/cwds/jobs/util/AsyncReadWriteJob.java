@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.util;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,7 +14,8 @@ import gov.ca.cwds.jobs.exception.NeutronException;
  * @param <O> output writer type
  */
 @SuppressWarnings("unchecked")
-public class AsyncReadWriteJob<I, O> extends ProducerConsumer<I> implements Rocket, JobComponent {
+public class AsyncReadWriteJob<I extends Serializable, O extends Serializable>
+    extends ProducerConsumer<I> implements Rocket, JobComponent {
 
   /**
    * Default serialization.
@@ -24,7 +26,7 @@ public class AsyncReadWriteJob<I, O> extends ProducerConsumer<I> implements Rock
   private transient JobProcessor<I, O> processor;
   private transient JobWriter<O> writer;
 
-  private transient List<O> chunk = new LinkedList<>();
+  private List<O> chunk = new LinkedList<>();
 
   private int chunkSize = 100;
 
