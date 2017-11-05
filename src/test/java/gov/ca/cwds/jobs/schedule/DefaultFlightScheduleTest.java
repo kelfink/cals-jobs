@@ -7,9 +7,9 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
+import org.quartz.listeners.JobChainingJobListener;
 
 public class DefaultFlightScheduleTest {
-
   @Test
   public void type() throws Exception {
     assertThat(DefaultFlightSchedule.class, notNullValue());
@@ -65,6 +65,42 @@ public class DefaultFlightScheduleTest {
     String key = "client";
     DefaultFlightSchedule actual = DefaultFlightSchedule.lookupByJobName(key);
     DefaultFlightSchedule expected = DefaultFlightSchedule.CLIENT;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void buildFullLoadJobChainListener_Args__() throws Exception {
+    JobChainingJobListener actual = DefaultFlightSchedule.buildFullLoadJobChainListener();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getShortName_Args__() throws Exception {
+    DefaultFlightSchedule target = DefaultFlightSchedule.CLIENT;
+    String actual = target.getShortName();
+    String expected = "client";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getWaitPeriodSeconds_Args__() throws Exception {
+    DefaultFlightSchedule target = DefaultFlightSchedule.CLIENT;
+    int actual = target.getWaitPeriodSeconds();
+    assertThat(actual, is(not(0)));
+  }
+
+  @Test
+  public void getLastRunPriority_Args__() throws Exception {
+    DefaultFlightSchedule target = DefaultFlightSchedule.CLIENT;
+    int actual = target.getLastRunPriority();
+    assertThat(actual, is(not(0)));
+  }
+
+  @Test
+  public void getInitialLoadOrder_Args__() throws Exception {
+    DefaultFlightSchedule target = DefaultFlightSchedule.CLIENT;
+    int actual = target.getInitialLoadOrder();
+    int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 
