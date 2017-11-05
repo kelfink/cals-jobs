@@ -20,6 +20,7 @@ import org.quartz.Trigger;
 
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.Rocket;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 
@@ -109,6 +110,12 @@ public class NeutronRocketTest extends Goddard {
   public void setTrack_Args__JobProgressTrack() throws Exception {
     FlightRecord track = mock(FlightRecord.class);
     target.setTrack(track);
+  }
+
+  @Test
+  public void getRocket() throws Exception {
+    Rocket actual = target.getRocket();
+    assertThat(actual, is(notNullValue()));
   }
 
 }
