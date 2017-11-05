@@ -16,7 +16,7 @@ import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 
 /**
  * Common functions and features for initial load.

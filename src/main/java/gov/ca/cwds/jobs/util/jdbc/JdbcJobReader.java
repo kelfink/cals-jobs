@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.JobReader;
+import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 
 /**
  * @param <T> persistence class

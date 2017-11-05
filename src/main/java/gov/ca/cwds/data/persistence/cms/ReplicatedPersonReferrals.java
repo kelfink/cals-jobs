@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
-import gov.ca.cwds.jobs.shrinkray.RetrovillePerson;
+import gov.ca.cwds.neutron.shrinkray.RetrovillePerson;
 
 /**
  * Pseudo-normalized container for CMS person referral.

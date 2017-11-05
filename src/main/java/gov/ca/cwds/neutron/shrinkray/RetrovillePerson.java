@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.shrinkray;
+package gov.ca.cwds.neutron.shrinkray;
 
 import java.util.Date;
 

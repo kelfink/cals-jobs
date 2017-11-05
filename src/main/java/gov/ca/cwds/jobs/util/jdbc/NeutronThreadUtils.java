@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 
 public class NeutronThreadUtils {
 

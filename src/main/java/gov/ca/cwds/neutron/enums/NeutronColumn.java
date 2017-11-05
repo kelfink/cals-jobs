@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.defaults;
+package gov.ca.cwds.neutron.enums;
 
 public enum NeutronColumn {
 

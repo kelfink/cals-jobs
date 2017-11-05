@@ -13,7 +13,7 @@ import com.google.common.collect.Lists;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPersonParent;
-import gov.ca.cwds.jobs.shrinkray.RetrovillePerson;
+import gov.ca.cwds.neutron.shrinkray.RetrovillePerson;
 
 /**
  * Pseudo-normalized container for CMS person case.

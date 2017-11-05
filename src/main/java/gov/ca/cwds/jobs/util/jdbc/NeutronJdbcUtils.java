@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.component.AtomHibernate;
-import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
+import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 
 /**
  * JDBC utilities for Neutron rockets.

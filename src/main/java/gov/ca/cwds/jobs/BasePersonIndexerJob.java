@@ -57,10 +57,6 @@ import gov.ca.cwds.jobs.component.AtomValidateDocument;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.defaults.NeutronColumn;
-import gov.ca.cwds.jobs.defaults.NeutronDateTimeFormat;
-import gov.ca.cwds.jobs.defaults.NeutronElasticsearchDefaults;
-import gov.ca.cwds.jobs.defaults.NeutronIntegerDefaults;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.log.JetPackLogger;
@@ -71,6 +67,10 @@ import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.neutron.enums.NeutronColumn;
+import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
+import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
+import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 
 /**
  * Base person batch job to load clients from CMS into ElasticSearch.

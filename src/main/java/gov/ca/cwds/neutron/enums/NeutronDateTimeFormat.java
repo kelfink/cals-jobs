@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.defaults;
+package gov.ca.cwds.neutron.enums;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
