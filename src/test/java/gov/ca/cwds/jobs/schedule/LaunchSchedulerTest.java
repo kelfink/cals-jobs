@@ -193,6 +193,14 @@ public class LaunchSchedulerTest extends Goddard {
     assertThat(actual, is(equalTo(expected)));
   }
 
+  @Test(expected = NeutronException.class)
+  public void isJobVetoed_Args__boom() throws Exception {
+    String className = "quibblescibblerazzerfrazzer";
+    boolean actual = target.isLaunchVetoed(className);
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
   @Test
   public void getRocketOptions_Args__() throws Exception {
     AtomFlightPlanManager actual = target.getFlightPlanManger();
