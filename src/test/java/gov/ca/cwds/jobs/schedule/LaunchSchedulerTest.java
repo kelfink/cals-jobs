@@ -133,6 +133,12 @@ public class LaunchSchedulerTest extends Goddard {
     target.startScheduler();
   }
 
+  @Test(expected = NeutronException.class)
+  public void startScheduler_Args__boom() throws Exception {
+    doThrow(new SchedulerException()).when(scheduler).start();
+    target.startScheduler();
+  }
+
   @Test
   public void addExecutingJob_Args__TriggerKey__NeutronRocket() throws Exception {
     NeutronRocket job = mock(NeutronRocket.class);
