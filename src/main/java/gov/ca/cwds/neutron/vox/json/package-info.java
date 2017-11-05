@@ -5,4 +5,4 @@
  * @author CWS-NS3
  *
  */
-package gov.ca.cwds.jobs.json;
+package gov.ca.cwds.neutron.vox.json;

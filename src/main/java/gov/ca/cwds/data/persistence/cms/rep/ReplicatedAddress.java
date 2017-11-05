@@ -15,7 +15,7 @@ import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.cms.BaseAddress;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 import gov.ca.cwds.jobs.util.JobDateUtil;
-import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**

@@ -20,7 +20,7 @@ import org.slf4j.Marker;
  * @author CWDS API Team
  * @see Logger
  */
-public class JetPackLogger implements NeutronConditionalLogger {
+public class JetPackLogger implements ConditionalLogger {
 
   /**
    * Delegate SLF4J Logger.

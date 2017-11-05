@@ -27,10 +27,10 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.util.JobLogs;
+import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
-import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
-import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
+import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
+import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
  * Job to load case history from CMS into ElasticSearch.
@@ -39,11 +39,8 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
  */
 public abstract class CaseHistoryIndexerJob
     extends BasePersonIndexerJob<ReplicatedPersonCases, EsPersonCase>
-    implements JobResultSetAware<EsPersonCase> {
+    implements NeutronRowMapper<EsPersonCase> {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CaseHistoryIndexerJob.class);

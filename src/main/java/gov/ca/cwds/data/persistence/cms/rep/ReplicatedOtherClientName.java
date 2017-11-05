@@ -1,6 +1,6 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
-import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
+import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -26,7 +26,7 @@ import gov.ca.cwds.data.persistence.cms.BaseOtherClientName;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.jdbc.RowMapper;
-import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 

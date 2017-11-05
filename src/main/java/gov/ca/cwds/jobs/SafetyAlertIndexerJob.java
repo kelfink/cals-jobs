@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs;
 
-import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
+import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,9 +35,9 @@ import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
-import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
-import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
+import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
+import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
+import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 
 /**
  * Job to load person referrals from CMS into ElasticSearch.
@@ -46,7 +46,7 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
  */
 public class SafetyAlertIndexerJob
     extends BasePersonIndexerJob<ReplicatedSafetyAlerts, EsSafetyAlert>
-    implements JobResultSetAware<EsSafetyAlert> {
+    implements NeutronRowMapper<EsSafetyAlert> {
 
   private static final long serialVersionUID = 1L;
 

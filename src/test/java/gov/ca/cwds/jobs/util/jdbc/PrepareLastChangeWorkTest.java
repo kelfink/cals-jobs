@@ -21,12 +21,12 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.util.JobLogs;
 
-public class PrepSQLWorkTest extends Goddard<ReplicatedPersonCases, EsPersonCase> {
+public class PrepareLastChangeWorkTest extends Goddard<ReplicatedPersonCases, EsPersonCase> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PrepSQLWorkTest.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(PrepareLastChangeWorkTest.class);
 
   protected PreparedStatement prepStmt;
-  PrepSQLWork target;
+  PrepareLastChangeWork target;
 
   @Override
   @Before
@@ -40,7 +40,7 @@ public class PrepSQLWorkTest extends Goddard<ReplicatedPersonCases, EsPersonCase
 
   @Test
   public void type() throws Exception {
-    assertThat(PrepSQLWork.class, notNullValue());
+    assertThat(PrepareLastChangeWork.class, notNullValue());
   }
 
   @Test
@@ -48,7 +48,7 @@ public class PrepSQLWorkTest extends Goddard<ReplicatedPersonCases, EsPersonCase
     Date lastRunTime = new Date();
     String sql = null;
 
-    target = new PrepSQLWork(lastRunTime, sql, null);
+    target = new PrepareLastChangeWork(lastRunTime, sql, null);
     assertThat(target, notNullValue());
   }
 
@@ -58,7 +58,7 @@ public class PrepSQLWorkTest extends Goddard<ReplicatedPersonCases, EsPersonCase
     final String sql =
         "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > :ts and current timestamp > ?";
 
-    target = new PrepSQLWork(lastRunTime, sql, c -> {
+    target = new PrepareLastChangeWork(lastRunTime, sql, c -> {
       try {
         return c.prepareStatement(sql);
       } catch (SQLException e) {
@@ -75,7 +75,7 @@ public class PrepSQLWorkTest extends Goddard<ReplicatedPersonCases, EsPersonCase
         "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > '2017-08-28 11:54:40' and current timestamp > ?";
     when(prepStmt.executeUpdate()).thenThrow(SQLException.class);
 
-    target = new PrepSQLWork(lastRunTime, sql, c -> {
+    target = new PrepareLastChangeWork(lastRunTime, sql, c -> {
       try {
         return c.prepareStatement(sql);
       } catch (SQLException e) {

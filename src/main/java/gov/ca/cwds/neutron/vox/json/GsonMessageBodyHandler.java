@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.json;
+package gov.ca.cwds.neutron.vox.json;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.util.jdbc;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class NeutronStreamUtils {
+public final class NeutronStreamUtils {
 
   private NeutronStreamUtils() {
     // static methods only

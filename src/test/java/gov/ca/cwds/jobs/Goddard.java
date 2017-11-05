@@ -68,7 +68,7 @@ import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
-import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 /**

@@ -8,18 +8,23 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.jdbc.Work;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import gov.ca.cwds.jobs.log.JetPackLogger;
+import gov.ca.cwds.jobs.log.ConditionalLogger;
 
 /**
- * Execute SQL prior to retrieving records, typically for last change runs. Examples include
- * populating a global temporary table prior to reading from a view.
+ * Execute SQL prior to retrieving records, typically for last change runs.
+ * 
+ * <p>
+ * Examples include populating a global temporary table prior to reading from a view.
+ * </p>
  * 
  * @author CWDS API Team
  */
-public class PrepSQLWork implements Work {
+public class PrepareLastChangeWork implements Work {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PrepSQLWork.class);
+  private static final ConditionalLogger LOGGER =
+      new JetPackLogger(PrepareLastChangeWork.class);
 
   private final Date lastRunTime;
   private final String sql;
@@ -32,7 +37,7 @@ public class PrepSQLWork implements Work {
    * @param sql SQL to run
    * @param prepStmtMaker Function to produce prepared statement
    */
-  public PrepSQLWork(Date lastRunTime, String sql,
+  public PrepareLastChangeWork(Date lastRunTime, String sql,
       final Function<Connection, PreparedStatement> prepStmtMaker) {
     this.lastRunTime = lastRunTime != null ? new Date(lastRunTime.getTime()) : null;
     this.sql = sql;

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.util.transform;
+package gov.ca.cwds.neutron.util.transform;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -44,6 +44,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.jobs.test.TestNormalizedEntry;
 import gov.ca.cwds.jobs.test.TestOnlyApiPersonAware;
+import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 public class ElasticTransformerTest extends Goddard {

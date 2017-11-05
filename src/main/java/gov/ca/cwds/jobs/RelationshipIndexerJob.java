@@ -41,11 +41,11 @@ import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
-import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
+import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
-import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
-import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
+import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
  * Job to load family relationships from CMS into ElasticSearch.
@@ -54,7 +54,7 @@ import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
  */
 public class RelationshipIndexerJob
     extends BasePersonIndexerJob<ReplicatedRelationships, EsRelationship>
-    implements JobResultSetAware<EsRelationship> {
+    implements NeutronRowMapper<EsRelationship> {
 
   private static final long serialVersionUID = 1L;
 

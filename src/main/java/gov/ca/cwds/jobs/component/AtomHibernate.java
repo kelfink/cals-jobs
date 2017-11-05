@@ -17,7 +17,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.util.JobLogs;
-import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
+import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 
@@ -30,7 +30,7 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
  * @param <M> de-normalized type or same as normalized type if normalization not needed
  */
 public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends AtomShared, AtomInitialLoad<T>, JobResultSetAware<M> {
+    extends AtomShared, AtomInitialLoad<T>, NeutronRowMapper<M> {
 
   /**
    * @return default CMS schema name

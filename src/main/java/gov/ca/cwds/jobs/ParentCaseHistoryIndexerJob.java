@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs;
 
-import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
+import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

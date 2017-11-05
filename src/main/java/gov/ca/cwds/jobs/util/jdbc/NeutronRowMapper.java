@@ -12,7 +12,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
  * @param <D> de-normalized entity class instance
  */
 @FunctionalInterface
-public interface JobResultSetAware<D extends ApiGroupNormalizer<?>> {
+public interface NeutronRowMapper<D extends ApiGroupNormalizer<?>> {
 
   /**
    * Read from a JDBC ResultSet into an entity bean.

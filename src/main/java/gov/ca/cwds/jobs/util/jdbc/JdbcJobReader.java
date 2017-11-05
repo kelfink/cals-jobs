@@ -33,21 +33,6 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
   private final String query;
   private final Function<Connection, PreparedStatement> statementMaker;
 
-  /**
-   * @param sessionFactory Hibernate session factory
-   * @param rowMapper row mapper
-   * @param query SQL query
-   * @deprecated SonarQube calls creating a PreparedStatement from query a "vulnerability"
-   * @see #JdbcJobReader(SessionFactory, RowMapper, Function)
-   */
-  @Deprecated
-  public JdbcJobReader(SessionFactory sessionFactory, RowMapper<T> rowMapper, String query) {
-    this.sessionFactory = sessionFactory;
-    this.rowMapper = rowMapper;
-    this.query = query;
-    this.statementMaker = null;
-  }
-
   @Inject
   public JdbcJobReader(SessionFactory sessionFactory, RowMapper<T> rowMapper,
       Function<Connection, PreparedStatement> statementMaker) {

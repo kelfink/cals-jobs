@@ -61,7 +61,7 @@ public class NeutronRestServer extends Application {
 
       jerseyServlet.setInitParameters(resources);
       jerseyServlet.setInitParameter(ServerProperties.PROVIDER_PACKAGES,
-          gov.ca.cwds.jobs.json.GsonMessageBodyHandler.class.getPackage().getName());
+          gov.ca.cwds.neutron.vox.json.GsonMessageBodyHandler.class.getPackage().getName());
 
       LOGGER.debug("init params: {}", jerseyServlet.getInitParameters());
 

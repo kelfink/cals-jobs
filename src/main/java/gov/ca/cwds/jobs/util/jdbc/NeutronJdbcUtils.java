@@ -26,7 +26,7 @@ import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
  * 
  * @author CWDS API Team
  */
-public class NeutronJdbcUtils {
+public final class NeutronJdbcUtils {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJdbcUtils.class);
 
@@ -72,13 +72,13 @@ public class NeutronJdbcUtils {
 
   public static void prepHibernateLastChange(final Session session, final Date lastRunTime,
       final String sqlPrepLastChange, final Function<Connection, PreparedStatement> func) {
-    final Work work = new PrepSQLWork(lastRunTime, sqlPrepLastChange, func);
+    final Work work = new PrepareLastChangeWork(lastRunTime, sqlPrepLastChange, func);
     session.doWork(work);
   }
 
   private static List<Pair<String, String>> buildPartitionsRanges(int partitions) {
     final int len = BASE_PARTITIONS.length;
-    final int skip = (len / partitions);
+    final int skip = len / partitions;
     LOGGER.info("len: {}, skip: {}", len, skip);
 
     final Integer[] positions =

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.util.transform;
+package gov.ca.cwds.neutron.util.transform;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -6,6 +6,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
+
+import gov.ca.cwds.neutron.util.transform.JobTransformUtils;
 
 public class JobTransformUtilsTest {
 

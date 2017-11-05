@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.json;
+package gov.ca.cwds.neutron.vox.json;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.jobs.schedule.RocketCommandInstruction;
+import gov.ca.cwds.neutron.vox.json.GsonMessageBodyHandler;
 
 public class GsonMessageBodyHandlerTest {
 

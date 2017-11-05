@@ -60,17 +60,17 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.log.JetPackLogger;
-import gov.ca.cwds.jobs.log.NeutronConditionalLogger;
+import gov.ca.cwds.jobs.log.ConditionalLogger;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
-import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.enums.NeutronColumn;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 
 /**
  * Base person batch job to load clients from CMS into ElasticSearch.
@@ -104,7 +104,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   private static final long serialVersionUID = 1L;
 
-  private static final NeutronConditionalLogger LOGGER =
+  private static final ConditionalLogger LOGGER =
       new JetPackLogger(BasePersonIndexerJob.class);
 
   /**

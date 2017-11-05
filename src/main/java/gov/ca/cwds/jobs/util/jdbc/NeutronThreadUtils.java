@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 
-public class NeutronThreadUtils {
+public final class NeutronThreadUtils {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronThreadUtils.class);
 
@@ -29,7 +29,8 @@ public class NeutronThreadUtils {
   }
 
   /**
-   * Common method sets the thread's name.
+   * Set the name of the current thread. Simplifies logging when a rocket runs multiple threads or
+   * when multiple rockets are in flight.
    * 
    * @param title title of thread
    * @param obj calling object

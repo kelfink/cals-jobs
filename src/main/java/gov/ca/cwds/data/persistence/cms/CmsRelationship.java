@@ -1,6 +1,6 @@
 package gov.ca.cwds.data.persistence.cms;
 
-import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
+import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

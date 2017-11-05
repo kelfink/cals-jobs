@@ -17,16 +17,13 @@ import gov.ca.cwds.jobs.exception.NeutronException;
  */
 public final class JobLogs {
 
-  /**
-   * Standard Logger.
-   */
-  protected static final Logger LOGGER = LoggerFactory.getLogger(JobLogs.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(JobLogs.class);
 
   private static final int DEFAULT_LOG_EVERY = 5000;
 
   private JobLogs() {
-    // Static methods only, no class instantiation. Evil singleton, blah, blah, blah ... I can't
-    // hear you!
+    // Static methods only; do not instantiate.
+    // Evil singleton, blah, blah, blah ... I can't hear you ...
   }
 
   /**

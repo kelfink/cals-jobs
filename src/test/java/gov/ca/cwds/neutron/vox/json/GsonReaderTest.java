@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.json;
+package gov.ca.cwds.neutron.vox.json;
 
 // import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.jobs.schedule.RocketCommandInstruction;
+import gov.ca.cwds.neutron.vox.json.GsonReader;
 
 public class GsonReaderTest {
 

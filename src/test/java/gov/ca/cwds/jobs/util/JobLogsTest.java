@@ -6,10 +6,13 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.exception.JobsException;
 
 public class JobLogsTest {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(JobLogsTest.class);
 
   @Test
   public void type() throws Exception {
@@ -53,7 +56,7 @@ public class JobLogsTest {
   @Test(expected = JobsException.class)
   public void logEvery_Args__Logger__int__String__ObjectArray1() throws Exception {
     Exception e = new Exception();
-    throw JobLogs.buildRuntimeException(JobLogs.LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+    throw JobLogs.buildRuntimeException(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
   }
 
   @Test

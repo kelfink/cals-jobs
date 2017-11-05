@@ -38,12 +38,12 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
-import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
+import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
-import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
  * Job to load Clients from CMS into ElasticSearch.
@@ -51,7 +51,7 @@ import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
  * @author CWDS API Team
  */
 public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsClientAddress>
-    implements JobResultSetAware<EsClientAddress>, AtomValidateDocument {
+    implements NeutronRowMapper<EsClientAddress>, AtomValidateDocument {
 
   private static final long serialVersionUID = 1L;
 

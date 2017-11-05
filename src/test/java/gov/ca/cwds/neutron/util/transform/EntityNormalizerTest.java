@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.util.transform;
+package gov.ca.cwds.neutron.util.transform;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
 import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
+import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 public class EntityNormalizerTest {
 

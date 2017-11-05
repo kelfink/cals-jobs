@@ -27,8 +27,8 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
-import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
+import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
+import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
  * Job loads Intake Screenings from PostgreSQL into ElasticSearch.
@@ -36,7 +36,7 @@ import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
  * @author CWDS API Team
  */
 public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, EsIntakeScreening>
-    implements JobResultSetAware<EsIntakeScreening> {
+    implements NeutronRowMapper<EsIntakeScreening> {
 
   private static final long serialVersionUID = 1L;
 

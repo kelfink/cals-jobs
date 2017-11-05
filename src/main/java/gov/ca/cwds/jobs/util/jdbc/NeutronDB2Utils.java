@@ -12,7 +12,7 @@ import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.jobs.log.JetPackLogger;
-import gov.ca.cwds.jobs.log.NeutronConditionalLogger;
+import gov.ca.cwds.jobs.log.ConditionalLogger;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
@@ -20,9 +20,9 @@ import gov.ca.cwds.jobs.util.JobLogs;
  * 
  * @author CWDS API Team
  */
-public class NeutronDB2Utils {
+public final class NeutronDB2Utils {
 
-  private static final NeutronConditionalLogger LOGGER = new JetPackLogger(NeutronDB2Utils.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(NeutronDB2Utils.class);
 
   private NeutronDB2Utils() {
     // Default no-op.
@@ -42,7 +42,9 @@ public class NeutronDB2Utils {
   }
 
   /**
-   * Character sets differ by operating system, which affect ORDER BY and WHERE clauses.
+   * DB2's ORDER BY clause does <strong>NOT</strong> result set order across platforms.
+   * Unfortunately, character sets differ by operating system, which affect ORDER BY and WHERE
+   * clauses.
    * 
    * <p>
    * SELECT statements using range partitions depend on sort order.
@@ -96,8 +98,7 @@ public class NeutronDB2Utils {
 
       ret = meta.getDatabaseProductVersion().startsWith("DSN");
     } catch (Exception e) {
-      throw JobLogs.buildRuntimeException(LOGGER, e, "FAILED TO FIND DB2 PLATFORM! {}",
-          e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "FAILED TO FIND DB2 PLATFORM! {}", e.getMessage());
     }
 
     return ret;

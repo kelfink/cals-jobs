@@ -1,6 +1,6 @@
 package gov.ca.cwds.data.persistence.cms;
 
-import static gov.ca.cwds.jobs.util.transform.JobTransformUtils.ifNull;
+import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -29,12 +29,15 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.util.JobDateUtil;
-import gov.ca.cwds.jobs.util.transform.ElasticTransformer;
+import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
- * Entity bean for Materialized Query Table (MQT), VW_BI_DIR_RELATION. By request of the Intake
- * team, it only reads relationships from CLN_RELT, for now.
+ * Entity bean for Materialized Query Table (MQT), VW_BI_DIR_RELATION.
+ * 
+ * <p>
+ * By request of the Intake team, it only reads relationships from CLN_RELT, for now.
+ * </p>
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedRelationships}.
