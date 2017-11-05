@@ -110,7 +110,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Jackson ObjectMapper.
    */
-  protected final ObjectMapper mapper;
+  protected ObjectMapper mapper;
 
   private final JobBulkProcessorBuilder jobBulkProcessorBuilder;
 
@@ -987,6 +987,14 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   public void setTrack(FlightRecord track) {
     this.track = track;
+  }
+
+  public ObjectMapper getMapper() {
+    return mapper;
+  }
+
+  public void setMapper(ObjectMapper mapper) {
+    this.mapper = mapper;
   }
 
 }

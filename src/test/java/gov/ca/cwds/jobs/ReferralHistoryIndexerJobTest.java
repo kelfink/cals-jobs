@@ -25,6 +25,7 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.db2.jcc.DB2SystemMonitor;
 
@@ -37,6 +38,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.config.FlightPlanTest;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.rocket.referral.MinClientReferral;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
@@ -149,7 +151,6 @@ public class ReferralHistoryIndexerJobTest
   public void prepareUpsertRequest_Args__ElasticSearchPerson__ReplicatedPersonReferrals()
       throws Exception {
     final ReplicatedPersonReferrals referrals = new ReplicatedPersonReferrals(DEFAULT_CLIENT_ID);
-
     final ElasticSearchPersonReferral ref = new ElasticSearchPersonReferral();
     ref.setId(DEFAULT_CLIENT_ID);
 
@@ -171,6 +172,22 @@ public class ReferralHistoryIndexerJobTest
       fail("Expected exception was not thrown!");
     } catch (Exception e) {
     }
+  }
+
+  @Test(expected = NeutronException.class)
+  public void prepareUpsertRequest_Args__boom() throws Exception {
+    final ReplicatedPersonReferrals referrals = new ReplicatedPersonReferrals(DEFAULT_CLIENT_ID);
+    final ElasticSearchPersonReferral ref = new ElasticSearchPersonReferral();
+    ref.setId(DEFAULT_CLIENT_ID);
+
+    final ElasticSearchPersonAllegation allegation = new ElasticSearchPersonAllegation();
+    allegation.setId(DEFAULT_ALLEGATION_ID);
+    referrals.addReferral(ref, allegation);
+
+    mapper = mock(ObjectMapper.class);
+    when(mapper.writeValueAsString(any(Object.class))).thenThrow(JsonProcessingException.class);
+    target.setMapper(mapper);
+    target.prepareUpsertRequest(esp, referrals);
   }
 
   @Test
