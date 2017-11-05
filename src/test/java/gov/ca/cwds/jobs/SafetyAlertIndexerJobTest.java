@@ -39,7 +39,7 @@ public class SafetyAlertIndexerJobTest extends Goddard {
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(session.beginTransaction()).thenReturn(transaction);
-    when(opts.isLoadSealedAndSensitive()).thenReturn(false);
+    when(flightPlan.isLoadSealedAndSensitive()).thenReturn(false);
     when(esDao.getConfig()).thenReturn(esConfig);
     when(esConfig.getElasticsearchAlias()).thenReturn("people");
     when(esConfig.getElasticsearchDocType()).thenReturn("person");
@@ -48,7 +48,7 @@ public class SafetyAlertIndexerJobTest extends Goddard {
     SimpleTestSystemCodeCache.init();
 
     target = new SafetyAlertIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory,
-        flightRecorder, opts);
+        flightRecorder, flightPlan);
   }
 
   @Test
@@ -93,7 +93,7 @@ public class SafetyAlertIndexerJobTest extends Goddard {
 
   @Test
   public void getInitialLoadQuery_Args__sealed() throws Exception {
-    when(opts.isLoadSealedAndSensitive()).thenReturn(true);
+    when(flightPlan.isLoadSealedAndSensitive()).thenReturn(true);
     String dbSchemaName = "CWSINT";
     String actual = target.getInitialLoadQuery(dbSchemaName).replaceAll("  ", " ").trim();
     String expected =

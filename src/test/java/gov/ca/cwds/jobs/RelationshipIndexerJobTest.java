@@ -33,7 +33,7 @@ public class RelationshipIndexerJobTest
     super.setup();
     dao = new ReplicatedRelationshipsDao(sessionFactory);
     target = new RelationshipIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
-        flightRecorder, opts);
+        flightRecorder, flightPlan);
   }
 
   @Test

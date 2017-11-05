@@ -5,10 +5,14 @@ import java.util.stream.Stream;
 
 public class NeutronStreamUtils {
 
+  private NeutronStreamUtils() {
+    // static methods only
+  }
+
   public static <T> Function<T, Stream<T>> everyNth(int n) {
     return new Function<T, Stream<T>>() {
       int i = 0;
-  
+
       @Override
       public Stream<T> apply(T t) {
         if (i++ % n == 0) {
@@ -16,7 +20,7 @@ public class NeutronStreamUtils {
         }
         return Stream.empty();
       }
-  
+
     };
   }
 

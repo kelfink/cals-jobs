@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs.schedule;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -10,7 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -31,7 +29,6 @@ public class RocketFactoryTest extends Goddard {
   RocketFactory target;
   Injector injector;
   FlightPlan opts;
-  FlightPlanLog rocketOptions;
 
   JobDetail jd;
   JobDataMap jobDataMap;
@@ -45,7 +42,6 @@ public class RocketFactoryTest extends Goddard {
     super.setup();
 
     injector = mock(Injector.class);
-    rocketOptions = mock(FlightPlanLog.class);
     jobDataMap = mock(JobDataMap.class);
     jd = mock(JobDetail.class);
     bundle = mock(TriggerFiredBundle.class);
@@ -57,9 +53,8 @@ public class RocketFactoryTest extends Goddard {
 
     rocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
     when(injector.getInstance(any(Class.class))).thenReturn(rocket);
-    // opts = new FlightPlan();
 
-    target = new RocketFactory(injector, opts, rocketOptions);
+    target = new RocketFactory(injector, opts, flightPlanRegistry);
   }
 
   @Test
@@ -69,7 +64,7 @@ public class RocketFactoryTest extends Goddard {
 
   @Test
   public void instantiation() throws Exception {
-    RocketFactory target = new RocketFactory(injector, opts, rocketOptions);
+    RocketFactory target = new RocketFactory(injector, opts, flightPlanRegistry);
     assertThat(target, notNullValue());
   }
 
@@ -90,11 +85,11 @@ public class RocketFactoryTest extends Goddard {
   }
 
   @Test
-  @Ignore
   public void newJob_Args__TriggerFiredBundle__Scheduler() throws Exception {
+    flightPlanRegistry.addFlightPlan(Mach1TestRocket.class, flightPlan);
+    target.setFlightPlanRegistry(flightPlanRegistry);
     Job actual = target.newJob(bundle, scheduler);
-    Job expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -114,7 +109,7 @@ public class RocketFactoryTest extends Goddard {
 
   @Test
   public void getRocketOptions_Args__() throws Exception {
-    FlightPlanLog actual = target.getRocketOptions();
+    FlightPlanRegistry actual = target.getFlightPlanRegistry();
     assertThat(actual, is(notNullValue()));
   }
 

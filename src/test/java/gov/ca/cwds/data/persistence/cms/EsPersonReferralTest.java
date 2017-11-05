@@ -35,7 +35,7 @@ public class EsPersonReferralTest extends Goddard {
   public void setup() throws Exception {
     super.setup();
 
-    EsPersonReferral.setOpts(opts);
+    EsPersonReferral.setOpts(flightPlan);
     target = new EsPersonReferral();
     target.setClientId(DEFAULT_CLIENT_ID);
   }

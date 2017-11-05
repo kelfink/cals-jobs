@@ -36,7 +36,7 @@ public class LaunchPadTest extends Goddard {
     scheduler = mock(Scheduler.class);
     sched = DefaultFlightSchedule.CLIENT;
     history = new FlightRecorder();
-    target = new LaunchPad(scheduler, sched, history, opts);
+    target = new LaunchPad(scheduler, sched, history, flightPlan);
   }
 
   @Test

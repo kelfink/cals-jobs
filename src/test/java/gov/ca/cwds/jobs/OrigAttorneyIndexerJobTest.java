@@ -25,7 +25,7 @@ public class OrigAttorneyIndexerJobTest
     super.setup();
     dao = new ReplicatedAttorneyDao(this.sessionFactory);
     target = new OrigAttorneyIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
-        flightRecorder, opts);
+        flightRecorder, flightPlan);
   }
 
   @Test

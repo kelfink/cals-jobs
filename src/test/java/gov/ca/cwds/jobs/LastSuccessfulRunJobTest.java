@@ -71,7 +71,7 @@ public class LastSuccessfulRunJobTest
   @Before
   public void setup() throws Exception {
     super.setup();
-    target = new TestLastSuccessfulRunJob(lastJobRunTimeFilename, esDao, flightRecorder, opts);
+    target = new TestLastSuccessfulRunJob(lastJobRunTimeFilename, esDao, flightRecorder, flightPlan);
 
     try (BufferedWriter w = new BufferedWriter(new FileWriter(tempFile))) {
       w.write(FIXED_DATETIME);
@@ -205,7 +205,7 @@ public class LastSuccessfulRunJobTest
   @Test
   public void calcLastRunDate_Args__Date__JobOptions() throws Exception {
     Date lastSuccessfulRunTime = new Date();
-    Date actual = target.calcLastRunDate(lastSuccessfulRunTime, opts);
+    Date actual = target.calcLastRunDate(lastSuccessfulRunTime, flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -231,7 +231,7 @@ public class LastSuccessfulRunJobTest
 
   @Test
   public void setOpts_Args__JobOptions() throws Exception {
-    target.setOpts(opts);
+    target.setOpts(flightPlan);
   }
 
   @Test

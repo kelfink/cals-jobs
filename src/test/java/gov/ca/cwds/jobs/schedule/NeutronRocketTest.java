@@ -38,8 +38,8 @@ public class NeutronRocketTest extends Goddard {
     dao = new TestNormalizedEntityDao(sessionFactory);
     rocket = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
         flightRecorder);
-    rocket.setOpts(opts);
-    rocket.init(this.tempFile.getAbsolutePath(), opts);
+    rocket.setOpts(flightPlan);
+    rocket.init(this.tempFile.getAbsolutePath(), flightPlan);
 
     rocket.setTrack(flightRecord);
     target = new NeutronRocket(rocket);

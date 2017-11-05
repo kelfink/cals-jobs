@@ -30,7 +30,7 @@ public class ReferralJobRangesTest extends Goddard {
 
     when(job.isDB2OnZOS()).thenReturn(isZOS);
     when(job.isLargeDataSet()).thenReturn(isLarge);
-    when(job.getOpts()).thenReturn(opts);
+    when(job.getOpts()).thenReturn(flightPlan);
 
     final List<Pair<String, String>> actual = target.getPartitionRanges(job);
     final int cntActual = actual.size();
@@ -52,17 +52,17 @@ public class ReferralJobRangesTest extends Goddard {
 
   @Test
   public void getPartitionRanges_RSQ() throws Exception {
-    when(opts.isRangeGiven()).thenReturn(true);
-    when(opts.getStartBucket()).thenReturn(1L);
-    when(opts.getEndBucket()).thenReturn(4L);
+    when(flightPlan.isRangeGiven()).thenReturn(true);
+    when(flightPlan.getStartBucket()).thenReturn(1L);
+    when(flightPlan.getEndBucket()).thenReturn(4L);
     checkPartitionRanges("CWSRSQ", true, 3562, true);
   }
 
   @Test
   public void getPartitionRanges_REP() throws Exception {
-    when(opts.isRangeGiven()).thenReturn(true);
-    when(opts.getStartBucket()).thenReturn(1L);
-    when(opts.getEndBucket()).thenReturn(4L);
+    when(flightPlan.isRangeGiven()).thenReturn(true);
+    when(flightPlan.getStartBucket()).thenReturn(1L);
+    when(flightPlan.getEndBucket()).thenReturn(4L);
     checkPartitionRanges("CWSREP", true, 3562, true);
   }
 
@@ -81,10 +81,10 @@ public class ReferralJobRangesTest extends Goddard {
     BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job =
         mock(BasePersonIndexerJob.class);
 
-    when(job.getOpts()).thenReturn(opts);
-    when(opts.isRangeGiven()).thenReturn(false);
-    when(opts.getStartBucket()).thenReturn(1L);
-    when(opts.getEndBucket()).thenReturn(1L);
+    when(job.getOpts()).thenReturn(flightPlan);
+    when(flightPlan.isRangeGiven()).thenReturn(false);
+    when(flightPlan.getStartBucket()).thenReturn(1L);
+    when(flightPlan.getEndBucket()).thenReturn(1L);
 
     final List actual = target.getPartitionRanges(job);
     final List expected = new ArrayList<>();

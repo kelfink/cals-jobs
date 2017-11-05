@@ -97,9 +97,9 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Before
   public void setup() throws Exception {
     super.setup();
-    opts = new FlightPlan();
-    opts.setEsConfigLoc("config/local.yaml");
-    target = new TestHyperCube(opts, new File(opts.getEsConfigLoc()), lastJobRunTimeFilename);
+    flightPlan = new FlightPlan();
+    flightPlan.setEsConfigLoc("config/local.yaml");
+    target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()), lastJobRunTimeFilename);
 
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
@@ -148,13 +148,13 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void setOpts_Args__JobOptions() throws Exception {
-    target.setOpts(opts);
+    target.setOpts(flightPlan);
   }
 
   @Test
   @Ignore
   public void buildInjector_Args__FlightPlan() throws Exception {
-    final Injector actual = HyperCube.buildInjector(opts);
+    final Injector actual = HyperCube.buildInjector(flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -162,7 +162,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Ignore
   public void newJob_Args__Class__FlightPlan() throws Exception {
     final Class klass = Mach1TestRocket.class;
-    Object actual = HyperCube.newJob(klass, opts);
+    Object actual = HyperCube.newJob(klass, flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -171,17 +171,17 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   public void newJob_Args__Class__FlightPlan_T__NeutronException() throws Exception {
     final Class klass = TestIndexerJob.class;
 
-    opts = new FlightPlan();
-    opts.setEsConfigLoc("config/local.yaml");
-    opts.setSimulateLaunch(true);
-    target = new TestHyperCube(opts, new File(opts.getEsConfigLoc()), lastJobRunTimeFilename);
+    flightPlan = new FlightPlan();
+    flightPlan.setEsConfigLoc("config/local.yaml");
+    flightPlan.setSimulateLaunch(true);
+    target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()), lastJobRunTimeFilename);
 
     target.setHibernateConfigCms("/test-h2-cms.xml");
     target.setHibernateConfigNs("/test-h2-ns.xml");
     target.setTestBinder(mock(Binder.class));
     HyperCube.setInstance(target);
 
-    HyperCube.newJob(klass, opts);
+    HyperCube.newJob(klass, flightPlan);
   }
 
   @Test
@@ -242,7 +242,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void setOpts_Args__FlightPlan() throws Exception {
-    target.setOpts(opts);
+    target.setOpts(flightPlan);
   }
 
   @Test

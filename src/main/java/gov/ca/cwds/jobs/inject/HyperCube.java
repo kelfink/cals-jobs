@@ -78,7 +78,7 @@ import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.AtomFlightPlanManager;
-import gov.ca.cwds.jobs.schedule.FlightPlanLog;
+import gov.ca.cwds.jobs.schedule.FlightPlanRegistry;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
@@ -127,7 +127,7 @@ public class HyperCube extends NeutronGuiceModule {
 
   private static HyperCube instance;
 
-  private static Function<FlightPlan, HyperCube> cubeMaker = o -> HyperCube.buildCube(o);
+  private static Function<FlightPlan, HyperCube> cubeMaker = HyperCube::buildCube;
 
   /**
    * Default constructor.
@@ -266,7 +266,7 @@ public class HyperCube extends NeutronGuiceModule {
     bind(ObjectMapper.class).toInstance(ObjectMapperUtils.createObjectMapper());
     bind(ElasticsearchDao.class).asEagerSingleton();
     bind(FlightRecorder.class).asEagerSingleton();
-    bind(AtomFlightPlanManager.class).to(FlightPlanLog.class).asEagerSingleton();
+    bind(AtomFlightPlanManager.class).to(FlightPlanRegistry.class).asEagerSingleton();
     bind(AtomRocketFactory.class).to(RocketFactory.class).asEagerSingleton();
   }
 

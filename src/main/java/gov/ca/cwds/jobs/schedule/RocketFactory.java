@@ -23,18 +23,18 @@ public class RocketFactory implements AtomRocketFactory {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RocketFactory.class);
 
-  private final Injector injector;
+  private Injector injector;
 
   private final FlightPlan baseOpts;
 
-  private final FlightPlanLog rocketOptions;
+  private FlightPlanRegistry flightPlanRegistry;
 
   @Inject
   public RocketFactory(final Injector injector, final FlightPlan opts,
-      final FlightPlanLog rocketOptions) {
+      final FlightPlanRegistry rocketOptions) {
     this.injector = injector;
     this.baseOpts = opts;
-    this.rocketOptions = rocketOptions;
+    this.flightPlanRegistry = rocketOptions;
   }
 
   @SuppressWarnings("rawtypes")
@@ -44,7 +44,7 @@ public class RocketFactory implements AtomRocketFactory {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
 
-      // QUESTION: is there a cleaner way to call this??
+      // DAVE-OTOLOGY: is there a cleaner way to call this??
       final BasePersonIndexerJob ret = (BasePersonIndexerJob<?, ?>) injector.getInstance(klass);
       ret.init(opts.getLastRunLoc(), opts);
       return ret;
@@ -77,10 +77,9 @@ public class RocketFactory implements AtomRocketFactory {
     }
 
     LOGGER.warn("LAUNCH! {}", klazz);
-
     NeutronRocket ret;
     try {
-      final FlightPlan opts = rocketOptions.getFlightPlan(klazz);
+      final FlightPlan opts = flightPlanRegistry.getFlightPlan(klazz);
       ret = new NeutronRocket(createJob(klazz, opts));
     } catch (NeutronException e) {
       throw new SchedulerException("NO ROCKET SETTINGS!", e);
@@ -93,8 +92,20 @@ public class RocketFactory implements AtomRocketFactory {
     return baseOpts;
   }
 
-  public FlightPlanLog getRocketOptions() {
-    return rocketOptions;
+  public FlightPlanRegistry getFlightPlanRegistry() {
+    return flightPlanRegistry;
+  }
+
+  public Injector getInjector() {
+    return injector;
+  }
+
+  public void setInjector(Injector injector) {
+    this.injector = injector;
+  }
+
+  public void setFlightPlanRegistry(FlightPlanRegistry flightPlanRegistry) {
+    this.flightPlanRegistry = flightPlanRegistry;
   }
 
 }

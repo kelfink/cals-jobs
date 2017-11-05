@@ -43,11 +43,11 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   public void setup() throws Exception {
     super.setup();
 
-    opts.setEsConfigLoc("config/local.yaml");
-    opts.setBaseDirectory("/var/lib/jenkins/");
-    opts.setLastRunLoc(lastJobRunTimeFilename);
+    flightPlan.setEsConfigLoc("config/local.yaml");
+    flightPlan.setBaseDirectory("/var/lib/jenkins/");
+    flightPlan.setLastRunLoc(lastJobRunTimeFilename);
     target = new LaunchCommand(flightRecorder, launchScheduler, esDao);
-    target.setStartingOpts(opts);
+    target.setStartingOpts(flightPlan);
 
     key = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
     LaunchCommand.setTestMode(true);
@@ -137,7 +137,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     final DateFormat fmt = new SimpleDateFormat("yyyy-mm-dd");
     final Date now = new Date();
     final DefaultFlightSchedule sched = DefaultFlightSchedule.CLIENT;
-    target.handleTimeFile(opts, fmt, now, sched);
+    target.handleTimeFile(flightPlan, fmt, now, sched);
   }
 
   @Test
@@ -156,21 +156,21 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   @Test
   public void createJob_Args__Class__FlightPlan() throws Exception {
     final Class<?> klass = Mach1TestRocket.class;
-    final BasePersonIndexerJob actual = target.createJob(klass, opts);
+    final BasePersonIndexerJob actual = target.createJob(klass, flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void createJob_Args__String__FlightPlan() throws Exception {
     final String rocketName = Mach1TestRocket.class.getName();
-    final BasePersonIndexerJob actual = target.createJob(rocketName, opts);
+    final BasePersonIndexerJob actual = target.createJob(rocketName, flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void runScheduledJob_Args__Class__FlightPlan() throws Exception {
     final Class<?> klass = Mach1TestRocket.class;
-    final FlightRecord actual = target.launchScheduledFlight(klass, opts);
+    final FlightRecord actual = target.launchScheduledFlight(klass, flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -178,7 +178,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   public void runScheduledJob_Args__String__FlightPlan() throws Exception {
     final String rocketName = Mach1TestRocket.class.getName();
     target.setLaunchScheduler(launchScheduler);
-    FlightRecord actual = target.launchScheduled(rocketName, opts);
+    FlightRecord actual = target.launchScheduled(rocketName, flightPlan);
   }
 
   @Test
@@ -189,7 +189,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void setStartingOpts_Args__FlightPlan() throws Exception {
-    target.setStartingOpts(opts);
+    target.setStartingOpts(flightPlan);
   }
 
   @Test
@@ -204,7 +204,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   public void scheduleJob_Args__Class__DefaultFlightSchedule__FlightPlan() throws Exception {
     final DefaultFlightSchedule sched = DefaultFlightSchedule.CLIENT;
     final Class<?> klazz = sched.getRocketClass();
-    LaunchPad actual = target.scheduleLaunch(klazz, sched, opts);
+    LaunchPad actual = target.scheduleLaunch(klazz, sched, flightPlan);
   }
 
   @Test

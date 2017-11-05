@@ -68,7 +68,7 @@ public class BasePersonIndexerJobTest
     dao = new TestNormalizedEntityDao(sessionFactory);
     target =
         new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, flightRecorder);
-    target.setOpts(opts);
+    target.setOpts(flightPlan);
     target.setTrack(flightRecord);
   }
 
@@ -391,7 +391,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void setOpts_Args__JobOptions() throws Exception {
-    target.setOpts(opts);
+    target.setOpts(flightPlan);
   }
 
   @Test
@@ -447,7 +447,7 @@ public class BasePersonIndexerJobTest
 
     final javax.persistence.Query q = mock(javax.persistence.Query.class);
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
-    when(opts.isLastRunMode()).thenReturn(true);
+    when(flightPlan.isLastRunMode()).thenReturn(true);
 
     final Date actual = target.executeJob(lastRunTime);
     assertThat(actual, notNullValue());
@@ -460,7 +460,7 @@ public class BasePersonIndexerJobTest
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
     when(q.getResultList()).thenReturn(new ArrayList<TestDenormalizedEntity>());
     when(q.setParameter(any(String.class), any(String.class))).thenReturn(q);
-    when(opts.isLastRunMode()).thenReturn(true);
+    when(flightPlan.isLastRunMode()).thenReturn(true);
 
     final Calendar cal = Calendar.getInstance();
     cal.add(Calendar.YEAR, -50);

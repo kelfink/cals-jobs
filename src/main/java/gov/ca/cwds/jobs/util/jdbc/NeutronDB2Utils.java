@@ -6,13 +6,13 @@ import java.sql.SQLException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ibm.db2.jcc.DB2Connection;
 import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.data.BaseDaoImpl;
+import gov.ca.cwds.jobs.log.JetPackLogger;
+import gov.ca.cwds.jobs.log.NeutronConditionalLogger;
 import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
@@ -22,7 +22,7 @@ import gov.ca.cwds.jobs.util.JobLogs;
  */
 public class NeutronDB2Utils {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronDB2Utils.class);
+  private static final NeutronConditionalLogger LOGGER = new JetPackLogger(NeutronDB2Utils.class);
 
   private NeutronDB2Utils() {
     // Default no-op.
@@ -136,6 +136,7 @@ public class NeutronDB2Utils {
    * @param monitor current monitor instance
    * @throws SQLException on JDBC error
    */
+  @SuppressWarnings("unchecked")
   public static void monitorStopAndReport(final DB2SystemMonitor monitor) throws SQLException {
     if (monitor != null) {
       monitor.stop();
@@ -150,7 +151,7 @@ public class NeutronDB2Utils {
           .append(monitor.getApplicationTimeMillis()).append("monitor.moreData: 0: ")
           .append(monitor.moreData(0)).append("monitor.moreData: 1: ").append(monitor.moreData(1))
           .append("monitor.moreData: 2: ").append(monitor.moreData(2));
-      LOGGER.info(buf.toString());
+      LOGGER.info("DB2 monitor report: {}", () -> buf.toString());
     }
   }
 

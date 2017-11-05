@@ -25,7 +25,7 @@ public class OtherChildInPlacemtHomeIndexerJobTest
     super.setup();
     dao = new ReplicatedOtherChildInPlacemtHomeDao(this.sessionFactory);
     target = new OtherChildInPlacemtHomeIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, flightRecorder, opts);
+        sessionFactory, flightRecorder, flightPlan);
   }
 
   @Test

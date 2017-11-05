@@ -791,7 +791,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       session.clear();
       txn.commit();
       return results.build();
-    } catch (NeutronException | HibernateException h) {
+    } catch (Exception h) {
       fail();
       txn.rollback();
       throw JobLogs.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());

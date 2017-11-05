@@ -61,6 +61,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.AtomFlightPlanManager;
+import gov.ca.cwds.jobs.schedule.FlightPlanRegistry;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
@@ -129,9 +130,10 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
 
   public Configuration hibernationConfiguration;
 
-  public FlightPlan opts;
+  public FlightPlan flightPlan;
   public FlightRecord flightRecord;
   public FlightRecorder flightRecorder;
+  public FlightPlanRegistry flightPlanRegistry;
 
   public Scheduler scheduler;
   public LaunchScheduler launchScheduler;
@@ -175,6 +177,7 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
     flightPlanManager = mock(AtomFlightPlanManager.class);
 
     mach1Rocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
+    flightPlanRegistry = new FlightPlanRegistry(flightPlan);
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(sessionFactory.createEntityManager()).thenReturn(em);
@@ -223,10 +226,10 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
 
     // Job options:
     esConfileFile = tempFolder.newFile("es.yml");
-    opts = mock(FlightPlan.class);
+    flightPlan = mock(FlightPlan.class);
 
-    when(opts.isLoadSealedAndSensitive()).thenReturn(false);
-    when(opts.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
+    when(flightPlan.isLoadSealedAndSensitive()).thenReturn(false);
+    when(flightPlan.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
 
     // Queries.
     nq = mock(NativeQuery.class);

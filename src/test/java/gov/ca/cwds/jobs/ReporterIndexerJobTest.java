@@ -33,7 +33,7 @@ public class ReporterIndexerJobTest
     super.setup();
     dao = new ReplicatedReporterDao(sessionFactory);
     target = new ReporterIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
-        flightRecorder, opts);
+        flightRecorder, flightPlan);
   }
 
   @Test

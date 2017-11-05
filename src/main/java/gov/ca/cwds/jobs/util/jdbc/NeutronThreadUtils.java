@@ -10,6 +10,10 @@ public class NeutronThreadUtils {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronThreadUtils.class);
 
+  private NeutronThreadUtils() {
+    // static methods only
+  }
+
   /**
    * Calculate the number of reader threads to run from incoming job options and available
    * processors.

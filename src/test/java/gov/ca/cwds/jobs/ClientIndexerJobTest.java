@@ -80,7 +80,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     super.setup();
     dao = new ReplicatedClientDao(sessionFactory);
     target = new ClientIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory,
-        flightRecorder, opts);
+        flightRecorder, flightPlan);
   }
 
   @Test
@@ -91,7 +91,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
   @Test
   public void instantiation() throws Exception {
     target = new ClientIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory,
-        flightRecorder, opts);
+        flightRecorder, flightPlan);
     assertThat(target, notNullValue());
   }
 
@@ -193,7 +193,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
 
     TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastJobRunTimeFilename,
-        mapper, sessionFactory, flightRecorder, opts);
+        mapper, sessionFactory, flightRecorder, flightPlan);
     target.setTxn(transaction);
     target.pullRange(p);
   }
@@ -222,7 +222,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void mustDeleteLimitedAccessRecords_Args__2() throws Exception {
-    when(opts.isLoadSealedAndSensitive()).thenReturn(true);
+    when(flightPlan.isLoadSealedAndSensitive()).thenReturn(true);
     boolean actual = target.mustDeleteLimitedAccessRecords();
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
@@ -265,7 +265,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
     dao = mock(ReplicatedClientDao.class);
     TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastJobRunTimeFilename,
-        mapper, sessionFactory, flightRecorder, opts);
+        mapper, sessionFactory, flightRecorder, flightPlan);
     target.setTxn(transaction);
     when(dao.find(any())).thenReturn(rep);
 

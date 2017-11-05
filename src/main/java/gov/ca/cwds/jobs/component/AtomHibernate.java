@@ -16,11 +16,10 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobLogs;
+import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
-import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 
 /**
  * Common functions and features for Hibernate calls.
@@ -165,13 +164,12 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * 
    * @param session current Hibernate session
    * @param lastRunTime last successful run datetime
-   * @throws NeutronException on disconnect, invalid parameters, etc.
    */
-  default void prepHibernateLastChange(final Session session, final Date lastRunTime)
-      throws NeutronException {
+  default void prepHibernateLastChange(final Session session, final Date lastRunTime) {
     final String sql = getPrepLastChangeSQL();
     if (StringUtils.isNotBlank(sql)) {
-      NeutronJdbcUtils.prepHibernateLastChange(session, lastRunTime, sql, getPreparedStatementMaker());
+      NeutronJdbcUtils.prepHibernateLastChange(session, lastRunTime, sql,
+          getPreparedStatementMaker());
     }
   }
 
