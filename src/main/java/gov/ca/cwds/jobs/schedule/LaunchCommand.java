@@ -46,7 +46,7 @@ import gov.ca.cwds.neutron.listener.NeutronTriggerListener;
  * 
  * @author CWDS API Team
  */
-public class LaunchCommand implements AtomLaunchScheduler {
+public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LaunchCommand.class);
 
@@ -79,6 +79,8 @@ public class LaunchCommand implements AtomLaunchScheduler {
   private FlightRecorder flightRecorder = new FlightRecorder();
 
   private LaunchScheduler launchScheduler;
+
+  private int exitCode = 0; // Single launch mode only.
 
   private LaunchCommand() {
     // no-op
@@ -482,8 +484,44 @@ public class LaunchCommand implements AtomLaunchScheduler {
     return instance;
   }
 
+  protected static FlightPlan buildStandaloneFlightPlan(String... args) {
+    FlightPlan standardFlightPlan;
+    try {
+      standardFlightPlan = FlightPlan.parseCommandLine(args);
+    } catch (Exception e) {
+      throw JobLogs.runtime(LOGGER, e, "CMD LINE ERROR! {}", e.getMessage());
+    }
+
+    return standardFlightPlan;
+  }
+
+  protected static LaunchCommand buildStandaloneInstance(final FlightPlan standardFlightPlan)
+      throws NeutronException {
+    Injector injector;
+    try {
+      injector = HyperCube.buildInjector(standardFlightPlan);
+      instance = injector.getInstance(LaunchCommand.class);
+      instance.startingOpts = standardFlightPlan;
+      instance.settings.setContinuousMode(false);
+    } catch (NeutronException e) {
+      throw JobLogs.checked(LOGGER, e, "Rethrow", e.getMessage());
+    }
+
+    return instance;
+  }
+
+  @Override
+  public void close() throws Exception {
+    // Single launch mode: close resources but do not kill the JVM.
+    if (!isTestMode() && !isSchedulerMode()) {
+      // Shutdown all remaining resources, even those not attached to this job.
+      Runtime.getRuntime().exit(instance.exitCode); // NOSONAR
+    }
+  }
+
   /**
-   * Entry point for standalone batch jobs, typically for initial load. Not used in continuous mode.
+   * Entry point for expendable, one shot rockets, typically for initial load. Not used in
+   * continuous mode.
    * 
    * <p>
    * This method automatically closes the Hibernate session factory and ElasticSearch DAO and EXITs
@@ -496,42 +534,19 @@ public class LaunchCommand implements AtomLaunchScheduler {
    */
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
-    int exitCode = 0;
-
-    FlightPlan standardFlightPlan;
-    try {
-      standardFlightPlan = FlightPlan.parseCommandLine(args);
-    } catch (Exception e) {
-      throw JobLogs.runtime(LOGGER, e, "CMD LINE ERROR! {}", e.getMessage());
-    }
-
+    final FlightPlan standardFlightPlan = buildStandaloneFlightPlan(args);
     if (standardFlightPlan.isSimulateLaunch()) {
       return; // Test "main" methods
     }
 
-    Injector injector;
-    try {
-      injector = HyperCube.buildInjector(standardFlightPlan);
-      instance = injector.getInstance(LaunchCommand.class);
-      instance.startingOpts = standardFlightPlan;
-      instance.settings.setContinuousMode(false);
-    } catch (NeutronException e) {
-      throw JobLogs.runtime(LOGGER, e, "Rethrow", e.getMessage());
-    }
-
-    try (final T job = HyperCube.newRocket(klass, args)) {
+    try (final LaunchCommand launchCommand = buildStandaloneInstance(standardFlightPlan);
+        final T job = HyperCube.newRocket(klass, args)) {
       job.run();
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
-      exitCode = -1;
+      instance.exitCode = -1;
       throw JobLogs.runtime(LOGGER, e, "STANDALONE ROCKET FAILED!: {}", e.getMessage());
-    } finally {
-      // WARNING: kills the JVM in testing but may be needed to shutdown resources.
-      if (!isTestMode() && !isSchedulerMode()) {
-        // Shutdown all remaining resources, even those not attached to this job.
-        Runtime.getRuntime().exit(exitCode); // NOSONAR
-      }
     }
   }
 

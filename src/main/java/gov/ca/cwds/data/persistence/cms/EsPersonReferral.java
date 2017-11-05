@@ -84,9 +84,9 @@ public class EsPersonReferral
   @Column(name = "LAST_CHG", updatable = false)
   private Date lastChange;
 
-  // ================
+  // ===================
   // KEYS:
-  // ================
+  // ===================
 
   @Id
   @Column(name = "CLIENT_ID")
@@ -99,9 +99,9 @@ public class EsPersonReferral
   @Column(name = COLUMN_REFERRAL_ID)
   private String referralId;
 
-  // ================
+  // ===================
   // REFERRAL:
-  // ================
+  // ===================
 
   @Column(name = "START_DATE")
   @Type(type = "date")
@@ -123,9 +123,9 @@ public class EsPersonReferral
   @Type(type = "timestamp")
   private Date referralLastUpdated;
 
-  // ==============
+  // =================
   // REPORTER:
-  // ==============
+  // =================
 
   @Column(name = "REPORTER_ID")
   private String reporterId;
@@ -142,9 +142,9 @@ public class EsPersonReferral
   @Type(type = "timestamp")
   private Date reporterLastUpdated;
 
-  // ==============
+  // =================
   // SOCIAL WORKER:
-  // ==============
+  // =================
 
   @Column(name = "WORKER_ID")
   private String workerId;
@@ -204,9 +204,9 @@ public class EsPersonReferral
   @Column(name = "VICTIM_SENSITIVITY_IND")
   private String victimSensitivityIndicator;
 
-  // ==================
+  // =====================
   // ACCESS LIMITATION:
-  // ==================
+  // =====================
 
   @Column(name = "LIMITED_ACCESS_CODE")
   private String limitedAccessCode;

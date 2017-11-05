@@ -101,10 +101,10 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     //
     // Worker (staff):
     //
-    ret.setWorkerId(ifNull(rs.getString("WORKER_ID")));
-    ret.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
-    ret.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
-    ret.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
+    ret.getWorker().setWorkerId(ifNull(rs.getString("WORKER_ID")));
+    ret.getWorker().setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
+    ret.getWorker().setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
+    ret.getWorker().setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
 
     //
     // Access Limitation:

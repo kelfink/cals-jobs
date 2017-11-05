@@ -16,6 +16,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPersonParent;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
@@ -38,9 +39,9 @@ public abstract class EsPersonCase
 
   private static final long serialVersionUID = 2896950873299112269L;
 
-  // ==============
+  // =================
   // ID:
-  // ==============
+  // =================
   @Id
   @Column(name = "CASE_ID")
   private String caseId;
@@ -53,9 +54,9 @@ public abstract class EsPersonCase
   @Column(name = "PARENT_ID")
   private String parentId;
 
-  // ================
+  // ===================
   // CASE:
-  // ================
+  // ===================
 
   @Column(name = "START_DATE")
   @Type(type = "date")
@@ -77,9 +78,9 @@ public abstract class EsPersonCase
   @Column(name = "CASE_LAST_UPDATED", updatable = false)
   private Date caseLastUpdated;
 
-  // ==============
+  // =================
   // FOCUS CHILD:
-  // ==============
+  // =================
 
   @Column(name = "FOCUS_CHLD_FIRST_NM")
   private String focusChildFirstName;
@@ -94,22 +95,11 @@ public abstract class EsPersonCase
   @Column(name = "FOCUS_CHILD_SENSITIVITY_IND")
   private String focusChildSensitivityIndicator;
 
-  // ==============
+  // =================
   // SOCIAL WORKER:
-  // ==============
+  // =================
 
-  @Column(name = "WORKER_ID")
-  private String workerId;
-
-  @Column(name = "WORKER_FIRST_NM")
-  private String workerFirstName;
-
-  @Column(name = "WORKER_LAST_NM")
-  private String workerLastName;
-
-  @Type(type = "timestamp")
-  @Column(name = "WORKER_LAST_UPDATED", updatable = false)
-  private Date workerLastUpdated;
+  private EmbeddableStaffWorker worker = new EmbeddableStaffWorker();
 
   // =============
   // PARENT:
@@ -135,9 +125,9 @@ public abstract class EsPersonCase
   @Column(name = "PARENT_SENSITIVITY_IND")
   private String parentSensitivityIndicator;
 
-  // ==================
+  // =====================
   // ACCESS LIMITATION:
-  // ==================
+  // =====================
 
   @Column(name = "LIMITED_ACCESS_CODE")
   private String limitedAccessCode;
@@ -246,38 +236,6 @@ public abstract class EsPersonCase
 
   public void setFocusChildLastUpdated(Date focusChildLastUpdated) {
     this.focusChildLastUpdated = JobDateUtil.freshDate(focusChildLastUpdated);
-  }
-
-  public String getWorkerId() {
-    return workerId;
-  }
-
-  public void setWorkerId(String workerId) {
-    this.workerId = workerId;
-  }
-
-  public String getWorkerFirstName() {
-    return workerFirstName;
-  }
-
-  public void setWorkerFirstName(String workerFirstName) {
-    this.workerFirstName = workerFirstName;
-  }
-
-  public String getWorkerLastName() {
-    return workerLastName;
-  }
-
-  public void setWorkerLastName(String workerLastName) {
-    this.workerLastName = workerLastName;
-  }
-
-  public Date getWorkerLastUpdated() {
-    return JobDateUtil.freshDate(workerLastUpdated);
-  }
-
-  public void setWorkerLastUpdated(Date workerLastUpdated) {
-    this.workerLastUpdated = JobDateUtil.freshDate(workerLastUpdated);
   }
 
   public String getParentFirstName() {
@@ -424,13 +382,14 @@ public abstract class EsPersonCase
     // Assigned Worker:
     //
     final ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
-    assignedWorker.setId(this.workerId);
-    assignedWorker.setLegacyClientId(this.workerId);
-    assignedWorker.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.workerLastUpdated));
-    assignedWorker.setFirstName(this.workerFirstName);
-    assignedWorker.setLastName(this.workerLastName);
-    assignedWorker.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
-        this.workerLastUpdated, LegacyTable.STAFF_PERSON));
+    assignedWorker.setId(this.worker.getWorkerId());
+    assignedWorker.setLegacyClientId(this.worker.getWorkerId());
+    assignedWorker
+        .setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.worker.getWorkerLastUpdated()));
+    assignedWorker.setFirstName(this.worker.getWorkerFirstName());
+    assignedWorker.setLastName(this.worker.getWorkerLastName());
+    assignedWorker.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(
+        this.worker.getWorkerId(), this.worker.getWorkerLastUpdated(), LegacyTable.STAFF_PERSON));
     esPersonCase.setAssignedSocialWorker(assignedWorker);
 
     //
@@ -464,6 +423,14 @@ public abstract class EsPersonCase
 
     cases.addCase(esPersonCase, parent);
     return cases;
+  }
+
+  public EmbeddableStaffWorker getWorker() {
+    return worker;
+  }
+
+  public void setWorker(EmbeddableStaffWorker worker) {
+    this.worker = worker;
   }
 
 }

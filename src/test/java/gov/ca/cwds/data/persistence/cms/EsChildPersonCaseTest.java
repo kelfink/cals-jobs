@@ -201,7 +201,7 @@ public class EsChildPersonCaseTest {
   @Test
   public void getWorkerId_Args__() throws Exception {
     EsChildPersonCase target = new EsChildPersonCase();
-    String actual = target.getWorkerId();
+    String actual = target.getWorker().getWorkerId();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -210,13 +210,13 @@ public class EsChildPersonCaseTest {
   public void setWorkerId_Args__String() throws Exception {
     EsChildPersonCase target = new EsChildPersonCase();
     String workerId = null;
-    target.setWorkerId(workerId);
+    target.getWorker().setWorkerId(workerId);
   }
 
   @Test
   public void getWorkerFirstName_Args__() throws Exception {
     EsChildPersonCase target = new EsChildPersonCase();
-    String actual = target.getWorkerFirstName();
+    String actual = target.getWorker().getWorkerFirstName();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -225,13 +225,13 @@ public class EsChildPersonCaseTest {
   public void setWorkerFirstName_Args__String() throws Exception {
     EsChildPersonCase target = new EsChildPersonCase();
     String workerFirstName = null;
-    target.setWorkerFirstName(workerFirstName);
+    target.getWorker().setWorkerFirstName(workerFirstName);
   }
 
   @Test
   public void getWorkerLastName_Args__() throws Exception {
     EsChildPersonCase target = new EsChildPersonCase();
-    String actual = target.getWorkerLastName();
+    String actual = target.getWorker().getWorkerLastName();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -240,13 +240,13 @@ public class EsChildPersonCaseTest {
   public void setWorkerLastName_Args__String() throws Exception {
     EsChildPersonCase target = new EsChildPersonCase();
     String workerLastName = null;
-    target.setWorkerLastName(workerLastName);
+    target.getWorker().setWorkerLastName(workerLastName);
   }
 
   @Test
   public void getWorkerLastUpdated_Args__() throws Exception {
     EsChildPersonCase target = new EsChildPersonCase();
-    Date actual = target.getWorkerLastUpdated();
+    Date actual = target.getWorker().getWorkerLastUpdated();
     Date expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -255,7 +255,7 @@ public class EsChildPersonCaseTest {
   public void setWorkerLastUpdated_Args__Date() throws Exception {
     EsChildPersonCase target = new EsChildPersonCase();
     Date workerLastUpdated = mock(Date.class);
-    target.setWorkerLastUpdated(workerLastUpdated);
+    target.getWorker().setWorkerLastUpdated(workerLastUpdated);
   }
 
   @Test
