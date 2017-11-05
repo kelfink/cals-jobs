@@ -39,9 +39,9 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.JobLogs;
+import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
-import gov.ca.cwds.jobs.util.jdbc.JobResultSetAware;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.jobs.util.transform.EntityNormalizer;
 
@@ -176,15 +176,9 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
     }
   }
 
-  @Override
-  public boolean validateDocument(ElasticSearchPerson person) throws NeutronException {
+  public boolean validateAddresses(final ReplicatedClient client,
+      final ElasticSearchPerson person) {
     final String clientId = person.getId();
-    LOGGER.info("Validate client: {}", clientId);
-
-    // WARNING: Initialize transaction. Fix DAO impl instead.
-    getOrCreateTransaction();
-    final ReplicatedClient client = getJobDao().find(clientId);
-
     final Map<String, ReplicatedAddress> repAddresses =
         client.getClientAddresses().stream().flatMap(ca -> ca.getAddresses().stream())
             .collect(Collectors.toMap(ReplicatedAddress::getId, a -> a));
@@ -210,9 +204,22 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
         docAddresses.size(), repAddresses.size(), client.getClientAddresses().size(),
         person.getAddresses().size());
 
+    return true;
+  }
+
+  @Override
+  public boolean validateDocument(final ElasticSearchPerson person) throws NeutronException {
+    final String clientId = person.getId();
+    LOGGER.info("Validate client: {}", clientId);
+
+    // WARNING: Initialize transaction. Fix DAO impl instead.
+    getOrCreateTransaction();
+    final ReplicatedClient client = getJobDao().find(clientId);
+
     return client.getCommonFirstName().equals(person.getFirstName())
         && client.getCommonLastName().equals(person.getLastName())
-        && client.getCommonMiddleName().equals(person.getMiddleName());
+        && client.getCommonMiddleName().equals(person.getMiddleName())
+        && validateAddresses(client, person);
   }
 
   /**
@@ -270,7 +277,8 @@ public class ClientIndexerJob extends BasePersonIndexerJob<ReplicatedClient, EsC
       final List<Pair<String, String>> ranges = getPartitionRanges();
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
-      final ForkJoinPool threadPool = new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getOpts()));
+      final ForkJoinPool threadPool =
+          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getOpts()));
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
