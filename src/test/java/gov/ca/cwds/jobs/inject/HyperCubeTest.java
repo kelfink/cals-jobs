@@ -25,9 +25,9 @@ import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
-import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
@@ -99,7 +99,8 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     super.setup();
     flightPlan = new FlightPlan();
     flightPlan.setEsConfigLoc("config/local.yaml");
-    target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()), lastJobRunTimeFilename);
+    target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()),
+        lastJobRunTimeFilename);
 
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
@@ -149,75 +150,6 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void setOpts_Args__JobOptions() throws Exception {
     target.setOpts(flightPlan);
-  }
-
-  @Test
-  @Ignore
-  public void buildInjector_Args__FlightPlan() throws Exception {
-    final Injector actual = HyperCube.buildInjector(flightPlan);
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
-  @Ignore
-  public void newJob_Args__Class__FlightPlan() throws Exception {
-    final Class klass = Mach1TestRocket.class;
-    Object actual = HyperCube.newJob(klass, flightPlan);
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test(expected = NeutronException.class)
-  @Ignore
-  public void newJob_Args__Class__FlightPlan_T__NeutronException() throws Exception {
-    final Class klass = TestIndexerJob.class;
-
-    flightPlan = new FlightPlan();
-    flightPlan.setEsConfigLoc("config/local.yaml");
-    flightPlan.setSimulateLaunch(true);
-    target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()), lastJobRunTimeFilename);
-
-    target.setHibernateConfigCms("/test-h2-cms.xml");
-    target.setHibernateConfigNs("/test-h2-ns.xml");
-    target.setTestBinder(mock(Binder.class));
-    HyperCube.setInstance(target);
-
-    HyperCube.newJob(klass, flightPlan);
-  }
-
-  @Test
-  @Ignore
-  public void newJob_Args__Class__StringArray() throws Exception {
-    final Class klass = TestIndexerJob.class;
-    final String[] args = new String[] {"-c", "config/local.yaml", "-l",
-        "/Users/CWS-NS3/client_indexer_time.txt", "-t", "4", "-S"};
-    Object actual = HyperCube.newJob(klass, args);
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
-  @Ignore
-  public void configure_Args__() throws Exception {
-    target.configure();
-  }
-
-  @Test
-  @Ignore
-  public void bindDaos_Args__() throws Exception {
-    target.bindDaos();
-  }
-
-  @Test
-  @Ignore
-  public void makeCmsSessionFactory_Args__() throws Exception {
-    final SessionFactory actual = target.makeCmsSessionFactory();
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
-  @Ignore
-  public void makeNsSessionFactory_Args__() throws Exception {
-    final SessionFactory actual = target.makeNsSessionFactory();
-    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -274,6 +206,74 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   public void setHibernateConfigNs_Args__String() throws Exception {
     String hibernateConfigNs = null;
     target.setHibernateConfigNs(hibernateConfigNs);
+  }
+
+  @Test
+  @Ignore
+  public void buildInjector_Args__FlightPlan() throws Exception {
+    final Injector actual = HyperCube.buildInjector(flightPlan);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  @Ignore
+  public void newJob_Args__Class__FlightPlan() throws Exception {
+    final Class klass = Mach1TestRocket.class;
+    Object actual = HyperCube.newJob(klass, flightPlan);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test(expected = NeutronException.class)
+  @Ignore
+  public void newJob_Args__Class__FlightPlan_T__NeutronException() throws Exception {
+    final Class klass = TestIndexerJob.class;
+
+    flightPlan = new FlightPlan();
+    flightPlan.setEsConfigLoc("config/local.yaml");
+    flightPlan.setSimulateLaunch(true);
+    target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()),
+        lastJobRunTimeFilename);
+
+    target.setHibernateConfigCms("/test-h2-cms.xml");
+    target.setHibernateConfigNs("/test-h2-ns.xml");
+    target.setTestBinder(mock(Binder.class));
+    HyperCube.setInstance(target);
+
+    HyperCube.newJob(klass, flightPlan);
+  }
+
+  @Test
+  // @Ignore
+  public void newJob_Args__Class__StringArray() throws Exception {
+    final Class klass = TestIndexerJob.class;
+    final String[] args = new String[] {"-c", "config/local.yaml", "-l",
+        "/Users/CWS-NS3/client_indexer_time.txt", "-t", "4", "-S"};
+    Object actual = HyperCube.newJob(klass, args);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  @Ignore
+  public void configure_Args__() throws Exception {
+    target.configure();
+  }
+
+  @Test
+  @Ignore
+  public void bindDaos_Args__() throws Exception {
+    target.bindDaos();
+  }
+
+  @Test
+  public void makeCmsSessionFactory_Args__() throws Exception {
+    final SessionFactory actual = target.makeCmsSessionFactory();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void makeNsSessionFactory_Args__() throws Exception {
+    final SessionFactory actual = target.makeNsSessionFactory();
+    assertThat(actual, is(notNullValue()));
   }
 
 }

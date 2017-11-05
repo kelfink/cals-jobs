@@ -141,8 +141,8 @@ public class LaunchSchedulerTest extends Goddard {
 
   @Test
   public void addExecutingJob_Args__TriggerKey__NeutronRocket() throws Exception {
-    NeutronRocket job = mock(NeutronRocket.class);
-    target.trackInFlightRocket(key, job);
+    NeutronRocket rocket = mock(NeutronRocket.class);
+    target.trackInFlightRocket(key, rocket);
   }
 
   @Test
