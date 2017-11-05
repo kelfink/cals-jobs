@@ -5,15 +5,12 @@ import java.io.Serializable;
 import gov.ca.cwds.data.persistence.PersistentObject;
 
 /**
- * Represents an Intake Participant or Person.
+ * Represents an abstract relationship from this person to another.
  * 
  * @author CWDS API Team
  */
 public class ReplicatedRelationship implements PersistentObject {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private String thisLegacyTable;

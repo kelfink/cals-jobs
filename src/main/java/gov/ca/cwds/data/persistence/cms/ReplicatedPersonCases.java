@@ -2,7 +2,6 @@ package gov.ca.cwds.data.persistence.cms;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,15 +13,14 @@ import com.google.common.collect.Lists;
 
 import gov.ca.cwds.data.es.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPersonParent;
-import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.jobs.shrinkray.RetrovillePerson;
 
 /**
  * Pseudo-normalized container for CMS person case.
  * 
  * @author CWDS API Team
  */
-public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
+public class ReplicatedPersonCases implements RetrovillePerson {
 
   private static final long serialVersionUID = -8746969311364544478L;
 
@@ -82,41 +80,6 @@ public class ReplicatedPersonCases implements PersistentObject, ApiPersonAware {
   @Override
   public Serializable getPrimaryKey() {
     return this.groupId;
-  }
-
-  @Override
-  public Date getBirthDate() {
-    return null;
-  }
-
-  @Override
-  public String getFirstName() {
-    return null;
-  }
-
-  @Override
-  public String getGender() {
-    return null;
-  }
-
-  @Override
-  public String getLastName() {
-    return null;
-  }
-
-  @Override
-  public String getMiddleName() {
-    return null;
-  }
-
-  @Override
-  public String getNameSuffix() {
-    return null;
-  }
-
-  @Override
-  public String getSsn() {
-    return null;
   }
 
   @Override
