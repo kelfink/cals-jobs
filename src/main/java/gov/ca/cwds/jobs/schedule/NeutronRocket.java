@@ -15,7 +15,6 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.FlightRecord;
-import gov.ca.cwds.jobs.util.JobLogs;
 
 /**
  * Wrapper for scheduled jobs.
@@ -67,7 +66,8 @@ public class NeutronRocket implements InterruptableJob {
 
       job.run();
     } catch (Exception e) {
-      throw JobLogs.runtime(LOGGER, e, "FAILED TO LAUNCH! {}", e);
+      LOGGER.error("FAILED TO LAUNCH! {}", e);
+      throw new JobExecutionException("FAILED TO LAUNCH! {}", e);
     }
 
     LOGGER.info("Executed {}", rocket.getClass().getName());

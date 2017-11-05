@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,6 +14,7 @@ import org.junit.Test;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
 
@@ -32,8 +35,8 @@ public class NeutronRocketTest extends Goddard {
     super.setup();
 
     dao = new TestNormalizedEntityDao(sessionFactory);
-    rocket =
-        new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, flightRecorder);
+    rocket = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
+        flightRecorder);
     rocket.setOpts(opts);
     rocket.init(this.tempFile.getAbsolutePath(), opts);
 
@@ -51,11 +54,31 @@ public class NeutronRocketTest extends Goddard {
     assertThat(target, notNullValue());
   }
 
-  @Test
+  @Test(expected = JobExecutionException.class)
   public void execute_Args__JobExecutionContext_T__JobException() throws Exception {
-    JobExecutionContext context_ = mock(JobExecutionContext.class);
-    JobDetail jd = mock(JobDetail.class);
-    Trigger trg = mock(Trigger.class);
+    final JobExecutionContext context_ = mock(JobExecutionContext.class);
+    final JobDetail jd = mock(JobDetail.class);
+    final Trigger trg = mock(Trigger.class);
+
+    final JobKey jobKey = new JobKey("crap", NeutronSchedulerConstants.GRP_LST_CHG);
+    final JobDataMap jdm = new JobDataMap();
+    jdm.put("job_class", "crap");
+    jdm.put("cmd_line", "--invalid");
+
+    when(context_.getJobDetail()).thenReturn(jd);
+    when(context_.getTrigger()).thenReturn(trg);
+    when(jd.getJobDataMap()).thenReturn(jdm);
+    when(trg.getJobKey()).thenReturn(jobKey);
+
+    doThrow(new IllegalArgumentException("uh oh")).when(context_).setResult(any(Object.class));
+    target.execute(context_);
+  }
+
+  @Test
+  public void execute__blow() throws Exception {
+    final JobExecutionContext context_ = mock(JobExecutionContext.class);
+    final JobDetail jd = mock(JobDetail.class);
+    final Trigger trg = mock(Trigger.class);
 
     final JobKey jobKey = new JobKey("crap", NeutronSchedulerConstants.GRP_LST_CHG);
     final JobDataMap jdm = new JobDataMap();
