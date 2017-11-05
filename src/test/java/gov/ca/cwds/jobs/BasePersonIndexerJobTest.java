@@ -66,8 +66,8 @@ public class BasePersonIndexerJobTest
     super.setup();
 
     dao = new TestNormalizedEntityDao(sessionFactory);
-    target =
-        new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, flightRecorder);
+    target = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
+        flightRecorder);
     target.setOpts(flightPlan);
     target.setTrack(flightRecord);
   }
@@ -676,7 +676,7 @@ public class BasePersonIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  @Test(expected = SQLException.class)
+  @Test(expected = JobsException.class)
   public void extractLastRunRecsFromView_Args__sql_error() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenThrow(SQLException.class);
