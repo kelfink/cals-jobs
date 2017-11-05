@@ -78,25 +78,6 @@ public class SafetyAlertIndexerJob
   }
 
   @Override
-  public String getJdbcOrderBy() {
-    return " ORDER BY CLIENT_ID ";
-  }
-
-  @Override
-  public String getInitialLoadQuery(String dbSchemaName) {
-    final StringBuilder buf = new StringBuilder();
-    buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
-        .append(" x ");
-
-    if (!getOpts().isLoadSealedAndSensitive()) {
-      buf.append(" WHERE x.CLIENT_SENSITIVITY_IND = 'N' ");
-    }
-
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
-    return buf.toString();
-  }
-
-  @Override
   public String getInitialLoadViewName() {
     return "VW_LST_SAFETY_ALERT";
   }

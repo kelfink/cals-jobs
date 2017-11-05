@@ -267,7 +267,7 @@ public class EsPersonReferralTest extends Goddard {
 
   @Test
   public void getWorkerId_Args__() throws Exception {
-    String actual = target.getWorkerId();
+    String actual = target.getWorker().getWorkerId();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -275,12 +275,12 @@ public class EsPersonReferralTest extends Goddard {
   @Test
   public void setWorkerId_Args__String() throws Exception {
     String workerId = null;
-    target.setWorkerId(workerId);
+    target.getWorker().setWorkerId(workerId);
   }
 
   @Test
   public void getWorkerFirstName_Args__() throws Exception {
-    String actual = target.getWorkerFirstName();
+    String actual = target.getWorker().getWorkerFirstName();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -288,12 +288,12 @@ public class EsPersonReferralTest extends Goddard {
   @Test
   public void setWorkerFirstName_Args__String() throws Exception {
     String workerFirstName = null;
-    target.setWorkerFirstName(workerFirstName);
+    target.getWorker().setWorkerFirstName(workerFirstName);
   }
 
   @Test
   public void getWorkerLastName_Args__() throws Exception {
-    String actual = target.getWorkerLastName();
+    String actual = target.getWorker().getWorkerLastName();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -301,7 +301,7 @@ public class EsPersonReferralTest extends Goddard {
   @Test
   public void setWorkerLastName_Args__String() throws Exception {
     String workerLastName = null;
-    target.setWorkerLastName(workerLastName);
+    target.getWorker().setWorkerLastName(workerLastName);
   }
 
   @Test
@@ -546,7 +546,7 @@ public class EsPersonReferralTest extends Goddard {
 
   @Test
   public void getWorkerLastUpdated_Args__() throws Exception {
-    Date actual = target.getWorkerLastUpdated();
+    Date actual = target.getWorker().getWorkerLastUpdated();
     Date expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -554,7 +554,7 @@ public class EsPersonReferralTest extends Goddard {
   @Test
   public void setWorkerLastUpdated_Args__Date() throws Exception {
     Date workerLastUpdated = new Date();
-    target.setWorkerLastUpdated(workerLastUpdated);
+    target.getWorker().setWorkerLastUpdated(workerLastUpdated);
   }
 
   @Test

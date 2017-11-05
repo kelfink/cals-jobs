@@ -23,16 +23,17 @@ public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extend
 
   @Override
   public String getJdbcOrderBy() {
-    return " ORDER BY x.clt_identifier ";
+    return " ORDER BY CLIENT_ID ";
   }
 
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
     buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
-        .append(" x WHERE x.clt_identifier BETWEEN ':fromId' AND ':toId' ");
+        .append(" x ");
+
     if (!getOpts().isLoadSealedAndSensitive()) {
-      buf.append(" AND x.CLT_SENSTV_IND = 'N' ");
+      buf.append(" WHERE x.CLIENT_SENSITIVITY_IND = 'N' ");
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
