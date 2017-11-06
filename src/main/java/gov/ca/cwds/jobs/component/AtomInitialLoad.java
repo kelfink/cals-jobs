@@ -131,19 +131,19 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
           (String) session.getSessionFactory().getProperties().get("hibernate.default_schema");
 
       try {
-        final ProcedureCall proc = session.createStoredProcedureCall(schema + ".REFRESHMQT");
-        proc.registerStoredProcedureParameter("MQT_NM", String.class, ParameterMode.IN);
-        proc.registerStoredProcedureParameter("RETCODE", Integer.class, ParameterMode.OUT);
+        final ProcedureCall proc = session.createStoredProcedureCall(schema + ".SPREFRSMQT");
+        proc.registerStoredProcedureParameter("MQTNAME", String.class, ParameterMode.IN);
+        proc.registerStoredProcedureParameter("RETMESSAG", String.class, ParameterMode.OUT);
 
-        proc.setParameter("MQT_NM", getMQTName());
+        proc.setParameter("MQTNAME", getMQTName());
         proc.execute();
 
-        final Integer returnCode = (Integer) proc.getOutputParameterValue("RETCODE");
-        getLogger().info("stored proc: returnCode: {}", returnCode);
+        final String returnMsg = (String) proc.getOutputParameterValue("RETCODE");
+        getLogger().info("stored proc: returnCode: {}", returnMsg);
 
-        if (returnCode != 0) {
-          getLogger().error("Stored Procedure return code - {}", returnCode);
-          throw new DaoException("Stored Procedure returned with ERROR - " + returnCode);
+        if (StringUtils.isNotBlank(returnMsg)) {
+          getLogger().error("Stored Procedure return message: {}", returnMsg);
+          throw new DaoException("Stored Procedure returned with ERROR - " + returnMsg);
         }
 
       } catch (DaoException h) {
