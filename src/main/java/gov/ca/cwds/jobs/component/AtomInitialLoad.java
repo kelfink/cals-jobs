@@ -138,7 +138,7 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
         proc.setParameter("MQTNAME", getMQTName());
         proc.execute();
 
-        final String returnMsg = (String) proc.getOutputParameterValue("RETCODE");
+        final String returnMsg = (String) proc.getOutputParameterValue("RETMESSAG");
         getLogger().info("stored proc: returnCode: {}", returnMsg);
 
         if (StringUtils.isNotBlank(returnMsg)) {
