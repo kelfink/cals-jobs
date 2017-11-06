@@ -171,6 +171,14 @@ public class HyperCube extends NeutronGuiceModule {
     return ret;
   }
 
+  public static synchronized Injector buildInjectorFunctional(final FlightPlan flightPlan) {
+    try {
+      return buildInjector(flightPlan);
+    } catch (NeutronException e) {
+      throw JobLogs.runtime(LOGGER, e, "FAILED TO BUILD INJECTOR! {}", e.getMessage());
+    }
+  }
+
   /**
    * Build the Guice Injector once and use it for all Job instances during the life of this batch
    * JVM.
@@ -179,7 +187,8 @@ public class HyperCube extends NeutronGuiceModule {
    * @return Guice Injector
    * @throws NeutronException if unable to construct dependencies
    */
-  public static synchronized Injector buildInjector(final FlightPlan flightPlan) throws NeutronException {
+  public static synchronized Injector buildInjector(final FlightPlan flightPlan)
+      throws NeutronException {
     if (injector == null) {
       try {
         injector = Guice.createInjector(cubeMaker.apply(flightPlan));

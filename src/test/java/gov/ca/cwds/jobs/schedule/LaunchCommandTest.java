@@ -178,7 +178,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   public void runScheduledJob_Args__String__FlightPlan() throws Exception {
     final String rocketName = Mach1TestRocket.class.getName();
     target.setLaunchScheduler(launchScheduler);
-    FlightRecord actual = target.launchScheduled(rocketName, flightPlan);
+    FlightRecord actual = target.launchScheduledFlight(rocketName, flightPlan);
   }
 
   @Test

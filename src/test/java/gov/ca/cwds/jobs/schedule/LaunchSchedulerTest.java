@@ -50,7 +50,7 @@ public class LaunchSchedulerTest extends Goddard {
     key = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
     target = new LaunchScheduler(jobHistory, rocketFactory, rocketOptions);
     target.setScheduler(scheduler);
-    target.setOpts(flightPlan);
+    target.setFlightPlan(flightPlan);
 
     target.getScheduleRegistry().put(Mach1TestRocket.class, launchPad);
   }
@@ -102,7 +102,7 @@ public class LaunchSchedulerTest extends Goddard {
   @Test(expected = NeutronException.class)
   public void runScheduledJob_Args__String__FlightPlan() throws Exception {
     String jobName = Mach1TestRocket.class.getName();
-    FlightRecord actual = target.launchScheduled(jobName, flightPlan);
+    FlightRecord actual = target.launchScheduledFlight(jobName, flightPlan);
     FlightRecord expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -164,13 +164,13 @@ public class LaunchSchedulerTest extends Goddard {
 
   @Test
   public void getOpts_Args__() throws Exception {
-    FlightPlan actual = target.getOpts();
+    FlightPlan actual = target.getFlightPlan();
     // assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void setOpts_Args__FlightPlan() throws Exception {
-    target.setOpts(flightPlan);
+    target.setFlightPlan(flightPlan);
   }
 
   @Test

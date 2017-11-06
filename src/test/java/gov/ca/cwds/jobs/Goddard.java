@@ -292,7 +292,7 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
 
     when(launchScheduler.launchScheduledFlight(any(Class.class), any(FlightPlan.class)))
         .thenReturn(flightRecord);
-    when(launchScheduler.launchScheduled(any(String.class), any(FlightPlan.class)))
+    when(launchScheduler.launchScheduledFlight(any(String.class), any(FlightPlan.class)))
         .thenReturn(flightRecord);
 
     when(rocketFactory.createJob(any(Class.class), any(FlightPlan.class))).thenReturn(mach1Rocket);

@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
@@ -55,6 +56,10 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
    */
   private static LaunchCommand instance = new LaunchCommand();
 
+  private static Function<FlightPlan, Injector> injectorMaker = HyperCube::buildInjectorFunctional;
+
+  private Injector injector;
+
   private LaunchCommandSettings settings = new LaunchCommandSettings();
 
   /**
@@ -94,6 +99,13 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     this.esDao = esDao;
   }
 
+  /**
+   * MOVE this responsibility to another unit.
+   * 
+   * @param initialMode obvious
+   * @param hoursInPast number of hours in past
+   * @throws IOException on file read/write error
+   */
   protected void resetTimestamps(boolean initialMode, int hoursInPast) throws IOException {
     final DateFormat fmt =
         new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
@@ -152,7 +164,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
    * Configure Quartz scheduling.
    * 
    * <p>
-   * MORE: inject this dependency.
+   * MORE: inject this dependency. MOVE this responsibility to another unit.
    * </p>
    * 
    * @param injector Guice injector
@@ -218,7 +230,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     if (settings.isInitialMode()) {
       startingOpts.setOverrideLastRunTime(now);
       startingOpts.setLastRunMode(false);
-      LOGGER.warn("\n\n\n\n>>>>>>> INITIAL, FULL LOAD! <<<<<<<\n\n\n\n");
+      LOGGER.warn("\n\n\n\n>>>>>>> FULL, INITIAL LOAD! <<<<<<<\n\n\n\n");
     }
   }
 
@@ -238,7 +250,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     exporter.export("Neutron:runner=master", this);
 
     // Expose Guice bean attributes to JMX.
-    Manager.manage("Neutron_Guice", HyperCube.getInjector());
+    Manager.manage("Neutron_Guice", injector);
   }
 
   protected void initializeCommandCenter() {
@@ -259,7 +271,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
    */
   protected void initScheduler(final Injector injector) throws NeutronException {
     try {
-      configureQuartz(injector);
+      configureQuartz(injector); // MOVE this responsibility to another class.
 
       // NOTE: make last change window configurable.
       final DateFormat fmt =
@@ -281,7 +293,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
         launchScheduler.getFlightPlanManger().addFlightPlan(klass, opts);
       }
 
-      // MOVE: move this responsibility to another class.
+      // MOVE this responsibility to another class.
       if (startingOpts.isDropIndex()) {
         esDao.deleteIndex(esDao.getConfig().getElasticsearchAlias());
       }
@@ -309,47 +321,51 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
   }
 
   /**
-   * Build a registered job.
+   * Create a registered rocket.
    * 
    * @param klass batch job class
-   * @param opts command line arguments
+   * @param flightPlan command line arguments
    * @return the job
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final Class<?> klass, final FlightPlan opts)
+  public BasePersonIndexerJob createJob(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException {
-    return this.launchScheduler.createJob(klass, opts);
-  }
+    final BasePersonIndexerJob ret = launchScheduler.createJob(klass, flightPlan);
+    ret.setOpts(flightPlan);
 
-  /**
-   * Build a registered job.
-   * 
-   * @param rocketName batch job class
-   * @param opts command line arguments
-   * @return the job
-   * @throws NeutronException unexpected runtime error
-   */
-  @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final String rocketName, final FlightPlan opts)
-      throws NeutronException {
-    final BasePersonIndexerJob ret = launchScheduler.createJob(rocketName, opts);
-    ret.setOpts(opts);
-
-    LOGGER.warn("CREATED ROCKET: {}", opts.getLastRunLoc());
+    LOGGER.warn("CREATED ROCKET! {}", flightPlan.getLastRunLoc());
     return ret;
   }
 
-  @Override
-  public FlightRecord launchScheduledFlight(final Class<?> klass, final FlightPlan opts)
+  /**
+   * Create a registered rocket.
+   * 
+   * @param rocketName batch job class
+   * @param flightPlan command line arguments
+   * @return the job
+   * @throws NeutronException unexpected runtime error
+   */
+  @SuppressWarnings("rawtypes")
+  public BasePersonIndexerJob createJob(final String rocketName, final FlightPlan flightPlan)
       throws NeutronException {
-    return this.launchScheduler.launchScheduledFlight(klass, opts);
+    try {
+      return createJob(Class.forName(rocketName), flightPlan);
+    } catch (Exception e) {
+      throw JobLogs.checked(LOGGER, e, "ROCKET CLASS NOT FOUND! {}", rocketName);
+    }
   }
 
   @Override
-  public FlightRecord launchScheduled(final String jobName, final FlightPlan opts)
+  public FlightRecord launchScheduledFlight(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException {
-    return this.launchScheduler.launchScheduled(jobName, opts);
+    return this.launchScheduler.launchScheduledFlight(klass, flightPlan);
+  }
+
+  @Override
+  public FlightRecord launchScheduledFlight(final String jobName, final FlightPlan flightPlan)
+      throws NeutronException {
+    return this.launchScheduler.launchScheduledFlight(jobName, flightPlan);
   }
 
   /**
@@ -405,7 +421,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
   @Override
   public boolean isLaunchVetoed(String className) throws NeutronException {
-    return this.launchScheduler.isLaunchVetoed("x*&^%$#");
+    return this.launchScheduler.isLaunchVetoed(className);
   }
 
   @Override
@@ -459,32 +475,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     return instance;
   }
 
-  protected static synchronized LaunchCommand startSchedulerMode(String[] args) {
-    LOGGER.info("STARTING ON-DEMAND JOBS SERVER ...");
-    try {
-      final FlightPlan globalOpts = FlightPlan.parseCommandLine(args);
-      if (globalOpts.isSimulateLaunch()) {
-        instance.startingOpts = globalOpts;
-        return instance;
-      }
-
-      final Injector injector = HyperCube.buildInjector(globalOpts);
-      instance = injector.getInstance(LaunchCommand.class);
-      instance.startingOpts = globalOpts;
-
-      instance.settings.setContinuousMode(true);
-      instance.settings.setInitialMode(!instance.startingOpts.isLastRunMode());
-      instance.initScheduler(injector);
-
-      LOGGER.info("ON-DEMAND JOBS SERVER STARTED!");
-    } catch (Exception e) {
-      LOGGER.error("FATAL ERROR! {}", e.getMessage(), e);
-    }
-
-    return instance;
-  }
-
-  protected static FlightPlan buildStandaloneFlightPlan(String... args) {
+  protected static FlightPlan parseCommandLine(String... args) {
     FlightPlan standardFlightPlan;
     try {
       standardFlightPlan = FlightPlan.parseCommandLine(args);
@@ -513,10 +504,38 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
   @Override
   public void close() throws Exception {
     // Single launch mode: close resources but do not kill the JVM.
-    if (!isTestMode() && !isSchedulerMode()) {
+    if (!isTestMode() && instance.exitCode != 0) {
       // Shutdown all remaining resources, even those not attached to this job.
       Runtime.getRuntime().exit(instance.exitCode); // NOSONAR
     }
+  }
+
+  protected static synchronized LaunchCommand startSchedulerMode(String[] args) {
+    LOGGER.info("STARTING LAUNCH COMMAND ...");
+
+    final FlightPlan standardFlightPlan = parseCommandLine(args);
+    if (standardFlightPlan.isSimulateLaunch()) {
+      return instance; // Test "main" methods
+    }
+
+    final Injector injector = injectorMaker.apply(standardFlightPlan);
+    try (final LaunchCommand launchCommand = buildStandaloneInstance(standardFlightPlan)) {
+      instance = injector.getInstance(LaunchCommand.class);
+      instance.startingOpts = standardFlightPlan;
+
+      instance.settings.setContinuousMode(true);
+      instance.settings.setInitialMode(!instance.startingOpts.isLastRunMode());
+      instance.initScheduler(injector);
+
+    } catch (Throwable e) { // NOSONAR
+      // Intentionally catch a Throwable, not an Exception.
+      // Close orphaned resources forcibly, if necessary, by system exit.
+      instance.exitCode = -1;
+      throw JobLogs.runtime(LOGGER, e, "LAUNCH COMMAND FAILED TO START!: {}", e.getMessage());
+    }
+
+    LOGGER.info("LAUNCH COMMAND STARTED!");
+    return instance;
   }
 
   /**
@@ -534,7 +553,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
    */
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
-    final FlightPlan standardFlightPlan = buildStandaloneFlightPlan(args);
+    final FlightPlan standardFlightPlan = parseCommandLine(args);
     if (standardFlightPlan.isSimulateLaunch()) {
       return; // Test "main" methods
     }
@@ -560,6 +579,22 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
    */
   public static void main(String[] args) {
     startSchedulerMode(args);
+  }
+
+  public static Function<FlightPlan, Injector> getInjectorMaker() {
+    return injectorMaker;
+  }
+
+  public static void setInjectorMaker(Function<FlightPlan, Injector> makeLaunchCommand) {
+    LaunchCommand.injectorMaker = makeLaunchCommand;
+  }
+
+  public Injector getInjector() {
+    return injector;
+  }
+
+  public void setInjector(Injector injector) {
+    this.injector = injector;
   }
 
 }
