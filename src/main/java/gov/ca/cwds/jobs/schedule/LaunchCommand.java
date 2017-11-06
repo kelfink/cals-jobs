@@ -245,7 +245,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
     // Expose Command Center methods to JMX.
     exporter.export("Neutron:runner=command_center", this);
-    exporter.getExportedObjects();
+    LOGGER.info("MBeans: {}", exporter.getExportedObjects());
 
     // Expose Guice bean attributes to JMX.
     Manager.manage("Neutron_Guice", injector);

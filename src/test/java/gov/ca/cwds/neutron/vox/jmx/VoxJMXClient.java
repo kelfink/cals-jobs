@@ -27,10 +27,10 @@ public class VoxJMXClient {
     final MBeanServerConnection mbeanServerConnection = jmxConnector.getMBeanServerConnection();
 
     // ObjectName should be same as your MBean name
-    final ObjectName mbeanName = new ObjectName("Neutron:last_run_jobs");
+    final ObjectName mbeanName = new ObjectName("Neutron:rocket");
 
-    // Get MBean proxy instance that will be used to make calls to registered MBean
-    VoxLaunchPadMBean mbeanProxy = MBeanServerInvocationHandler
+    // Get MBean proxy instance that will be used to make calls to registered MBean.
+    final VoxLaunchPadMBean mbeanProxy = MBeanServerInvocationHandler
         .newProxyInstance(mbeanServerConnection, mbeanName, VoxLaunchPadMBean.class, true);
 
     // let's make some calls to mbean through proxy and see the results.
