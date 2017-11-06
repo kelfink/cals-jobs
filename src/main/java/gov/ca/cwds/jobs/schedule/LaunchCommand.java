@@ -81,7 +81,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
   private LaunchScheduler launchScheduler;
 
-  private int exitCode = -1; // Single launch mode only.
+  private int exitCode = 0; // Single launch mode only.
 
   private LaunchCommand() {
     // no-op
@@ -254,6 +254,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     if (this.settings.isExposeJmx()) {
       exposeJMX();
     }
+
     if (this.settings.isExposeRest()) {
       exposeREST();
     }
@@ -526,6 +527,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
       instance.settings.setContinuousMode(true);
       instance.settings.setInitialMode(!instance.startingOpts.isLastRunMode());
       instance.initScheduler(injector);
+      instance.exitCode = 0; // Good to go
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
