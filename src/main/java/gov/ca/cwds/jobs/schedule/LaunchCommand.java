@@ -282,7 +282,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
       configureInitialMode(now);
 
-      // Schedule jobs.
+      // Prepare launch pads and flight plans.
       for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
         final Class<?> klass = sched.getRocketClass();
         final FlightPlan opts = new FlightPlan(startingOpts);
@@ -299,12 +299,12 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
         esDao.deleteIndex(esDao.getConfig().getElasticsearchAlias());
       }
 
-      // Start last change jobs.
+      // Start rockets.
       for (LaunchPad j : launchScheduler.getScheduleRegistry().values()) {
         j.schedule();
       }
 
-      // Start your engines ...
+      // Cindy: "Let's light this candle!"
       if (!this.settings.isTestMode()) {
         LOGGER.warn("start scheduler ...");
         launchScheduler.getScheduler().start();
@@ -330,7 +330,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final Class<?> klass, final FlightPlan flightPlan)
+  public BasePersonIndexerJob createRocket(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException {
     final BasePersonIndexerJob ret = launchScheduler.createJob(klass, flightPlan);
     ret.setOpts(flightPlan);
@@ -348,10 +348,10 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final String rocketName, final FlightPlan flightPlan)
+  public BasePersonIndexerJob createRocket(final String rocketName, final FlightPlan flightPlan)
       throws NeutronException {
     try {
-      return createJob(Class.forName(rocketName), flightPlan);
+      return createRocket(Class.forName(rocketName), flightPlan);
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "ROCKET CLASS NOT FOUND! {}", rocketName);
     }

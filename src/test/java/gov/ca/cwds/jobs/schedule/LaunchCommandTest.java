@@ -156,14 +156,14 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   @Test
   public void createJob_Args__Class__FlightPlan() throws Exception {
     final Class<?> klass = Mach1TestRocket.class;
-    final BasePersonIndexerJob actual = target.createJob(klass, flightPlan);
+    final BasePersonIndexerJob actual = target.createRocket(klass, flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void createJob_Args__String__FlightPlan() throws Exception {
     final String rocketName = Mach1TestRocket.class.getName();
-    final BasePersonIndexerJob actual = target.createJob(rocketName, flightPlan);
+    final BasePersonIndexerJob actual = target.createRocket(rocketName, flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 
