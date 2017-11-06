@@ -41,7 +41,7 @@ public class ReferralJobRanges {
       BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job,
       final List<Pair<String, String>> allKeyPairs) {
     List<Pair<String, String>> ret = new ArrayList<>();
-    final FlightPlan opts = job.getOpts();
+    final FlightPlan opts = job.getFlightPlan();
     if (opts.isRangeGiven()) {
       final List<Pair<String, String>> list = new ArrayList<>();
 

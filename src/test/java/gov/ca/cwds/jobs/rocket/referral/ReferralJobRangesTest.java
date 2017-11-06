@@ -30,7 +30,7 @@ public class ReferralJobRangesTest extends Goddard {
 
     when(job.isDB2OnZOS()).thenReturn(isZOS);
     when(job.isLargeDataSet()).thenReturn(isLarge);
-    when(job.getOpts()).thenReturn(flightPlan);
+    when(job.getFlightPlan()).thenReturn(flightPlan);
 
     final List<Pair<String, String>> actual = target.getPartitionRanges(job);
     final int cntActual = actual.size();
@@ -81,7 +81,7 @@ public class ReferralJobRangesTest extends Goddard {
     BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job =
         mock(BasePersonIndexerJob.class);
 
-    when(job.getOpts()).thenReturn(flightPlan);
+    when(job.getFlightPlan()).thenReturn(flightPlan);
     when(flightPlan.isRangeGiven()).thenReturn(false);
     when(flightPlan.getStartBucket()).thenReturn(1L);
     when(flightPlan.getEndBucket()).thenReturn(1L);

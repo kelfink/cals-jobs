@@ -46,7 +46,7 @@ public class ServiceProviderIndexerJobTest extends Goddard {
     dao = new ReplicatedServiceProviderDao(sessionFactory);
     target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
         sessionFactory, flightRecorder, flightPlan);
-    target.setOpts(FlightPlanTest.makeGeneric());
+    target.setFlightPlan(FlightPlanTest.makeGeneric());
   }
 
   @After

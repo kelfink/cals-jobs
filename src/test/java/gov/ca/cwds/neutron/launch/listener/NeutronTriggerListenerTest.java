@@ -49,7 +49,7 @@ public class NeutronTriggerListenerTest extends Goddard {
     dao = new TestNormalizedEntityDao(sessionFactory);
     rocket =
         new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, flightRecorder);
-    rocket.setOpts(flightPlan);
+    rocket.setFlightPlan(flightPlan);
     rocket.setTrack(flightRecord);
     job = new NeutronRocket(rocket);
 

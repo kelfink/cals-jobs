@@ -184,7 +184,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return bulk delete request
    */
   public DeleteRequest bulkDelete(final String id) {
-    return new DeleteRequest(getOpts().getIndexName(), esDao.getConfig().getElasticsearchDocType(),
+    return new DeleteRequest(getFlightPlan().getIndexName(), esDao.getConfig().getElasticsearchDocType(),
         id);
   }
 
@@ -283,7 +283,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       esp.setLegacySourceTable(getLegacySourceTable());
     }
 
-    return ElasticTransformer.<T>prepareUpsertRequest(this, getOpts().getIndexName(),
+    return ElasticTransformer.<T>prepareUpsertRequest(this, getFlightPlan().getIndexName(),
         esDao.getConfig().getElasticsearchDocType(), esp, t);
   }
 
@@ -523,7 +523,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.warn("Found {} people to delete, IDs: {}", deletionResults.size(), deletionResults);
 
       for (String deletionId : deletionResults) {
-        bp.add(new DeleteRequest(getOpts().getIndexName(),
+        bp.add(new DeleteRequest(getFlightPlan().getIndexName(),
             esDao.getConfig().getElasticsearchDocType(), deletionId));
       }
 
@@ -599,10 +599,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.info("RUNNING JOB: {}", getClass().getName());
 
       // If index name is provided, use it, else take alias from ES config.
-      final String indexNameOverride = getOpts().getIndexName();
+      final String indexNameOverride = getFlightPlan().getIndexName();
       final String effectiveIndexName = StringUtils.isBlank(indexNameOverride)
           ? esDao.getConfig().getElasticsearchAlias() : indexNameOverride;
-      getOpts().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
+      getFlightPlan().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
 
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
       LOGGER.debug("Last successsful run time: {}", lastRun); // NOSONAR
@@ -744,7 +744,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
     final Class<?> entityClass = getDenormalizedClass(); // view entity class
     final String namedQueryName =
-        getOpts().isLoadSealedAndSensitive() ? entityClass.getName() + ".findAllUpdatedAfter"
+        getFlightPlan().isLoadSealedAndSensitive() ? entityClass.getName() + ".findAllUpdatedAfter"
             : entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
 
     final Session session = jobDao.getSessionFactory().getCurrentSession();

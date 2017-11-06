@@ -88,7 +88,7 @@ public class SafetyAlertIndexerJob
    */
   @Override
   public boolean mustDeleteLimitedAccessRecords() {
-    return !getOpts().isLoadSealedAndSensitive();
+    return !getFlightPlan().isLoadSealedAndSensitive();
   }
 
   @Override

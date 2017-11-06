@@ -60,7 +60,7 @@ public class NeutronRocket implements InterruptableJob {
       track.setJobName(jobName);
       job.setTrack(track);
 
-      map.put("opts", job.getOpts());
+      map.put("opts", job.getFlightPlan());
       map.put("track", track);
       context.setResult(track);
 

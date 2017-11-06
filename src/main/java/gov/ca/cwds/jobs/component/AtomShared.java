@@ -36,7 +36,7 @@ public interface AtomShared extends ApiMarker {
    * 
    * @return this job's options
    */
-  FlightPlan getOpts();
+  FlightPlan getFlightPlan();
 
   /**
    * Common method sets the thread's name.

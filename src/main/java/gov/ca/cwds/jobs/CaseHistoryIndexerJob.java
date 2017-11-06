@@ -93,7 +93,7 @@ public abstract class CaseHistoryIndexerJob
     buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
         .append(" x ");
 
-    if (!getOpts().isLoadSealedAndSensitive()) {
+    if (!getFlightPlan().isLoadSealedAndSensitive()) {
       buf.append(" WHERE x.LIMITED_ACCESS_CODE = 'N' ");
     }
 
@@ -107,7 +107,7 @@ public abstract class CaseHistoryIndexerJob
    */
   @Override
   public boolean mustDeleteLimitedAccessRecords() {
-    return !getOpts().isLoadSealedAndSensitive();
+    return !getFlightPlan().isLoadSealedAndSensitive();
   }
 
   @Override

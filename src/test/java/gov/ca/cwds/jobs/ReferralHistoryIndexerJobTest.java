@@ -222,7 +222,7 @@ public class ReferralHistoryIndexerJobTest
   @Test
   public void getInitialLoadQuery_Args__no_sealed() throws Exception {
     String dbSchemaName = "CWSRS1";
-    target.getOpts().setLoadSealedAndSensitive(false);
+    target.getFlightPlan().setLoadSealedAndSensitive(false);
     String actual = target.getInitialLoadQuery(dbSchemaName);
     assertThat(actual, notNullValue());
   }
@@ -296,7 +296,7 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void testCalcThreads() throws Exception {
-    NeutronThreadUtils.calcReaderThreads(target.getOpts());
+    NeutronThreadUtils.calcReaderThreads(target.getFlightPlan());
   }
 
   @Test

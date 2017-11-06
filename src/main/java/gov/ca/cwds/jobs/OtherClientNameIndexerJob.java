@@ -179,7 +179,7 @@ public class OtherClientNameIndexerJob
     buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
         .append(" x ");
 
-    if (!getOpts().isLoadSealedAndSensitive()) {
+    if (!getFlightPlan().isLoadSealedAndSensitive()) {
       buf.append(" WHERE x.CLIENT_SENSITIVITY_IND = 'N' ");
     }
 

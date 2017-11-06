@@ -37,7 +37,7 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
    */
   default List<Pair<String, String>> limitRange(final List<Pair<String, String>> allKeyPairs) {
     List<Pair<String, String>> ret;
-    final FlightPlan opts = getOpts();
+    final FlightPlan opts = getFlightPlan();
     if (opts != null && opts.isRangeGiven()) {
       final List<Pair<String, String>> list = new ArrayList<>();
 
@@ -124,7 +124,7 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
   }
 
   default void refreshMQT() {
-    if (getOpts().isRefreshMqt() && StringUtils.isNotBlank(getMQTName())) {
+    if (getFlightPlan().isRefreshMqt() && StringUtils.isNotBlank(getMQTName())) {
       getLogger().warn("REFRESH MQT!");
       final Session session = getJobDao().getSessionFactory().getCurrentSession();
       getOrCreateTransaction();

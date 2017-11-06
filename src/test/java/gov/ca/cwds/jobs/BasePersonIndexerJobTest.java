@@ -68,7 +68,7 @@ public class BasePersonIndexerJobTest
     dao = new TestNormalizedEntityDao(sessionFactory);
     target = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
         flightRecorder);
-    target.setOpts(flightPlan);
+    target.setFlightPlan(flightPlan);
     target.setTrack(flightRecord);
   }
 
@@ -385,13 +385,13 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void getOpts_Args__() throws Exception {
-    FlightPlan actual = target.getOpts();
+    FlightPlan actual = target.getFlightPlan();
     assertThat(actual, notNullValue());
   }
 
   @Test
   public void setOpts_Args__JobOptions() throws Exception {
-    target.setOpts(flightPlan);
+    target.setFlightPlan(flightPlan);
   }
 
   @Test
@@ -849,7 +849,7 @@ public class BasePersonIndexerJobTest
     final FlightPlan opts = new FlightPlan();
     opts.setRefreshMqt(true);
     opts.setEsConfigLoc("config/local.yaml");
-    target.setOpts(opts);
+    target.setFlightPlan(opts);
     target.refreshMQT();
   }
 

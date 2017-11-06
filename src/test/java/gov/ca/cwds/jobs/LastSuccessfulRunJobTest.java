@@ -215,7 +215,7 @@ public class LastSuccessfulRunJobTest
 
     FlightPlan opts = new FlightPlan();
     opts.setOverrideLastRunTime(lastSuccessfulRunTime);
-    target.setOpts(opts);
+    target.setFlightPlan(opts);
 
     final Date actual = target.calcLastRunDate(lastSuccessfulRunTime);
     assertThat(actual, is(notNullValue()));
@@ -224,14 +224,14 @@ public class LastSuccessfulRunJobTest
   @Test
   public void getOpts_Args__() throws Exception {
     FlightPlan opts = new FlightPlan();
-    target.setOpts(opts);
-    FlightPlan actual = target.getOpts();
+    target.setFlightPlan(opts);
+    FlightPlan actual = target.getFlightPlan();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void setOpts_Args__JobOptions() throws Exception {
-    target.setOpts(flightPlan);
+    target.setFlightPlan(flightPlan);
   }
 
   @Test

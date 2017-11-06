@@ -184,7 +184,7 @@ public class ReferralHistoryIndexerJob
 
   @Override
   public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
-    EsPersonReferral.setOpts(getOpts()); // WARNING: change for continuous mode
+    EsPersonReferral.setOpts(getFlightPlan()); // WARNING: change for continuous mode
     return EsPersonReferral.class;
   }
 
@@ -206,7 +206,7 @@ public class ReferralHistoryIndexerJob
     final StringBuilder buf = new StringBuilder();
     buf.append(SELECT_REFERRAL);
 
-    if (!getOpts().isLoadSealedAndSensitive()) {
+    if (!getFlightPlan().isLoadSealedAndSensitive()) {
       buf.append(" WHERE RFL.LMT_ACSSCD = 'N' ");
     }
 
@@ -473,7 +473,7 @@ public class ReferralHistoryIndexerJob
     LOGGER.info("BEGIN: main read thread");
 
     // WARNING: static setter is OK in standalone job but NOT permitted in continuous mode.
-    EsPersonReferral.setOpts(getOpts());
+    EsPersonReferral.setOpts(getFlightPlan());
     doneTransform(); // normalize in place **without** the transform thread
 
     try {
@@ -481,7 +481,7 @@ public class ReferralHistoryIndexerJob
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
       final ForkJoinPool threadPool =
-          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getOpts()));
+          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
@@ -534,7 +534,7 @@ public class ReferralHistoryIndexerJob
    */
   @Override
   public boolean mustDeleteLimitedAccessRecords() {
-    return !getOpts().isLoadSealedAndSensitive();
+    return !getFlightPlan().isLoadSealedAndSensitive();
   }
 
   @Override

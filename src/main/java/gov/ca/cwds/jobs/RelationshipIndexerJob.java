@@ -126,7 +126,7 @@ public class RelationshipIndexerJob
     buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
         .append(" x WHERE x.THIS_LEGACY_ID BETWEEN ':fromId' AND ':toId' ");
 
-    if (!getOpts().isLoadSealedAndSensitive()) {
+    if (!getFlightPlan().isLoadSealedAndSensitive()) {
       buf.append(" AND x.THIS_SENSITIVITY_IND = 'N' AND x.RELATED_SENSITIVITY_IND = 'N' ");
     }
 
@@ -227,7 +227,7 @@ public class RelationshipIndexerJob
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
       final ForkJoinPool threadPool =
-          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getOpts()));
+          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {

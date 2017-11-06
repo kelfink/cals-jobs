@@ -34,7 +34,7 @@ public class AtomSharedTest {
     }
 
     @Override
-    public FlightPlan getOpts() {
+    public FlightPlan getFlightPlan() {
       return null;
     }
 

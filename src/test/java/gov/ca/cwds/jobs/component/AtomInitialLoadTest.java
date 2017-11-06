@@ -40,7 +40,7 @@ public class AtomInitialLoadTest {
     }
 
     @Override
-    public FlightPlan getOpts() {
+    public FlightPlan getFlightPlan() {
       return null;
     }
 

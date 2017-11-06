@@ -221,7 +221,7 @@ public class HyperCube extends NeutronGuiceModule {
       final FlightPlan flightPlan) throws NeutronException {
     try {
       final T ret = buildInjector(flightPlan).getInstance(klass);
-      ret.setOpts(flightPlan);
+      ret.setFlightPlan(flightPlan);
       return ret;
     } catch (CreationException e) {
       throw JobLogs.checked(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());

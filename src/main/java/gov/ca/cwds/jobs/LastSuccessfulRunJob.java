@@ -39,25 +39,25 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
   /**
    * Command line options for this job.
    */
-  protected FlightPlan opts;
-
-  private String lastRunTimeFilename;
+  protected FlightPlan flightPlan;
 
   private final FlightRecorder jobHistory;
+
+  private String lastRunTimeFilename;
 
   /**
    * Construct from last successful run date-time.
    * 
    * @param lastJobRunTimeFilename location of last run time file
-   * @param jobHistory injected job history
-   * @param opts job options
+   * @param flightRecorder injected job history
+   * @param flightPlan job options
    */
-  public LastSuccessfulRunJob(String lastJobRunTimeFilename, final FlightRecorder jobHistory,
-      final FlightPlan opts) {
-    this.lastRunTimeFilename =
-        StringUtils.isBlank(lastJobRunTimeFilename) ? opts.getLastRunLoc() : lastJobRunTimeFilename;
-    this.jobHistory = jobHistory;
-    this.opts = opts;
+  public LastSuccessfulRunJob(String lastJobRunTimeFilename, final FlightRecorder flightRecorder,
+      final FlightPlan flightPlan) {
+    this.lastRunTimeFilename = StringUtils.isBlank(lastJobRunTimeFilename)
+        ? flightPlan.getLastRunLoc() : lastJobRunTimeFilename;
+    this.jobHistory = flightRecorder;
+    this.flightPlan = flightPlan;
   }
 
   /**
@@ -69,7 +69,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
   public void init(String lastJobRunTimeFilename, final FlightPlan opts) {
     this.lastRunTimeFilename =
         StringUtils.isBlank(lastJobRunTimeFilename) ? opts.getLastRunLoc() : lastJobRunTimeFilename;
-    this.opts = opts;
+    this.flightPlan = opts;
   }
 
   @Override
@@ -136,7 +136,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * @return appropriate date to detect changes
    */
   protected Date calcLastRunDate(final Date lastSuccessfulRunTime) {
-    return calcLastRunDate(lastSuccessfulRunTime, getOpts());
+    return calcLastRunDate(lastSuccessfulRunTime, getFlightPlan());
   }
 
   /**
@@ -205,17 +205,17 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * @return this job's options
    */
   @Override
-  public FlightPlan getOpts() {
-    return opts;
+  public FlightPlan getFlightPlan() {
+    return flightPlan;
   }
 
   /**
    * Setter for this job's options.
    * 
-   * @param opts this job's options
+   * @param flightPlan this job's options
    */
-  public void setOpts(FlightPlan opts) {
-    this.opts = opts;
+  public void setFlightPlan(FlightPlan flightPlan) {
+    this.flightPlan = flightPlan;
   }
 
   @Override
