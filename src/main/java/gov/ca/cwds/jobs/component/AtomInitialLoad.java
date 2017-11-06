@@ -141,8 +141,8 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
         final String returnMsg = (String) proc.getOutputParameterValue("RETMESSAG");
         getLogger().info("stored proc: returnCode: {}", returnMsg);
 
-        if (StringUtils.isNotBlank(returnMsg)) {
-          getLogger().error("Stored Procedure return message: {}", returnMsg);
+        if (StringUtils.isNotBlank(returnMsg) && !returnMsg.contains("SUCCESS")) {
+          getLogger().error("REFRESH MQT ERROR! {}", returnMsg);
           throw new DaoException("Stored Procedure returned with ERROR - " + returnMsg);
         }
 
