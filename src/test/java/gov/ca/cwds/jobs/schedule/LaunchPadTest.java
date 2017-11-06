@@ -141,7 +141,7 @@ public class LaunchPadTest extends Goddard {
 
   @Test
   public void getOpts_Args__() throws Exception {
-    FlightPlan actual = target.getOpts();
+    FlightPlan actual = target.getFlightPlan();
     FlightPlan expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -149,7 +149,7 @@ public class LaunchPadTest extends Goddard {
   @Test
   public void setOpts_Args__FlightPlan() throws Exception {
     FlightPlan opts_ = mock(FlightPlan.class);
-    target.setOpts(opts_);
+    target.setFlightPlan(opts_);
   }
 
 }

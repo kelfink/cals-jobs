@@ -18,7 +18,7 @@ public class LaunchCommandSettings {
    */
   private boolean continuousMode;
 
-  private boolean exposeJmx;
+  private boolean exposeJmx = true;
 
   private boolean exposeRest;
 

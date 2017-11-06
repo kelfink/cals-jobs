@@ -25,7 +25,6 @@ import org.weakref.jmx.Managed;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
@@ -62,9 +61,6 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
   private LaunchCommandSettings settings = new LaunchCommandSettings();
 
-  /**
-   * HACK: inject dependencies.
-   */
   private FlightPlan startingOpts;
 
   /**
@@ -234,32 +230,32 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     }
   }
 
-  protected void exposeRest() {
+  protected void exposeREST() {
     // Jetty for REST administration.
     Thread jettyServer = new Thread(restServer::run);
     jettyServer.start();
   }
 
-  protected void exposeJmx() {
+  protected void exposeJMX() {
     final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
     for (LaunchPad pad : launchScheduler.getScheduleRegistry().values()) {
-      exporter.export("Neutron:last_run_jobs=" + pad.getFlightSchedule().getShortName(), pad);
+      exporter.export("Neutron:rocket=" + pad.getFlightSchedule().getShortName(), pad);
     }
 
     // Expose Command Center methods to JMX.
-    exporter.export("Neutron:runner=master", this);
+    exporter.export("Neutron:runner=command_center", this);
     exporter.getExportedObjects();
 
     // Expose Guice bean attributes to JMX.
-    Manager.manage("Neutron_Guice", injector);
+    // Manager.manage("Neutron_Guice", injector);
   }
 
   protected void initializeCommandCenter() {
     if (this.settings.isExposeJmx()) {
-      exposeJmx();
+      exposeJMX();
     }
     if (this.settings.isExposeRest()) {
-      exposeRest();
+      exposeREST();
     }
   }
 
@@ -508,7 +504,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
   @Override
   public void close() throws Exception {
     //
-    if (!isTestMode() && !isSchedulerMode() && instance.exitCode != 0) {
+    if (!isTestMode() && instance.exitCode != 0) {
       // Shutdown all remaining resources, even those not attached to this job.
       Runtime.getRuntime().exit(instance.exitCode); // NOSONAR
     }
