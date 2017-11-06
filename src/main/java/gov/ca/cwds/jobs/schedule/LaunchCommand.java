@@ -85,7 +85,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
   private LaunchScheduler launchScheduler;
 
-  private int exitCode = 0; // Single launch mode only.
+  private int exitCode = -1; // Single launch mode only.
 
   private LaunchCommand() {
     // no-op
@@ -502,10 +502,13 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     return instance;
   }
 
+  /**
+   * Single launch mode: close resources and exit JVM.
+   */
   @Override
   public void close() throws Exception {
-    // Single launch mode: close resources but do not kill the JVM.
-    if (!isTestMode() && instance.exitCode != 0) {
+    //
+    if (!isTestMode() && !isSchedulerMode() && instance.exitCode != 0) {
       // Shutdown all remaining resources, even those not attached to this job.
       Runtime.getRuntime().exit(instance.exitCode); // NOSONAR
     }
@@ -527,7 +530,6 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
       instance.settings.setContinuousMode(true);
       instance.settings.setInitialMode(!instance.startingOpts.isLastRunMode());
       instance.initScheduler(injector);
-
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
@@ -562,7 +564,9 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     instance.exitCode = -1;
     try (final LaunchCommand launchCommand = buildStandaloneInstance(standardFlightPlan);
         final T job = HyperCube.newRocket(klass, args)) {
+      launchCommand.exitCode = -1;
       job.run();
+      launchCommand.exitCode = 1;
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
