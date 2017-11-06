@@ -248,6 +248,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
     // Expose Command Center methods to JMX.
     exporter.export("Neutron:runner=master", this);
+    exporter.getExportedObjects();
 
     // Expose Guice bean attributes to JMX.
     Manager.manage("Neutron_Guice", injector);
@@ -490,11 +491,11 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
       throws NeutronException {
     Injector injector;
     try {
-      injector = HyperCube.buildInjector(standardFlightPlan);
+      injector = injectorMaker.apply(standardFlightPlan);
       instance = injector.getInstance(LaunchCommand.class);
       instance.startingOpts = standardFlightPlan;
       instance.settings.setContinuousMode(false);
-    } catch (NeutronException e) {
+    } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "Rethrow", e.getMessage());
     }
 
@@ -558,6 +559,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
       return; // Test "main" methods
     }
 
+    instance.exitCode = -1;
     try (final LaunchCommand launchCommand = buildStandaloneInstance(standardFlightPlan);
         final T job = HyperCube.newRocket(klass, args)) {
       job.run();
@@ -567,18 +569,6 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
       instance.exitCode = -1;
       throw JobLogs.runtime(LOGGER, e, "STANDALONE ROCKET FAILED!: {}", e.getMessage());
     }
-  }
-
-  /**
-   * OPTION: configure individual jobs, like Rundeck.
-   * <p>
-   * Best to load a configuration file with settings per job.
-   * </p>
-   * 
-   * @param args command line
-   */
-  public static void main(String[] args) {
-    startSchedulerMode(args);
   }
 
   public static Function<FlightPlan, Injector> getInjectorMaker() {
@@ -595,6 +585,18 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
   public void setInjector(Injector injector) {
     this.injector = injector;
+  }
+
+  /**
+   * OPTION: configure individual jobs, like Rundeck.
+   * <p>
+   * Best to load a configuration file with settings per job.
+   * </p>
+   * 
+   * @param args command line
+   */
+  public static void main(String[] args) {
+    startSchedulerMode(args);
   }
 
 }

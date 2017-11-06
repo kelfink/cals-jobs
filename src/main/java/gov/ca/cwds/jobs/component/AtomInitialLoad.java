@@ -134,21 +134,24 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
       try {
         final ProcedureCall proc = session.createStoredProcedureCall(schema + ".SPREFRSMQT");
         proc.registerStoredProcedureParameter("MQTNAME", String.class, ParameterMode.IN);
+        proc.registerStoredProcedureParameter("RETSTATUS", String.class, ParameterMode.OUT);
         proc.registerStoredProcedureParameter("RETMESSAG", String.class, ParameterMode.OUT);
 
         proc.setParameter("MQTNAME", getMQTName());
         proc.execute();
 
+        final String returnStatus = (String) proc.getOutputParameterValue("RETSTATUS");
         final String returnMsg = (String) proc.getOutputParameterValue("RETMESSAG");
-        getLogger().info("stored proc: returnCode: {}", returnMsg);
 
-        if (StringUtils.isNotBlank(returnMsg) && !returnMsg.contains("SUCCESS")) {
+        getLogger().info("refresh MQT proc: status: {}, msg: {}", returnStatus, returnMsg);
+
+        if (returnStatus.charAt(0) != '0') {
           getLogger().error("REFRESH MQT ERROR! {}", returnMsg);
-          throw new DaoException("Stored Procedure returned with ERROR - " + returnMsg);
+          throw new DaoException("REFRESH MQT ERROR: " + returnMsg);
         }
 
       } catch (DaoException h) {
-        throw new DaoException("Call to Stored Procedure failed - " + h, h);
+        throw new DaoException("REFRESH MQT FAILED - " + h, h);
       }
     }
   }
