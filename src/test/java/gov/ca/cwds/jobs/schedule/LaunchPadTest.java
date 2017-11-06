@@ -109,11 +109,6 @@ public class LaunchPadTest extends Goddard {
   }
 
   @Test
-  public void vetoScheduledJob_Args__() throws Exception {
-    target.vetoScheduledJob();
-  }
-
-  @Test
   public void history_Args__() throws Exception {
     String actual = target.history();
     assertThat(actual, is(notNullValue()));

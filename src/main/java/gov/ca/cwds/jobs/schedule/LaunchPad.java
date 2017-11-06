@@ -98,11 +98,6 @@ public class LaunchPad implements ApiMarker {
     scheduler.pauseTrigger(triggerKey);
   }
 
-  @Managed(description = "Veto scheduled job execution")
-  public void vetoScheduledJob() {
-    LOGGER.debug("Veto job execution");
-  }
-
   @Managed(description = "Show job status")
   public String status() {
     LOGGER.debug("Show job status");
