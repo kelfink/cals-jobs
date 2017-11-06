@@ -25,6 +25,7 @@ import org.weakref.jmx.Managed;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
@@ -61,7 +62,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
   private LaunchCommandSettings settings = new LaunchCommandSettings();
 
-  private FlightPlan startingOpts;
+  private FlightPlan commonFlightPlan;
 
   /**
    * Only used to drop and create indexes.
@@ -108,7 +109,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     final Date now = new DateTime().minusHours(initialMode ? 876000 : hoursInPast).toDate();
 
     for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
-      final FlightPlan opts = new FlightPlan(startingOpts);
+      final FlightPlan opts = new FlightPlan(commonFlightPlan);
 
       // Find the job's time file under the base directory:
       final StringBuilder buf = new StringBuilder();
@@ -208,7 +209,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     final String timeFileLoc =
         buf.toString().replaceAll(File.separator + File.separator, File.separator);
     opts.setLastRunLoc(timeFileLoc);
-    LOGGER.warn("base directory: {}, job name: {}, last run loc: {}", opts.getBaseDirectory(),
+    LOGGER.debug("base directory: {}, job name: {}, last run loc: {}", opts.getBaseDirectory(),
         sched.getShortName(), opts.getLastRunLoc());
 
     // If timestamp file doesn't exist, create it.
@@ -224,8 +225,8 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
   protected void configureInitialMode(final Date now) {
     if (settings.isInitialMode()) {
-      startingOpts.setOverrideLastRunTime(now);
-      startingOpts.setLastRunMode(false);
+      commonFlightPlan.setOverrideLastRunTime(now);
+      commonFlightPlan.setLastRunMode(false);
       LOGGER.warn("\n\n\n\n>>>>>>> FULL, INITIAL LOAD! <<<<<<<\n\n\n\n");
     }
   }
@@ -247,7 +248,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     exporter.getExportedObjects();
 
     // Expose Guice bean attributes to JMX.
-    // Manager.manage("Neutron_Guice", injector);
+    Manager.manage("Neutron_Guice", injector);
   }
 
   protected void initializeCommandCenter() {
@@ -282,7 +283,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
       // Prepare launch pads and flight plans.
       for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
         final Class<?> klass = sched.getRocketClass();
-        final FlightPlan opts = new FlightPlan(startingOpts);
+        final FlightPlan opts = new FlightPlan(commonFlightPlan);
         handleTimeFile(opts, fmt, now, sched);
 
         final LaunchPad nj =
@@ -292,7 +293,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
       }
 
       // MOVE this responsibility to another class.
-      if (startingOpts.isDropIndex()) {
+      if (commonFlightPlan.isDropIndex()) {
         esDao.deleteIndex(esDao.getConfig().getElasticsearchAlias());
       }
 
@@ -410,11 +411,11 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
   }
 
   public FlightPlan getStartingOpts() {
-    return startingOpts;
+    return commonFlightPlan;
   }
 
   public void setStartingOpts(FlightPlan startingOpts) {
-    this.startingOpts = startingOpts;
+    this.commonFlightPlan = startingOpts;
   }
 
   @Override
@@ -490,7 +491,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     try {
       injector = injectorMaker.apply(standardFlightPlan);
       instance = injector.getInstance(LaunchCommand.class);
-      instance.startingOpts = standardFlightPlan;
+      instance.commonFlightPlan = standardFlightPlan;
       instance.settings.setContinuousMode(false);
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "Rethrow", e.getMessage());
@@ -522,10 +523,11 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     final Injector injector = injectorMaker.apply(standardFlightPlan);
     try (final LaunchCommand launchCommand = buildStandaloneInstance(standardFlightPlan)) {
       instance = injector.getInstance(LaunchCommand.class);
-      instance.startingOpts = standardFlightPlan;
+      instance.commonFlightPlan = standardFlightPlan;
+      instance.injector = injector;
 
       instance.settings.setContinuousMode(true);
-      instance.settings.setInitialMode(!instance.startingOpts.isLastRunMode());
+      instance.settings.setInitialMode(!instance.commonFlightPlan.isLastRunMode());
       instance.initScheduler(injector);
       instance.exitCode = 0; // Good to go
     } catch (Throwable e) { // NOSONAR
