@@ -150,6 +150,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   public void initScheduler_Args__Injector() throws Exception {
     final Injector injector = mock(Injector.class);
     when(injector.getInstance(RocketFactory.class)).thenReturn(rocketFactory);
+    target.getSettings().setExposeJmx(false);
     target.initScheduler(injector);
   }
 

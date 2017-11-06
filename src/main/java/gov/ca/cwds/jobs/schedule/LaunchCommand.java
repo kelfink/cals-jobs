@@ -603,4 +603,12 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     startSchedulerMode(args);
   }
 
+  public LaunchCommandSettings getSettings() {
+    return settings;
+  }
+
+  public void setSettings(LaunchCommandSettings settings) {
+    this.settings = settings;
+  }
+
 }
