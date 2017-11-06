@@ -4,24 +4,23 @@ import org.quartz.JobDetail;
 import org.quartz.JobKey;
 
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 
 public interface VoxLaunchPadMBean {
 
-  String run(String cmdLine);
+  String run(String cmdLine) throws NeutronException;
 
-  void schedule();
+  void schedule() throws NeutronException;
 
-  void unschedule();
+  void unschedule() throws NeutronException;
 
-  void vetoScheduledJob();
+  void stop() throws NeutronException;
 
   String status();
 
   String history();
-
-  void stop();
 
   FlightPlan getFlightPlan();
 
@@ -38,9 +37,5 @@ public interface VoxLaunchPadMBean {
   JobDetail getJd();
 
   JobKey getJobKey();
-
-  boolean isVetoExecution();
-
-  void setVetoExecution(boolean vetoExecution);
 
 }
