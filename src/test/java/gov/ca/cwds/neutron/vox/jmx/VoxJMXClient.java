@@ -18,7 +18,7 @@ public class VoxJMXClient {
   private static final Logger LOGGER = LoggerFactory.getLogger(VoxJMXClient.class);
 
   public static final String HOST = "localhost";
-  public static final String PORT = "1097";
+  public static final String PORT = "1098";
 
   public static void main(String[] args) throws IOException, MalformedObjectNameException {
     final JMXServiceURL url =
@@ -26,8 +26,10 @@ public class VoxJMXClient {
     final JMXConnector jmxConnector = JMXConnectorFactory.connect(url);
     final MBeanServerConnection mbeanServerConnection = jmxConnector.getMBeanServerConnection();
 
+    LOGGER.info("mbean count: {}", mbeanServerConnection.getMBeanCount());
+
     // ObjectName should be same as your MBean name
-    final ObjectName mbeanName = new ObjectName("Neutron:rocket");
+    final ObjectName mbeanName = new ObjectName("Neutron:rocket=client");
 
     // Get MBean proxy instance that will be used to make calls to registered MBean.
     final VoxLaunchPadMBean mbeanProxy = MBeanServerInvocationHandler
