@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.util.JobLogs;
+import gov.ca.cwds.neutron.log.JobLogs;
 
 public interface AtomValidateDocument {
 

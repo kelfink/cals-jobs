@@ -17,7 +17,7 @@ import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.util.JobLogs;
+import gov.ca.cwds.neutron.log.JobLogs;
 
 public class LaunchScheduler implements AtomLaunchScheduler {
 

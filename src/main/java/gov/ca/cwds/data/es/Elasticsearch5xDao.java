@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.util.JobLogs;
+import gov.ca.cwds.neutron.log.JobLogs;
 
 /**
  * A DAO for Elasticsearch.

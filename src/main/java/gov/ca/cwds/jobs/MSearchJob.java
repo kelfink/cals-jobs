@@ -25,7 +25,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.service.NeutronElasticValidator;
+import gov.ca.cwds.neutron.validate.NeutronElasticValidator;
 
 /**
  * Test Elasticsearch mass search capability for automatic validation.

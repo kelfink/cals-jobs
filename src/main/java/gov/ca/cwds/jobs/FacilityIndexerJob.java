@@ -38,13 +38,13 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.facility.FacilityProcessor;
 import gov.ca.cwds.jobs.facility.FacilityRowMapper;
 import gov.ca.cwds.jobs.util.AsyncReadWriteJob;
-import gov.ca.cwds.jobs.util.JobLogs;
 import gov.ca.cwds.jobs.util.JobProcessor;
 import gov.ca.cwds.jobs.util.JobReader;
 import gov.ca.cwds.jobs.util.JobWriter;
 import gov.ca.cwds.jobs.util.elastic.ElasticJobWriter;
 import gov.ca.cwds.jobs.util.jdbc.JdbcJobReader;
 import gov.ca.cwds.jobs.util.jdbc.RowMapper;
+import gov.ca.cwds.neutron.log.JobLogs;
 
 /**
  * 

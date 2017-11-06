@@ -9,8 +9,8 @@ import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.jdbc.Work;
 
-import gov.ca.cwds.jobs.log.JetPackLogger;
-import gov.ca.cwds.jobs.log.ConditionalLogger;
+import gov.ca.cwds.neutron.log.ConditionalLogger;
+import gov.ca.cwds.neutron.log.JetPackLogger;
 
 /**
  * Execute SQL prior to retrieving records, typically for last change runs.
