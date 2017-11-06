@@ -125,6 +125,7 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
 
   default void refreshMQT() {
     if (getOpts().isRefreshMqt() && StringUtils.isNotBlank(getMQTName())) {
+      getLogger().warn("REFRESH MQT!");
       final Session session = getJobDao().getSessionFactory().getCurrentSession();
       getOrCreateTransaction();
       final String schema =
