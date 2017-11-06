@@ -259,7 +259,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void startContinuousMode_Args__StringArray() throws Exception {
-    final String[] args = new String[] {};
+    String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-S"};
     LaunchCommand actual = LaunchCommand.startSchedulerMode(args);
     assertThat(actual, is(notNullValue()));
   }
@@ -267,14 +267,13 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   @Test
   public void runStandalone_Args__Class__StringArray() throws Exception {
     final Class<Mach1TestRocket> klass = Mach1TestRocket.class;
-    final String[] args =
-        new String[] {"--simulate_launch", "-b", "/var/lib/jenkins", "-c", "config/local.yaml"};
+    final String[] args = new String[] {"-S", "-b", "/var/lib/jenkins", "-c", "config/local.yaml"};
     LaunchCommand.runStandalone(klass, args);
   }
 
   @Test
   public void main_Args__StringArray() throws Exception {
-    final String[] args = new String[] {};
+    final String[] args = new String[] {"-S", "-b", "/var/lib/jenkins", "-c", "config/local.yaml"};
     LaunchCommand.main(args);
   }
 

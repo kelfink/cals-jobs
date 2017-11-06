@@ -14,7 +14,8 @@ public class AttorneyIndexerJobTest {
 
   @Test
   public void main_Args__StringArray() throws Exception {
-    String[] args = new String[] {"-S"};
+    String[] args = new String[] {"-c", "config/local.yaml", "-l",
+        "/var/lib/jenkins/client_indexer_time.txt", "-S"};
     AttorneyIndexerJob.main(args);
   }
 
