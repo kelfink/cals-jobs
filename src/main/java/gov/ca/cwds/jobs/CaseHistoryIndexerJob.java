@@ -28,7 +28,7 @@ import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 

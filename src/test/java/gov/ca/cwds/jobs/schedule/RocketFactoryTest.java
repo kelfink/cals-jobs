@@ -102,7 +102,7 @@ public class RocketFactoryTest extends Goddard {
 
   @Test
   public void getBaseOpts_Args__() throws Exception {
-    FlightPlan actual = target.getBaseOpts();
+    FlightPlan actual = target.getBaseFlightPlan();
     // assertThat(actual, is(notNullValue()));
   }
 

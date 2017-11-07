@@ -16,7 +16,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.jobs.util.JobReader;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * @param <T> persistence class

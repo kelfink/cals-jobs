@@ -5,4 +5,4 @@
  * @author CWS-NS3
  *
  */
-package gov.ca.cwds.neutron.log;
+package gov.ca.cwds.neutron.jetpack;

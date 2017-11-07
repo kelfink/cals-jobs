@@ -19,7 +19,7 @@ import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.vox.jmx.VoxLaunchPadMBean;
 
 public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {

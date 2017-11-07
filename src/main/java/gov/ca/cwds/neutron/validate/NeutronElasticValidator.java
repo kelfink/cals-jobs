@@ -24,7 +24,7 @@ import gov.ca.cwds.jobs.component.AtomValidateDocument;
 import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
-import gov.ca.cwds.neutron.log.JetPackLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 
 public class NeutronElasticValidator implements AtomValidateDocument {
 

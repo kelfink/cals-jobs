@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.util.jdbc.RowMapper;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * @author CWDS Elasticsearch Team

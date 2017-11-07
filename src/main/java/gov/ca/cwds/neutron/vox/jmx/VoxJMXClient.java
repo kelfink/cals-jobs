@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 

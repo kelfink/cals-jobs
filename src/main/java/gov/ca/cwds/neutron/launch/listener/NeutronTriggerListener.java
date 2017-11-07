@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 public class NeutronTriggerListener implements TriggerListener {
 

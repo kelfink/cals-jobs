@@ -25,7 +25,7 @@ import gov.ca.cwds.jobs.facility.FacilityRowMapper;
 import gov.ca.cwds.jobs.util.JobReader;
 import gov.ca.cwds.jobs.util.jdbc.JdbcJobReader;
 import gov.ca.cwds.jobs.util.jdbc.RowMapper;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * @author CWDS Elasticsearch Team

@@ -19,7 +19,7 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * Common functions and features for Hibernate calls.

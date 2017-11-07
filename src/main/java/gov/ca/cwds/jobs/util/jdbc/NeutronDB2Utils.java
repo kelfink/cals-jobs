@@ -11,9 +11,9 @@ import com.ibm.db2.jcc.DB2Connection;
 import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.data.BaseDaoImpl;
-import gov.ca.cwds.neutron.log.ConditionalLogger;
-import gov.ca.cwds.neutron.log.JetPackLogger;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * Miscellaneous DB2 utilities for Neutron rockets.

@@ -1,4 +1,4 @@
-package gov.ca.cwds.neutron.log;
+package gov.ca.cwds.neutron.jetpack;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Marker;
 
-import gov.ca.cwds.neutron.log.JetPackLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 
 public class JetPackLoggerTest {
 

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 public class PrepareLastChangeWorkTest extends Goddard<ReplicatedPersonCases, EsPersonCase> {
 

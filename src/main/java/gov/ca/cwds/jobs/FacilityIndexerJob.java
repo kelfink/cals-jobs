@@ -44,7 +44,7 @@ import gov.ca.cwds.jobs.util.JobWriter;
 import gov.ca.cwds.jobs.util.elastic.ElasticJobWriter;
 import gov.ca.cwds.jobs.util.jdbc.JdbcJobReader;
 import gov.ca.cwds.jobs.util.jdbc.RowMapper;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * 

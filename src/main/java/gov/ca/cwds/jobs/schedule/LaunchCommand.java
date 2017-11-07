@@ -36,14 +36,15 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.inject.HyperCube;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.listener.NeutronJobListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronSchedulerListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
-import gov.ca.cwds.neutron.log.JobLogs;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 
 /**
- * Run stand-alone jobs or serve up jobs with Quartz. The master of ceremonies, AKA, Jimmy Neutron.
+ * Run stand-alone rockets or serve up rockets with Quartz. The master of ceremonies, AKA, Jimmy
+ * Neutron.
  * 
  * @author CWDS API Team
  */

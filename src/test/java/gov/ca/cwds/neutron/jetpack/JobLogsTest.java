@@ -1,4 +1,4 @@
-package gov.ca.cwds.neutron.log;
+package gov.ca.cwds.neutron.jetpack;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 public class JobLogsTest {
 

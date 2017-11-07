@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobDateUtil;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * Represents batch job options from the command line.

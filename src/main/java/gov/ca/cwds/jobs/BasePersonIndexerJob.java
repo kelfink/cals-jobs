@@ -67,9 +67,9 @@ import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
-import gov.ca.cwds.neutron.log.ConditionalLogger;
-import gov.ca.cwds.neutron.log.JetPackLogger;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 
 /**

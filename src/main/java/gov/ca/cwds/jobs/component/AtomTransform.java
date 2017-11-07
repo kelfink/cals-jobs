@@ -4,7 +4,7 @@ import java.util.List;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**

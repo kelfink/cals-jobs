@@ -15,7 +15,7 @@ import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * Get key ranges by platform and job size.

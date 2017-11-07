@@ -1,4 +1,4 @@
-package gov.ca.cwds.neutron.log;
+package gov.ca.cwds.neutron.jetpack;
 
 import java.text.MessageFormat;
 

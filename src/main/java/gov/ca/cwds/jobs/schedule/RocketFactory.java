@@ -16,7 +16,8 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.neutron.log.JobLogs;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.shrinkray.NeutronClassFinder;
 
 @Singleton
 public class RocketFactory implements AtomRocketFactory {
@@ -25,7 +26,7 @@ public class RocketFactory implements AtomRocketFactory {
 
   private Injector injector;
 
-  private final FlightPlan baseOpts;
+  private final FlightPlan baseFlightPlan;
 
   private FlightPlanRegistry flightPlanRegistry;
 
@@ -35,21 +36,21 @@ public class RocketFactory implements AtomRocketFactory {
   public RocketFactory(final Injector injector, final FlightPlan opts,
       final FlightPlanRegistry flightPlanRegistry, final FlightRecorder flightRecorder) {
     this.injector = injector;
-    this.baseOpts = opts;
+    this.baseFlightPlan = opts;
     this.flightPlanRegistry = flightPlanRegistry;
     this.flightRecorder = flightRecorder;
   }
 
   @SuppressWarnings("rawtypes")
   @Override
-  public BasePersonIndexerJob createJob(Class<?> klass, final FlightPlan opts)
+  public BasePersonIndexerJob createJob(Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
 
       // DAVE-OTOLOGY: is there a cleaner way to call this??
       final BasePersonIndexerJob ret = (BasePersonIndexerJob<?, ?>) injector.getInstance(klass);
-      ret.init(opts.getLastRunLoc(), opts);
+      ret.init(flightPlan.getLastRunLoc(), flightPlan);
       return ret;
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "FAILED TO CREATE ROCKET!: {}", e.getMessage());
@@ -58,24 +59,21 @@ public class RocketFactory implements AtomRocketFactory {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public BasePersonIndexerJob createJob(String jobName, final FlightPlan opts)
+  public BasePersonIndexerJob createJob(String rocketName, final FlightPlan flightPlan)
       throws NeutronException {
-    try {
-      return createJob(Class.forName(jobName), opts);
-    } catch (ClassNotFoundException e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO CREATE ROCKET!: {}", e.getMessage());
-    }
+    return createJob(NeutronClassFinder.classForName(rocketName), flightPlan);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler) throws SchedulerException {
     final JobDetail jd = bundle.getJobDetail();
-
     Class<?> klazz;
+
     try {
-      klazz = Class.forName(jd.getJobDataMap().getString(NeutronSchedulerConstants.ROCKET_CLASS));
-    } catch (ClassNotFoundException e) {
+      klazz = NeutronClassFinder
+          .classForName(jd.getJobDataMap().getString(NeutronSchedulerConstants.ROCKET_CLASS));
+    } catch (NeutronException e) {
       throw new SchedulerException("NO SUCH ROCKET CLASS!", e);
     }
 
@@ -92,8 +90,8 @@ public class RocketFactory implements AtomRocketFactory {
     return ret;
   }
 
-  public FlightPlan getBaseOpts() {
-    return baseOpts;
+  public FlightPlan getBaseFlightPlan() {
+    return baseFlightPlan;
   }
 
   public FlightPlanRegistry getFlightPlanRegistry() {
@@ -110,6 +108,10 @@ public class RocketFactory implements AtomRocketFactory {
 
   public void setFlightPlanRegistry(FlightPlanRegistry flightPlanRegistry) {
     this.flightPlanRegistry = flightPlanRegistry;
+  }
+
+  public static Logger getLogger() {
+    return LOGGER;
   }
 
 }
