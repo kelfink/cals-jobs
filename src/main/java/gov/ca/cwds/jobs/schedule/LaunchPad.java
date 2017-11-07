@@ -60,9 +60,8 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
       return track.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);
-      return "Job failed. Check the logs!";
+      return JobLogs.stackToString(e);
     }
-
   }
 
   @Override
@@ -93,7 +92,7 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
       scheduler.scheduleJob(jd, trg);
       LOGGER.info("Scheduled trigger {}", jobName);
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "BOOM! rocket: {}", jobName);
+      throw JobLogs.checked(LOGGER, e, "FAILED TO SCHEDULE LAUNCH! rocket: {}", jobName);
     }
   }
 
@@ -106,7 +105,7 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
           new TriggerKey(triggerName, NeutronSchedulerConstants.GRP_LST_CHG);
       scheduler.pauseTrigger(triggerKey);
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "BOOM! rocket: {}", jobName);
+      throw JobLogs.checked(LOGGER, e, "FAILED TO UNSCHEDULE LAUNCH! rocket: {}", jobName);
     }
   }
 
@@ -134,7 +133,7 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
       final JobKey key = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
       scheduler.interrupt(key);
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "BOOM! rocket: {}", jobName);
+      throw JobLogs.checked(LOGGER, e, "FAILED TO STOP ROCKET! rocket: {}", jobName);
     }
   }
 
