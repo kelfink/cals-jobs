@@ -61,6 +61,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.AtomFlightPlanManager;
+import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightPlanRegistry;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -134,6 +135,7 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
   public FlightLog flightRecord;
   public FlightRecorder flightRecorder;
   public FlightPlanRegistry flightPlanRegistry;
+  public DefaultFlightSchedule flightSchedule;
 
   public Scheduler scheduler;
   public LaunchScheduler launchScheduler;
@@ -178,6 +180,7 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
 
     mach1Rocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
     flightPlanRegistry = new FlightPlanRegistry(flightPlan);
+    flightSchedule = DefaultFlightSchedule.CLIENT;
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(sessionFactory.createEntityManager()).thenReturn(em);

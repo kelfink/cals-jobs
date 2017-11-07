@@ -54,7 +54,7 @@ public class RocketFactoryTest extends Goddard {
     rocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
     when(injector.getInstance(any(Class.class))).thenReturn(rocket);
 
-    target = new RocketFactory(injector, opts, flightPlanRegistry);
+    target = new RocketFactory(injector, opts, flightPlanRegistry, flightRecorder);
   }
 
   @Test
@@ -64,7 +64,6 @@ public class RocketFactoryTest extends Goddard {
 
   @Test
   public void instantiation() throws Exception {
-    RocketFactory target = new RocketFactory(injector, opts, flightPlanRegistry);
     assertThat(target, notNullValue());
   }
 

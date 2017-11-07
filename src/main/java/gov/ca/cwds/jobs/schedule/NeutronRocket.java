@@ -32,7 +32,11 @@ public class NeutronRocket implements InterruptableJob {
   @SuppressWarnings("rawtypes")
   private final BasePersonIndexerJob rocket;
 
-  private volatile FlightLog track;
+  private final FlightRecorder flightRecorder;
+
+  private final DefaultFlightSchedule flightSchedule;
+
+  private volatile FlightLog flightLog;
 
   /**
    * Constructor.
@@ -40,10 +44,15 @@ public class NeutronRocket implements InterruptableJob {
    * @param <T> ES replicated Person persistence class
    * @param <M> MQT entity class, if any, or T
    * @param rocket launch me!
+   * @param flightSchedule flight schedule
+   * @param flightRecorder common flight recorder
    */
   public <T extends PersistentObject, M extends ApiGroupNormalizer<?>> NeutronRocket(
-      final BasePersonIndexerJob<T, M> rocket) {
+      final BasePersonIndexerJob<T, M> rocket, final DefaultFlightSchedule flightSchedule,
+      final FlightRecorder flightRecorder) {
     this.rocket = rocket;
+    this.flightSchedule = flightSchedule;
+    this.flightRecorder = flightRecorder;
   }
 
   @SuppressWarnings("rawtypes")
@@ -56,18 +65,20 @@ public class NeutronRocket implements InterruptableJob {
         instanceCounter.incrementAndGet());
 
     try (final BasePersonIndexerJob job = rocket) {
-      track = new FlightLog(); // fresh progress track
-      track.setRocketName(jobName);
-      job.setTrack(track);
+      flightLog = new FlightLog(); // fresh progress track
+      flightLog.setRocketName(jobName);
+      job.setTrack(flightLog);
 
       map.put("opts", job.getFlightPlan());
-      map.put("track", track);
-      context.setResult(track);
+      map.put("track", flightLog);
+      context.setResult(flightLog);
 
       job.run();
     } catch (Exception e) {
       LOGGER.error("FAILED TO LAUNCH! {}", e);
       throw new JobExecutionException("FAILED TO LAUNCH! {}", e);
+    } finally {
+      flightRecorder.summarizeFlight(flightSchedule, flightLog);
     }
 
     LOGGER.info("Executed {}", rocket.getClass().getName());
@@ -78,12 +89,12 @@ public class NeutronRocket implements InterruptableJob {
     LOGGER.warn("INTERRUPT RUNNING JOB!");
   }
 
-  public FlightLog getTrack() {
-    return track;
+  public FlightLog getFlightLog() {
+    return flightLog;
   }
 
-  public void setTrack(FlightLog track) {
-    this.track = track;
+  public void setFlightLog(FlightLog track) {
+    this.flightLog = track;
   }
 
   public BasePersonIndexerJob getRocket() {

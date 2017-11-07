@@ -41,7 +41,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   protected FlightPlan flightPlan;
 
-  private final FlightRecorder jobHistory;
+  private final FlightRecorder flightRecorder;
 
   private String lastRunTimeFilename;
 
@@ -56,7 +56,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
       final FlightPlan flightPlan) {
     this.lastRunTimeFilename = StringUtils.isBlank(lastJobRunTimeFilename)
         ? flightPlan.getLastRunLoc() : lastJobRunTimeFilename;
-    this.jobHistory = flightRecorder;
+    this.flightRecorder = flightRecorder;
     this.flightPlan = flightPlan;
   }
 
@@ -97,7 +97,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
     }
 
     // Only applies in continuous mode.
-    jobHistory.addTrack(getClass(), track);
+    flightRecorder.addFlightLog(getClass(), track);
   }
 
   /**

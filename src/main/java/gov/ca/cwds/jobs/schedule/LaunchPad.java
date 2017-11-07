@@ -45,7 +45,7 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
     this.triggerName = flightSchedule.getShortName();
     this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
     this.flightPlan = opts;
-    jobHistory.addTrack(sched.getRocketClass(), new FlightLog());
+    jobHistory.addFlightLog(sched.getRocketClass(), new FlightLog());
   }
 
   @Override

@@ -36,7 +36,7 @@ public class FlightRecorderTest {
   public void addTrack_Args__Class__FlightLog() throws Exception {
     final Class<?> klazz = DefaultFlightSchedule.INTAKE_SCREENING.getRocketClass();
     final FlightLog flightLog = new FlightLog();
-    target.addTrack(klazz, flightLog);
+    target.addFlightLog(klazz, flightLog);
   }
 
   @Test

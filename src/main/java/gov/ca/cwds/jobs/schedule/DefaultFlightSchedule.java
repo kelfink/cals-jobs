@@ -115,9 +115,11 @@ public enum DefaultFlightSchedule {
 
   private static final Map<String, DefaultFlightSchedule> mapName = new ConcurrentHashMap<>();
 
+  private static final Map<Class<?>, DefaultFlightSchedule> mapClass = new ConcurrentHashMap<>();
   static {
     for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
       mapName.put(sched.shortName, sched);
+      mapClass.put(sched.klazz, sched);
     }
   }
 
@@ -181,6 +183,10 @@ public enum DefaultFlightSchedule {
 
   public static DefaultFlightSchedule lookupByJobName(String key) {
     return mapName.get(key);
+  }
+
+  public static DefaultFlightSchedule lookupByClass(Class<?> key) {
+    return mapClass.get(key);
   }
 
   public int getInitialLoadOrder() {

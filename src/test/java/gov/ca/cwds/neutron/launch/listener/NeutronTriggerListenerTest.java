@@ -24,7 +24,6 @@ import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
-import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 
 public class NeutronTriggerListenerTest extends Goddard {
 
@@ -47,11 +46,11 @@ public class NeutronTriggerListenerTest extends Goddard {
   public void setup() throws Exception {
     super.setup();
     dao = new TestNormalizedEntityDao(sessionFactory);
-    rocket =
-        new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, flightRecorder);
+    rocket = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
+        flightRecorder);
     rocket.setFlightPlan(flightPlan);
     rocket.setTrack(flightRecord);
-    job = new NeutronRocket(rocket);
+    job = new NeutronRocket(rocket, flightSchedule, flightRecorder);
 
     context_ = mock(JobExecutionContext.class);
     triggerKey = new TriggerKey("fakejob", NeutronSchedulerConstants.GRP_LST_CHG);

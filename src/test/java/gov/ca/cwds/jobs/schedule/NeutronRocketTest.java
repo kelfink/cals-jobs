@@ -42,7 +42,7 @@ public class NeutronRocketTest extends Goddard {
     rocket.init(this.tempFile.getAbsolutePath(), flightPlan);
 
     rocket.setTrack(flightRecord);
-    target = new NeutronRocket(rocket);
+    target = new NeutronRocket(rocket, flightSchedule, flightRecorder);
   }
 
   @Test
@@ -101,7 +101,7 @@ public class NeutronRocketTest extends Goddard {
 
   @Test
   public void getTrack_Args__() throws Exception {
-    FlightLog actual = target.getTrack();
+    FlightLog actual = target.getFlightLog();
     FlightLog expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -109,7 +109,7 @@ public class NeutronRocketTest extends Goddard {
   @Test
   public void setTrack_Args__JobProgressTrack() throws Exception {
     FlightLog track = mock(FlightLog.class);
-    target.setTrack(track);
+    target.setFlightLog(track);
   }
 
   @Test

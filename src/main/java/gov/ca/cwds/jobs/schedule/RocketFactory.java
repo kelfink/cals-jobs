@@ -29,12 +29,15 @@ public class RocketFactory implements AtomRocketFactory {
 
   private FlightPlanRegistry flightPlanRegistry;
 
+  private final FlightRecorder flightRecorder;
+
   @Inject
   public RocketFactory(final Injector injector, final FlightPlan opts,
-      final FlightPlanRegistry rocketOptions) {
+      final FlightPlanRegistry flightPlanRegistry, final FlightRecorder flightRecorder) {
     this.injector = injector;
     this.baseOpts = opts;
-    this.flightPlanRegistry = rocketOptions;
+    this.flightPlanRegistry = flightPlanRegistry;
+    this.flightRecorder = flightRecorder;
   }
 
   @SuppressWarnings("rawtypes")
@@ -80,7 +83,8 @@ public class RocketFactory implements AtomRocketFactory {
     NeutronRocket ret;
     try {
       final FlightPlan opts = flightPlanRegistry.getFlightPlan(klazz);
-      ret = new NeutronRocket(createJob(klazz, opts));
+      ret = new NeutronRocket(createJob(klazz, opts), DefaultFlightSchedule.lookupByClass(klazz),
+          flightRecorder);
     } catch (NeutronException e) {
       throw new SchedulerException("NO ROCKET SETTINGS!", e);
     }
