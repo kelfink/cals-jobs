@@ -1,6 +1,7 @@
 package gov.ca.cwds.neutron.vox.jmx;
 
 import java.io.IOException;
+import java.util.function.BiFunction;
 
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
@@ -27,6 +28,15 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
   private static final String DEFAULT_HOST = "localhost";
   private static final String DEFAULT_PORT = "1098";
 
+  private static BiFunction<String, String, JMXConnector> makeConnector = (host, port) -> {
+    try {
+      return JMXConnectorFactory.connect(
+          new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi"));
+    } catch (IOException e) {
+      throw JobLogs.runtime(LOGGER, e, "JMX CONNECTION FAILED! {}", e.getMessage());
+    }
+  };
+
   private final String host;
   private final String port;
 
@@ -40,9 +50,7 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
 
   public void connect() throws NeutronException {
     try {
-      final JMXServiceURL url =
-          new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi");
-      jmxConnector = JMXConnectorFactory.connect(url);
+      jmxConnector = makeConnector.apply(host, port);
       mbeanServerConnection = jmxConnector.getMBeanServerConnection();
       LOGGER.info("mbean count: {}", mbeanServerConnection.getMBeanCount());
     } catch (Exception e) {
