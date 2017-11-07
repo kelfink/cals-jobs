@@ -82,7 +82,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
   private LaunchScheduler launchScheduler;
 
-  private int exitCode = 0; // Single launch mode only.
+  private boolean fatalError; // Single launch mode only.
 
   private LaunchCommand() {
     // no-op
@@ -501,14 +501,18 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
   }
 
   /**
+   * <p>
    * Single launch mode: close resources and exit JVM.
+   * </p>
+   * <p>
+   * Continuous launch mode: close resources and exit JVM only on fatal startup error.
+   * </p>
    */
   @Override
   public void close() throws Exception {
-    //
-    if (!isTestMode() && instance.exitCode != 0) {
+    if (!isTestMode() && instance.fatalError) {
       // Shutdown all remaining resources, even those not attached to this job.
-      Runtime.getRuntime().exit(instance.exitCode); // NOSONAR
+      Runtime.getRuntime().exit(-1); // NOSONAR
     }
   }
 
@@ -529,11 +533,11 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
       instance.settings.setContinuousMode(true);
       instance.settings.setInitialMode(!instance.commonFlightPlan.isLastRunMode());
       instance.initScheduler(injector);
-      instance.exitCode = 0; // Good to go
+      instance.fatalError = false; // Good to go
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
-      instance.exitCode = -1;
+      instance.fatalError = true;
       throw JobLogs.runtime(LOGGER, e, "LAUNCH COMMAND FAILED TO START!: {}", e.getMessage());
     }
 
@@ -561,16 +565,16 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
       return; // Test "main" methods
     }
 
-    instance.exitCode = -1;
+    instance.fatalError = true;
     try (final LaunchCommand launchCommand = buildStandaloneInstance(standardFlightPlan);
         final T job = HyperCube.newRocket(klass, args)) {
-      launchCommand.exitCode = -1;
+      launchCommand.fatalError = true;
       job.run();
-      launchCommand.exitCode = 1;
+      launchCommand.fatalError = false;
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
-      instance.exitCode = -1;
+      instance.fatalError = true;
       throw JobLogs.runtime(LOGGER, e, "STANDALONE ROCKET FAILED!: {}", e.getMessage());
     }
   }
