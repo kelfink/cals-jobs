@@ -16,6 +16,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPersonParent;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.rep.EmbeddableAccessLimitation;
 import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.util.JobDateUtil;
@@ -129,19 +130,7 @@ public abstract class EsPersonCase
   // ACCESS LIMITATION:
   // =====================
 
-  @Column(name = "LIMITED_ACCESS_CODE")
-  private String limitedAccessCode;
-
-  @Column(name = "LIMITED_ACCESS_DATE")
-  @Type(type = "date")
-  private Date limitedAccessDate;
-
-  @Column(name = "LIMITED_ACCESS_DESCRIPTION")
-  private String limitedAccessDescription;
-
-  @Column(name = "LIMITED_ACCESS_GOVERNMENT_ENT")
-  @Type(type = "integer")
-  private Integer limitedAccessGovernmentEntityId;
+  private EmbeddableAccessLimitation accessLimitation = new EmbeddableAccessLimitation();
 
   /**
    * Default constructor.
@@ -278,38 +267,6 @@ public abstract class EsPersonCase
     this.parentSourceTable = parentSourceTable;
   }
 
-  public String getLimitedAccessCode() {
-    return limitedAccessCode;
-  }
-
-  public void setLimitedAccessCode(String limitedAccessCode) {
-    this.limitedAccessCode = limitedAccessCode;
-  }
-
-  public Date getLimitedAccessDate() {
-    return JobDateUtil.freshDate(limitedAccessDate);
-  }
-
-  public void setLimitedAccessDate(Date limitedAccessDate) {
-    this.limitedAccessDate = JobDateUtil.freshDate(limitedAccessDate);
-  }
-
-  public String getLimitedAccessDescription() {
-    return limitedAccessDescription;
-  }
-
-  public void setLimitedAccessDescription(String limitedAccessDescription) {
-    this.limitedAccessDescription = limitedAccessDescription;
-  }
-
-  public Integer getLimitedAccessGovernmentEntityId() {
-    return limitedAccessGovernmentEntityId;
-  }
-
-  public void setLimitedAccessGovernmentEntityId(Integer limitedAccessGovernmentEntityId) {
-    this.limitedAccessGovernmentEntityId = limitedAccessGovernmentEntityId;
-  }
-
   public String getFocusChildSensitivityIndicator() {
     return focusChildSensitivityIndicator;
   }
@@ -396,13 +353,15 @@ public abstract class EsPersonCase
     // Access Limitation:
     //
     final ElasticSearchAccessLimitation accessLimit = new ElasticSearchAccessLimitation();
-    accessLimit.setLimitedAccessCode(this.limitedAccessCode);
-    accessLimit.setLimitedAccessDate(DomainChef.cookDate(this.limitedAccessDate));
-    accessLimit.setLimitedAccessDescription(this.limitedAccessDescription);
-    accessLimit.setLimitedAccessGovernmentEntityId(this.limitedAccessGovernmentEntityId == null
-        ? null : this.limitedAccessGovernmentEntityId.toString());
+    accessLimit.setLimitedAccessCode(this.accessLimitation.getLimitedAccessCode());
+    accessLimit
+        .setLimitedAccessDate(DomainChef.cookDate(this.accessLimitation.getLimitedAccessDate()));
+    accessLimit.setLimitedAccessDescription(this.accessLimitation.getLimitedAccessDescription());
+    accessLimit.setLimitedAccessGovernmentEntityId(
+        this.accessLimitation.getLimitedAccessGovernmentEntityId() == null ? null
+            : this.accessLimitation.getLimitedAccessGovernmentEntityId().toString());
     accessLimit.setLimitedAccessGovernmentEntityName(SystemCodeCache.global()
-        .getSystemCodeShortDescription(this.limitedAccessGovernmentEntityId));
+        .getSystemCodeShortDescription(this.accessLimitation.getLimitedAccessGovernmentEntityId()));
     esPersonCase.setAccessLimitation(accessLimit);
 
     //
@@ -431,6 +390,51 @@ public abstract class EsPersonCase
 
   public void setWorker(EmbeddableStaffWorker worker) {
     this.worker = worker;
+  }
+
+  public EmbeddableAccessLimitation getAccessLimitation() {
+    return accessLimitation;
+  }
+
+  public void setAccessLimitation(EmbeddableAccessLimitation accessLimitation) {
+    this.accessLimitation = accessLimitation;
+  }
+
+  public String getLimitedAccessCode() {
+    return accessLimitation.getLimitedAccessCode();
+  }
+
+  public void setLimitedAccessCode(String limitedAccessCode) {
+    accessLimitation.setLimitedAccessCode(limitedAccessCode);
+  }
+
+  public Date getLimitedAccessDate() {
+    return accessLimitation.getLimitedAccessDate();
+  }
+
+  public void setLimitedAccessDate(Date limitedAccessDate) {
+    accessLimitation.setLimitedAccessDate(limitedAccessDate);
+  }
+
+  public String getLimitedAccessDescription() {
+    return accessLimitation.getLimitedAccessDescription();
+  }
+
+  public void setLimitedAccessDescription(String limitedAccessDescription) {
+    accessLimitation.setLimitedAccessDescription(limitedAccessDescription);
+  }
+
+  public Integer getLimitedAccessGovernmentEntityId() {
+    return accessLimitation.getLimitedAccessGovernmentEntityId();
+  }
+
+  public void setLimitedAccessGovernmentEntityId(Integer limitedAccessGovernmentEntityId) {
+    accessLimitation.setLimitedAccessGovernmentEntityId(limitedAccessGovernmentEntityId);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return accessLimitation.equals(obj);
   }
 
 }
