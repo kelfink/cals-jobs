@@ -16,7 +16,7 @@ public class LaunchCommandSettings {
   /**
    * Run a single server for all jobs. Launch one JVM, serve many jobs.
    */
-  private boolean continuousMode;
+  private boolean schedulerMode;
 
   private boolean exposeJmx = true;
 
@@ -39,12 +39,12 @@ public class LaunchCommandSettings {
     this.testMode = testMode;
   }
 
-  public boolean isContinuousMode() {
-    return continuousMode;
+  public boolean isSchedulerMode() {
+    return schedulerMode;
   }
 
-  public void setContinuousMode(boolean continuousMode) {
-    this.continuousMode = continuousMode;
+  public void setSchedulerMode(boolean continuousMode) {
+    this.schedulerMode = continuousMode;
   }
 
   public boolean isInitialMode() {

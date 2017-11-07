@@ -39,7 +39,7 @@ public class LastSuccessfulRunJobTest
 
     public TestLastSuccessfulRunJob(String lastJobRunTimeFilename, ElasticsearchDao esDao,
         FlightRecorder jobHistory, final FlightPlan opts) {
-      super(lastJobRunTimeFilename, jobHistory, opts);
+      super(lastJobRunTimeFilename, opts);
     }
 
     @Override

@@ -43,8 +43,8 @@ import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 
 /**
- * Run stand-alone rockets or serve up rockets with Quartz. The master of ceremonies, AKA, <a
- * href="http://jimmyneutron.wikia.com/wiki/Jimmy_Neutron>Jimmy Neutron</a>.
+ * Run stand-alone rockets or serve up rockets with Quartz. The master of ceremonies, AKA, Jimmy
+ * Neutron.
  * 
  * @author CWDS API Team
  */
@@ -112,7 +112,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
       final FlightPlan opts = new FlightPlan(commonFlightPlan);
 
-      // Find the job's time file under the base directory:
+      // Find the rocket's time file under the base directory:
       final StringBuilder buf = new StringBuilder();
       buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getShortName())
           .append(".time");
@@ -375,7 +375,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
    * @return true if running in continuous mode
    */
   public static boolean isSchedulerMode() {
-    return getInstance().settings.isContinuousMode();
+    return getInstance().settings.isSchedulerMode();
   }
 
   /**
@@ -494,7 +494,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
       injector = injectorMaker.apply(standardFlightPlan);
       instance = injector.getInstance(LaunchCommand.class);
       instance.commonFlightPlan = standardFlightPlan;
-      instance.settings.setContinuousMode(false);
+      instance.settings.setSchedulerMode(false);
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "Rethrow", e.getMessage());
     }
@@ -532,7 +532,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
       instance.commonFlightPlan = standardFlightPlan;
       instance.injector = injector;
 
-      instance.settings.setContinuousMode(true);
+      instance.settings.setSchedulerMode(true);
       instance.settings.setInitialMode(!instance.commonFlightPlan.isLastRunMode());
       instance.initScheduler(injector);
       instance.fatalError = false; // Good to go

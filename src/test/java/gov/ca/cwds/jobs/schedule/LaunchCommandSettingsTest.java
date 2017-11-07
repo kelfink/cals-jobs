@@ -38,7 +38,7 @@ public class LaunchCommandSettingsTest {
   @Test
   public void isContinuousMode_Args__() throws Exception {
     LaunchCommandSettings target = new LaunchCommandSettings();
-    boolean actual = target.isContinuousMode();
+    boolean actual = target.isSchedulerMode();
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -47,7 +47,7 @@ public class LaunchCommandSettingsTest {
   public void setContinuousMode_Args__boolean() throws Exception {
     LaunchCommandSettings target = new LaunchCommandSettings();
     boolean continuousMode = false;
-    target.setContinuousMode(continuousMode);
+    target.setSchedulerMode(continuousMode);
   }
 
   @Test

@@ -167,7 +167,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   public BasePersonIndexerJob(final BaseDaoImpl<T> jobDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       SessionFactory sessionFactory, FlightRecorder jobHistory, FlightPlan opts) {
-    super(lastJobRunTimeFilename, jobHistory, opts);
+    super(lastJobRunTimeFilename, opts);
     this.jobDao = jobDao;
     this.esDao = esDao;
     this.mapper = mapper;

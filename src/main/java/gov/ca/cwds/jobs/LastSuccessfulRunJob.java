@@ -12,7 +12,6 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.component.AtomJobControl;
 import gov.ca.cwds.jobs.component.AtomShared;
@@ -20,9 +19,10 @@ import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.component.Rocket;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
@@ -34,14 +34,12 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
 
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(LastSuccessfulRunJob.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(LastSuccessfulRunJob.class);
 
   /**
    * Command line options for this job.
    */
   protected FlightPlan flightPlan;
-
-  private final FlightRecorder flightRecorder;
 
   private String lastRunTimeFilename;
 
@@ -49,14 +47,11 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * Construct from last successful run date-time.
    * 
    * @param lastJobRunTimeFilename location of last run time file
-   * @param flightRecorder injected job history
    * @param flightPlan job options
    */
-  public LastSuccessfulRunJob(String lastJobRunTimeFilename, final FlightRecorder flightRecorder,
-      final FlightPlan flightPlan) {
+  public LastSuccessfulRunJob(String lastJobRunTimeFilename, final FlightPlan flightPlan) {
     this.lastRunTimeFilename = StringUtils.isBlank(lastJobRunTimeFilename)
         ? flightPlan.getLastRunLoc() : lastJobRunTimeFilename;
-    this.flightRecorder = flightRecorder;
     this.flightPlan = flightPlan;
   }
 
@@ -75,12 +70,12 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
   @Override
   public final void run() {
     LOGGER.warn("LastSuccessfulRunJob.run(): lastRunTimeFilename: {}", lastRunTimeFilename);
-    final FlightLog track = getTrack();
-    track.start();
+    final FlightLog flightLog = getTrack();
+    flightLog.start();
 
     try {
       final Date lastRunTime = determineLastSuccessfulRunTime();
-      track.setLastChangeSince(lastRunTime);
+      flightLog.setLastChangeSince(lastRunTime);
 
       writeLastSuccessfulRunTime(executeJob(lastRunTime));
     } catch (Exception e) {
@@ -88,16 +83,16 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
       LOGGER.error("FAIL JOB!", e);
     }
 
-    finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
-    track.done();
+    try {
+      finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
+    } finally {
+      flightLog.done();
+    }
 
     // SLF4J does not yet support conditional invocation.
     if (LOGGER.isWarnEnabled()) {
-      LOGGER.warn(track.toString());
+      LOGGER.warn(flightLog.toString());
     }
-
-    // Only applies in continuous mode.
-    flightRecorder.addFlightLog(getClass(), track);
   }
 
   /**
