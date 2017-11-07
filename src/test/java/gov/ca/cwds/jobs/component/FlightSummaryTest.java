@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -179,6 +180,30 @@ public class FlightSummaryTest {
   public void setRecsBulkError_Args__int() throws Exception {
     int recsBulkError = 0;
     target.setRecsBulkError(recsBulkError);
+  }
+
+  @Test
+  public void getFirstStart_Args__() throws Exception {
+    Date actual = target.getFirstStart();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setFirstStart_Args__Date() throws Exception {
+    Date firstStart = new Date();
+    target.setFirstStart(firstStart);
+  }
+
+  @Test
+  public void getLastEnd_Args__() throws Exception {
+    Date actual = target.getLastEnd();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setLastEnd_Args__Date() throws Exception {
+    Date lastEnd = new Date();
+    target.setLastEnd(lastEnd);
   }
 
 }

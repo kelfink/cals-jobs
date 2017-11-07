@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.component;
 
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -14,6 +15,10 @@ public class FlightSummary implements ApiMarker {
    * Runtime rocket name. Distinguish this rocket's threads from other running threads.
    */
   private String rocketName;
+
+  private Date firstStart = new Date();
+
+  private Date lastEnd = new Date();
 
   private EnumMap<FlightStatus, Integer> status = new EnumMap<>(FlightStatus.class);
 
@@ -60,6 +65,16 @@ public class FlightSummary implements ApiMarker {
     this.recsBulkPrepared += flightLog.getCurrentBulkPrepared();
     this.recsBulkDeleted += flightLog.getCurrentBulkDeleted();
     this.rowsNormalized += flightLog.getCurrentNormalized();
+
+    final Date startTime = new Date(flightLog.getStartTime());
+    if (firstStart.before(startTime)) {
+      firstStart = startTime;
+    }
+
+    final Date endTime = new Date(flightLog.getEndTime());
+    if (lastEnd.before(endTime)) {
+      lastEnd = endTime;
+    }
 
     if (status.containsKey(flightLog.getStatus())) {
       status.put(flightLog.getStatus(), new Integer(status.get(flightLog.getStatus()) + 1));
@@ -154,6 +169,22 @@ public class FlightSummary implements ApiMarker {
 
   public void setRecsBulkError(int recsBulkError) {
     this.recsBulkError = recsBulkError;
+  }
+
+  public Date getFirstStart() {
+    return firstStart;
+  }
+
+  public void setFirstStart(Date earliestStart) {
+    this.firstStart = earliestStart;
+  }
+
+  public Date getLastEnd() {
+    return lastEnd;
+  }
+
+  public void setLastEnd(Date lastEnd) {
+    this.lastEnd = lastEnd;
   }
 
 }
