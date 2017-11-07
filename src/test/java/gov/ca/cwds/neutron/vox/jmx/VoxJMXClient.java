@@ -107,4 +107,28 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
     }
   }
 
+  public JMXConnector getJmxConnector() {
+    return jmxConnector;
+  }
+
+  public void setJmxConnector(JMXConnector jmxConnector) {
+    this.jmxConnector = jmxConnector;
+  }
+
+  public MBeanServerConnection getMbeanServerConnection() {
+    return mbeanServerConnection;
+  }
+
+  public void setMbeanServerConnection(MBeanServerConnection mbeanServerConnection) {
+    this.mbeanServerConnection = mbeanServerConnection;
+  }
+
+  public String getHost() {
+    return host;
+  }
+
+  public String getPort() {
+    return port;
+  }
+
 }

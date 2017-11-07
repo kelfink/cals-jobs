@@ -63,8 +63,8 @@ public class VoxJMXClientTest {
 
   @Test(expected = NeutronException.class)
   public void connect_Args___T__NeutronException() throws Exception {
+    doThrow(new IllegalStateException()).when(jmxConnector).getMBeanServerConnection();
     target.connect();
-    fail("Expected exception was not thrown!");
   }
 
   @Test
@@ -72,9 +72,10 @@ public class VoxJMXClientTest {
     target.close();
   }
 
-  @Test(expected = Exception.class)
+  @Test(expected = IllegalStateException.class)
   public void close_Args___T__Exception() throws Exception {
     doThrow(new IllegalStateException()).when(jmxConnector).close();
+    target.setJmxConnector(jmxConnector);
     target.close();
   }
 
