@@ -276,19 +276,6 @@ public class FlightPlan implements ApiMarker {
    * @param shortOpt single letter option name
    * @param longOpt long option name
    * @param description option description
-   * @return command line option
-   */
-  protected static Option makeOpt(String shortOpt, String longOpt, String description) {
-    return Option.builder(shortOpt).argName(longOpt).longOpt(longOpt).desc(description)
-        .numberOfArgs(0).build();
-  }
-
-  /**
-   * Define a command line option.
-   * 
-   * @param shortOpt single letter option name
-   * @param longOpt long option name
-   * @param description option description
    * @param required true if required
    * @param argc number of arguments to this option
    * @param type arguments Java class
