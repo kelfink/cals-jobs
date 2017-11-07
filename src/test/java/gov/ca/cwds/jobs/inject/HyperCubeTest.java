@@ -211,14 +211,13 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   }
 
   @Test
-  @Ignore
+  // @Ignore
   public void buildInjector_Args__FlightPlan() throws Exception {
     final Injector actual = HyperCube.buildInjector(flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
-  @Ignore
   public void newJob_Args__Class__FlightPlan() throws Exception {
     final Class klass = Mach1TestRocket.class;
     Object actual = HyperCube.newRocket(klass, flightPlan);
