@@ -78,6 +78,7 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
   }
 
   public static void main(String[] args) throws IOException, MalformedObjectNameException {
+    LOGGER.info("START JMX CLIENT ...");
     final OptionParser parser = new OptionParser("h:p:r:");
     final OptionSet options = parser.parse(args);
 
@@ -85,8 +86,10 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
     final String port = options.has("p") ? (String) options.valueOf("p") : DEFAULT_PORT;
     final String rocket = options.has("r") ? (String) options.valueOf("r")
         : DefaultFlightSchedule.CLIENT.getShortName();
+    LOGGER.info("SETTINGS: host: {}, port: {}, rocket: {}", host, port, rocket);
 
     try (VoxJMXClient client = new VoxJMXClient(host, port)) {
+      LOGGER.info("CONNECT ...");
       client.connect();
       final VoxLaunchPadMBean mbeanProxy = client.proxy(rocket);
       LOGGER.info("status::{}", mbeanProxy.status());

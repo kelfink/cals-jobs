@@ -6,10 +6,6 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
-
-import javax.management.MalformedObjectNameException;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -82,30 +78,30 @@ public class VoxJMXClientTest {
     }
   }
 
-  @Test
-  public void main_Args__StringArray() throws Exception {
-    String[] args = new String[] {};
-    VoxJMXClient.main(args);
-  }
+  // @Test
+  // public void main_Args__StringArray() throws Exception {
+  // String[] args = new String[] {};
+  // VoxJMXClient.main(args);
+  // }
 
-  @Test
-  public void main_Args__StringArray_T__IOException() throws Exception {
-    String[] args = new String[] {};
-    try {
-      VoxJMXClient.main(args);
-      fail("Expected exception was not thrown!");
-    } catch (IOException e) {
-    }
-  }
+  // @Test
+  // public void main_Args__StringArray_T__IOException() throws Exception {
+  // String[] args = new String[] {};
+  // try {
+  // VoxJMXClient.main(args);
+  // fail("Expected exception was not thrown!");
+  // } catch (IOException e) {
+  // }
+  // }
 
-  @Test
-  public void main_Args__StringArray_T__MalformedObjectNameException() throws Exception {
-    String[] args = new String[] {};
-    try {
-      VoxJMXClient.main(args);
-      fail("Expected exception was not thrown!");
-    } catch (MalformedObjectNameException e) {
-    }
-  }
+  // @Test
+  // public void main_Args__StringArray_T__MalformedObjectNameException() throws Exception {
+  // String[] args = new String[] {};
+  // try {
+  // VoxJMXClient.main(args);
+  // fail("Expected exception was not thrown!");
+  // } catch (MalformedObjectNameException e) {
+  // }
+  // }
 
 }
