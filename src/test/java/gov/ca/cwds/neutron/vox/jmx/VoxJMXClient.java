@@ -59,7 +59,7 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
 
   public VoxLaunchPadMBean proxy(String rocketName) throws NeutronException {
     try {
-      final ObjectName mbeanName = new ObjectName("Neutron:rocket=client");
+      final ObjectName mbeanName = new ObjectName("Neutron:rocket=" + rocketName);
       final VoxLaunchPadMBean mbeanProxy = MBeanServerInvocationHandler
           .newProxyInstance(mbeanServerConnection, mbeanName, VoxLaunchPadMBean.class, true);
       LOGGER.info("status::{}", mbeanProxy.status());
