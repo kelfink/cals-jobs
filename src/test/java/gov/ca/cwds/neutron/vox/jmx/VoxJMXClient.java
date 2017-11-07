@@ -28,7 +28,7 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
   private static final String DEFAULT_HOST = "localhost";
   private static final String DEFAULT_PORT = "1098";
 
-  private static BiFunction<String, String, JMXConnector> makeConnector = (host, port) -> {
+  private BiFunction<String, String, JMXConnector> makeConnector = (host, port) -> {
     try {
       return JMXConnectorFactory.connect(
           new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi"));
@@ -75,6 +75,14 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "JMX CONNECTION FAILED! {}", e.getMessage());
     }
+  }
+
+  public BiFunction<String, String, JMXConnector> getMakeConnector() {
+    return makeConnector;
+  }
+
+  public void setMakeConnector(BiFunction<String, String, JMXConnector> makeConnector) {
+    this.makeConnector = makeConnector;
   }
 
   public static void main(String[] args) throws IOException, MalformedObjectNameException {

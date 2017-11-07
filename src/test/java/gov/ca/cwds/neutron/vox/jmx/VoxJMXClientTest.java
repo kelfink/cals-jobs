@@ -5,6 +5,14 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.function.BiFunction;
+
+import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +24,11 @@ public class VoxJMXClientTest {
   String host;
   String port;
   String rocketName;
+
+  JMXConnector jmxConnector;
+  MBeanServerConnection mbeanServerConnection;
+  BiFunction<String, String, JMXConnector> makeConnector = (host, port) -> jmxConnector;
+
   VoxJMXClient target;
 
   @Before
@@ -24,7 +37,13 @@ public class VoxJMXClientTest {
     port = "1098";
     rocketName = "reporter";
 
+    jmxConnector = mock(JMXConnector.class);
+    mbeanServerConnection = mock(MBeanServerConnection.class);
+
+    when(jmxConnector.getMBeanServerConnection()).thenReturn(mbeanServerConnection);
+
     target = new VoxJMXClient(host, port);
+    target.setMakeConnector(makeConnector);
   }
 
   @Test
@@ -53,13 +72,10 @@ public class VoxJMXClientTest {
     target.close();
   }
 
-  @Test
+  @Test(expected = Exception.class)
   public void close_Args___T__Exception() throws Exception {
-    try {
-      target.close();
-      fail("Expected exception was not thrown!");
-    } catch (Exception e) {
-    }
+    doThrow(new IllegalStateException()).when(jmxConnector).close();
+    target.close();
   }
 
   @Test
