@@ -9,20 +9,20 @@ import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.component.AtomFlightRecorder;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 
 public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
 
-  private final Map<Class<?>, CircularFifoQueue<FlightRecord>> trackHistory =
+  private final Map<Class<?>, CircularFifoQueue<FlightLog>> trackHistory =
       new ConcurrentHashMap<>();
 
-  private final Map<Class<?>, FlightRecord> lastTracks = new ConcurrentHashMap<>();
+  private final Map<Class<?>, FlightLog> lastTracks = new ConcurrentHashMap<>();
 
-  public Map<Class<?>, CircularFifoQueue<FlightRecord>> getTrackHistory() {
+  public Map<Class<?>, CircularFifoQueue<FlightLog>> getTrackHistory() {
     return trackHistory;
   }
 
-  public void addTrack(Class<?> klazz, FlightRecord track) {
+  public void addTrack(Class<?> klazz, FlightLog track) {
     lastTracks.put(klazz, track);
 
     if (!trackHistory.containsKey(klazz)) {
@@ -31,11 +31,11 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
     trackHistory.get(klazz).add(track);
   }
 
-  public FlightRecord getLastTrack(final Class<?> klazz) {
+  public FlightLog getLastTrack(final Class<?> klazz) {
     return lastTracks.get(klazz);
   }
 
-  public List<FlightRecord> getHistory(final Class<?> klazz) {
+  public List<FlightLog> getHistory(final Class<?> klazz) {
     return new ArrayList<>(trackHistory.get(klazz));
   }
 

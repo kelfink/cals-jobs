@@ -17,7 +17,7 @@ public interface AtomShared extends ApiMarker {
   /**
    * @return job's progress tracker
    */
-  FlightRecord getTrack();
+  FlightLog getTrack();
 
   /**
    * @return Elasticsearch DAO

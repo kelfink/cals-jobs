@@ -25,7 +25,7 @@ public class AtomInitialLoadTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestAtomInitialLoad.class);
 
     @Override
-    public FlightRecord getTrack() {
+    public FlightLog getTrack() {
       return null;
     }
 

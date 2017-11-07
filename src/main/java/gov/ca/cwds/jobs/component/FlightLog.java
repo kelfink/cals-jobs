@@ -20,16 +20,16 @@ import gov.ca.cwds.jobs.schedule.FlightStatus;
 import gov.ca.cwds.jobs.util.JobDateUtil;
 
 /**
- * Track job progress and record counts.
+ * Track rocket flight progress and record counts.
  * 
  * <p>
- * Class instances represent an individual job run and are not intended for reuse. Hence, some
+ * Class instances represent an individual rocket flight and are not intended for reuse. Hence, some
  * member variables are {@code final} or effectively non-modifiable.
  * </p>
  * 
  * @author CWDS API Team
  */
-public class FlightRecord implements ApiMarker, AtomJobControl {
+public class FlightLog implements ApiMarker, AtomJobControl {
 
   /**
    * Default serialization.
@@ -37,9 +37,9 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
   private static final long serialVersionUID = 1L;
 
   /**
-   * Runtime job name. Distinguish this job's threads from other running threads.
+   * Runtime rocket name. Distinguish this rocket's threads from other running threads.
    */
-  private String jobName;
+  private String rocketName;
 
   /**
    * Completion flag for fatal errors.
@@ -117,21 +117,199 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
    */
   private final AtomicInteger recsBulkError = new AtomicInteger(0);
 
-  // initial load only
+  /**
+   * Initial load only.
+   */
   private final List<Pair<String, String>> initialLoadRangesStarted = new ArrayList<>();
 
-  // initial load only
+  /**
+   * Initial load only.
+   */
   private final List<Pair<String, String>> initialLoadRangesCompleted = new ArrayList<>();
 
-  // last change only
+  /**
+   * Last change only. Log ES documents created or modified by this rocket.
+   */
   private final Queue<String> affectedDocumentIds = new CircularFifoQueue<>();
 
-  public FlightRecord() {
-    // default
+  public FlightLog() {
+    // default ctor
   }
 
-  public FlightRecord(String jobName) {
-    this.jobName = jobName;
+  public FlightLog(String jobName) {
+    this.rocketName = jobName;
+  }
+
+  // =======================
+  // AtomJobControl:
+  // =======================
+
+  public void start() {
+    if (this.status == FlightStatus.NOT_STARTED) {
+      this.status = FlightStatus.RUNNING;
+      startTime = System.currentTimeMillis();
+    }
+  }
+
+  @Override
+  public void fail() {
+    if (this.status != FlightStatus.FAILED) {
+      this.status = FlightStatus.FAILED;
+      this.endTime = System.currentTimeMillis();
+
+      this.fatalError = true;
+      this.doneJob = true;
+    }
+  }
+
+  @Override
+  public void done() {
+    if (this.status != FlightStatus.FAILED) {
+      this.status = FlightStatus.SUCCEEDED;
+    }
+
+    this.endTime = System.currentTimeMillis();
+    this.doneRetrieve = true;
+    this.doneIndex = true;
+    this.doneTransform = true;
+    this.doneJob = true;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isRunning() {
+    return !this.doneJob && !this.fatalError;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isFailed() {
+    return this.fatalError;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isRetrieveDone() {
+    return this.doneRetrieve;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isTransformDone() {
+    return this.doneTransform;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isIndexDone() {
+    return this.doneIndex;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void doneIndex() {
+    this.doneIndex = true;
+  }
+
+  @Override
+  public void doneRetrieve() {
+    this.doneRetrieve = true;
+  }
+
+  @Override
+  public void doneTransform() {
+    this.doneTransform = true;
+  }
+
+  // =======================
+  // PRINT:
+  // =======================
+
+  private String pad(Integer padme) {
+    return StringUtils.leftPad(new DecimalFormat("###,###,###").format(padme.intValue()), 8, ' ');
+  }
+
+  /**
+   * Format for JMX console.
+   */
+  @Override
+  public String toString() {
+    final StringBuilder buf = new StringBuilder();
+    buf.append("\n[\n    JOB STATUS: ").append(status).append(":\t").append(rocketName);
+
+    if (initialLoad) {
+      buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
+          .append(pad(initialLoadRangesStarted.size())).append("\n\tranges completed:")
+          .append(pad(initialLoadRangesCompleted.size()));
+    } else {
+      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
+    }
+
+    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
+    if (endTime > 0L) {
+      buf.append("\n\tend:                    ").append(new Date(endTime))
+          .append("\n\ttotal seconds:          ").append((endTime - startTime) / 1000);
+    }
+
+    buf.append("\n\n    RECORDS RETRIEVED:").append("\n\tdenormalized:    ")
+        .append(pad(recsSentToIndexQueue.get())).append("\n\tnormalized:      ")
+        .append(pad(rowsNormalized.get())).append("\n\n    ELASTICSEARCH:")
+        .append("\n\tto bulk:         ").append(pad(recsSentToBulkProcessor.get()))
+        .append("\n\tbulk prepared:   ").append(pad(recsBulkPrepared.get()))
+        .append("\n\tbulk deleted:    ").append(pad(recsBulkDeleted.get()))
+        .append("\n\tbulk before:     ").append(pad(recsBulkBefore.get()))
+        .append("\n\tbulk after:      ").append(pad(recsBulkAfter.get()))
+        .append("\n\tbulk errors:     ").append(pad(recsBulkError.get()));
+
+    if (!initialLoad && !affectedDocumentIds.isEmpty()) {
+      buf.append("\n\n    SAMPLE DOCUMENTS:").append("\n\tdocument id's:    ")
+          .append(StringUtils.joinWith(",", (Object[]) getAffectedDocumentIds()));
+    }
+
+    buf.append("\n]");
+    return buf.toString();
+  }
+
+  // =======================
+  // IDENTITY:
+  // =======================
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
+  // =======================
+  // ACCESSORS:
+  // =======================
+
+  public List<Pair<String, String>> getInitialLoadRangesStarted() {
+    final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();
+    results.addAll(initialLoadRangesStarted);
+    return results.build();
+  }
+
+  public List<Pair<String, String>> getInitialLoadRangesCompleted() {
+    final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();
+    results.addAll(initialLoadRangesCompleted);
+    return results.build();
   }
 
   public int getCurrentQueuedToIndex() {
@@ -210,53 +388,6 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
     initialLoadRangesCompleted.add(pair);
   }
 
-  public void start() {
-    if (this.status == FlightStatus.NOT_STARTED) {
-      this.status = FlightStatus.RUNNING;
-      startTime = System.currentTimeMillis();
-    }
-  }
-
-  @Override
-  public void fail() {
-    if (this.status != FlightStatus.FAILED) {
-      this.status = FlightStatus.FAILED;
-      this.endTime = System.currentTimeMillis();
-
-      this.fatalError = true;
-      this.doneJob = true;
-    }
-  }
-
-  @Override
-  public void done() {
-    if (this.status != FlightStatus.FAILED) {
-      this.status = FlightStatus.SUCCEEDED;
-    }
-
-    this.endTime = System.currentTimeMillis();
-    this.doneRetrieve = true;
-    this.doneIndex = true;
-    this.doneTransform = true;
-    this.doneJob = true;
-  }
-
-  public List<Pair<String, String>> getInitialLoadRangesStarted() {
-    final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();
-    results.addAll(initialLoadRangesStarted);
-    return results.build();
-  }
-
-  public List<Pair<String, String>> getInitialLoadRangesCompleted() {
-    final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();
-    results.addAll(initialLoadRangesCompleted);
-    return results.build();
-  }
-
-  private String pad(Integer padme) {
-    return StringUtils.leftPad(new DecimalFormat("###,###,###").format(padme.intValue()), 8, ' ');
-  }
-
   public boolean isInitialLoad() {
     return initialLoad;
   }
@@ -277,12 +408,12 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
     affectedDocumentIds.add(docId);
   }
 
-  public String getJobName() {
-    return jobName;
+  public String getRocketName() {
+    return rocketName;
   }
 
-  public void setJobName(String jobName) {
-    this.jobName = jobName;
+  public void setRocketName(String jobName) {
+    this.rocketName = jobName;
   }
 
   public long getStartTime() {
@@ -299,106 +430,6 @@ public class FlightRecord implements ApiMarker, AtomJobControl {
 
   public String[] getAffectedDocumentIds() {
     return affectedDocumentIds.toArray(new String[0]);
-  }
-
-  @Override
-  public boolean isRunning() {
-    return !this.doneJob && !this.fatalError;
-  }
-
-  @Override
-  public boolean isFailed() {
-    return this.fatalError;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean isRetrieveDone() {
-    return this.doneRetrieve;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean isTransformDone() {
-    return this.doneTransform;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean isIndexDone() {
-    return this.doneIndex;
-  }
-
-  @Override
-  public void doneIndex() {
-    this.doneIndex = true;
-  }
-
-  @Override
-  public void doneRetrieve() {
-    this.doneRetrieve = true;
-  }
-
-  @Override
-  public void doneTransform() {
-    this.doneTransform = true;
-  }
-
-  /**
-   * Format for JMX console.
-   */
-  @Override
-  public String toString() {
-    final StringBuilder buf = new StringBuilder();
-    buf.append("\n[\n    JOB STATUS: ").append(status).append(":\t").append(jobName);
-
-    if (initialLoad) {
-      buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
-          .append(pad(initialLoadRangesStarted.size())).append("\n\tranges completed:")
-          .append(pad(initialLoadRangesCompleted.size()));
-    } else {
-      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
-    }
-
-    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
-    if (endTime > 0L) {
-      buf.append("\n\tend:                    ").append(new Date(endTime))
-          .append("\n\ttotal seconds:          ").append((endTime - startTime) / 1000);
-    }
-
-    buf.append("\n\n    RECORDS RETRIEVED:").append("\n\tdenormalized:    ")
-        .append(pad(recsSentToIndexQueue.get())).append("\n\tnormalized:      ")
-        .append(pad(rowsNormalized.get())).append("\n\n    ELASTICSEARCH:")
-        .append("\n\tto bulk:         ").append(pad(recsSentToBulkProcessor.get()))
-        .append("\n\tbulk prepared:   ").append(pad(recsBulkPrepared.get()))
-        .append("\n\tbulk deleted:    ").append(pad(recsBulkDeleted.get()))
-        .append("\n\tbulk before:     ").append(pad(recsBulkBefore.get()))
-        .append("\n\tbulk after:      ").append(pad(recsBulkAfter.get()))
-        .append("\n\tbulk errors:     ").append(pad(recsBulkError.get()));
-
-    if (!initialLoad && !affectedDocumentIds.isEmpty()) {
-      buf.append("\n\n    SAMPLE DOCUMENTS:").append("\n\tdocument id's:    ")
-          .append(StringUtils.joinWith(",", (Object[]) getAffectedDocumentIds()));
-    }
-
-    buf.append("\n]");
-    return buf.toString();
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this, false);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }

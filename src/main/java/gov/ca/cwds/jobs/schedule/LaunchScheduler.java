@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.log.JobLogs;
@@ -85,7 +85,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightRecord launchScheduledFlight(Class<?> klass, FlightPlan flightPlan)
+  public FlightLog launchScheduledFlight(Class<?> klass, FlightPlan flightPlan)
       throws NeutronException {
     try {
       LOGGER.info("Run scheduled rocket: {}", klass.getName());
@@ -98,7 +98,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightRecord launchScheduledFlight(String jobName, FlightPlan flightPlan)
+  public FlightLog launchScheduledFlight(String jobName, FlightPlan flightPlan)
       throws NeutronException {
     try {
       final Class<?> klass = Class.forName(jobName);

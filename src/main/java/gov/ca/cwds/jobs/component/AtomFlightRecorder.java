@@ -7,12 +7,12 @@ import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 public interface AtomFlightRecorder {
 
-  Map<Class<?>, CircularFifoQueue<FlightRecord>> getTrackHistory();
+  Map<Class<?>, CircularFifoQueue<FlightLog>> getTrackHistory();
 
-  void addTrack(Class<?> klazz, FlightRecord track);
+  void addTrack(Class<?> klazz, FlightLog track);
 
-  FlightRecord getLastTrack(final Class<?> klazz);
+  FlightLog getLastTrack(final Class<?> klazz);
 
-  List<FlightRecord> getHistory(final Class<?> klazz);
+  List<FlightLog> getHistory(final Class<?> klazz);
 
 }

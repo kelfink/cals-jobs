@@ -38,7 +38,7 @@ public class AtomHibernateTest
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestAtomHibernate.class);
 
-    private final FlightRecord track = new FlightRecord();
+    private final FlightLog track = new FlightLog();
 
     public TestAtomHibernate(final TestNormalizedEntityDao mainDao,
         final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
@@ -48,7 +48,7 @@ public class AtomHibernateTest
     }
 
     @Override
-    public FlightRecord getTrack() {
+    public FlightLog getTrack() {
       return track;
     }
 

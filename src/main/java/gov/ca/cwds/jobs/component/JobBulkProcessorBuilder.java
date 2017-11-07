@@ -27,7 +27,7 @@ public class JobBulkProcessorBuilder implements ApiMarker {
   /**
    * Track job progress.
    */
-  protected final FlightRecord track;
+  protected final FlightLog track;
 
   /**
    * Elasticsearch client DAO.
@@ -40,7 +40,7 @@ public class JobBulkProcessorBuilder implements ApiMarker {
    * @param esDao ES DAO
    * @param track progress tracker
    */
-  public JobBulkProcessorBuilder(final ElasticsearchDao esDao, final FlightRecord track) {
+  public JobBulkProcessorBuilder(final ElasticsearchDao esDao, final FlightLog track) {
     this.esDao = esDao;
     this.track = track;
   }

@@ -58,7 +58,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.AtomFlightPlanManager;
 import gov.ca.cwds.jobs.schedule.FlightPlanRegistry;
@@ -131,7 +131,7 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
   public Configuration hibernationConfiguration;
 
   public FlightPlan flightPlan;
-  public FlightRecord flightRecord;
+  public FlightLog flightRecord;
   public FlightRecorder flightRecorder;
   public FlightPlanRegistry flightPlanRegistry;
 
@@ -245,7 +245,7 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
     when(nq.setCacheable(any(Boolean.class))).thenReturn(nq);
 
     // Job track:
-    flightRecord = new FlightRecord();
+    flightRecord = new FlightLog();
     flightRecorder = new FlightRecorder();
     launchScheduler = mock(LaunchScheduler.class);
 

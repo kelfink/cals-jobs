@@ -20,7 +20,7 @@ import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 
@@ -86,7 +86,7 @@ public class LaunchPadTest extends Goddard {
     JobDataMap jdm = new JobDataMap();
     jdm.put("job_class", "TestNeutronJob");
     jdm.put("cmd_line", "--invalid");
-    final FlightRecord track = new FlightRecord();
+    final FlightLog track = new FlightLog();
     jdm.put("track", track);
     when(jd.getJobDataMap()).thenReturn(jdm);
     history.addTrack(ClientIndexerJob.class, track);

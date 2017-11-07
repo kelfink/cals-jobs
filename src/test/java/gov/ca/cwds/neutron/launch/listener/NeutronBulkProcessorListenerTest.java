@@ -9,17 +9,17 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.neutron.launch.listener.NeutronBulkProcessorListener;
 
 public class NeutronBulkProcessorListenerTest {
 
-  FlightRecord track;
+  FlightLog track;
   NeutronBulkProcessorListener target;
 
   @Before
   public void setup() throws Exception {
-    track = new FlightRecord();
+    track = new FlightLog();
     target = new NeutronBulkProcessorListener(track);
   }
 

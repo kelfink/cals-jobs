@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 
 /**
  * Wrapper for scheduled jobs.
@@ -32,7 +32,7 @@ public class NeutronRocket implements InterruptableJob {
   @SuppressWarnings("rawtypes")
   private final BasePersonIndexerJob rocket;
 
-  private volatile FlightRecord track;
+  private volatile FlightLog track;
 
   /**
    * Constructor.
@@ -56,8 +56,8 @@ public class NeutronRocket implements InterruptableJob {
         instanceCounter.incrementAndGet());
 
     try (final BasePersonIndexerJob job = rocket) {
-      track = new FlightRecord(); // fresh progress track
-      track.setJobName(jobName);
+      track = new FlightLog(); // fresh progress track
+      track.setRocketName(jobName);
       job.setTrack(track);
 
       map.put("opts", job.getFlightPlan());
@@ -78,11 +78,11 @@ public class NeutronRocket implements InterruptableJob {
     LOGGER.warn("INTERRUPT RUNNING JOB!");
   }
 
-  public FlightRecord getTrack() {
+  public FlightLog getTrack() {
     return track;
   }
 
-  public void setTrack(FlightRecord track) {
+  public void setTrack(FlightLog track) {
     this.track = track;
   }
 

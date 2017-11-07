@@ -53,7 +53,7 @@ import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
 import gov.ca.cwds.jobs.component.AtomSecurity;
 import gov.ca.cwds.jobs.component.AtomTransform;
 import gov.ca.cwds.jobs.component.AtomValidateDocument;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
@@ -131,7 +131,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Track job progress.
    */
-  protected FlightRecord track = new FlightRecord();
+  protected FlightLog track = new FlightLog();
 
   /**
    * Queue of raw, de-normalized records waiting to be normalized.
@@ -174,7 +174,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     this.sessionFactory = sessionFactory;
     this.jobBulkProcessorBuilder = new JobBulkProcessorBuilder(esDao, track);
     this.lock = new ReentrantReadWriteLock(false);
-    this.track.setJobName(getClass().getSimpleName());
+    this.track.setRocketName(getClass().getSimpleName());
   }
 
   /**
@@ -952,7 +952,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   @Override
-  public FlightRecord getTrack() {
+  public FlightLog getTrack() {
     return track;
   }
 
@@ -984,7 +984,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param track progress tracker
    */
-  public void setTrack(FlightRecord track) {
+  public void setTrack(FlightLog track) {
     this.track = track;
   }
 

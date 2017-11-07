@@ -48,7 +48,7 @@ import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.log.JobLogs;
 import gov.ca.cwds.rest.api.domain.DomainChef;
@@ -86,7 +86,7 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  public static void pushToBulkProcessor(final FlightRecord track, final BulkProcessor bp,
+  public static void pushToBulkProcessor(final FlightLog track, final BulkProcessor bp,
       final DocWriteRequest<?> t) {
     JobLogs.logEvery(track.trackQueuedToIndex(), "add to es bulk", "push doc");
     bp.add(t);

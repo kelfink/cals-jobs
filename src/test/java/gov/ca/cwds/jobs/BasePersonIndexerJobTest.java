@@ -42,7 +42,7 @@ import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -618,7 +618,7 @@ public class BasePersonIndexerJobTest
 
   @Test(expected = JobsException.class)
   public void threadIndex_Args__error() throws Exception {
-    final FlightRecord track = mock(FlightRecord.class);
+    final FlightLog track = mock(FlightLog.class);
     when(track.isFailed()).thenThrow(IllegalStateException.class);
     target.setTrack(track);
 
@@ -639,7 +639,7 @@ public class BasePersonIndexerJobTest
     final BulkProcessor bp = mock(BulkProcessor.class);
     final TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
 
-    final FlightRecord track = mock(FlightRecord.class);
+    final FlightLog track = mock(FlightLog.class);
     when(track.trackBulkPrepared()).thenThrow(IOException.class);
     when(track.trackQueuedToIndex()).thenThrow(IOException.class);
 

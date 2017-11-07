@@ -18,18 +18,18 @@ import org.junit.Test;
 import gov.ca.cwds.jobs.schedule.FlightStatus;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
-public class FlightRecordTest {
+public class FlightLogTest {
 
-  FlightRecord target;
+  FlightLog target;
 
   @Before
   public void setup() throws Exception {
-    target = new FlightRecord();
+    target = new FlightLog();
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(FlightRecord.class, notNullValue());
+    assertThat(FlightLog.class, notNullValue());
   }
 
   @Test
@@ -185,7 +185,7 @@ public class FlightRecordTest {
 
   @Test
   public void getJobName_Args__() throws Exception {
-    String actual = target.getJobName();
+    String actual = target.getRocketName();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -193,7 +193,7 @@ public class FlightRecordTest {
   @Test
   public void setJobName_Args__String() throws Exception {
     String jobName = null;
-    target.setJobName(jobName);
+    target.setRocketName(jobName);
   }
 
   @Test

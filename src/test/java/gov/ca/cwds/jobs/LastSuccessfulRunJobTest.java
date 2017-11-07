@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
@@ -33,7 +33,7 @@ public class LastSuccessfulRunJobTest
 
     ElasticsearchDao esDao;
 
-    FlightRecord track = new FlightRecord();
+    FlightLog track = new FlightLog();
 
     FlightPlan opts;
 
@@ -51,7 +51,7 @@ public class LastSuccessfulRunJobTest
     protected void finish() {}
 
     @Override
-    public FlightRecord getTrack() {
+    public FlightLog getTrack() {
       return track;
     }
 
@@ -113,7 +113,7 @@ public class LastSuccessfulRunJobTest
 
   @Test
   public void writeLastSuccessfulRunTime_Args__Date() throws Exception {
-    FlightRecord track = mock(FlightRecord.class);
+    FlightLog track = mock(FlightLog.class);
     when(track.isFailed()).thenReturn(false);
     target.track = track;
 
@@ -125,7 +125,7 @@ public class LastSuccessfulRunJobTest
 
   @Test(expected = NeutronException.class)
   public void writeLastSuccessfulRunTime_Args__bomb() throws Exception {
-    FlightRecord track = mock(FlightRecord.class);
+    FlightLog track = mock(FlightLog.class);
     when(track.isFailed()).thenReturn(false);
     target.track = track;
 

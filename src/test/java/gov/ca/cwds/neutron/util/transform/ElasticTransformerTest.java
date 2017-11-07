@@ -36,7 +36,7 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.test.SimpleAddress;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
@@ -144,7 +144,7 @@ public class ElasticTransformerTest extends Goddard {
   @Test
   public void pushToBulkProcessor_Args__JobProgressTrack__BulkProcessor__DocWriteRequest()
       throws Exception {
-    FlightRecord track = mock(FlightRecord.class);
+    FlightLog track = mock(FlightLog.class);
     BulkProcessor bp = mock(BulkProcessor.class);
     DocWriteRequest<?> t = mock(DocWriteRequest.class);
     ElasticTransformer.pushToBulkProcessor(track, bp, t);

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.component.AtomJobControl;
 import gov.ca.cwds.jobs.component.AtomShared;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.component.Rocket;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -75,7 +75,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
   @Override
   public final void run() {
     LOGGER.warn("LastSuccessfulRunJob.run(): lastRunTimeFilename: {}", lastRunTimeFilename);
-    final FlightRecord track = getTrack();
+    final FlightLog track = getTrack();
     track.start();
 
     try {

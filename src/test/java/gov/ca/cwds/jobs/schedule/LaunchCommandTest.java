@@ -25,7 +25,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.AtomFlightRecorder;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
@@ -171,7 +171,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   @Test
   public void runScheduledJob_Args__Class__FlightPlan() throws Exception {
     final Class<?> klass = Mach1TestRocket.class;
-    final FlightRecord actual = target.launchScheduledFlight(klass, flightPlan);
+    final FlightLog actual = target.launchScheduledFlight(klass, flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -179,7 +179,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   public void runScheduledJob_Args__String__FlightPlan() throws Exception {
     final String rocketName = Mach1TestRocket.class.getName();
     target.setLaunchScheduler(launchScheduler);
-    FlightRecord actual = target.launchScheduledFlight(rocketName, flightPlan);
+    FlightLog actual = target.launchScheduledFlight(rocketName, flightPlan);
   }
 
   @Test

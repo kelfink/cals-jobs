@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.weakref.jmx.Managed;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.log.JobLogs;
@@ -45,7 +45,7 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
     this.triggerName = flightSchedule.getShortName();
     this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
     this.flightPlan = opts;
-    jobHistory.addTrack(sched.getRocketClass(), new FlightRecord());
+    jobHistory.addTrack(sched.getRocketClass(), new FlightLog());
   }
 
   @Override
@@ -55,7 +55,7 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
       LOGGER.info("RUN JOB: {}", flightSchedule.getShortName());
       final FlightPlan runOnceOpts =
           FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
-      final FlightRecord track = LaunchCommand.getInstance()
+      final FlightLog track = LaunchCommand.getInstance()
           .launchScheduledFlight(flightSchedule.getRocketClass(), runOnceOpts);
       return track.toString();
     } catch (Exception e) {

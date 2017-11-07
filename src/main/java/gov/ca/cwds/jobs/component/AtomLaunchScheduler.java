@@ -18,9 +18,9 @@ public interface AtomLaunchScheduler {
    * @return job progress
    * @throws NeutronException unexpected runtime error
    */
-  FlightRecord launchScheduledFlight(Class<?> klass, FlightPlan opts) throws NeutronException;
+  FlightLog launchScheduledFlight(Class<?> klass, FlightPlan opts) throws NeutronException;
 
-  FlightRecord launchScheduledFlight(String jobName, FlightPlan opts) throws NeutronException;
+  FlightLog launchScheduledFlight(String jobName, FlightPlan opts) throws NeutronException;
 
   void trackInFlightRocket(TriggerKey key, NeutronRocket rocket);
 

@@ -31,7 +31,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomFlightRecorder;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
-import gov.ca.cwds.jobs.component.FlightRecord;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.inject.HyperCube;
@@ -357,13 +357,13 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
   }
 
   @Override
-  public FlightRecord launchScheduledFlight(final Class<?> klass, final FlightPlan flightPlan)
+  public FlightLog launchScheduledFlight(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException {
     return this.launchScheduler.launchScheduledFlight(klass, flightPlan);
   }
 
   @Override
-  public FlightRecord launchScheduledFlight(final String jobName, final FlightPlan flightPlan)
+  public FlightLog launchScheduledFlight(final String jobName, final FlightPlan flightPlan)
       throws NeutronException {
     return this.launchScheduler.launchScheduledFlight(jobName, flightPlan);
   }
