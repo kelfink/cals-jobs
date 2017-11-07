@@ -83,7 +83,7 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
       final VoxLaunchPadMBean mbeanProxy = client.proxy(rocket);
       LOGGER.info("status::{}", mbeanProxy.status());
     } catch (Exception e) {
-      LOGGER.error("FAILED TO CONNECT! host: {}, port: {}", host, port, e);
+      LOGGER.error("JMX ERROR! host: {}, port: {}, rocket: {}", host, port, rocket, e);
       Runtime.getRuntime().exit(-1); // NOSONAR
     }
   }
