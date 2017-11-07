@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.util.EnumMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +54,7 @@ public class FlightSummaryTest {
 
   @Test
   public void getStatus_Args__() throws Exception {
-    EnumMap<FlightStatus, Integer> actual = target.getStatus();
+    Map<FlightStatus, Integer> actual = target.getStatus();
     assertThat(actual, is(notNullValue()));
   }
 

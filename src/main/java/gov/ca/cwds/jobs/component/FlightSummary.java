@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.component;
 
 import java.util.EnumMap;
+import java.util.Map;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.schedule.FlightStatus;
@@ -75,7 +76,7 @@ public class FlightSummary implements ApiMarker {
     this.rocketName = rocketName;
   }
 
-  public EnumMap<FlightStatus, Integer> getStatus() {
+  public Map<FlightStatus, Integer> getStatus() {
     return status;
   }
 
