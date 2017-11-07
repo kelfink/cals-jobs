@@ -437,4 +437,46 @@ public abstract class EsPersonCase
     return accessLimitation.equals(obj);
   }
 
+  public String getWorkerId() {
+    return worker.getWorkerId();
+  }
+
+  public void setWorkerId(String workerId) {
+    worker.setWorkerId(workerId);
+  }
+
+  public String getWorkerFirstName() {
+    return worker.getWorkerFirstName();
+  }
+
+  public void setWorkerFirstName(String workerFirstName) {
+    worker.setWorkerFirstName(workerFirstName);
+  }
+
+  public String getWorkerLastName() {
+    return worker.getWorkerLastName();
+  }
+
+  public void setWorkerLastName(String workerLastName) {
+    worker.setWorkerLastName(workerLastName);
+  }
+
+  public Date getWorkerLastUpdated() {
+    return worker.getWorkerLastUpdated();
+  }
+
+  public void setWorkerLastUpdated(Date workerLastUpdated) {
+    worker.setWorkerLastUpdated(workerLastUpdated);
+  }
+
+  @Override
+  public int hashCode() {
+    return worker.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return worker.toString();
+  }
+
 }

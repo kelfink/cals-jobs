@@ -239,8 +239,7 @@ public class HyperCube extends NeutronGuiceModule {
    */
   public static <T extends BasePersonIndexerJob<?, ?>> T newRocket(final Class<T> klass,
       String... args) throws NeutronException {
-    final FlightPlan flightPlan = FlightPlan.parseCommandLine(args);
-    return newRocket(klass, flightPlan);
+    return newRocket(klass, FlightPlan.parseCommandLine(args));
   }
 
   /**

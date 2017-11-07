@@ -43,8 +43,8 @@ import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 
 /**
- * Run stand-alone rockets or serve up rockets with Quartz. The master of ceremonies, AKA, Jimmy
- * Neutron.
+ * Run stand-alone rockets or serve up rockets with Quartz. The master of ceremonies, AKA, <a
+ * href="http://jimmyneutron.wikia.com/wiki/Jimmy_Neutron>Jimmy Neutron</a>.
  * 
  * @author CWDS API Team
  */
@@ -59,7 +59,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
   private static Function<FlightPlan, Injector> injectorMaker = HyperCube::buildInjectorFunctional;
 
-  private Injector injector;
+  private Injector injector; // A bit hacky but easier than alternatives.
 
   private LaunchCommandSettings settings = new LaunchCommandSettings();
 
@@ -75,7 +75,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
   private ElasticsearchDao esDao;
 
   /**
-   * REST administration.
+   * REST administration. Started if enabled in #.
    */
   private NeutronRestServer restServer = new NeutronRestServer();
 
@@ -83,16 +83,16 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
   private LaunchScheduler launchScheduler;
 
-  private boolean fatalError; // Single launch mode only.
+  private boolean fatalError;
 
   private LaunchCommand() {
     // no-op
   }
 
   @Inject
-  public LaunchCommand(final FlightRecorder jobHistory, final LaunchScheduler launchScheduler,
+  public LaunchCommand(final FlightRecorder flightRecorder, final LaunchScheduler launchScheduler,
       final ElasticsearchDao esDao) {
-    this.flightRecorder = jobHistory;
+    this.flightRecorder = flightRecorder;
     this.launchScheduler = launchScheduler;
     this.esDao = esDao;
   }
@@ -512,7 +512,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
    */
   @Override
   public void close() throws Exception {
-    if (!isTestMode() && instance.fatalError) {
+    if (!isTestMode() && ((isSchedulerMode() && instance.fatalError) || !isSchedulerMode())) {
       // Shutdown all remaining resources, even those not attached to this job.
       Runtime.getRuntime().exit(-1); // NOSONAR
     }
@@ -567,12 +567,11 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
       return; // Test "main" methods
     }
 
-    instance.fatalError = true;
+    instance.fatalError = true; // Murphy was an optimist.
     try (final LaunchCommand launchCommand = buildStandaloneInstance(standardFlightPlan);
         final T job = HyperCube.newRocket(klass, args)) {
-      launchCommand.fatalError = true;
       job.run();
-      launchCommand.fatalError = false;
+      launchCommand.fatalError = false; // We may it. Almost.
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
