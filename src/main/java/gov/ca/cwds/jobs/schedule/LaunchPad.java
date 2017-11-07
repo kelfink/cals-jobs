@@ -113,7 +113,7 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
   @Managed(description = "Show job status")
   public String status() {
     LOGGER.debug("Show job status");
-    return flightRecorder.getLastTrack(this.flightSchedule.getRocketClass()).toString();
+    return flightRecorder.getLastFlightLog(this.flightSchedule.getRocketClass()).toString();
   }
 
   @Override
