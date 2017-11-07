@@ -262,13 +262,13 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   @Ignore
   public void configure_Args__() throws Exception {
-    target.configure();
+    target.configure(); // can only call from module
   }
 
   @Test
   @Ignore
   public void bindDaos_Args__() throws Exception {
-    target.bindDaos();
+    target.bindDaos(); // can only call from module
   }
 
   /**

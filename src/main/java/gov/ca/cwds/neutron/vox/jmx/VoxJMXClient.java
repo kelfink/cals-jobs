@@ -101,25 +101,6 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
     return Triple.of(host, port, rocket);
   }
 
-  public static void main(String[] args) throws IOException, MalformedObjectNameException {
-    LOGGER.info("BEGIN");
-
-    final Triple<String, String, String> triple = parseCommandLine(args);
-    final String host = triple.getLeft();
-    final String port = triple.getMiddle();
-    final String rocket = triple.getRight();
-
-    try (VoxJMXClient client = new VoxJMXClient(host, port)) {
-      LOGGER.info("CONNECT JMX...");
-      client.connect();
-      final VoxLaunchPadMBean mbeanProxy = client.proxy(rocket);
-      LOGGER.info("status::{}", mbeanProxy.status());
-    } catch (Exception e) {
-      throw JobLogs.runtime(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", host, port,
-          rocket);
-    }
-  }
-
   public JMXConnector getJmxConnector() {
     return jmxConnector;
   }
@@ -142,6 +123,27 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
 
   public String getPort() {
     return port;
+  }
+
+  public static void launch(final Triple<String, String, String> triple) {
+    final String host = triple.getLeft();
+    final String port = triple.getMiddle();
+    final String rocket = triple.getRight();
+
+    try (VoxJMXClient client = new VoxJMXClient(host, port)) {
+      LOGGER.info("CONNECT JMX...");
+      client.connect();
+      final VoxLaunchPadMBean mbeanProxy = client.proxy(rocket);
+      LOGGER.info("status::{}", mbeanProxy.status());
+    } catch (Exception e) {
+      throw JobLogs.runtime(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", host, port,
+          rocket);
+    }
+  }
+
+  public static void main(String[] args) throws IOException, MalformedObjectNameException {
+    LOGGER.info("BEGIN");
+    launch(parseCommandLine(args));
   }
 
 }
