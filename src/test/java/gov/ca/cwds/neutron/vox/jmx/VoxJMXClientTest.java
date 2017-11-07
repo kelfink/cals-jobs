@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -79,20 +78,16 @@ public class VoxJMXClientTest {
     target.close();
   }
 
-  @Test
+  @Test(expected = NeutronException.class)
   public void proxy_Args__String() throws Exception {
     Object actual = target.proxy(rocketName);
     Object expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
+  @Test(expected = NeutronException.class)
   public void proxy_Args__String_T__NeutronException() throws Exception {
-    try {
-      target.proxy(rocketName);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronException e) {
-    }
+    target.proxy(rocketName);
   }
 
   // @Test
