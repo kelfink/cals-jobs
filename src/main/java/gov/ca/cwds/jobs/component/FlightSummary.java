@@ -55,16 +55,104 @@ public class FlightSummary implements ApiMarker {
 
   public synchronized void accumulate(final FlightLog flightLog) {
     totalRuns++;
-    this.recsBulkDeleted = flightLog.getCurrentBulkDeleted();
-    this.recsBulkPrepared = flightLog.getCurrentBulkPrepared();
-    this.recsBulkDeleted = flightLog.getCurrentBulkDeleted();
-    this.rowsNormalized = flightLog.getCurrentNormalized();
+    this.recsBulkDeleted += flightLog.getCurrentBulkDeleted();
+    this.recsBulkPrepared += flightLog.getCurrentBulkPrepared();
+    this.recsBulkDeleted += flightLog.getCurrentBulkDeleted();
+    this.rowsNormalized += flightLog.getCurrentNormalized();
 
     if (status.containsKey(flightLog.getStatus())) {
       status.put(flightLog.getStatus(), new Integer(status.get(flightLog.getStatus()) + 1));
     } else {
       status.put(flightLog.getStatus(), 1);
     }
+  }
+
+  public String getRocketName() {
+    return rocketName;
+  }
+
+  public void setRocketName(String rocketName) {
+    this.rocketName = rocketName;
+  }
+
+  public EnumMap<FlightStatus, Integer> getStatus() {
+    return status;
+  }
+
+  public void setStatus(EnumMap<FlightStatus, Integer> status) {
+    this.status = status;
+  }
+
+  public int getTotalRuns() {
+    return totalRuns;
+  }
+
+  public void setTotalRuns(int totalRuns) {
+    this.totalRuns = totalRuns;
+  }
+
+  public int getRecsSentToIndexQueue() {
+    return recsSentToIndexQueue;
+  }
+
+  public void setRecsSentToIndexQueue(int recsSentToIndexQueue) {
+    this.recsSentToIndexQueue = recsSentToIndexQueue;
+  }
+
+  public int getRecsSentToBulkProcessor() {
+    return recsSentToBulkProcessor;
+  }
+
+  public void setRecsSentToBulkProcessor(int recsSentToBulkProcessor) {
+    this.recsSentToBulkProcessor = recsSentToBulkProcessor;
+  }
+
+  public int getRowsNormalized() {
+    return rowsNormalized;
+  }
+
+  public void setRowsNormalized(int rowsNormalized) {
+    this.rowsNormalized = rowsNormalized;
+  }
+
+  public int getRecsBulkPrepared() {
+    return recsBulkPrepared;
+  }
+
+  public void setRecsBulkPrepared(int recsBulkPrepared) {
+    this.recsBulkPrepared = recsBulkPrepared;
+  }
+
+  public int getRecsBulkDeleted() {
+    return recsBulkDeleted;
+  }
+
+  public void setRecsBulkDeleted(int recsBulkDeleted) {
+    this.recsBulkDeleted = recsBulkDeleted;
+  }
+
+  public int getRecsBulkBefore() {
+    return recsBulkBefore;
+  }
+
+  public void setRecsBulkBefore(int recsBulkBefore) {
+    this.recsBulkBefore = recsBulkBefore;
+  }
+
+  public int getRecsBulkAfter() {
+    return recsBulkAfter;
+  }
+
+  public void setRecsBulkAfter(int recsBulkAfter) {
+    this.recsBulkAfter = recsBulkAfter;
+  }
+
+  public int getRecsBulkError() {
+    return recsBulkError;
+  }
+
+  public void setRecsBulkError(int recsBulkError) {
+    this.recsBulkError = recsBulkError;
   }
 
 }
