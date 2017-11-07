@@ -11,6 +11,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,8 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
       throw JobLogs.runtime(LOGGER, e, "JMX CONNECTION FAILED! {}", e.getMessage());
     }
   };
+
+  private static boolean testMode;
 
   private final String host;
   private final String port;
@@ -85,8 +88,8 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
     this.makeConnector = makeConnector;
   }
 
-  public static void main(String[] args) throws IOException, MalformedObjectNameException {
-    LOGGER.info("START JMX CLIENT ...");
+  public static Triple<String, String, String> parseCommandLine(final String[] args) {
+    LOGGER.info("PARSE COMMAND LINE");
     final OptionParser parser = new OptionParser("h:p:r:");
     final OptionSet options = parser.parse(args);
 
@@ -95,15 +98,25 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
     final String rocket = options.has("r") ? (String) options.valueOf("r")
         : DefaultFlightSchedule.CLIENT.getShortName();
     LOGGER.info("SETTINGS: host: {}, port: {}, rocket: {}", host, port, rocket);
+    return Triple.of(host, port, rocket);
+  }
+
+  public static void main(String[] args) throws IOException, MalformedObjectNameException {
+    LOGGER.info("BEGIN");
+
+    final Triple<String, String, String> triple = parseCommandLine(args);
+    final String host = triple.getLeft();
+    final String port = triple.getMiddle();
+    final String rocket = triple.getRight();
 
     try (VoxJMXClient client = new VoxJMXClient(host, port)) {
-      LOGGER.info("CONNECT ...");
+      LOGGER.info("CONNECT JMX...");
       client.connect();
       final VoxLaunchPadMBean mbeanProxy = client.proxy(rocket);
       LOGGER.info("status::{}", mbeanProxy.status());
     } catch (Exception e) {
-      LOGGER.error("JMX ERROR! host: {}, port: {}, rocket: {}", host, port, rocket, e);
-      Runtime.getRuntime().exit(-1); // NOSONAR
+      throw JobLogs.runtime(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", host, port,
+          rocket);
     }
   }
 

@@ -90,30 +90,10 @@ public class VoxJMXClientTest {
     target.proxy(rocketName);
   }
 
-  // @Test
-  // public void main_Args__StringArray() throws Exception {
-  // String[] args = new String[] {};
-  // VoxJMXClient.main(args);
-  // }
-
-  // @Test
-  // public void main_Args__StringArray_T__IOException() throws Exception {
-  // String[] args = new String[] {};
-  // try {
-  // VoxJMXClient.main(args);
-  // fail("Expected exception was not thrown!");
-  // } catch (IOException e) {
-  // }
-  // }
-
-  // @Test
-  // public void main_Args__StringArray_T__MalformedObjectNameException() throws Exception {
-  // String[] args = new String[] {};
-  // try {
-  // VoxJMXClient.main(args);
-  // fail("Expected exception was not thrown!");
-  // } catch (MalformedObjectNameException e) {
-  // }
-  // }
+  @Test(expected = Exception.class)
+  public void main_Args__StringArray() throws Exception {
+    String[] args = new String[] {};
+    VoxJMXClient.main(args);
+  }
 
 }
