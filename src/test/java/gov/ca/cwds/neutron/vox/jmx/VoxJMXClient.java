@@ -70,15 +70,18 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
   }
 
   public static void main(String[] args) throws IOException, MalformedObjectNameException {
-    final OptionParser parser = new OptionParser("h:p:");
+    final OptionParser parser = new OptionParser("h:p:r:");
     final OptionSet options = parser.parse(args);
 
     final String host = options.has("h") ? (String) options.valueOf("h") : DEFAULT_HOST;
     final String port = options.has("p") ? (String) options.valueOf("p") : DEFAULT_PORT;
+    final String rocket = options.has("r") ? (String) options.valueOf("r")
+        : DefaultFlightSchedule.CLIENT.getShortName();
 
     try (VoxJMXClient client = new VoxJMXClient(host, port)) {
       client.connect();
-      client.proxy(DefaultFlightSchedule.CLIENT.getShortName());
+      final VoxLaunchPadMBean mbeanProxy = client.proxy(rocket);
+      LOGGER.info("status::{}", mbeanProxy.status());
     } catch (Exception e) {
       LOGGER.error("FAILED TO CONNECT! host: {}, port: {}", host, port, e);
       Runtime.getRuntime().exit(-1); // NOSONAR

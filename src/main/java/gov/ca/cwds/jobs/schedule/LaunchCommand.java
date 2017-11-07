@@ -238,6 +238,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
   }
 
   protected void exposeJMX() {
+    LOGGER.warn("\n>>>>>>> ENABLE JMX! <<<<<<<\n");
     final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
     for (LaunchPad pad : launchScheduler.getScheduleRegistry().values()) {
       exporter.export("Neutron:rocket=" + pad.getFlightSchedule().getShortName(), pad);
