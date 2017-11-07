@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -23,6 +22,7 @@ import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.FlightRecord;
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.exception.NeutronException;
 
 public class LaunchPadTest extends Goddard {
   Scheduler scheduler;
@@ -61,7 +61,7 @@ public class LaunchPadTest extends Goddard {
     target.schedule();
   }
 
-  @Test(expected = SchedulerException.class)
+  @Test(expected = NeutronException.class)
   public void schedule_Args___T__SchedulerException() throws Exception {
     when(scheduler.checkExists(any(JobKey.class))).thenThrow(SchedulerException.class);
     when(scheduler.getJobDetail(any(JobKey.class))).thenThrow(SchedulerException.class);
@@ -73,7 +73,7 @@ public class LaunchPadTest extends Goddard {
     target.unschedule();
   }
 
-  @Test(expected = SchedulerException.class)
+  @Test(expected = NeutronException.class)
   public void unschedule_Args___T__SchedulerException() throws Exception {
     doThrow(SchedulerException.class).when(scheduler).pauseTrigger(any(TriggerKey.class));
     target.unschedule();
@@ -98,14 +98,10 @@ public class LaunchPadTest extends Goddard {
     target.stop();
   }
 
-  @Test
+  @Test(expected = NeutronException.class)
   public void stop_Args___T__SchedulerException() throws Exception {
-    try {
-      doThrow(SchedulerException.class).when(scheduler).pauseTrigger(any(TriggerKey.class));
-      target.stop();
-      fail("Expected exception was not thrown!");
-    } catch (SchedulerException e) {
-    }
+    doThrow(SchedulerException.class).when(scheduler).pauseTrigger(any(TriggerKey.class));
+    target.stop();
   }
 
   @Test
