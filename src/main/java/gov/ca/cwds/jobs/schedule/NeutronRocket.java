@@ -60,15 +60,12 @@ public class NeutronRocket implements InterruptableJob {
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
     final JobDataMap map = context.getJobDetail().getJobDataMap();
-    final String jobName = context.getTrigger().getJobKey().getName();
+    final String rocketName = context.getTrigger().getJobKey().getName();
     LOGGER.info("Execute {}, instance # {}", rocket.getClass().getName(), instanceCounter.get());
 
     try (final BasePersonIndexerJob job = rocket) {
-      // flightLog = new FlightLog(); // fresh progress track
-      // job.setTrack(flightLog);
-
       flightLog = rocket.getFlightLog();
-      flightLog.setRocketName(jobName);
+      flightLog.setRocketName(rocketName);
 
       map.put("opts", job.getFlightPlan());
       map.put("track", flightLog);
@@ -83,7 +80,7 @@ public class NeutronRocket implements InterruptableJob {
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
     }
 
-    LOGGER.info("Executed {}", rocket.getClass().getName());
+    LOGGER.info("ANOTHER HAPPY LANDING! {}", rocket.getClass().getName());
   }
 
   @Override
