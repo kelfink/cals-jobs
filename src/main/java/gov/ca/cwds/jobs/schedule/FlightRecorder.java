@@ -65,7 +65,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
 
   @Override
   public FlightSummary getFlightSummary(DefaultFlightSchedule flightSchedule) {
-    return flightSummaries.get(flightSchedule.getRocketClass());
+    return flightSummaries.get(flightSchedule);
   }
 
 }

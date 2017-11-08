@@ -80,7 +80,7 @@ public class FlightSummary implements ApiMarker {
     }
 
     if (status.containsKey(flightLog.getStatus())) {
-      status.put(flightLog.getStatus(), new Integer(status.get(flightLog.getStatus()) + 1));
+      status.put(flightLog.getStatus(), Integer.valueOf(status.get(flightLog.getStatus()) + 1));
     } else {
       status.put(flightLog.getStatus(), 1);
     }

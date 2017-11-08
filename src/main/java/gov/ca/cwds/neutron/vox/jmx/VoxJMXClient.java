@@ -5,7 +5,6 @@ import java.util.function.BiFunction;
 
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -140,17 +139,17 @@ public class VoxJMXClient implements AutoCloseable {
     }
   }
 
-  public static void main(String[] args) throws IOException, MalformedObjectNameException {
-    LOGGER.info("BEGIN");
-    launch(parseCommandLine(args));
-  }
-
   public static boolean isTestMode() {
     return testMode;
   }
 
   public static void setTestMode(boolean testMode) {
     VoxJMXClient.testMode = testMode;
+  }
+
+  public static void main(String[] args) {
+    LOGGER.info("BEGIN");
+    launch(parseCommandLine(args));
   }
 
 }
