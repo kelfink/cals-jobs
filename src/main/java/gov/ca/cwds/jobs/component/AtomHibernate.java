@@ -30,7 +30,7 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
  * @param <M> de-normalized type or same as normalized type if normalization not needed
  */
 public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends AtomShared, AtomInitialLoad<T>, NeutronRowMapper<M> {
+    extends AtomShared, NeutronRowMapper<M> {
 
   /**
    * @return default CMS schema name
@@ -49,7 +49,6 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   /**
    * @return the job's main DAO.
    */
-  @Override
   BaseDaoImpl<T> getJobDao();
 
   /**

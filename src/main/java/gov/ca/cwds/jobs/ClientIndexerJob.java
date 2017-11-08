@@ -159,7 +159,8 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
    * @param rs result set
    * @throws SQLException on database error
    */
-  protected void iterateRangeResults(final ResultSet rs) throws SQLException {
+  @Override
+  public void iterateRangeResults(final ResultSet rs) throws SQLException {
     int cntr = 0;
     EsClientAddress m;
     Object lastId = new Object();
@@ -229,7 +230,8 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
    * 
    * @param p key range to read
    */
-  protected void pullRange(final Pair<String, String> p) {
+  @Override
+  public void pullRange(final Pair<String, String> p) {
     final String threadName =
         "extract_" + nextThreadNum.incrementAndGet() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);

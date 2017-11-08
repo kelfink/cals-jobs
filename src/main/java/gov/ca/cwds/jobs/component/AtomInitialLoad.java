@@ -1,5 +1,9 @@
 package gov.ca.cwds.jobs.component;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,14 +13,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.procedure.ProcedureCall;
 
-import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
+import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * Common functions and features for initial load.
@@ -24,10 +31,10 @@ import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
  * @author CWDS API Team
  *
  * @param <T> normalized type
+ * @param <M> de-normalized type
  */
-public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared {
-
-  BaseDaoImpl<T> getJobDao();
+public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
+    extends AtomHibernate<T, M>, AtomShared, AtomJobControl {
 
   /**
    * Restrict initial load key ranges from command line.
@@ -112,6 +119,54 @@ public interface AtomInitialLoad<T extends PersistentObject> extends AtomShared 
       txn = session.getTransaction();
     }
     return txn;
+  }
+
+  default int nextThreadNumber() {
+    return 1;
+  }
+
+  /**
+   * Iterate results sets from {@link #pullRange(Pair)}.
+   * 
+   * @param rs result set
+   * @throws SQLException on database error
+   */
+  default void iterateRangeResults(final ResultSet rs) throws SQLException {
+    // Provide your own solution, for now.
+  }
+
+  /**
+   * Read records from the given key range, typically within a single partition on large tables.
+   * 
+   * @param p partition range to read
+   */
+  default void pullRange(final Pair<String, String> p) {
+    final String threadName =
+        "extract_" + nextThreadNumber() + "_" + p.getLeft() + "_" + p.getRight();
+    nameThread(threadName);
+    getLogger().info("BEGIN: extract thread {}", threadName);
+    getFlightLog().trackRangeStart(p);
+    try (Connection con = getJobDao().getSessionFactory().getSessionFactoryOptions()
+        .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
+      con.setSchema(getDBSchemaName());
+      con.setAutoCommit(false);
+      final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
+          .replaceAll(":toId", p.getRight());
+      getLogger().info("query: {}", query);
+      NeutronDB2Utils.enableParallelism(con);
+      try (Statement stmt = con.createStatement()) {
+        stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
+        stmt.setMaxRows(0);
+        stmt.setQueryTimeout(0);
+        final ResultSet rs = stmt.executeQuery(query); // NOSONAR
+        // iterateRangeResults(rs);
+        con.commit();
+      }
+    } catch (Exception e) {
+      fail();
+      throw JobLogs.runtime(getLogger(), e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(),
+          p.getRight(), e.getMessage());
+    }
   }
 
   /**

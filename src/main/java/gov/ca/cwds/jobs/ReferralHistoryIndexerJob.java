@@ -405,7 +405,7 @@ public class ReferralHistoryIndexerJob
    * @param p partition (key) range to read
    * @return number of client documents affected
    */
-  protected int pullRange(final Pair<String, String> p) {
+  protected int pullNextRange(final Pair<String, String> p) {
     final String threadName =
         "extract_" + nextThreadNum.incrementAndGet() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);
@@ -485,7 +485,7 @@ public class ReferralHistoryIndexerJob
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
-        tasks.add(threadPool.submit(() -> pullRange(p)));
+        tasks.add(threadPool.submit(() -> pullNextRange(p)));
       }
 
       // Join threads. Don't return from method until they complete.

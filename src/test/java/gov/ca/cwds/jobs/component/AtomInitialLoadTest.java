@@ -21,7 +21,8 @@ import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 
 public class AtomInitialLoadTest {
 
-  private static class TestAtomInitialLoad implements AtomInitialLoad<TestDenormalizedEntity> {
+  private static class TestAtomInitialLoad
+      implements AtomInitialLoad<TestDenormalizedEntity, TestDenormalizedEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestAtomInitialLoad.class);
 
     @Override
@@ -47,6 +48,66 @@ public class AtomInitialLoadTest {
     @Override
     public BaseDaoImpl<TestDenormalizedEntity> getJobDao() {
       return null;
+    }
+
+    @Override
+    public boolean isRunning() {
+      // TODO Auto-generated method stub
+      return false;
+    }
+
+    @Override
+    public boolean isFailed() {
+      // TODO Auto-generated method stub
+      return false;
+    }
+
+    @Override
+    public boolean isIndexDone() {
+      // TODO Auto-generated method stub
+      return false;
+    }
+
+    @Override
+    public boolean isTransformDone() {
+      // TODO Auto-generated method stub
+      return false;
+    }
+
+    @Override
+    public boolean isRetrieveDone() {
+      // TODO Auto-generated method stub
+      return false;
+    }
+
+    @Override
+    public void fail() {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void doneIndex() {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void done() {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void doneRetrieve() {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void doneTransform() {
+      // TODO Auto-generated method stub
+
     }
 
   }

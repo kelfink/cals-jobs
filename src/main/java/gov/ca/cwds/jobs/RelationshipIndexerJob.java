@@ -151,7 +151,8 @@ public class RelationshipIndexerJob
    * @param rs result set
    * @throws SQLException on database error
    */
-  protected void iterateRangeResults(final ResultSet rs) throws SQLException {
+  @Override
+  public void iterateRangeResults(final ResultSet rs) throws SQLException {
     int cntr = 0;
     EsRelationship m;
     Object lastId = new Object();
@@ -175,7 +176,8 @@ public class RelationshipIndexerJob
    * 
    * @param p partition range to read
    */
-  protected void pullRange(final Pair<String, String> p) {
+  @Override
+  public void pullRange(final Pair<String, String> p) {
     final String threadName =
         "extract_" + nextThreadNum.incrementAndGet() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);

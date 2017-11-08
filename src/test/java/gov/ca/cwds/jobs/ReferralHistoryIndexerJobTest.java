@@ -63,8 +63,8 @@ public class ReferralHistoryIndexerJobTest
     }
 
     @Override
-    protected int pullRange(Pair<String, String> p) {
-      return fakePull ? 0 : super.pullRange(p);
+    protected int pullNextRange(Pair<String, String> p) {
+      return fakePull ? 0 : super.pullNextRange(p);
     }
 
     @Override

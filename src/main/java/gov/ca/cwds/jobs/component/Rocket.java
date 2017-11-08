@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.component;
 import gov.ca.cwds.data.std.ApiMarker;
 
 /**
- * Marker interface for batch Jobs.
+ * Marker interface for batch Rockets.
  * 
  * <p>
  * In Jimmy Neutron's world, "jobs" are "rockets."
@@ -15,7 +15,7 @@ import gov.ca.cwds.data.std.ApiMarker;
 public interface Rocket extends ApiMarker, Runnable {
 
   /**
-   * Run the job.
+   * Launch the rocket.
    */
   @Override
   public void run();

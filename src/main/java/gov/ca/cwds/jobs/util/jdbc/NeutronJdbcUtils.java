@@ -18,7 +18,7 @@ import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.jobs.component.AtomHibernate;
+import gov.ca.cwds.jobs.component.AtomInitialLoad;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 
 /**
@@ -112,13 +112,14 @@ public final class NeutronJdbcUtils {
 
   @SuppressWarnings("unchecked")
   public static List<Pair<String, String>> getCommonPartitionRanges(
-      @SuppressWarnings("rawtypes") AtomHibernate initialLoad, int numPartitions) {
+      @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad, int numPartitions) {
     List<Pair<String, String>> ret = new ArrayList<>(numPartitions);
     if (initialLoad.isLargeDataSet()) {
       // ----------------------------
       // z/OS, large data set:
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
+      // default List<Pair<String, String>> limitRange(final List<Pair<String, String>> allKeyPairs)
       ret = initialLoad.limitRange(buildPartitionsRanges(numPartitions));
     } else if (initialLoad.isDB2OnZOS()) {
       // ----------------------------
@@ -138,17 +139,17 @@ public final class NeutronJdbcUtils {
   }
 
   public static List<Pair<String, String>> getCommonPartitionRanges4(
-      @SuppressWarnings("rawtypes") AtomHibernate initialLoad) {
+      @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad) {
     return getCommonPartitionRanges(initialLoad, 4);
   }
 
   public static List<Pair<String, String>> getCommonPartitionRanges16(
-      @SuppressWarnings("rawtypes") AtomHibernate initialLoad) {
+      @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad) {
     return getCommonPartitionRanges(initialLoad, 16);
   }
 
   public static List<Pair<String, String>> getCommonPartitionRanges64(
-      @SuppressWarnings("rawtypes") AtomHibernate initialLoad) {
+      @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad) {
     return getCommonPartitionRanges(initialLoad, 64);
   }
 

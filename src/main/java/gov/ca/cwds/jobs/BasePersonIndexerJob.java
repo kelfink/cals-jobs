@@ -47,7 +47,6 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.jobs.component.AtomHibernate;
 import gov.ca.cwds.jobs.component.AtomInitialLoad;
 import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
 import gov.ca.cwds.jobs.component.AtomSecurity;
@@ -98,9 +97,8 @@ import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
  * @see FlightPlan
  */
 public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends LastSuccessfulRunJob
-    implements AutoCloseable, AtomPersonDocPrep<T>, AtomHibernate<T, M>, AtomTransform<T, M>,
-    AtomInitialLoad<T>, AtomSecurity, AtomValidateDocument {
+    extends LastSuccessfulRunJob implements AutoCloseable, AtomPersonDocPrep<T>,
+    AtomInitialLoad<T, M>, AtomTransform<T, M>, AtomSecurity, AtomValidateDocument {
 
   private static final long serialVersionUID = 1L;
 
@@ -184,8 +182,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return bulk delete request
    */
   public DeleteRequest bulkDelete(final String id) {
-    return new DeleteRequest(getFlightPlan().getIndexName(), esDao.getConfig().getElasticsearchDocType(),
-        id);
+    return new DeleteRequest(getFlightPlan().getIndexName(),
+        esDao.getConfig().getElasticsearchDocType(), id);
   }
 
   /**

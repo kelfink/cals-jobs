@@ -26,6 +26,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.AtomHibernate;
+import gov.ca.cwds.jobs.component.AtomInitialLoad;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
@@ -34,8 +35,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 
-public class NeutronJdbcUtilsTest
-    extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
+public class NeutronJdbcUtilsTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   private static final class TestAtomHibernate extends TestIndexerJob
       implements AtomHibernate<TestNormalizedEntity, TestDenormalizedEntity> {
@@ -58,7 +58,7 @@ public class NeutronJdbcUtilsTest
 
   }
 
-  AtomHibernate initialLoad;
+  AtomInitialLoad initialLoad;
 
   @Override
   @Before
