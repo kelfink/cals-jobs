@@ -15,14 +15,13 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
-public class VoxJMXClient implements ApiMarker, AutoCloseable {
+public class VoxJMXClient implements AutoCloseable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(VoxJMXClient.class);
 
@@ -43,8 +42,8 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
   private final String host;
   private final String port;
 
-  private transient JMXConnector jmxConnector;
-  private transient MBeanServerConnection mbeanServerConnection;
+  private JMXConnector jmxConnector;
+  private MBeanServerConnection mbeanServerConnection;
 
   public VoxJMXClient(final String host, final String port) {
     this.host = host;
