@@ -283,6 +283,11 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
     return EntityNormalizer.<ReplicatedClient, EsClientAddress>normalizeList(recs);
   }
 
+  @Override
+  public int nextThreadNumber() {
+    return nextThreadNum.incrementAndGet();
+  }
+
   /**
    * Batch job entry point.
    * 
