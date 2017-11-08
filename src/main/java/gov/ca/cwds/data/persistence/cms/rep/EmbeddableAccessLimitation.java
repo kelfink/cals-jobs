@@ -1,5 +1,9 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
+import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -27,6 +31,13 @@ public class EmbeddableAccessLimitation implements ApiMarker {
   @Column(name = "LIMITED_ACCESS_GOVERNMENT_ENT")
   @Type(type = "integer")
   private Integer limitedAccessGovernmentEntityId;
+
+  public void accept(final ResultSet rs) throws SQLException {
+    this.limitedAccessCode = ifNull(rs.getString("LIMITED_ACCESS_CODE"));
+    this.limitedAccessDate = rs.getDate("LIMITED_ACCESS_DATE");
+    this.limitedAccessDescription = ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION"));
+    this.limitedAccessGovernmentEntityId = rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT");
+  }
 
   public String getLimitedAccessCode() {
     return limitedAccessCode;
