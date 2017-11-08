@@ -131,7 +131,7 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
    * @param rs result set
    * @throws SQLException on database error
    */
-  default void iterateRangeResults(final ResultSet rs) throws SQLException {
+  default void handleRangeResults(final ResultSet rs) throws SQLException {
     // Provide your own solution, for now.
   }
 
@@ -159,7 +159,7 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
-        // iterateRangeResults(rs);
+        handleRangeResults(rs);
         con.commit();
       }
     } catch (Exception e) {

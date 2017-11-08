@@ -249,7 +249,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void iterateRangeResults_Args__ResultSet() throws Exception {
-    target.iterateRangeResults(rs);
+    target.handleRangeResults(rs);
   }
 
   @Test

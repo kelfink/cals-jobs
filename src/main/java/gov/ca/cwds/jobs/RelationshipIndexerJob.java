@@ -152,7 +152,7 @@ public class RelationshipIndexerJob
    * @throws SQLException on database error
    */
   @Override
-  public void iterateRangeResults(final ResultSet rs) throws SQLException {
+  public void handleRangeResults(final ResultSet rs) throws SQLException {
     int cntr = 0;
     EsRelationship m;
     Object lastId = new Object();
@@ -199,7 +199,7 @@ public class RelationshipIndexerJob
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
-        iterateRangeResults(rs);
+        handleRangeResults(rs);
         con.commit();
       }
 

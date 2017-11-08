@@ -358,9 +358,12 @@ public class ReferralHistoryIndexerJobTest
   public void pullRange_Args__Pair_throw() throws Exception {
     final String schema = target.getDBSchemaName();
     when(con.prepareStatement(any())).thenThrow(JobsException.class);
+    when(con.prepareStatement(any())).thenThrow(JobsException.class);
+    doThrow(SQLException.class).when(con).setAutoCommit(false);
 
     final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
     target.fakePull = false;
+
     target.pullRange(p);
   }
 

@@ -155,7 +155,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
    * @throws SQLException on database error
    */
   @Override
-  public void iterateRangeResults(final ResultSet rs) throws SQLException {
+  public void handleRangeResults(final ResultSet rs) throws SQLException {
     int cntr = 0;
     EsClientAddress m;
     Object lastId = new Object();
