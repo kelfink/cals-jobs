@@ -17,7 +17,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
 
   private static final int QUEUE_SIZE = 200;
 
-  private final Map<Class<?>, CircularFifoQueue<FlightLog>> trackHistory =
+  private final Map<Class<?>, CircularFifoQueue<FlightLog>> flightHistory =
       new ConcurrentHashMap<>();
 
   private final Map<Class<?>, FlightLog> lastFlightLogs = new ConcurrentHashMap<>();
@@ -27,17 +27,17 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
 
   @Override
   public Map<Class<?>, CircularFifoQueue<FlightLog>> getFlightLogHistory() {
-    return trackHistory;
+    return flightHistory;
   }
 
   @Override
   public void addFlightLog(Class<?> klazz, FlightLog track) {
     lastFlightLogs.put(klazz, track);
 
-    if (!trackHistory.containsKey(klazz)) {
-      trackHistory.put(klazz, new CircularFifoQueue<>(QUEUE_SIZE));
+    if (!flightHistory.containsKey(klazz)) {
+      flightHistory.put(klazz, new CircularFifoQueue<>(QUEUE_SIZE));
     }
-    trackHistory.get(klazz).add(track);
+    flightHistory.get(klazz).add(track);
   }
 
   @Override
@@ -47,7 +47,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
 
   @Override
   public List<FlightLog> getHistory(final Class<?> klazz) {
-    return trackHistory.containsKey(klazz) ? new ArrayList<>(trackHistory.get(klazz))
+    return flightHistory.containsKey(klazz) ? new ArrayList<>(flightHistory.get(klazz))
         : new ArrayList<>();
   }
 
@@ -56,7 +56,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
       FlightLog flightLog) {
     FlightSummary summary = flightSummaries.get(flightSchedule);
     if (summary == null) {
-      summary = new FlightSummary();
+      summary = new FlightSummary(flightSchedule);
       flightSummaries.put(flightSchedule, summary);
     }
 

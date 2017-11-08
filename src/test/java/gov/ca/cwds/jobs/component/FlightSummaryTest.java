@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.component;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -12,16 +13,22 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import gov.ca.cwds.jobs.Goddard;
+import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightStatus;
 
 public class FlightSummaryTest {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(FlightSummaryTest.class);
 
   FlightSummary target;
 
   @Before
   public void setup() throws Exception {
-    target = new FlightSummary();
+    target = new FlightSummary(DefaultFlightSchedule.CLIENT);
   }
 
   @Test
@@ -36,21 +43,34 @@ public class FlightSummaryTest {
 
   @Test
   public void accumulate_Args__FlightLog() throws Exception {
-    FlightLog flightLog = new FlightLog();
+    final FlightLog flightLog = new FlightLog();
+    flightLog.addAffectedDocumentId(Goddard.DEFAULT_CLIENT_ID);
+    flightLog.addToQueuedToIndex(35);
+    flightLog.addToBulkAfter(60);
+    flightLog.addToBulkError(22);
+    flightLog.addToBulkPrepared(36);
+    flightLog.addToNormalized(45);
+    flightLog.addToBulkDeleted(4);
+
+    flightLog.trackQueuedToIndex();
+    flightLog.trackQueuedToIndex();
+    flightLog.trackQueuedToIndex();
+    flightLog.trackQueuedToIndex();
+
+    flightLog.trackBulkError();
+    flightLog.trackBulkError();
+    flightLog.trackBulkError();
+
+    flightLog.trackBulkDeleted();
+    flightLog.trackBulkDeleted();
+    flightLog.trackBulkDeleted();
+    flightLog.trackBulkDeleted();
+    flightLog.done();
+
     target.accumulate(flightLog);
-  }
+    LOGGER.info("summary: {}", target);
 
-  @Test
-  public void getRocketName_Args__() throws Exception {
-    String actual = target.getRocketName();
-    String expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void setRocketName_Args__String() throws Exception {
-    String rocketName = null;
-    target.setRocketName(rocketName);
+    assertThat(target.getRecsBulkPrepared(), is(not(0)));
   }
 
   @Test

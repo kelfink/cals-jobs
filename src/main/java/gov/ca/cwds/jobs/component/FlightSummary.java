@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightStatus;
 
 public class FlightSummary implements ApiMarker {
@@ -14,7 +15,7 @@ public class FlightSummary implements ApiMarker {
   /**
    * Runtime rocket name. Distinguish this rocket's threads from other running threads.
    */
-  private String rocketName;
+  private final DefaultFlightSchedule flightSchedule;
 
   private Date firstStart = new Date();
 
@@ -55,15 +56,17 @@ public class FlightSummary implements ApiMarker {
    */
   private int recsBulkError;
 
-  public FlightSummary() {
-    // default, no-op.
+  public FlightSummary(final DefaultFlightSchedule flightSchedule) {
+    this.flightSchedule = flightSchedule;
   }
 
-  public synchronized void accumulate(final FlightLog flightLog) {
+  public void accumulate(final FlightLog flightLog) {
     totalRuns++;
     this.recsBulkDeleted += flightLog.getCurrentBulkDeleted();
     this.recsBulkPrepared += flightLog.getCurrentBulkPrepared();
-    this.recsBulkDeleted += flightLog.getCurrentBulkDeleted();
+    this.recsBulkError += flightLog.getCurrentBulkError();
+    this.recsBulkAfter += flightLog.getCurrentBulkAfter();
+
     this.rowsNormalized += flightLog.getCurrentNormalized();
 
     final Date startTime = new Date(flightLog.getStartTime());
@@ -81,14 +84,6 @@ public class FlightSummary implements ApiMarker {
     } else {
       status.put(flightLog.getStatus(), 1);
     }
-  }
-
-  public String getRocketName() {
-    return rocketName;
-  }
-
-  public void setRocketName(String rocketName) {
-    this.rocketName = rocketName;
   }
 
   public Map<FlightStatus, Integer> getStatus() {
@@ -185,6 +180,17 @@ public class FlightSummary implements ApiMarker {
 
   public void setLastEnd(Date lastEnd) {
     this.lastEnd = lastEnd;
+  }
+
+  @Override
+  public String toString() {
+    return "FlightSummary [\nrocketName=" + flightSchedule.getShortName() + "\nfirstStart="
+        + firstStart + "\nlastEnd=" + lastEnd + "\nstatus=" + status + "\ntotalRuns=" + totalRuns
+        + "\nrecsSentToIndexQueue=" + recsSentToIndexQueue + "\nrecsSentToBulkProcessor="
+        + recsSentToBulkProcessor + "\nrowsNormalized=" + rowsNormalized + "\nrecsBulkPrepared="
+        + recsBulkPrepared + "\nrecsBulkDeleted=" + recsBulkDeleted + "\nrecsBulkBefore="
+        + recsBulkBefore + "\nrecsBulkAfter=" + recsBulkAfter + "\nrecsBulkError=" + recsBulkError
+        + "]";
   }
 
 }

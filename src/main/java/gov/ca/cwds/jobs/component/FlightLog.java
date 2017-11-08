@@ -332,6 +332,10 @@ public class FlightLog implements ApiMarker, AtomJobControl {
     return this.recsBulkError.get();
   }
 
+  public int getCurrentBulkAfter() {
+    return this.recsBulkAfter.get();
+  }
+
   public int addToQueuedToIndex(int addMe) {
     return this.recsSentToIndexQueue.getAndAdd(addMe);
   }
