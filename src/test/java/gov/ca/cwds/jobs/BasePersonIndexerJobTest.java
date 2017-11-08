@@ -214,7 +214,7 @@ public class BasePersonIndexerJobTest
         target.queueNormalize.push(new TestDenormalizedEntity("xyz1234567", "4", "5", "6"));
       }
       target.catchYourBreath();
-      target.getTrack().start();
+      target.getFlightLog().start();
 
       runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 2500L);
       target.threadNormalize();
@@ -485,7 +485,7 @@ public class BasePersonIndexerJobTest
   @Test
   public void threadRetrieveByJdbc_Args() throws Exception {
     when(rs.next()).thenReturn(true, true, false);
-    target.getTrack().start();
+    target.getFlightLog().start();
     runKillThread(target);
     target.threadRetrieveByJdbc();
     markTestDone();

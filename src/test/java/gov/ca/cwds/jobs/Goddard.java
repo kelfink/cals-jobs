@@ -284,9 +284,9 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
     systemMetaDao = mock(SystemMetaDao.class);
 
     // Command and control.
-    when(launchScheduler.createJob(any(String.class), any(FlightPlan.class)))
+    when(launchScheduler.fuelRocket(any(String.class), any(FlightPlan.class)))
         .thenReturn(mach1Rocket);
-    when(launchScheduler.createJob(any(Class.class), any(FlightPlan.class)))
+    when(launchScheduler.fuelRocket(any(Class.class), any(FlightPlan.class)))
         .thenReturn(mach1Rocket);
 
     when(launchScheduler.getScheduler()).thenReturn(scheduler);

@@ -410,7 +410,7 @@ public class ReferralHistoryIndexerJob
         "extract_" + nextThreadNum.incrementAndGet() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);
     LOGGER.info("BEGIN");
-    getTrack().trackRangeStart(p);
+    getFlightLog().trackRangeStart(p);
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
     final List<EsPersonReferral> listAllegations = allocAllegations.get();
@@ -455,7 +455,7 @@ public class ReferralHistoryIndexerJob
     }
 
     int cntr = mapReduce(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
-    getTrack().trackRangeComplete(p);
+    getFlightLog().trackRangeComplete(p);
     LOGGER.info("DONE");
     return cntr;
   }

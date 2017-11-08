@@ -65,7 +65,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final Class<?> klass, final FlightPlan flightPlan)
+  public BasePersonIndexerJob fuelRocket(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException {
     return this.rocketFactory.createJob(klass, flightPlan);
   }
@@ -79,7 +79,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final String jobName, final FlightPlan flightPlan)
+  public BasePersonIndexerJob fuelRocket(final String jobName, final FlightPlan flightPlan)
       throws NeutronException {
     return this.rocketFactory.createJob(jobName, flightPlan);
   }
@@ -89,9 +89,9 @@ public class LaunchScheduler implements AtomLaunchScheduler {
       throws NeutronException {
     try {
       LOGGER.info("Run scheduled rocket: {}", klass.getName());
-      final BasePersonIndexerJob<?, ?> job = createJob(klass, flightPlan);
-      job.run();
-      return job.getTrack();
+      final BasePersonIndexerJob<?, ?> rocket = fuelRocket(klass, flightPlan);
+      rocket.run();
+      return rocket.getFlightLog();
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "SCHEDULED LAUNCH FAILED!: {}", e.getMessage());
     }

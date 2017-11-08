@@ -253,10 +253,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       if (isDelete(t)) {
         ret = bulkDelete((String) t.getPrimaryKey()); // NOTE: cannot assume String PK.
-        getTrack().trackBulkDeleted();
+        getFlightLog().trackBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);
-        getTrack().trackBulkPrepared();
+        getFlightLog().trackBulkPrepared();
       }
     } catch (Exception e) {
       throw JobLogs.runtime(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey()); // NOSONAR
@@ -323,7 +323,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // WARN: threading practices
-      LOGGER.info("PROGRESS TRACK: {}", () -> this.getTrack().toString());
+      LOGGER.info("PROGRESS TRACK: {}", () -> this.getFlightLog().toString());
     } catch (Exception e) {
       fail();
       Thread.currentThread().interrupt();
@@ -561,7 +561,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       if (results != null && !results.isEmpty()) {
         LOGGER.info("Found {} people to index", results.size());
         results.stream().forEach(p -> { // NOSONAR
-          getTrack().addAffectedDocumentId(p.getPrimaryKey().toString());
+          getFlightLog().addAffectedDocumentId(p.getPrimaryKey().toString());
           prepareDocumentTrapException(bp, p);
         });
       }
@@ -569,7 +569,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       handleDeletes(deletionResults, bp);
       awaitBulkProcessorClose(bp);
       validateDocuments();
-      return new Date(getTrack().getStartTime());
+      return new Date(getFlightLog().getStartTime());
     } catch (Exception e) {
       fail();
       throw JobLogs.checked(LOGGER, e, "General Exception: {}", e.getMessage());
@@ -644,10 +644,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Updating last successful run time to {}",
             new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
-                .format(getTrack().getStartTime()));
+                .format(getFlightLog().getStartTime()));
       }
       // CHECKSTYLE:ON
-      ret = new Date(this.getTrack().getStartTime());
+      ret = new Date(this.getFlightLog().getStartTime());
     } catch (Exception e) {
       fail();
       throw JobLogs.checked(LOGGER, e, "JOB BOMBED! {}", e.getMessage());
@@ -859,7 +859,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected List<T> pullBucketRange(String minId, String maxId) {
     LOGGER.info("PULL BUCKET RANGE {} to {}", minId, maxId);
     final Pair<String, String> p = Pair.of(minId, maxId);
-    getTrack().trackRangeStart(p);
+    getFlightLog().trackRangeStart(p);
 
     final Class<?> entityClass =
         getDenormalizedClass() != null ? getDenormalizedClass() : getJobDao().getEntityClass();
@@ -894,7 +894,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       session.flush();
       results.close();
       txn.commit();
-      getTrack().trackRangeComplete(p);
+      getFlightLog().trackRangeComplete(p);
       return ret.build();
     } catch (HibernateException e) {
       fail();
@@ -943,7 +943,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
     }
 
-    return getTrack().getCurrentBulkPrepared();
+    return getFlightLog().getCurrentBulkPrepared();
   }
 
   @Override
@@ -952,7 +952,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   @Override
-  public FlightLog getTrack() {
+  public FlightLog getFlightLog() {
     return track;
   }
 

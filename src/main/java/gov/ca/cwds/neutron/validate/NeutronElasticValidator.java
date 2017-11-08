@@ -22,6 +22,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.component.AtomValidateDocument;
 import gov.ca.cwds.jobs.component.FlightLog;
+import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
@@ -116,7 +117,13 @@ public class NeutronElasticValidator implements AtomValidateDocument {
   }
 
   @Override
-  public FlightLog getTrack() {
+  public FlightLog getFlightLog() {
+    return null;
+  }
+
+  @Override
+  public FlightPlan getFlightPlan() {
+    // TODO Auto-generated method stub
     return null;
   }
 

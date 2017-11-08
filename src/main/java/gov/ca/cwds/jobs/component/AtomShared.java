@@ -15,9 +15,9 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 public interface AtomShared extends ApiMarker {
 
   /**
-   * @return job's progress tracker
+   * @return the rocket's progress tracker
    */
-  FlightLog getTrack();
+  FlightLog getFlightLog();
 
   /**
    * @return Elasticsearch DAO

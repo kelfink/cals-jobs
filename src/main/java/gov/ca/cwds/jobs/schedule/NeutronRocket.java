@@ -53,6 +53,7 @@ public class NeutronRocket implements InterruptableJob {
     this.rocket = rocket;
     this.flightSchedule = flightSchedule;
     this.flightRecorder = flightRecorder;
+    instanceCounter.incrementAndGet();
   }
 
   @SuppressWarnings("rawtypes")
@@ -60,14 +61,14 @@ public class NeutronRocket implements InterruptableJob {
   public void execute(JobExecutionContext context) throws JobExecutionException {
     final JobDataMap map = context.getJobDetail().getJobDataMap();
     final String jobName = context.getTrigger().getJobKey().getName();
-
-    LOGGER.info("Execute {}, instance # {}", rocket.getClass().getName(),
-        instanceCounter.incrementAndGet());
+    LOGGER.info("Execute {}, instance # {}", rocket.getClass().getName(), instanceCounter.get());
 
     try (final BasePersonIndexerJob job = rocket) {
-      flightLog = new FlightLog(); // fresh progress track
+      // flightLog = new FlightLog(); // fresh progress track
+      // job.setTrack(flightLog);
+
+      flightLog = rocket.getFlightLog();
       flightLog.setRocketName(jobName);
-      job.setTrack(flightLog);
 
       map.put("opts", job.getFlightPlan());
       map.put("track", flightLog);
@@ -75,9 +76,10 @@ public class NeutronRocket implements InterruptableJob {
 
       job.run();
     } catch (Exception e) {
-      LOGGER.error("FAILED TO LAUNCH! {}", e);
+      LOGGER.error("LAUNCH FAILURE! {}", e);
       throw new JobExecutionException("FAILED TO LAUNCH! {}", e);
     } finally {
+      LOGGER.info("Flight summary: {}", flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
     }
 

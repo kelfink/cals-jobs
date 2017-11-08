@@ -68,7 +68,7 @@ public class LaunchSchedulerTest extends Goddard {
   @Test
   public void createJob_Args__Class__FlightPlan() throws Exception {
     Class<?> klass = Mach1TestRocket.class;
-    BasePersonIndexerJob actual = target.createJob(klass, flightPlan);
+    BasePersonIndexerJob actual = target.fuelRocket(klass, flightPlan);
     BasePersonIndexerJob expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -76,7 +76,7 @@ public class LaunchSchedulerTest extends Goddard {
   @Test
   public void createJob_Args__String__FlightPlan() throws Exception {
     String jobName = null;
-    BasePersonIndexerJob actual = target.createJob(jobName, flightPlan);
+    BasePersonIndexerJob actual = target.fuelRocket(jobName, flightPlan);
     BasePersonIndexerJob expected = null;
     assertThat(actual, is(equalTo(expected)));
   }

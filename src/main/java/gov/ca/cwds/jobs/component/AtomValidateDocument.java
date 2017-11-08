@@ -7,20 +7,12 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.slf4j.Logger;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 
-public interface AtomValidateDocument {
-
-  Logger getLogger();
-
-  FlightLog getTrack();
-
-  ElasticsearchDao getEsDao();
+public interface AtomValidateDocument extends AtomShared {
 
   default ElasticSearchPerson readPerson(String json) throws NeutronException {
     try {
@@ -57,11 +49,11 @@ public interface AtomValidateDocument {
   }
 
   default void validateDocuments() throws NeutronException {
-    final String[] docIds = getTrack().getAffectedDocumentIds();
+    final String[] docIds = getFlightLog().getAffectedDocumentIds();
     long totalHits = 0;
 
     if (docIds != null && docIds.length > 0) {
-      final String[] affectedDocIds = getTrack().getAffectedDocumentIds();
+      final String[] affectedDocIds = getFlightLog().getAffectedDocumentIds();
       if (affectedDocIds != null && affectedDocIds.length > 0) {
         final Client esClient = getEsDao().getClient();
         final MultiSearchResponse multiResponse = esClient.prepareMultiSearch()

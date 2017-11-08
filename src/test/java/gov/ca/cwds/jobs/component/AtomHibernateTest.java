@@ -48,7 +48,7 @@ public class AtomHibernateTest
     }
 
     @Override
-    public FlightLog getTrack() {
+    public FlightLog getFlightLog() {
       return track;
     }
 

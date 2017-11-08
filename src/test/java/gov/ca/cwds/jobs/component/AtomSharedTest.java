@@ -19,7 +19,7 @@ public class AtomSharedTest {
     private final FlightLog track = new FlightLog();
 
     @Override
-    public FlightLog getTrack() {
+    public FlightLog getFlightLog() {
       return track;
     }
 

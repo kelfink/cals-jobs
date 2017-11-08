@@ -70,7 +70,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
   @Override
   public final void run() {
     LOGGER.warn("LastSuccessfulRunJob.run(): lastRunTimeFilename: {}", lastRunTimeFilename);
-    final FlightLog flightLog = getTrack();
+    final FlightLog flightLog = getFlightLog();
     flightLog.start();
 
     try {
@@ -224,7 +224,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   @Override
   public void done() {
-    this.getTrack().done();
+    this.getFlightLog().done();
   }
 
   /**
@@ -232,8 +232,8 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   @Override
   public void fail() {
-    this.getTrack().fail();
-    this.getTrack().done();
+    this.getFlightLog().fail();
+    this.getFlightLog().done();
   }
 
   /**
@@ -241,7 +241,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   @Override
   public void doneRetrieve() {
-    getTrack().doneRetrieve();
+    getFlightLog().doneRetrieve();
   }
 
   /**
@@ -249,7 +249,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   @Override
   public void doneTransform() {
-    getTrack().doneTransform();
+    getFlightLog().doneTransform();
   }
 
   /**
@@ -257,7 +257,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   @Override
   public void doneIndex() {
-    getTrack().doneIndex();
+    getFlightLog().doneIndex();
   }
 
   /**
@@ -265,7 +265,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   @Override
   public boolean isRunning() {
-    return getTrack().isRunning();
+    return getFlightLog().isRunning();
   }
 
   /**
@@ -273,7 +273,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   @Override
   public boolean isFailed() {
-    return getTrack().isFailed();
+    return getFlightLog().isFailed();
   }
 
   /**
@@ -281,7 +281,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   @Override
   public boolean isRetrieveDone() {
-    return getTrack().isRetrieveDone();
+    return getFlightLog().isRetrieveDone();
   }
 
   /**
@@ -289,7 +289,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   @Override
   public boolean isTransformDone() {
-    return getTrack().isTransformDone();
+    return getFlightLog().isTransformDone();
   }
 
   /**
@@ -297,7 +297,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    */
   @Override
   public boolean isIndexDone() {
-    return getTrack().isIndexDone();
+    return getFlightLog().isIndexDone();
   }
 
   public String getLastRunTimeFilename() {

@@ -63,7 +63,7 @@ public interface AtomTransform<T extends PersistentObject, M extends ApiGroupNor
    * Increment the number normalized records.
    */
   default void incrementNormalizeCount() {
-    JobLogs.logEvery(getTrack().trackNormalized(), "Normalize", "single");
+    JobLogs.logEvery(getFlightLog().trackNormalized(), "Normalize", "single");
   }
 
   /**

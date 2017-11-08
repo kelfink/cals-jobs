@@ -51,7 +51,7 @@ public class LastSuccessfulRunJobTest
     protected void finish() {}
 
     @Override
-    public FlightLog getTrack() {
+    public FlightLog getFlightLog() {
       return track;
     }
 

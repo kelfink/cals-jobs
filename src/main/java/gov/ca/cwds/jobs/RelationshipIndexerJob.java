@@ -180,7 +180,7 @@ public class RelationshipIndexerJob
         "extract_" + nextThreadNum.incrementAndGet() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);
     LOGGER.info("BEGIN: extract thread {}", threadName);
-    getTrack().trackRangeStart(p);
+    getFlightLog().trackRangeStart(p);
 
     try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection()) {
@@ -207,7 +207,7 @@ public class RelationshipIndexerJob
           p.getRight(), e.getMessage());
     }
 
-    getTrack().trackRangeComplete(p);
+    getFlightLog().trackRangeComplete(p);
     LOGGER.info("DONE: Extract thread {}", threadName);
   }
 

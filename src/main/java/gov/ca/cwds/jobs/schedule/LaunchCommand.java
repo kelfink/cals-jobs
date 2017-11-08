@@ -332,7 +332,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
   @SuppressWarnings("rawtypes")
   public BasePersonIndexerJob createRocket(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException {
-    final BasePersonIndexerJob ret = launchScheduler.createJob(klass, flightPlan);
+    final BasePersonIndexerJob ret = launchScheduler.fuelRocket(klass, flightPlan);
     ret.setFlightPlan(flightPlan);
 
     LOGGER.warn("CREATED ROCKET! {}", flightPlan.getLastRunLoc());
