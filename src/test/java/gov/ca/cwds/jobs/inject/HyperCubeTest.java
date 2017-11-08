@@ -145,13 +145,13 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void getOpts_Args__() throws Exception {
-    final FlightPlan actual = target.getOpts();
+    final FlightPlan actual = target.getFlightPlan();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void setOpts_Args__JobOptions() throws Exception {
-    target.setOpts(flightPlan);
+    target.setFlightPlan(flightPlan);
   }
 
   @Test
@@ -176,7 +176,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void setOpts_Args__FlightPlan() throws Exception {
-    target.setOpts(flightPlan);
+    target.setFlightPlan(flightPlan);
   }
 
   @Test

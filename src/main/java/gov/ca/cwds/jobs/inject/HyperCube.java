@@ -77,6 +77,7 @@ import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
+import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -130,7 +131,7 @@ public class HyperCube extends NeutronGuiceModule {
 
   private String lastJobRunTimeFilename;
 
-  private FlightPlan opts;
+  private FlightPlan flightPlan;
 
   private String hibernateConfigCms = HIBERNATE_CONFIG_CMS;
 
@@ -144,7 +145,7 @@ public class HyperCube extends NeutronGuiceModule {
    * Default constructor.
    */
   public HyperCube() {
-    this.opts = null;
+    this.flightPlan = null;
   }
 
   /**
@@ -158,7 +159,7 @@ public class HyperCube extends NeutronGuiceModule {
     this.esConfig = esConfigFile;
     this.lastJobRunTimeFilename =
         !StringUtils.isBlank(lastJobRunTimeFilename) ? lastJobRunTimeFilename : "";
-    this.opts = opts;
+    this.flightPlan = opts;
   }
 
   public Configuration makeHibernateConfiguration() {
@@ -466,7 +467,7 @@ public class HyperCube extends NeutronGuiceModule {
    */
   @Provides
   @Singleton
-  protected LaunchScheduler configureQuartz(final Injector injector,
+  protected AtomLaunchScheduler configureQuartz(final Injector injector,
       final FlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
       final AtomFlightPlanManager flightPlanMgr) throws SchedulerException {
     // Chicken/egg dilemma
@@ -497,13 +498,13 @@ public class HyperCube extends NeutronGuiceModule {
   }
 
   @SuppressWarnings("javadoc")
-  public FlightPlan getOpts() {
-    return opts;
+  public FlightPlan getFlightPlan() {
+    return flightPlan;
   }
 
   @SuppressWarnings("javadoc")
-  public void setOpts(FlightPlan opts) {
-    this.opts = opts;
+  public void setFlightPlan(FlightPlan opts) {
+    this.flightPlan = opts;
   }
 
   @SuppressWarnings("javadoc")
