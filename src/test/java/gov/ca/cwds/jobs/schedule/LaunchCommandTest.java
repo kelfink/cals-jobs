@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,9 +21,9 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.AtomFlightRecorder;
+import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
@@ -155,20 +154,6 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   }
 
   @Test
-  public void createJob_Args__Class__FlightPlan() throws Exception {
-    final Class<?> klass = Mach1TestRocket.class;
-    final BasePersonIndexerJob actual = target.createRocket(klass, flightPlan);
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
-  public void createJob_Args__String__FlightPlan() throws Exception {
-    final String rocketName = Mach1TestRocket.class.getName();
-    final BasePersonIndexerJob actual = target.createRocket(rocketName, flightPlan);
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
   public void runScheduledJob_Args__Class__FlightPlan() throws Exception {
     final Class<?> klass = Mach1TestRocket.class;
     final FlightLog actual = target.launchScheduledFlight(klass, flightPlan);
@@ -221,7 +206,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void getNeutronScheduler_Args__() throws Exception {
-    LaunchScheduler actual = target.getNeutronScheduler();
+    AtomLaunchScheduler actual = target.getNeutronScheduler();
     assertThat(actual, is(notNullValue()));
   }
 
@@ -239,17 +224,6 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   public void addExecutingJob_Args__TriggerKey__NeutronRocket() throws Exception {
     final NeutronRocket job = mock(NeutronRocket.class);
     target.trackInFlightRocket(key, job);
-  }
-
-  @Test
-  public void removeExecutingJob_Args__TriggerKey() throws Exception {
-    target.removeInFlightRocket(key);
-  }
-
-  @Test
-  public void getExecutingJobs_Args__() throws Exception {
-    final Map<TriggerKey, NeutronRocket> actual = target.getInFlightRockets();
-    assertThat(actual, is(notNullValue()));
   }
 
   @Test

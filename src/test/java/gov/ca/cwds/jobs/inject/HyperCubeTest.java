@@ -23,9 +23,9 @@ import com.google.inject.Injector;
 
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.schedule.AtomLaunchCommand;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
@@ -156,7 +156,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void provideLaunchDirector_Args__() throws Exception {
-    AtomLaunchScheduler actual = target.provideLaunchDirector();
+    final AtomLaunchCommand actual = target.provideLaunchDirector();
     assertThat(actual, is(notNullValue()));
   }
 

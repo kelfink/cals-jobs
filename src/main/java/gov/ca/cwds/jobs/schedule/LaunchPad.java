@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.weakref.jmx.Managed;
 
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -27,25 +28,30 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
   private static final long serialVersionUID = 1L;
   private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPad.class);
   private transient Scheduler scheduler;
+
+  private final AtomLaunchScheduler launchScheduler;
   private final DefaultFlightSchedule flightSchedule;
   private final FlightRecorder flightRecorder;
   private final String jobName;
   private final String triggerName;
+
   private FlightPlan flightPlan;
   private boolean vetoExecution;
   private volatile JobKey jobKey;
   private volatile JobDetail jd;
 
-  public LaunchPad(final Scheduler scheduler, DefaultFlightSchedule sched,
-      final FlightRecorder jobHistory, final FlightPlan opts) {
-    this.scheduler = scheduler;
+  public LaunchPad(final AtomLaunchScheduler launchScheduler, DefaultFlightSchedule sched,
+      final FlightRecorder flightRecorder, final FlightPlan opts) {
+    this.launchScheduler = launchScheduler;
+    this.scheduler = launchScheduler.getScheduler();
+
     this.flightSchedule = sched;
-    this.flightRecorder = jobHistory;
+    this.flightRecorder = flightRecorder;
     this.jobName = flightSchedule.getShortName();
     this.triggerName = flightSchedule.getShortName();
     this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
     this.flightPlan = opts;
-    jobHistory.addFlightLog(sched.getRocketClass(), new FlightLog());
+    flightRecorder.addFlightLog(sched.getRocketClass(), new FlightLog());
   }
 
   @Override
@@ -55,8 +61,8 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
       LOGGER.info("RUN JOB: {}", flightSchedule.getShortName());
       final FlightPlan runOnceOpts =
           FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
-      final FlightLog track = LaunchCommand.getInstance()
-          .launchScheduledFlight(flightSchedule.getRocketClass(), runOnceOpts);
+      final FlightLog track =
+          this.launchScheduler.launchScheduledFlight(flightSchedule.getRocketClass(), runOnceOpts);
       return track.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);
@@ -183,6 +189,10 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
   @Override
   public JobKey getJobKey() {
     return jobKey;
+  }
+
+  public AtomLaunchScheduler getLaunchScheduler() {
+    return launchScheduler;
   }
 
 }

@@ -25,6 +25,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 
 public class LaunchPadTest extends Goddard {
+
   Scheduler scheduler;
   DefaultFlightSchedule sched;
   FlightRecorder history;
@@ -33,10 +34,16 @@ public class LaunchPadTest extends Goddard {
   @Override
   @Before
   public void setup() throws Exception {
+    super.setup();
+
     scheduler = mock(Scheduler.class);
+    launchScheduler.setScheduler(scheduler);
+    when(launchScheduler.getScheduler()).thenReturn(scheduler);
+
     sched = DefaultFlightSchedule.CLIENT;
     history = new FlightRecorder();
-    target = new LaunchPad(scheduler, sched, history, flightPlan);
+
+    target = new LaunchPad(launchScheduler, sched, history, flightPlan);
   }
 
   @Test
@@ -63,8 +70,11 @@ public class LaunchPadTest extends Goddard {
 
   @Test(expected = NeutronException.class)
   public void schedule_Args___T__SchedulerException() throws Exception {
-    when(scheduler.checkExists(any(JobKey.class))).thenThrow(SchedulerException.class);
     when(scheduler.getJobDetail(any(JobKey.class))).thenThrow(SchedulerException.class);
+    when(launchScheduler.launchScheduledFlight(any(Class.class), any(FlightPlan.class)))
+        .thenThrow(SchedulerException.class);
+    when(scheduler.checkExists(any(JobKey.class))).thenThrow(SchedulerException.class);
+
     target.schedule();
   }
 
@@ -76,6 +86,7 @@ public class LaunchPadTest extends Goddard {
   @Test(expected = NeutronException.class)
   public void unschedule_Args___T__SchedulerException() throws Exception {
     doThrow(SchedulerException.class).when(scheduler).pauseTrigger(any(TriggerKey.class));
+    when(scheduler.interrupt(any(JobKey.class))).thenThrow(SchedulerException.class);
     target.unschedule();
   }
 
@@ -101,6 +112,7 @@ public class LaunchPadTest extends Goddard {
   @Test(expected = NeutronException.class)
   public void stop_Args___T__SchedulerException() throws Exception {
     doThrow(SchedulerException.class).when(scheduler).pauseTrigger(any(TriggerKey.class));
+    when(scheduler.interrupt(any(JobKey.class))).thenThrow(SchedulerException.class);
     target.stop();
   }
 
@@ -125,16 +137,15 @@ public class LaunchPadTest extends Goddard {
 
   @Test
   public void getJd_Args__() throws Exception {
+    target.schedule();
     JobDetail actual = target.getJd();
-    JobDetail expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void getOpts_Args__() throws Exception {
     FlightPlan actual = target.getFlightPlan();
-    FlightPlan expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test

@@ -8,16 +8,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.Properties;
 import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
-import org.quartz.ListenerManager;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
-import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weakref.jmx.MBeanExporter;
@@ -37,9 +34,6 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.inject.HyperCube;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import gov.ca.cwds.neutron.launch.listener.NeutronJobListener;
-import gov.ca.cwds.neutron.launch.listener.NeutronSchedulerListener;
-import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 
 /**
@@ -48,7 +42,7 @@ import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
  * 
  * @author CWDS API Team
  */
-public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
+public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LaunchCommand.class);
 
@@ -81,7 +75,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
 
   private FlightRecorder flightRecorder = new FlightRecorder();
 
-  private LaunchScheduler launchScheduler;
+  private AtomLaunchScheduler launchScheduler;
 
   private boolean fatalError;
 
@@ -90,8 +84,8 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
   }
 
   @Inject
-  public LaunchCommand(final FlightRecorder flightRecorder, final LaunchScheduler launchScheduler,
-      final ElasticsearchDao esDao) {
+  public LaunchCommand(final FlightRecorder flightRecorder,
+      final AtomLaunchScheduler launchScheduler, final ElasticsearchDao esDao) {
     this.flightRecorder = flightRecorder;
     this.launchScheduler = launchScheduler;
     this.esDao = esDao;
@@ -148,48 +142,16 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     resetTimestamps(false, hoursInPast);
   }
 
+  @Override
   @Managed(description = "Stop the scheduler")
   public void stopScheduler(boolean waitForJobsToComplete) throws NeutronException {
     this.launchScheduler.stopScheduler(waitForJobsToComplete);
   }
 
+  @Override
   @Managed(description = "Start the scheduler")
   public void startScheduler() throws NeutronException {
     this.launchScheduler.startScheduler();
-  }
-
-  /**
-   * Configure Quartz scheduling.
-   * 
-   * <p>
-   * MORE: inject this dependency. MOVE this responsibility to another unit.
-   * </p>
-   * 
-   * @param injector Guice injector
-   * @return prepare launch scheduler
-   * @throws SchedulerException Quartz error
-   */
-  protected LaunchScheduler configureQuartz(final Injector injector) throws SchedulerException {
-    final Properties p = new Properties();
-    p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
-
-    // MORE: make configurable.
-    p.put("org.quartz.threadPool.threadCount",
-        instance.settings.isInitialMode() ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
-    final StdSchedulerFactory factory = new StdSchedulerFactory(p);
-    final Scheduler scheduler = factory.getScheduler();
-
-    // MORE: inject scheduler and rocket factory.
-    scheduler.setJobFactory(injector.getInstance(RocketFactory.class));
-    launchScheduler.setScheduler(scheduler);
-
-    // Scheduler listeners.
-    final ListenerManager listenerMgr = launchScheduler.getScheduler().getListenerManager();
-    listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
-    listenerMgr.addTriggerListener(new NeutronTriggerListener(launchScheduler));
-    listenerMgr.addJobListener(instance.settings.isInitialMode()
-        ? DefaultFlightSchedule.buildFullLoadJobChainListener() : new NeutronJobListener());
-    return launchScheduler;
   }
 
   /**
@@ -246,7 +208,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     }
 
     // Expose Command Center methods to JMX.
-    exporter.export("Neutron:runner=command_center", this);
+    exporter.export("Neutron:runner=Launch_Command", this);
     LOGGER.info("MBeans: {}", exporter.getExportedObjects());
 
     // Expose Guice bean attributes to JMX.
@@ -272,8 +234,6 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
    */
   protected void initScheduler(final Injector injector) throws NeutronException {
     try {
-      configureQuartz(injector); // MOVE this responsibility to another class.
-
       // NOTE: make last change window configurable.
       final DateFormat fmt =
           new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
@@ -288,8 +248,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
         final FlightPlan opts = new FlightPlan(commonFlightPlan);
         handleTimeFile(opts, fmt, now, sched);
 
-        final LaunchPad nj =
-            new LaunchPad(launchScheduler.getScheduler(), sched, flightRecorder, opts);
+        final LaunchPad nj = new LaunchPad(launchScheduler, sched, flightRecorder, opts);
         launchScheduler.getScheduleRegistry().put(klass, nj);
         launchScheduler.getFlightPlanManger().addFlightPlan(klass, opts);
       }
@@ -321,49 +280,11 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     }
   }
 
-  /**
-   * Create a registered rocket.
-   * 
-   * @param klass batch job class
-   * @param flightPlan command line arguments
-   * @return the job
-   * @throws NeutronException unexpected runtime error
-   */
-  @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createRocket(final Class<?> klass, final FlightPlan flightPlan)
-      throws NeutronException {
-    final BasePersonIndexerJob ret = launchScheduler.fuelRocket(klass, flightPlan);
-    ret.setFlightPlan(flightPlan);
-
-    LOGGER.warn("CREATED ROCKET! {}", flightPlan.getLastRunLoc());
-    return ret;
-  }
-
-  /**
-   * Create a registered rocket.
-   * 
-   * @param rocketName batch job class
-   * @param flightPlan command line arguments
-   * @return the job
-   * @throws NeutronException unexpected runtime error
-   */
-  @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createRocket(final String rocketName, final FlightPlan flightPlan)
-      throws NeutronException {
-    try {
-      return createRocket(Class.forName(rocketName), flightPlan);
-    } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "ROCKET CLASS NOT FOUND! {}", rocketName);
-    }
-  }
-
-  @Override
   public FlightLog launchScheduledFlight(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException {
     return this.launchScheduler.launchScheduledFlight(klass, flightPlan);
   }
 
-  @Override
   public FlightLog launchScheduledFlight(final String jobName, final FlightPlan flightPlan)
       throws NeutronException {
     return this.launchScheduler.launchScheduledFlight(jobName, flightPlan);
@@ -420,12 +341,10 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     this.commonFlightPlan = startingOpts;
   }
 
-  @Override
   public boolean isLaunchVetoed(String className) throws NeutronException {
     return this.launchScheduler.isLaunchVetoed(className);
   }
 
-  @Override
   public LaunchPad scheduleLaunch(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts) {
     return this.launchScheduler.scheduleLaunch(klazz, sched, opts);
   }
@@ -438,7 +357,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     this.flightRecorder = jobHistory;
   }
 
-  public LaunchScheduler getNeutronScheduler() {
+  public AtomLaunchScheduler getNeutronScheduler() {
     return launchScheduler;
   }
 
@@ -454,17 +373,8 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     return launchScheduler.getScheduleRegistry();
   }
 
-  @Override
   public void trackInFlightRocket(TriggerKey key, NeutronRocket rocket) {
     launchScheduler.trackInFlightRocket(key, rocket);
-  }
-
-  public void removeInFlightRocket(TriggerKey key) {
-    launchScheduler.removeExecutingJob(key);
-  }
-
-  public Map<TriggerKey, NeutronRocket> getInFlightRockets() {
-    return launchScheduler.getRocketsInFlight();
   }
 
   /**
@@ -487,7 +397,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     return standardFlightPlan;
   }
 
-  protected static LaunchCommand buildStandaloneInstance(final FlightPlan standardFlightPlan)
+  protected static LaunchCommand buildCommandCenter(final FlightPlan standardFlightPlan)
       throws NeutronException {
     Injector injector;
     try {
@@ -527,7 +437,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     }
 
     final Injector injector = injectorMaker.apply(standardFlightPlan);
-    try (final LaunchCommand launchCommand = buildStandaloneInstance(standardFlightPlan)) {
+    try (final LaunchCommand launchCommand = buildCommandCenter(standardFlightPlan)) {
       instance = injector.getInstance(LaunchCommand.class);
       instance.commonFlightPlan = standardFlightPlan;
       instance.injector = injector;
@@ -568,7 +478,7 @@ public class LaunchCommand implements AtomLaunchScheduler, AutoCloseable {
     }
 
     instance.fatalError = true; // Murphy was an optimist.
-    try (final LaunchCommand launchCommand = buildStandaloneInstance(standardFlightPlan);
+    try (final LaunchCommand launchCommand = buildCommandCenter(standardFlightPlan);
         final T job = HyperCube.newRocket(klass, args)) {
       job.run();
       launchCommand.fatalError = false; // We may it. Almost.

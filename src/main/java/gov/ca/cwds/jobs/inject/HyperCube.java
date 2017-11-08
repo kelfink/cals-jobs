@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.inject;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.util.Properties;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,10 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.quartz.ListenerManager;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,18 +77,24 @@ import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.AtomRocketFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.AtomFlightPlanManager;
+import gov.ca.cwds.jobs.schedule.AtomLaunchCommand;
+import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightPlanRegistry;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.jobs.schedule.LaunchScheduler;
+import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.launch.listener.NeutronJobListener;
+import gov.ca.cwds.neutron.launch.listener.NeutronSchedulerListener;
+import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.validate.NeutronElasticValidator;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
@@ -95,8 +106,8 @@ import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
  * batch jobs.
  * 
  * <p>
- * Also known as, "Hyper Cube", Jimmy's invention to store an infinite number of items in a small
- * place.
+ * Also known as, <a href="http://jimmyneutron.wikia.com/wiki/Hyper_Corn">Hyper Cube</a>, Jimmy's
+ * invention to store an infinite number of items in a small place.
  * </p>
  * 
  * @author CWDS API Team
@@ -339,7 +350,7 @@ public class HyperCube extends NeutronGuiceModule {
 
   @Provides
   @Singleton
-  public AtomLaunchScheduler provideLaunchDirector() {
+  public AtomLaunchCommand provideLaunchDirector() {
     return LaunchCommand.getInstance();
   }
 
@@ -441,6 +452,45 @@ public class HyperCube extends NeutronGuiceModule {
       }
     }
     return ret;
+  }
+
+  /**
+   * Configure Quartz scheduling.
+   * 
+   * @param injector Guice injector
+   * @return prepare launch scheduler
+   * @throws SchedulerException Quartz error
+   */
+  @Provides
+  @Singleton
+  protected LaunchScheduler configureQuartz(final Injector injector,
+      final FlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
+      final AtomFlightPlanManager flightPlanMgr) throws SchedulerException {
+    // Chicken/egg dilemma
+    final boolean initialMode = LaunchCommand.isInitialMode();
+    final LaunchScheduler launchScheduler =
+        new LaunchScheduler(flightRecorder, rocketFactory, flightPlanMgr);
+
+    final Properties p = new Properties();
+    p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
+
+    // MORE: make configurable.
+    p.put("org.quartz.threadPool.threadCount",
+        initialMode ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
+    final StdSchedulerFactory factory = new StdSchedulerFactory(p);
+    final Scheduler scheduler = factory.getScheduler();
+
+    // MORE: inject scheduler and rocket factory.
+    scheduler.setJobFactory(injector.getInstance(RocketFactory.class));
+    launchScheduler.setScheduler(scheduler);
+
+    // Scheduler listeners.
+    final ListenerManager listenerMgr = launchScheduler.getScheduler().getListenerManager();
+    listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
+    listenerMgr.addTriggerListener(new NeutronTriggerListener(launchScheduler));
+    listenerMgr.addJobListener(initialMode ? DefaultFlightSchedule.buildFullLoadJobChainListener()
+        : new NeutronJobListener());
+    return launchScheduler;
   }
 
   @SuppressWarnings("javadoc")

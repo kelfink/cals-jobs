@@ -1,9 +1,13 @@
 package gov.ca.cwds.jobs.component;
 
+import java.util.Map;
+
+import org.quartz.Scheduler;
 import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.schedule.AtomFlightPlanManager;
 import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 import gov.ca.cwds.jobs.schedule.LaunchPad;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
@@ -27,5 +31,15 @@ public interface AtomLaunchScheduler {
   LaunchPad scheduleLaunch(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts);
 
   boolean isLaunchVetoed(String className) throws NeutronException;
+
+  void stopScheduler(boolean waitForJobsToComplete) throws NeutronException;
+
+  void startScheduler() throws NeutronException;
+
+  Map<Class<?>, LaunchPad> getScheduleRegistry();
+
+  Scheduler getScheduler();
+
+  AtomFlightPlanManager getFlightPlanManger();
 
 }

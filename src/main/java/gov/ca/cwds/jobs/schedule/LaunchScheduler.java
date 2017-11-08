@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
@@ -19,6 +20,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 
+@Singleton
 public class LaunchScheduler implements AtomLaunchScheduler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LaunchScheduler.class);
@@ -109,14 +111,16 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public LaunchPad scheduleLaunch(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan flightPlan) {
+  public LaunchPad scheduleLaunch(Class<?> klazz, DefaultFlightSchedule sched,
+      FlightPlan flightPlan) {
     LOGGER.debug("LAUNCH COORDINATOR: LAST CHANGE LOCATION: {}", flightPlan.getLastRunLoc());
-    final LaunchPad nj = new LaunchPad(this.getScheduler(), sched, flightRecorder, flightPlan);
+    final LaunchPad nj = new LaunchPad(this, sched, flightRecorder, flightPlan);
     flightPlanManger.addFlightPlan(klazz, flightPlan);
     scheduleRegistry.put(klazz, nj);
     return nj;
   }
 
+  @Override
   public void stopScheduler(boolean waitForJobsToComplete) throws NeutronException {
     LOGGER.warn("STOP SCHEDULER! wait for jobs to complete: {}", waitForJobsToComplete);
     try {
@@ -126,6 +130,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     }
   }
 
+  @Override
   public void startScheduler() throws NeutronException {
     LOGGER.warn("START SCHEDULER!");
     try {
@@ -163,6 +168,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     this.flightPlan = opts;
   }
 
+  @Override
   public Scheduler getScheduler() {
     return scheduler;
   }
@@ -171,6 +177,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     this.scheduler = scheduler;
   }
 
+  @Override
   public Map<Class<?>, LaunchPad> getScheduleRegistry() {
     return scheduleRegistry;
   }
@@ -186,6 +193,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     return this.getScheduleRegistry().get(klazz).isVetoExecution();
   }
 
+  @Override
   public AtomFlightPlanManager getFlightPlanManger() {
     return flightPlanManger;
   }
