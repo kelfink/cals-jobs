@@ -184,13 +184,13 @@ public class FlightSummary implements ApiMarker {
 
   @Override
   public String toString() {
-    return "FlightSummary [\nrocketName=" + flightSchedule.getShortName() + "\nfirstStart="
-        + firstStart + "\nlastEnd=" + lastEnd + "\nstatus=" + status + "\ntotalRuns=" + totalRuns
-        + "\nrecsSentToIndexQueue=" + recsSentToIndexQueue + "\nrecsSentToBulkProcessor="
-        + recsSentToBulkProcessor + "\nrowsNormalized=" + rowsNormalized + "\nrecsBulkPrepared="
-        + recsBulkPrepared + "\nrecsBulkDeleted=" + recsBulkDeleted + "\nrecsBulkBefore="
-        + recsBulkBefore + "\nrecsBulkAfter=" + recsBulkAfter + "\nrecsBulkError=" + recsBulkError
-        + "]";
+    return "FlightSummary [\n\trocketName=" + flightSchedule.getShortName() + "\n\tfirstStart="
+        + firstStart + "\n\tlastEnd=" + lastEnd + "\n\tstatus=" + status + "\n\ttotalRuns="
+        + totalRuns + "\n\trecsSentToIndexQueue=" + recsSentToIndexQueue
+        + "\n\trecsSentToBulkProcessor=" + recsSentToBulkProcessor + "\n\trowsNormalized="
+        + rowsNormalized + "\n\trecsBulkPrepared=" + recsBulkPrepared + "\n\trecsBulkDeleted="
+        + recsBulkDeleted + "\n\trecsBulkBefore=" + recsBulkBefore + "\n\trecsBulkAfter="
+        + recsBulkAfter + "\n\trecsBulkError=" + recsBulkError + "\n]";
   }
 
 }
