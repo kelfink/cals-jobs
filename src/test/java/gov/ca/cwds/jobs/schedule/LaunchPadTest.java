@@ -20,12 +20,12 @@ import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
+import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 
 public class LaunchPadTest extends Goddard {
-
   Scheduler scheduler;
   DefaultFlightSchedule sched;
   FlightRecorder history;
@@ -35,14 +35,11 @@ public class LaunchPadTest extends Goddard {
   @Before
   public void setup() throws Exception {
     super.setup();
-
     scheduler = mock(Scheduler.class);
     launchScheduler.setScheduler(scheduler);
     when(launchScheduler.getScheduler()).thenReturn(scheduler);
-
     sched = DefaultFlightSchedule.CLIENT;
     history = new FlightRecorder();
-
     target = new LaunchPad(launchScheduler, sched, history, flightPlan);
   }
 
@@ -74,7 +71,6 @@ public class LaunchPadTest extends Goddard {
     when(launchScheduler.launchScheduledFlight(any(Class.class), any(FlightPlan.class)))
         .thenThrow(SchedulerException.class);
     when(scheduler.checkExists(any(JobKey.class))).thenThrow(SchedulerException.class);
-
     target.schedule();
   }
 
@@ -152,6 +148,54 @@ public class LaunchPadTest extends Goddard {
   public void setOpts_Args__FlightPlan() throws Exception {
     FlightPlan opts_ = mock(FlightPlan.class);
     target.setFlightPlan(opts_);
+  }
+
+  @Test
+  public void getFlightPlan_Args__() throws Exception {
+    FlightPlan actual = target.getFlightPlan();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setFlightPlan_Args__FlightPlan() throws Exception {
+    FlightPlan opts_ = mock(FlightPlan.class);
+    target.setFlightPlan(opts_);
+  }
+
+  @Test
+  public void getFlightSchedule_Args__() throws Exception {
+    DefaultFlightSchedule actual = target.getFlightSchedule();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getFlightRecorder_Args__() throws Exception {
+    FlightRecorder actual = target.getFlightRecorder();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getJobName_Args__() throws Exception {
+    String actual = target.getJobName();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getTriggerName_Args__() throws Exception {
+    String actual = target.getTriggerName();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getJobKey_Args__() throws Exception {
+    JobKey actual = target.getJobKey();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getLaunchScheduler_Args__() throws Exception {
+    AtomLaunchScheduler actual = target.getLaunchScheduler();
+    assertThat(actual, is(notNullValue()));
   }
 
 }
