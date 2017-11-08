@@ -28,7 +28,6 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.AtomFlightRecorder;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
-import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.inject.HyperCube;
@@ -53,11 +52,11 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   private static Function<FlightPlan, Injector> injectorMaker = HyperCube::buildInjectorFunctional;
 
+  private FlightPlan commonFlightPlan;
+
   private Injector injector; // A bit hacky but easier than alternatives.
 
   private LaunchCommandSettings settings = new LaunchCommandSettings();
-
-  private FlightPlan commonFlightPlan;
 
   /**
    * Only used to drop and create indexes.
@@ -280,16 +279,6 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     }
   }
 
-  public FlightLog launchScheduledFlight(final Class<?> klass, final FlightPlan flightPlan)
-      throws NeutronException {
-    return this.launchScheduler.launchScheduledFlight(klass, flightPlan);
-  }
-
-  public FlightLog launchScheduledFlight(final String jobName, final FlightPlan flightPlan)
-      throws NeutronException {
-    return this.launchScheduler.launchScheduledFlight(jobName, flightPlan);
-  }
-
   /**
    * Load all job definitions and continue running after a job completes.
    * 
@@ -506,6 +495,14 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     this.injector = injector;
   }
 
+  public LaunchCommandSettings getSettings() {
+    return settings;
+  }
+
+  public void setSettings(LaunchCommandSettings settings) {
+    this.settings = settings;
+  }
+
   /**
    * OPTION: configure individual jobs, like Rundeck.
    * <p>
@@ -516,14 +513,6 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   public static void main(String[] args) {
     startSchedulerMode(args);
-  }
-
-  public LaunchCommandSettings getSettings() {
-    return settings;
-  }
-
-  public void setSettings(LaunchCommandSettings settings) {
-    this.settings = settings;
   }
 
 }

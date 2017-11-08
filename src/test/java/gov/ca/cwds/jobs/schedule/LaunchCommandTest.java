@@ -24,7 +24,6 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.component.AtomFlightRecorder;
 import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
-import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
@@ -151,20 +150,6 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     when(injector.getInstance(RocketFactory.class)).thenReturn(rocketFactory);
     target.getSettings().setExposeJmx(false);
     target.initScheduler(injector);
-  }
-
-  @Test
-  public void runScheduledJob_Args__Class__FlightPlan() throws Exception {
-    final Class<?> klass = Mach1TestRocket.class;
-    final FlightLog actual = target.launchScheduledFlight(klass, flightPlan);
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
-  public void runScheduledJob_Args__String__FlightPlan() throws Exception {
-    final String rocketName = Mach1TestRocket.class.getName();
-    target.setLaunchScheduler(launchScheduler);
-    FlightLog actual = target.launchScheduledFlight(rocketName, flightPlan);
   }
 
   @Test
