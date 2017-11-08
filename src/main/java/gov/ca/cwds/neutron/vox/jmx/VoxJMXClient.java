@@ -33,7 +33,7 @@ public class VoxJMXClient implements AutoCloseable {
       return JMXConnectorFactory.connect(new JMXServiceURL(
           "service:jmx:rmi:///jndi/rmi://" + the_host + ":" + the_port + "/jmxrmi"));
     } catch (IOException e) {
-      throw JobLogs.runtime(LOGGER, e, "JMX CONNECTION FAILED! {}", e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "FAILED TO CONNECT VIA JMX! {}", e.getMessage());
     }
   };
 
@@ -56,7 +56,7 @@ public class VoxJMXClient implements AutoCloseable {
       mbeanServerConnection = jmxConnector.getMBeanServerConnection();
       LOGGER.info("mbean count: {}", mbeanServerConnection.getMBeanCount());
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "JMX CONNECTION FAILED! {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "OOPS! DIDN'T CONNECT!! {}", e.getMessage());
     }
   }
 
@@ -75,7 +75,7 @@ public class VoxJMXClient implements AutoCloseable {
       LOGGER.info("status::{}", mbeanProxy.status());
       return mbeanProxy;
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "JMX CONNECTION FAILED! {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO GET MBEAN PROXY! {}", e.getMessage());
     }
   }
 
