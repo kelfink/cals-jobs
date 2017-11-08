@@ -26,10 +26,12 @@ import gov.ca.cwds.neutron.vox.jmx.VoxLaunchPadMBean;
 public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
 
   private static final long serialVersionUID = 1L;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPad.class);
+
   private transient Scheduler scheduler;
 
-  private final AtomLaunchScheduler launchScheduler;
+  private transient AtomLaunchScheduler launchScheduler;
   private final DefaultFlightSchedule flightSchedule;
   private final FlightRecorder flightRecorder;
   private final String jobName;

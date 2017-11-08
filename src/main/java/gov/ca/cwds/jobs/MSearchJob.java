@@ -25,7 +25,6 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.neutron.validate.NeutronElasticValidator;
 
 /**
  * Test Elasticsearch mass search capability for automatic validation.
@@ -39,8 +38,6 @@ public class MSearchJob extends
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MSearchJob.class);
 
-  private transient NeutronElasticValidator validator;
-
   /**
    * Construct batch job instance with all required dependencies.
    * 
@@ -48,16 +45,14 @@ public class MSearchJob extends
    * @param esDao ElasticSearch DAO
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
-   * @param validator document validation logic
    * @param jobHistory job history
    * @param opts command line options
    */
   @Inject
   public MSearchJob(final ReplicatedOtherAdultInPlacemtHomeDao dao, final ElasticsearchDao esDao,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-      final NeutronElasticValidator validator, FlightRecorder jobHistory, FlightPlan opts) {
+      FlightRecorder jobHistory, FlightPlan opts) {
     super(dao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, jobHistory, opts);
-    this.validator = validator;
   }
 
   @Override
@@ -102,14 +97,6 @@ public class MSearchJob extends
    */
   public static void main(String... args) {
     LaunchCommand.runStandalone(MSearchJob.class, args);
-  }
-
-  public NeutronElasticValidator getValidator() {
-    return validator;
-  }
-
-  public void setValidator(NeutronElasticValidator validator) {
-    this.validator = validator;
   }
 
 }

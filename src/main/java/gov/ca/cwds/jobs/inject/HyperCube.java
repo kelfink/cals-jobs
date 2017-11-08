@@ -97,7 +97,6 @@ import gov.ca.cwds.neutron.launch.listener.NeutronJobListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronSchedulerListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
-import gov.ca.cwds.neutron.validate.NeutronElasticValidator;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
@@ -278,9 +277,6 @@ public class HyperCube extends NeutronGuiceModule {
 
     // Inject annotations.
     bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
-
-    // Miscellaneous:
-    bind(NeutronElasticValidator.class);
 
     // Singleton:
     bind(ObjectMapper.class).toInstance(ObjectMapperUtils.createObjectMapper());
