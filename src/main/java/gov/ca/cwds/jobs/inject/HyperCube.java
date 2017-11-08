@@ -457,9 +457,12 @@ public class HyperCube extends NeutronGuiceModule {
   /**
    * Configure Quartz scheduling.
    * 
-   * @param injector Guice injector
-   * @return prepare launch scheduler
-   * @throws SchedulerException Quartz error
+   * @param injector DI
+   * @param flightRecorder flight recorder
+   * @param rocketFactory rocket factory
+   * @param flightPlanMgr flight plan manager
+   * @return configured launch scheduler
+   * @throws SchedulerException if unable to configure Quartz
    */
   @Provides
   @Singleton
