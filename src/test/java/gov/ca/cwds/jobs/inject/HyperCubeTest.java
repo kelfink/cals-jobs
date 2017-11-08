@@ -210,8 +210,8 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     target.setHibernateConfigNs(hibernateConfigNs);
   }
 
+  // Actually a live test, though it could connect to H2 and a mock Elasticsearch.
   @Test
-  // @Ignore
   public void buildInjector_Args__FlightPlan() throws Exception {
     final Injector actual = HyperCube.buildInjector(flightPlan);
     assertThat(actual, is(notNullValue()));

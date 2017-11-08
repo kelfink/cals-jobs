@@ -99,6 +99,8 @@ dependencies {
 	testCompile group: 'com.jayway.awaitility', name: 'awaitility', version: '1.7.0'
 	testCompile 'io.exemplary.guice:guice-behave:1.0.0'
 	
+	testCompile 'com.github.tlrx:elasticsearch-test:1.2.1'
+	// testCompile group: 'org.elasticsearch.test', name: 'framework', version: 'elasticsearchVersion'
     // testCompile 'org.jacoco:jacoco:0.7.9'
 }
 
