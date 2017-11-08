@@ -1,9 +1,7 @@
 package gov.ca.cwds.jobs;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +12,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.SessionFactory;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +33,9 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
-import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
@@ -223,48 +218,6 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
         && client.getCommonLastName().equals(person.getLastName())
         && client.getCommonMiddleName().equals(person.getMiddleName())
         && validateAddresses(client, person);
-  }
-
-  /**
-   * Read a record bundle for initial load.
-   * 
-   * @param p key range to read
-   */
-  @Override
-  public void pullRange(final Pair<String, String> p) {
-    final String threadName =
-        "extract_" + nextThreadNum.incrementAndGet() + "_" + p.getLeft() + "_" + p.getRight();
-    nameThread(threadName);
-    LOGGER.info("BEGIN: extract thread {}", threadName);
-    getFlightLog().trackRangeStart(p);
-
-    try (Connection con = jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
-        .getService(ConnectionProvider.class).getConnection()) {
-      con.setSchema(getDBSchemaName());
-      con.setAutoCommit(false);
-
-      final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
-          .replaceAll(":toId", p.getRight());
-      LOGGER.info("query: {}", query);
-      NeutronDB2Utils.enableParallelism(con);
-
-      try (Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
-        stmt.setMaxRows(0);
-        stmt.setQueryTimeout(0);
-        final ResultSet rs = stmt.executeQuery(query); // NOSONAR
-        iterateRangeResults(rs);
-        con.commit();
-      }
-
-    } catch (SQLException e) {
-      fail();
-      throw JobLogs.runtime(LOGGER, e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(),
-          p.getRight(), e.getMessage());
-    }
-
-    getFlightLog().trackRangeComplete(p);
-    LOGGER.info("DONE: Extract thread {}", threadName);
   }
 
   /**
