@@ -31,16 +31,16 @@ public class NeutronElasticValidator implements AtomValidateDocument {
 
   private static final Logger LOGGER = new JetPackLogger(NeutronRocket.class);
 
-  private final ElasticsearchDao esDao;
+  private transient ElasticsearchDao esDao;
 
-  private final ReplicatedClientDao repClientDao;
-  private final ReplicatedClientAddressDao repClientAddressDao;
+  private transient ReplicatedClientDao repClientDao;
+  private transient ReplicatedClientAddressDao repClientAddressDao;
 
-  private final ReplicatedReporterDao repReporterDao;
+  private transient ReplicatedReporterDao repReporterDao;
   private final ReplicatedCollateralIndividualDao repCollateralIndividualDao;
 
-  private final ReplicatedOtherClientNameDao repOtherClientNameDao;
-  private final ReplicatedClientRelationshipDao repClientRelationshipDao;
+  private transient ReplicatedOtherClientNameDao repOtherClientNameDao;
+  private transient ReplicatedClientRelationshipDao repClientRelationshipDao;
 
   @Inject
   public NeutronElasticValidator(final ElasticsearchDao esDao,

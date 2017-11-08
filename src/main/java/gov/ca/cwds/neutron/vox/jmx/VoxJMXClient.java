@@ -29,10 +29,10 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
   private static final String DEFAULT_HOST = "localhost";
   private static final String DEFAULT_PORT = "1098";
 
-  private BiFunction<String, String, JMXConnector> makeConnector = (host, port) -> {
+  private BiFunction<String, String, JMXConnector> makeConnector = (the_host, the_port) -> {
     try {
-      return JMXConnectorFactory.connect(
-          new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi"));
+      return JMXConnectorFactory.connect(new JMXServiceURL(
+          "service:jmx:rmi:///jndi/rmi://" + the_host + ":" + the_port + "/jmxrmi"));
     } catch (IOException e) {
       throw JobLogs.runtime(LOGGER, e, "JMX CONNECTION FAILED! {}", e.getMessage());
     }
@@ -43,8 +43,8 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
   private final String host;
   private final String port;
 
-  private JMXConnector jmxConnector;
-  private MBeanServerConnection mbeanServerConnection;
+  private transient JMXConnector jmxConnector;
+  private transient MBeanServerConnection mbeanServerConnection;
 
   public VoxJMXClient(final String host, final String port) {
     this.host = host;
@@ -144,6 +144,14 @@ public class VoxJMXClient implements ApiMarker, AutoCloseable {
   public static void main(String[] args) throws IOException, MalformedObjectNameException {
     LOGGER.info("BEGIN");
     launch(parseCommandLine(args));
+  }
+
+  public static boolean isTestMode() {
+    return testMode;
+  }
+
+  public static void setTestMode(boolean testMode) {
+    VoxJMXClient.testMode = testMode;
   }
 
 }
