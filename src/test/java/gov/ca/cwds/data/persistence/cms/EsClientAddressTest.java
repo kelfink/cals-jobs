@@ -1355,17 +1355,4 @@ public class EsClientAddressTest extends Goddard<ReplicatedClient, EsClientAddre
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void isUseCounty_Args__() throws Exception {
-    boolean actual = EsClientAddress.isUseCounty();
-    boolean expected = false;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void setUseCounty_Args__boolean() throws Exception {
-    boolean useCounty = false;
-    EsClientAddress.setUseCounty(useCounty);
-  }
-
 }

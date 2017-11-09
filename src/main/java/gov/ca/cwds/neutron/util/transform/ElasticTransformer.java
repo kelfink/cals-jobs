@@ -38,7 +38,6 @@ import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
-import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiLanguageAware;
@@ -465,13 +464,11 @@ public final class ElasticTransformer {
     // Sealed and sensitive.
     ret.setSensitivityIndicator(p.getSensitivityIndicator());
 
-    if (!EsClientAddress.isUseCounty()) {
-      // Set client county
-      ret.setClientCounty(handleClientCountyC(p));
+    // Set client county
+    ret.setClientCounty(handleClientCountyC(p));
 
-      // Set race/ethnicity
-      ret.setCleintRace(handleRaceEthnicity(p));
-    }
+    // Set race/ethnicity
+    ret.setCleintRace(handleRaceEthnicity(p));
 
     return ret;
   }

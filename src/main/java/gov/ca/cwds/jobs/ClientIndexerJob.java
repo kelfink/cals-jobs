@@ -5,8 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -35,7 +33,6 @@ import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
-import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
@@ -81,9 +78,6 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
       FlightPlan opts) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
-
-    // HACK: **short-term** fix for county table in Perf and Prod.
-    EsClientAddress.setUseCounty(isLargeDataSet());
   }
 
   @Override
@@ -226,35 +220,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
    */
   @Override
   protected void threadRetrieveByJdbc() {
-    nameThread("extract_main");
-    LOGGER.info("BEGIN: main extract thread");
-    doneTransform(); // no transform/normalize thread
-
-    try {
-      final List<Pair<String, String>> ranges = getPartitionRanges();
-      LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
-      final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
-      final ForkJoinPool threadPool =
-          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
-
-      // Queue execution.
-      for (Pair<String, String> p : ranges) {
-        tasks.add(threadPool.submit(() -> pullRange(p)));
-      }
-
-      // Join threads. Don't return from method until they complete.
-      for (ForkJoinTask<?> task : tasks) {
-        task.get();
-      }
-
-    } catch (Exception e) {
-      fail();
-      throw JobLogs.runtime(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
-    } finally {
-      doneRetrieve();
-    }
-
-    LOGGER.info("DONE: main extract thread");
+    bigRetrieveByJdbc();
   }
 
   @Override
@@ -264,8 +230,6 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
 
   @Override
   public List<Pair<String, String>> getPartitionRanges() {
-    // NOTE: **short-term** fix for county table in Perf and Prod.
-    EsClientAddress.setUseCounty(isLargeDataSet());
     return NeutronJdbcUtils.getCommonPartitionRanges64(this);
   }
 

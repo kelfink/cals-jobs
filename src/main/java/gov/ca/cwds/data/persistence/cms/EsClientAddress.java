@@ -549,14 +549,11 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     ret.cltPrevRegionalCenterIndicator = rs.getString("CLT_PREREG_IND");
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
-    // WARNING: not yet available in RSQ.
-    if (!EsClientAddress.isUseCounty()) {
-      ret.clientEthnicityCode = rs.getShort("ETHNICITY_CODE");
-      ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
+    ret.clientEthnicityCode = rs.getShort("ETHNICITY_CODE");
+    ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
 
-      ret.clientCountyId = rs.getString("CLC_CLIENT_ID");
-      ret.clientEthnicityId = rs.getString("ETHNICITY_CODE");
-    }
+    ret.clientCountyId = rs.getString("CLC_CLIENT_ID");
+    ret.clientEthnicityId = rs.getString("ETHNICITY_CODE");
 
     // Languages
     ret.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
@@ -716,10 +713,7 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
       ret.setReplicationOperation(getCltReplicationOperation());
       ret.setLastUpdatedTime(getCltLastUpdatedTime());
 
-      // WARNING: not yet in RSQ.
-      if (!EsClientAddress.isUseCounty()) {
-        ret.setClientCounty(getClientCounty());
-      }
+      ret.setClientCounty(getClientCounty());
     }
 
     // Client Address:
@@ -786,11 +780,8 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
       }
     }
 
-    // WARNING: not yet in RSQ.
-    if (!EsClientAddress.isUseCounty()) {
-      // Client races
-      ret.addClientRace(this.clientEthnicityCode);
-    }
+    // Client races
+    ret.addClientRace(this.clientEthnicityCode);
 
     map.put(ret.getId(), ret);
     return ret;
@@ -1489,14 +1480,6 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
 
   public Date getCltFatherParentalRightTermDate() {
     return JobDateUtil.freshDate(cltFatherParentalRightTermDate);
-  }
-
-  public static boolean isUseCounty() {
-    return useCounty;
-  }
-
-  public static void setUseCounty(boolean useCounty) {
-    EsClientAddress.useCounty = useCounty;
   }
 
   public void setClaId(String claId) {
