@@ -650,13 +650,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       ret = new Date(this.getFlightLog().getStartTime());
     } catch (Exception e) {
       fail();
-      throw JobLogs.checked(LOGGER, e, "JOB BOMBED! {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "ROCKET EXPLODED! {}", e.getMessage());
     } finally {
       done();
       try {
         this.close();
       } catch (IOException io) {
-        LOGGER.error("IOException on close! {}", io.getMessage(), io);
+        LOGGER.error("IOEXCEPTION ON CLOSE! {}", io.getMessage(), io);
       }
     }
 
