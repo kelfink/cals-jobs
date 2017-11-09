@@ -26,6 +26,7 @@ import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * Test Elasticsearch mass search capability for automatic validation.
@@ -93,7 +94,22 @@ public class SanityCheckRocket extends
     }
 
     LOGGER.info("total hits: {}", totalHits);
+
+    try {
+      launchScheduler.stopScheduler(false);
+    } catch (Exception e) {
+      JobLogs.runtime(LOGGER, e, "FAILED TO STOP SCHEDULER! {}", e.getMessage());
+    }
+
     return lastSuccessfulRunTime;
+  }
+
+  public AtomLaunchScheduler getLaunchScheduler() {
+    return launchScheduler;
+  }
+
+  public void setLaunchScheduler(AtomLaunchScheduler launchScheduler) {
+    this.launchScheduler = launchScheduler;
   }
 
   /**
@@ -103,14 +119,6 @@ public class SanityCheckRocket extends
    */
   public static void main(String... args) {
     LaunchCommand.runStandalone(SanityCheckRocket.class, args);
-  }
-
-  public AtomLaunchScheduler getLaunchScheduler() {
-    return launchScheduler;
-  }
-
-  public void setLaunchScheduler(AtomLaunchScheduler launchScheduler) {
-    this.launchScheduler = launchScheduler;
   }
 
 }

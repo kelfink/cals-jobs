@@ -10,6 +10,10 @@ public class NeutronClassFinder {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronClassFinder.class);
 
+  private NeutronClassFinder() {
+    // static methods only
+  }
+
   public static Class<?> classForName(String className) throws NeutronException {
     try {
       return Class.forName(className);

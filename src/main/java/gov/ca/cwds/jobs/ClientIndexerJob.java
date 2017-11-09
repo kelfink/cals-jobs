@@ -116,27 +116,6 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
     return getInitialLoadViewName();
   }
 
-  @Override
-  public String getJdbcOrderBy() {
-    return " ORDER BY x.clt_identifier ";
-  }
-
-  @Override
-  public String getInitialLoadQuery(String dbSchemaName) {
-    final StringBuilder buf = new StringBuilder();
-
-    buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
-        .append(" x WHERE x.clt_identifier BETWEEN ':fromId' AND ':toId' ");
-
-    if (!getFlightPlan().isLoadSealedAndSensitive()) {
-      buf.append(" AND x.CLT_SENSTV_IND = 'N' ");
-    }
-
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
-    return buf.toString();
-  }
-
-
   /**
    * Send all recs for same client id to the index queue.
    * 

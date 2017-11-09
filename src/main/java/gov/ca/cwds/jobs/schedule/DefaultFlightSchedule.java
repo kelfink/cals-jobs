@@ -13,7 +13,6 @@ import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.CollateralIndividualIndexerJob;
 import gov.ca.cwds.jobs.EducationProviderContactIndexerJob;
 import gov.ca.cwds.jobs.IntakeScreeningJob;
-import gov.ca.cwds.jobs.SanityCheckRocket;
 import gov.ca.cwds.jobs.OtherAdultInPlacemtHomeIndexerJob;
 import gov.ca.cwds.jobs.OtherChildInPlacemtHomeIndexerJob;
 import gov.ca.cwds.jobs.OtherClientNameIndexerJob;
@@ -90,12 +89,12 @@ public enum DefaultFlightSchedule {
   /**
    * Screenings.
    */
-  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 70, 90, 20, 800, "screenings"),
+  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 70, 90, 20, 800, "screenings")
 
-  /**
-   * Validation.
-   */
-  VALIDATE_LAST_RUN(SanityCheckRocket.class, "validate_last_run", 90, 90, 10, 100, null)
+  // /**
+  // * Validation.
+  // */
+  // , SANITY_CHECK(SanityCheckRocket.class, "sanity_check", 90, 90, 10, 1000, null)
 
   ;
 
