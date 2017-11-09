@@ -254,7 +254,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
         launchScheduler.getFlightPlanManger().addFlightPlan(klass, opts);
       }
 
-      // MOVE this responsibility to another class.
+      // **MOVE** this responsibility to another class.
       if (commonFlightPlan.isDropIndex()) {
         esDao.deleteIndex(esDao.getConfig().getElasticsearchAlias());
       }
@@ -404,7 +404,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   @Override
   public void close() throws Exception {
-    if (!isTestMode() && ((isSchedulerMode() && instance.fatalError) || !isSchedulerMode())) {
+    if (!isTestMode() && (!isSchedulerMode() || isInitialMode() || instance.fatalError)) {
       // Shutdown all remaining resources, even those not attached to this job.
       Runtime.getRuntime().exit(-1); // NOSONAR
     }
