@@ -94,7 +94,7 @@ public enum DefaultFlightSchedule {
   // /**
   // * Validation.
   // */
-  // , SANITY_CHECK(SanityCheckRocket.class, "sanity_check", 90, 90, 10, 1000, null)
+  // , SANITY_CHECK(SanityCheckRocket.class, "sanity_check", 100, 90, 10, 1, null)
 
   ;
 

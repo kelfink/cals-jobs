@@ -10,6 +10,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.UnableToInterruptJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -64,6 +65,7 @@ public class NeutronRocket implements InterruptableJob {
     LOGGER.info("Execute {}, instance # {}", rocket.getClass().getName(), instanceCounter.get());
 
     try (final BasePersonIndexerJob job = rocket) {
+      MDC.put("rocketLog", rocketName);
       flightLog = rocket.getFlightLog();
       flightLog.setRocketName(rocketName);
 
@@ -78,6 +80,7 @@ public class NeutronRocket implements InterruptableJob {
     } finally {
       LOGGER.info("Flight summary: {}", flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
+      MDC.remove("rocketLog");
     }
 
     LOGGER.info("ANOTHER HAPPY LANDING! {}", rocket.getClass().getName());

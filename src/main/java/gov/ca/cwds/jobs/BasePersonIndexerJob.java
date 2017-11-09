@@ -616,7 +616,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       // Written when DevOps started using Rundeck and was unable to pass parameters to jobs.
       final Calendar cal = Calendar.getInstance();
       cal.add(Calendar.YEAR, -25);
-      final boolean autoInitialLoad = lastRun.before(cal.getTime());
+      final boolean autoInitialLoad =
+          this.getFlightLog().isInitialLoad() || lastRun.before(cal.getTime());
 
       // Configure queue sizes for last run or initial load.
       if (autoInitialLoad) {
@@ -628,6 +629,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       }
 
       if (autoInitialLoad) {
+        getFlightLog().setInitialLoad(true);
         refreshMQT();
         if (isInitialLoadJdbc()) {
           doInitialLoadJdbc();
