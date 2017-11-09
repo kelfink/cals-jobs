@@ -155,8 +155,7 @@ public final class ElasticTransformer {
       esp.setLegacyId(t.getPrimaryKey().toString());
     }
 
-    // Child classes may override these methods as needed.
-    // left = update, right = insert.
+    // Child classes may override these methods as needed. left = update, right = insert.
     Pair<String, String> json;
     try {
       json = ElasticTransformer.prepareUpsertJson(docPrep, esp, t, docPrep.getOptionalElementName(),

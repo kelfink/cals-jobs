@@ -30,6 +30,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.inject.HyperCube;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
+import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -205,7 +206,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   protected void exposeJMX() {
     LOGGER.warn("\n>>>>>>> ENABLE JMX! <<<<<<<\n");
     final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-    for (LaunchPad pad : launchScheduler.getScheduleRegistry().values()) {
+    for (AtomLaunchPad pad : launchScheduler.getScheduleRegistry().values()) {
       exporter.export("Neutron:rocket=" + pad.getFlightSchedule().getShortName(), pad);
     }
 
@@ -217,7 +218,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     Manager.manage("Neutron_Guice", injector);
   }
 
-  protected void initializeCommandCenter() {
+  protected void initializeManagementInterfaces() {
     if (LaunchCommand.settings.isExposeJmx()) {
       exposeJMX();
     }
@@ -249,7 +250,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
         final FlightPlan opts = new FlightPlan(commonFlightPlan);
         handleTimeFile(opts, fmt, now, sched);
 
-        final LaunchPad nj = new LaunchPad(launchScheduler, sched, flightRecorder, opts);
+        final AtomLaunchPad nj = new LaunchPad(launchScheduler, sched, flightRecorder, opts);
         launchScheduler.getScheduleRegistry().put(klass, nj);
         launchScheduler.getFlightPlanManger().addFlightPlan(klass, opts);
       }
@@ -260,8 +261,8 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       }
 
       // Start rockets.
-      for (LaunchPad j : launchScheduler.getScheduleRegistry().values()) {
-        j.schedule();
+      for (AtomLaunchPad pad : launchScheduler.getScheduleRegistry().values()) {
+        pad.schedule();
       }
 
       // Cindy: "Let's light this candle!"
@@ -270,7 +271,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
         launchScheduler.getScheduler().start();
       }
 
-      initializeCommandCenter();
+      initializeManagementInterfaces();
     } catch (IOException | SchedulerException | ParseException e) {
       try {
         launchScheduler.getScheduler().shutdown(false);
@@ -352,7 +353,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     return launchScheduler.getScheduler();
   }
 
-  public Map<Class<?>, LaunchPad> getScheduleRegistry() {
+  public Map<Class<?>, AtomLaunchPad> getScheduleRegistry() {
     return launchScheduler.getScheduleRegistry();
   }
 

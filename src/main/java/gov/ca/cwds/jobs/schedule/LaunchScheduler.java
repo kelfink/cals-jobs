@@ -16,6 +16,7 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -39,7 +40,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   /**
    * Scheduled jobs.
    */
-  private final Map<Class<?>, LaunchPad> scheduleRegistry = new ConcurrentHashMap<>();
+  private final Map<Class<?>, AtomLaunchPad> scheduleRegistry = new ConcurrentHashMap<>();
 
   /**
    * Possibly not necessary. Listeners and running jobs should handle this, but we still need a
@@ -179,7 +180,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public Map<Class<?>, LaunchPad> getScheduleRegistry() {
+  public Map<Class<?>, AtomLaunchPad> getScheduleRegistry() {
     return scheduleRegistry;
   }
 

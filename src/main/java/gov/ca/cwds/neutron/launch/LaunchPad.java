@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weakref.jmx.Managed;
 
-import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -28,7 +27,7 @@ import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.vox.jmx.VoxLaunchPadMBean;
 
-public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
+public class LaunchPad implements VoxLaunchPadMBean {
 
   private static final long serialVersionUID = 1L;
 
@@ -61,8 +60,13 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
     flightRecorder.addFlightLog(sched.getRocketClass(), new FlightLog());
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#run(java.lang.String)
+   */
   @Override
-  @Managed(description = "Run job now, show results immediately")
+  @Managed(description = "Run rocket now, show results immediately")
   public String run(String cmdLine) throws NeutronException {
     try {
       LOGGER.info("RUN JOB: {}", flightSchedule.getShortName());
@@ -77,12 +81,17 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
     }
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#schedule()
+   */
   @Override
-  @Managed(description = "Schedule job on repeat")
+  @Managed(description = "Schedule rocket on repeat")
   public void schedule() throws NeutronException {
     try {
       if (scheduler.checkExists(this.jobKey)) {
-        LOGGER.warn("JOB ALREADY SCHEDULED! {}", jobName);
+        LOGGER.warn("ROCKET ALREADY SCHEDULED! {}", jobName);
         return;
       }
 
@@ -109,11 +118,16 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
     }
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#unschedule()
+   */
   @Override
-  @Managed(description = "Unschedule job")
+  @Managed(description = "Unschedule rocket")
   public void unschedule() throws NeutronException {
     try {
-      LOGGER.warn("unschedule job");
+      LOGGER.warn("unschedule rocket");
       final TriggerKey triggerKey =
           new TriggerKey(triggerName, NeutronSchedulerConstants.GRP_LST_CHG);
       scheduler.pauseTrigger(triggerKey);
@@ -122,26 +136,54 @@ public class LaunchPad implements ApiMarker, VoxLaunchPadMBean {
     }
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#status()
+   */
   @Override
-  @Managed(description = "Show job status")
+  @Managed(description = "Show rocket status")
   public String status() {
     LOGGER.debug("Show job status");
     return flightRecorder.getLastFlightLog(this.flightSchedule.getRocketClass()).toString();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#history()
+   */
   @Override
-  @Managed(description = "Show job history")
+  @Managed(description = "Show rocket history")
   public String history() {
     StringBuilder buf = new StringBuilder();
     flightRecorder.getHistory(this.flightSchedule.getRocketClass()).stream().forEach(buf::append);
     return buf.toString();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#logs()
+   */
   @Override
-  @Managed(description = "Stop running job")
+  @Managed(description = "Show rocket log")
+  public String logs() {
+    StringBuilder buf = new StringBuilder();
+    flightRecorder.getHistory(this.flightSchedule.getRocketClass()).stream().forEach(buf::append);
+    return buf.toString();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#stop()
+   */
+  @Override
+  @Managed(description = "Stop flying rocket")
   public void stop() throws NeutronException {
     try {
-      LOGGER.warn("Stop running job");
+      LOGGER.warn("Stop flying rocket");
       unschedule();
       final JobKey key = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
       scheduler.interrupt(key);

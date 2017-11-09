@@ -37,7 +37,7 @@ public interface AtomLaunchScheduler {
 
   void startScheduler() throws NeutronException;
 
-  Map<Class<?>, LaunchPad> getScheduleRegistry();
+  Map<Class<?>, AtomLaunchPad> getScheduleRegistry();
 
   Scheduler getScheduler();
 
