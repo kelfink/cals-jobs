@@ -65,7 +65,9 @@ public class NeutronRocket implements InterruptableJob {
     LOGGER.info("Execute {}, instance # {}", rocket.getClass().getName(), instanceCounter.get());
 
     try (final BasePersonIndexerJob job = rocket) {
+      LOGGER.warn(">>>>>> rocketName: {}", rocketName);
       MDC.put("rocketLog", rocketName);
+
       flightLog = rocket.getFlightLog();
       flightLog.setRocketName(rocketName);
 

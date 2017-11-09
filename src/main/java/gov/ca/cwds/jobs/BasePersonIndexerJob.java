@@ -34,6 +34,7 @@ import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -595,6 +596,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     Date ret;
     try {
       LOGGER.info("RUNNING JOB: {}", getClass().getName());
+      MDC.put("rocketLog", "fred");
 
       // If index name is provided, use it, else take alias from ES config.
       final String indexNameOverride = getFlightPlan().getIndexName();
@@ -658,6 +660,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       } catch (IOException io) {
         LOGGER.error("IOEXCEPTION ON CLOSE! {}", io.getMessage(), io);
       }
+      MDC.remove("rocketLog");
     }
 
     return ret;
