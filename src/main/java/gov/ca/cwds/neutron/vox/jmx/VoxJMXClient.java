@@ -123,6 +123,14 @@ public class VoxJMXClient implements AutoCloseable {
     return port;
   }
 
+  public static boolean isTestMode() {
+    return testMode;
+  }
+
+  public static void setTestMode(boolean testMode) {
+    VoxJMXClient.testMode = testMode;
+  }
+
   public static void launch(final Triple<String, String, String> triple) {
     final String host = triple.getLeft();
     final String port = triple.getMiddle();
@@ -137,14 +145,6 @@ public class VoxJMXClient implements AutoCloseable {
       throw JobLogs.runtime(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", host, port,
           rocket);
     }
-  }
-
-  public static boolean isTestMode() {
-    return testMode;
-  }
-
-  public static void setTestMode(boolean testMode) {
-    VoxJMXClient.testMode = testMode;
   }
 
   public static void main(String[] args) {
