@@ -263,7 +263,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
   }
 
   @Override
-  protected List<Pair<String, String>> getPartitionRanges() {
+  public List<Pair<String, String>> getPartitionRanges() {
     // NOTE: **short-term** fix for county table in Perf and Prod.
     EsClientAddress.setUseCounty(isLargeDataSet());
     return NeutronJdbcUtils.getCommonPartitionRanges64(this);

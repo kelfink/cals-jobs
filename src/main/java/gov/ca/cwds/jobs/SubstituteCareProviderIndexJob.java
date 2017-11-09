@@ -48,7 +48,7 @@ public class SubstituteCareProviderIndexJob extends
   }
 
   @Override
-  protected List<Pair<String, String>> getPartitionRanges() {
+  public List<Pair<String, String>> getPartitionRanges() {
     return NeutronJdbcUtils.getCommonPartitionRanges16(this);
   }
 

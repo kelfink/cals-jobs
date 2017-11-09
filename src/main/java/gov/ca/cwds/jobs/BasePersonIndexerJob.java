@@ -830,19 +830,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   }
 
   /**
-   * Return partition keys for initial load. Supports native named query, "findPartitionedBuckets".
-   * 
-   * <p>
-   * Prefer methods {@link #threadRetrieveByJdbc()} or {@link #extractHibernate()} over this one.
-   * </p>
-   * 
-   * @return list of partition key pairs
-   */
-  protected List<Pair<String, String>> getPartitionRanges() {
-    return new ArrayList<>();
-  }
-
-  /**
    * Divide work into buckets: pull a unique range of identifiers so that no bucket results overlap.
    * <p>
    * Where possible, prefer use {@link #threadRetrieveByJdbc()} or {@link #extractHibernate()}

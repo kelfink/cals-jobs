@@ -48,7 +48,7 @@ public final class CollateralIndividualIndexerJob
   }
 
   @Override
-  protected List<Pair<String, String>> getPartitionRanges() {
+  public List<Pair<String, String>> getPartitionRanges() {
     return NeutronJdbcUtils.getCommonPartitionRanges64(this);
   }
 

@@ -221,7 +221,7 @@ public class RelationshipIndexerJob
   }
 
   @Override
-  protected List<Pair<String, String>> getPartitionRanges() {
+  public List<Pair<String, String>> getPartitionRanges() {
     return NeutronJdbcUtils.getCommonPartitionRanges64(this);
   }
 

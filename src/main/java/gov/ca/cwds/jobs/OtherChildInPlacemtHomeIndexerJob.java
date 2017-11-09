@@ -48,7 +48,7 @@ public class OtherChildInPlacemtHomeIndexerJob extends
   }
 
   @Override
-  protected List<Pair<String, String>> getPartitionRanges() {
+  public List<Pair<String, String>> getPartitionRanges() {
     return NeutronJdbcUtils.getCommonPartitionRanges4(this);
   }
 

@@ -176,6 +176,15 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
   }
 
   /**
+   * Return partition keys for initial load. Supports native named query, "findPartitionedBuckets".
+   * 
+   * @return list of partition key pairs
+   */
+  default List<Pair<String, String>> getPartitionRanges() {
+    return new ArrayList<>();
+  }
+
+  /**
    * The "extract" part of ETL. Single producer, chained consumers. This job normalizes **without**
    * the transform thread.
    */

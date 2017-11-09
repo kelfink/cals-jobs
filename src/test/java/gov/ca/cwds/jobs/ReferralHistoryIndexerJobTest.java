@@ -68,7 +68,7 @@ public class ReferralHistoryIndexerJobTest
     }
 
     @Override
-    protected List<Pair<String, String>> getPartitionRanges() {
+    public List<Pair<String, String>> getPartitionRanges() {
       if (throwOnRanges) {
         throw new JobsException("test");
       }

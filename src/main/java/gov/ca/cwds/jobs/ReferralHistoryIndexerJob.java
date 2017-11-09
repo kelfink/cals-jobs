@@ -524,7 +524,7 @@ public class ReferralHistoryIndexerJob
    * @see ReferralJobRanges
    */
   @Override
-  protected List<Pair<String, String>> getPartitionRanges() {
+  public List<Pair<String, String>> getPartitionRanges() {
     return new ReferralJobRanges().getPartitionRanges(this);
   }
 
