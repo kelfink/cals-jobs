@@ -142,8 +142,8 @@ public final class ElasticTransformer {
     // Set id and legacy id.
     if (t instanceof ApiLegacyAware) {
       ApiLegacyAware l = (ApiLegacyAware) t;
-      final boolean hasLegacyId =
-          StringUtils.isNotBlank(l.getLegacyId()) && l.getLegacyId().trim().length() == CMS_ID_LEN;
+      final String tempId = StringUtils.isNotBlank(l.getLegacyId()) ? l.getLegacyId().trim() : null;
+      final boolean hasLegacyId = tempId != null && tempId.length() == CMS_ID_LEN;
 
       if (hasLegacyId) {
         id = l.getLegacyId();
