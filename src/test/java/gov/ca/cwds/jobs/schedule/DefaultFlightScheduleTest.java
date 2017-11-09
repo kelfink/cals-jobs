@@ -70,7 +70,7 @@ public class DefaultFlightScheduleTest {
 
   @Test
   public void buildFullLoadJobChainListener_Args__() throws Exception {
-    JobChainingJobListener actual = DefaultFlightSchedule.buildFullLoadJobChainListener();
+    JobChainingJobListener actual = DefaultFlightSchedule.buildInitialLoadJobChainListener();
     assertThat(actual, is(notNullValue()));
   }
 

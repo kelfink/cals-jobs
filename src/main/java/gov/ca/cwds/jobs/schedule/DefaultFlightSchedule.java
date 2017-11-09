@@ -134,7 +134,7 @@ public enum DefaultFlightSchedule {
     this.jsonElement = jsonElement;
   }
 
-  public static JobChainingJobListener buildFullLoadJobChainListener() {
+  public static JobChainingJobListener buildInitialLoadJobChainListener() {
     final JobChainingJobListener ret = new JobChainingJobListener("initial_load");
 
     final DefaultFlightSchedule[] arr =
