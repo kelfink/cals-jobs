@@ -132,7 +132,7 @@ public class VoxJMXClient implements AutoCloseable {
       LOGGER.info("CONNECT JMX...");
       client.connect();
       final VoxLaunchPadMBean mbeanProxy = client.proxy(rocket);
-      LOGGER.info("status::{}", mbeanProxy.status());
+      LOGGER.info("status::{}", mbeanProxy::status);
     } catch (Exception e) {
       throw JobLogs.runtime(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", host, port,
           rocket);
