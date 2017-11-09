@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.neutron.atom;
 
 import java.io.IOException;
 

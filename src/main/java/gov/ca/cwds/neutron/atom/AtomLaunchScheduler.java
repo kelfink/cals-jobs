@@ -1,16 +1,17 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.neutron.atom;
 
 import java.util.Map;
 
 import org.quartz.Scheduler;
 import org.quartz.TriggerKey;
 
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.AtomFlightPlanManager;
 import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
-import gov.ca.cwds.jobs.schedule.LaunchPad;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
+import gov.ca.cwds.neutron.launch.LaunchPad;
 
 public interface AtomLaunchScheduler {
 

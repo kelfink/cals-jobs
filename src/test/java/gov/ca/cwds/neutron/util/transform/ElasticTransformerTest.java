@@ -35,7 +35,6 @@ import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.component.AtomPersonDocPrep;
 import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.test.SimpleAddress;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
@@ -44,6 +43,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.jobs.test.TestNormalizedEntry;
 import gov.ca.cwds.jobs.test.TestOnlyApiPersonAware;
+import gov.ca.cwds.neutron.atom.AtomPersonDocPrep;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 

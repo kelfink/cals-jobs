@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableList;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.schedule.FlightStatus;
 import gov.ca.cwds.jobs.util.JobDateUtil;
+import gov.ca.cwds.neutron.atom.AtomJobControl;
 
 /**
  * Track rocket flight progress and record counts.

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.neutron.atom;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 
 public class AtomSharedTest {

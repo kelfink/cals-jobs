@@ -22,12 +22,12 @@ import com.google.inject.Injector;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.component.AtomFlightRecorder;
-import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
+import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
+import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 
 public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 

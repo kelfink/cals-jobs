@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.neutron.launch;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -20,12 +20,15 @@ import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
+import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 
 public class LaunchPadTest extends Goddard {
+
   Scheduler scheduler;
   DefaultFlightSchedule sched;
   FlightRecorder history;

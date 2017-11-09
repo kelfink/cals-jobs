@@ -1,10 +1,12 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.neutron.atom;
 
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
+import gov.ca.cwds.jobs.component.FlightLog;
+import gov.ca.cwds.jobs.component.FlightSummary;
 import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
 
 public interface AtomFlightRecorder {

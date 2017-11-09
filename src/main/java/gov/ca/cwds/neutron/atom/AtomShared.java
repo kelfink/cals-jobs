@@ -1,9 +1,10 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.neutron.atom;
 
 import org.slf4j.Logger;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 

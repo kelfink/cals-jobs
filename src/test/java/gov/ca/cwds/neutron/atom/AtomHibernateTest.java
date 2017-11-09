@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.neutron.atom;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.Goddard;
+import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
@@ -28,8 +29,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 
-public class AtomHibernateTest
-    extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
+public class AtomHibernateTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   private static final class TestAtomHibernate extends TestIndexerJob
       implements AtomHibernate<TestNormalizedEntity, TestDenormalizedEntity> {

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.neutron.atom;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.neutron.atom.AtomSecurity;
 
 public class AtomSecurityTest {
 
