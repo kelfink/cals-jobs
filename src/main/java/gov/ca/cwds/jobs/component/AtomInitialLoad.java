@@ -146,14 +146,17 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
     nameThread(threadName);
     getLogger().info("BEGIN: extract thread {}", threadName);
     getFlightLog().trackRangeStart(p);
+
     try (Connection con = getJobDao().getSessionFactory().getSessionFactoryOptions()
         .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
+
       final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
           .replaceAll(":toId", p.getRight());
       getLogger().info("query: {}", query);
       NeutronDB2Utils.enableParallelism(con);
+
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
