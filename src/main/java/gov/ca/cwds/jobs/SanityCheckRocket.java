@@ -10,8 +10,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.hibernate.SessionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -21,22 +19,27 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.component.AtomLaunchScheduler;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 
 /**
  * Test Elasticsearch mass search capability for automatic validation.
  * 
  * @author CWDS API Team
  */
-public class MSearchJob extends
+public class SanityCheckRocket extends
     BasePersonIndexerJob<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
 
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MSearchJob.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(SanityCheckRocket.class);
+
+  private transient AtomLaunchScheduler launchScheduler;
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -47,12 +50,15 @@ public class MSearchJob extends
    * @param sessionFactory Hibernate session factory
    * @param jobHistory job history
    * @param opts command line options
+   * @param launchScheduler launch scheduler
    */
   @Inject
-  public MSearchJob(final ReplicatedOtherAdultInPlacemtHomeDao dao, final ElasticsearchDao esDao,
-      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-      FlightRecorder jobHistory, FlightPlan opts) {
+  public SanityCheckRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
+      final ElasticsearchDao esDao, final ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory, FlightPlan opts,
+      AtomLaunchScheduler launchScheduler) {
     super(dao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, jobHistory, opts);
+    this.launchScheduler = launchScheduler;
   }
 
   @Override
@@ -96,7 +102,15 @@ public class MSearchJob extends
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.runStandalone(MSearchJob.class, args);
+    LaunchCommand.runStandalone(SanityCheckRocket.class, args);
+  }
+
+  public AtomLaunchScheduler getLaunchScheduler() {
+    return launchScheduler;
+  }
+
+  public void setLaunchScheduler(AtomLaunchScheduler launchScheduler) {
+    this.launchScheduler = launchScheduler;
   }
 
 }

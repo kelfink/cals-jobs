@@ -13,7 +13,7 @@ import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.CollateralIndividualIndexerJob;
 import gov.ca.cwds.jobs.EducationProviderContactIndexerJob;
 import gov.ca.cwds.jobs.IntakeScreeningJob;
-import gov.ca.cwds.jobs.MSearchJob;
+import gov.ca.cwds.jobs.SanityCheckRocket;
 import gov.ca.cwds.jobs.OtherAdultInPlacemtHomeIndexerJob;
 import gov.ca.cwds.jobs.OtherChildInPlacemtHomeIndexerJob;
 import gov.ca.cwds.jobs.OtherClientNameIndexerJob;
@@ -95,7 +95,7 @@ public enum DefaultFlightSchedule {
   /**
    * Validation.
    */
-  VALIDATE_LAST_RUN(MSearchJob.class, "validate_last_run", 90, 90, 10, 100, null)
+  VALIDATE_LAST_RUN(SanityCheckRocket.class, "validate_last_run", 90, 90, 10, 100, null)
 
   ;
 

@@ -12,23 +12,23 @@ import org.junit.Test;
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 
-public class MSearchJobTest
+public class SanityCheckRocketTest
     extends Goddard<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
 
   ReplicatedOtherAdultInPlacemtHomeDao dao;
-  MSearchJob target;
+  SanityCheckRocket target;
 
   @Override
   @Before
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedOtherAdultInPlacemtHomeDao(this.sessionFactory);
-    target = new MSearchJob(dao, esDao, MAPPER, sessionFactory, flightRecorder, flightPlan);
+    target = new SanityCheckRocket(dao, esDao, MAPPER, sessionFactory, flightRecorder, flightPlan);
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(MSearchJob.class, notNullValue());
+    assertThat(SanityCheckRocket.class, notNullValue());
   }
 
   @Test
@@ -47,7 +47,7 @@ public class MSearchJobTest
   public void main_Args__StringArray() throws Exception {
     final String[] args = new String[] {"-c", "config/local.yaml", "-l",
         "/Users/CWS-NS3/client_indexer_time.txt", "-S"};
-    MSearchJob.main(args);
+    SanityCheckRocket.main(args);
   }
 
 }
