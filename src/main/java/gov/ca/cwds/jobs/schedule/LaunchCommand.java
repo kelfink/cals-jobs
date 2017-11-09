@@ -404,7 +404,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   @Override
   public void close() throws Exception {
-    if (!isTestMode() && (!isSchedulerMode() || isInitialMode() || instance.fatalError)) {
+    if (!isTestMode() && (!isSchedulerMode() || instance.fatalError)) {
       // Shutdown all remaining resources, even those not attached to this job.
       Runtime.getRuntime().exit(-1); // NOSONAR
     }
