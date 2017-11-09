@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 
 import javax.persistence.ParameterMode;
 
@@ -22,6 +24,7 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 
@@ -170,6 +173,42 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
       throw JobLogs.runtime(getLogger(), e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(),
           p.getRight(), e.getMessage());
     }
+  }
+
+  /**
+   * The "extract" part of ETL. Single producer, chained consumers. This job normalizes **without**
+   * the transform thread.
+   */
+  default void bigRetrieveByJdbc() {
+    nameThread("extract_main");
+    getLogger().info("BEGIN: main extract thread");
+    doneTransform(); // no transform/normalize thread
+
+    try {
+      final List<Pair<String, String>> ranges = getPartitionRanges();
+      getLogger().info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
+      final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
+      final ForkJoinPool threadPool =
+          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
+
+      // Queue execution.
+      for (Pair<String, String> p : ranges) {
+        tasks.add(threadPool.submit(() -> pullRange(p)));
+      }
+
+      // Join threads. Don't return from method until they complete.
+      for (ForkJoinTask<?> task : tasks) {
+        task.get();
+      }
+
+    } catch (Exception e) {
+      fail();
+      throw JobLogs.runtime(getLogger(), e, "BATCH ERROR! {}", e.getMessage());
+    } finally {
+      doneRetrieve();
+    }
+
+    getLogger().info("DONE: main extract thread");
   }
 
   /**
