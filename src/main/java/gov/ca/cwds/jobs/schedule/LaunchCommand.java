@@ -217,11 +217,11 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   }
 
   protected void initializeCommandCenter() {
-    if (this.settings.isExposeJmx()) {
+    if (LaunchCommand.settings.isExposeJmx()) {
       exposeJMX();
     }
 
-    if (this.settings.isExposeRest()) {
+    if (LaunchCommand.settings.isExposeRest()) {
       exposeREST();
     }
   }
@@ -477,7 +477,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   }
 
   public static Function<FlightPlan, Injector> getInjectorMaker() {
-    return injectorMaker;
+    return LaunchCommand.injectorMaker;
   }
 
   public static void setInjectorMaker(Function<FlightPlan, Injector> makeLaunchCommand) {
