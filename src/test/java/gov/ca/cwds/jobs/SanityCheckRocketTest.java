@@ -23,7 +23,8 @@ public class SanityCheckRocketTest
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedOtherAdultInPlacemtHomeDao(this.sessionFactory);
-    target = new SanityCheckRocket(dao, esDao, MAPPER, sessionFactory, flightRecorder, flightPlan);
+    target = new SanityCheckRocket(dao, esDao, MAPPER, sessionFactory, flightRecorder, flightPlan,
+        launchScheduler);
   }
 
   @Test
