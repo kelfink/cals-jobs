@@ -9,7 +9,7 @@
 		</layout>
 	</appender>
 
-	<property name="USER_HOME" value="${HOME}/rocketlog" />
+	<property name="ROCKET_LOGS" value="${LAUNCH_DIR}/rocketlog" />
 	<appender name="FILE-THREAD" class="ch.qos.logback.classic.sift.SiftingAppender">
 
 		<!-- This is MDC value -->
@@ -23,7 +23,7 @@
 		  <!-- A standard RollingFileAppender, the log file is based on 'rocketLog' at runtime  -->
 		  <appender name="FILE-${rocketLog}"
 			class="ch.qos.logback.core.rolling.RollingFileAppender">
-			<file>${USER_HOME}/${rocketLog}.log</file>
+			<file>${ROCKET_LOGS}/${rocketLog}.log</file>
 
 			<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 				<Pattern>
@@ -33,7 +33,7 @@
 
 			<rollingPolicy
 				class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-				<FileNamePattern>${USER_HOME}/${rocketLog}.%i.log.zip
+				<FileNamePattern>${ROCKET_LOGS}/${rocketLog}.%i.log.zip
 				</FileNamePattern>
 				<MinIndex>1</MinIndex>
 				<MaxIndex>10</MaxIndex>

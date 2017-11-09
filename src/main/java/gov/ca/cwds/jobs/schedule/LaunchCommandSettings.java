@@ -22,6 +22,8 @@ public class LaunchCommandSettings {
 
   private boolean exposeRest;
 
+  private String baseDirectory;
+
   /**
    * Launch one JVM, run initial load jobs sequentially, and exit.
    */
@@ -77,6 +79,14 @@ public class LaunchCommandSettings {
 
   public void setExposeRest(boolean exposeRest) {
     this.exposeRest = exposeRest;
+  }
+
+  public String getBaseDirectory() {
+    return baseDirectory;
+  }
+
+  public void setBaseDirectory(String baseDirectory) {
+    this.baseDirectory = baseDirectory;
   }
 
 }

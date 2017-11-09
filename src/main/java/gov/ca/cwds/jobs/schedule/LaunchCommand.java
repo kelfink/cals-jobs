@@ -414,7 +414,6 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   protected static synchronized LaunchCommand startSchedulerMode(String[] args) {
     LOGGER.info("STARTING LAUNCH COMMAND ...");
 
-    standardFlightPlan = parseCommandLine(args);
     if (standardFlightPlan.isSimulateLaunch()) {
       return instance; // Test "main" methods
     }
@@ -456,7 +455,6 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
-    standardFlightPlan = parseCommandLine(args);
     if (standardFlightPlan.isSimulateLaunch()) {
       return; // Test "main" methods
     }
@@ -518,6 +516,10 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * @param args command line
    */
   public static void main(String[] args) {
+    standardFlightPlan = parseCommandLine(args);
+    LaunchCommand.settings.setBaseDirectory(standardFlightPlan.getBaseDirectory());
+    System.setProperty("LAUNCH_DIR", LaunchCommand.settings.getBaseDirectory());
+
     startSchedulerMode(args);
   }
 
