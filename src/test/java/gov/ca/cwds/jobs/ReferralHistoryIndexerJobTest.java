@@ -68,9 +68,9 @@ public class ReferralHistoryIndexerJobTest
     }
 
     @Override
-    public List<Pair<String, String>> getPartitionRanges() {
+    public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
       if (throwOnRanges) {
-        throw new JobsException("test");
+        throw new NeutronException("test");
       }
       return super.getPartitionRanges();
     }

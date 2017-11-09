@@ -911,9 +911,10 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * </p>
    * 
    * @return number of records processed
+   * @throws NeutronException on general error
    * @see #pullBucketRange(String, String)
    */
-  protected int extractHibernate() {
+  protected int extractHibernate() throws NeutronException {
     LOGGER.info("INITIAL LOAD WITH HIBERNATE!");
     final List<Pair<String, String>> buckets = getPartitionRanges();
 

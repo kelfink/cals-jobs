@@ -15,6 +15,7 @@ import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
@@ -64,9 +65,11 @@ public class ReferralJobRanges {
    * 
    * @param job referrals job
    * @return key pairs
+   * @throws NeutronException on parse error
    */
   public List<Pair<String, String>> getPartitionRanges(
-      BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job) {
+      BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job)
+      throws NeutronException {
     List<Pair<String, String>> ret = new ArrayList<>();
 
     if (job.isLargeDataSet()) {
@@ -77,7 +80,7 @@ public class ReferralJobRanges {
           IOUtils.readLines(this.getClass().getResourceAsStream("/referral_ranges.tsv")).stream()) {
         ret = lines.sequential().map(this::splitLine).collect(Collectors.toList());
       } catch (Exception e) {
-        throw JobLogs.runtime(LOGGER, e, "Failed to load referral ranges!");
+        throw JobLogs.checked(LOGGER, e, "Failed to load referral ranges!");
       }
 
       limitRange(job, ret);

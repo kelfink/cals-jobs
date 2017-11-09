@@ -29,10 +29,10 @@ public class VoxJMXClient implements AutoCloseable {
 
   private static boolean testMode;
 
-  private BiFunction<String, String, JMXConnector> makeConnector = (the_host, the_port) -> {
+  private BiFunction<String, String, JMXConnector> makeConnector = (theHost, thePort) -> {
     try {
       return JMXConnectorFactory.connect(new JMXServiceURL(
-          "service:jmx:rmi:///jndi/rmi://" + the_host + ":" + the_port + "/jmxrmi"));
+          "service:jmx:rmi:///jndi/rmi://" + theHost + ":" + thePort + "/jmxrmi"));
     } catch (IOException e) {
       throw JobLogs.runtime(LOGGER, e, "FAILED TO CONNECT VIA JMX! {}", e.getMessage());
     }

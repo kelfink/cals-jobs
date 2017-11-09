@@ -524,7 +524,7 @@ public class ReferralHistoryIndexerJob
    * @see ReferralJobRanges
    */
   @Override
-  public List<Pair<String, String>> getPartitionRanges() {
+  public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
     return new ReferralJobRanges().getPartitionRanges(this);
   }
 
