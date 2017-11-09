@@ -9,7 +9,7 @@
 		</layout>
 	</appender>
 
-	<property name="USER_HOME" value="/home/dsmith/rocketlog" />
+	<property name="USER_HOME" value="/Users/CWS-NS3/rocketlog" />
 	<appender name="FILE-THREAD" class="ch.qos.logback.classic.sift.SiftingAppender">
 
 		<!-- This is MDC value -->
@@ -20,10 +20,10 @@
 		</discriminator>
 
 		<sift>
-		  <!-- A standard RollingFileAppender, the log file is based on 'logFileName' at runtime  -->
-		  <appender name="FILE-${logFileName}"
+		  <!-- A standard RollingFileAppender, the log file is based on 'rocketLog' at runtime  -->
+		  <appender name="FILE-${rocketLog}"
 			class="ch.qos.logback.core.rolling.RollingFileAppender">
-			<file>${USER_HOME}/${logFileName}.log</file>
+			<file>${USER_HOME}/${rocketLog}.log</file>
 
 			<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 				<Pattern>
@@ -33,7 +33,7 @@
 
 			<rollingPolicy
 				class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-				<FileNamePattern>${USER_HOME}/${logFileName}.%i.log.zip
+				<FileNamePattern>${USER_HOME}/${rocketLog}.%i.log.zip
 				</FileNamePattern>
 				<MinIndex>1</MinIndex>
 				<MaxIndex>10</MaxIndex>
