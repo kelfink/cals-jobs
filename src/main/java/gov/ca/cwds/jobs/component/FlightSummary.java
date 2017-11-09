@@ -10,7 +10,7 @@ import gov.ca.cwds.jobs.schedule.FlightStatus;
 
 public class FlightSummary implements ApiMarker {
 
-  private static long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
   /**
    * Runtime rocket name. Distinguish this rocket's threads from other running threads.

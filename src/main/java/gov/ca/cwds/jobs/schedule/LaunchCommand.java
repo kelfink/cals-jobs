@@ -230,10 +230,9 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * Too many responsibilities: initialize Quartz, register jobs, expose operations to JMX, even
    * initialize HTTP ...
    * 
-   * @param injector Guice injector. Soon to be removed.
    * @throws NeutronException on initialization error
    */
-  protected void initScheduler(final Injector injector) throws NeutronException {
+  protected void initScheduler() throws NeutronException {
     try {
       // NOTE: make last change window configurable.
       final DateFormat fmt =
@@ -427,7 +426,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       instance.commonFlightPlan = new FlightPlan(standardFlightPlan);
       instance.injector = injector;
 
-      instance.initScheduler(injector);
+      instance.initScheduler();
       instance.fatalError = false; // Good to go
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
