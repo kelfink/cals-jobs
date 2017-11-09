@@ -9,7 +9,7 @@
 		</layout>
 	</appender>
 
-	<property name="USER_HOME" value="/Users/CWS-NS3/rocketlog" />
+	<property name="USER_HOME" value="${HOME}/rocketlog" />
 	<appender name="FILE-THREAD" class="ch.qos.logback.classic.sift.SiftingAppender">
 
 		<!-- This is MDC value -->
