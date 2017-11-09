@@ -11,21 +11,23 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
 import org.apache.commons.lang3.tuple.Triple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
 public class VoxJMXClient implements AutoCloseable {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(VoxJMXClient.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(VoxJMXClient.class);
 
   private static final String DEFAULT_HOST = "localhost";
   private static final String DEFAULT_PORT = "1098";
+
+  private static boolean testMode;
 
   private BiFunction<String, String, JMXConnector> makeConnector = (the_host, the_port) -> {
     try {
@@ -35,8 +37,6 @@ public class VoxJMXClient implements AutoCloseable {
       throw JobLogs.runtime(LOGGER, e, "FAILED TO CONNECT VIA JMX! {}", e.getMessage());
     }
   };
-
-  private static boolean testMode;
 
   private final String host;
   private final String port;
@@ -71,7 +71,7 @@ public class VoxJMXClient implements AutoCloseable {
       final ObjectName mbeanName = new ObjectName("Neutron:rocket=" + rocketName);
       final VoxLaunchPadMBean mbeanProxy = MBeanServerInvocationHandler
           .newProxyInstance(mbeanServerConnection, mbeanName, VoxLaunchPadMBean.class, true);
-      LOGGER.info("status::{}", mbeanProxy.status());
+      LOGGER.info("status::{}", () -> mbeanProxy.status());
       return mbeanProxy;
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "FAILED TO GET MBEAN PROXY! {}", e.getMessage());

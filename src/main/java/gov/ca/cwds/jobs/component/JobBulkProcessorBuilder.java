@@ -58,7 +58,8 @@ public class JobBulkProcessorBuilder implements ApiMarker {
   public BulkProcessor buildBulkProcessor() {
     return BulkProcessor.builder(esDao.getClient(), new NeutronBulkProcessorListener(this.track))
         .setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(ES_BYTES_MB, ByteSizeUnit.MB))
-        .setConcurrentRequests(1).setName("jobs_bp").build();
+        .setConcurrentRequests(1).setName("jobs_bp") // disappears in ES 5.6.3
+        .build();
   }
 
 }

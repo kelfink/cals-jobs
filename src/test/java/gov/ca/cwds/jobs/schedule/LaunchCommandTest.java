@@ -164,21 +164,6 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   }
 
   @Test
-  public void isJobVetoed_Args__String() throws Exception {
-    final String className = DefaultFlightSchedule.CLIENT.getRocketClass().getName();
-    final boolean actual = target.isLaunchVetoed(className);
-    boolean expected = false;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void scheduleJob_Args__Class__DefaultFlightSchedule__FlightPlan() throws Exception {
-    final DefaultFlightSchedule sched = DefaultFlightSchedule.CLIENT;
-    final Class<?> klazz = sched.getRocketClass();
-    LaunchPad actual = target.scheduleLaunch(klazz, sched, flightPlan);
-  }
-
-  @Test
   public void getFlightRecorder_Args__() throws Exception {
     AtomFlightRecorder actual = target.getFlightRecorder();
     assertThat(actual, is(notNullValue()));

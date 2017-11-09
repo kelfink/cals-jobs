@@ -235,7 +235,7 @@ public class HyperCube extends NeutronGuiceModule {
       ret.setFlightPlan(flightPlan);
       return ret;
     } catch (CreationException e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO CREATE JOB!: {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO BUILD ROCKET!: {}", e.getMessage());
     }
   }
 
@@ -466,7 +466,6 @@ public class HyperCube extends NeutronGuiceModule {
   protected AtomLaunchScheduler configureQuartz(final Injector injector,
       final FlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
       final AtomFlightPlanManager flightPlanMgr) throws SchedulerException {
-    // Chicken/egg dilemma
     final boolean initialMode = LaunchCommand.isInitialMode();
     final LaunchScheduler launchScheduler =
         new LaunchScheduler(flightRecorder, rocketFactory, flightPlanMgr);

@@ -164,23 +164,23 @@ public class FlightPlan implements ApiMarker {
   /**
    * Copy constructor.
    * 
-   * @param opts other job options
+   * @param flightPlan other job options
    */
-  public FlightPlan(final FlightPlan opts) {
-    this.esConfigLoc = opts.esConfigLoc;
-    this.indexName = StringUtils.isBlank(opts.indexName) ? null : opts.indexName;
-    this.overrideLastRunTime = opts.overrideLastRunTime;
-    this.lastRunLoc = opts.lastRunLoc;
-    this.lastRunMode = opts.lastRunMode;
-    this.startBucket = opts.startBucket;
-    this.endBucket = opts.endBucket;
-    this.threadCount = opts.threadCount;
-    this.loadSealedAndSensitive = opts.loadSealedAndSensitive;
-    this.rangeGiven = opts.rangeGiven;
-    this.baseDirectory = opts.baseDirectory;
-    this.refreshMqt = opts.refreshMqt;
-    this.dropIndex = opts.dropIndex;
-    this.simulateLaunch = opts.simulateLaunch;
+  public FlightPlan(final FlightPlan flightPlan) {
+    this.esConfigLoc = flightPlan.esConfigLoc;
+    this.indexName = StringUtils.isBlank(flightPlan.indexName) ? null : flightPlan.indexName;
+    this.overrideLastRunTime = flightPlan.overrideLastRunTime;
+    this.lastRunLoc = flightPlan.lastRunLoc;
+    this.lastRunMode = flightPlan.lastRunMode;
+    this.startBucket = flightPlan.startBucket;
+    this.endBucket = flightPlan.endBucket;
+    this.threadCount = flightPlan.threadCount;
+    this.loadSealedAndSensitive = flightPlan.loadSealedAndSensitive;
+    this.rangeGiven = flightPlan.rangeGiven;
+    this.baseDirectory = flightPlan.baseDirectory;
+    this.refreshMqt = flightPlan.refreshMqt;
+    this.dropIndex = flightPlan.dropIndex;
+    this.simulateLaunch = flightPlan.simulateLaunch;
   }
 
   /**

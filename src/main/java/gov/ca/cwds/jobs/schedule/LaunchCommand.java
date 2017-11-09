@@ -52,11 +52,13 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   private static Function<FlightPlan, Injector> injectorMaker = HyperCube::buildInjectorFunctional;
 
+  private static LaunchCommandSettings settings = new LaunchCommandSettings();
+
+  private static FlightPlan standardFlightPlan;
+
   private FlightPlan commonFlightPlan;
 
-  private Injector injector; // A bit hacky but easier than alternatives.
-
-  private LaunchCommandSettings settings = new LaunchCommandSettings();
+  private Injector injector; // HACK: make an interface for DI?
 
   /**
    * Only used to drop and create indexes.
@@ -263,7 +265,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       }
 
       // Cindy: "Let's light this candle!"
-      if (!this.settings.isTestMode()) {
+      if (!LaunchCommand.settings.isTestMode()) {
         LOGGER.warn("start scheduler ...");
         launchScheduler.getScheduler().start();
       }
@@ -285,7 +287,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * @return true if running in continuous mode
    */
   public static boolean isSchedulerMode() {
-    return getInstance().settings.isSchedulerMode();
+    return LaunchCommand.settings.isSchedulerMode();
   }
 
   /**
@@ -295,7 +297,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * @return whether in test mode
    */
   public static boolean isTestMode() {
-    return getInstance().settings.isTestMode();
+    return LaunchCommand.settings.isTestMode();
   }
 
   /**
@@ -305,11 +307,11 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * @param mode whether in test mode
    */
   public static void setTestMode(boolean mode) {
-    getInstance().settings.setTestMode(mode);
+    LaunchCommand.settings.setTestMode(mode);
   }
 
   public static boolean isInitialMode() {
-    return getInstance().settings.isInitialMode();
+    return LaunchCommand.settings.isInitialMode();
   }
 
   public ElasticsearchDao getEsDao() {
@@ -328,14 +330,6 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   public void setStartingOpts(FlightPlan startingOpts) {
     this.commonFlightPlan = startingOpts;
-  }
-
-  public boolean isLaunchVetoed(String className) throws NeutronException {
-    return this.launchScheduler.isLaunchVetoed(className);
-  }
-
-  public LaunchPad scheduleLaunch(Class<?> klazz, DefaultFlightSchedule sched, FlightPlan opts) {
-    return this.launchScheduler.scheduleLaunch(klazz, sched, opts);
   }
 
   public AtomFlightRecorder getFlightRecorder() {
@@ -376,14 +370,14 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   }
 
   protected static FlightPlan parseCommandLine(String... args) {
-    FlightPlan standardFlightPlan;
+    FlightPlan ret;
     try {
-      standardFlightPlan = FlightPlan.parseCommandLine(args);
+      ret = FlightPlan.parseCommandLine(args);
     } catch (Exception e) {
       throw JobLogs.runtime(LOGGER, e, "CMD LINE ERROR! {}", e.getMessage());
     }
 
-    return standardFlightPlan;
+    return ret;
   }
 
   protected static LaunchCommand buildCommandCenter(final FlightPlan standardFlightPlan)
@@ -393,7 +387,6 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       injector = injectorMaker.apply(standardFlightPlan);
       instance = injector.getInstance(LaunchCommand.class);
       instance.commonFlightPlan = standardFlightPlan;
-      instance.settings.setSchedulerMode(false);
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "Rethrow", e.getMessage());
     }
@@ -420,19 +413,20 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   protected static synchronized LaunchCommand startSchedulerMode(String[] args) {
     LOGGER.info("STARTING LAUNCH COMMAND ...");
 
-    final FlightPlan standardFlightPlan = parseCommandLine(args);
+    standardFlightPlan = parseCommandLine(args);
     if (standardFlightPlan.isSimulateLaunch()) {
       return instance; // Test "main" methods
     }
 
+    LaunchCommand.settings.setSchedulerMode(true);
+    LaunchCommand.settings.setInitialMode(!standardFlightPlan.isLastRunMode());
     final Injector injector = injectorMaker.apply(standardFlightPlan);
+
     try (final LaunchCommand launchCommand = buildCommandCenter(standardFlightPlan)) {
       instance = injector.getInstance(LaunchCommand.class);
-      instance.commonFlightPlan = standardFlightPlan;
+      instance.commonFlightPlan = new FlightPlan(standardFlightPlan);
       instance.injector = injector;
 
-      instance.settings.setSchedulerMode(true);
-      instance.settings.setInitialMode(!instance.commonFlightPlan.isLastRunMode());
       instance.initScheduler(injector);
       instance.fatalError = false; // Good to go
     } catch (Throwable e) { // NOSONAR
@@ -461,16 +455,19 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
-    final FlightPlan standardFlightPlan = parseCommandLine(args);
+    standardFlightPlan = parseCommandLine(args);
     if (standardFlightPlan.isSimulateLaunch()) {
       return; // Test "main" methods
     }
 
+    LaunchCommand.settings.setSchedulerMode(false);
+    LaunchCommand.settings.setInitialMode(!standardFlightPlan.isLastRunMode());
     instance.fatalError = true; // Murphy was an optimist.
+
     try (final LaunchCommand launchCommand = buildCommandCenter(standardFlightPlan);
         final T job = HyperCube.newRocket(klass, args)) {
       job.run();
-      launchCommand.fatalError = false; // We may it. Almost.
+      launchCommand.fatalError = false; // We made it. Almost.
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
       // Close orphaned resources forcibly, if necessary, by system exit.
@@ -495,18 +492,26 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     this.injector = injector;
   }
 
-  public LaunchCommandSettings getSettings() {
-    return settings;
+  public static LaunchCommandSettings getSettings() {
+    return LaunchCommand.settings;
   }
 
-  public void setSettings(LaunchCommandSettings settings) {
-    this.settings = settings;
+  public static void setSettings(LaunchCommandSettings settings) {
+    LaunchCommand.settings = settings;
+  }
+
+  public static FlightPlan getStandardFlightPlan() {
+    return standardFlightPlan;
+  }
+
+  public static void setStandardFlightPlan(FlightPlan standardFlightPlan) {
+    LaunchCommand.standardFlightPlan = standardFlightPlan;
   }
 
   /**
-   * OPTION: configure individual jobs, like Rundeck.
+   * OPTION: configure individual rockets, like Rundeck.
    * <p>
-   * Best to load a configuration file with settings per job.
+   * Perhaps load a configuration file with settings per rockets.
    * </p>
    * 
    * @param args command line
