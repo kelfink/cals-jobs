@@ -198,7 +198,7 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
         proc.execute();
 
         final int retcode = ((Integer) proc.getOutputParameterValue("RETCODE")).intValue();
-        LOGGER.info("client count proc: retcode: {}", retcode);
+        LOGGER.info("Client county proc: retcode: {}", retcode);
 
         if (retcode != 0) {
           LOGGER.error("FAILED TO CALL PROC! retcode: {}", retcode);
