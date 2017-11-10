@@ -392,7 +392,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       instance = injector.getInstance(LaunchCommand.class);
       instance.commonFlightPlan = standardFlightPlan;
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "Rethrow", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "COMMAND CENTER FAILURE! {}", e.getMessage());
     }
 
     return instance;
@@ -410,7 +410,9 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   public void close() throws Exception {
     if (!isTestMode() && (!isSchedulerMode() || instance.fatalError)) {
       // Shutdown all remaining resources, even those not attached to this job.
-      Runtime.getRuntime().exit(this.fatalError ? -1 : 0); // NOSONAR
+      final int exitCode = this.fatalError ? -1 : 0;
+      LOGGER.debug("exitCode: {}", exitCode);
+      Runtime.getRuntime().exit(exitCode); // NOSONAR
     }
   }
 
