@@ -171,7 +171,7 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
   }
 
   /**
-   * Proc call for initial load: {@code CALL CWSRSQ.GENCLNCNTY ('O', '', '', ?);}
+   * Proc call for initial load: {@code CALL CWSRSQ.PRCCLNCNTY ('O', '', '', ?);}
    * 
    * <p>
    * Incremental changes are called by table trigger, not by batch.
