@@ -18,7 +18,7 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import gov.ca.cwds.neutron.shrinkray.NeutronClassFinder;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronClassFinder;
 
 @Singleton
 public class RocketFactory implements AtomRocketFactory {

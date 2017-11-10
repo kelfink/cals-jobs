@@ -49,7 +49,7 @@ public class NeutronTriggerListenerTest extends Goddard {
     rocket = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
         flightRecorder);
     rocket.setFlightPlan(flightPlan);
-    rocket.setTrack(flightRecord);
+    rocket.setFlightLog(flightRecord);
     job = new NeutronRocket(rocket, flightSchedule, flightRecorder);
 
     context_ = mock(JobExecutionContext.class);

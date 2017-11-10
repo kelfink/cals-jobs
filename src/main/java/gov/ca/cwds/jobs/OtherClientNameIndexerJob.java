@@ -32,7 +32,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
@@ -75,7 +75,7 @@ public class OtherClientNameIndexerJob
       final ReplicatedOtherClientNameDao denormDao, final ElasticsearchDao esDao,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
       FlightRecorder jobHistory, FlightPlan opts) {
-    super(dao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, jobHistory, opts);
+    super(dao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, opts);
     this.denormDao = denormDao;
   }
 
@@ -170,7 +170,7 @@ public class OtherClientNameIndexerJob
 
   @Override
   public List<Pair<String, String>> getPartitionRanges() {
-    return NeutronJdbcUtils.getCommonPartitionRanges16(this);
+    return NeutronJdbcUtil.getCommonPartitionRanges16(this);
   }
 
   @Override

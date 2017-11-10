@@ -50,7 +50,7 @@ import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
 
@@ -69,7 +69,7 @@ public class BasePersonIndexerJobTest
     target = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
         flightRecorder);
     target.setFlightPlan(flightPlan);
-    target.setTrack(flightRecord);
+    target.setFlightLog(flightRecord);
   }
 
   @Test
@@ -620,7 +620,7 @@ public class BasePersonIndexerJobTest
   public void threadIndex_Args__error() throws Exception {
     final FlightLog track = mock(FlightLog.class);
     when(track.isFailed()).thenThrow(IllegalStateException.class);
-    target.setTrack(track);
+    target.setFlightLog(track);
 
     runKillThread(target);
     target.threadIndex();
@@ -643,7 +643,7 @@ public class BasePersonIndexerJobTest
     when(track.trackBulkPrepared()).thenThrow(IOException.class);
     when(track.trackQueuedToIndex()).thenThrow(IOException.class);
 
-    target.setTrack(track);
+    target.setFlightLog(track);
     target.prepareDocumentTrapException(bp, p);
   }
 
@@ -728,7 +728,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void enableParallelism_Args__Connection() throws Exception {
-    NeutronDB2Utils.enableParallelism(con);
+    NeutronDB2Util.enableParallelism(con);
   }
 
   @Test

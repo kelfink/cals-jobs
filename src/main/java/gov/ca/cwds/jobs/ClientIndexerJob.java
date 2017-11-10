@@ -30,7 +30,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
@@ -227,7 +227,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
 
   @Override
   public List<Pair<String, String>> getPartitionRanges() {
-    return NeutronJdbcUtils.getCommonPartitionRanges64(this);
+    return NeutronJdbcUtil.getCommonPartitionRanges64(this);
   }
 
   /**

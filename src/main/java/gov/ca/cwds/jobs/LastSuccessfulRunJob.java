@@ -59,12 +59,12 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * HACK for dependency injection issue. (re-?) initialize the job.
    * 
    * @param lastJobRunTimeFilename last run file location
-   * @param opts launch options
+   * @param flightPlan launch options
    */
-  public void init(String lastJobRunTimeFilename, final FlightPlan opts) {
+  public void init(String lastJobRunTimeFilename, final FlightPlan flightPlan) {
     this.lastRunTimeFilename =
-        StringUtils.isBlank(lastJobRunTimeFilename) ? opts.getLastRunLoc() : lastJobRunTimeFilename;
-    this.flightPlan = opts;
+        StringUtils.isBlank(lastJobRunTimeFilename) ? flightPlan.getLastRunLoc() : lastJobRunTimeFilename;
+    this.flightPlan = flightPlan;
   }
 
   @Override

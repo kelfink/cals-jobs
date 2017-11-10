@@ -8,7 +8,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
-import gov.ca.cwds.neutron.shrinkray.RetrovillePerson;
+import gov.ca.cwds.neutron.util.shrinkray.RetrovillePerson;
 
 /**
  * Pseudo-normalized container for CMS safety alerts.

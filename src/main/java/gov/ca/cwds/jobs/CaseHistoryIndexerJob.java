@@ -25,7 +25,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
-import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -61,7 +61,7 @@ public abstract class CaseHistoryIndexerJob
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
       FlightPlan opts) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, opts);
   }
 
   @Override
@@ -164,7 +164,7 @@ public abstract class CaseHistoryIndexerJob
 
   @Override
   public List<Pair<String, String>> getPartitionRanges() {
-    return NeutronJdbcUtils.getCommonPartitionRanges64(this);
+    return NeutronJdbcUtil.getCommonPartitionRanges64(this);
   }
 
 }

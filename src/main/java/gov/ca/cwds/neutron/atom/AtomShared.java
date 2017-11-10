@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 import gov.ca.cwds.neutron.flight.FlightLog;
 
 /**
@@ -45,11 +45,11 @@ public interface AtomShared extends ApiMarker {
    * @param title title of thread
    */
   default void nameThread(final String title) {
-    NeutronThreadUtils.nameThread(title, this);
+    NeutronThreadUtil.nameThread(title, this);
   }
 
   default void catchYourBreath() {
-    NeutronThreadUtils.catchYourBreath();
+    NeutronThreadUtil.catchYourBreath();
   }
 
 }

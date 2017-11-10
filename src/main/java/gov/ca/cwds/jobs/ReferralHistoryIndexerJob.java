@@ -43,9 +43,9 @@ import gov.ca.cwds.jobs.rocket.referral.MinClientReferral;
 import gov.ca.cwds.jobs.rocket.referral.ReferralJobRanges;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
-import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -179,7 +179,7 @@ public class ReferralHistoryIndexerJob
       @LastRunFile String lastJobRunTimeFilename, ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
       FlightPlan opts) {
-    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
+    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, opts);
   }
 
   @Override
@@ -424,9 +424,9 @@ public class ReferralHistoryIndexerJob
     try (final Connection con = getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      NeutronDB2Utils.enableParallelism(con);
+      NeutronDB2Util.enableParallelism(con);
 
-      final DB2SystemMonitor monitor = NeutronDB2Utils.monitorStart(con);
+      final DB2SystemMonitor monitor = NeutronDB2Util.monitorStart(con);
       final String schema = getDBSchemaName();
 
       try (
@@ -445,7 +445,7 @@ public class ReferralHistoryIndexerJob
         readAllegations(stmtSelAllegation, listAllegations);
 
         // Retrieved all data.
-        NeutronDB2Utils.monitorStopAndReport(monitor);
+        NeutronDB2Util.monitorStopAndReport(monitor);
         con.commit();
       }
     } catch (Exception e) {
@@ -481,7 +481,7 @@ public class ReferralHistoryIndexerJob
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
       final ForkJoinPool threadPool =
-          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
+          new ForkJoinPool(NeutronThreadUtil.calcReaderThreads(getFlightPlan()));
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {

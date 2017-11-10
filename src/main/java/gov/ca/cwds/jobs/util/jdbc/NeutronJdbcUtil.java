@@ -26,9 +26,9 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
  * 
  * @author CWDS API Team
  */
-public final class NeutronJdbcUtils {
+public final class NeutronJdbcUtil {
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(NeutronJdbcUtils.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(NeutronJdbcUtil.class);
 
   private static final String Z_OS_START = "aaaaaaaaaa";
   private static final String Z_OS_END = "9999999999";
@@ -45,7 +45,7 @@ public final class NeutronJdbcUtils {
       "4u0U0MECwr", "4YRF9Dd70O", "5rOfwNO3gC", "5T7PS2j37S", "6oipPRSKDX", "6R6kaia0SL",
       "7ki4MYoAzi", "7NYwtxJ7Lu", "8guC2hG4ak", "8JpJrxB37S", "9cRG3VmH6i", "9GwwRzY7D3", Z_OS_END};
 
-  private NeutronJdbcUtils() {
+  private NeutronJdbcUtil() {
     // Default, no-op. Static utility class.
   }
 
@@ -83,7 +83,7 @@ public final class NeutronJdbcUtils {
     LOGGER.info("len: {}, skip: {}", len, skip);
 
     final Integer[] positions =
-        IntStream.rangeClosed(0, len - 1).boxed().flatMap(NeutronStreamUtils.everyNth(skip))
+        IntStream.rangeClosed(0, len - 1).boxed().flatMap(NeutronStreamUtil.everyNth(skip))
             .sorted().sequential().collect(Collectors.toList()).toArray(new Integer[0]);
 
     if (LOGGER.isInfoEnabled()) {

@@ -45,7 +45,7 @@ public class Mach1TestRocket
   public Mach1TestRocket(final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       FlightRecorder jobHistory) {
-    super(null, esDao, lastJobRunTimeFilename, mapper, null, jobHistory, null);
+    super(null, esDao, lastJobRunTimeFilename, mapper, null, null);
   }
 
   @Override

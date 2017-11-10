@@ -47,14 +47,13 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.jobs.component.JobBulkProcessorBuilder;
+import gov.ca.cwds.jobs.component.BulkProcessorBuilder;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
-import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
+import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.atom.AtomPersonDocPrep;
 import gov.ca.cwds.neutron.atom.AtomSecurity;
@@ -109,7 +108,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected ObjectMapper mapper;
 
-  private final JobBulkProcessorBuilder jobBulkProcessorBuilder;
+  private final BulkProcessorBuilder bulkProcessorBuilder;
 
   /**
    * Main DAO for the supported persistence class.
@@ -127,9 +126,9 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected final SessionFactory sessionFactory;
 
   /**
-   * Track job progress.
+   * Track this rocket's flight progress.
    */
-  protected FlightLog track = new FlightLog();
+  protected FlightLog flightLog = new FlightLog();
 
   /**
    * Queue of raw, de-normalized records waiting to be normalized.
@@ -155,24 +154,24 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param jobDao Person DAO, such as {@link ReplicatedClientDao}
    * @param esDao ElasticSearch DAO
-   * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
+   * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
-   * @param jobHistory job history
-   * @param opts command line options
+   * @param flightPlan command line options
    */
   @Inject
   public BasePersonIndexerJob(final BaseDaoImpl<T> jobDao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      SessionFactory sessionFactory, FlightRecorder jobHistory, FlightPlan opts) {
-    super(lastJobRunTimeFilename, opts);
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper,
+      SessionFactory sessionFactory, FlightPlan flightPlan) {
+    super(lastRunFile, flightPlan);
     this.jobDao = jobDao;
     this.esDao = esDao;
     this.mapper = mapper;
     this.sessionFactory = sessionFactory;
-    this.jobBulkProcessorBuilder = new JobBulkProcessorBuilder(esDao, track);
+    this.bulkProcessorBuilder = new BulkProcessorBuilder(esDao, flightLog);
+    this.flightLog.setRocketName(getClass().getSimpleName());
+
     this.lock = new ReentrantReadWriteLock(false);
-    this.track.setRocketName(getClass().getSimpleName());
   }
 
   /**
@@ -194,7 +193,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    */
   protected void addToIndexQueue(T norm) {
     try {
-      JobLogs.logEvery(track.trackQueuedToIndex(), "add to index queue", "recs");
+      JobLogs.logEvery(flightLog.trackQueuedToIndex(), "add to index queue", "recs");
       queueIndex.putLast(norm);
     } catch (InterruptedException e) {
       fail();
@@ -209,7 +208,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @return an ES bulk processor
    */
   public BulkProcessor buildBulkProcessor() {
-    return this.jobBulkProcessorBuilder.buildBulkProcessor();
+    return this.bulkProcessorBuilder.buildBulkProcessor();
   }
 
   /**
@@ -228,7 +227,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   protected void prepareDocument(final BulkProcessor bp, T t) throws IOException {
     Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
         .map(p -> prepareUpsertRequestNoChecked(p, t)).forEach(x -> { // NOSONAR
-          ElasticTransformer.pushToBulkProcessor(track, bp, x);
+          ElasticTransformer.pushToBulkProcessor(flightLog, bp, x);
         });
   }
 
@@ -285,9 +284,13 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         esDao.getConfig().getElasticsearchDocType(), esp, t);
   }
 
+  protected void addThread(Runnable target, List<Thread> threads) {
+    threads.add(new Thread(target));
+  }
+
   protected void addThread(boolean make, Runnable target, List<Thread> threads) {
     if (make) {
-      threads.add(new Thread(target));
+      addThread(target, threads);
     }
   }
 
@@ -352,7 +355,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       LOGGER.info("query: {}", query);
 
       // Enable parallelism for underlying database.
-      NeutronDB2Utils.enableParallelism(con);
+      NeutronDB2Util.enableParallelism(con);
 
       M m;
       try (final Statement stmt = con.createStatement()) {
@@ -525,7 +528,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
             esDao.getConfig().getElasticsearchDocType(), deletionId));
       }
 
-      track.addToBulkDeleted(deletionResults.size());
+      flightLog.addToBulkDeleted(deletionResults.size());
     }
   }
 
@@ -685,7 +688,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-          NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
+          NeutronJdbcUtil.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
@@ -711,7 +714,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
         entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
     final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
     q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-        NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
+        NeutronJdbcUtil.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
     final List<M> deletionRecs = q.list();
 
@@ -756,7 +759,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
       prepHibernateLastChange(session, lastRunTime);
       final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-          NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
+          NeutronJdbcUtil.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<M> recs = q.list();
@@ -941,7 +944,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
 
   @Override
   public FlightLog getFlightLog() {
-    return track;
+    return flightLog;
   }
 
   @Override
@@ -972,8 +975,8 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * 
    * @param track progress tracker
    */
-  public void setTrack(FlightLog track) {
-    this.track = track;
+  public void setFlightLog(FlightLog track) {
+    this.flightLog = track;
   }
 
   public ObjectMapper getMapper() {

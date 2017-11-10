@@ -40,7 +40,7 @@ public class OrigAttorneyIndexerJob
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
       FlightPlan opts) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, opts);
   }
 
   /**

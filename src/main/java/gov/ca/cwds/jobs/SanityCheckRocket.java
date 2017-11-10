@@ -58,7 +58,7 @@ public class SanityCheckRocket extends
       final ElasticsearchDao esDao, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory, FlightPlan opts,
       AtomLaunchScheduler launchScheduler) {
-    super(dao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, jobHistory, opts);
+    super(dao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, opts);
     this.launchScheduler = launchScheduler;
   }
 

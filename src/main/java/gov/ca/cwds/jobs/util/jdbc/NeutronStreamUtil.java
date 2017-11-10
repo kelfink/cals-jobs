@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public final class NeutronStreamUtils {
+public final class NeutronStreamUtil {
 
-  private NeutronStreamUtils() {
+  private NeutronStreamUtil() {
     // static methods only
   }
 

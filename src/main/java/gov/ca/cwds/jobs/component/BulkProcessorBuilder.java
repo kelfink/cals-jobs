@@ -14,7 +14,7 @@ import gov.ca.cwds.neutron.launch.listener.NeutronBulkProcessorListener;
  * 
  * @author CWDS API Team
  */
-public class JobBulkProcessorBuilder implements ApiMarker {
+public class BulkProcessorBuilder implements ApiMarker {
 
   /**
    * Default serialization.
@@ -41,7 +41,7 @@ public class JobBulkProcessorBuilder implements ApiMarker {
    * @param esDao ES DAO
    * @param track progress tracker
    */
-  public JobBulkProcessorBuilder(final ElasticsearchDao esDao, final FlightLog track) {
+  public BulkProcessorBuilder(final ElasticsearchDao esDao, final FlightLog track) {
     this.esDao = esDao;
     this.track = track;
   }

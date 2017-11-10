@@ -42,7 +42,7 @@ public class NeutronRocketTest extends Goddard {
     rocket.setFlightPlan(flightPlan);
     rocket.init(this.tempFile.getAbsolutePath(), flightPlan);
 
-    rocket.setTrack(flightRecord);
+    rocket.setFlightLog(flightRecord);
     target = new NeutronRocket(rocket, flightSchedule, flightRecorder);
   }
 

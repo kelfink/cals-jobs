@@ -20,11 +20,11 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
  * 
  * @author CWDS API Team
  */
-public final class NeutronDB2Utils {
+public final class NeutronDB2Util {
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(NeutronDB2Utils.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(NeutronDB2Util.class);
 
-  private NeutronDB2Utils() {
+  private NeutronDB2Util() {
     // Default no-op.
   }
 

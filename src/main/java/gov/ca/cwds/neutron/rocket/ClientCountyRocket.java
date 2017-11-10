@@ -26,7 +26,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
@@ -56,15 +56,15 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
    * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
-   * @param jobHistory job history
+   * @param flightRecorder job history
    * @param opts command line options
    */
   @Inject
   public ClientCountyRocket(final ReplicatedClientDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
+      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder flightRecorder,
       FlightPlan opts) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, flightRecorder, opts);
   }
 
   @Override
@@ -99,6 +99,22 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
   @Override
   public String getJdbcOrderBy() {
     return " ORDER BY x.IDENTIFIER ";
+  }
+
+  /**
+   * NEXT: Turn this method into a rocket setting.
+   */
+  @Override
+  public boolean useTransformThread() {
+    return false;
+  }
+
+  /**
+   * NEXT: Turn this method into a rocket setting.
+   */
+  @Override
+  public boolean isInitialLoadJdbc() {
+    return true;
   }
 
   /**
@@ -163,25 +179,9 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
     bigRetrieveByJdbc();
   }
 
-  /**
-   * NEXT: Turn this method into a rocket setting.
-   */
-  @Override
-  public boolean useTransformThread() {
-    return false;
-  }
-
-  /**
-   * NEXT: Turn this method into a rocket setting.
-   */
-  @Override
-  public boolean isInitialLoadJdbc() {
-    return true;
-  }
-
   @Override
   public List<Pair<String, String>> getPartitionRanges() {
-    return NeutronJdbcUtils.getCommonPartitionRanges64(this);
+    return NeutronJdbcUtil.getCommonPartitionRanges64(this);
   }
 
   @Override

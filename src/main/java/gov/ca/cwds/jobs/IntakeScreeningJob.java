@@ -62,7 +62,7 @@ public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, 
   public IntakeScreeningJob(final IntakeParticipantDao normalizedDao,
       final EsIntakeScreeningDao viewDao, final ElasticsearchDao esDao, final ObjectMapper mapper,
       @NsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory, FlightPlan opts) {
-    super(normalizedDao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, jobHistory, opts);
+    super(normalizedDao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, opts);
     this.viewDao = viewDao;
   }
 

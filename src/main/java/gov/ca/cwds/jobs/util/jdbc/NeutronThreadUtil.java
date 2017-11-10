@@ -6,11 +6,11 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 
-public final class NeutronThreadUtils {
+public final class NeutronThreadUtil {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronThreadUtils.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronThreadUtil.class);
 
-  private NeutronThreadUtils() {
+  private NeutronThreadUtil() {
     // static methods only
   }
 

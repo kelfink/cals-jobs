@@ -41,8 +41,8 @@ import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.rocket.referral.MinClientReferral;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
-import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
+import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 
 public class ReferralHistoryIndexerJobTest
     extends Goddard<ReplicatedPersonReferrals, EsPersonReferral> {
@@ -291,12 +291,12 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void testMonitorStopAndReport() throws Exception {
-    NeutronDB2Utils.monitorStopAndReport(new TestDB2SystemMonitor());
+    NeutronDB2Util.monitorStopAndReport(new TestDB2SystemMonitor());
   }
 
   @Test
   public void testCalcThreads() throws Exception {
-    NeutronThreadUtils.calcReaderThreads(target.getFlightPlan());
+    NeutronThreadUtil.calcReaderThreads(target.getFlightPlan());
   }
 
   @Test

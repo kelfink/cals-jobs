@@ -49,11 +49,11 @@ public class WorkPrepareInitialLoad implements Work {
 
   @Override
   public void execute(Connection con) throws SQLException {
-    con.setSchema(NeutronJdbcUtils.getDBSchemaName());
+    con.setSchema(NeutronJdbcUtil.getDBSchemaName());
     con.setAutoCommit(false);
-    NeutronDB2Utils.enableParallelism(con);
+    NeutronDB2Util.enableParallelism(con);
 
-    final String strLastRunTime = NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime);
+    final String strLastRunTime = NeutronJdbcUtil.makeSimpleTimestampString(lastRunTime);
     try (final PreparedStatement stmt = createPreparedStatement(con)) {
       for (int i = 1; i <= StringUtils.countMatches(sql, "?"); i++) {
         stmt.setString(i, strLastRunTime);
