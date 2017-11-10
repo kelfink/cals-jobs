@@ -407,11 +407,16 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   public void close() throws Exception {
     if (!isTestMode() && (!isSchedulerMode() || instance.fatalError)) {
       // Shutdown all remaining resources, even those not attached to this job.
-      Runtime.getRuntime().exit(-1); // NOSONAR
+      Runtime.getRuntime().exit(this.fatalError ? -1 : 0); // NOSONAR
     }
   }
 
-  protected static synchronized LaunchCommand startSchedulerMode(String[] args) {
+  /**
+   * Run continuous, scheduler mode.
+   * 
+   * @return launch command instance with dependencies injected
+   */
+  protected static synchronized LaunchCommand startSchedulerMode() {
     LOGGER.info("STARTING LAUNCH COMMAND ...");
 
     if (standardFlightPlan.isSimulateLaunch()) {
@@ -519,8 +524,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     standardFlightPlan = parseCommandLine(args);
     LaunchCommand.settings.setBaseDirectory(standardFlightPlan.getBaseDirectory());
     System.setProperty("LAUNCH_DIR", LaunchCommand.settings.getBaseDirectory());
-
-    startSchedulerMode(args);
+    startSchedulerMode();
   }
 
 }
