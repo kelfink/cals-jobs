@@ -21,6 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -59,12 +60,12 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightPlanRegistry;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
@@ -82,7 +83,7 @@ import gov.ca.cwds.rest.ElasticsearchConfiguration;
  * 
  * @author CWDS API Team
  */
-public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>> {
+public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>> {
 
   protected static final ObjectMapper MAPPER = ObjectMapperUtils.createObjectMapper();
 
@@ -146,7 +147,7 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
   public AtomFlightPlanManager flightPlanManager;
 
   public ObjectMapper mapper;
-
+  public Pair<String, String> pair;
 
   @Before
   public void setup() throws Exception {
@@ -158,6 +159,7 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
     jobConfigFile = tempFolder.newFile("jobConfigFile.yml");
     lastJobRunTimeFilename = tempFile.getAbsolutePath();
     mapper = MAPPER;
+    pair = Pair.of("aaaaaaaaaa", "9999999999");
 
     // JDBC:
     sessionFactory = mock(SessionFactory.class);

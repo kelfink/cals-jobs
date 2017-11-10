@@ -182,15 +182,14 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void pullRange_Args__Pair() throws Exception {
-    final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
+    final Pair<String, String> p = pair;
     target.pullRange(p);
   }
 
   @Test(expected = JobsException.class)
   public void pullRange_Args__Pair__Exception() throws Exception {
     when(con.createStatement()).thenThrow(SQLException.class);
-
-    final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
+    final Pair<String, String> p = pair;
 
     TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastJobRunTimeFilename,
         mapper, sessionFactory, flightRecorder, flightPlan);
@@ -202,7 +201,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
   public void getPartitionRanges_Args() throws Exception {
     final List actual = target.getPartitionRanges();
     final List expected = new ArrayList<>();
-    expected.add(Pair.of("aaaaaaaaaa", "9999999999"));
+    expected.add(pair);
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -290,7 +289,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
   public void getPartitionRanges_Args__() throws Exception {
     final List actual = target.getPartitionRanges();
     final List expected = new ArrayList<>();
-    expected.add(Pair.of("aaaaaaaaaa", "9999999999"));
+    expected.add(pair);
     assertThat(actual, is(equalTo(expected)));
   }
 
