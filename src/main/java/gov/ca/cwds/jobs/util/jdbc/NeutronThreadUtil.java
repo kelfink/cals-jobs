@@ -18,11 +18,11 @@ public final class NeutronThreadUtil {
    * Calculate the number of reader threads to run from incoming job options and available
    * processors.
    * 
-   * @param opts job options
+   * @param flightPlan job options
    * @return number of reader threads to run
    */
-  public static int calcReaderThreads(final FlightPlan opts) {
-    final int ret = opts.getThreadCount() != 0L ? (int) opts.getThreadCount()
+  public static int calcReaderThreads(final FlightPlan flightPlan) {
+    final int ret = flightPlan.getThreadCount() != 0L ? (int) flightPlan.getThreadCount()
         : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
     LOGGER.info(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
     return ret;
