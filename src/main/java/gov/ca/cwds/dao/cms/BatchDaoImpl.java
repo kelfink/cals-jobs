@@ -1,6 +1,5 @@
 package gov.ca.cwds.dao.cms;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -13,6 +12,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.hibernate.type.TimestampType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,9 +55,10 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
   public List<T> findAll() {
     final String namedQueryName = constructNamedQueryWithSuffix("findAll");
     Session session = getSessionFactory().getCurrentSession();
-
     Transaction txn = session.beginTransaction();
+
     try {
+      @SuppressWarnings("rawtypes")
       final Query query = session.getNamedQuery(namedQueryName);
       ImmutableList.Builder<T> entities = new ImmutableList.Builder<>();
       entities.addAll(query.list());
@@ -78,15 +79,14 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
   @Override
   public List<T> findAllUpdatedAfter(Date datetime) {
     final String namedQueryName = constructNamedQueryWithSuffix("findAllUpdatedAfter");
-    Session session = getSessionFactory().getCurrentSession();
-
-    Transaction txn = session.beginTransaction();
+    final Session session = getSessionFactory().getCurrentSession();
+    final Transaction txn = session.beginTransaction();
     final java.sql.Timestamp ts = new java.sql.Timestamp(datetime.getTime());
     try {
       // Cross platform DB2 (both z/OS and Linux).
       final Query<T> query = session.getNamedQuery(namedQueryName).setCacheable(false)
           .setHibernateFlushMode(FlushMode.MANUAL).setReadOnly(true).setCacheMode(CacheMode.IGNORE)
-          .setTimestamp("after", ts);
+          .setParameter("after", ts, TimestampType.INSTANCE);
 
       // Iterate, process, flush.
       query.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
@@ -115,107 +115,6 @@ public abstract class BatchDaoImpl<T extends PersistentObject> extends BaseDaoIm
       txn.rollback();
       throw new DaoException(h);
     }
-  }
-
-  /**
-   * Retrieve all records for batch processing for a single bucket. PostgreSQL queries would likely
-   * rely on the <a href="https://www.postgresql.org/docs/9.6/static/functions-window.html">NTILE
-   * analytic function</a>, whereas DB2 10.5, lacking modern analytics, would likely rely on nested
-   * or correlated queries. Note that DB2 doesn't even provide basic pseudo-columns, like ROWNUM,
-   * without enabling <a href=
-   * "http://www.ibm.com/support/knowledgecenter/SSEPGG_10.5.0/com.ibm.db2.luw.apdv.porting.doc/doc/r0052867.html">
-   * "compatibility vectors"</a> or writing a
-   * <a href="http://hoteljavaopensource.blogspot.com/2011/06/ntile-and-db2.html">user-defined
-   * function</a>.
-   * 
-   * <p>
-   * The following DB2 SQL demonstrates how to simulate the NTILE analytic without installing
-   * additional packages or non-standard functions.
-   * </p>
-   * 
-   * <pre>
-   * {@code 
-   * select z.identifier, z.bucket, z.rn, row_number() over (partition by z.bucket order by 1) as bucket_rn 
-   * from ( 
-   *    select mod(y.rn,10) + 1 as bucket, y.rn, y.identifier 
-   *    from (
-   *       select row_number() over (order by 1) as rn, x.identifier 
-   *       from ( select c.identifier from client_t c 
-   *       WHERE x.identifier >= 'B3bMRWu8NW' and x.identifier < 'DW5GzxJ30A') x 
-   *    ) y 
-   * ) z 
-   * where z.bucket = 3 for read only;
-   * }
-   * </pre>
-   * 
-   * <p>
-   * Most batch bucket queries are defined Hibernate named queries in the persistence class itself.
-   * </p>
-   * 
-   * @param bucketNum current bucket for this batch
-   * @param totalBuckets total buckets for this batch run only, NOT the total for all batches
-   * @param minId minimum key value, inclusive
-   * @param maxId maximum key value, exclusive
-   * @return ordered list of referral/client document records
-   * @deprecated DB2 on z/OS does not optimize this query.
-   */
-  @Deprecated
-  @Override
-  @SuppressWarnings("unchecked")
-  public List<T> partitionedBucketList(long bucketNum, long totalBuckets, String minId,
-      String maxId) {
-    return new ArrayList<>();
-  }
-
-  /**
-   * Retrieve all records for batch processing for a single "bucket" (an arbitrary number of
-   * records). PostgreSQL queries would likely rely on the
-   * <a href="https://www.postgresql.org/docs/9.6/static/functions-window.html">NTILE analytic
-   * function</a>, whereas DB2 10.5, lacking modern analytics, would likely rely on nested or
-   * correlated queries. Note that DB2 doesn't even provide common pseudo-columns, like ROWNUM,
-   * without enabling <a href=
-   * "http://www.ibm.com/support/knowledgecenter/SSEPGG_10.5.0/com.ibm.db2.luw.apdv.porting.doc/doc/r0052867.html">
-   * "compatibility vectors"</a> or writing a
-   * <a href="http://hoteljavaopensource.blogspot.com/2011/06/ntile-and-db2.html">user-defined
-   * function</a>.
-   * 
-   * <p>
-   * The following DB2 SQL demonstrates how to simulate the NTILE analytic without installing
-   * additional packages or non-standard functions.
-   * </p>
-   * 
-   * <pre>
-   * select z.identifier, z.bucket, z.rn, row_number() over (partition by z.bucket order by 1) as bucket_rn 
-   * from ( 
-   *    select mod(y.rn, :total_buckets) + 1 as bucket, y.rn, y.identifier 
-   *    from (
-   *       select row_number() over (order by 1) as rn, x.identifier 
-   *       from ( select c.identifier from client_t c ) x 
-   *    ) y 
-   * ) z 
-   * where z.bucket = :bucket_num for read only;
-   * </pre>
-   * 
-   * <p>
-   * Batch bucket queries are defined Hibernate named queries in the persistence class itself.
-   * </p>
-   * 
-   * <p>
-   * Since the large CMS DB2 tables are usually partitioned by primary key (column IDENTIFIER)
-   * across 16 partitions, this method takes a minimum and maximum key to enhance performance via
-   * partition pruning.
-   * </p>
-   * 
-   * @param bucketNum current bucket for this batch
-   * @param totalBuckets total buckets in batch run
-   * @return ordered list of referral/client document records
-   * @deprecated DB2 on z/OS does not optimize this query.
-   */
-  @Deprecated
-  @Override
-  @SuppressWarnings("unchecked")
-  public List<T> bucketList(long bucketNum, long totalBuckets) {
-    return new ArrayList<>();
   }
 
   /**

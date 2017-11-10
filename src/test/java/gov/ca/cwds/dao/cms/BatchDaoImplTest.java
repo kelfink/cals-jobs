@@ -19,6 +19,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hibernate.type.StringType;
+import org.hibernate.type.TimestampType;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -27,8 +28,7 @@ import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 
-public class BatchDaoImplTest
-    extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
+public class BatchDaoImplTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   private static final class TestBatchDaoImpl extends BatchDaoImpl<TestDenormalizedEntity> {
 
@@ -84,7 +84,8 @@ public class BatchDaoImplTest
     when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
     when(q.setFetchSize(any(Integer.class))).thenReturn(q);
     when(q.setCacheable(any(Boolean.class))).thenReturn(q);
-    when(q.setTimestamp(any(String.class), any(Timestamp.class))).thenReturn(q);
+    when(q.setParameter(any(String.class), any(Timestamp.class), any(TimestampType.class)))
+        .thenReturn(q);
 
     final ScrollableResults results = mock(ScrollableResults.class);
     when(q.scroll(any(ScrollMode.class))).thenReturn(results);
@@ -93,24 +94,6 @@ public class BatchDaoImplTest
 
     final Date datetime = new Date();
     final List<Object> actual = target.findAllUpdatedAfter(datetime);
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
-  public void partitionedBucketList_Args__long__long__String__String() throws Exception {
-    long bucketNum = 0L;
-    long totalBuckets = 0L;
-    String minId = "1";
-    String maxId = "2";
-    final List<Object> actual = target.partitionedBucketList(bucketNum, totalBuckets, minId, maxId);
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
-  public void bucketList_Args__long__long() throws Exception {
-    long bucketNum = 0L;
-    long totalBuckets = 0L;
-    final List<Object> actual = target.bucketList(bucketNum, totalBuckets);
     assertThat(actual, is(notNullValue()));
   }
 

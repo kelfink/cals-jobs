@@ -17,10 +17,12 @@ import org.apache.commons.io.IOUtils;
 
 import com.google.gson.Gson;
 
+import gov.ca.cwds.data.std.ApiMarker;
+
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
 @Singleton
-public class GsonReader<T> implements MessageBodyReader<T> {
+public class GsonReader<T> implements MessageBodyReader<T>, ApiMarker {
 
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation[] antns, MediaType mt) {
@@ -29,8 +31,8 @@ public class GsonReader<T> implements MessageBodyReader<T> {
 
   @Override
   public T readFrom(Class<T> type, Type genericType, Annotation[] antns, MediaType mt,
-      MultivaluedMap<String, String> mm, InputStream in)
-      throws IOException, WebApplicationException {
+      MultivaluedMap<String, String> mm, InputStream in) throws IOException, WebApplicationException // NOSONAR
+  {
     return new Gson().fromJson(IOUtils.toString(in), type);
   }
 
