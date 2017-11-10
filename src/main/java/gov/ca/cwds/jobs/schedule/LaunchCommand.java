@@ -411,7 +411,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     if (!isTestMode() && (!isSchedulerMode() || instance.fatalError)) {
       // Shutdown all remaining resources, even those not attached to this job.
       final int exitCode = this.fatalError ? -1 : 0;
-      LOGGER.debug("exitCode: {}", exitCode);
+      LOGGER.info("Process exit code: {}", exitCode);
       Runtime.getRuntime().exit(exitCode); // NOSONAR
     }
   }

@@ -143,10 +143,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
   }
 
   /**
-   * Iterate results sets from {@link #pullRange(Pair)}.
-   * 
-   * @param rs result set
-   * @throws SQLException on database error
+   * {@inheritDoc}
    */
   @Override
   public void handleRangeResults(final ResultSet rs) throws SQLException {

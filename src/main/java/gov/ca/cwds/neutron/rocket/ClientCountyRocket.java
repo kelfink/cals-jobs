@@ -32,6 +32,7 @@ import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * Job to load Clients from CMS into ElasticSearch.
@@ -76,44 +77,56 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
     return EsClientAddress.class;
   }
 
+  /**
+   * NEXT: fixed rocket setting, not override method.
+   */
   @Override
   public String getInitialLoadViewName() {
     return "CLIENT_T";
   }
 
+  /**
+   * NEXT: fixed rocket setting, not override method.
+   */
   @Override
   public String getMQTName() {
     return getInitialLoadViewName();
   }
 
+  /**
+   * NEXT: fixed rocket setting, not override method.
+   */
   @Override
   public String getJdbcOrderBy() {
     return " ORDER BY x.IDENTIFIER ";
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
-  public String getInitialLoadQuery(String dbSchemaName) {
-    final StringBuilder buf = new StringBuilder();
+  public void handleRangeResults(final ResultSet rs) throws SQLException {
+    int cntr = 0;
+    EsClientAddress m;
 
-    buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
-        .append(" x WHERE x.IDENTIFIER BETWEEN ':fromId' AND ':toId' ");
-
-    if (!getFlightPlan().isLoadSealedAndSensitive()) {
-      buf.append(" AND x.CLT_SENSTV_IND = 'N' ");
+    // NOTE: Assumes that records are sorted by group key.
+    while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
+      JobLogs.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
     }
-
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
-    return buf.toString();
   }
 
   /**
-   * Example call: {@code CALL CWSRSQ.GENCLNCNTY ('O', '', '', ?);}
+   * Proc call for initial load: {@code CALL CWSRSQ.GENCLNCNTY ('O', '', '', ?);}
+   * 
+   * <p>
+   * Incremental changes are called by table trigger, not by batch.
+   * </p>
    */
   protected void callProc() {
-    if (LaunchCommand.isInitialMode()) {
+    if (LaunchCommand.isInitialMode()) { // initial mode only
       LOGGER.info("Call stored proc");
       final Session session = getJobDao().getSessionFactory().getCurrentSession();
-      getOrCreateTransaction();
+      getOrCreateTransaction(); // HACK. move to base DAO.
       final String schema =
           (String) session.getSessionFactory().getProperties().get("hibernate.default_schema");
 

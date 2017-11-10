@@ -130,7 +130,7 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
   }
 
   /**
-   * Iterate results sets from {@link #pullRange(Pair)}.
+   * Process results sets from {@link #pullRange(Pair)}.
    * 
    * @param rs result set
    * @throws SQLException on database error
