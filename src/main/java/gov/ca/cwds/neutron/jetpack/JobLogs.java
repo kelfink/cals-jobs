@@ -75,6 +75,7 @@ public final class JobLogs {
    */
   public static JobsException buildRuntimeException(final Logger log, Throwable e, String pattern,
       Object... args) {
+    JobsException ret;
     final boolean hasArgs = args == null || args.length == 0;
     final boolean hasPattern = !StringUtils.isEmpty(pattern);
     final Logger logger = log != null ? log : LOGGER;
@@ -84,8 +85,15 @@ public final class JobLogs {
     final String pat = hasPattern ? pattern : StringUtils.join(objs, "{}");
     final String msg = hasPattern && hasArgs ? MessageFormat.format(pat, objs) : "";
 
-    logger.error(msg, e);
-    return new JobsException(msg, e);
+    if (e != null) {
+      logger.error(msg, e);
+      ret = new JobsException(msg, e);
+    } else {
+      logger.error(msg);
+      ret = new JobsException(msg);
+    }
+
+    return ret;
   }
 
   /**
@@ -120,6 +128,10 @@ public final class JobLogs {
   public static JobsException runtime(final Logger log, Throwable e, String pattern,
       Object... args) {
     return buildRuntimeException(log, e, pattern, args);
+  }
+
+  public static JobsException runtime(final Logger log, String pattern, Object... args) {
+    return buildRuntimeException(log, null, pattern, args);
   }
 
   public static String stackToString(Exception e) {

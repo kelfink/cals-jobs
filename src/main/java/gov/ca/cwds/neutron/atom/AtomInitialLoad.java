@@ -18,7 +18,6 @@ import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.procedure.ProcedureCall;
 
-import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -242,27 +241,20 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
       final String schema =
           (String) session.getSessionFactory().getProperties().get("hibernate.default_schema");
 
-      try {
-        final ProcedureCall proc = session.createStoredProcedureCall(schema + ".SPREFRSMQT");
-        proc.registerStoredProcedureParameter("MQTNAME", String.class, ParameterMode.IN);
-        proc.registerStoredProcedureParameter("RETSTATUS", String.class, ParameterMode.OUT);
-        proc.registerStoredProcedureParameter("RETMESSAG", String.class, ParameterMode.OUT);
+      final ProcedureCall proc = session.createStoredProcedureCall(schema + ".SPREFRSMQT");
+      proc.registerStoredProcedureParameter("MQTNAME", String.class, ParameterMode.IN);
+      proc.registerStoredProcedureParameter("RETSTATUS", String.class, ParameterMode.OUT);
+      proc.registerStoredProcedureParameter("RETMESSAG", String.class, ParameterMode.OUT);
 
-        proc.setParameter("MQTNAME", getMQTName());
-        proc.execute();
+      proc.setParameter("MQTNAME", getMQTName());
+      proc.execute();
 
-        final String returnStatus = (String) proc.getOutputParameterValue("RETSTATUS");
-        final String returnMsg = (String) proc.getOutputParameterValue("RETMESSAG");
+      final String returnStatus = (String) proc.getOutputParameterValue("RETSTATUS");
+      final String returnMsg = (String) proc.getOutputParameterValue("RETMESSAG");
+      getLogger().info("refresh MQT proc: status: {}, msg: {}", returnStatus, returnMsg);
 
-        getLogger().info("refresh MQT proc: status: {}, msg: {}", returnStatus, returnMsg);
-
-        if (returnStatus.charAt(0) != '0') {
-          getLogger().error("REFRESH MQT ERROR! {}", returnMsg);
-          throw new DaoException("REFRESH MQT ERROR: " + returnMsg);
-        }
-
-      } catch (DaoException de) {
-        throw de;
+      if (returnStatus.charAt(0) != '0') {
+        JobLogs.runtime(getLogger(), "REFRESH MQT ERROR! {}", returnMsg);
       }
     }
   }

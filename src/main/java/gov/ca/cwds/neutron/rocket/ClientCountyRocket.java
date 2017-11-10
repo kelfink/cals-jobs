@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
-import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
@@ -185,27 +184,22 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
       final String schema =
           (String) session.getSessionFactory().getProperties().get("hibernate.default_schema");
 
-      try {
-        final ProcedureCall proc = session.createStoredProcedureCall(schema + ".PRCCLNCNTY");
-        proc.registerStoredProcedureParameter("PARM_CRUD", String.class, ParameterMode.IN);
-        proc.registerStoredProcedureParameter("PARM_ID", String.class, ParameterMode.IN);
-        proc.registerStoredProcedureParameter("PARM_TRIGTBL", String.class, ParameterMode.IN);
-        proc.registerStoredProcedureParameter("RETCODE", Integer.class, ParameterMode.OUT);
+      final ProcedureCall proc = session.createStoredProcedureCall(schema + ".PRCCLNCNTY");
+      proc.registerStoredProcedureParameter("PARM_CRUD", String.class, ParameterMode.IN);
+      proc.registerStoredProcedureParameter("PARM_ID", String.class, ParameterMode.IN);
+      proc.registerStoredProcedureParameter("PARM_TRIGTBL", String.class, ParameterMode.IN);
+      proc.registerStoredProcedureParameter("RETCODE", Integer.class, ParameterMode.OUT);
 
-        proc.setParameter("PARM_CRUD", "0");
-        proc.setParameter("PARM_ID", "");
-        proc.setParameter("PARM_TRIGTBL", "");
-        proc.execute();
+      proc.setParameter("PARM_CRUD", "0");
+      proc.setParameter("PARM_ID", "");
+      proc.setParameter("PARM_TRIGTBL", "");
+      proc.execute();
 
-        final int retcode = ((Integer) proc.getOutputParameterValue("RETCODE")).intValue();
-        LOGGER.info("Client county proc: retcode: {}", retcode);
+      final int retcode = ((Integer) proc.getOutputParameterValue("RETCODE")).intValue();
+      LOGGER.info("Client county proc: retcode: {}", retcode);
 
-        if (retcode != 0) {
-          LOGGER.error("FAILED TO CALL PROC! retcode: {}", retcode);
-          throw new DaoException("FAILED TO CALL PROC! retcode: " + retcode);
-        }
-      } catch (DaoException h) {
-        throw h; // just re-throw
+      if (retcode != 0) {
+        throw JobLogs.runtime(getLogger(), "PROC FAILED! {}", retcode);
       }
     }
   }
