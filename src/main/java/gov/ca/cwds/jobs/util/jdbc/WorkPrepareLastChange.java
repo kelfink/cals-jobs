@@ -21,9 +21,9 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
  * 
  * @author CWDS API Team
  */
-public class PrepareLastChangeWork implements Work {
+public class WorkPrepareLastChange implements Work {
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(PrepareLastChangeWork.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(WorkPrepareLastChange.class);
 
   private final Date lastRunTime;
   private final String sql;
@@ -36,7 +36,7 @@ public class PrepareLastChangeWork implements Work {
    * @param sql SQL to run
    * @param prepStmtMaker Function to produce prepared statement
    */
-  public PrepareLastChangeWork(Date lastRunTime, String sql,
+  public WorkPrepareLastChange(Date lastRunTime, String sql,
       final Function<Connection, PreparedStatement> prepStmtMaker) {
     this.lastRunTime = lastRunTime != null ? new Date(lastRunTime.getTime()) : null;
     this.sql = sql;

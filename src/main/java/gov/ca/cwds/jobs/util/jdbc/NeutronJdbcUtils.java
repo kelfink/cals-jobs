@@ -72,7 +72,7 @@ public final class NeutronJdbcUtils {
 
   public static void prepHibernateLastChange(final Session session, final Date lastRunTime,
       final String sqlPrepLastChange, final Function<Connection, PreparedStatement> func) {
-    final Work work = new PrepareLastChangeWork(lastRunTime, sqlPrepLastChange, func);
+    final Work work = new WorkPrepareLastChange(lastRunTime, sqlPrepLastChange, func);
     session.clear();
     session.doWork(work);
   }

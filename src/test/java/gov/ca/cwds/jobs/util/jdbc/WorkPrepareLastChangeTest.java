@@ -13,20 +13,21 @@ import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.jobs.Goddard;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 
-public class PrepareLastChangeWorkTest extends Goddard<ReplicatedPersonCases, EsPersonCase> {
+public class WorkPrepareLastChangeTest extends Goddard<ReplicatedPersonCases, EsPersonCase> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PrepareLastChangeWorkTest.class);
+  private static final ConditionalLogger LOGGER =
+      new JetPackLogger(WorkPrepareLastChangeTest.class);
 
-  protected PreparedStatement prepStmt;
-  PrepareLastChangeWork target;
+  PreparedStatement prepStmt;
+  WorkPrepareLastChange target;
 
   @Override
   @Before
@@ -40,7 +41,7 @@ public class PrepareLastChangeWorkTest extends Goddard<ReplicatedPersonCases, Es
 
   @Test
   public void type() throws Exception {
-    assertThat(PrepareLastChangeWork.class, notNullValue());
+    assertThat(WorkPrepareLastChange.class, notNullValue());
   }
 
   @Test
@@ -48,7 +49,7 @@ public class PrepareLastChangeWorkTest extends Goddard<ReplicatedPersonCases, Es
     Date lastRunTime = new Date();
     String sql = null;
 
-    target = new PrepareLastChangeWork(lastRunTime, sql, null);
+    target = new WorkPrepareLastChange(lastRunTime, sql, null);
     assertThat(target, notNullValue());
   }
 
@@ -58,7 +59,7 @@ public class PrepareLastChangeWorkTest extends Goddard<ReplicatedPersonCases, Es
     final String sql =
         "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > :ts and current timestamp > ?";
 
-    target = new PrepareLastChangeWork(lastRunTime, sql, c -> {
+    target = new WorkPrepareLastChange(lastRunTime, sql, c -> {
       try {
         return c.prepareStatement(sql);
       } catch (SQLException e) {
@@ -75,7 +76,7 @@ public class PrepareLastChangeWorkTest extends Goddard<ReplicatedPersonCases, Es
         "SELECT C.* FROM CLIENT_T C WHERE c.LST_UPD_TS > '2017-08-28 11:54:40' and current timestamp > ?";
     when(prepStmt.executeUpdate()).thenThrow(SQLException.class);
 
-    target = new PrepareLastChangeWork(lastRunTime, sql, c -> {
+    target = new WorkPrepareLastChange(lastRunTime, sql, c -> {
       try {
         return c.prepareStatement(sql);
       } catch (SQLException e) {
