@@ -21,13 +21,26 @@ public class NeutronReferentialIntegrityInterceptor extends ApiHibernateIntercep
   private static final Logger LOGGER =
       LoggerFactory.getLogger(NeutronReferentialIntegrityInterceptor.class);
 
+  /**
+   * <p>
+   * Called on entity delete.
+   * </p>
+   * 
+   * {@inheritDoc}
+   */
   @Override
   public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames,
       Type[] types) {
     LOGGER.debug("on delete");
   }
 
-  // Called on entity update.
+  /**
+   * <p>
+   * Called on entity update.
+   * </p>
+   * 
+   * {@inheritDoc}
+   */
   @Override
   public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState,
       Object[] previousState, String[] propertyNames, Type[] types) {
@@ -35,7 +48,13 @@ public class NeutronReferentialIntegrityInterceptor extends ApiHibernateIntercep
     return false;
   }
 
-  // Called on entity load.
+  /**
+   * <p>
+   * Called on entity load.
+   * </p>
+   * 
+   * {@inheritDoc}
+   */
   @Override
   public boolean onLoad(Object entity, Serializable id, Object[] state, String[] propertyNames,
       Type[] types) {
@@ -43,6 +62,13 @@ public class NeutronReferentialIntegrityInterceptor extends ApiHibernateIntercep
     return true;
   }
 
+  /**
+   * <p>
+   * Called on entity save.
+   * </p>
+   * 
+   * {@inheritDoc}
+   */
   @Override
   public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames,
       Type[] types) {
@@ -50,9 +76,15 @@ public class NeutronReferentialIntegrityInterceptor extends ApiHibernateIntercep
     return false;
   }
 
-  // Called before commit to database.
+  /**
+   * <p>
+   * Called on <strong>before</strong> commit.
+   * </p>
+   * 
+   * {@inheritDoc}
+   */
   @Override
-  public void preFlush(Iterator iterator) {
+  public void preFlush(@SuppressWarnings("rawtypes") Iterator iterator) {
     LOGGER.debug("Before commiting");
   }
 

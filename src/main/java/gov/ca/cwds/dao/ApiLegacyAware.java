@@ -1,17 +1,16 @@
 package gov.ca.cwds.dao;
 
-import java.io.Serializable;
-
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.std.ApiMarker;
 
 /**
- * Entity/persistence bean is aware of legacy identifiers. For new databases, such as Postgres,
- * {@link #getId()} may return a different value from {@link #getLegacyId()}. For legacy systems,
- * they may be the same.
+ * Means that the implementing entity persistence bean can handle legacy identifiers. For new
+ * databases, such as Postgres, {@link #getId()} may return a different value from
+ * {@link #getLegacyId()}. For legacy systems, they may be the same.
  * 
  * @author CWDS API Team
  */
-public interface ApiLegacyAware extends Serializable {
+public interface ApiLegacyAware extends ApiMarker {
 
   /**
    * Get the unique identifier of this record.
@@ -33,4 +32,5 @@ public interface ApiLegacyAware extends Serializable {
    * @return Legacy descriptor.
    */
   ElasticSearchLegacyDescriptor getLegacyDescriptor();
+
 }

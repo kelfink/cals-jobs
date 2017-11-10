@@ -5,6 +5,7 @@ import java.io.Serializable;
 /**
  * @author CWDS API Team
  */
+@FunctionalInterface
 public interface ApiClientCountyAware extends Serializable {
 
   /**
