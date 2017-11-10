@@ -10,7 +10,7 @@ import javax.persistence.Enumerated;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.util.JobDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtil;
 
 @Embeddable
 public class EmbeddableCmsReplicatedEntity implements ApiMarker {
@@ -38,11 +38,11 @@ public class EmbeddableCmsReplicatedEntity implements ApiMarker {
   }
 
   public Date getReplicationDate() {
-    return JobDateUtil.freshDate(replicationDate);
+    return NeutronDateUtil.freshDate(replicationDate);
   }
 
   public void setReplicationDate(Date replicationDate) {
-    this.replicationDate = JobDateUtil.freshDate(replicationDate);
+    this.replicationDate = NeutronDateUtil.freshDate(replicationDate);
   }
 
 }

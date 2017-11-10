@@ -1,10 +1,10 @@
-package gov.ca.cwds.jobs.util;
+package gov.ca.cwds.neutron.util;
 
 import java.util.Date;
 
-public class JobDateUtil {
+public class NeutronDateUtil {
 
-  private JobDateUtil() {
+  private NeutronDateUtil() {
     // no-op
   }
 

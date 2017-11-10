@@ -38,6 +38,7 @@ import gov.ca.cwds.neutron.inject.HyperCube;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.LaunchPad;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
+import gov.ca.cwds.neutron.util.NeutronStringUtil;
 
 /**
  * Run stand-alone rockets or serve up rockets with Quartz. The master of ceremonies, AKA, Jimmy
@@ -462,13 +463,17 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
-    if (standardFlightPlan.isSimulateLaunch()) {
-      return; // Test "main" methods
-    }
+    standardFlightPlan = parseCommandLine(args);
+    System.setProperty("LAUNCH_DIR",
+        NeutronStringUtil.filePath(standardFlightPlan.getLastRunLoc()));
 
     LaunchCommand.settings.setSchedulerMode(false);
     LaunchCommand.settings.setInitialMode(!standardFlightPlan.isLastRunMode());
     instance.fatalError = true; // Murphy was an optimist.
+
+    if (standardFlightPlan.isSimulateLaunch()) {
+      return; // Test "main" methods
+    }
 
     try (final LaunchCommand launchCommand = buildCommandCenter(standardFlightPlan);
         final T job = HyperCube.newRocket(klass, args)) {

@@ -23,8 +23,7 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
  */
 public class PrepareLastChangeWork implements Work {
 
-  private static final ConditionalLogger LOGGER =
-      new JetPackLogger(PrepareLastChangeWork.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(PrepareLastChangeWork.class);
 
   private final Date lastRunTime;
   private final String sql;
@@ -44,7 +43,7 @@ public class PrepareLastChangeWork implements Work {
     this.prepStmtMaker = prepStmtMaker;
   }
 
-  private PreparedStatement createPreparedStatement(Connection con) {
+  protected PreparedStatement createPreparedStatement(Connection con) {
     return prepStmtMaker.apply(con);
   }
 
@@ -55,7 +54,6 @@ public class PrepareLastChangeWork implements Work {
     NeutronDB2Utils.enableParallelism(con);
 
     final String strLastRunTime = NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime);
-
     try (final PreparedStatement stmt = createPreparedStatement(con)) {
       for (int i = 1; i <= StringUtils.countMatches(sql, "?"); i++) {
         stmt.setString(i, strLastRunTime);

@@ -7,7 +7,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.jobs.util.JobDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtil;
 
 /**
  * @author CWDS Elasticsearch Team
@@ -111,27 +111,27 @@ public class FacilityRow implements PersistentObject {
   }
 
   public Date getLicenseEffectiveDate() {
-    return JobDateUtil.freshDate(licenseEffectiveDate);
+    return NeutronDateUtil.freshDate(licenseEffectiveDate);
   }
 
   public void setLicenseEffectiveDate(Date licenseEffectiveDate) {
-    this.licenseEffectiveDate = JobDateUtil.freshDate(licenseEffectiveDate);
+    this.licenseEffectiveDate = NeutronDateUtil.freshDate(licenseEffectiveDate);
   }
 
   public Date getOriginalApplicationReceivedDate() {
-    return JobDateUtil.freshDate(originalApplicationReceivedDate);
+    return NeutronDateUtil.freshDate(originalApplicationReceivedDate);
   }
 
   public void setOriginalApplicationReceivedDate(Date originalApplicationReceivedDate) {
-    this.originalApplicationReceivedDate = JobDateUtil.freshDate(originalApplicationReceivedDate);
+    this.originalApplicationReceivedDate = NeutronDateUtil.freshDate(originalApplicationReceivedDate);
   }
 
   public Date getLastVisitDate() {
-    return JobDateUtil.freshDate(lastVisitDate);
+    return NeutronDateUtil.freshDate(lastVisitDate);
   }
 
   public void setLastVisitDate(Date lastVisitDate) {
-    this.lastVisitDate = JobDateUtil.freshDate(lastVisitDate);
+    this.lastVisitDate = NeutronDateUtil.freshDate(lastVisitDate);
   }
 
   public String getLastVisitReason() {

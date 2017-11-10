@@ -24,7 +24,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonAny;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.jobs.util.JobDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtil;
 
 /**
  * NS Persistence class for Intake Screenings.
@@ -163,19 +163,19 @@ public class IntakeScreening extends CommonScreening
   }
 
   public Date getStartedAt() {
-    return JobDateUtil.freshDate(startedAt);
+    return NeutronDateUtil.freshDate(startedAt);
   }
 
   public void setStartedAt(Date startedAt) {
-    this.startedAt = JobDateUtil.freshDate(startedAt);
+    this.startedAt = NeutronDateUtil.freshDate(startedAt);
   }
 
   public Date getEndedAt() {
-    return JobDateUtil.freshDate(endedAt);
+    return NeutronDateUtil.freshDate(endedAt);
   }
 
   public void setEndedAt(Date endedAt) {
-    this.endedAt = JobDateUtil.freshDate(endedAt);
+    this.endedAt = NeutronDateUtil.freshDate(endedAt);
   }
 
   public IntakeParticipant getSocialWorker() {

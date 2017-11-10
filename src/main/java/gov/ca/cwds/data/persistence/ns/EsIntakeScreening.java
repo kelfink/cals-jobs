@@ -26,7 +26,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
-import gov.ca.cwds.jobs.util.JobDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtil;
 
 /**
  * Entity bean for PostgreSQL view, VW_SCREENING_HISTORY.
@@ -466,7 +466,7 @@ public class EsIntakeScreening extends CommonScreening
    * @return last change date
    */
   public Date getLastChange() {
-    return JobDateUtil.freshDate(lastChange);
+    return NeutronDateUtil.freshDate(lastChange);
   }
 
   /**
@@ -476,7 +476,7 @@ public class EsIntakeScreening extends CommonScreening
    * @param lastChange last change date
    */
   public void setLastChange(Date lastChange) {
-    this.lastChange = JobDateUtil.freshDate(lastChange);
+    this.lastChange = NeutronDateUtil.freshDate(lastChange);
   }
 
   public String getThisParticipantId() {
@@ -512,19 +512,19 @@ public class EsIntakeScreening extends CommonScreening
   }
 
   public Date getStartedAt() {
-    return JobDateUtil.freshDate(startedAt);
+    return NeutronDateUtil.freshDate(startedAt);
   }
 
   public void setStartedAt(Date startedAt) {
-    this.startedAt = JobDateUtil.freshDate(startedAt);
+    this.startedAt = NeutronDateUtil.freshDate(startedAt);
   }
 
   public Date getEndedAt() {
-    return JobDateUtil.freshDate(endedAt);
+    return NeutronDateUtil.freshDate(endedAt);
   }
 
   public void setEndedAt(Date endedAt) {
-    this.endedAt = JobDateUtil.freshDate(endedAt);
+    this.endedAt = NeutronDateUtil.freshDate(endedAt);
   }
 
   public String getReferralId() {
@@ -552,11 +552,11 @@ public class EsIntakeScreening extends CommonScreening
   }
 
   public Date getBirthDt() {
-    return JobDateUtil.freshDate(birthDt);
+    return NeutronDateUtil.freshDate(birthDt);
   }
 
   public void setBirthDt(Date birthDt) {
-    this.birthDt = JobDateUtil.freshDate(birthDt);
+    this.birthDt = NeutronDateUtil.freshDate(birthDt);
   }
 
   public String getFirstName() {

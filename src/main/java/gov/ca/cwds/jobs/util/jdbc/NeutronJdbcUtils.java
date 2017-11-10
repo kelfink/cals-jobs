@@ -15,11 +15,11 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 
 /**
  * JDBC utilities for Neutron rockets.
@@ -28,7 +28,7 @@ import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
  */
 public final class NeutronJdbcUtils {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJdbcUtils.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(NeutronJdbcUtils.class);
 
   private static final String Z_OS_START = "aaaaaaaaaa";
   private static final String Z_OS_END = "9999999999";

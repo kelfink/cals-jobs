@@ -19,7 +19,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.EmbeddableAccessLimitation;
 import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.jobs.util.JobDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtil;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -164,19 +164,19 @@ public abstract class EsPersonCase
   }
 
   public Date getStartDate() {
-    return JobDateUtil.freshDate(startDate);
+    return NeutronDateUtil.freshDate(startDate);
   }
 
   public void setStartDate(Date startDate) {
-    this.startDate = JobDateUtil.freshDate(startDate);
+    this.startDate = NeutronDateUtil.freshDate(startDate);
   }
 
   public Date getEndDate() {
-    return JobDateUtil.freshDate(endDate);
+    return NeutronDateUtil.freshDate(endDate);
   }
 
   public void setEndDate(Date endDate) {
-    this.endDate = JobDateUtil.freshDate(endDate);
+    this.endDate = NeutronDateUtil.freshDate(endDate);
   }
 
   public Integer getCounty() {
@@ -196,11 +196,11 @@ public abstract class EsPersonCase
   }
 
   public Date getCaseLastUpdated() {
-    return JobDateUtil.freshDate(caseLastUpdated);
+    return NeutronDateUtil.freshDate(caseLastUpdated);
   }
 
   public void setCaseLastUpdated(Date caseLastUpdated) {
-    this.caseLastUpdated = JobDateUtil.freshDate(caseLastUpdated);
+    this.caseLastUpdated = NeutronDateUtil.freshDate(caseLastUpdated);
   }
 
   public String getFocusChildFirstName() {
@@ -220,11 +220,11 @@ public abstract class EsPersonCase
   }
 
   public Date getFocusChildLastUpdated() {
-    return JobDateUtil.freshDate(focusChildLastUpdated);
+    return NeutronDateUtil.freshDate(focusChildLastUpdated);
   }
 
   public void setFocusChildLastUpdated(Date focusChildLastUpdated) {
-    this.focusChildLastUpdated = JobDateUtil.freshDate(focusChildLastUpdated);
+    this.focusChildLastUpdated = NeutronDateUtil.freshDate(focusChildLastUpdated);
   }
 
   public String getParentFirstName() {
@@ -252,11 +252,11 @@ public abstract class EsPersonCase
   }
 
   public Date getParentLastUpdated() {
-    return JobDateUtil.freshDate(parentLastUpdated);
+    return NeutronDateUtil.freshDate(parentLastUpdated);
   }
 
   public void setParentLastUpdated(Date parentLastUpdated) {
-    this.parentLastUpdated = JobDateUtil.freshDate(parentLastUpdated);
+    this.parentLastUpdated = NeutronDateUtil.freshDate(parentLastUpdated);
   }
 
   public String getParentSourceTable() {

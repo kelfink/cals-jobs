@@ -88,7 +88,7 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
 
   @Override
   public String getJdbcOrderBy() {
-    return " ORDER BY x.clt_identifier ";
+    return " ORDER BY x.IDENTIFIER ";
   }
 
   @Override
@@ -96,7 +96,7 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
     final StringBuilder buf = new StringBuilder();
 
     buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
-        .append(" x WHERE x.clt_identifier BETWEEN ':fromId' AND ':toId' ");
+        .append(" x WHERE x.IDENTIFIER BETWEEN ':fromId' AND ':toId' ");
 
     if (!getFlightPlan().isLoadSealedAndSensitive()) {
       buf.append(" AND x.CLT_SENSTV_IND = 'N' ");

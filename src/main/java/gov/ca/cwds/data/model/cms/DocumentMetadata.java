@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.NamedNativeQuery;
 
-import gov.ca.cwds.jobs.util.JobDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtil;
 
 /**
  * 
@@ -59,6 +59,6 @@ public class DocumentMetadata {
    * @return the lastUpdatedTimestamp
    */
   public Date getLastUpdatedTimestamp() {
-    return JobDateUtil.freshDate(lastUpdatedTimestamp);
+    return NeutronDateUtil.freshDate(lastUpdatedTimestamp);
   }
 }

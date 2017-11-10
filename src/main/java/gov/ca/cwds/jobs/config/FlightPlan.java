@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.util.NeutronDateUtil;
 
 /**
  * Represents batch job options from the command line.
@@ -147,7 +147,7 @@ public class FlightPlan implements ApiMarker {
       boolean dropIndex, boolean simulateLaunch) {
     this.esConfigLoc = esConfigLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
-    this.overrideLastRunTime = JobDateUtil.freshDate(lastRunTime);
+    this.overrideLastRunTime = NeutronDateUtil.freshDate(lastRunTime);
     this.lastRunLoc = lastRunLoc;
     this.lastRunMode = lastRunMode;
     this.startBucket = startBucket;
@@ -507,7 +507,7 @@ public class FlightPlan implements ApiMarker {
   }
 
   public void setOverrideLastRunTime(Date lastRunTime) {
-    this.overrideLastRunTime = JobDateUtil.freshDate(lastRunTime);
+    this.overrideLastRunTime = NeutronDateUtil.freshDate(lastRunTime);
   }
 
   public boolean isRefreshMqt() {

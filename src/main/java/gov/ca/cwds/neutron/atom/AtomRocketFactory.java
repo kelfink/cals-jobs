@@ -9,11 +9,11 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 public interface AtomRocketFactory extends JobFactory {
 
   /**
-   * Build a registered job.
+   * Build a registered rocket.
    * 
-   * @param klass batch job class
+   * @param klass rocket class
    * @param opts command line arguments
-   * @return the job
+   * @return the rocket
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
@@ -21,15 +21,15 @@ public interface AtomRocketFactory extends JobFactory {
       throws NeutronException;
 
   /**
-   * Build a registered job.
+   * Build a registered rocket.
    * 
-   * @param jobName batch job class
-   * @param opts command line arguments
-   * @return the job
+   * @param rocketName rocket class
+   * @param flightPlan command line arguments
+   * @return the rocket
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob createJob(final String jobName, final FlightPlan opts)
+  public BasePersonIndexerJob createJob(final String rocketName, final FlightPlan flightPlan)
       throws NeutronException;
 
 }
