@@ -13,6 +13,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
  * Job to load attorneys from CMS into ElasticSearch.
@@ -20,7 +21,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
  * @author CWDS API Team
  */
 public class OrigAttorneyIndexerJob
-    extends BasePersonIndexerJob<ReplicatedAttorney, ReplicatedAttorney> {
+    extends BasePersonRocket<ReplicatedAttorney, ReplicatedAttorney> {
 
   private static final long serialVersionUID = 1L;
 

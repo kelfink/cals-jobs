@@ -76,15 +76,14 @@ import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
 import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightPlanRegistry;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
@@ -96,6 +95,7 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.listener.NeutronJobListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronSchedulerListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -220,15 +220,15 @@ public class HyperCube extends NeutronGuiceModule {
   }
 
   /**
-   * Prepare a batch job with all required dependencies.
+   * Prepare a rocket with all required dependencies.
    * 
-   * @param klass batch job class
+   * @param klass batch rocket class
    * @param flightPlan command line options
-   * @return batch job, ready to run
+   * @return batch rocket, ready to run
    * @param <T> Person persistence type
    * @throws NeutronException checked exception
    */
-  public static <T extends BasePersonIndexerJob<?, ?>> T newRocket(final Class<T> klass,
+  public static <T extends BasePersonRocket<?, ?>> T newRocket(final Class<T> klass,
       final FlightPlan flightPlan) throws NeutronException {
     try {
       final T ret = buildInjector(flightPlan).getInstance(klass);
@@ -248,7 +248,7 @@ public class HyperCube extends NeutronGuiceModule {
    * @param <T> Person persistence type
    * @throws NeutronException checked exception
    */
-  public static <T extends BasePersonIndexerJob<?, ?>> T newRocket(final Class<T> klass,
+  public static <T extends BasePersonRocket<?, ?>> T newRocket(final Class<T> klass,
       String... args) throws NeutronException {
     return newRocket(klass, FlightPlan.parseCommandLine(args));
   }
@@ -487,8 +487,8 @@ public class HyperCube extends NeutronGuiceModule {
     final ListenerManager listenerMgr = launchScheduler.getScheduler().getListenerManager();
     listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
     listenerMgr.addTriggerListener(new NeutronTriggerListener(launchScheduler));
-    listenerMgr.addJobListener(initialMode ? StandardFlightSchedule.buildInitialLoadJobChainListener()
-        : new NeutronJobListener());
+    listenerMgr.addJobListener(initialMode
+        ? StandardFlightSchedule.buildInitialLoadJobChainListener() : new NeutronJobListener());
     return launchScheduler;
   }
 

@@ -35,6 +35,7 @@ import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
@@ -44,7 +45,7 @@ import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
  * @author CWDS API Team
  */
 public class OtherClientNameIndexerJob
-    extends BasePersonIndexerJob<ReplicatedAkas, ReplicatedOtherClientName>
+    extends BasePersonRocket<ReplicatedAkas, ReplicatedOtherClientName>
     implements NeutronRowMapper<ReplicatedOtherClientName> {
 
   private static final long serialVersionUID = 1L;

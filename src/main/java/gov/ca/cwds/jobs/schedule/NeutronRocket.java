@@ -14,8 +14,8 @@ import org.slf4j.MDC;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
  * Wrapper for scheduled jobs.
@@ -31,7 +31,7 @@ public class NeutronRocket implements InterruptableJob {
   private static final AtomicInteger instanceCounter = new AtomicInteger(0);
 
   @SuppressWarnings("rawtypes")
-  private final BasePersonIndexerJob rocket;
+  private final BasePersonRocket rocket;
 
   private final FlightRecorder flightRecorder;
 
@@ -49,7 +49,7 @@ public class NeutronRocket implements InterruptableJob {
    * @param flightRecorder common flight recorder
    */
   public <T extends PersistentObject, M extends ApiGroupNormalizer<?>> NeutronRocket(
-      final BasePersonIndexerJob<T, M> rocket, final StandardFlightSchedule flightSchedule,
+      final BasePersonRocket<T, M> rocket, final StandardFlightSchedule flightSchedule,
       final FlightRecorder flightRecorder) {
     this.rocket = rocket;
     this.flightSchedule = flightSchedule;
@@ -64,7 +64,7 @@ public class NeutronRocket implements InterruptableJob {
     final String rocketName = context.getTrigger().getJobKey().getName();
     LOGGER.info("Execute {}, instance # {}", rocket.getClass().getName(), instanceCounter.get());
 
-    try (final BasePersonIndexerJob job = rocket) {
+    try (final BasePersonRocket job = rocket) {
       MDC.put("rocketLog", rocketName);
 
       flightLog = rocket.getFlightLog();
@@ -100,7 +100,7 @@ public class NeutronRocket implements InterruptableJob {
     this.flightLog = track;
   }
 
-  public BasePersonIndexerJob getRocket() {
+  public BasePersonRocket getRocket() {
     return rocket;
   }
 

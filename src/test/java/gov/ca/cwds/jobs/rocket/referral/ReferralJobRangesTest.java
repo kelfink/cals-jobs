@@ -15,8 +15,8 @@ import org.junit.Test;
 
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 public class ReferralJobRangesTest extends Goddard {
 
@@ -25,8 +25,8 @@ public class ReferralJobRangesTest extends Goddard {
   public void checkPartitionRanges(String schema, boolean isZOS, int expectedCnt, boolean isLarge)
       throws Exception {
     System.setProperty("DB_CMS_SCHEMA", schema);
-    BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job =
-        mock(BasePersonIndexerJob.class);
+    BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> job =
+        mock(BasePersonRocket.class);
 
     when(job.isDB2OnZOS()).thenReturn(isZOS);
     when(job.isLargeDataSet()).thenReturn(isLarge);
@@ -78,8 +78,8 @@ public class ReferralJobRangesTest extends Goddard {
 
   @Test
   public void getPartitionRanges_Args__BasePersonIndexerJob() throws Exception {
-    BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job =
-        mock(BasePersonIndexerJob.class);
+    BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> job =
+        mock(BasePersonRocket.class);
 
     when(job.getFlightPlan()).thenReturn(flightPlan);
     when(flightPlan.isRangeGiven()).thenReturn(false);

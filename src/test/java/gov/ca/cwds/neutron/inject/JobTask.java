@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 public class JobTask<N extends PersistentObject, D extends ApiGroupNormalizer<?>>
     extends ApiObjectIdentity {
@@ -21,7 +21,7 @@ public class JobTask<N extends PersistentObject, D extends ApiGroupNormalizer<?>
 
   private transient Thread thread;
 
-  private transient BasePersonIndexerJob<N, D> job;
+  private transient BasePersonRocket<N, D> job;
 
   private final FlightPlan opts;
 
@@ -35,7 +35,7 @@ public class JobTask<N extends PersistentObject, D extends ApiGroupNormalizer<?>
 
   private Date endTime;
 
-  public JobTask(BasePersonIndexerJob<N, D> job, boolean continuousMode, FlightPlan opts,
+  public JobTask(BasePersonRocket<N, D> job, boolean continuousMode, FlightPlan opts,
       String description) {
     this.job = job;
     this.continuousMode = continuousMode;

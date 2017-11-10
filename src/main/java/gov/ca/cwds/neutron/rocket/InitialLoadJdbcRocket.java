@@ -8,11 +8,10 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
 
 public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends BasePersonIndexerJob<T, M> {
+    extends BasePersonRocket<T, M> {
 
   public InitialLoadJdbcRocket(BaseDaoImpl<T> jobDao, ElasticsearchDao esDao,
       String lastRunFile, ObjectMapper mapper, SessionFactory sessionFactory,

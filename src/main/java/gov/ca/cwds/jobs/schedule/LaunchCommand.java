@@ -25,7 +25,6 @@ import com.google.inject.Injector;
 import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
@@ -38,6 +37,7 @@ import gov.ca.cwds.neutron.inject.HyperCube;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.LaunchPad;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.NeutronStringUtil;
 
 /**
@@ -463,7 +463,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * @param args command line arguments
    * @param <T> Person persistence type
    */
-  public static <T extends BasePersonIndexerJob<?, ?>> void runStandalone(final Class<T> klass,
+  public static <T extends BasePersonRocket<?, ?>> void runStandalone(final Class<T> klass,
       String... args) {
     standardFlightPlan = parseCommandLine(args);
     System.setProperty("LAUNCH_DIR",

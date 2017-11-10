@@ -12,12 +12,12 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronClassFinder;
 
 @Singleton
@@ -44,13 +44,13 @@ public class RocketFactory implements AtomRocketFactory {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public BasePersonIndexerJob createJob(Class<?> klass, final FlightPlan flightPlan)
+  public BasePersonRocket createJob(Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
 
       // DAVE-OTOLOGY: is there a cleaner way to call this??
-      final BasePersonIndexerJob ret = (BasePersonIndexerJob<?, ?>) injector.getInstance(klass);
+      final BasePersonRocket ret = (BasePersonRocket<?, ?>) injector.getInstance(klass);
       ret.init(flightPlan.getLastRunLoc(), flightPlan);
       return ret;
     } catch (Exception e) {
@@ -60,7 +60,7 @@ public class RocketFactory implements AtomRocketFactory {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public BasePersonIndexerJob createJob(String rocketName, final FlightPlan flightPlan)
+  public BasePersonRocket createJob(String rocketName, final FlightPlan flightPlan)
       throws NeutronException {
     return createJob(NeutronClassFinder.classForName(rocketName), flightPlan);
   }

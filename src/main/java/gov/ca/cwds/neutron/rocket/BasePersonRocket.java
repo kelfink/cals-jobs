@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.neutron.rocket;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -47,6 +45,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.jobs.LastSuccessfulRunJob;
 import gov.ca.cwds.jobs.component.BulkProcessorBuilder;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
@@ -95,13 +94,13 @@ import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
  * @param <M> MQT entity class, if any, or T
  * @see FlightPlan
  */
-public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
+public abstract class BasePersonRocket<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends LastSuccessfulRunJob implements AutoCloseable, AtomPersonDocPrep<T>,
     AtomInitialLoad<T, M>, AtomTransform<T, M>, AtomSecurity, AtomValidateDocument {
 
   private static final long serialVersionUID = 1L;
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(BasePersonIndexerJob.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(BasePersonRocket.class);
 
   /**
    * Jackson ObjectMapper.
@@ -133,21 +132,24 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
   /**
    * Queue of raw, de-normalized records waiting to be normalized.
    * <p>
-   * <strong>NOTE</strong>: some jobs normalize on their own, since the normalize/transform step is
-   * inexpensive.
+   * <strong>NOTE</strong>: some rockets normalize on their own, since the normalize/transform step
+   * is inexpensive.
+   * </p>
+   * 
+   * <p>
+   * <strong>MOVE</strong> to another unit.
    * </p>
    */
   protected LinkedBlockingDeque<M> queueNormalize = new LinkedBlockingDeque<>(50000);
 
   /**
    * Queue of normalized records waiting to publish to Elasticsearch.
+   * 
+   * <p>
+   * <strong>MOVE</strong> to another unit.
+   * </p>
    */
   protected LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(125000);
-
-  /**
-   * Read/write lock for extract threads and sources, such as JDBC, Hibernate, or even flat files.
-   */
-  protected transient ReadWriteLock lock;
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -160,7 +162,7 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
    * @param flightPlan command line options
    */
   @Inject
-  public BasePersonIndexerJob(final BaseDaoImpl<T> jobDao, final ElasticsearchDao esDao,
+  public BasePersonRocket(final BaseDaoImpl<T> jobDao, final ElasticsearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper,
       SessionFactory sessionFactory, FlightPlan flightPlan) {
     super(lastRunFile, flightPlan);
@@ -170,8 +172,6 @@ public abstract class BasePersonIndexerJob<T extends PersistentObject, M extends
     this.sessionFactory = sessionFactory;
     this.bulkProcessorBuilder = new BulkProcessorBuilder(esDao, flightLog);
     this.flightLog.setRocketName(getClass().getSimpleName());
-
-    this.lock = new ReentrantReadWriteLock(false);
   }
 
   /**

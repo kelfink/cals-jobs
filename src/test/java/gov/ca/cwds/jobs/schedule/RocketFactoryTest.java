@@ -19,10 +19,10 @@ import org.quartz.spi.TriggerFiredBundle;
 
 import com.google.inject.Injector;
 
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 public class RocketFactoryTest extends Goddard {
 
@@ -34,7 +34,7 @@ public class RocketFactoryTest extends Goddard {
   JobDataMap jobDataMap;
   TriggerFiredBundle bundle = mock(TriggerFiredBundle.class);
   Scheduler scheduler = mock(Scheduler.class);
-  BasePersonIndexerJob rocket;
+  BasePersonRocket rocket;
 
   @Override
   @Before
@@ -71,7 +71,7 @@ public class RocketFactoryTest extends Goddard {
   public void createJob_Args__Class__FlightPlan() throws Exception {
     Class<?> klass = Mach1TestRocket.class;
     FlightPlan opts_ = mock(FlightPlan.class);
-    BasePersonIndexerJob actual = target.createJob(klass, opts_);
+    BasePersonRocket actual = target.createJob(klass, opts_);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -79,7 +79,7 @@ public class RocketFactoryTest extends Goddard {
   public void createJob_Args__String__FlightPlan() throws Exception {
     String jobName = Mach1TestRocket.class.getName();
     FlightPlan opts_ = mock(FlightPlan.class);
-    BasePersonIndexerJob actual = target.createJob(jobName, opts_);
+    BasePersonRocket actual = target.createJob(jobName, opts_);
     assertThat(actual, is(notNullValue()));
   }
 

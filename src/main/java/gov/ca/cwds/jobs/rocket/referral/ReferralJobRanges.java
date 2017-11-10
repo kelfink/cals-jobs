@@ -13,10 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
  * Get key ranges by platform and job size.
@@ -39,7 +39,7 @@ public class ReferralJobRanges {
   }
 
   private List<Pair<String, String>> limitRange(
-      BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job,
+      BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> job,
       final List<Pair<String, String>> allKeyPairs) {
     List<Pair<String, String>> ret = new ArrayList<>();
     final FlightPlan opts = job.getFlightPlan();
@@ -68,7 +68,7 @@ public class ReferralJobRanges {
    * @throws NeutronException on parse error
    */
   public List<Pair<String, String>> getPartitionRanges(
-      BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral> job)
+      BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> job)
       throws NeutronException {
     List<Pair<String, String>> ret = new ArrayList<>();
 

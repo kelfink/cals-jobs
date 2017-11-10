@@ -16,12 +16,12 @@ import com.google.inject.Inject;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
  * Test rocket. Don't lite this candle in production because Mach 1 versions tend to, well, explode.
@@ -30,7 +30,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
  * @see Goddard
  */
 public class Mach1TestRocket
-    extends BasePersonIndexerJob<TestNormalizedEntity, TestDenormalizedEntity>
+    extends BasePersonRocket<TestNormalizedEntity, TestDenormalizedEntity>
     implements ApiGroupNormalizer<TestDenormalizedEntity> {
 
   private boolean fakeMarkDone;

@@ -17,6 +17,7 @@ import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
  * Job to load Substitute Care Providers from CMS into ElasticSearch.
@@ -24,7 +25,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
  * @author CWDS API Team
  */
 public class SubstituteCareProviderIndexJob extends
-    BasePersonIndexerJob<ReplicatedSubstituteCareProvider, ReplicatedSubstituteCareProvider> {
+    BasePersonRocket<ReplicatedSubstituteCareProvider, ReplicatedSubstituteCareProvider> {
 
   private static final long serialVersionUID = 1L;
 

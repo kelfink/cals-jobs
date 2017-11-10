@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.neutron.rocket;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -42,6 +42,7 @@ import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -54,8 +55,7 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
 
-public class BasePersonIndexerJobTest
-    extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
+public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   TestNormalizedEntityDao dao;
   TestIndexerJob target;
@@ -74,7 +74,7 @@ public class BasePersonIndexerJobTest
 
   @Test
   public void type() throws Exception {
-    assertThat(BasePersonIndexerJob.class, notNullValue());
+    assertThat(BasePersonRocket.class, notNullValue());
   }
 
   @Test

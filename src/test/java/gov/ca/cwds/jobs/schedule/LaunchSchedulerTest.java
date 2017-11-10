@@ -17,7 +17,6 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
 
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -27,6 +26,7 @@ import gov.ca.cwds.neutron.atom.AtomRocketFactory;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.launch.LaunchPad;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 public class LaunchSchedulerTest extends Goddard {
 
@@ -71,16 +71,16 @@ public class LaunchSchedulerTest extends Goddard {
   @Test
   public void createJob_Args__Class__FlightPlan() throws Exception {
     Class<?> klass = Mach1TestRocket.class;
-    BasePersonIndexerJob actual = target.fuelRocket(klass, flightPlan);
-    BasePersonIndexerJob expected = null;
+    BasePersonRocket actual = target.fuelRocket(klass, flightPlan);
+    BasePersonRocket expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void createJob_Args__String__FlightPlan() throws Exception {
     String jobName = null;
-    BasePersonIndexerJob actual = target.fuelRocket(jobName, flightPlan);
-    BasePersonIndexerJob expected = null;
+    BasePersonRocket actual = target.fuelRocket(jobName, flightPlan);
+    BasePersonRocket expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 

@@ -49,6 +49,7 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
@@ -62,7 +63,7 @@ import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
  * @author CWDS API Team
  */
 public class ReferralHistoryIndexerJob
-    extends BasePersonIndexerJob<ReplicatedPersonReferrals, EsPersonReferral>
+    extends BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral>
     implements NeutronRowMapper<EsPersonReferral> {
 
   /**

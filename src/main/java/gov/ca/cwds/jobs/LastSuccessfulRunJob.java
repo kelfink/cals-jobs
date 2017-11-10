@@ -62,8 +62,8 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * @param flightPlan launch options
    */
   public void init(String lastJobRunTimeFilename, final FlightPlan flightPlan) {
-    this.lastRunTimeFilename =
-        StringUtils.isBlank(lastJobRunTimeFilename) ? flightPlan.getLastRunLoc() : lastJobRunTimeFilename;
+    this.lastRunTimeFilename = StringUtils.isBlank(lastJobRunTimeFilename)
+        ? flightPlan.getLastRunLoc() : lastJobRunTimeFilename;
     this.flightPlan = flightPlan;
   }
 
@@ -130,7 +130,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * @param lastSuccessfulRunTime last successful run
    * @return appropriate date to detect changes
    */
-  protected Date calcLastRunDate(final Date lastSuccessfulRunTime) {
+  public Date calcLastRunDate(final Date lastSuccessfulRunTime) {
     return calcLastRunDate(lastSuccessfulRunTime, getFlightPlan());
   }
 

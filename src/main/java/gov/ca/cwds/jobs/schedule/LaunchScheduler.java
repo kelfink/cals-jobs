@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
@@ -22,6 +21,7 @@ import gov.ca.cwds.neutron.atom.AtomRocketFactory;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.LaunchPad;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 @Singleton
 public class LaunchScheduler implements AtomLaunchScheduler {
@@ -70,7 +70,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob fuelRocket(final Class<?> klass, final FlightPlan flightPlan)
+  public BasePersonRocket fuelRocket(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException {
     return this.rocketFactory.createJob(klass, flightPlan);
   }
@@ -84,7 +84,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonIndexerJob fuelRocket(final String jobName, final FlightPlan flightPlan)
+  public BasePersonRocket fuelRocket(final String jobName, final FlightPlan flightPlan)
       throws NeutronException {
     return this.rocketFactory.createJob(jobName, flightPlan);
   }
@@ -94,7 +94,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
       throws NeutronException {
     try {
       LOGGER.info("Run scheduled rocket: {}", klass.getName());
-      final BasePersonIndexerJob<?, ?> rocket = fuelRocket(klass, flightPlan);
+      final BasePersonRocket<?, ?> rocket = fuelRocket(klass, flightPlan);
       rocket.run();
       return rocket.getFlightLog();
     } catch (Exception e) {

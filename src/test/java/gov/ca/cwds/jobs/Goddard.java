@@ -70,6 +70,7 @@ import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
@@ -143,7 +144,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public ListenerManager listenerManager;
 
   public RocketFactory rocketFactory;
-  public BasePersonIndexerJob mach1Rocket;
+  public BasePersonRocket mach1Rocket;
   public AtomFlightPlanManager flightPlanManager;
 
   public ObjectMapper mapper;
@@ -306,7 +307,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     markTestDone();
   }
 
-  public Thread runKillThread(final BasePersonIndexerJob<T, M> target, long sleepMillis) {
+  public Thread runKillThread(final BasePersonRocket<T, M> target, long sleepMillis) {
     final Thread t = new Thread(() -> {
       try {
         lock.lockInterruptibly();
@@ -323,7 +324,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     return t;
   }
 
-  public Thread runKillThread(final BasePersonIndexerJob<T, M> target) {
+  public Thread runKillThread(final BasePersonRocket<T, M> target) {
     return runKillThread(target, 1100L);
   }
 

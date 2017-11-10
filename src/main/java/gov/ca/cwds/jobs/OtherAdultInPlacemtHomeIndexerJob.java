@@ -16,6 +16,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
  * Job to load Other Adult In Placement Home from CMS into ElasticSearch.
@@ -23,7 +24,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
  * @author CWDS API Team
  */
 public class OtherAdultInPlacemtHomeIndexerJob extends
-    BasePersonIndexerJob<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
+    BasePersonRocket<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
 
   private static final long serialVersionUID = 1L;
 

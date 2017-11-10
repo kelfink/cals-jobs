@@ -27,6 +27,7 @@ import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
  * Test Elasticsearch mass search capability for automatic validation.
@@ -34,7 +35,7 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
  * @author CWDS API Team
  */
 public class SanityCheckRocket extends
-    BasePersonIndexerJob<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
+    BasePersonRocket<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
 
   private static final long serialVersionUID = 1L;
 

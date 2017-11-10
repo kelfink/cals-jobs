@@ -18,14 +18,14 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 public class TestIndexerJob
-    extends BasePersonIndexerJob<TestNormalizedEntity, TestDenormalizedEntity>
+    extends BasePersonRocket<TestNormalizedEntity, TestDenormalizedEntity>
     implements ApiGroupNormalizer<TestDenormalizedEntity> {
 
   private boolean fakeMarkDone;

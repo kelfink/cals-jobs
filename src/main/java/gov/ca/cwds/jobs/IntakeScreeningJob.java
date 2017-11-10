@@ -28,6 +28,7 @@ import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
@@ -35,7 +36,7 @@ import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
  * 
  * @author CWDS API Team
  */
-public class IntakeScreeningJob extends BasePersonIndexerJob<IntakeParticipant, EsIntakeScreening>
+public class IntakeScreeningJob extends BasePersonRocket<IntakeParticipant, EsIntakeScreening>
     implements NeutronRowMapper<EsIntakeScreening> {
 
   private static final long serialVersionUID = 1L;
