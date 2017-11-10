@@ -225,12 +225,15 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
   /**
    * Source Materialized Query Table to be refreshed before running initial load.
    * 
-   * @return MQT name
+   * @return MQT name or null if none
    */
   default String getMQTName() {
     return null;
   }
 
+  /**
+   * Automates refresh of DB2 materialized query tables (MQT).
+   */
   default void refreshMQT() {
     if (getFlightPlan().isRefreshMqt() && StringUtils.isNotBlank(getMQTName())) {
       getLogger().warn("REFRESH MQT!");
@@ -258,8 +261,8 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
           throw new DaoException("REFRESH MQT ERROR: " + returnMsg);
         }
 
-      } catch (DaoException h) {
-        throw new DaoException("REFRESH MQT FAILED - " + h, h);
+      } catch (DaoException de) {
+        throw de;
       }
     }
   }
