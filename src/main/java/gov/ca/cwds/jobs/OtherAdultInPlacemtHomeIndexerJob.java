@@ -13,7 +13,6 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
@@ -33,18 +32,17 @@ public class OtherAdultInPlacemtHomeIndexerJob extends
    * 
    * @param dao OtherAdultInPlacemtHome DAO
    * @param esDao ElasticSearch DAO
-   * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
+   * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
-   * @param jobHistory job history
-   * @param opts command line options
+   * @param flightPlan command line options
    */
   @Inject
   public OtherAdultInPlacemtHomeIndexerJob(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      final ElasticsearchDao esDao, @LastRunFile final String lastJobRunTimeFilename,
+      final ElasticsearchDao esDao, @LastRunFile final String lastRunFile,
       final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-      FlightRecorder jobHistory, FlightPlan opts) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, opts);
+      FlightPlan flightPlan) {
+    super(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
   }
 
   @Override

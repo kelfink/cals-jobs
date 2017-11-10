@@ -1,7 +1,9 @@
 package gov.ca.cwds.neutron.rocket;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -10,6 +12,7 @@ import javax.persistence.ParameterMode;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.procedure.ProcedureCall;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,12 +28,15 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
+import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * Job to load Clients from CMS into ElasticSearch.
@@ -45,7 +51,7 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
   private static final ConditionalLogger LOGGER = new JetPackLogger(ClientCountyRocket.class);
 
   private static final String INSERT_CLIENT_INITIAL_LOAD =
-      "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT CLT.IDENTIFIER \nFROM CLIENT_T x\n"
+      "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT x.IDENTIFIER \nFROM CLIENT_T x\n"
           + "WHERE x.IDENTIFIER BETWEEN ':fromId' AND ':toId' ";
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
@@ -96,6 +102,11 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
     return getInitialLoadViewName();
   }
 
+  @Override
+  public String getInitialLoadQuery(String dbSchemaName) {
+    return INSERT_CLIENT_INITIAL_LOAD;
+  }
+
   /**
    * NEXT: turn into a fixed rocket setting, not override method.
    */
@@ -121,12 +132,42 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
   }
 
   /**
-   * {@inheritDoc}
+   * Read records from the given key range, typically within a single partition on large tables.
+   * 
+   * @param p partition range to read
    */
   @Override
-  public void handleRangeResults(final ResultSet rs) throws SQLException {
-    // Call the stored procedure once for all client id's inserted into the global temporary table.
-    callProc();
+  public void pullRange(final Pair<String, String> p) {
+    final String threadName =
+        "extract_" + nextThreadNumber() + "_" + p.getLeft() + "_" + p.getRight();
+    nameThread(threadName);
+    getLogger().info("BEGIN: extract thread {}", threadName);
+    getFlightLog().trackRangeStart(p);
+
+    try (Connection con = getJobDao().getSessionFactory().getSessionFactoryOptions()
+        .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
+      con.setSchema(getDBSchemaName());
+      con.setAutoCommit(false);
+
+      final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
+          .replaceAll(":toId", p.getRight());
+      getLogger().info("query: {}", query);
+      NeutronDB2Util.enableParallelism(con);
+
+      try (Statement stmt = con.createStatement()) {
+        stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
+        stmt.setMaxRows(0);
+        stmt.setQueryTimeout(0);
+        getOrCreateTransaction(); // HACK: fix Hibernate DAO.
+        stmt.executeUpdate(query); // NOSONAR
+        callProc();
+        con.commit();
+      }
+    } catch (Exception e) {
+      fail();
+      throw JobLogs.runtime(getLogger(), e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(),
+          p.getRight(), e.getMessage());
+    }
   }
 
   /**

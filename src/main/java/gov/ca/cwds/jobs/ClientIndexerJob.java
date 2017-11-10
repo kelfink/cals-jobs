@@ -28,7 +28,6 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
@@ -66,18 +65,16 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
    * 
    * @param dao Client DAO
    * @param esDao ElasticSearch DAO
-   * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
+   * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
-   * @param jobHistory job history
-   * @param opts command line options
+   * @param flightPlan command line options
    */
   @Inject
   public ClientIndexerJob(final ReplicatedClientDao dao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
-      FlightPlan opts) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, opts);
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory, FlightPlan flightPlan) {
+    super(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
   }
 
   @Override
