@@ -28,6 +28,7 @@ import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
+import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 
 public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
@@ -134,7 +135,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
       throws Exception {
     final DateFormat fmt = new SimpleDateFormat("yyyy-mm-dd");
     final Date now = new Date();
-    final DefaultFlightSchedule sched = DefaultFlightSchedule.CLIENT;
+    final StandardFlightSchedule sched = StandardFlightSchedule.CLIENT;
     target.handleTimeFile(flightPlan, fmt, now, sched);
   }
 

@@ -5,9 +5,9 @@ import java.util.Map;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
-import gov.ca.cwds.jobs.component.FlightLog;
-import gov.ca.cwds.jobs.component.FlightSummary;
-import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
+import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.flight.FlightSummary;
 
 public interface AtomFlightRecorder {
 
@@ -19,7 +19,7 @@ public interface AtomFlightRecorder {
 
   List<FlightLog> getHistory(final Class<?> klazz);
 
-  void summarizeFlight(DefaultFlightSchedule flightSchedule, FlightLog flightLog);
+  void summarizeFlight(StandardFlightSchedule flightSchedule, FlightLog flightLog);
 
-  FlightSummary getFlightSummary(DefaultFlightSchedule flightSchedule);
+  FlightSummary getFlightSummary(StandardFlightSchedule flightSchedule);
 }

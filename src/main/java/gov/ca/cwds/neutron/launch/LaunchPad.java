@@ -15,15 +15,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weakref.jmx.Managed;
 
-import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
-import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
+import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.vox.jmx.VoxLaunchPadMBean;
 
@@ -36,7 +36,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
   private transient Scheduler scheduler;
 
   private transient AtomLaunchScheduler launchScheduler;
-  private final DefaultFlightSchedule flightSchedule;
+  private final StandardFlightSchedule flightSchedule;
   private final FlightRecorder flightRecorder;
   private final String jobName;
   private final String triggerName;
@@ -46,7 +46,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
   private volatile JobKey jobKey;
   private volatile JobDetail jd;
 
-  public LaunchPad(final AtomLaunchScheduler launchScheduler, DefaultFlightSchedule sched,
+  public LaunchPad(final AtomLaunchScheduler launchScheduler, StandardFlightSchedule sched,
       final FlightRecorder flightRecorder, final FlightPlan opts) {
     this.launchScheduler = launchScheduler;
     this.scheduler = launchScheduler.getScheduler();
@@ -216,7 +216,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
   }
 
   @Override
-  public DefaultFlightSchedule getFlightSchedule() {
+  public StandardFlightSchedule getFlightSchedule() {
     return flightSchedule;
   }
 

@@ -13,7 +13,7 @@ import javax.management.remote.JMXServiceURL;
 import org.apache.commons.lang3.tuple.Triple;
 
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -94,7 +94,7 @@ public class VoxJMXClient implements AutoCloseable {
     final String host = options.has("h") ? (String) options.valueOf("h") : DEFAULT_HOST;
     final String port = options.has("p") ? (String) options.valueOf("p") : DEFAULT_PORT;
     final String rocket = options.has("r") ? (String) options.valueOf("r")
-        : DefaultFlightSchedule.CLIENT.getShortName();
+        : StandardFlightSchedule.CLIENT.getShortName();
     LOGGER.info("SETTINGS: host: {}, port: {}, rocket: {}", host, port, rocket);
     return Triple.of(host, port, rocket);
   }

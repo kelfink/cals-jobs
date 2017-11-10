@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 import com.google.inject.BindingAnnotation;
 
-import gov.ca.cwds.jobs.inject.HyperCube;
+import gov.ca.cwds.neutron.inject.HyperCube;
 
 /**
  * Alternative input file.

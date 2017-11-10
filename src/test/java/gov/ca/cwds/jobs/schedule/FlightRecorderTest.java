@@ -10,8 +10,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.component.FlightLog;
-import gov.ca.cwds.jobs.component.FlightSummary;
+import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.flight.FlightSummary;
 
 public class FlightRecorderTest {
 
@@ -34,14 +34,14 @@ public class FlightRecorderTest {
 
   @Test
   public void addTrack_Args__Class__FlightLog() throws Exception {
-    final Class<?> klazz = DefaultFlightSchedule.INTAKE_SCREENING.getRocketClass();
+    final Class<?> klazz = StandardFlightSchedule.INTAKE_SCREENING.getRocketClass();
     final FlightLog flightLog = new FlightLog();
     target.addFlightLog(klazz, flightLog);
   }
 
   @Test
   public void getLastTrack_Args__Class() throws Exception {
-    final Class<?> klazz = DefaultFlightSchedule.INTAKE_SCREENING.getRocketClass();
+    final Class<?> klazz = StandardFlightSchedule.INTAKE_SCREENING.getRocketClass();
     final FlightLog actual = target.getLastFlightLog(klazz);
     FlightLog expected = null;
     assertThat(actual, is(equalTo(expected)));
@@ -49,21 +49,21 @@ public class FlightRecorderTest {
 
   @Test
   public void getHistory_Args__Class() throws Exception {
-    final Class<?> klazz = DefaultFlightSchedule.INTAKE_SCREENING.getRocketClass();
+    final Class<?> klazz = StandardFlightSchedule.INTAKE_SCREENING.getRocketClass();
     List<FlightLog> actual = target.getHistory(klazz);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void summarizeFlight_Args__DefaultFlightSchedule__FlightLog() throws Exception {
-    final DefaultFlightSchedule flightSchedule = DefaultFlightSchedule.INTAKE_SCREENING;
+    final StandardFlightSchedule flightSchedule = StandardFlightSchedule.INTAKE_SCREENING;
     final FlightLog flightLog = new FlightLog();
     target.summarizeFlight(flightSchedule, flightLog);
   }
 
   @Test
   public void getFlightSummary_Args__DefaultFlightSchedule() throws Exception {
-    final DefaultFlightSchedule flightSchedule = DefaultFlightSchedule.INTAKE_SCREENING;
+    final StandardFlightSchedule flightSchedule = StandardFlightSchedule.INTAKE_SCREENING;
     final FlightSummary actual = target.getFlightSummary(flightSchedule);
     FlightSummary expected = null;
     assertThat(actual, is(equalTo(expected)));

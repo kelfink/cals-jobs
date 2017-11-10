@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.inject;
+package gov.ca.cwds.neutron.inject;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -79,18 +79,18 @@ import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.AtomFlightPlanManager;
-import gov.ca.cwds.jobs.schedule.AtomLaunchCommand;
-import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightPlanRegistry;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
-import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
+import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
+import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
+import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.listener.NeutronJobListener;
@@ -487,7 +487,7 @@ public class HyperCube extends NeutronGuiceModule {
     final ListenerManager listenerMgr = launchScheduler.getScheduler().getListenerManager();
     listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
     listenerMgr.addTriggerListener(new NeutronTriggerListener(launchScheduler));
-    listenerMgr.addJobListener(initialMode ? DefaultFlightSchedule.buildInitialLoadJobChainListener()
+    listenerMgr.addJobListener(initialMode ? StandardFlightSchedule.buildInitialLoadJobChainListener()
         : new NeutronJobListener());
     return launchScheduler;
   }

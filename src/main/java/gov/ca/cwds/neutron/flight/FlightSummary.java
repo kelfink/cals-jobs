@@ -1,12 +1,12 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.neutron.flight;
 
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
-import gov.ca.cwds.jobs.schedule.FlightStatus;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
+import gov.ca.cwds.neutron.enums.FlightStatus;
 
 public class FlightSummary implements ApiMarker {
 
@@ -15,7 +15,7 @@ public class FlightSummary implements ApiMarker {
   /**
    * Runtime rocket name. Distinguish this rocket's threads from other running threads.
    */
-  private final DefaultFlightSchedule flightSchedule;
+  private final StandardFlightSchedule flightSchedule;
 
   private Date firstStart = new Date();
 
@@ -56,7 +56,7 @@ public class FlightSummary implements ApiMarker {
    */
   private int recsBulkError;
 
-  public FlightSummary(final DefaultFlightSchedule flightSchedule) {
+  public FlightSummary(final StandardFlightSchedule flightSchedule) {
     this.flightSchedule = flightSchedule;
   }
 

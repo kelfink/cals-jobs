@@ -13,12 +13,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.LaunchPad;
 
@@ -113,7 +114,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public LaunchPad scheduleLaunch(Class<?> klazz, DefaultFlightSchedule sched,
+  public LaunchPad scheduleLaunch(Class<?> klazz, StandardFlightSchedule sched,
       FlightPlan flightPlan) {
     LOGGER.debug("LAUNCH COORDINATOR: LAST CHANGE LOCATION: {}", flightPlan.getLastRunLoc());
     final LaunchPad nj = new LaunchPad(this, sched, flightRecorder, flightPlan);

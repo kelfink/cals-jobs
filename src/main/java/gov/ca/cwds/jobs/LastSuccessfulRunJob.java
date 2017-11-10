@@ -13,7 +13,6 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.component.Rocket;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -21,6 +20,7 @@ import gov.ca.cwds.neutron.atom.AtomJobControl;
 import gov.ca.cwds.neutron.atom.AtomShared;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;

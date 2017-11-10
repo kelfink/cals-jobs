@@ -15,7 +15,7 @@ import org.slf4j.MDC;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
-import gov.ca.cwds.jobs.component.FlightLog;
+import gov.ca.cwds.neutron.flight.FlightLog;
 
 /**
  * Wrapper for scheduled jobs.
@@ -35,7 +35,7 @@ public class NeutronRocket implements InterruptableJob {
 
   private final FlightRecorder flightRecorder;
 
-  private final DefaultFlightSchedule flightSchedule;
+  private final StandardFlightSchedule flightSchedule;
 
   private volatile FlightLog flightLog; // volatile shows changes immediately across threads
 
@@ -49,7 +49,7 @@ public class NeutronRocket implements InterruptableJob {
    * @param flightRecorder common flight recorder
    */
   public <T extends PersistentObject, M extends ApiGroupNormalizer<?>> NeutronRocket(
-      final BasePersonIndexerJob<T, M> rocket, final DefaultFlightSchedule flightSchedule,
+      final BasePersonIndexerJob<T, M> rocket, final StandardFlightSchedule flightSchedule,
       final FlightRecorder flightRecorder) {
     this.rocket = rocket;
     this.flightSchedule = flightSchedule;

@@ -9,7 +9,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.component.FlightLog;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.launch.listener.NeutronBulkProcessorListener;
 
 public class NeutronBulkProcessorListenerTest {

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.neutron.flight;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -15,7 +15,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.schedule.FlightStatus;
+import gov.ca.cwds.neutron.enums.FlightStatus;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 public class FlightLogTest {

@@ -20,17 +20,17 @@ import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
+import gov.ca.cwds.neutron.flight.FlightLog;
 
 public class LaunchPadTest extends Goddard {
 
   Scheduler scheduler;
-  DefaultFlightSchedule sched;
+  StandardFlightSchedule sched;
   FlightRecorder history;
   LaunchPad target;
 
@@ -41,7 +41,7 @@ public class LaunchPadTest extends Goddard {
     scheduler = mock(Scheduler.class);
     launchScheduler.setScheduler(scheduler);
     when(launchScheduler.getScheduler()).thenReturn(scheduler);
-    sched = DefaultFlightSchedule.CLIENT;
+    sched = StandardFlightSchedule.CLIENT;
     history = new FlightRecorder();
     target = new LaunchPad(launchScheduler, sched, history, flightPlan);
   }
@@ -167,7 +167,7 @@ public class LaunchPadTest extends Goddard {
 
   @Test
   public void getFlightSchedule_Args__() throws Exception {
-    DefaultFlightSchedule actual = target.getFlightSchedule();
+    StandardFlightSchedule actual = target.getFlightSchedule();
     assertThat(actual, is(notNullValue()));
   }
 

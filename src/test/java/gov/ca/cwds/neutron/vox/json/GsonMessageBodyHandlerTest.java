@@ -18,7 +18,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.schedule.RocketCommandInstruction;
+import gov.ca.cwds.neutron.vox.RocketCommandInstruction;
 import gov.ca.cwds.neutron.vox.json.GsonMessageBodyHandler;
 
 public class GsonMessageBodyHandlerTest {

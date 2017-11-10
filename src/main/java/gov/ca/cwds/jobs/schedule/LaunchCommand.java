@@ -28,11 +28,13 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.inject.HyperCube;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
+import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
+import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
+import gov.ca.cwds.neutron.inject.HyperCube;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.LaunchPad;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
@@ -106,7 +108,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
         new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
     final Date now = new DateTime().minusHours(initialMode ? 876000 : hoursInPast).toDate();
 
-    for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
+    for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
       final FlightPlan opts = new FlightPlan(commonFlightPlan);
 
       // Find the rocket's time file under the base directory:
@@ -167,7 +169,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * @throws IOException on file error
    */
   protected void handleTimeFile(final FlightPlan opts, final DateFormat fmt, final Date now,
-      final DefaultFlightSchedule sched) throws IOException {
+      final StandardFlightSchedule sched) throws IOException {
     final StringBuilder buf = new StringBuilder();
 
     buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getShortName())
@@ -245,7 +247,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       configureInitialMode(now);
 
       // Prepare launch pads and flight plans.
-      for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
+      for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
         final Class<?> klass = sched.getRocketClass();
         final FlightPlan opts = new FlightPlan(commonFlightPlan);
         handleTimeFile(opts, fmt, now, sched);

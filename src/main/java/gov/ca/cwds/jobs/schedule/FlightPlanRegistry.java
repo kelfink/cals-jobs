@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 
 @Singleton
 public class FlightPlanRegistry implements AtomFlightPlanManager {

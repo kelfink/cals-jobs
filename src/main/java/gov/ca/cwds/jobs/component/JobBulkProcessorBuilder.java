@@ -6,6 +6,7 @@ import org.elasticsearch.common.unit.ByteSizeValue;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.launch.listener.NeutronBulkProcessorListener;
 
 /**

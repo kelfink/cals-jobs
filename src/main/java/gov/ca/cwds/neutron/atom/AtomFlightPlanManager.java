@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.neutron.atom;
 
 import gov.ca.cwds.jobs.config.FlightPlan;
 

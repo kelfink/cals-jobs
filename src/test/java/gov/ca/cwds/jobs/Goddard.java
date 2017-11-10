@@ -58,10 +58,8 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.schedule.AtomFlightPlanManager;
-import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightPlanRegistry;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -69,6 +67,8 @@ import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
+import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
@@ -135,7 +135,7 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
   public FlightLog flightRecord;
   public FlightRecorder flightRecorder;
   public FlightPlanRegistry flightPlanRegistry;
-  public DefaultFlightSchedule flightSchedule;
+  public StandardFlightSchedule flightSchedule;
 
   public Scheduler scheduler;
   public LaunchScheduler launchScheduler;
@@ -180,7 +180,7 @@ public class Goddard<T extends PersistentObject, M extends ApiGroupNormalizer<?>
 
     mach1Rocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
     flightPlanRegistry = new FlightPlanRegistry(flightPlan);
-    flightSchedule = DefaultFlightSchedule.CLIENT;
+    flightSchedule = StandardFlightSchedule.CLIENT;
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(sessionFactory.createEntityManager()).thenReturn(em);

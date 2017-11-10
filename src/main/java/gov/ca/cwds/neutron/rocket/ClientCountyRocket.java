@@ -32,7 +32,6 @@ import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
  * Job to load Clients from CMS into ElasticSearch.
@@ -68,11 +67,6 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
   }
 
   @Override
-  public boolean useTransformThread() {
-    return false;
-  }
-
-  @Override
   public EsClientAddress extract(ResultSet rs) throws SQLException {
     return EsClientAddress.extract(rs);
   }
@@ -84,7 +78,7 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
 
   @Override
   public String getInitialLoadViewName() {
-    return "MQT_CLIENT_ADDRESS";
+    return "CLIENT_T";
   }
 
   @Override
@@ -125,25 +119,25 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
 
       try {
         final ProcedureCall proc = session.createStoredProcedureCall(schema + ".PRCCLNCNTY");
-        proc.registerStoredProcedureParameter("MQTNAME", String.class, ParameterMode.IN);
-        proc.registerStoredProcedureParameter("RETSTATUS", String.class, ParameterMode.OUT);
-        proc.registerStoredProcedureParameter("RETMESSAG", String.class, ParameterMode.OUT);
+        proc.registerStoredProcedureParameter("PARM_CRUD", String.class, ParameterMode.IN);
+        proc.registerStoredProcedureParameter("PARM_ID", String.class, ParameterMode.IN);
+        proc.registerStoredProcedureParameter("PARM_TRIGTBL", String.class, ParameterMode.IN);
+        proc.registerStoredProcedureParameter("RETCODE", Integer.class, ParameterMode.OUT);
 
-        proc.setParameter("MQTNAME", getMQTName());
+        proc.setParameter("PARM_CRUD", "0");
+        proc.setParameter("PARM_ID", "");
+        proc.setParameter("PARM_TRIGTBL", "");
         proc.execute();
 
-        final String returnStatus = (String) proc.getOutputParameterValue("RETSTATUS");
-        final String returnMsg = (String) proc.getOutputParameterValue("RETMESSAG");
+        final int retcode = ((Integer) proc.getOutputParameterValue("RETCODE")).intValue();
+        LOGGER.info("client count proc: retcode: {}", retcode);
 
-        LOGGER.info("refresh MQT proc: status: {}, msg: {}", returnStatus, returnMsg);
-
-        if (returnStatus.charAt(0) != '0') {
-          LOGGER.error("REFRESH MQT ERROR! {}", returnMsg);
-          throw new DaoException("REFRESH MQT ERROR: " + returnMsg);
+        if (retcode != 0) {
+          LOGGER.error("FAILED TO CALL PROC! retcode: {}", retcode);
+          throw new DaoException("FAILED TO CALL PROC! retcode: " + retcode);
         }
-
       } catch (DaoException h) {
-        throw h;
+        throw h; // just re-throw
       }
     }
   }
@@ -156,6 +150,17 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
     bigRetrieveByJdbc();
   }
 
+  /**
+   * NEXT: Turn this method into a rocket setting.
+   */
+  @Override
+  public boolean useTransformThread() {
+    return false;
+  }
+
+  /**
+   * NEXT: Turn this method into a rocket setting.
+   */
   @Override
   public boolean isInitialLoadJdbc() {
     return true;
@@ -164,20 +169,6 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
   @Override
   public List<Pair<String, String>> getPartitionRanges() {
     return NeutronJdbcUtils.getCommonPartitionRanges64(this);
-  }
-
-  /**
-   * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
-   * sensitive flag must be deleted.
-   */
-  @Override
-  public boolean mustDeleteLimitedAccessRecords() {
-    return !getFlightPlan().isLoadSealedAndSensitive();
-  }
-
-  @Override
-  public List<ReplicatedClient> normalize(List<EsClientAddress> recs) {
-    return EntityNormalizer.<ReplicatedClient, EsClientAddress>normalizeList(recs);
   }
 
   @Override

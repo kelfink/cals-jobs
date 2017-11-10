@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.neutron.vox;
 
 import gov.ca.cwds.data.std.ApiMarker;
 

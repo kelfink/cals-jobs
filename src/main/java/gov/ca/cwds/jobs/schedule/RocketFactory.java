@@ -16,6 +16,7 @@ import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
+import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.shrinkray.NeutronClassFinder;
 
@@ -81,7 +82,7 @@ public class RocketFactory implements AtomRocketFactory {
     NeutronRocket ret;
     try {
       final FlightPlan opts = flightPlanRegistry.getFlightPlan(klazz);
-      ret = new NeutronRocket(createJob(klazz, opts), DefaultFlightSchedule.lookupByClass(klazz),
+      ret = new NeutronRocket(createJob(klazz, opts), StandardFlightSchedule.lookupByClass(klazz),
           flightRecorder);
     } catch (NeutronException e) {
       throw new SchedulerException("NO ROCKET SETTINGS!", e);

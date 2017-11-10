@@ -6,7 +6,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.jobs.component.FlightLog;
+import gov.ca.cwds.neutron.flight.FlightLog;
 
 public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
 

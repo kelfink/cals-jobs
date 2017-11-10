@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.neutron.flight;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -17,8 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
-import gov.ca.cwds.jobs.schedule.FlightStatus;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
+import gov.ca.cwds.neutron.enums.FlightStatus;
+import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.flight.FlightSummary;
 
 public class FlightSummaryTest {
 
@@ -28,7 +30,7 @@ public class FlightSummaryTest {
 
   @Before
   public void setup() throws Exception {
-    target = new FlightSummary(DefaultFlightSchedule.CLIENT);
+    target = new FlightSummary(StandardFlightSchedule.CLIENT);
   }
 
   @Test

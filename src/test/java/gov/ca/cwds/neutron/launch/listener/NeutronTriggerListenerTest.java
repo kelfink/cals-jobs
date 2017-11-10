@@ -18,12 +18,12 @@ import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.schedule.DefaultFlightSchedule;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
-import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
+import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 
 public class NeutronTriggerListenerTest extends Goddard {
 
@@ -67,7 +67,7 @@ public class NeutronTriggerListenerTest extends Goddard {
     when(trigger.getKey()).thenReturn(triggerKey);
     when(jobDataMap.getString(any(String.class))).thenReturn(TestIndexerJob.class.getName());
 
-    neutronScheduler.scheduleLaunch(TestIndexerJob.class, DefaultFlightSchedule.CLIENT, flightPlan);
+    neutronScheduler.scheduleLaunch(TestIndexerJob.class, StandardFlightSchedule.CLIENT, flightPlan);
     target = new NeutronTriggerListener(neutronScheduler);
   }
 

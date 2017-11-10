@@ -9,9 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.component.FlightLog;
-import gov.ca.cwds.jobs.component.FlightSummary;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
+import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.flight.FlightSummary;
 
 public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
 
@@ -22,8 +22,8 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
 
   private final Map<Class<?>, FlightLog> lastFlightLogs = new ConcurrentHashMap<>();
 
-  private final Map<DefaultFlightSchedule, FlightSummary> flightSummaries =
-      new EnumMap<>(DefaultFlightSchedule.class);
+  private final Map<StandardFlightSchedule, FlightSummary> flightSummaries =
+      new EnumMap<>(StandardFlightSchedule.class);
 
   @Override
   public Map<Class<?>, CircularFifoQueue<FlightLog>> getFlightLogHistory() {
@@ -52,7 +52,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
   }
 
   @Override
-  public synchronized void summarizeFlight(DefaultFlightSchedule flightSchedule,
+  public synchronized void summarizeFlight(StandardFlightSchedule flightSchedule,
       FlightLog flightLog) {
     FlightSummary summary = flightSummaries.get(flightSchedule);
     if (summary == null) {
@@ -64,7 +64,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
   }
 
   @Override
-  public FlightSummary getFlightSummary(DefaultFlightSchedule flightSchedule) {
+  public FlightSummary getFlightSummary(StandardFlightSchedule flightSchedule) {
     return flightSummaries.get(flightSchedule);
   }
 

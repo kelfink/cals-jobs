@@ -11,7 +11,7 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
 
-import gov.ca.cwds.jobs.schedule.NeutronSchedulerConstants;
+import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.launch.listener.NeutronSchedulerListener;
 
 public class NeutronSchedulerListenerTest {

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.inject;
+package gov.ca.cwds.neutron.inject;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -25,13 +25,14 @@ import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.AtomLaunchCommand;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
+import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
+import gov.ca.cwds.neutron.inject.HyperCube;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 

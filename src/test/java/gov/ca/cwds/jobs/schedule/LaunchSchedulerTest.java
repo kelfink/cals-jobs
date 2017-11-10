@@ -19,11 +19,13 @@ import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.component.FlightLog;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
+import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
+import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.launch.LaunchPad;
 
 public class LaunchSchedulerTest extends Goddard {
@@ -111,7 +113,7 @@ public class LaunchSchedulerTest extends Goddard {
   @Test
   public void scheduleJob_Args__Class__DefaultFlightSchedule__FlightPlan() throws Exception {
     Class<?> klass = Mach1TestRocket.class;
-    DefaultFlightSchedule sched = DefaultFlightSchedule.CLIENT;
+    StandardFlightSchedule sched = StandardFlightSchedule.CLIENT;
     LaunchPad actual = target.scheduleLaunch(klass, sched, flightPlan);
     assertThat(actual, is(notNullValue()));
   }

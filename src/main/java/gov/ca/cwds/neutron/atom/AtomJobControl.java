@@ -1,7 +1,7 @@
 package gov.ca.cwds.neutron.atom;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.component.FlightLog;
+import gov.ca.cwds.neutron.flight.FlightLog;
 
 /**
  * Job control interface.

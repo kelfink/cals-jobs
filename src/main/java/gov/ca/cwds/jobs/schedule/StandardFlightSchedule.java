@@ -23,8 +23,9 @@ import gov.ca.cwds.jobs.ReporterIndexerJob;
 import gov.ca.cwds.jobs.SafetyAlertIndexerJob;
 import gov.ca.cwds.jobs.ServiceProviderIndexerJob;
 import gov.ca.cwds.jobs.SubstituteCareProviderIndexJob;
+import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 
-public enum DefaultFlightSchedule {
+public enum StandardFlightSchedule {
 
   //
   // Person document roots.
@@ -112,17 +113,17 @@ public enum DefaultFlightSchedule {
 
   private final String jsonElement;
 
-  private static final Map<String, DefaultFlightSchedule> mapName = new ConcurrentHashMap<>();
+  private static final Map<String, StandardFlightSchedule> mapName = new ConcurrentHashMap<>();
 
-  private static final Map<Class<?>, DefaultFlightSchedule> mapClass = new ConcurrentHashMap<>();
+  private static final Map<Class<?>, StandardFlightSchedule> mapClass = new ConcurrentHashMap<>();
   static {
-    for (DefaultFlightSchedule sched : DefaultFlightSchedule.values()) {
+    for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
       mapName.put(sched.shortName, sched);
       mapClass.put(sched.klazz, sched);
     }
   }
 
-  private DefaultFlightSchedule(Class<?> klazz, String shortName, int initialLoadOrder,
+  private StandardFlightSchedule(Class<?> klazz, String shortName, int initialLoadOrder,
       int startDelaySeconds, int periodSeconds, int lastRunPriority, String jsonElement) {
     this.klazz = klazz;
     this.shortName = shortName;
@@ -136,11 +137,11 @@ public enum DefaultFlightSchedule {
   public static JobChainingJobListener buildInitialLoadJobChainListener() {
     final JobChainingJobListener ret = new JobChainingJobListener("initial_load");
 
-    final DefaultFlightSchedule[] arr =
-        Arrays.copyOf(DefaultFlightSchedule.values(), DefaultFlightSchedule.values().length);
+    final StandardFlightSchedule[] arr =
+        Arrays.copyOf(StandardFlightSchedule.values(), StandardFlightSchedule.values().length);
     Arrays.sort(arr, (o1, o2) -> Integer.compare(o1.initialLoadOrder, o2.initialLoadOrder));
 
-    DefaultFlightSchedule sched;
+    StandardFlightSchedule sched;
     final int len = arr.length;
     for (int i = 0; i < len; i++) {
       sched = arr[i];
@@ -180,11 +181,11 @@ public enum DefaultFlightSchedule {
     return jsonElement;
   }
 
-  public static DefaultFlightSchedule lookupByJobName(String key) {
+  public static StandardFlightSchedule lookupByJobName(String key) {
     return mapName.get(key);
   }
 
-  public static DefaultFlightSchedule lookupByClass(Class<?> key) {
+  public static StandardFlightSchedule lookupByClass(Class<?> key) {
     return mapClass.get(key);
   }
 

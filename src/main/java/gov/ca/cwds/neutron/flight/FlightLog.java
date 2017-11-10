@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.component;
+package gov.ca.cwds.neutron.flight;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -16,9 +16,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.collect.ImmutableList;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.schedule.FlightStatus;
 import gov.ca.cwds.jobs.util.JobDateUtil;
 import gov.ca.cwds.neutron.atom.AtomJobControl;
+import gov.ca.cwds.neutron.enums.FlightStatus;
 
 /**
  * Track rocket flight progress and record counts.

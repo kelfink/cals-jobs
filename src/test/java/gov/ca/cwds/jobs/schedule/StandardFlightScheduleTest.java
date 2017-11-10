@@ -9,29 +9,29 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.quartz.listeners.JobChainingJobListener;
 
-public class DefaultFlightScheduleTest {
+public class StandardFlightScheduleTest {
   @Test
   public void type() throws Exception {
-    assertThat(DefaultFlightSchedule.class, notNullValue());
+    assertThat(StandardFlightSchedule.class, notNullValue());
   }
 
   @Test
   public void getName_Args__() throws Exception {
-    DefaultFlightSchedule target = DefaultFlightSchedule.CHILD_CASE;
+    StandardFlightSchedule target = StandardFlightSchedule.CHILD_CASE;
     String actual = target.getShortName();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void isNewDocument_Args__() throws Exception {
-    DefaultFlightSchedule target = DefaultFlightSchedule.CLIENT;
+    StandardFlightSchedule target = StandardFlightSchedule.CLIENT;
     boolean actual = target.isNewDocument();
     assertThat(actual, is(equalTo(true)));
   }
 
   @Test
   public void getStartDelaySeconds_Args__() throws Exception {
-    DefaultFlightSchedule target = DefaultFlightSchedule.COLLATERAL_INDIVIDUAL;
+    StandardFlightSchedule target = StandardFlightSchedule.COLLATERAL_INDIVIDUAL;
     int actual = target.getStartDelaySeconds();
     int expected = 10;
     assertThat(actual, is(not(expected)));
@@ -39,7 +39,7 @@ public class DefaultFlightScheduleTest {
 
   @Test
   public void getPeriodSeconds_Args__() throws Exception {
-    DefaultFlightSchedule target = DefaultFlightSchedule.PARENT_CASE;
+    StandardFlightSchedule target = StandardFlightSchedule.PARENT_CASE;
     int actual = target.getWaitPeriodSeconds();
     int expected = 0;
     assertThat(actual, is(not(expected)));
@@ -47,14 +47,14 @@ public class DefaultFlightScheduleTest {
 
   @Test
   public void getLoadOrder_Args__() throws Exception {
-    DefaultFlightSchedule target = DefaultFlightSchedule.COLLATERAL_INDIVIDUAL;
+    StandardFlightSchedule target = StandardFlightSchedule.COLLATERAL_INDIVIDUAL;
     int actual = target.getLastRunPriority();
     assertThat(actual, is(not(5)));
   }
 
   @Test
   public void getJsonElement_Args__() throws Exception {
-    DefaultFlightSchedule target = DefaultFlightSchedule.REFERRAL;
+    StandardFlightSchedule target = StandardFlightSchedule.REFERRAL;
     String actual = target.getJsonElement();
     String expected = "referrals";
     assertThat(actual, is(equalTo(expected)));
@@ -63,20 +63,20 @@ public class DefaultFlightScheduleTest {
   @Test
   public void lookupByJobName_Args__String() throws Exception {
     String key = "client";
-    DefaultFlightSchedule actual = DefaultFlightSchedule.lookupByJobName(key);
-    DefaultFlightSchedule expected = DefaultFlightSchedule.CLIENT;
+    StandardFlightSchedule actual = StandardFlightSchedule.lookupByJobName(key);
+    StandardFlightSchedule expected = StandardFlightSchedule.CLIENT;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void buildFullLoadJobChainListener_Args__() throws Exception {
-    JobChainingJobListener actual = DefaultFlightSchedule.buildInitialLoadJobChainListener();
+    JobChainingJobListener actual = StandardFlightSchedule.buildInitialLoadJobChainListener();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void getShortName_Args__() throws Exception {
-    DefaultFlightSchedule target = DefaultFlightSchedule.CLIENT;
+    StandardFlightSchedule target = StandardFlightSchedule.CLIENT;
     String actual = target.getShortName();
     String expected = "client";
     assertThat(actual, is(equalTo(expected)));
@@ -84,21 +84,21 @@ public class DefaultFlightScheduleTest {
 
   @Test
   public void getWaitPeriodSeconds_Args__() throws Exception {
-    DefaultFlightSchedule target = DefaultFlightSchedule.CLIENT;
+    StandardFlightSchedule target = StandardFlightSchedule.CLIENT;
     int actual = target.getWaitPeriodSeconds();
     assertThat(actual, is(not(0)));
   }
 
   @Test
   public void getLastRunPriority_Args__() throws Exception {
-    DefaultFlightSchedule target = DefaultFlightSchedule.CLIENT;
+    StandardFlightSchedule target = StandardFlightSchedule.CLIENT;
     int actual = target.getLastRunPriority();
     assertThat(actual, is(not(0)));
   }
 
   @Test
   public void getInitialLoadOrder_Args__() throws Exception {
-    DefaultFlightSchedule target = DefaultFlightSchedule.CLIENT;
+    StandardFlightSchedule target = StandardFlightSchedule.CLIENT;
     int actual = target.getInitialLoadOrder();
     int expected = 1;
     assertThat(actual, is(equalTo(expected)));
