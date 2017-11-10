@@ -10,15 +10,14 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.BasePersonIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 
 public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends BasePersonIndexerJob<T, M> {
 
   public InitialLoadJdbcRocket(BaseDaoImpl<T> jobDao, ElasticsearchDao esDao,
-      String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
-      FlightRecorder jobHistory, FlightPlan opts) {
-    super(jobDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, opts);
+      String lastRunFile, ObjectMapper mapper, SessionFactory sessionFactory,
+      FlightPlan flightPlan) {
+    super(jobDao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
   }
 
   @Override

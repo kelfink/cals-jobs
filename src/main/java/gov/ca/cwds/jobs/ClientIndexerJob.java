@@ -77,7 +77,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
       FlightPlan opts) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, opts);
   }
 
   @Override
@@ -129,7 +129,6 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
   }
-
 
   /**
    * Send all recs for same client id to the index queue.

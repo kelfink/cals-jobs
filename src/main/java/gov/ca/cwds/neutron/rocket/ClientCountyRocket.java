@@ -24,7 +24,6 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
@@ -32,7 +31,6 @@ import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * Job to load Clients from CMS into ElasticSearch.
@@ -46,6 +44,10 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(ClientCountyRocket.class);
 
+  private static final String INSERT_CLIENT_INITIAL_LOAD =
+      "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT CLT.IDENTIFIER \nFROM CLIENT_T x\n"
+          + "WHERE x.IDENTIFIER BETWEEN ':fromId' AND ':toId' ";
+
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   /**
@@ -53,18 +55,16 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
    * 
    * @param dao Client DAO
    * @param esDao ElasticSearch DAO
-   * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
+   * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
-   * @param flightRecorder job history
-   * @param opts command line options
+   * @param flightPlan command line options
    */
   @Inject
   public ClientCountyRocket(final ReplicatedClientDao dao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder flightRecorder,
-      FlightPlan opts) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, flightRecorder, opts);
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory, FlightPlan flightPlan) {
+    super(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
   }
 
   @Override
@@ -72,13 +72,16 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
     return EsClientAddress.extract(rs);
   }
 
+  /**
+   * NEXT: turn into a fixed rocket setting, not override method.
+   */
   @Override
   public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
     return EsClientAddress.class;
   }
 
   /**
-   * NEXT: fixed rocket setting, not override method.
+   * NEXT: turn into a fixed rocket setting, not override method.
    */
   @Override
   public String getInitialLoadViewName() {
@@ -86,7 +89,7 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
   }
 
   /**
-   * NEXT: fixed rocket setting, not override method.
+   * NEXT: turn into a fixed rocket setting, not override method.
    */
   @Override
   public String getMQTName() {
@@ -94,7 +97,7 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
   }
 
   /**
-   * NEXT: fixed rocket setting, not override method.
+   * NEXT: turn into a fixed rocket setting, not override method.
    */
   @Override
   public String getJdbcOrderBy() {
@@ -122,13 +125,8 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
    */
   @Override
   public void handleRangeResults(final ResultSet rs) throws SQLException {
-    int cntr = 0;
-    EsClientAddress m;
-
-    // NOTE: Assumes that records are sorted by group key.
-    while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
-      JobLogs.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
-    }
+    // Call the stored procedure once for all client id's inserted into the global temporary table.
+    callProc();
   }
 
   /**

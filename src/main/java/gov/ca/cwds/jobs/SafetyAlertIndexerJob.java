@@ -69,7 +69,7 @@ public class SafetyAlertIndexerJob
       @LastRunFile String lastJobRunTimeFilename, ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
       FlightPlan opts) {
-    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
+    super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, opts);
   }
 
   @Override

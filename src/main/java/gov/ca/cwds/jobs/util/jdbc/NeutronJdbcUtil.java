@@ -71,9 +71,9 @@ public final class NeutronJdbcUtil {
   }
 
   public static void prepHibernateLastChange(final Session session, final Date lastRunTime,
-      final String sqlPrepLastChange, final Function<Connection, PreparedStatement> func) {
-    final Work work = new WorkPrepareLastChange(lastRunTime, sqlPrepLastChange, func);
-    session.clear();
+      final String sql, final Function<Connection, PreparedStatement> func) {
+    final Work work = new WorkPrepareLastChange(lastRunTime, sql, func);
+    session.clear(); // Fixes Hibernate "duplicate object" bug
     session.doWork(work);
   }
 
@@ -83,8 +83,8 @@ public final class NeutronJdbcUtil {
     LOGGER.info("len: {}, skip: {}", len, skip);
 
     final Integer[] positions =
-        IntStream.rangeClosed(0, len - 1).boxed().flatMap(NeutronStreamUtil.everyNth(skip))
-            .sorted().sequential().collect(Collectors.toList()).toArray(new Integer[0]);
+        IntStream.rangeClosed(0, len - 1).boxed().flatMap(NeutronStreamUtil.everyNth(skip)).sorted()
+            .sequential().collect(Collectors.toList()).toArray(new Integer[0]);
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info(ToStringBuilder.reflectionToString(positions, ToStringStyle.MULTI_LINE_STYLE));
