@@ -191,6 +191,7 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
       proc.setParameter("PARM_CRUD", "O");
       proc.setParameter("PARM_ID", "");
       proc.setParameter("PARM_TRIGTBL", "");
+      proc.setCacheable(false);
       proc.execute();
 
       final Integer origOut = (Integer) proc.getOutputParameterValue("RETCODE");
