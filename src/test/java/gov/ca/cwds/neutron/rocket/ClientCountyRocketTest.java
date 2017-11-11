@@ -105,6 +105,11 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
 
   @Test
   public void pullRange_Args__Pair() throws Exception {
+    final LaunchCommandSettings settings = new LaunchCommandSettings();
+    settings.setInitialMode(true);
+    LaunchCommand.setSettings(settings);
+
+    when(procedureCall.getOutputParameterValue(any(String.class))).thenReturn(new Integer(0));
     target.pullRange(pair);
   }
 
