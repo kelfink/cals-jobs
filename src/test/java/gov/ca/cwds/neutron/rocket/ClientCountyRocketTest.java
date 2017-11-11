@@ -23,7 +23,6 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.schedule.LaunchCommandSettings;
 
 public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAddress> {
 
@@ -34,10 +33,14 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
   @Override
   public void setup() throws Exception {
     super.setup();
+
+    LaunchCommand.getSettings().setInitialMode(true);
     dao = new ReplicatedClientDao(sessionFactory);
     target = new ClientCountyRocket(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
         flightPlan);
     pair = Pair.of("aaaaaaaaaa", "9999999999");
+
+    when(procedureCall.getOutputParameterValue(any(String.class))).thenReturn(new Integer(0));
   }
 
   @Test
@@ -108,37 +111,23 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
 
   @Test
   public void pullRange_Args__Pair() throws Exception {
-    final LaunchCommandSettings settings = new LaunchCommandSettings();
-    settings.setInitialMode(true);
-    LaunchCommand.setSettings(settings);
-
-    when(procedureCall.getOutputParameterValue(any(String.class))).thenReturn(new Integer(0));
     target.pullRange(pair);
   }
 
   @Test(expected = JobsException.class)
   public void pullRange_Args__Pair__boom() throws Exception {
-    final LaunchCommandSettings settings = new LaunchCommandSettings();
-    settings.setInitialMode(true);
-    LaunchCommand.setSettings(settings);
-
-    when(procedureCall.getOutputParameterValue(any(String.class))).thenReturn(new Integer(0));
     doThrow(new SQLException()).when(con).commit();
     target.pullRange(pair);
   }
 
   @Test
   public void callProc_Args__() throws Exception {
-    final LaunchCommandSettings settings = new LaunchCommandSettings();
-    settings.setInitialMode(true);
-    LaunchCommand.setSettings(settings);
-
-    when(procedureCall.getOutputParameterValue(any(String.class))).thenReturn(new Integer(0));
     target.callProc();
   }
 
   @Test
   public void threadRetrieveByJdbc_Args__() throws Exception {
+    // NeutronThreadUtil.catchYourBreath();
     target.threadRetrieveByJdbc();
   }
 

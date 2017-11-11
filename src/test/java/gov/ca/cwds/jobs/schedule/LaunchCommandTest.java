@@ -120,7 +120,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   @Test
   public void isInitialMode_Args__() throws Exception {
     boolean actual = LaunchCommand.isInitialMode();
-    boolean expected = false;
+    boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 

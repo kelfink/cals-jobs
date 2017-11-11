@@ -158,6 +158,9 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     MockitoAnnotations.initMocks(this);
     System.setProperty("DB_CMS_SCHEMA", "CWSRS1");
 
+    LaunchCommand.getSettings().setInitialMode(true);
+    LaunchCommand.getSettings().setTestMode(true);
+
     // Last run time:
     tempFile = tempFolder.newFile("tempFile.txt");
     jobConfigFile = tempFolder.newFile("jobConfigFile.yml");
@@ -249,6 +252,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
 
     when(flightPlan.isLoadSealedAndSensitive()).thenReturn(false);
     when(flightPlan.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
+    when(flightPlan.getThreadCount()).thenReturn(1L);
 
     // Queries.
     nq = mock(NativeQuery.class);
