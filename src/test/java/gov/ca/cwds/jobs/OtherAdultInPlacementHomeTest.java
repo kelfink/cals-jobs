@@ -25,7 +25,7 @@ public class OtherAdultInPlacementHomeTest
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedOtherAdultInPlacemtHomeDao(this.sessionFactory);
-    target = new OtherAdultInPlacemtHomeIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+    target = new OtherAdultInPlacemtHomeIndexerJob(dao, esDao, lastRunFile, MAPPER,
         sessionFactory, flightPlan);
   }
 

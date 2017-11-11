@@ -49,7 +49,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
 
     flightPlan.setEsConfigLoc("config/local.yaml");
     flightPlan.setBaseDirectory("/var/lib/jenkins/");
-    flightPlan.setLastRunLoc(lastJobRunTimeFilename);
+    flightPlan.setLastRunLoc(lastRunFile);
 
     target = new LaunchCommand(flightRecorder, launchScheduler, esDao);
     target.setCommonFlightPlan(flightPlan);

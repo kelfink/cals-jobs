@@ -24,7 +24,7 @@ public class ChildCaseHistoryIndexerJobTest
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedPersonCasesDao(this.sessionFactory);
-    target = new ChildCaseHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+    target = new ChildCaseHistoryIndexerJob(dao, esDao, lastRunFile, MAPPER,
         sessionFactory, flightRecorder, flightPlan);
   }
 

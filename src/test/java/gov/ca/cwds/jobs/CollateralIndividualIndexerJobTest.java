@@ -29,7 +29,7 @@ public class CollateralIndividualIndexerJobTest
     super.setup();
 
     dao = new ReplicatedCollateralIndividualDao(sessionFactory);
-    target = new CollateralIndividualIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+    target = new CollateralIndividualIndexerJob(dao, esDao, lastRunFile, MAPPER,
         sessionFactory, flightRecorder, flightPlan);
     target.setFlightPlan(FlightPlanTest.makeGeneric());
   }

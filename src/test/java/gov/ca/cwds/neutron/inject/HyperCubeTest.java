@@ -99,7 +99,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     flightPlan = new FlightPlan();
     flightPlan.setEsConfigLoc("config/local.yaml");
     target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()),
-        lastJobRunTimeFilename);
+        lastRunFile);
 
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");

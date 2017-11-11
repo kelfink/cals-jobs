@@ -79,7 +79,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedClientDao(sessionFactory);
-    target = new ClientIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory,
+    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, sessionFactory,
         flightPlan);
   }
 
@@ -90,7 +90,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void instantiation() throws Exception {
-    target = new ClientIndexerJob(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory,
+    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, sessionFactory,
         flightPlan);
     assertThat(target, notNullValue());
   }
@@ -191,7 +191,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     when(con.createStatement()).thenThrow(SQLException.class);
     final Pair<String, String> p = pair;
 
-    TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastJobRunTimeFilename,
+    TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile,
         mapper, sessionFactory, flightRecorder, flightPlan);
     target.setTxn(transaction);
     target.pullRange(p);
@@ -263,7 +263,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     rep.setBirthCity("Glasgow");
 
     dao = mock(ReplicatedClientDao.class);
-    TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastJobRunTimeFilename,
+    TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile,
         mapper, sessionFactory, flightRecorder, flightPlan);
     target.setTxn(transaction);
     when(dao.find(any())).thenReturn(rep);

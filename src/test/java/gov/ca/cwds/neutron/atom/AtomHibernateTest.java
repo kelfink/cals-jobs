@@ -77,7 +77,7 @@ public class AtomHibernateTest extends Goddard<TestNormalizedEntity, TestDenorma
   public void setup() throws Exception {
     super.setup();
     dao = new TestNormalizedEntityDao(sessionFactory);
-    target = new TestAtomHibernate(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
+    target = new TestAtomHibernate(dao, esDao, lastRunFile, MAPPER, sessionFactory,
         flightRecorder);
   }
 

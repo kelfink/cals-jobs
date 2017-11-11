@@ -51,7 +51,7 @@ public class RocketFactoryTest extends Goddard {
     when(jd.getJobDataMap()).thenReturn(jobDataMap);
     when(jobDataMap.getString(any())).thenReturn(Mach1TestRocket.class.getName());
 
-    rocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
+    rocket = new Mach1TestRocket(testNormalizedEntityDao, esDao, lastRunFile, MAPPER);
     when(injector.getInstance(any(Class.class))).thenReturn(rocket);
 
     target = new RocketFactory(injector, opts, flightPlanRegistry, flightRecorder);

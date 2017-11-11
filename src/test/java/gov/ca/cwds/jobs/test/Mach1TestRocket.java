@@ -13,25 +13,34 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
+import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
- * Test rocket. Don't lite this candle in production because Mach 1 versions tend to, well, explode.
+ * Test rocket. Don't light this candle in production because Mach 1 versions tend to, well,
+ * explode.
  * 
  * @author CWDS API Team
  * @see Goddard
  */
-public class Mach1TestRocket
-    extends BasePersonRocket<TestNormalizedEntity, TestDenormalizedEntity>
+public class Mach1TestRocket extends BasePersonRocket<TestNormalizedEntity, TestDenormalizedEntity>
     implements ApiGroupNormalizer<TestDenormalizedEntity> {
+
+  private static final String INSERT_CLIENT_LAST_CHG =
+      "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT CLT.IDENTIFIER \nFROM CLIENT_T clt\n"
+          + "WHERE CLT.IBMSNAP_LOGMARKER > ?\nUNION\n" + "SELECT CLT.IDENTIFIER "
+          + "FROM CLIENT_T clt\n" + "JOIN CL_ADDRT cla ON clt.IDENTIFIER = cla.FKCLIENT_T \n"
+          + "WHERE CLA.IBMSNAP_LOGMARKER > ?\nUNION\n" + "SELECT CLT.IDENTIFIER "
+          + "FROM CLIENT_T clt\n" + "JOIN CL_ADDRT cla ON clt.IDENTIFIER = cla.FKCLIENT_T\n"
+          + "JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER\n"
+          + "WHERE ADR.IBMSNAP_LOGMARKER > ?";
 
   private boolean fakeMarkDone;
   private boolean fakeFinish = true;
@@ -42,10 +51,10 @@ public class Mach1TestRocket
   private boolean shouldDelete = false;
 
   @Inject
-  public Mach1TestRocket(final ElasticsearchDao esDao,
-      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      FlightRecorder jobHistory) {
-    super(null, esDao, lastJobRunTimeFilename, mapper, null, null);
+  public Mach1TestRocket(final BaseDaoImpl<TestNormalizedEntity> jobDao,
+      final ElasticsearchDao esDao, @LastRunFile final String lastRunFile,
+      final ObjectMapper mapper) {
+    super(jobDao, esDao, lastRunFile, mapper, null, null);
   }
 
   @Override
@@ -66,6 +75,11 @@ public class Mach1TestRocket
   @Override
   public String getInitialLoadViewName() {
     return "VW_NUTTIN";
+  }
+
+  @Override
+  public String getMQTName() {
+    return getInitialLoadViewName();
   }
 
   public String getDriverTableNative() {
@@ -90,6 +104,26 @@ public class Mach1TestRocket
   @Override
   public Serializable getNormalizationGroupKey() {
     return null;
+  }
+
+  @Override
+  public String getPrepLastChangeSQL() {
+    return INSERT_CLIENT_LAST_CHG;
+  }
+
+  @Override
+  public String getInitialLoadQuery(String dbSchemaName) {
+    final StringBuilder buf = new StringBuilder();
+
+    buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
+        .append(" x WHERE x.clt_identifier BETWEEN ':fromId' AND ':toId' ");
+
+    if (!getFlightPlan().isLoadSealedAndSensitive()) {
+      buf.append(" AND x.CLT_SENSTV_IND = 'N' ");
+    }
+
+    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
+    return buf.toString();
   }
 
   @Override
@@ -136,7 +170,6 @@ public class Mach1TestRocket
     }
 
     final List<Pair<String, String>> ret = new ArrayList<>();
-
     if (fakeRanges) {
       ret.add(Pair.of("aaaaaaaaaa", "999999999"));
     }

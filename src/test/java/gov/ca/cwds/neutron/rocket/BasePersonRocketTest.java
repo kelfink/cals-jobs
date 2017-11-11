@@ -67,7 +67,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     super.setup();
 
     dao = new TestNormalizedEntityDao(sessionFactory);
-    target = new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
+    target = new TestIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory,
         flightRecorder);
     target.setFlightPlan(flightPlan);
     target.setFlightLog(flightRecord);

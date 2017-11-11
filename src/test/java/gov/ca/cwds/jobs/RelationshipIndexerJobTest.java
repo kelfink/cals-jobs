@@ -32,7 +32,7 @@ public class RelationshipIndexerJobTest
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedRelationshipsDao(sessionFactory);
-    target = new RelationshipIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
+    target = new RelationshipIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory,
         flightRecorder, flightPlan);
   }
 

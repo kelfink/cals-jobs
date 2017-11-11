@@ -44,7 +44,7 @@ public class ServiceProviderIndexerJobTest extends Goddard {
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedServiceProviderDao(sessionFactory);
-    target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER,
         sessionFactory, flightRecorder, flightPlan);
     target.setFlightPlan(FlightPlanTest.makeGeneric());
   }
@@ -61,7 +61,7 @@ public class ServiceProviderIndexerJobTest extends Goddard {
 
   @Test
   public void testInstantiation() throws Exception {
-    target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER,
         sessionFactory, flightRecorder, flightPlan);
     assertThat(target, notNullValue());
   }
@@ -85,7 +85,7 @@ public class ServiceProviderIndexerJobTest extends Goddard {
 
   @Test
   public void getPartitionRanges_Args__() throws Exception {
-    target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER,
         sessionFactory, flightRecorder, flightPlan);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
@@ -94,7 +94,7 @@ public class ServiceProviderIndexerJobTest extends Goddard {
   @Test
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
-    target = new ServiceProviderIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER,
         sessionFactory, flightRecorder, flightPlan);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));

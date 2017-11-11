@@ -70,6 +70,7 @@ import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
+import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
@@ -114,7 +115,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public File tempFile;
   public File jobConfigFile;
   public File esConfileFile;
-  public String lastJobRunTimeFilename;
+  public String lastRunFile;
   public java.util.Date lastRunTime = new java.util.Date();
 
   public SessionFactory sessionFactory;
@@ -129,12 +130,13 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public ResultSet rs;
   public DatabaseMetaData meta;
   public NativeQuery<M> nq;
-  public ProcedureCall procedureCall;
+  public ProcedureCall proc;
 
   public SystemCodeDao systemCodeDao;
   public SystemMetaDao systemMetaDao;
 
   public Configuration hibernationConfiguration;
+  public TestNormalizedEntityDao testNormalizedEntityDao;
 
   public FlightPlan flightPlan;
   public FlightLog flightRecord;
@@ -147,7 +149,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public ListenerManager listenerManager;
 
   public RocketFactory rocketFactory;
-  public BasePersonRocket mach1Rocket;
+  public Mach1TestRocket mach1Rocket;
   public AtomFlightPlanManager flightPlanManager;
 
   public ObjectMapper mapper;
@@ -164,7 +166,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     // Last run time:
     tempFile = tempFolder.newFile("tempFile.txt");
     jobConfigFile = tempFolder.newFile("jobConfigFile.yml");
-    lastJobRunTimeFilename = tempFile.getAbsolutePath();
+    lastRunFile = tempFile.getAbsolutePath();
     mapper = MAPPER;
     pair = Pair.of("aaaaaaaaaa", "9999999999");
 
@@ -185,10 +187,11 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     scheduler = mock(Scheduler.class);
     listenerManager = mock(ListenerManager.class);
     flightPlanManager = mock(AtomFlightPlanManager.class);
-    procedureCall = mock(ProcedureCall.class);
+    proc = mock(ProcedureCall.class);
     client = mock(Client.class);
 
-    mach1Rocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
+    TestNormalizedEntityDao testNormalizedEntityDao = new TestNormalizedEntityDao(sessionFactory);
+    mach1Rocket = new Mach1TestRocket(testNormalizedEntityDao, esDao, lastRunFile, MAPPER);
     flightPlanRegistry = new FlightPlanRegistry(flightPlan);
     flightSchedule = StandardFlightSchedule.CLIENT;
 
@@ -201,10 +204,11 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(sessionFactory.getProperties()).thenReturn(sessionProperties);
 
+    when(session.getSessionFactory()).thenReturn(sessionFactory);
     when(session.getProperties()).thenReturn(sessionProperties);
     when(session.beginTransaction()).thenReturn(transaction);
     when(session.getTransaction()).thenReturn(transaction);
-    when(session.createStoredProcedureCall(any(String.class))).thenReturn(procedureCall);
+    when(session.createStoredProcedureCall(any(String.class))).thenReturn(proc);
 
     when(sfo.getServiceRegistry()).thenReturn(reg);
     when(reg.getService(ConnectionProvider.class)).thenReturn(cp);

@@ -36,11 +36,11 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
 
     LaunchCommand.getSettings().setInitialMode(true);
     dao = new ReplicatedClientDao(sessionFactory);
-    target = new ClientCountyRocket(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
+    target = new ClientCountyRocket(dao, esDao, lastRunFile, MAPPER, sessionFactory,
         flightPlan);
     pair = Pair.of("aaaaaaaaaa", "9999999999");
 
-    when(procedureCall.getOutputParameterValue(any(String.class))).thenReturn(new Integer(0));
+    when(proc.getOutputParameterValue(any(String.class))).thenReturn(new Integer(0));
   }
 
   @Test

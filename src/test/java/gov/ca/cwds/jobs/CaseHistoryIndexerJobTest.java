@@ -43,7 +43,7 @@ public class CaseHistoryIndexerJobTest extends Goddard {
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedPersonCasesDao(sessionFactory);
-    target = new TestCaseHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+    target = new TestCaseHistoryIndexerJob(dao, esDao, lastRunFile, MAPPER,
         sessionFactory, flightRecorder, flightPlan);
   }
 

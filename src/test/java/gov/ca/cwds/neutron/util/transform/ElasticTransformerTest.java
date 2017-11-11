@@ -59,7 +59,7 @@ public class ElasticTransformerTest extends Goddard {
 
     dao = new TestNormalizedEntityDao(sessionFactory);
     target =
-        new TestIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory, flightRecorder);
+        new TestIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory, flightRecorder);
     target.setFlightPlan(flightPlan);
     target.setFlightLog(flightRecord);
   }

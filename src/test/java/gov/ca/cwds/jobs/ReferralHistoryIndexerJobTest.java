@@ -109,8 +109,8 @@ public class ReferralHistoryIndexerJobTest
     super.setup();
 
     dao = new ReplicatedPersonReferralsDao(sessionFactory);
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
-        sessionFactory, flightRecorder, FlightPlanTest.makeGeneric());
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory,
+        flightRecorder, FlightPlanTest.makeGeneric());
 
     when(rs.next()).thenReturn(true, true, false);
   }
@@ -213,15 +213,10 @@ public class ReferralHistoryIndexerJobTest
     assertThat(actual, notNullValue());
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void extract_Args__ResultSet_T__SQLException() throws Exception {
     doThrow(new SQLException()).when(rs).getString(any());
-    try {
-      target.extract(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
-
+    target.extract(rs);
   }
 
   @Test
@@ -340,6 +335,7 @@ public class ReferralHistoryIndexerJobTest
     when(con.prepareStatement(sqlSelClient)).thenReturn(stmtSelClient);
     when(con.prepareStatement(sqlSelReferral)).thenReturn(stmtSelReferral);
     when(con.prepareStatement(selAllegation)).thenReturn(stmtSelAllegation);
+
     when(stmtInsClient.executeQuery()).thenReturn(rsInsClient);
     when(stmtSelClient.executeQuery()).thenReturn(rsSelClient);
     when(stmtSelReferral.executeQuery()).thenReturn(rsSelReferral);

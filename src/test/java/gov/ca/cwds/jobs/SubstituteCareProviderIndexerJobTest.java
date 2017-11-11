@@ -30,7 +30,7 @@ public class SubstituteCareProviderIndexerJobTest
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedSubstituteCareProviderDao(sessionFactory);
-    target = new SubstituteCareProviderIndexJob(dao, esDao, lastJobRunTimeFilename, MAPPER,
+    target = new SubstituteCareProviderIndexJob(dao, esDao, lastRunFile, MAPPER,
         sessionFactory, flightRecorder, flightPlan);
   }
 

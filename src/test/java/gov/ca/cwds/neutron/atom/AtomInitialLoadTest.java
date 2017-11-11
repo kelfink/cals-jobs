@@ -4,120 +4,39 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.Transaction;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.data.BaseDaoImpl;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
-import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 
-public class AtomInitialLoadTest {
+public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDenormalizedEntity> {
 
-  private static class TestAtomInitialLoad
-      implements AtomInitialLoad<TestDenormalizedEntity, TestDenormalizedEntity> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestAtomInitialLoad.class);
+  Mach1TestRocket target;
 
-    @Override
-    public FlightLog getFlightLog() {
-      return null;
-    }
-
-    @Override
-    public ElasticsearchDao getEsDao() {
-      return null;
-    }
-
-    @Override
-    public Logger getLogger() {
-      return null;
-    }
-
-    @Override
-    public FlightPlan getFlightPlan() {
-      return null;
-    }
-
-    @Override
-    public BaseDaoImpl<TestDenormalizedEntity> getJobDao() {
-      return null;
-    }
-
-    @Override
-    public boolean isRunning() {
-      // TODO Auto-generated method stub
-      return false;
-    }
-
-    @Override
-    public boolean isFailed() {
-      // TODO Auto-generated method stub
-      return false;
-    }
-
-    @Override
-    public boolean isIndexDone() {
-      // TODO Auto-generated method stub
-      return false;
-    }
-
-    @Override
-    public boolean isTransformDone() {
-      // TODO Auto-generated method stub
-      return false;
-    }
-
-    @Override
-    public boolean isRetrieveDone() {
-      // TODO Auto-generated method stub
-      return false;
-    }
-
-    @Override
-    public void fail() {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void doneIndex() {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void done() {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void doneRetrieve() {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void doneTransform() {
-      // TODO Auto-generated method stub
-
-    }
-
-  }
-
-  AtomInitialLoad target;
-
+  @Override
   @Before
   public void setup() throws Exception {
-    target = new TestAtomInitialLoad();
+    super.setup();
+
+    flightPlan = new FlightPlan();
+    flightPlan.setRefreshMqt(true);
+    flightPlan.setLastRunMode(false);
+    flightPlan.setThreadCount(1);
+
+    target = mach1Rocket;
+    target.setFlightPlan(flightPlan);
   }
 
   @Test
@@ -132,9 +51,9 @@ public class AtomInitialLoadTest {
 
   @Test
   public void limitRange_Args__List() throws Exception {
-    List allKeyPairs = new ArrayList();
-    List<Pair<String, String>> actual = target.limitRange(allKeyPairs);
-    List<Pair<String, String>> expected = new ArrayList<>();
+    final List allKeyPairs = new ArrayList();
+    final List<Pair<String, String>> actual = target.limitRange(allKeyPairs);
+    final List<Pair<String, String>> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -147,17 +66,16 @@ public class AtomInitialLoadTest {
 
   @Test
   public void getInitialLoadViewName_Args__() throws Exception {
-    String actual = target.getInitialLoadViewName();
-    String expected = null;
+    final String actual = target.getInitialLoadViewName();
+    final String expected = "VW_NUTTIN";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getInitialLoadQuery_Args__String() throws Exception {
-    String dbSchemaName = null;
+    String dbSchemaName = "CWSRS1";
     String actual = target.getInitialLoadQuery(dbSchemaName);
-    String expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -169,10 +87,59 @@ public class AtomInitialLoadTest {
 
   @Test
   public void isDelete_Args__Object() throws Exception {
-    TestDenormalizedEntity t = null;
+    TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     boolean actual = target.isDelete(t);
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getOrCreateTransaction_Args__() throws Exception {
+    final Transaction actual = target.getOrCreateTransaction();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void nextThreadNumber_Args__() throws Exception {
+    int actual = target.nextThreadNumber();
+    int expected = 1;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void handleRangeResults_Args__ResultSet() throws Exception {
+    target.handleRangeResults(rs);
+  }
+
+  @Test
+  public void pullRange_Args__Pair() throws Exception {
+    Pair<String, String> p = pair;
+    target.pullRange(p);
+  }
+
+  @Test
+  public void getPartitionRanges_Args__() throws Exception {
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
+    final List<Pair<String, String>> expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void bigRetrieveByJdbc_Args__() throws Exception {
+    target.bigRetrieveByJdbc();
+  }
+
+  @Test
+  public void getMQTName_Args__() throws Exception {
+    String actual = target.getMQTName();
+    String expected = "VW_NUTTIN";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void refreshMQT_Args__() throws Exception {
+    when(proc.getOutputParameterValue(any(String.class))).thenReturn("0");
+    target.refreshMQT();
   }
 
 }

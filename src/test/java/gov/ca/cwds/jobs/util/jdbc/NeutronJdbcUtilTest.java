@@ -64,7 +64,7 @@ public class NeutronJdbcUtilTest extends Goddard<TestNormalizedEntity, TestDenor
   @Before
   public void setup() throws Exception {
     super.setup();
-    initialLoad = new TestAtomHibernate(null, esDao, lastJobRunTimeFilename, MAPPER, sessionFactory,
+    initialLoad = new TestAtomHibernate(null, esDao, lastRunFile, MAPPER, sessionFactory,
         flightRecorder);
   }
 
