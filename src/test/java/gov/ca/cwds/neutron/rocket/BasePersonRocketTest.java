@@ -719,7 +719,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test(expected = JobsException.class)
+  @Test(expected = NeutronException.class)
   public void isDB2OnZOS_Args__() throws Exception {
     when(con.getMetaData()).thenThrow(JobsException.class);
     boolean actual = target.isDB2OnZOS();

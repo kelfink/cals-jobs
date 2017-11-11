@@ -21,7 +21,7 @@ public class FlightSummary implements ApiMarker {
 
   private Date lastEnd = new Date();
 
-  private EnumMap<FlightStatus, Integer> status = new EnumMap<>(FlightStatus.class);
+  private Map<FlightStatus, Integer> status = new EnumMap<>(FlightStatus.class);
 
   private int totalRuns;
 
