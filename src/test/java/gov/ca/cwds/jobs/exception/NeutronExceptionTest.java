@@ -36,6 +36,12 @@ public class NeutronExceptionTest {
   }
 
   @Test
+  public void instantiation5() throws Exception {
+    NeutronException target = new NeutronException(new IllegalArgumentException("whatever"));
+    assertThat(target, notNullValue());
+  }
+
+  @Test
   public void instantiation() throws Exception {
     String message = null;
     NeutronException target = new NeutronException(message);
