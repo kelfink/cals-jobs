@@ -193,7 +193,12 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
       proc.setParameter("PARM_TRIGTBL", "");
       proc.execute();
 
-      final int retcode = ((Integer) proc.getOutputParameterValue("RETCODE")).intValue();
+      final Integer origOut = (Integer) proc.getOutputParameterValue("RETCODE");
+      if (origOut == null) {
+        throw JobLogs.runtime(getLogger(), "RETCODE IS NULL???");
+      }
+
+      final int retcode = origOut.intValue();
       LOGGER.info("Client county proc: retcode: {}", retcode);
 
       if (retcode != 0) {
