@@ -118,6 +118,26 @@ public class JobLogsTest {
   }
 
   @Test
+  public void buildRuntimeException_Args__2() throws Exception {
+    Logger log = mock(Logger.class);
+    Throwable e = null;
+    String pattern = "uh oh: {}";
+    Object[] args = new Object[] {"oops!"};
+    JobsException actual = JobLogs.buildRuntimeException(log, e, pattern, args);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void buildRuntimeException_Args__3() throws Exception {
+    Logger log = null;
+    Throwable e = null;
+    String pattern = "uh oh: {}";
+    Object[] args = new Object[] {"oops!"};
+    JobsException actual = JobLogs.buildRuntimeException(log, e, pattern, args);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
   public void buildCheckedException_Args__Logger__Throwable__String__ObjectArray()
       throws Exception {
     Logger log = mock(Logger.class);
