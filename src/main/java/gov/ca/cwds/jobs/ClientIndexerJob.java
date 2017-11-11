@@ -222,7 +222,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
   }
 
   @Override
-  public List<Pair<String, String>> getPartitionRanges() {
+  public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
     return NeutronJdbcUtil.getCommonPartitionRanges64(this);
   }
 

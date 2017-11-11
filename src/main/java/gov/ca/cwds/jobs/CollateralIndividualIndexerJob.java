@@ -13,6 +13,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
@@ -49,7 +50,7 @@ public final class CollateralIndividualIndexerJob
   }
 
   @Override
-  public List<Pair<String, String>> getPartitionRanges() {
+  public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
     return NeutronJdbcUtil.getCommonPartitionRanges64(this);
   }
 

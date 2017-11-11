@@ -11,6 +11,7 @@ import com.ibm.db2.jcc.DB2Connection;
 import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.data.BaseDaoImpl;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -84,8 +85,9 @@ public final class NeutronDB2Util {
    * @param dao DAO
    * 
    * @return true if DB2 is running on a mainframe
+   * @throws NeutronException on general error
    */
-  public static boolean isDB2OnZOS(final BaseDaoImpl<?> dao) {
+  public static boolean isDB2OnZOS(final BaseDaoImpl<?> dao) throws NeutronException {
     boolean ret = false;
 
     try (final Connection con = dao.getSessionFactory().getSessionFactoryOptions()
@@ -98,7 +100,7 @@ public final class NeutronDB2Util {
 
       ret = meta.getDatabaseProductVersion().startsWith("DSN");
     } catch (Exception e) {
-      throw JobLogs.runtime(LOGGER, e, "FAILED TO FIND DB2 PLATFORM! {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "UNABLE TO DETERMINE DB2 PLATFORM! {}", e.getMessage());
     }
 
     return ret;

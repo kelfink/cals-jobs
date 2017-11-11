@@ -15,6 +15,7 @@ import org.hibernate.Session;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
@@ -111,17 +112,19 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   /**
    * @see NeutronDB2Util#isDB2OnZOS(BaseDaoImpl)
    * @return true if DB2 on mainframe
+   * @throws NeutronException on error
    */
-  default boolean isDB2OnZOS() {
+  default boolean isDB2OnZOS() throws NeutronException {
     return NeutronDB2Util.isDB2OnZOS(getJobDao());
   }
 
   /**
-   * Detect large datasets on the mainframe.
+   * Detect large data sets on the mainframe.
    * 
    * @return true if is large data set on z/OS
+   * @throws NeutronException on error
    */
-  default boolean isLargeDataSet() {
+  default boolean isLargeDataSet() throws NeutronException {
     return isDB2OnZOS() && (getDBSchemaName().toUpperCase().endsWith("RSQ")
         || getDBSchemaName().toUpperCase().endsWith("REP"));
   }
@@ -143,8 +146,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   }
 
   /**
-   * Execute JDBC prior to calling method
-   * {@link BasePersonRocket#pullBucketRange(String, String)}.
+   * Execute JDBC prior to calling method {@link BasePersonRocket#pullBucketRange(String, String)}.
    * 
    * <blockquote>
    * 

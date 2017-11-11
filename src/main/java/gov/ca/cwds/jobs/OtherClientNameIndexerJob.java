@@ -170,7 +170,7 @@ public class OtherClientNameIndexerJob
   }
 
   @Override
-  public List<Pair<String, String>> getPartitionRanges() {
+  public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
     return NeutronJdbcUtil.getCommonPartitionRanges16(this);
   }
 

@@ -8,6 +8,8 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.es.ElasticSearchAccessLimitation;
@@ -432,11 +434,6 @@ public abstract class EsPersonCase
     accessLimitation.setLimitedAccessGovernmentEntityId(limitedAccessGovernmentEntityId);
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    return accessLimitation.equals(obj);
-  }
-
   public String getWorkerId() {
     return worker.getWorkerId();
   }
@@ -470,13 +467,18 @@ public abstract class EsPersonCase
   }
 
   @Override
-  public int hashCode() {
-    return worker.hashCode();
+  public String toString() {
+    return worker.toString();
   }
 
   @Override
-  public String toString() {
-    return worker.toString();
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }

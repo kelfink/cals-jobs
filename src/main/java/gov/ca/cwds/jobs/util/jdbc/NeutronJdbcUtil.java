@@ -19,6 +19,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.jdbc.Work;
 
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
@@ -126,7 +127,8 @@ public final class NeutronJdbcUtil {
 
   @SuppressWarnings("unchecked")
   public static List<Pair<String, String>> getCommonPartitionRanges(
-      @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad, int numPartitions) {
+      @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad, int numPartitions)
+      throws NeutronException {
     List<Pair<String, String>> ret = new ArrayList<>(numPartitions);
     if (initialLoad.isLargeDataSet()) {
       // ----------------------------
@@ -153,17 +155,17 @@ public final class NeutronJdbcUtil {
   }
 
   public static List<Pair<String, String>> getCommonPartitionRanges4(
-      @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad) {
+      @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad) throws NeutronException {
     return getCommonPartitionRanges(initialLoad, 4);
   }
 
   public static List<Pair<String, String>> getCommonPartitionRanges16(
-      @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad) {
+      @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad) throws NeutronException {
     return getCommonPartitionRanges(initialLoad, 16);
   }
 
   public static List<Pair<String, String>> getCommonPartitionRanges64(
-      @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad) {
+      @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad) throws NeutronException {
     return getCommonPartitionRanges(initialLoad, 64);
   }
 

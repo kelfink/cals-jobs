@@ -13,6 +13,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherChildInPlacemtHome;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
@@ -24,8 +25,8 @@ import gov.ca.cwds.neutron.rocket.BasePersonRocket;
  * 
  * @author CWDS API Team
  */
-public class OtherChildInPlacemtHomeIndexerJob extends
-    BasePersonRocket<ReplicatedOtherChildInPlacemtHome, ReplicatedOtherChildInPlacemtHome> {
+public class OtherChildInPlacemtHomeIndexerJob
+    extends BasePersonRocket<ReplicatedOtherChildInPlacemtHome, ReplicatedOtherChildInPlacemtHome> {
 
   private static final long serialVersionUID = 1L;
 
@@ -49,7 +50,7 @@ public class OtherChildInPlacemtHomeIndexerJob extends
   }
 
   @Override
-  public List<Pair<String, String>> getPartitionRanges() {
+  public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
     return NeutronJdbcUtil.getCommonPartitionRanges4(this);
   }
 
