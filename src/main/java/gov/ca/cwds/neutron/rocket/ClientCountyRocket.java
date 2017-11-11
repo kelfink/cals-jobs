@@ -155,9 +155,8 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
 
         callProc();
         con.commit();
-      } catch (SQLException e) {
-        LOGGER.error("ERROR CALLING CLIENT COUNTY PROC! SQL state: {}, error code: {}, msg: {}",
-            e.getSQLState(), e.getErrorCode(), e.getMessage(), e);
+      } catch (Exception e) {
+        LOGGER.error("ERROR CALLING CLIENT COUNTY PROC! SQL msg: {}", e.getMessage(), e);
         con.rollback(); // Clear cursors.
         throw e;
       }
