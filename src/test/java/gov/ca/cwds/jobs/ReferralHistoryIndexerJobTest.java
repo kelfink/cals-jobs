@@ -75,6 +75,21 @@ public class ReferralHistoryIndexerJobTest
       return super.getPartitionRanges();
     }
 
+    @Override
+    public void cleanUpMemory(List<EsPersonReferral> listAllegations,
+        Map<String, EsPersonReferral> mapReferrals, List<MinClientReferral> listClientReferralKeys,
+        List<EsPersonReferral> listReadyToNorm) {
+      super.cleanUpMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
+    }
+
+    @Override
+    public int mapReduce(List<EsPersonReferral> listAllegations,
+        Map<String, EsPersonReferral> mapReferrals, List<MinClientReferral> listClientReferralKeys,
+        List<EsPersonReferral> listReadyToNorm) {
+      return super.mapReduce(listAllegations, mapReferrals, listClientReferralKeys,
+          listReadyToNorm);
+    }
+
   }
 
   public static final String DEFAULT_REFERRAL_ID = "ref1234567";
@@ -398,23 +413,20 @@ public class ReferralHistoryIndexerJobTest
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
-  // public void extractReferral_Args__ResultSet() throws Exception {
-  // EsPersonReferral actual = target.extractReferral(rs);
-  // assertThat(actual, notNullValue());
-  // }
-  //
-  // @Test
-  // public void extractReferral_Args__ResultSet_T__SQLException() throws Exception {
-  // when(rs.next()).thenThrow(new SQLException());
-  // when(rs.getString(any(Integer.class))).thenThrow(new SQLException());
-  // try {
-  // target.extractReferral(rs);
-  // fail("Expected exception was not thrown!");
-  // } catch (SQLException e) {
-  // }
-  // }
-  //
+  @Test
+  public void extractReferral_Args__ResultSet() throws Exception {
+    final EsPersonReferral actual = target.extract(rs);
+    assertThat(actual, notNullValue());
+  }
+
+  @Test(expected = SQLException.class)
+  public void extractReferral_Args__ResultSet_T__SQLException() throws Exception {
+    when(rs.next()).thenThrow(new SQLException());
+    when(rs.getString(any(String.class))).thenThrow(new SQLException());
+    when(rs.getString(any(Integer.class))).thenThrow(new SQLException());
+    target.extract(rs);
+  }
+
   // @Test
   // public void extractAllegation_Args__ResultSet() throws Exception {
   // EsPersonReferral actual = target.extractAllegation(rs);
@@ -430,25 +442,21 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void isRangeSelfManaging_Args__() throws Exception {
-    boolean actual = target.isInitialLoadJdbc();
-    boolean expected = true;
+    final boolean actual = target.isInitialLoadJdbc();
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getConnection_Args__() throws Exception {
-    Connection actual = target.getConnection();
+    final Connection actual = target.getConnection();
     assertThat(actual, notNullValue());
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void getConnection_Args___T__SQLException() throws Exception {
     when(cp.getConnection()).thenThrow(SQLException.class);
-    try {
-      target.getConnection();
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    target.getConnection();
   }
 
   @Test
@@ -458,7 +466,7 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void getPrepLastChangeSQL_Args__() throws Exception {
-    String actual = target.getPrepLastChangeSQL();
+    final String actual = target.getPrepLastChangeSQL();
     assertThat(actual, notNullValue());
   }
 
@@ -472,7 +480,7 @@ public class ReferralHistoryIndexerJobTest
   @Test
   public void main_Args__StringArray() throws Exception {
     final String[] args = new String[] {"-c", "config/local.yaml", "-l",
-        "/Users/CWS-NS3/client_indexer_time.txt", "-S"};
+        "/var/lib/jenkins/client_indexer_time.txt", "-S"};
     TestReferralHistoryIndexerJob.main(args);
   }
 

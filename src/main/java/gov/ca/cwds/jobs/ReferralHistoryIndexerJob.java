@@ -356,7 +356,7 @@ public class ReferralHistoryIndexerJob
     return cntr;
   }
 
-  private void cleanUpMemory(final List<EsPersonReferral> listAllegations,
+  protected void cleanUpMemory(final List<EsPersonReferral> listAllegations,
       Map<String, EsPersonReferral> mapReferrals, List<MinClientReferral> listClientReferralKeys,
       List<EsPersonReferral> listReadyToNorm) {
     // Release heap objects early and often.
