@@ -12,7 +12,6 @@ import javax.persistence.ParameterMode;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.procedure.ProcedureCall;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +26,6 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
@@ -142,30 +140,31 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
     nameThread(threadName);
     getLogger().info("BEGIN: extract thread {}", threadName);
     getFlightLog().trackRangeStart(p);
+    final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
+        .replaceAll(":toId", p.getRight());
+    getLogger().info("query: {}", query);
 
-    try (Connection con = getJobDao().getSessionFactory().getSessionFactoryOptions()
-        .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
-      con.setSchema(getDBSchemaName());
-      con.setAutoCommit(false);
-
-      final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
-          .replaceAll(":toId", p.getRight());
-      getLogger().info("query: {}", query);
-      NeutronDB2Util.enableParallelism(con);
-
+    try (Connection con = NeutronJdbcUtil.prepConnection(getJobDao().getSessionFactory())) {
       try (Statement stmt = con.createStatement()) {
         stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
+
         getOrCreateTransaction(); // HACK: fix Hibernate DAO.
         stmt.executeUpdate(query); // NOSONAR
+
         callProc();
         con.commit();
+      } catch (SQLException e) {
+        LOGGER.error("ERROR CALLING CLIENT COUNTY PROC! SQL state: {}, error code: {}, msg: {}",
+            e.getSQLState(), e.getErrorCode(), e.getMessage(), e);
+        con.rollback(); // Clear cursors.
+        throw e;
       }
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(getLogger(), e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(),
-          p.getRight(), e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "PROC ERROR ON RANGE! {}-{} : {}", p.getLeft(), p.getRight(),
+          e.getMessage());
     }
   }
 

@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.util.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,6 +15,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.jdbc.Work;
 
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
@@ -68,6 +71,16 @@ public final class NeutronJdbcUtil {
    */
   public static String getDBSchemaName() {
     return System.getProperty("DB_CMS_SCHEMA");
+  }
+
+  public static Connection prepConnection(final SessionFactory sessionFactory) throws SQLException {
+    final Connection con = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
+        .getService(ConnectionProvider.class).getConnection();
+    con.setSchema(getDBSchemaName());
+    con.setAutoCommit(false);
+    NeutronDB2Util.enableParallelism(con);
+
+    return con;
   }
 
   public static void prepHibernateLastChange(final Session session, final Date lastRunTime,
