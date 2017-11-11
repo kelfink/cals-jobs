@@ -399,6 +399,50 @@ public class ReferralHistoryIndexerJobTest
   }
 
   @Test(expected = JobsException.class)
+  public void pullNextRange_Args__Pair__boom() throws Exception {
+    final String schema = target.getDBSchemaName();
+    final PreparedStatement stmtInsClient = mock(PreparedStatement.class);
+    final PreparedStatement stmtSelClient = mock(PreparedStatement.class);
+    final PreparedStatement stmtSelReferral = mock(PreparedStatement.class);
+    final PreparedStatement stmtSelAllegation = mock(PreparedStatement.class);
+    final ResultSet rsInsClient = mock(ResultSet.class);
+    final ResultSet rsSelClient = mock(ResultSet.class);
+    final ResultSet rsSelReferral = mock(ResultSet.class);
+    final ResultSet rsSelAllegation = mock(ResultSet.class);
+
+    final String sqlInsClient =
+        target.INSERT_CLIENT_FULL.replaceAll("#SCHEMA#", schema).replaceAll("\\s+", " ").trim();
+    final String sqlSelClient =
+        target.SELECT_CLIENT.replaceAll("#SCHEMA#", schema).replaceAll("\\s+", " ").trim();
+    final String sqlSelReferral = target.getInitialLoadQuery(schema).replaceAll("\\s+", " ").trim();
+    final String selAllegation =
+        target.SELECT_ALLEGATION.replaceAll("#SCHEMA#", schema).replaceAll("\\s+", " ").trim();
+
+    when(con.prepareStatement(sqlInsClient)).thenReturn(stmtInsClient);
+    when(con.prepareStatement(sqlSelClient)).thenReturn(stmtSelClient);
+    when(con.prepareStatement(sqlSelReferral)).thenReturn(stmtSelReferral);
+    when(con.prepareStatement(selAllegation)).thenReturn(stmtSelAllegation);
+    when(stmtInsClient.executeQuery()).thenReturn(rsInsClient);
+    when(stmtSelClient.executeQuery()).thenReturn(rsSelClient);
+    when(stmtSelReferral.executeQuery()).thenReturn(rsSelReferral);
+    when(stmtSelAllegation.executeQuery()).thenReturn(rsSelAllegation);
+    when(rsInsClient.next()).thenReturn(true).thenReturn(false);
+    when(rsSelClient.next()).thenReturn(true).thenReturn(false);
+    when(rsSelReferral.next()).thenReturn(false);
+    when(rsSelAllegation.next()).thenReturn(false);
+
+    when(rsSelClient.getString("FKCLIENT_T")).thenReturn(DEFAULT_CLIENT_ID);
+    when(rsSelClient.getString("FKREFERL_T")).thenReturn(DEFAULT_REFERRAL_ID);
+    when(rsSelClient.getString("SENSTV_IND")).thenReturn("N");
+
+    when(con.prepareStatement(any(String.class))).thenThrow(SQLException.class);
+
+    final Pair<String, String> p = pair;
+    target.fakePull = false;
+    target.pullNextRange(p);
+  }
+
+  @Test(expected = JobsException.class)
   public void pullRange_Args__Pair_throw() throws Exception {
     final String schema = target.getDBSchemaName();
     when(con.prepareStatement(any())).thenThrow(JobsException.class);
