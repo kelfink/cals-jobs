@@ -427,19 +427,6 @@ public class ReferralHistoryIndexerJobTest
     target.extract(rs);
   }
 
-  // @Test
-  // public void extractAllegation_Args__ResultSet() throws Exception {
-  // EsPersonReferral actual = target.extractAllegation(rs);
-  // assertThat(actual, notNullValue());
-  // }
-  //
-  // @Test(expected = SQLException.class)
-  // public void extractAllegation_Args__ResultSet_T__SQLException() throws Exception {
-  // when(rs.next()).thenThrow(new SQLException());
-  // when(rs.getString(any(Integer.class))).thenThrow(new SQLException());
-  // target.extractAllegation(rs);
-  // }
-
   @Test
   public void isRangeSelfManaging_Args__() throws Exception {
     final boolean actual = target.isInitialLoadJdbc();
