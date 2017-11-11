@@ -1,7 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -19,11 +18,9 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
-import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
-import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -41,7 +38,7 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
  * 
  * @author CWDS API Team
  */
-public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, EsClientAddress>
+public class ClientCountyRocket extends ClientIndexerJob
     implements NeutronRowMapper<EsClientAddress>, AtomValidateDocument {
 
   private static final long serialVersionUID = 1L;
@@ -69,19 +66,6 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
       @LastRunFile final String lastRunFile, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
-  }
-
-  @Override
-  public EsClientAddress extract(ResultSet rs) throws SQLException {
-    return EsClientAddress.extract(rs);
-  }
-
-  /**
-   * NEXT: turn into a fixed rocket setting, not override method.
-   */
-  @Override
-  public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
-    return EsClientAddress.class;
   }
 
   /**
@@ -113,20 +97,27 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
     return " ORDER BY x.IDENTIFIER ";
   }
 
-  /**
-   * NEXT: Turn this method into a rocket setting.
-   */
-  @Override
-  public boolean useTransformThread() {
-    return false;
-  }
+  protected void processStatement(final Pair<String, String> p, final Connection con)
+      throws SQLException {
+    try (Statement stmt = con.createStatement()) {
+      stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
+      stmt.setMaxRows(0);
+      stmt.setQueryTimeout(0);
 
-  /**
-   * NEXT: Turn this method into a rocket setting.
-   */
-  @Override
-  public boolean isInitialLoadJdbc() {
-    return true;
+      getOrCreateTransaction(); // HACK: fix Hibernate DAO.
+      getFlightLog().trackRangeStart(p);
+      final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
+          .replaceAll(":toId", p.getRight());
+      getLogger().info("query: {}", query);
+      stmt.executeUpdate(query); // NOSONAR
+
+      callProc();
+      con.commit();
+    } catch (Exception e) {
+      LOGGER.error("ERROR CALLING CLIENT COUNTY PROC! SQL msg: {}", e.getMessage(), e);
+      con.rollback(); // Clear cursors.
+      throw e;
+    }
   }
 
   /**
@@ -140,27 +131,9 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
         "extract_" + nextThreadNumber() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);
     getLogger().info("BEGIN: extract thread {}", threadName);
-    getFlightLog().trackRangeStart(p);
-    final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
-        .replaceAll(":toId", p.getRight());
-    getLogger().info("query: {}", query);
 
     try (Connection con = NeutronJdbcUtil.prepConnection(getJobDao().getSessionFactory())) {
-      try (Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
-        stmt.setMaxRows(0);
-        stmt.setQueryTimeout(0);
-
-        getOrCreateTransaction(); // HACK: fix Hibernate DAO.
-        stmt.executeUpdate(query); // NOSONAR
-
-        callProc();
-        con.commit();
-      } catch (Exception e) {
-        LOGGER.error("ERROR CALLING CLIENT COUNTY PROC! SQL msg: {}", e.getMessage(), e);
-        con.rollback(); // Clear cursors.
-        throw e;
-      }
+      processStatement(p, con);
     } catch (Exception e) {
       fail();
       throw JobLogs.runtime(LOGGER, e, "PROC ERROR ON RANGE! {}-{} : {}", p.getLeft(), p.getRight(),
