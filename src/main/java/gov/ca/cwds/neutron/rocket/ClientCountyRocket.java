@@ -177,10 +177,10 @@ public class ClientCountyRocket extends InitialLoadJdbcRocket<ReplicatedClient, 
   protected void callProc() {
     if (LaunchCommand.isInitialMode()) { // initial mode only
       LOGGER.info("Call stored proc");
-      final Session session = getJobDao().getSessionFactory().getCurrentSession();
+      final SessionFactory sessionFactory = getJobDao().getSessionFactory();
+      final Session session = sessionFactory.getCurrentSession();
       getOrCreateTransaction(); // HACK. move to base DAO.
-      final String schema =
-          (String) session.getSessionFactory().getProperties().get("hibernate.default_schema");
+      final String schema = (String) sessionFactory.getProperties().get("hibernate.default_schema");
 
       final ProcedureCall proc = session.createStoredProcedureCall(schema + ".PRCCLNCNTY");
       proc.registerStoredProcedureParameter("PARM_CRUD", String.class, ParameterMode.IN);

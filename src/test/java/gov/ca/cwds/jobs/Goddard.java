@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -39,6 +40,7 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.spi.SessionFactoryOptions;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.procedure.ProcedureCall;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
 import org.junit.Before;
@@ -127,6 +129,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public ResultSet rs;
   public DatabaseMetaData meta;
   public NativeQuery<M> nq;
+  public ProcedureCall procedureCall;
 
   public SystemCodeDao systemCodeDao;
   public SystemMetaDao systemMetaDao;
@@ -174,22 +177,32 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     meta = mock(DatabaseMetaData.class);
     stmt = mock(Statement.class);
     em = mock(EntityManager.class);
-    client = mock(Client.class);
     hibernationConfiguration = mock(Configuration.class);
     rocketFactory = mock(RocketFactory.class);
     scheduler = mock(Scheduler.class);
     listenerManager = mock(ListenerManager.class);
     flightPlanManager = mock(AtomFlightPlanManager.class);
+    procedureCall = mock(ProcedureCall.class);
+    client = mock(Client.class);
 
     mach1Rocket = new Mach1TestRocket(esDao, lastJobRunTimeFilename, MAPPER, flightRecorder);
     flightPlanRegistry = new FlightPlanRegistry(flightPlan);
     flightSchedule = StandardFlightSchedule.CLIENT;
 
+    final Map<String, Object> sessionProperties = new HashMap<>();
+    sessionProperties.put("hibernate.default_schema", "CWSRS1");
+
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(sessionFactory.createEntityManager()).thenReturn(em);
+    when(sessionFactory.getSessionFactoryOptions()).thenReturn(sfo);
+    when(sessionFactory.getCurrentSession()).thenReturn(session);
+    when(sessionFactory.getProperties()).thenReturn(sessionProperties);
+
+    when(session.getProperties()).thenReturn(sessionProperties);
     when(session.beginTransaction()).thenReturn(transaction);
     when(session.getTransaction()).thenReturn(transaction);
-    when(sessionFactory.getSessionFactoryOptions()).thenReturn(sfo);
+    when(session.createStoredProcedureCall(any(String.class))).thenReturn(procedureCall);
+
     when(sfo.getServiceRegistry()).thenReturn(reg);
     when(reg.getService(ConnectionProvider.class)).thenReturn(cp);
     when(cp.getConnection()).thenReturn(con);
