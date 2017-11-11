@@ -47,6 +47,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.jobs.schedule.LaunchCommandSettings;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -589,6 +590,11 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void bulkPrepare_Args__BulkProcessor__int() throws Exception {
+    final LaunchCommandSettings settings = new LaunchCommandSettings();
+    settings.setInitialMode(true);
+    settings.setTestMode(true);
+    LaunchCommand.setSettings(settings);
+
     final TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     for (int i = 0; i < 10000; i++) {
       target.queueIndex.add(entity);
