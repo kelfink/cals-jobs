@@ -205,9 +205,11 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void threadNormalize_Args__() throws Exception {
+    target.getFlightLog().start();
     try {
       for (int i = 0; i < 100; i++) {
-        target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "1", "2", "3"));
+        target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, String.valueOf(i),
+            String.valueOf(i + 3), String.valueOf(i + 7)));
         target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "4", "5", "6"));
         target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "7", "8", "9"));
         target.queueNormalize.push(new TestDenormalizedEntity("xyz1234567", "1", "2", "3"));

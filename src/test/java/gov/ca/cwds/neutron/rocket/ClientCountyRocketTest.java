@@ -5,10 +5,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +21,7 @@ import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
+import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.LaunchCommandSettings;
 
@@ -110,6 +113,17 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
     LaunchCommand.setSettings(settings);
 
     when(procedureCall.getOutputParameterValue(any(String.class))).thenReturn(new Integer(0));
+    target.pullRange(pair);
+  }
+
+  @Test(expected = JobsException.class)
+  public void pullRange_Args__Pair__boom() throws Exception {
+    final LaunchCommandSettings settings = new LaunchCommandSettings();
+    settings.setInitialMode(true);
+    LaunchCommand.setSettings(settings);
+
+    when(procedureCall.getOutputParameterValue(any(String.class))).thenReturn(new Integer(0));
+    doThrow(new SQLException()).when(con).commit();
     target.pullRange(pair);
   }
 
