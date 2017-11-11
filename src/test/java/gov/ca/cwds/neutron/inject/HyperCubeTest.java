@@ -18,21 +18,17 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.google.inject.Binder;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
-import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
-import gov.ca.cwds.neutron.inject.HyperCube;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
@@ -176,6 +172,15 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   }
 
   @Test
+  public void elasticsearchClient_Args__boom() throws Exception {
+    final ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
+    final TransportClient transportClient = target.makeTransportClient(config, false);
+
+    Client actual = target.elasticsearchClient();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
   public void setOpts_Args__FlightPlan() throws Exception {
     target.setFlightPlan(flightPlan);
   }
@@ -225,25 +230,6 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test(expected = NeutronException.class)
-  @Ignore
-  public void newJob_Args__Class__FlightPlan_T__NeutronException() throws Exception {
-    final Class klass = TestIndexerJob.class;
-
-    flightPlan = new FlightPlan();
-    flightPlan.setEsConfigLoc("config/local.yaml");
-    flightPlan.setSimulateLaunch(true);
-    target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()),
-        lastJobRunTimeFilename);
-
-    target.setHibernateConfigCms("/test-h2-cms.xml");
-    target.setHibernateConfigNs("/test-h2-ns.xml");
-    target.setTestBinder(mock(Binder.class));
-    HyperCube.setInstance(target);
-
-    HyperCube.newRocket(klass, flightPlan);
-  }
-
   @Test
   public void newJob_Args__Class__StringArray() throws Exception {
     final Class klass = Mach1TestRocket.class;
@@ -259,17 +245,38 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
-  @Ignore
-  public void configure_Args__() throws Exception {
-    target.configure(); // can only call from module
-  }
+  // H2 credential issue on Jenkins.
 
-  @Test
-  @Ignore
-  public void bindDaos_Args__() throws Exception {
-    target.bindDaos(); // can only call from module
-  }
+  // @Test
+  // @Ignore
+  // public void configure_Args__() throws Exception {
+  // target.configure(); // can only call from module
+  // }
+  //
+  // @Test
+  // @Ignore
+  // public void bindDaos_Args__() throws Exception {
+  // target.bindDaos(); // can only call from module
+  // }
+
+  // @Test(expected = NeutronException.class)
+  // @Ignore
+  // public void newJob_Args__Class__FlightPlan_T__NeutronException() throws Exception {
+  // final Class klass = TestIndexerJob.class;
+  //
+  // flightPlan = new FlightPlan();
+  // flightPlan.setEsConfigLoc("config/local.yaml");
+  // flightPlan.setSimulateLaunch(true);
+  // target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()),
+  // lastJobRunTimeFilename);
+  //
+  // target.setHibernateConfigCms("/test-h2-cms.xml");
+  // target.setHibernateConfigNs("/test-h2-ns.xml");
+  // target.setTestBinder(mock(Binder.class));
+  // HyperCube.setInstance(target);
+  //
+  // HyperCube.newRocket(klass, flightPlan);
+  // }
 
   /**
    * <strong>ERROR: H2 credentials.</strong>

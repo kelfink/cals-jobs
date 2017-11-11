@@ -4,12 +4,14 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.function.Function;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,12 +19,14 @@ import org.quartz.Scheduler;
 import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.weakref.jmx.JmxException;
 
 import com.google.inject.Injector;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -34,6 +38,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LaunchCommandTest.class);
 
+  Injector injector;
   LaunchCommand target;
   TriggerKey key;
 
@@ -45,8 +50,17 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     flightPlan.setEsConfigLoc("config/local.yaml");
     flightPlan.setBaseDirectory("/var/lib/jenkins/");
     flightPlan.setLastRunLoc(lastJobRunTimeFilename);
+
     target = new LaunchCommand(flightRecorder, launchScheduler, esDao);
-    target.setStartingOpts(flightPlan);
+    target.setCommonFlightPlan(flightPlan);
+    target.setLaunchScheduler(launchScheduler);
+
+    Function<FlightPlan, Injector> makeLaunchCommand = mock(Function.class);
+    injector = mock(Injector.class);
+    when(makeLaunchCommand.apply(any(FlightPlan.class))).thenReturn(injector);
+    when(injector.getInstance(LaunchCommand.class)).thenReturn(target);
+    LaunchCommand.setInjectorMaker(makeLaunchCommand);
+    LaunchCommand.setStandardFlightPlan(flightPlan);
 
     key = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
     LaunchCommand.setTestMode(true);
@@ -91,6 +105,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void isTestMode_Args__() throws Exception {
+    LaunchCommand.getSettings().setTestMode(true);
     boolean actual = LaunchCommand.isTestMode();
     boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
@@ -156,13 +171,13 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void getStartingOpts_Args__() throws Exception {
-    final FlightPlan actual = target.getStartingOpts();
+    final FlightPlan actual = target.getCommonFlightPlan();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void setStartingOpts_Args__FlightPlan() throws Exception {
-    target.setStartingOpts(flightPlan);
+    target.setCommonFlightPlan(flightPlan);
   }
 
   @Test
@@ -224,13 +239,140 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     LaunchCommand.main(args);
   }
 
+  @Test
+  public void handleTimeFile_Args__FlightPlan__DateFormat__Date__StandardFlightSchedule()
+      throws Exception {
+    DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+    Date now = new Date();
+    StandardFlightSchedule sched = StandardFlightSchedule.REFERRAL;
+    target.handleTimeFile(flightPlan, fmt, now, sched);
+  }
+
+  @Test
+  public void exposeREST_Args__() throws Exception {
+    target.exposeREST();
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void exposeJMX_Args__() throws Exception {
+    target.exposeJMX();
+  }
+
+  @Test
+  public void initializeManagementInterfaces_Args__() throws Exception {
+    target.initializeManagementInterfaces();
+  }
+
+  @Test
+  public void initScheduler_Args__() throws Exception {
+    LaunchCommand.getSettings().setExposeJmx(false);
+    target.initScheduler();
+  }
+
+  @Test(expected = JmxException.class)
+  public void initScheduler_Args___T__NeutronException() throws Exception {
+    target.initScheduler();
+  }
+
+  @Test
+  public void setLaunchScheduler_Args__LaunchScheduler() throws Exception {
+    target.setLaunchScheduler(launchScheduler);
+  }
+
+  @Test
+  public void trackInFlightRocket_Args__TriggerKey__NeutronRocket() throws Exception {
+    NeutronRocket rocket = mock(NeutronRocket.class);
+    target.trackInFlightRocket(key, rocket);
+  }
+
+  @Test
+  public void parseCommandLine_Args__StringArray() throws Exception {
+    final String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"};
+    final FlightPlan actual = LaunchCommand.parseCommandLine(args);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void buildCommandCenter_Args__FlightPlan() throws Exception {
+    FlightPlan standardFlightPlan = flightPlan;
+    LaunchCommand actual = LaunchCommand.buildCommandCenter(standardFlightPlan);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test(expected = NeutronException.class)
+  public void buildCommandCenter_Args__FlightPlan_T__NeutronException() throws Exception {
+    when(injector.getInstance(any(Class.class))).thenThrow(new IllegalStateException());
+    LaunchCommand.buildCommandCenter(flightPlan);
+  }
+
+  @Test
+  public void close_Args__() throws Exception {
+    target.close();
+  }
+
+  @Test
+  public void startSchedulerMode_Args__() throws Exception {
+    LaunchCommand.getSettings().setExposeJmx(false);
+    LaunchCommand actual = LaunchCommand.startSchedulerMode();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getInjectorMaker_Args__() throws Exception {
+    Function<FlightPlan, Injector> actual = LaunchCommand.getInjectorMaker();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setInjectorMaker_Args__Function() throws Exception {
+    Function<FlightPlan, Injector> makeLaunchCommand = mock(Function.class);
+    LaunchCommand.setInjectorMaker(makeLaunchCommand);
+  }
+
+  @Test
+  public void getInjector_Args__() throws Exception {
+    Injector actual = target.getInjector();
+    Injector expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setInjector_Args__Injector() throws Exception {
+    Injector injector = mock(Injector.class);
+    target.setInjector(injector);
+  }
+
+  @Test
+  public void getSettings_Args__() throws Exception {
+    LaunchCommandSettings actual = LaunchCommand.getSettings();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getStandardFlightPlan_Args__() throws Exception {
+    FlightPlan actual = LaunchCommand.getStandardFlightPlan();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setStandardFlightPlan_Args__FlightPlan() throws Exception {
+    FlightPlan standardFlightPlan = mock(FlightPlan.class);
+    LaunchCommand.setStandardFlightPlan(standardFlightPlan);
+  }
+
   // @Test
   // @Ignore
   // public void createJob_Args__Class__StringArray() throws Exception {
   // Class<?> klass = TestIndexerJob.class;
   // String[] args = new String[] {"-c", "config/local.yaml", "-b", "/var/lib/jenkins/", "-F"}
+
   // BasePersonIndexerJob actual = target.createJob(klass, args);
   // assertThat(actual, is(notNullValue()));
+  // }
+
+  // @Test(expected = Exception.class)
+  // public void close_Args___T__Exception() throws Exception {
+  // target.close();
   // }
 
 }

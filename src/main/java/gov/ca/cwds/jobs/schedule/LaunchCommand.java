@@ -163,32 +163,32 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   /**
    * Find the job's time file under the base directory.
    * 
-   * @param opts base options
+   * @param flightPlan base options
    * @param fmt reusable date format
    * @param now current datetime
    * @param sched this schedule
    * @throws IOException on file error
    */
-  protected void handleTimeFile(final FlightPlan opts, final DateFormat fmt, final Date now,
+  protected void handleTimeFile(final FlightPlan flightPlan, final DateFormat fmt, final Date now,
       final StandardFlightSchedule sched) throws IOException {
     final StringBuilder buf = new StringBuilder();
 
-    buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getShortName())
+    buf.append(flightPlan.getBaseDirectory()).append(File.separatorChar).append(sched.getShortName())
         .append(".time");
     final String timeFileLoc =
         buf.toString().replaceAll(File.separator + File.separator, File.separator);
-    opts.setLastRunLoc(timeFileLoc);
-    LOGGER.debug("base directory: {}, job name: {}, last run loc: {}", opts.getBaseDirectory(),
-        sched.getShortName(), opts.getLastRunLoc());
+    flightPlan.setLastRunLoc(timeFileLoc);
+    LOGGER.debug("base directory: {}, job name: {}, last run loc: {}", flightPlan.getBaseDirectory(),
+        sched.getShortName(), flightPlan.getLastRunLoc());
 
     // If timestamp file doesn't exist, create it.
     final File f = new File(timeFileLoc); // NOSONAR
     final boolean fileExists = f.exists();
-    final boolean overrideLastRunTime = opts.getOverrideLastRunTime() != null;
+    final boolean overrideLastRunTime = flightPlan.getOverrideLastRunTime() != null;
 
     if (!fileExists || settings.isInitialMode()) {
       FileUtils.writeStringToFile(f,
-          fmt.format(overrideLastRunTime ? opts.getOverrideLastRunTime() : now));
+          fmt.format(overrideLastRunTime ? flightPlan.getOverrideLastRunTime() : now));
     }
   }
 
@@ -250,12 +250,12 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       // Prepare launch pads and flight plans.
       for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
         final Class<?> klass = sched.getRocketClass();
-        final FlightPlan opts = new FlightPlan(commonFlightPlan);
-        handleTimeFile(opts, fmt, now, sched);
+        final FlightPlan flightPlan = new FlightPlan(commonFlightPlan);
+        handleTimeFile(flightPlan, fmt, now, sched);
 
-        final AtomLaunchPad nj = new LaunchPad(launchScheduler, sched, flightRecorder, opts);
+        final AtomLaunchPad nj = new LaunchPad(launchScheduler, sched, flightRecorder, flightPlan);
         launchScheduler.getScheduleRegistry().put(klass, nj);
-        launchScheduler.getFlightPlanManger().addFlightPlan(klass, opts);
+        launchScheduler.getFlightPlanManger().addFlightPlan(klass, flightPlan);
       }
 
       // **MOVE** this responsibility to another class.
@@ -328,11 +328,11 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     }
   }
 
-  public FlightPlan getStartingOpts() {
+  public FlightPlan getCommonFlightPlan() {
     return commonFlightPlan;
   }
 
-  public void setStartingOpts(FlightPlan startingOpts) {
+  public void setCommonFlightPlan(FlightPlan startingOpts) {
     this.commonFlightPlan = startingOpts;
   }
 
