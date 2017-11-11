@@ -155,4 +155,13 @@ public class JobLogsTest {
     assertThat(actual, is(notNullValue()));
   }
 
+  @Test
+  public void runtime_Args__Logger__String__ObjectArray() throws Exception {
+    Logger log = mock(Logger.class);
+    String pattern = null;
+    Object[] args = new Object[] {};
+    JobsException actual = JobLogs.runtime(log, pattern, args);
+    assertThat(actual, is(notNullValue()));
+  }
+
 }
