@@ -34,6 +34,7 @@ public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDen
     flightPlan.setRefreshMqt(true);
     flightPlan.setLastRunMode(false);
     flightPlan.setThreadCount(1);
+    flightPlan.setRangeGiven(true);
 
     target = mach1Rocket;
     target.setFlightPlan(flightPlan);
@@ -51,9 +52,11 @@ public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDen
 
   @Test
   public void limitRange_Args__List() throws Exception {
-    final List allKeyPairs = new ArrayList();
+    final List<Pair<String, String>> allKeyPairs = new ArrayList();
+    allKeyPairs.add(pair);
+
     final List<Pair<String, String>> actual = target.limitRange(allKeyPairs);
-    final List<Pair<String, String>> expected = new ArrayList<>();
+    final List<Pair<String, String>> expected = allKeyPairs;
     assertThat(actual, is(equalTo(expected)));
   }
 
