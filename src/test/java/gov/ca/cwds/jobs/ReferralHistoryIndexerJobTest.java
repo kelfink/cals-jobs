@@ -149,9 +149,11 @@ public class ReferralHistoryIndexerJobTest
   @Test
   public void normalizeSingle_Args__List() throws Exception {
     List<EsPersonReferral> recs = new ArrayList<EsPersonReferral>();
+
     EsPersonReferral addMe = new EsPersonReferral();
     addMe.setClientId("qz11234567");
     addMe.setReferralId("abc1234567");
+
     recs.add(addMe);
     ReplicatedPersonReferrals actual = target.normalizeSingle(recs);
     assertThat(actual, notNullValue());
@@ -617,6 +619,17 @@ public class ReferralHistoryIndexerJobTest
     Map<String, EsPersonReferral> mapReferrals = new HashMap<String, EsPersonReferral>();
     List<MinClientReferral> listClientReferralKeys = new ArrayList<MinClientReferral>();
     List<EsPersonReferral> listReadyToNorm = new ArrayList<EsPersonReferral>();
+
+    EsPersonReferral addMe = new EsPersonReferral();
+    addMe.setClientId("qz11234567");
+    addMe.setReferralId("abc1234567");
+    listReadyToNorm.add(addMe);
+
+    addMe = new EsPersonReferral();
+    addMe.setClientId(DEFAULT_CLIENT_ID);
+    addMe.setReferralId("abc1234567");
+    listReadyToNorm.add(addMe);
+
     int actual =
         target.mapReduce(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
     int expected = 0;
