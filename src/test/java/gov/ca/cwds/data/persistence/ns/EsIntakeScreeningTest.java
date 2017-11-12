@@ -77,9 +77,11 @@ public class EsIntakeScreeningTest extends Goddard {
   @Test
   public void fillScreening_Args__IntakeScreening() throws Exception {
     IntakeScreening s = new IntakeScreening();
+
+    target.setStartedAt(new Date());
+    target.setEndedAt(new Date());
     IntakeScreening actual = target.fillScreening(s);
-    IntakeScreening expected = new IntakeScreening();
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -96,6 +98,7 @@ public class EsIntakeScreeningTest extends Goddard {
     IntakeParticipant p = new IntakeParticipant();
     p.setId(DEFAULT_CLIENT_ID);
     p.setLegacyId(DEFAULT_CLIENT_ID);
+    map.put(DEFAULT_SCREENING_ID, p);
 
     IntakeScreening s = new IntakeScreening();
     s.setId(DEFAULT_SCREENING_ID);
@@ -112,7 +115,7 @@ public class EsIntakeScreeningTest extends Goddard {
     alg.setAllegationTypes(types);
     s.addAllegation(alg);
 
-    map.put(DEFAULT_SCREENING_ID, p);
+    target.setOtherParticipantId("xyz1234567");
 
     IntakeParticipant actual = target.normalize(map);
     assertThat(actual, notNullValue());
