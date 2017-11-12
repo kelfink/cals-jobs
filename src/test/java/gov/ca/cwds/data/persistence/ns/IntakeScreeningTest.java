@@ -42,6 +42,12 @@ public class IntakeScreeningTest extends Goddard {
   }
 
   @Test
+  public void instantiation2() throws Exception {
+    target = new IntakeScreening(DEFAULT_CLIENT_ID);
+    assertThat(target, notNullValue());
+  }
+
+  @Test
   public void getPrimaryKey_Args__() throws Exception {
     String actual = target.getPrimaryKey();
     String expected = null;
