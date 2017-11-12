@@ -98,7 +98,7 @@ public class VoxJMXCommandClientTest {
   @Test(expected = Exception.class)
   public void main_Args__StringArray() throws Exception {
     String[] args = new String[] {};
-    VoxJMXCommandClient.main(args);
+    VoxCommandFactory.main(args);
   }
 
   @Test

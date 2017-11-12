@@ -16,30 +16,27 @@ public class VoxCommandFactory implements ApiMarker {
     // Static class
   }
 
-  public static void launch(final VoxCommandType cmdType, final VoxCommandInstruction cmd)
-      throws NeutronException {
-    try (VoxJMXCommandClient client = (VoxJMXCommandClient) cmdType.getKlass().newInstance()) {
-      LOGGER.info("CONNECT JMX...");
-      client.setHost(cmd.getHost());
-      client.setPort(cmd.getPort());
-      client.setRocket(cmd.getRocket());
-
-      client.connect();
-      client.run();
+  public static VoxJMXCommandClient build(final VoxCommandType cmdType,
+      final VoxCommandInstruction cmd) throws NeutronException {
+    VoxJMXCommandClient ret;
+    try {
+      ret = (VoxJMXCommandClient) cmdType.getKlass().newInstance();
     } catch (Exception e) {
       throw JobLogs.runtime(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", cmd.getHost(),
           cmd.getPort(), cmd.getRocket());
     }
+
+    return ret;
   }
 
-  public static void run(String[] args) throws NeutronException {
+  public static VoxJMXCommandClient build(String[] args) throws NeutronException {
     final VoxCommandInstruction cmd = VoxCommandInstruction.parseCommandLine(args);
     final VoxCommandType cmdType = VoxCommandType.lookup(cmd.getCommand());
-    launch(cmdType, cmd);
+    return build(cmdType, cmd);
   }
 
   public static void main(String[] args) throws Exception {
-    run(args);
+    build(args).run();
   }
 
 }

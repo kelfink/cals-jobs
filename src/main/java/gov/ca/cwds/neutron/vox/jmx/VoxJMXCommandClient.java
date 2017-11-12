@@ -14,6 +14,7 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.vox.VoxCommandInstruction;
 
 /**
  * Base class of JMX command actions.
@@ -81,6 +82,21 @@ public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAc
     }
   }
 
+  public void launch(final VoxCommandInstruction cmd) throws NeutronException {
+    try {
+      LOGGER.info("CONNECT JMX...");
+      this.setHost(cmd.getHost());
+      this.setPort(cmd.getPort());
+      this.setRocket(cmd.getRocket());
+
+      this.connect();
+      this.run();
+    } catch (Exception e) {
+      throw JobLogs.runtime(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", cmd.getHost(),
+          cmd.getPort(), cmd.getRocket());
+    }
+  }
+
   public BiFunction<String, String, JMXConnector> getMakeConnector() {
     return makeConnector;
   }
@@ -143,10 +159,6 @@ public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAc
 
   public void setRocket(String rocket) {
     this.rocket = rocket;
-  }
-
-  public static void main(String[] args) throws Exception {
-    VoxCommandFactory.run(args);
   }
 
 }
