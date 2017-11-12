@@ -31,6 +31,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.es.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.EmbeddableAccessLimitation;
+import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.neutron.atom.AtomSecurity;
@@ -147,20 +148,7 @@ public class EsPersonReferral
   // SOCIAL WORKER:
   // =================
 
-  @Column(name = "WORKER_ID")
-  private String workerId;
-
-  @Column(name = "WORKER_FIRST_NM")
-  @ColumnTransformer(read = "trim(WORKER_FIRST_NM)")
-  private String workerFirstName;
-
-  @Column(name = "WORKER_LAST_NM")
-  @ColumnTransformer(read = "trim(WORKER_LAST_NM)")
-  private String workerLastName;
-
-  @Column(name = "WORKER_LAST_UPDATED")
-  @Type(type = "timestamp")
-  private Date workerLastUpdated;
+  private EmbeddableStaffWorker worker = new EmbeddableStaffWorker();
 
   // =============
   // ALLEGATION:
@@ -268,10 +256,10 @@ public class EsPersonReferral
     this.victimLastUpdated = rs.getTimestamp("VICTIM_LAST_UPDATED");
     this.victimSensitivityIndicator = rs.getString("VICTIM_SENSITIVITY_IND");
 
-    this.workerId = ifNull(rs.getString("WORKER_ID"));
-    this.workerFirstName = ifNull(rs.getString("WORKER_FIRST_NM"));
-    this.workerLastName = ifNull(rs.getString("WORKER_LAST_NM"));
-    this.workerLastUpdated = rs.getTimestamp("WORKER_LAST_UPDATED");
+    this.worker.setWorkerId(ifNull(rs.getString("WORKER_ID")));
+    this.worker.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
+    this.worker.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
+    this.worker.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
 
     this.county = rs.getInt("REFERRAL_COUNTY");
     this.lastChange = rs.getDate("LAST_CHG");
@@ -335,10 +323,10 @@ public class EsPersonReferral
     ret.reporterLastName = ifNull(rs.getString("REPORTER_LAST_NM"));
     ret.reporterLastUpdated = rs.getTimestamp("REPORTER_LAST_UPDATED");
 
-    ret.workerId = ifNull(rs.getString("WORKER_ID"));
-    ret.workerFirstName = ifNull(rs.getString("WORKER_FIRST_NM"));
-    ret.workerLastName = ifNull(rs.getString("WORKER_LAST_NM"));
-    ret.workerLastUpdated = rs.getTimestamp("WORKER_LAST_UPDATED");
+    ret.worker.setWorkerId(ifNull(rs.getString("WORKER_ID")));
+    ret.worker.setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
+    ret.worker.setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
+    ret.worker.setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
 
     ret.county = rs.getInt("REFERRAL_COUNTY");
     ret.lastChange = rs.getDate("LAST_CHG");
@@ -373,10 +361,10 @@ public class EsPersonReferral
     this.reporterId = ifNull(ref.reporterId);
     this.reporterLastName = ifNull(ref.reporterLastName);
     this.reporterLastUpdated = ref.reporterLastUpdated;
-    this.workerFirstName = ifNull(ref.workerFirstName);
-    this.workerId = ref.workerId;
-    this.workerLastName = ifNull(ref.workerLastName);
-    this.workerLastUpdated = ref.workerLastUpdated;
+    this.worker.setWorkerFirstName(ifNull(ref.getWorkerFirstName()));
+    this.worker.setWorkerId(ref.getWorkerId());
+    this.worker.setWorkerLastName(ifNull(ref.getWorkerLastName()));
+    this.worker.setWorkerLastUpdated(ref.getWorkerLastUpdated());
   }
 
   private ElasticSearchPersonReporter makeReporter() {
@@ -392,12 +380,12 @@ public class EsPersonReferral
 
   private ElasticSearchPersonSocialWorker makeAssignedWorker() {
     final ElasticSearchPersonSocialWorker ret = new ElasticSearchPersonSocialWorker();
-    ret.setId(this.workerId);
-    ret.setLegacyClientId(this.workerId);
-    ret.setFirstName(ifNull(this.workerFirstName));
-    ret.setLastName(ifNull(this.workerLastName));
-    ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.workerId,
-        this.workerLastUpdated, LegacyTable.STAFF_PERSON));
+    ret.setId(this.getWorkerId());
+    ret.setLegacyClientId(this.getWorkerId());
+    ret.setFirstName(ifNull(this.getWorkerFirstName()));
+    ret.setLastName(ifNull(this.getWorkerLastName()));
+    ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.getWorkerId(),
+        this.getWorkerLastUpdated(), LegacyTable.STAFF_PERSON));
     return ret;
   }
 
@@ -612,27 +600,27 @@ public class EsPersonReferral
   }
 
   public String getWorkerId() {
-    return workerId;
+    return this.worker.getWorkerId();
   }
 
   public void setWorkerId(String workerId) {
-    this.workerId = workerId;
+    this.worker.setWorkerId(workerId);
   }
 
   public String getWorkerFirstName() {
-    return workerFirstName;
+    return this.worker.getWorkerFirstName();
   }
 
   public void setWorkerFirstName(String workerFirstName) {
-    this.workerFirstName = workerFirstName;
+    this.worker.setWorkerFirstName(workerFirstName);
   }
 
   public String getWorkerLastName() {
-    return workerLastName;
+    return this.worker.getWorkerLastName();
   }
 
   public void setWorkerLastName(String workerLastName) {
-    this.workerLastName = workerLastName;
+    this.worker.setWorkerLastName(workerLastName);
   }
 
   public String getAllegationId() {
@@ -724,11 +712,11 @@ public class EsPersonReferral
   }
 
   public Date getWorkerLastUpdated() {
-    return NeutronDateUtil.freshDate(workerLastUpdated);
+    return NeutronDateUtil.freshDate(this.worker.getWorkerLastUpdated());
   }
 
   public void setWorkerLastUpdated(Date workerLastUpdated) {
-    this.workerLastUpdated = NeutronDateUtil.freshDate(workerLastUpdated);
+    this.worker.setWorkerLastUpdated(NeutronDateUtil.freshDate(workerLastUpdated));
   }
 
   public Date getAllegationLastUpdated() {
@@ -851,5 +839,13 @@ public class EsPersonReferral
 
   public void setLimitedAccessGovernmentEntityId(Integer limitedAccessGovernmentEntityId) {
     accessLimitation.setLimitedAccessGovernmentEntityId(limitedAccessGovernmentEntityId);
+  }
+
+  public EmbeddableStaffWorker getWorker() {
+    return worker;
+  }
+
+  public void setWorker(EmbeddableStaffWorker worker) {
+    this.worker = worker;
   }
 }
