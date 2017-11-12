@@ -22,7 +22,7 @@ public class VoxCommandFactory implements ApiMarker {
     try {
       ret = (VoxJMXCommandClient) cmdType.getKlass().newInstance();
     } catch (Exception e) {
-      throw JobLogs.runtime(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", cmd.getHost(),
+      throw JobLogs.checked(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", cmd.getHost(),
           cmd.getPort(), cmd.getRocket());
     }
 
