@@ -380,12 +380,15 @@ public class EsPersonReferral
 
   private ElasticSearchPersonSocialWorker makeAssignedWorker() {
     final ElasticSearchPersonSocialWorker ret = new ElasticSearchPersonSocialWorker();
-    ret.setId(this.getWorkerId());
-    ret.setLegacyClientId(this.getWorkerId());
+
+    final String id = this.getWorkerId();
+    ret.setId(id);
+    ret.setLegacyClientId(id);
     ret.setFirstName(ifNull(this.getWorkerFirstName()));
     ret.setLastName(ifNull(this.getWorkerLastName()));
     ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.getWorkerId(),
         this.getWorkerLastUpdated(), LegacyTable.STAFF_PERSON));
+
     return ret;
   }
 
