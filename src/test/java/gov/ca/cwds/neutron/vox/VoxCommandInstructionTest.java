@@ -19,7 +19,7 @@ public class VoxCommandInstructionTest {
     String jobName = null;
     String command = null;
     String body = null;
-    VoxCommandInstruction target = new VoxCommandInstruction(jobName, command, body);
+    VoxCommandInstruction target = new VoxCommandInstruction(jobName, command);
     assertThat(target, notNullValue());
   }
 
@@ -28,7 +28,7 @@ public class VoxCommandInstructionTest {
     String jobName = "xyz";
     String command = null;
     String body = null;
-    VoxCommandInstruction target = new VoxCommandInstruction(jobName, command, body);
+    VoxCommandInstruction target = new VoxCommandInstruction(jobName, command);
     String actual = target.getRocket();
     String expected = "xyz";
     assertThat(actual, is(equalTo(expected)));
@@ -39,7 +39,7 @@ public class VoxCommandInstructionTest {
     String jobName = null;
     String command = null;
     String body = null;
-    VoxCommandInstruction target = new VoxCommandInstruction(jobName, command, body);
+    VoxCommandInstruction target = new VoxCommandInstruction(jobName, command);
     String actual = target.getCommand();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));

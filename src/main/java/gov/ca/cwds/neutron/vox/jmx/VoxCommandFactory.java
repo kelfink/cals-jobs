@@ -1,6 +1,7 @@
 package gov.ca.cwds.neutron.vox.jmx;
 
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -15,7 +16,8 @@ public class VoxCommandFactory implements ApiMarker {
     // Static class
   }
 
-  public static void launch(final VoxCommandType cmdType, final VoxCommandInstruction cmd) {
+  public static void launch(final VoxCommandType cmdType, final VoxCommandInstruction cmd)
+      throws NeutronException {
     try (VoxJMXCommandClient client = (VoxJMXCommandClient) cmdType.getKlass().newInstance()) {
       LOGGER.info("CONNECT JMX...");
       client.setHost(cmd.getHost());
@@ -30,10 +32,14 @@ public class VoxCommandFactory implements ApiMarker {
     }
   }
 
-  public static void run(String[] args) {
+  public static void run(String[] args) throws NeutronException {
     final VoxCommandInstruction cmd = VoxCommandInstruction.parseCommandLine(args);
     final VoxCommandType cmdType = VoxCommandType.lookup(cmd.getCommand());
     launch(cmdType, cmd);
+  }
+
+  public static void main(String[] args) throws Exception {
+    run(args);
   }
 
 }

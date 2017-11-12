@@ -54,7 +54,7 @@ public class NeutronJobManagerResource implements ApiMarker {
     buf.append("{\"result\":\"ACK\",\"job_name\":\"").append(jobName).append("\",\"command\":\"")
         .append(command).append("\"}");
 
-    final VoxCommandInstruction cmd = new VoxCommandInstruction(jobName, command, body);
+    final VoxCommandInstruction cmd = new VoxCommandInstruction(jobName, command);
     LOGGER.info("cmd: {}", cmd);
 
     // NOTE: Handle command.

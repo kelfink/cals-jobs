@@ -17,18 +17,19 @@ public class VoxCommandInstruction implements ApiMarker {
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(VoxCommandInstruction.class);
 
-  private String rocket;
   private String host;
   private String port;
+
+  private String rocket;
   private String command;
 
   public VoxCommandInstruction() {
     // default
   }
 
-  public VoxCommandInstruction(String rocket, String command, String config) {
+  public VoxCommandInstruction(String rocket, String command) {
     this.rocket = rocket;
-
+    this.command = command;
   }
 
   public static VoxCommandInstruction parseCommandLine(final String[] args) {

@@ -37,7 +37,7 @@ public class GsonMessageBodyHandlerTest {
   public void setup() throws Exception {
     target = new GsonMessageBodyHandler();
 
-    object = new VoxCommandInstruction("client", "stop", "crap");
+    object = new VoxCommandInstruction("client", "stop");
     type = VoxCommandInstruction.class;
     genericType = VoxCommandInstruction.class;
     annotations = new Annotation[] {};

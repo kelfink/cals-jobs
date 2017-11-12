@@ -137,16 +137,16 @@ public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAc
     this.mbean = mbean;
   }
 
-  public static void main(String[] args) {
-    VoxCommandFactory.run(args);
-  }
-
   public String getRocket() {
     return rocket;
   }
 
   public void setRocket(String rocket) {
     this.rocket = rocket;
+  }
+
+  public static void main(String[] args) throws Exception {
+    VoxCommandFactory.run(args);
   }
 
 }

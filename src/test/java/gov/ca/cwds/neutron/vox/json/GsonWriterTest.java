@@ -43,7 +43,7 @@ public class GsonWriterTest {
   @Test
   public void writeTo_Args__Object__Class__Type__AnnotationArray__MediaType__MultivaluedMap__OutputStream()
       throws Exception {
-    VoxCommandInstruction t = new VoxCommandInstruction("client", "stop", "crap");
+    VoxCommandInstruction t = new VoxCommandInstruction("client", "stop");
     Class<?> type = VoxCommandInstruction.class;
     Type genericType = mock(Type.class);
     Annotation[] annotations = new Annotation[] {};
@@ -69,7 +69,7 @@ public class GsonWriterTest {
 
   @Test
   public void getSize_Args__Object__Class__Type__AnnotationArray__MediaType() throws Exception {
-    VoxCommandInstruction t = new VoxCommandInstruction("client", "stop", "crap");
+    VoxCommandInstruction t = new VoxCommandInstruction("client", "stop");
     Class<?> type = VoxCommandInstruction.class;
     Type genericType = mock(Type.class);
     Annotation[] annotations = new Annotation[] {};
@@ -83,7 +83,7 @@ public class GsonWriterTest {
 
   @Test
   public void isWriteable_Args__Class__Type__AnnotationArray__MediaType() throws Exception {
-    VoxCommandInstruction t = new VoxCommandInstruction("client", "stop", "crap");
+    VoxCommandInstruction t = new VoxCommandInstruction("client", "stop");
     Class<?> type = VoxCommandInstruction.class;
     Type genericType = mock(Type.class);
     Annotation[] annotations = new Annotation[] {};

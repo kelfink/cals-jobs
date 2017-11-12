@@ -42,7 +42,7 @@ public class GsonReaderTest {
     antns = new Annotation[] {};
     mt = mock(MediaType.class);
 
-    object = new VoxCommandInstruction("client", "stop", "crap");
+    object = new VoxCommandInstruction("client", "stop");
     type = VoxCommandInstruction.class;
     genericType = mock(Type.class);
     mediaType = MediaType.APPLICATION_JSON_TYPE;
