@@ -69,27 +69,29 @@ public class NeutronRocket implements InterruptableJob {
 
       flightLog = rocket.getFlightLog();
       flightLog.setRocketName(rocketName);
+      flightLog.start();
 
       map.put("opts", job.getFlightPlan());
       map.put("track", flightLog);
       context.setResult(flightLog);
 
       job.run();
+      LOGGER.info("HAPPY LANDING! {}", rocket.getClass().getName());
     } catch (Exception e) {
+      flightLog.fail();
       LOGGER.error("LAUNCH FAILURE! {}", e);
       throw new JobExecutionException("FAILED TO LAUNCH! {}", e);
     } finally {
-      LOGGER.info("Flight summary: {}", flightLog);
+      flightLog.done();
+      LOGGER.info("FLIGHT SUMMARY: {}", flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
       MDC.remove("rocketLog");
     }
-
-    LOGGER.info("ANOTHER HAPPY LANDING! {}", rocket.getClass().getName());
   }
 
   @Override
   public void interrupt() throws UnableToInterruptJobException {
-    LOGGER.warn("INTERRUPT RUNNING JOB!");
+    LOGGER.warn("ABORT FLIGHT!");
   }
 
   public FlightLog getFlightLog() {

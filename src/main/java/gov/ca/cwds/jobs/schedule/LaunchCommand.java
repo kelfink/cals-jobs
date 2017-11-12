@@ -173,13 +173,13 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       final StandardFlightSchedule sched) throws IOException {
     final StringBuilder buf = new StringBuilder();
 
-    buf.append(flightPlan.getBaseDirectory()).append(File.separatorChar).append(sched.getShortName())
-        .append(".time");
+    buf.append(flightPlan.getBaseDirectory()).append(File.separatorChar)
+        .append(sched.getShortName()).append(".time");
     final String timeFileLoc =
         buf.toString().replaceAll(File.separator + File.separator, File.separator);
     flightPlan.setLastRunLoc(timeFileLoc);
-    LOGGER.debug("base directory: {}, job name: {}, last run loc: {}", flightPlan.getBaseDirectory(),
-        sched.getShortName(), flightPlan.getLastRunLoc());
+    LOGGER.debug("base directory: {}, job name: {}, last run loc: {}",
+        flightPlan.getBaseDirectory(), sched.getShortName(), flightPlan.getLastRunLoc());
 
     // If timestamp file doesn't exist, create it.
     final File f = new File(timeFileLoc); // NOSONAR
@@ -253,8 +253,8 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
         final FlightPlan flightPlan = new FlightPlan(commonFlightPlan);
         handleTimeFile(flightPlan, fmt, now, sched);
 
-        final AtomLaunchPad nj = new LaunchPad(launchScheduler, sched, flightRecorder, flightPlan);
-        launchScheduler.getScheduleRegistry().put(klass, nj);
+        final LaunchPad pad = new LaunchPad(launchScheduler, sched, flightRecorder, flightPlan);
+        launchScheduler.getScheduleRegistry().put(klass, pad);
         launchScheduler.getFlightPlanManger().addFlightPlan(klass, flightPlan);
       }
 
