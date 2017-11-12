@@ -29,14 +29,14 @@ public class VoxCommandFactory implements ApiMarker {
     return ret;
   }
 
-  public static VoxJMXCommandClient build(String[] args) throws NeutronException {
+  public static void launch(String[] args) throws NeutronException {
     final VoxCommandInstruction cmd = VoxCommandInstruction.parseCommandLine(args);
     final VoxCommandType cmdType = VoxCommandType.lookup(cmd.getCommand());
-    return build(cmdType, cmd);
+    build(cmdType, cmd).launch(cmd);
   }
 
   public static void main(String[] args) throws Exception {
-    build(args).run();
+    launch(args);
   }
 
 }

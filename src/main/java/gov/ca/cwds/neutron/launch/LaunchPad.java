@@ -60,10 +60,8 @@ public class LaunchPad implements VoxLaunchPadMBean {
     flightRecorder.addFlightLog(sched.getRocketClass(), new FlightLog());
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#run(java.lang.String)
+  /**
+   * {@inheritDoc}
    */
   @Override
   @Managed(description = "Run rocket now, show results immediately")
@@ -81,10 +79,8 @@ public class LaunchPad implements VoxLaunchPadMBean {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#schedule()
+  /**
+   * {@inheritDoc}
    */
   @Override
   @Managed(description = "Schedule rocket on repeat")
@@ -118,10 +114,8 @@ public class LaunchPad implements VoxLaunchPadMBean {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#unschedule()
+  /**
+   * {@inheritDoc}
    */
   @Override
   @Managed(description = "Unschedule rocket")
@@ -136,10 +130,8 @@ public class LaunchPad implements VoxLaunchPadMBean {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#status()
+  /**
+   * {@inheritDoc}
    */
   @Override
   @Managed(description = "Show rocket status")
@@ -148,10 +140,8 @@ public class LaunchPad implements VoxLaunchPadMBean {
     return flightRecorder.getLastFlightLog(this.flightSchedule.getRocketClass()).toString();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#history()
+  /**
+   * {@inheritDoc}
    */
   @Override
   @Managed(description = "Show rocket history")
@@ -161,10 +151,8 @@ public class LaunchPad implements VoxLaunchPadMBean {
     return buf.toString();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#logs()
+  /**
+   * {@inheritDoc}
    */
   @Override
   @Managed(description = "Show rocket log")
@@ -174,10 +162,8 @@ public class LaunchPad implements VoxLaunchPadMBean {
     return buf.toString();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gov.ca.cwds.neutron.launch.AtomLaunchPad#stop()
+  /**
+   * {@inheritDoc}
    */
   @Override
   @Managed(description = "Stop flying rocket")
