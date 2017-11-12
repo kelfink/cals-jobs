@@ -17,10 +17,10 @@ import org.weakref.jmx.Managed;
 
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.flight.FlightLog;
@@ -192,10 +192,18 @@ public class LaunchPad implements VoxLaunchPadMBean {
     }
   }
 
+  @Override
+  public void shutdown() throws NeutronException {
+    LOGGER.warn("Shutdown command center");
+    launchScheduler.stopScheduler(false);
+  }
+
+  @Override
   public boolean isVetoExecution() {
     return vetoExecution;
   }
 
+  @Override
   public void setVetoExecution(boolean vetoExecution) {
     this.vetoExecution = vetoExecution;
   }

@@ -7,6 +7,10 @@ public class VoxCommandLastRunStatus extends VoxJMXCommandClient implements VoxC
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(VoxCommandLastRunStatus.class);
 
+  public VoxCommandLastRunStatus() {
+    super();
+  }
+
   public VoxCommandLastRunStatus(String host, String port) {
     super(host, port);
   }

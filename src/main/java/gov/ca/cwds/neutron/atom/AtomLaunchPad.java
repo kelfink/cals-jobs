@@ -29,10 +29,26 @@ public interface AtomLaunchPad extends ApiMarker {
 
   String history();
 
+  /**
+   * Display this rocket's logs.
+   * 
+   * @return logs
+   */
   String logs();
 
+  /**
+   * Aborts a flying rocket.
+   * 
+   * @throws NeutronException general error
+   */
   void stop() throws NeutronException;
 
+  /**
+   * Abort rockets, shutdown command, and exit.
+   * 
+   * @throws NeutronException general error
+   */
+  void shutdown() throws NeutronException;
 
 
   FlightPlan getFlightPlan();

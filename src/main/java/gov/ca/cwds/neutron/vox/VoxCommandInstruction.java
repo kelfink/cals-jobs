@@ -7,10 +7,16 @@ import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.vox.jmx.VoxCommandType;
 import gov.ca.cwds.neutron.vox.jmx.VoxJmxDefaults;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
+/**
+ * Parses Vox instructions from the command line.
+ * 
+ * @author CWDS API Team
+ */
 public class VoxCommandInstruction implements ApiMarker {
 
   private static final long serialVersionUID = 1L;
@@ -44,7 +50,8 @@ public class VoxCommandInstruction implements ApiMarker {
         options.has("p") ? (String) options.valueOf("p") : VoxJmxDefaults.DEFAULT_PORT;
     final String rocket = options.has("r") ? (String) options.valueOf("r")
         : StandardFlightSchedule.CLIENT.getShortName();
-    final String cmd = options.has("c") ? (String) options.valueOf("c") : "status";
+    final String cmd =
+        options.has("c") ? (String) options.valueOf("c") : VoxCommandType.LAST_RUN_STATUS.getKey();
 
     ret.setHost(host);
     ret.setPort(port);
