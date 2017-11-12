@@ -18,15 +18,15 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.neutron.vox.RocketCommandInstruction;
+import gov.ca.cwds.neutron.vox.VoxCommandInstruction;
 import gov.ca.cwds.neutron.vox.json.GsonMessageBodyHandler;
 
 public class GsonMessageBodyHandlerTest {
 
   GsonMessageBodyHandler target;
 
-  RocketCommandInstruction object;
-  Class<RocketCommandInstruction> type;
+  VoxCommandInstruction object;
+  Class<VoxCommandInstruction> type;
   Type genericType;
   Annotation[] annotations;
   MediaType mediaType;
@@ -37,9 +37,9 @@ public class GsonMessageBodyHandlerTest {
   public void setup() throws Exception {
     target = new GsonMessageBodyHandler();
 
-    object = new RocketCommandInstruction("client", "stop", "crap");
-    type = RocketCommandInstruction.class;
-    genericType = RocketCommandInstruction.class;
+    object = new VoxCommandInstruction("client", "stop", "crap");
+    type = VoxCommandInstruction.class;
+    genericType = VoxCommandInstruction.class;
     annotations = new Annotation[] {};
     mediaType = MediaType.APPLICATION_JSON_TYPE;
     httpHeaders = new MultivaluedHashMap<String, Object>();

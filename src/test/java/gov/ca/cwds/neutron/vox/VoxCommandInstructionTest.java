@@ -7,13 +7,11 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import gov.ca.cwds.neutron.vox.RocketCommandInstruction;
-
-public class RocketCommandInstructionTest {
+public class VoxCommandInstructionTest {
 
   @Test
   public void type() throws Exception {
-    assertThat(RocketCommandInstruction.class, notNullValue());
+    assertThat(VoxCommandInstruction.class, notNullValue());
   }
 
   @Test
@@ -21,7 +19,7 @@ public class RocketCommandInstructionTest {
     String jobName = null;
     String command = null;
     String body = null;
-    RocketCommandInstruction target = new RocketCommandInstruction(jobName, command, body);
+    VoxCommandInstruction target = new VoxCommandInstruction(jobName, command, body);
     assertThat(target, notNullValue());
   }
 
@@ -30,8 +28,8 @@ public class RocketCommandInstructionTest {
     String jobName = "xyz";
     String command = null;
     String body = null;
-    RocketCommandInstruction target = new RocketCommandInstruction(jobName, command, body);
-    String actual = target.getRocketName();
+    VoxCommandInstruction target = new VoxCommandInstruction(jobName, command, body);
+    String actual = target.getRocket();
     String expected = "xyz";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -41,19 +39,8 @@ public class RocketCommandInstructionTest {
     String jobName = null;
     String command = null;
     String body = null;
-    RocketCommandInstruction target = new RocketCommandInstruction(jobName, command, body);
+    VoxCommandInstruction target = new VoxCommandInstruction(jobName, command, body);
     String actual = target.getCommand();
-    String expected = null;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void getConfig_Args__() throws Exception {
-    String jobName = null;
-    String command = null;
-    String body = null;
-    RocketCommandInstruction target = new RocketCommandInstruction(jobName, command, body);
-    String actual = target.getConfig();
     String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }

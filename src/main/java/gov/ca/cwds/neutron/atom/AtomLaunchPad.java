@@ -3,9 +3,8 @@ package gov.ca.cwds.neutron.atom;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
-
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 
 public interface AtomLaunchPad extends ApiMarker {
 
@@ -17,6 +16,10 @@ public interface AtomLaunchPad extends ApiMarker {
    * @throws NeutronException on error
    */
   String run(String cmdLine) throws NeutronException;
+
+  // ==============
+  // COMMANDS:
+  // ==============
 
   void schedule() throws NeutronException;
 
@@ -31,11 +34,6 @@ public interface AtomLaunchPad extends ApiMarker {
   void stop() throws NeutronException;
 
 
-  boolean isVetoExecution();
-
-  void setVetoExecution(boolean vetoExecution);
-
-
 
   FlightPlan getFlightPlan();
 
@@ -45,5 +43,10 @@ public interface AtomLaunchPad extends ApiMarker {
   StandardFlightSchedule getFlightSchedule();
 
   FlightRecorder getFlightRecorder();
+
+
+  boolean isVetoExecution();
+
+  void setVetoExecution(boolean vetoExecution);
 
 }

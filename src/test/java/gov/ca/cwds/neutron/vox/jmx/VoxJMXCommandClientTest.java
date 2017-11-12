@@ -13,13 +13,13 @@ import java.util.function.BiFunction;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 
-import org.apache.commons.lang3.tuple.Triple;
 import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.neutron.vox.VoxCommandInstruction;
 
-public class VoxJMXClientTest {
+public class VoxJMXCommandClientTest {
 
   String host;
   String port;
@@ -28,7 +28,7 @@ public class VoxJMXClientTest {
   JMXConnector jmxConnector;
   MBeanServerConnection mbeanServerConnection;
   BiFunction<String, String, JMXConnector> makeConnector = (host, port) -> jmxConnector;
-  VoxJMXClient target;
+  VoxJMXCommandClient target;
 
   @Before
   public void setup() throws Exception {
@@ -38,13 +38,14 @@ public class VoxJMXClientTest {
     jmxConnector = mock(JMXConnector.class);
     mbeanServerConnection = mock(MBeanServerConnection.class);
     when(jmxConnector.getMBeanServerConnection()).thenReturn(mbeanServerConnection);
-    target = new VoxJMXClient(host, port);
+    target = new VoxCommandLastRunStatus(host, port);
+
     target.setMakeConnector(makeConnector);
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(VoxJMXClient.class, notNullValue());
+    assertThat(VoxJMXCommandClient.class, notNullValue());
   }
 
   @Test
@@ -90,7 +91,7 @@ public class VoxJMXClientTest {
   @Test(expected = Exception.class)
   public void main_Args__StringArray() throws Exception {
     String[] args = new String[] {};
-    VoxJMXClient.main(args);
+    VoxJMXCommandClient.main(args);
   }
 
   @Test
@@ -108,8 +109,8 @@ public class VoxJMXClientTest {
   @Test
   public void parseCommandLine_Args__StringArray() throws Exception {
     String[] args = new String[] {"-h", host, "-p", port, "-r", rocket};
-    Triple<String, String, String> actual = VoxJMXClient.parseCommandLine(args);
-    Triple<String, String, String> expected = Triple.of(host, port, rocket);
+    VoxCommandInstruction actual = VoxCommandInstruction.parseCommandLine(args);
+    VoxCommandInstruction expected = new VoxCommandInstruction();
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -161,7 +162,7 @@ public class VoxJMXClientTest {
 
   @Test
   public void isTestMode_Args__() throws Exception {
-    boolean actual = VoxJMXClient.isTestMode();
+    boolean actual = VoxJMXCommandClient.isTestMode();
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -169,7 +170,7 @@ public class VoxJMXClientTest {
   @Test
   public void setTestMode_Args__boolean() throws Exception {
     boolean testMode = false;
-    VoxJMXClient.setTestMode(testMode);
+    VoxJMXCommandClient.setTestMode(testMode);
   }
 
 }

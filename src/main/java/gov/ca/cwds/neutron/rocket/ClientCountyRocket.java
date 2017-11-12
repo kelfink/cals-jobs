@@ -34,7 +34,7 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
- * Job to load Clients from CMS into ElasticSearch.
+ * Populates the Client County table via stored procedure.
  * 
  * @author CWDS API Team
  */
@@ -74,14 +74,6 @@ public class ClientCountyRocket extends ClientIndexerJob
   @Override
   public String getInitialLoadViewName() {
     return "CLIENT_T";
-  }
-
-  /**
-   * NEXT: turn into a fixed rocket setting, not override method.
-   */
-  @Override
-  public String getMQTName() {
-    return getInitialLoadViewName();
   }
 
   @Override

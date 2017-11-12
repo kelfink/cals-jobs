@@ -10,22 +10,19 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.apache.commons.lang3.tuple.Triple;
-
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
 
-public class VoxJMXClient implements AutoCloseable {
+/**
+ * Base class of JMX command actions.
+ * 
+ * @author CWDS API Team
+ */
+public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAction {
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(VoxJMXClient.class);
-
-  private static final String DEFAULT_HOST = "localhost";
-  private static final String DEFAULT_PORT = "1098";
+  private static final ConditionalLogger LOGGER = new JetPackLogger(VoxJMXCommandClient.class);
 
   private static boolean testMode;
 
@@ -38,13 +35,20 @@ public class VoxJMXClient implements AutoCloseable {
     }
   };
 
-  private final String host;
-  private final String port;
+  private String host;
+  private String port;
+  private String rocket;
+
+  private VoxLaunchPadMBean mbean;
 
   private JMXConnector jmxConnector;
   private MBeanServerConnection mbeanServerConnection;
 
-  public VoxJMXClient(final String host, final String port) {
+  public VoxJMXCommandClient() {
+    // default
+  }
+
+  public VoxJMXCommandClient(final String host, final String port) {
     this.host = host;
     this.port = port;
   }
@@ -54,8 +58,9 @@ public class VoxJMXClient implements AutoCloseable {
       jmxConnector = makeConnector.apply(host, port);
       mbeanServerConnection = jmxConnector.getMBeanServerConnection();
       LOGGER.info("mbean count: {}", mbeanServerConnection.getMBeanCount());
+      this.mbean = proxy(rocket);
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "OOPS! DIDN'T CONNECT!! {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "JMX DIDN'T CONNECT!! {}", e.getMessage());
     }
   }
 
@@ -69,12 +74,10 @@ public class VoxJMXClient implements AutoCloseable {
   public VoxLaunchPadMBean proxy(String rocketName) throws NeutronException {
     try {
       final ObjectName mbeanName = new ObjectName("Neutron:rocket=" + rocketName);
-      final VoxLaunchPadMBean mbeanProxy = MBeanServerInvocationHandler
-          .newProxyInstance(mbeanServerConnection, mbeanName, VoxLaunchPadMBean.class, true);
-      LOGGER.info("status::{}", () -> mbeanProxy.status());
-      return mbeanProxy;
+      return MBeanServerInvocationHandler.newProxyInstance(mbeanServerConnection, mbeanName,
+          VoxLaunchPadMBean.class, true);
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO GET MBEAN PROXY! {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO GET MBEAN! {}", e.getMessage());
     }
   }
 
@@ -84,19 +87,6 @@ public class VoxJMXClient implements AutoCloseable {
 
   public void setMakeConnector(BiFunction<String, String, JMXConnector> makeConnector) {
     this.makeConnector = makeConnector;
-  }
-
-  public static Triple<String, String, String> parseCommandLine(final String[] args) {
-    LOGGER.info("PARSE COMMAND LINE");
-    final OptionParser parser = new OptionParser("h:p:r:");
-    final OptionSet options = parser.parse(args);
-
-    final String host = options.has("h") ? (String) options.valueOf("h") : DEFAULT_HOST;
-    final String port = options.has("p") ? (String) options.valueOf("p") : DEFAULT_PORT;
-    final String rocket = options.has("r") ? (String) options.valueOf("r")
-        : StandardFlightSchedule.CLIENT.getShortName();
-    LOGGER.info("SETTINGS: host: {}, port: {}, rocket: {}", host, port, rocket);
-    return Triple.of(host, port, rocket);
   }
 
   public JMXConnector getJmxConnector() {
@@ -128,32 +118,35 @@ public class VoxJMXClient implements AutoCloseable {
   }
 
   public static void setTestMode(boolean testMode) {
-    VoxJMXClient.testMode = testMode;
+    VoxJMXCommandClient.testMode = testMode;
   }
 
-  public String doIt(final VoxLaunchPadMBean mbean) {
-    return mbean.status();
+  public void setHost(String host) {
+    this.host = host;
   }
 
-  public static void launch(final Triple<String, String, String> triple) {
-    final String host = triple.getLeft();
-    final String port = triple.getMiddle();
-    final String rocket = triple.getRight();
+  public void setPort(String port) {
+    this.port = port;
+  }
 
-    try (VoxJMXClient client = new VoxJMXClient(host, port)) {
-      LOGGER.info("CONNECT JMX...");
-      client.connect();
-      final VoxLaunchPadMBean mbeanProxy = client.proxy(rocket);
-      LOGGER.info("status: {}", mbeanProxy::status);
-    } catch (Exception e) {
-      throw JobLogs.runtime(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", host, port,
-          rocket);
-    }
+  public VoxLaunchPadMBean getMbean() {
+    return mbean;
+  }
+
+  public void setMbean(VoxLaunchPadMBean mbean) {
+    this.mbean = mbean;
   }
 
   public static void main(String[] args) {
-    LOGGER.info("BEGIN");
-    launch(parseCommandLine(args));
+    VoxCommandFactory.run(args);
+  }
+
+  public String getRocket() {
+    return rocket;
+  }
+
+  public void setRocket(String rocket) {
+    this.rocket = rocket;
   }
 
 }

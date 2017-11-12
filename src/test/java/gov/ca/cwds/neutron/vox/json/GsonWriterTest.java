@@ -18,7 +18,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.neutron.vox.RocketCommandInstruction;
+import gov.ca.cwds.neutron.vox.VoxCommandInstruction;
 import gov.ca.cwds.neutron.vox.json.GsonWriter;
 
 public class GsonWriterTest {
@@ -43,8 +43,8 @@ public class GsonWriterTest {
   @Test
   public void writeTo_Args__Object__Class__Type__AnnotationArray__MediaType__MultivaluedMap__OutputStream()
       throws Exception {
-    RocketCommandInstruction t = new RocketCommandInstruction("client", "stop", "crap");
-    Class<?> type = RocketCommandInstruction.class;
+    VoxCommandInstruction t = new VoxCommandInstruction("client", "stop", "crap");
+    Class<?> type = VoxCommandInstruction.class;
     Type genericType = mock(Type.class);
     Annotation[] annotations = new Annotation[] {};
     MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
@@ -69,8 +69,8 @@ public class GsonWriterTest {
 
   @Test
   public void getSize_Args__Object__Class__Type__AnnotationArray__MediaType() throws Exception {
-    RocketCommandInstruction t = new RocketCommandInstruction("client", "stop", "crap");
-    Class<?> type = RocketCommandInstruction.class;
+    VoxCommandInstruction t = new VoxCommandInstruction("client", "stop", "crap");
+    Class<?> type = VoxCommandInstruction.class;
     Type genericType = mock(Type.class);
     Annotation[] annotations = new Annotation[] {};
     MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
@@ -83,8 +83,8 @@ public class GsonWriterTest {
 
   @Test
   public void isWriteable_Args__Class__Type__AnnotationArray__MediaType() throws Exception {
-    RocketCommandInstruction t = new RocketCommandInstruction("client", "stop", "crap");
-    Class<?> type = RocketCommandInstruction.class;
+    VoxCommandInstruction t = new VoxCommandInstruction("client", "stop", "crap");
+    Class<?> type = VoxCommandInstruction.class;
     Type genericType = mock(Type.class);
     Annotation[] annotations = new Annotation[] {};
     MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;

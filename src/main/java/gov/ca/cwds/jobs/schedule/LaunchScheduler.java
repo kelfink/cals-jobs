@@ -22,6 +22,7 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.LaunchPad;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronClassFinder;
 
 @Singleton
 public class LaunchScheduler implements AtomLaunchScheduler {
@@ -103,14 +104,9 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightLog launchScheduledFlight(String jobName, FlightPlan flightPlan)
+  public FlightLog launchScheduledFlight(String rocketName, FlightPlan flightPlan)
       throws NeutronException {
-    try {
-      final Class<?> klass = Class.forName(jobName);
-      return launchScheduledFlight(klass, flightPlan);
-    } catch (ClassNotFoundException e) {
-      throw JobLogs.checked(LOGGER, e, "SCHEDULED LAUNCH FAILED!: {}", e.getMessage());
-    }
+    return launchScheduledFlight(NeutronClassFinder.classForName(rocketName), flightPlan);
   }
 
   @Override
@@ -187,13 +183,8 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   @Override
   public boolean isLaunchVetoed(String className) throws NeutronException {
-    Class<?> klazz = null;
-    try {
-      klazz = Class.forName(className);
-    } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "UNKNOWN JOB CLASS! {}", className, e);
-    }
-    return this.getScheduleRegistry().get(klazz).isVetoExecution();
+    return this.getScheduleRegistry().get(NeutronClassFinder.classForName(className))
+        .isVetoExecution();
   }
 
   @Override
