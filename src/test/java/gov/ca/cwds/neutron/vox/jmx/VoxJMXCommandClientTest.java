@@ -24,6 +24,7 @@ public class VoxJMXCommandClientTest {
   String host;
   String port;
   String rocket;
+  String cmd;
 
   JMXConnector jmxConnector;
   MBeanServerConnection mbeanServerConnection;
@@ -35,10 +36,15 @@ public class VoxJMXCommandClientTest {
     host = "localhost";
     port = "1098";
     rocket = "reporter";
+    cmd = "status";
+
     jmxConnector = mock(JMXConnector.class);
     mbeanServerConnection = mock(MBeanServerConnection.class);
     when(jmxConnector.getMBeanServerConnection()).thenReturn(mbeanServerConnection);
     target = new VoxCommandLastRunStatus(host, port);
+    target.setHost(host);
+    target.setPort(port);
+    target.setRocket(rocket);
 
     target.setMakeConnector(makeConnector);
   }
@@ -96,21 +102,27 @@ public class VoxJMXCommandClientTest {
 
   @Test
   public void getMakeConnector_Args__() throws Exception {
-    BiFunction<String, String, JMXConnector> actual = target.getMakeConnector();
+    final BiFunction<String, String, JMXConnector> actual = target.getMakeConnector();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void setMakeConnector_Args__BiFunction() throws Exception {
-    BiFunction<String, String, JMXConnector> makeConnector = mock(BiFunction.class);
+    final BiFunction<String, String, JMXConnector> makeConnector = mock(BiFunction.class);
     target.setMakeConnector(makeConnector);
   }
 
   @Test
   public void parseCommandLine_Args__StringArray() throws Exception {
-    String[] args = new String[] {"-h", host, "-p", port, "-r", rocket};
-    VoxCommandInstruction actual = VoxCommandInstruction.parseCommandLine(args);
-    VoxCommandInstruction expected = new VoxCommandInstruction();
+    final String[] args = new String[] {"-h", host, "-p", port, "-r", rocket, "-c", cmd};
+    final VoxCommandInstruction actual = VoxCommandInstruction.parseCommandLine(args);
+
+    final VoxCommandInstruction expected = new VoxCommandInstruction();
+    expected.setHost(host);
+    expected.setPort(port);
+    expected.setRocket(rocket);
+    expected.setCommand(cmd);
+
     assertThat(actual, is(equalTo(expected)));
   }
 

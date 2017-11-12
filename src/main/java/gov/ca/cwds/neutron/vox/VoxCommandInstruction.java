@@ -1,5 +1,8 @@
 package gov.ca.cwds.neutron.vox;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
@@ -81,6 +84,16 @@ public class VoxCommandInstruction implements ApiMarker {
 
   public void setCommand(String command) {
     this.command = command;
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }
