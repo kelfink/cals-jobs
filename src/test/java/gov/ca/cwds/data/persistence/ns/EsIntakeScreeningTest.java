@@ -8,8 +8,10 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -17,12 +19,13 @@ import org.junit.Test;
 
 import gov.ca.cwds.jobs.Goddard;
 
-public class EsIntakeScreeningTest {
+public class EsIntakeScreeningTest extends Goddard {
 
   public static final String DEFAULT_SCREENING_ID = "scr1234567";
 
   EsIntakeScreening target;
 
+  @Override
   @Before
   public void setup() {
     target = new EsIntakeScreening();
@@ -89,8 +92,29 @@ public class EsIntakeScreeningTest {
   @Test
   public void normalize_Args__Map() throws Exception {
     Map<Object, IntakeParticipant> map = new HashMap<Object, IntakeParticipant>();
+
+    IntakeParticipant p = new IntakeParticipant();
+    p.setId(DEFAULT_CLIENT_ID);
+    p.setLegacyId(DEFAULT_CLIENT_ID);
+
+    IntakeScreening s = new IntakeScreening();
+    s.setId(DEFAULT_SCREENING_ID);
+    s.setEndedAt(new Date());
+    s.setStartedAt(new Date());
+    p.addScreening(s);
+
+    IntakeAllegation alg = new IntakeAllegation();
+    alg.setId(DEFAULT_CLIENT_ID);
+    List<String> types = new ArrayList<>();
+    types.add("abuse");
+    types.add("neglect");
+    types.add("greed");
+    alg.setAllegationTypes(types);
+    s.addAllegation(alg);
+
+    map.put(DEFAULT_SCREENING_ID, p);
+
     IntakeParticipant actual = target.normalize(map);
-    IntakeParticipant expected = null;
     assertThat(actual, notNullValue());
   }
 
