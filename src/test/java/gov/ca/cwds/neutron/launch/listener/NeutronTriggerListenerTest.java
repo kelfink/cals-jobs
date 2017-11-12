@@ -18,9 +18,11 @@ import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.TriggerKey;
 
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
+import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
@@ -46,8 +48,7 @@ public class NeutronTriggerListenerTest extends Goddard {
   public void setup() throws Exception {
     super.setup();
     dao = new TestNormalizedEntityDao(sessionFactory);
-    rocket = new TestIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory,
-        flightRecorder);
+    rocket = new TestIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory, flightRecorder);
     rocket.setFlightPlan(flightPlan);
     rocket.setFlightLog(flightRecord);
     job = new NeutronRocket(rocket, flightSchedule, flightRecorder);
@@ -67,7 +68,8 @@ public class NeutronTriggerListenerTest extends Goddard {
     when(trigger.getKey()).thenReturn(triggerKey);
     when(jobDataMap.getString(any(String.class))).thenReturn(TestIndexerJob.class.getName());
 
-    neutronScheduler.scheduleLaunch(TestIndexerJob.class, StandardFlightSchedule.CLIENT, flightPlan);
+    neutronScheduler.scheduleLaunch(TestIndexerJob.class, StandardFlightSchedule.CLIENT,
+        flightPlan);
     target = new NeutronTriggerListener(neutronScheduler);
   }
 
@@ -95,6 +97,15 @@ public class NeutronTriggerListenerTest extends Goddard {
 
   @Test
   public void vetoJobExecution_Args__Trigger__JobExecutionContext() throws Exception {
+    boolean actual = target.vetoJobExecution(trigger, context_);
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test(expected = JobsException.class)
+  public void vetoJobExecution__boom() throws Exception {
+    when(neutronScheduler.isLaunchVetoed(any(String.class))).thenThrow(NeutronException.class);
+
     boolean actual = target.vetoJobExecution(trigger, context_);
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));

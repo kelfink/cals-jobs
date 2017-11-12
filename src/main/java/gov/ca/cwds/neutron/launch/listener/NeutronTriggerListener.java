@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
-import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchScheduler;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -50,7 +49,7 @@ public class NeutronTriggerListener implements TriggerListener {
 
     try {
       answer = neutronScheduler.isLaunchVetoed(className);
-    } catch (NeutronException e) {
+    } catch (Exception e) {
       throw JobLogs.runtime(LOGGER, e, "ERROR FINDING JOB FACADE! job class: {}", className, e);
     }
 
