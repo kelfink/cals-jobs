@@ -1,9 +1,10 @@
-package gov.ca.cwds.neutron.vox.jmx;
+package gov.ca.cwds.neutron.vox.jmx.cmd;
 
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.vox.jmx.VoxJMXCommandClient;
 
 public class VoxCommandShutdown extends VoxJMXCommandClient {
 

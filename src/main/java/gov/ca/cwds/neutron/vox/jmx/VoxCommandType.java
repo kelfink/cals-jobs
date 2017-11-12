@@ -3,6 +3,8 @@ package gov.ca.cwds.neutron.vox.jmx;
 import java.util.HashMap;
 import java.util.Map;
 
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandLastRunStatus;
+
 public enum VoxCommandType {
 
   LAST_RUN_STATUS(VoxCommandLastRunStatus.class, "status"),

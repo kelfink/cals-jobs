@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.vox.VoxCommandInstruction;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandLastRunStatus;
 
 public class VoxJMXCommandClientTest {
 
