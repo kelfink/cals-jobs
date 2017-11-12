@@ -105,8 +105,11 @@ public class IntakeScreeningTest extends Goddard {
 
   @Test
   public void addParticipantRole_Args__String__String() throws Exception {
-    String partcId = null;
-    String role = null;
+    String partcId = DEFAULT_CLIENT_ID;
+    String role = "office_admin";
+    target.addParticipantRole(partcId, role);
+
+    role = "tri_county_officer";
     target.addParticipantRole(partcId, role);
   }
 
