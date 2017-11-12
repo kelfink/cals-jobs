@@ -7,9 +7,11 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,12 +59,22 @@ public class IntakeScreeningTest extends Goddard {
   @Test
   public void toEsScreening_Args__() throws Exception {
     target.setId(DEFAULT_CLIENT_ID);
+
+    IntakeAllegation alg = new IntakeAllegation();
+    alg.setId(DEFAULT_CLIENT_ID);
+    List<String> types = new ArrayList<>();
+    types.add("abuse");
+    types.add("neglect");
+    types.add("greed");
+    alg.setAllegationTypes(types);
+    target.addAllegation(alg);
+
+    IntakeParticipant p = new IntakeParticipant();
+    p.setId(DEFAULT_CLIENT_ID);
+    target.addParticipant(p);
+
     ElasticSearchPersonScreening actual = target.toEsScreening();
-
-    ElasticSearchPersonScreening expected = new ElasticSearchPersonScreening();
-    expected.setId(DEFAULT_CLIENT_ID);
-
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
