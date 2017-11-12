@@ -36,7 +36,7 @@ public class VoxJMXCommandClientTest {
   public void setup() throws Exception {
     host = "localhost";
     port = "1098";
-    rocket = "reporter";
+    rocket = "client";
     cmd = "status";
 
     jmxConnector = mock(JMXConnector.class);
