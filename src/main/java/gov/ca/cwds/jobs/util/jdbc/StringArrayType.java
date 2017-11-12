@@ -31,16 +31,6 @@ public class StringArrayType implements UserType {
   }
 
   @Override
-  public boolean equals(Object x, Object y) {
-    return x == null ? y == null : x.equals(y);
-  }
-
-  @Override
-  public int hashCode(Object x) {
-    return x == null ? 0 : x.hashCode();
-  }
-
-  @Override
   public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session,
       Object owner) throws SQLException {
     String[] results = null;
@@ -87,6 +77,16 @@ public class StringArrayType implements UserType {
   @Override
   public Object replace(Object original, Object target, Object owner) {
     return original;
+  }
+
+  @Override
+  public boolean equals(Object x, Object y) {
+    return x == null ? y == null : x.equals(y);
+  }
+
+  @Override
+  public int hashCode(Object x) {
+    return x == null ? 0 : x.hashCode();
   }
 
 }
