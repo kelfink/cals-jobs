@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
@@ -27,10 +28,8 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.flight.FlightLog;
-import gov.ca.cwds.neutron.rocket.LastRunRocket;
 
-public class LastRunRocketTest
-    extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
+public class LastRunRocketTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   private static class TestLastSuccessfulRunJob extends LastRunRocket {
 
@@ -38,7 +37,7 @@ public class LastRunRocketTest
 
     FlightLog track = new FlightLog();
 
-    FlightPlan opts;
+    FlightPlan flightPlan;
 
     public TestLastSuccessfulRunJob(String lastJobRunTimeFilename, ElasticsearchDao esDao,
         FlightRecorder jobHistory, final FlightPlan opts) {
