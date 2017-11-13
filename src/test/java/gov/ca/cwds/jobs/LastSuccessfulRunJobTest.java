@@ -16,6 +16,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -58,6 +60,11 @@ public class LastSuccessfulRunJobTest
     @Override
     public ElasticsearchDao getEsDao() {
       return esDao;
+    }
+
+    @Override
+    public ObjectMapper getMapper() {
+      return MAPPER;
     }
 
   }

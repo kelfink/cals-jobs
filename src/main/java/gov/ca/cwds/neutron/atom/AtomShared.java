@@ -2,6 +2,8 @@ package gov.ca.cwds.neutron.atom;
 
 import org.slf4j.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.config.FlightPlan;
@@ -31,6 +33,8 @@ public interface AtomShared extends ApiMarker {
    * @return SLF4J logger
    */
   Logger getLogger();
+
+  ObjectMapper getMapper();
 
   /**
    * Getter for the job's command line options.

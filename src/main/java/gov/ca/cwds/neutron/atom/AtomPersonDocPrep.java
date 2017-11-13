@@ -2,6 +2,13 @@ package gov.ca.cwds.neutron.atom;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.common.xcontent.XContentType;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
@@ -9,9 +16,11 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.data.std.ApiPersonAware;
+import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 
-public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker {
+public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker, AtomShared {
 
   /**
    * Set optional ES person collections before serializing JSON for insert. Child classes which
@@ -64,6 +73,33 @@ public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker
    */
   default List<ApiTypedIdentifier<String>> getOptionalCollection(ElasticSearchPerson esp, T t) {
     return new ArrayList<>();
+  }
+
+  default <E> UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T p, List<E> elements)
+      throws NeutronException {
+    final StringBuilder buf = new StringBuilder();
+    buf.append("{\"").append(getOptionalElementName()).append("\":[");
+    if (!elements.isEmpty()) {
+      try {
+        buf.append(elements.stream().map(ElasticTransformer::jsonify).sorted(String::compareTo)
+            .collect(Collectors.joining(",")));
+      } catch (Exception e) {
+        throw JobLogs.runtime(getLogger(), e, "ERROR SERIALIZING RELATIONSHIPS! {}",
+            e.getMessage());
+      }
+    }
+    buf.append("]}");
+    String insertJson;
+    try {
+      insertJson = getMapper().writeValueAsString(esp);
+    } catch (JsonProcessingException e) {
+      throw JobLogs.checked(getLogger(), e, "FAILED TO WRITE OBJECT TO JSON! {}", e.getMessage());
+    }
+    final String updateJson = buf.toString();
+    final String alias = getEsDao().getConfig().getElasticsearchAlias();
+    final String docType = getEsDao().getConfig().getElasticsearchDocType();
+    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON).upsert(
+        new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
   }
 
 }

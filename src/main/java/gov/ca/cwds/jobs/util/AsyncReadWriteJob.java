@@ -17,9 +17,6 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 public class AsyncReadWriteJob<I extends Serializable, O extends Serializable>
     extends ProducerConsumer<I> implements Rocket, JobComponent {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private transient JobReader<I> reader;

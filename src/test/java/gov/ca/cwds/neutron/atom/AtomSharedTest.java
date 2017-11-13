@@ -7,11 +7,14 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.neutron.flight.FlightLog;
 
-public class AtomSharedTest {
+public class AtomSharedTest extends Goddard {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AtomSharedTest.class);
 
@@ -37,6 +40,11 @@ public class AtomSharedTest {
     @Override
     public FlightPlan getFlightPlan() {
       return null;
+    }
+
+    @Override
+    public ObjectMapper getMapper() {
+      return MAPPER;
     }
 
   }
