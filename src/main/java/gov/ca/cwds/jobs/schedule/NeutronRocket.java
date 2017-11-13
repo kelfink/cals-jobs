@@ -30,10 +30,10 @@ public class NeutronRocket implements InterruptableJob {
 
   private static final AtomicInteger instanceCounter = new AtomicInteger(0);
 
+  private final int instanceNumber = instanceCounter.incrementAndGet();
+
   @SuppressWarnings("rawtypes")
   private final BasePersonRocket rocket;
-
-  private final int instanceNumber = instanceCounter.incrementAndGet();
 
   private final FlightRecorder flightRecorder;
 

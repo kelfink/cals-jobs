@@ -92,7 +92,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightLog launchScheduledFlight(Class<?> klass, FlightPlan flightPlan)
+  public FlightLog launch(Class<?> klass, FlightPlan flightPlan)
       throws NeutronException {
     try {
       LOGGER.info("Run scheduled rocket: {}", klass.getName());
@@ -105,9 +105,9 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightLog launchScheduledFlight(String rocketName, FlightPlan flightPlan)
+  public FlightLog launch(String rocketName, FlightPlan flightPlan)
       throws NeutronException {
-    return launchScheduledFlight(NeutronClassFinder.classForName(rocketName), flightPlan);
+    return launch(NeutronClassFinder.classForName(rocketName), flightPlan);
   }
 
   @Override

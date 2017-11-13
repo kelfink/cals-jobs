@@ -8,7 +8,7 @@ import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 public interface AtomLaunchPad extends ApiMarker {
 
   /**
-   * Action: run immediately.
+   * Action: launch immediately and wait synchronously for results.
    * 
    * @param cmdLine command line
    * @return JXM output

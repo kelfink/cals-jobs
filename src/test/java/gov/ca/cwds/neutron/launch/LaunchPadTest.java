@@ -72,7 +72,7 @@ public class LaunchPadTest extends Goddard {
   @Test(expected = NeutronException.class)
   public void schedule_Args___T__SchedulerException() throws Exception {
     when(scheduler.getJobDetail(any(JobKey.class))).thenThrow(SchedulerException.class);
-    when(launchScheduler.launchScheduledFlight(any(Class.class), any(FlightPlan.class)))
+    when(launchScheduler.launch(any(Class.class), any(FlightPlan.class)))
         .thenThrow(SchedulerException.class);
     when(scheduler.checkExists(any(JobKey.class))).thenThrow(SchedulerException.class);
     target.schedule();

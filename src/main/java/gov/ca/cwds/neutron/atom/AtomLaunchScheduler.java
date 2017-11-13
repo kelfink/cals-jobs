@@ -22,9 +22,9 @@ public interface AtomLaunchScheduler {
    * @return rocket flight progress
    * @throws NeutronException unexpected runtime error
    */
-  FlightLog launchScheduledFlight(Class<?> klass, FlightPlan flightPlan) throws NeutronException;
+  FlightLog launch(Class<?> klass, FlightPlan flightPlan) throws NeutronException;
 
-  FlightLog launchScheduledFlight(String jobName, FlightPlan flightPlan) throws NeutronException;
+  FlightLog launch(String jobName, FlightPlan flightPlan) throws NeutronException;
 
   void markRocketAsInFlight(TriggerKey key, NeutronRocket rocket);
 

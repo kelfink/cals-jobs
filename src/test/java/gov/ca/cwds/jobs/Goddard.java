@@ -317,9 +317,9 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(scheduler.getListenerManager()).thenReturn(listenerManager);
     when(launchScheduler.getFlightPlanManger()).thenReturn(flightPlanManager);
 
-    when(launchScheduler.launchScheduledFlight(any(Class.class), any(FlightPlan.class)))
+    when(launchScheduler.launch(any(Class.class), any(FlightPlan.class)))
         .thenReturn(flightRecord);
-    when(launchScheduler.launchScheduledFlight(any(String.class), any(FlightPlan.class)))
+    when(launchScheduler.launch(any(String.class), any(FlightPlan.class)))
         .thenReturn(flightRecord);
 
     when(rocketFactory.fuelRocket(any(Class.class), any(FlightPlan.class))).thenReturn(mach1Rocket);

@@ -87,7 +87,7 @@ public class LaunchSchedulerTest extends Goddard {
   @Test(expected = NeutronException.class)
   public void runScheduledJob_Args__Class__FlightPlan() throws Exception {
     Class<?> klass = Mach1TestRocket.class;
-    FlightLog actual = target.launchScheduledFlight(klass, flightPlan);
+    FlightLog actual = target.launch(klass, flightPlan);
     FlightLog expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -96,7 +96,7 @@ public class LaunchSchedulerTest extends Goddard {
   public void runScheduledJob_Args__Class__FlightPlan_T__NeutronException() throws Exception {
     Class<?> klass = Mach1TestRocket.class;
     try {
-      target.launchScheduledFlight(klass, flightPlan);
+      target.launch(klass, flightPlan);
       fail("Expected exception was not thrown!");
     } catch (NeutronException e) {
     }
@@ -105,7 +105,7 @@ public class LaunchSchedulerTest extends Goddard {
   @Test(expected = NeutronException.class)
   public void runScheduledJob_Args__String__FlightPlan() throws Exception {
     String jobName = Mach1TestRocket.class.getName();
-    FlightLog actual = target.launchScheduledFlight(jobName, flightPlan);
+    FlightLog actual = target.launch(jobName, flightPlan);
     FlightLog expected = null;
     assertThat(actual, is(equalTo(expected)));
   }

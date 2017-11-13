@@ -72,10 +72,10 @@ public class LaunchPad implements VoxLaunchPadMBean {
   public String run(String cmdLine) throws NeutronException {
     try {
       LOGGER.info("RUN JOB: {}", flightSchedule.getShortName());
-      final FlightPlan flightPlan =
+      final FlightPlan plan =
           FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       final FlightLog flightLog =
-          this.launchScheduler.launchScheduledFlight(flightSchedule.getRocketClass(), flightPlan);
+          this.launchScheduler.launch(flightSchedule.getRocketClass(), plan);
       return flightLog.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);
