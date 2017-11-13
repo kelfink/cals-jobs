@@ -7,6 +7,8 @@ import gov.ca.cwds.data.std.ApiPhoneAware;
 
 public class IntakePhone implements PersistentObject, ApiPhoneAware {
 
+  private static final long serialVersionUID = 1L;
+
   private String id;
 
   private String phoneNumber;

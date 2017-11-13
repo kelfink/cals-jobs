@@ -20,6 +20,8 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 @Entity
 public class BatchBucket implements Serializable {
 
+  private static final long serialVersionUID = 1L;
+
   @Id
   private int bucket;
   private String minId;

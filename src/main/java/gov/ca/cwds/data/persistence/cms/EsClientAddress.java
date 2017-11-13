@@ -74,8 +74,6 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
    */
   private static final long serialVersionUID = 1L;
 
-  private static boolean useCounty;
-
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)
   private Date lastChange;

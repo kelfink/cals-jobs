@@ -26,6 +26,7 @@ import gov.ca.cwds.jobs.util.JobWriter;
 public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticJobWriter.class);
+
   private Elasticsearch5xDao esDao;
   private BulkProcessor bulkProcessor;
   private ObjectMapper objectMapper;

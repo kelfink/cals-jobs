@@ -19,11 +19,13 @@ import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.vox.VoxCommandInstruction;
 
 @Path("/neutron")
-public class NeutronJobManagerResource implements ApiMarker {
+public class NeutronCommandResource implements ApiMarker {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronJobManagerResource.class);
+  private static final long serialVersionUID = 1L;
 
-  public NeutronJobManagerResource() {
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronCommandResource.class);
+
+  public NeutronCommandResource() {
     // default, no-op
   }
 

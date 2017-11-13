@@ -24,6 +24,8 @@ import gov.ca.cwds.data.std.ApiMarker;
 @Singleton
 public class GsonReader<T> implements MessageBodyReader<T>, ApiMarker {
 
+  private static final long serialVersionUID = 1L;
+
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation[] antns, MediaType mt) {
     return true;

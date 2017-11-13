@@ -27,7 +27,7 @@ public class JetPackLogger implements ConditionalLogger {
    */
   private final Logger logger;
 
-  public JetPackLogger(Class klass) {
+  public JetPackLogger(Class<?> klass) {
     this.logger = LoggerFactory.getLogger(klass);
   }
 
@@ -42,30 +42,35 @@ public class JetPackLogger implements ConditionalLogger {
         .toArray(new Object[0]);
   }
 
+  @Override
   public void trace(String format, Supplier<Object>... args) {
     if (isTraceEnabled()) {
       logger.trace(format, collect(args));
     }
   }
 
+  @Override
   public void debug(String format, Supplier<Object>... args) {
     if (isDebugEnabled()) {
       logger.debug(format, collect(args));
     }
   }
 
+  @Override
   public void info(String format, Supplier<Object>... args) {
     if (isInfoEnabled()) {
       logger.info(format, collect(args));
     }
   }
 
+  @Override
   public void warn(String format, Supplier<Object>... args) {
     if (isWarnEnabled()) {
       logger.warn(format, collect(args));
     }
   }
 
+  @Override
   public void error(String format, Supplier<Object>... args) {
     if (isErrorEnabled()) {
       logger.error(format, collect(args));

@@ -13,9 +13,10 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends BasePersonRocket<T, M> {
 
-  public InitialLoadJdbcRocket(BaseDaoImpl<T> jobDao, ElasticsearchDao esDao,
-      String lastRunFile, ObjectMapper mapper, SessionFactory sessionFactory,
-      FlightPlan flightPlan) {
+  private static final long serialVersionUID = 1L;
+
+  public InitialLoadJdbcRocket(BaseDaoImpl<T> jobDao, ElasticsearchDao esDao, String lastRunFile,
+      ObjectMapper mapper, SessionFactory sessionFactory, FlightPlan flightPlan) {
     super(jobDao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
   }
 

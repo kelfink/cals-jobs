@@ -15,6 +15,8 @@ import gov.ca.cwds.neutron.flight.FlightSummary;
 
 public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
 
+  private static final long serialVersionUID = 1L;
+
   private static final int QUEUE_SIZE = 200;
 
   private final Map<Class<?>, CircularFifoQueue<FlightLog>> flightHistory =

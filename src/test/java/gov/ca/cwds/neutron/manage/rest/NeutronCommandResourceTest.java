@@ -7,20 +7,20 @@ import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.neutron.manage.rest.NeutronJobManagerResource;
+import gov.ca.cwds.neutron.manage.rest.NeutronCommandResource;
 
-public class NeutronJobManagerResourceTest {
+public class NeutronCommandResourceTest {
 
-  NeutronJobManagerResource target;
+  NeutronCommandResource target;
 
   @Before
   public void setup() throws Exception {
-    target = new NeutronJobManagerResource();
+    target = new NeutronCommandResource();
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(NeutronJobManagerResource.class, notNullValue());
+    assertThat(NeutronCommandResource.class, notNullValue());
   }
 
   @Test

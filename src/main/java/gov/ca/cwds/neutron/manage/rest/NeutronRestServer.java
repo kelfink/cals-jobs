@@ -35,7 +35,7 @@ public class NeutronRestServer extends Application {
   @Override
   public Set<Class<?>> getClasses() {
     Set<Class<?>> s = new HashSet<>();
-    s.add(NeutronJobManagerResource.class);
+    s.add(NeutronCommandResource.class);
     return s;
   }
 
@@ -57,7 +57,7 @@ public class NeutronRestServer extends Application {
       // Tells the Jersey Servlet which REST service/class to load.
       final Map<String, String> resources = new ConcurrentHashMap<>();
       resources.put(ServerProperties.PROVIDER_CLASSNAMES,
-          NeutronJobManagerResource.class.getCanonicalName() + ";");
+          NeutronCommandResource.class.getCanonicalName() + ";");
 
       jerseyServlet.setInitParameters(resources);
       jerseyServlet.setInitParameter(ServerProperties.PROVIDER_PACKAGES,

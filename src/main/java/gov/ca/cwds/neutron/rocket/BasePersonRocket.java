@@ -708,6 +708,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     }
   }
 
+  @SuppressWarnings("unchecked")
   protected void loadRecsForDeletion(final Class<?> entityClass, final Session session,
       final Date lastRunTime, Set<String> deletionResults) {
     final String namedQueryNameForDeletion =
