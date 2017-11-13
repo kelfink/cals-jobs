@@ -18,7 +18,7 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
- * Wrapper for scheduled jobs.
+ * Wrapper for scheduled flights.
  * 
  * @author CWDS API Team
  * @see LaunchCommand
@@ -66,7 +66,6 @@ public class NeutronRocket implements InterruptableJob {
 
     try (final BasePersonRocket job = rocket) {
       MDC.put("rocketLog", rocketName);
-
       flightLog = rocket.getFlightLog();
       flightLog.setRocketName(rocketName);
       flightLog.start();
