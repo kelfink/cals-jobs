@@ -651,7 +651,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       }
       // CHECKSTYLE:ON
       ret = new Date(this.getFlightLog().getStartTime());
-    } catch (Exception e) {
+    } catch (NeutronException | RuntimeException | IOException e) {
       fail();
       throw JobLogs.checked(LOGGER, e, "ROCKET EXPLODED! {}", e.getMessage());
     } finally {

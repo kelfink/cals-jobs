@@ -3,7 +3,6 @@ package gov.ca.cwds.neutron.rocket;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.persistence.ParameterMode;
@@ -22,7 +21,6 @@ import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
@@ -180,11 +178,6 @@ public class ClientCountyRocket extends ClientIndexerJob
   @Override
   protected void threadRetrieveByJdbc() {
     bigRetrieveByJdbc();
-  }
-
-  @Override
-  public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
-    return NeutronJdbcUtil.getCommonPartitionRanges64(this);
   }
 
   @Override

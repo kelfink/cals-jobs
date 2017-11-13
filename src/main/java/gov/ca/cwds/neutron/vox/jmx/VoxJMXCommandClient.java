@@ -92,7 +92,7 @@ public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAc
       this.connect();
       this.run();
     } catch (Exception e) {
-      throw JobLogs.runtime(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", cmd.getHost(),
+      throw JobLogs.checked(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", cmd.getHost(),
           cmd.getPort(), cmd.getRocket());
     }
   }
