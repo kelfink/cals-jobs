@@ -44,7 +44,7 @@ public class LaunchPadTest extends Goddard {
     when(launchScheduler.getScheduler()).thenReturn(scheduler);
     sched = StandardFlightSchedule.CLIENT;
     history = new FlightRecorder();
-    target = new LaunchPad(launchScheduler, sched, history, flightPlan);
+    target = new LaunchPad(launchScheduler, sched, flightPlan);
   }
 
   @Test

@@ -50,12 +50,12 @@ public class LaunchPad implements VoxLaunchPadMBean {
 
   @Inject
   public LaunchPad(final AtomLaunchScheduler launchScheduler, StandardFlightSchedule sched,
-      final AtomFlightRecorder flightRecorder, final FlightPlan flightPlan) {
+      final FlightPlan flightPlan) {
     this.launchScheduler = launchScheduler;
     this.scheduler = launchScheduler.getScheduler();
+    this.flightRecorder = launchScheduler.getFlightRecorder();
 
     this.flightSchedule = sched;
-    this.flightRecorder = flightRecorder;
     this.flightPlan = flightPlan;
 
     this.jobName = flightSchedule.getShortName();

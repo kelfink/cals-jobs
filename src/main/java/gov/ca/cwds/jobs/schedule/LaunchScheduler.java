@@ -114,7 +114,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   public LaunchPad scheduleLaunch(Class<?> klazz, StandardFlightSchedule sched,
       FlightPlan flightPlan) {
     LOGGER.debug("LAUNCH COORDINATOR: LAST CHANGE LOCATION: {}", flightPlan.getLastRunLoc());
-    final LaunchPad nj = new LaunchPad(this, sched, flightRecorder, flightPlan);
+    final LaunchPad nj = new LaunchPad(this, sched, flightPlan);
     flightPlanManger.addFlightPlan(klazz, flightPlan);
     scheduleRegistry.put(klazz, nj);
     return nj;
@@ -191,6 +191,10 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   @Override
   public AtomFlightPlanManager getFlightPlanManger() {
     return flightPlanManger;
+  }
+
+  public AtomFlightRecorder getFlightRecorder() {
+    return flightRecorder;
   }
 
 }

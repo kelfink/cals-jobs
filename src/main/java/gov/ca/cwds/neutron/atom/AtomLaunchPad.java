@@ -24,6 +24,11 @@ public interface AtomLaunchPad extends ApiMarker {
 
   void unschedule() throws NeutronException;
 
+  /**
+   * Show last flight status.
+   * 
+   * @return last flight status
+   */
   String status();
 
   String history();

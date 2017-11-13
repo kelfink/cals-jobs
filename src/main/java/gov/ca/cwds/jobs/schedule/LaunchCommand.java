@@ -256,7 +256,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
         final FlightPlan flightPlan = new FlightPlan(commonFlightPlan);
         handleTimeFile(flightPlan, fmt, now, sched);
 
-        final LaunchPad pad = new LaunchPad(launchScheduler, sched, flightRecorder, flightPlan);
+        final LaunchPad pad = new LaunchPad(launchScheduler, sched, flightPlan);
         launchScheduler.getScheduleRegistry().put(klass, pad);
         launchScheduler.getFlightPlanManger().addFlightPlan(klass, flightPlan);
       }
