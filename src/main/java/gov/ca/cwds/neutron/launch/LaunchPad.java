@@ -39,7 +39,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
 
   private transient AtomLaunchDirector launchDirector;
   private final StandardFlightSchedule flightSchedule;
-  private final AtomFlightRecorder flightRecorder;
+  private transient AtomFlightRecorder flightRecorder;
   private final String jobName;
   private final String triggerName;
 
