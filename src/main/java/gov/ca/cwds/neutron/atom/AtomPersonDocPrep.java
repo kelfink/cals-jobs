@@ -84,20 +84,23 @@ public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker
         buf.append(elements.stream().map(ElasticTransformer::jsonify).sorted(String::compareTo)
             .collect(Collectors.joining(",")));
       } catch (Exception e) {
-        throw JobLogs.runtime(getLogger(), e, "ERROR SERIALIZING RELATIONSHIPS! {}",
+        throw JobLogs.runtime(getLogger(), e, "ERROR SERIALIZING NESTED ELEMENTS! {}",
             e.getMessage());
       }
     }
     buf.append("]}");
+
     String insertJson;
     try {
       insertJson = getMapper().writeValueAsString(esp);
     } catch (JsonProcessingException e) {
       throw JobLogs.checked(getLogger(), e, "FAILED TO WRITE OBJECT TO JSON! {}", e.getMessage());
     }
+
     final String updateJson = buf.toString();
     final String alias = getEsDao().getConfig().getElasticsearchAlias();
     final String docType = getEsDao().getConfig().getElasticsearchDocType();
+
     return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON).upsert(
         new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
   }
