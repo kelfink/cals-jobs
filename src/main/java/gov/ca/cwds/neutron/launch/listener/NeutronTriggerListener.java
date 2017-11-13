@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
-import gov.ca.cwds.jobs.schedule.LaunchScheduler;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 
@@ -19,10 +19,10 @@ public class NeutronTriggerListener implements TriggerListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronTriggerListener.class);
 
-  private final LaunchScheduler neutronScheduler;
+  private final LaunchDirector neutronScheduler;
 
   @Inject
-  public NeutronTriggerListener(final LaunchScheduler neutronScheduler) {
+  public NeutronTriggerListener(final LaunchDirector neutronScheduler) {
     this.neutronScheduler = neutronScheduler;
   }
 

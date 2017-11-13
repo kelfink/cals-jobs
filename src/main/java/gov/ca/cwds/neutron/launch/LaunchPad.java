@@ -23,7 +23,7 @@ import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
-import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -37,7 +37,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
 
   private transient Scheduler scheduler;
 
-  private transient AtomLaunchScheduler launchScheduler;
+  private transient AtomLaunchDirector launchScheduler;
   private final StandardFlightSchedule flightSchedule;
   private final AtomFlightRecorder flightRecorder;
   private final String jobName;
@@ -49,7 +49,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
   private volatile JobDetail jd;
 
   @Inject
-  public LaunchPad(final AtomLaunchScheduler launchScheduler, StandardFlightSchedule sched,
+  public LaunchPad(final AtomLaunchDirector launchScheduler, StandardFlightSchedule sched,
       final FlightPlan flightPlan) {
     this.launchScheduler = launchScheduler;
     this.scheduler = launchScheduler.getScheduler();
@@ -239,7 +239,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
     return jobKey;
   }
 
-  public AtomLaunchScheduler getLaunchScheduler() {
+  public AtomLaunchDirector getLaunchScheduler() {
     return launchScheduler;
   }
 

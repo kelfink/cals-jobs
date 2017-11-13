@@ -65,7 +65,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.FlightPlanRegistry;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.schedule.LaunchScheduler;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
@@ -145,7 +145,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public StandardFlightSchedule flightSchedule;
 
   public Scheduler scheduler;
-  public LaunchScheduler launchScheduler;
+  public LaunchDirector launchScheduler;
   public ListenerManager listenerManager;
 
   public RocketFactory rocketFactory;
@@ -274,7 +274,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     // Job track:
     flightRecord = new FlightLog();
     flightRecorder = new FlightRecorder();
-    launchScheduler = mock(LaunchScheduler.class);
+    launchScheduler = mock(LaunchDirector.class);
 
     // Elasticsearch msearch.
     final MultiSearchRequestBuilder mBuilder = mock(MultiSearchRequestBuilder.class);

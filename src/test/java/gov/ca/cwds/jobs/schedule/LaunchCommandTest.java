@@ -31,7 +31,7 @@ import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
-import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 
 public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
@@ -193,7 +193,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void getNeutronScheduler_Args__() throws Exception {
-    AtomLaunchScheduler actual = target.getNeutronScheduler();
+    AtomLaunchDirector actual = target.getNeutronScheduler();
     assertThat(actual, is(notNullValue()));
   }
 

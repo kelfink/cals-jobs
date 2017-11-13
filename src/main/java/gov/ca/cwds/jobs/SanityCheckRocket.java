@@ -23,7 +23,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -41,7 +41,7 @@ public class SanityCheckRocket extends
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(SanityCheckRocket.class);
 
-  private transient AtomLaunchScheduler launchScheduler;
+  private transient AtomLaunchDirector launchScheduler;
 
   /**
    * Construct batch job instance with all required dependencies.
@@ -58,7 +58,7 @@ public class SanityCheckRocket extends
   public SanityCheckRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       final ElasticsearchDao esDao, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory, FlightPlan opts,
-      AtomLaunchScheduler launchScheduler) {
+      AtomLaunchDirector launchScheduler) {
     super(dao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, opts);
     this.launchScheduler = launchScheduler;
   }
@@ -105,11 +105,11 @@ public class SanityCheckRocket extends
     return lastSuccessfulRunTime;
   }
 
-  public AtomLaunchScheduler getLaunchScheduler() {
+  public AtomLaunchDirector getLaunchScheduler() {
     return launchScheduler;
   }
 
-  public void setLaunchScheduler(AtomLaunchScheduler launchScheduler) {
+  public void setLaunchScheduler(AtomLaunchDirector launchScheduler) {
     this.launchScheduler = launchScheduler;
   }
 

@@ -12,7 +12,7 @@ import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.launch.LaunchPad;
 
-public interface AtomLaunchScheduler {
+public interface AtomLaunchDirector {
 
   /**
    * Launch a registered rocket.

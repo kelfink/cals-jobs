@@ -20,7 +20,7 @@ import org.quartz.TriggerKey;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.LaunchScheduler;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
@@ -31,7 +31,7 @@ public class NeutronTriggerListenerTest extends Goddard {
 
   NeutronTriggerListener target;
   NeutronRocket job;
-  LaunchScheduler neutronScheduler;
+  LaunchDirector neutronScheduler;
 
   JobExecutionContext context_;
   JobDataMap jobDataMap;
@@ -58,7 +58,7 @@ public class NeutronTriggerListenerTest extends Goddard {
     trigger = mock(Trigger.class);
     jobDataMap = mock(JobDataMap.class);
     jobDetail = mock(JobDetail.class);
-    neutronScheduler = mock(LaunchScheduler.class);
+    neutronScheduler = mock(LaunchDirector.class);
 
     when(context_.getJobInstance()).thenReturn(job);
     when(context_.getJobDetail()).thenReturn(jobDetail);

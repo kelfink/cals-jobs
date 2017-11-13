@@ -81,14 +81,13 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightPlanRegistry;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.schedule.LaunchScheduler;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
-import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
-import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
@@ -282,6 +281,7 @@ public class HyperCube extends NeutronGuiceModule {
     // Singleton:
     bind(ObjectMapper.class).toInstance(ObjectMapperUtils.createObjectMapper());
     bind(ElasticsearchDao.class).asEagerSingleton();
+
     bind(AtomFlightRecorder.class).to(FlightRecorder.class).asEagerSingleton();
     bind(AtomFlightPlanManager.class).to(FlightPlanRegistry.class).asEagerSingleton();
     bind(AtomRocketFactory.class).to(RocketFactory.class).asEagerSingleton();
@@ -344,12 +344,6 @@ public class HyperCube extends NeutronGuiceModule {
     return makeHibernateConfiguration().configure(getHibernateConfigNs())
         .addAnnotatedClass(EsIntakeScreening.class).addAnnotatedClass(IntakeScreening.class)
         .buildSessionFactory();
-  }
-
-  @Provides
-  @Singleton
-  public AtomLaunchCommand provideCommandCenter() {
-    return LaunchCommand.getInstance();
   }
 
   @Provides
@@ -464,12 +458,11 @@ public class HyperCube extends NeutronGuiceModule {
    */
   @Provides
   @Singleton
-  protected AtomLaunchScheduler configureQuartz(final Injector injector,
+  protected AtomLaunchDirector configureQuartz(final Injector injector,
       final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
       final AtomFlightPlanManager flightPlanMgr) throws SchedulerException {
     final boolean initialMode = LaunchCommand.isInitialMode();
-    final LaunchScheduler launchScheduler =
-        new LaunchScheduler(flightRecorder, rocketFactory, flightPlanMgr);
+    final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr);
 
     final Properties p = new Properties();
     p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
@@ -482,15 +475,15 @@ public class HyperCube extends NeutronGuiceModule {
 
     // MORE: inject scheduler and rocket factory.
     scheduler.setJobFactory(rocketFactory);
-    launchScheduler.setScheduler(scheduler);
+    ret.setScheduler(scheduler);
 
     // Scheduler listeners.
-    final ListenerManager mgr = launchScheduler.getScheduler().getListenerManager();
+    final ListenerManager mgr = ret.getScheduler().getListenerManager();
     mgr.addSchedulerListener(new NeutronSchedulerListener());
-    mgr.addTriggerListener(new NeutronTriggerListener(launchScheduler));
+    mgr.addTriggerListener(new NeutronTriggerListener(ret));
     mgr.addJobListener(initialMode ? StandardFlightSchedule.buildInitialLoadJobChainListener()
         : new NeutronJobListener());
-    return launchScheduler;
+    return ret;
   }
 
   @SuppressWarnings("javadoc")

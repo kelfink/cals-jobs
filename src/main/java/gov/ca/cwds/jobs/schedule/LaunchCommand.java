@@ -30,7 +30,7 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchPad;
-import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.inject.HyperCube;
@@ -83,7 +83,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   private FlightRecorder flightRecorder;
 
-  private AtomLaunchScheduler launchScheduler;
+  private AtomLaunchDirector launchScheduler;
 
   private boolean fatalError;
 
@@ -93,7 +93,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   @Inject
   public LaunchCommand(final FlightRecorder flightRecorder,
-      final AtomLaunchScheduler launchScheduler, final ElasticsearchDao esDao) {
+      final AtomLaunchDirector launchScheduler, final ElasticsearchDao esDao) {
     this.flightRecorder = flightRecorder;
     this.launchScheduler = launchScheduler;
     this.esDao = esDao;
@@ -337,11 +337,11 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     this.flightRecorder = jobHistory;
   }
 
-  public AtomLaunchScheduler getNeutronScheduler() {
+  public AtomLaunchDirector getNeutronScheduler() {
     return launchScheduler;
   }
 
-  public void setLaunchScheduler(AtomLaunchScheduler launchScheduler) {
+  public void setLaunchScheduler(AtomLaunchDirector launchScheduler) {
     this.launchScheduler = launchScheduler;
   }
 

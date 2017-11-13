@@ -28,7 +28,7 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.launch.LaunchPad;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
-public class LaunchSchedulerTest extends Goddard {
+public class LaunchDirectorTest extends Goddard {
 
   FlightRecorder jobHistory;
   RocketFactory rocketFactory;
@@ -37,7 +37,7 @@ public class LaunchSchedulerTest extends Goddard {
   Scheduler scheduler;
   LaunchPad launchPad;
 
-  LaunchScheduler target;
+  LaunchDirector target;
 
 
   @Override
@@ -51,7 +51,7 @@ public class LaunchSchedulerTest extends Goddard {
     launchPad = mock(LaunchPad.class);
 
     key = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
-    target = new LaunchScheduler(jobHistory, rocketFactory, rocketOptions);
+    target = new LaunchDirector(jobHistory, rocketFactory, rocketOptions);
     target.setScheduler(scheduler);
     target.setFlightPlan(flightPlan);
 
@@ -60,7 +60,7 @@ public class LaunchSchedulerTest extends Goddard {
 
   @Test
   public void type() throws Exception {
-    assertThat(LaunchScheduler.class, notNullValue());
+    assertThat(LaunchDirector.class, notNullValue());
   }
 
   @Test
