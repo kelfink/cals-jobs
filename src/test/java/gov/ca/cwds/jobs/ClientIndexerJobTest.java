@@ -339,6 +339,35 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
   }
 
   @Test
+  public void validateAddresses_Args__ReplicatedClient__ElasticSearchPerson__2() throws Exception {
+    ReplicatedClient client = new ReplicatedClient();
+    ElasticSearchPerson person = new ElasticSearchPerson();
+
+    ReplicatedAddress repAddr = new ReplicatedAddress();
+    repAddr.setId(DEFAULT_CLIENT_ID);
+    repAddr.setCity("Provo");
+    repAddr.setZip("80604");
+
+    ReplicatedClientAddress ca = new ReplicatedClientAddress();
+    ca.addAddress(repAddr);
+    client.addClientAddress(ca);
+
+    boolean actual = target.validateAddresses(client, person);
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void validateAddresses_Args__ReplicatedClient__ElasticSearchPerson__3() throws Exception {
+    ReplicatedClient client = new ReplicatedClient();
+    ElasticSearchPerson person = new ElasticSearchPerson();
+
+    boolean actual = target.validateAddresses(client, person);
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
   public void nextThreadNumber_Args__() throws Exception {
     int actual = target.nextThreadNumber();
     int expected = 1;
