@@ -116,6 +116,24 @@ public class EsIntakeScreeningTest extends Goddard {
     s.addAllegation(alg);
 
     target.setOtherParticipantId("xyz1234567");
+    target.setAllegationId(DEFAULT_SCREENING_ID);
+
+    target.setAddressId("2");
+    target.setAddressType("Home");
+    target.setZip("12345");
+    target.setCity("Nowhere");
+    target.setStreetAddress("1523 Main Street");
+
+    target.setPhoneNumberId("3");
+    target.setPhoneNumber("9164408791");
+    target.setPhoneType("Home");
+
+    target.setFirstName("Joseph");
+    target.setLastName("Muller");
+
+    target.setFlgPerpetrator(true);
+    target.setFlgVictim(true);
+    target.setFlgReporter(true);
 
     IntakeParticipant actual = target.normalize(map);
     assertThat(actual, notNullValue());
