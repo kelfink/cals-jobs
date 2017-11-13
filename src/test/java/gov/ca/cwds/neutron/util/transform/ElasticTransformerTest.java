@@ -44,7 +44,6 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntry;
 import gov.ca.cwds.jobs.test.TestOnlyApiPersonAware;
 import gov.ca.cwds.neutron.atom.AtomPersonDocPrep;
 import gov.ca.cwds.neutron.flight.FlightLog;
-import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 public class ElasticTransformerTest extends Goddard {
@@ -58,8 +57,7 @@ public class ElasticTransformerTest extends Goddard {
     super.setup();
 
     dao = new TestNormalizedEntityDao(sessionFactory);
-    target =
-        new TestIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory, flightRecorder);
+    target = new TestIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory, flightRecorder);
     target.setFlightPlan(flightPlan);
     target.setFlightLog(flightRecord);
   }
@@ -182,22 +180,6 @@ public class ElasticTransformerTest extends Goddard {
     assertThat(actual, is(notNullValue()));
   }
 
-  // @Test
-  // public void
-  // prepareUpsertRequest_Args__AtomPersonDocPrep__String__String__ElasticSearchPerson__Object_T__NeutronException()
-  // throws Exception {
-  // AtomPersonDocPrep<Object> docPrep = mock(AtomPersonDocPrep.class);
-  // String alias = null;
-  // String docType = null;
-  // ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
-  // Object t = null;
-  // try {
-  // ElasticTransformer.prepareUpsertRequest(docPrep, alias, docType, esp, t);
-  // fail("Expected exception was not thrown!");
-  // } catch (NeutronException e) {
-  // }
-  // }
-
   @Test
   public void prepareUpsertJson_Args__AtomPersonDocPrep__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray()
       throws Exception {
@@ -215,35 +197,6 @@ public class ElasticTransformerTest extends Goddard {
     assertThat(actual, is(notNullValue()));
   }
 
-  // @Test
-  // public void
-  // prepareUpsertJson_Args__AtomPersonDocPrep__ElasticSearchPerson__Object__String__List__ESOptionalCollectionArray_T__JsonProcessingException()
-  // throws Exception {
-  // AtomPersonDocPrep<Object> docPrep = mock(AtomPersonDocPrep.class);
-  // ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
-  // Object t = null;
-  // String elementName = null;
-  // List list = new ArrayList();
-  // ESOptionalCollection[] keep = new ESOptionalCollection[] {};
-  // try {
-  // ElasticTransformer.prepareUpsertJson(docPrep, esp, t, elementName, list, keep);
-  // fail("Expected exception was not thrown!");
-  // } catch (JsonProcessingException e) {
-  // }
-  // }
-
-  // @Test
-  // public void
-  // prepareInsertCollections_Args__AtomPersonDocPrep__ElasticSearchPerson__Object__List__ESOptionalCollectionArray()
-  // throws Exception {
-  // AtomPersonDocPrep<Object> docPrep = mock(AtomPersonDocPrep.class);
-  // ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
-  // Object t = null;
-  // List list = new ArrayList();
-  // ESOptionalCollection[] keep = new ESOptionalCollection[] {};
-  // ElasticTransformer.prepareInsertCollections(docPrep, esp, t, list, keep);
-  // }
-
   @Test
   public void buildElasticSearchPersons_Args__PersistentObject() throws Exception {
     TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
@@ -252,34 +205,12 @@ public class ElasticTransformerTest extends Goddard {
     assertThat(actual, is(notNullValue()));
   }
 
-  // @Test
-  // public void buildElasticSearchPersons_Args__PersistentObject_T__JsonProcessingException()
-  // throws Exception {
-  // PersistentObject p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-  // try {
-  // ElasticTransformer.buildElasticSearchPersons(p);
-  // fail("Expected exception was not thrown!");
-  // } catch (JsonProcessingException e) {
-  // }
-  // }
-
   @Test
   public void buildElasticSearchPerson_Args__ApiPersonAware() throws Exception {
     ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     ElasticSearchPerson actual = ElasticTransformer.buildElasticSearchPerson(p);
     assertThat(actual, is(notNullValue()));
   }
-
-  // @Test
-  // public void buildElasticSearchPerson_Args__ApiPersonAware_T__JsonProcessingException()
-  // throws Exception {
-  // ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-  // try {
-  // ElasticTransformer.buildElasticSearchPerson(p);
-  // fail("Expected exception was not thrown!");
-  // } catch (JsonProcessingException e) {
-  // }
-  // }
 
   @Test
   public void createLegacyDescriptor_Args__String__Date__LegacyTable() throws Exception {
@@ -313,17 +244,6 @@ public class ElasticTransformerTest extends Goddard {
     ElasticSearchPerson actual = ElasticTransformer.buildElasticSearchPersonDoc(p);
     assertThat(actual, is(notNullValue()));
   }
-
-  // @Test
-  // public void buildElasticSearchPersonDoc_Args__ApiPersonAware_T__JsonProcessingException()
-  // throws Exception {
-  // ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-  // try {
-  // ElasticTransformer.buildElasticSearchPersonDoc(p);
-  // fail("Expected exception was not thrown!");
-  // } catch (JsonProcessingException e) {
-  // }
-  // }
 
   @Test
   public void getMapper_Args__() throws Exception {

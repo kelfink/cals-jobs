@@ -15,7 +15,6 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.inject.Injector;
@@ -98,8 +97,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     super.setup();
     flightPlan = new FlightPlan();
     flightPlan.setEsConfigLoc("config/local.yaml");
-    target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()),
-        lastRunFile);
+    target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()), lastRunFile);
 
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
@@ -238,14 +236,12 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
     final Injector injector = mock(Injector.class);
     when(injector.getInstance(RocketFactory.class)).thenReturn(rocketFactory);
-    when(injector.getInstance(Mach1TestRocket.class)).thenReturn((Mach1TestRocket) mach1Rocket);
+    when(injector.getInstance(Mach1TestRocket.class)).thenReturn(mach1Rocket);
     HyperCube.setInjector(injector);
 
     final Object actual = HyperCube.newRocket(klass, args);
     assertThat(actual, is(notNullValue()));
   }
-
-  // H2 credential issue on Jenkins.
 
   // @Test
   // @Ignore
@@ -278,28 +274,23 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   // HyperCube.newRocket(klass, flightPlan);
   // }
 
-  /**
-   * <strong>ERROR: H2 credentials.</strong>
-   * 
-   * @throws Exception test error
-   */
-  @Test
-  @Ignore
-  public void makeCmsSessionFactory_Args__() throws Exception {
-    final SessionFactory actual = target.makeCmsSessionFactory();
-    assertThat(actual, is(notNullValue()));
-  }
+  // =================================
+  // ERROR:
+  // H2 credentials on Jenkins.
+  // =================================
 
-  /**
-   * <strong>ERROR: H2 credentials.</strong>
-   * 
-   * @throws Exception test error
-   */
-  @Test
-  @Ignore
-  public void makeNsSessionFactory_Args__() throws Exception {
-    final SessionFactory actual = target.makeNsSessionFactory();
-    assertThat(actual, is(notNullValue()));
-  }
+  // @Test
+  // @Ignore
+  // public void makeCmsSessionFactory_Args__() throws Exception {
+  // final SessionFactory actual = target.makeCmsSessionFactory();
+  // assertThat(actual, is(notNullValue()));
+  // }
+
+  // @Test
+  // @Ignore
+  // public void makeNsSessionFactory_Args__() throws Exception {
+  // final SessionFactory actual = target.makeNsSessionFactory();
+  // assertThat(actual, is(notNullValue()));
+  // }
 
 }
