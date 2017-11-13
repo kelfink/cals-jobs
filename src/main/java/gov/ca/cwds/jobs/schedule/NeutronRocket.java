@@ -83,7 +83,7 @@ public class NeutronRocket implements InterruptableJob {
       LOGGER.error("LAUNCH FAILURE! {}", e);
       throw new JobExecutionException("FAILED TO LAUNCH! {}", e);
     } finally {
-      flightRecorder.addFlightLog(getClass(), flightLog);
+      flightRecorder.addFlightLog(rocket.getClass(), flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
       MDC.remove("rocketLog");
       LOGGER.info("FLIGHT SUMMARY: {}", flightLog);

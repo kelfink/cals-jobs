@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.schedule;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -17,7 +18,7 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightSummary;
 
 @Singleton
-public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
+public class FlightRecorder implements ApiMarker, AtomFlightRecorder, Serializable {
 
   private static final long serialVersionUID = 1L;
 
