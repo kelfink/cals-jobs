@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
 
@@ -85,9 +84,9 @@ public class IntakePhoneTest {
     target.setPhoneNumber(phoneNumber);
   }
 
-  // @Test
+  @Test
   public void setPhoneType_Args__ApiPhoneAwarePhoneType() throws Exception {
-    ApiPhoneAware.PhoneType phoneType = mock(ApiPhoneAware.PhoneType.class);
+    ApiPhoneAware.PhoneType phoneType = ApiPhoneAware.PhoneType.Cell;
     target.setPhoneType(phoneType);
   }
 
