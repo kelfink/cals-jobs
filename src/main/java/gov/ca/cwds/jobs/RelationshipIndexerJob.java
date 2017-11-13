@@ -170,7 +170,7 @@ public class RelationshipIndexerJob
    */
   @Override
   protected void threadRetrieveByJdbc() {
-    nameThread("extract_main");
+    nameThread("relationship_extract");
     LOGGER.info("BEGIN: main extract thread");
     doneTransform(); // No transform thread
 
@@ -200,7 +200,7 @@ public class RelationshipIndexerJob
       EsRelationship.SonarQubeMemoryBloatComplaintCache.getInstance().clearCache();
     }
 
-    LOGGER.info("DONE: main extract thread");
+    LOGGER.info("DONE: relationship extract thread");
   }
 
   @Override
