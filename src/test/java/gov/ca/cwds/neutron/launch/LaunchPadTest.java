@@ -198,7 +198,7 @@ public class LaunchPadTest extends Goddard {
 
   @Test
   public void getLaunchScheduler_Args__() throws Exception {
-    AtomLaunchDirector actual = target.getLaunchScheduler();
+    AtomLaunchDirector actual = target.getLaunchDirector();
     assertThat(actual, is(notNullValue()));
   }
 

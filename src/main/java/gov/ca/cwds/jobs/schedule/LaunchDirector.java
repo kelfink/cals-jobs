@@ -16,8 +16,8 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
-import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
+import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -114,8 +114,8 @@ public class LaunchDirector implements AtomLaunchDirector {
     LOGGER.debug("LAUNCH COORDINATOR: LAST CHANGE LOCATION: {}", flightPlan.getLastRunLoc());
     final LaunchPad pad = new LaunchPad(this, sched, flightPlan);
     final Class<?> klass = sched.getRocketClass();
-    flightPlanManger.addFlightPlan(klass, flightPlan);
     launchPads.put(klass, pad);
+    flightPlanManger.addFlightPlan(klass, flightPlan);
     pad.schedule();
 
     return pad;

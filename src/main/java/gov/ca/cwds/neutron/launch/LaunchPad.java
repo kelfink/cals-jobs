@@ -37,7 +37,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
 
   private transient Scheduler scheduler;
 
-  private transient AtomLaunchDirector launchScheduler;
+  private transient AtomLaunchDirector launchDirector;
   private final StandardFlightSchedule flightSchedule;
   private final AtomFlightRecorder flightRecorder;
   private final String jobName;
@@ -49,11 +49,11 @@ public class LaunchPad implements VoxLaunchPadMBean {
   private volatile JobDetail jd;
 
   @Inject
-  public LaunchPad(final AtomLaunchDirector launchScheduler, StandardFlightSchedule sched,
+  public LaunchPad(final AtomLaunchDirector director, StandardFlightSchedule sched,
       final FlightPlan flightPlan) {
-    this.launchScheduler = launchScheduler;
-    this.scheduler = launchScheduler.getScheduler();
-    this.flightRecorder = launchScheduler.getFlightRecorder();
+    this.launchDirector = director;
+    this.scheduler = director.getScheduler();
+    this.flightRecorder = director.getFlightRecorder();
 
     this.flightSchedule = sched;
     this.flightPlan = flightPlan;
@@ -61,7 +61,12 @@ public class LaunchPad implements VoxLaunchPadMBean {
     this.jobName = flightSchedule.getShortName();
     this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
     this.triggerName = flightSchedule.getShortName();
-    flightRecorder.addFlightLog(sched.getRocketClass(), new FlightLog());
+
+    final FlightLog flightLog = new FlightLog();
+    flightLog.setRocketName(sched.getShortName());
+
+    // Seed the flight log history.
+    flightRecorder.addFlightLog(sched.getRocketClass(), flightLog);
   }
 
   /**
@@ -74,8 +79,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
       LOGGER.info("RUN JOB: {}", flightSchedule.getShortName());
       final FlightPlan plan =
           FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
-      final FlightLog flightLog =
-          this.launchScheduler.launch(flightSchedule.getRocketClass(), plan);
+      final FlightLog flightLog = this.launchDirector.launch(flightSchedule.getRocketClass(), plan);
       return flightLog.toString();
     } catch (Exception e) {
       LOGGER.error("FAILED TO RUN ON DEMAND! {}", e.getMessage(), e);
@@ -186,7 +190,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
   @Override
   public void shutdown() throws NeutronException {
     LOGGER.warn("Shutdown command center");
-    launchScheduler.stopScheduler(false);
+    launchDirector.stopScheduler(false);
   }
 
   @Override
@@ -239,8 +243,8 @@ public class LaunchPad implements VoxLaunchPadMBean {
     return jobKey;
   }
 
-  public AtomLaunchDirector getLaunchScheduler() {
-    return launchScheduler;
+  public AtomLaunchDirector getLaunchDirector() {
+    return launchDirector;
   }
 
 }
