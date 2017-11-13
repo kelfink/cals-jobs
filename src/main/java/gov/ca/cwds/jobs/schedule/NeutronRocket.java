@@ -65,10 +65,10 @@ public class NeutronRocket implements InterruptableJob {
     LOGGER.info("Execute {}, instance # {}", rocket.getClass().getName(), instanceCounter.get());
 
     try (final BasePersonRocket job = rocket) {
-      MDC.put("rocketLog", rocketName);
       flightLog = rocket.getFlightLog();
       flightLog.setRocketName(rocketName);
       flightLog.start();
+      MDC.put("rocketLog", rocketName);
 
       map.put("opts", job.getFlightPlan());
       map.put("track", flightLog);
@@ -102,6 +102,7 @@ public class NeutronRocket implements InterruptableJob {
     this.flightLog = track;
   }
 
+  @SuppressWarnings("rawtypes")
   public BasePersonRocket getRocket() {
     return rocket;
   }

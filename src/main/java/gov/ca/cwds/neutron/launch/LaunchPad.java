@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weakref.jmx.Managed;
 
+import com.google.inject.Inject;
+
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
@@ -46,17 +48,19 @@ public class LaunchPad implements VoxLaunchPadMBean {
   private volatile JobKey jobKey;
   private volatile JobDetail jd;
 
+  @Inject
   public LaunchPad(final AtomLaunchScheduler launchScheduler, StandardFlightSchedule sched,
-      final FlightRecorder flightRecorder, final FlightPlan opts) {
+      final FlightRecorder flightRecorder, final FlightPlan flightPlan) {
     this.launchScheduler = launchScheduler;
     this.scheduler = launchScheduler.getScheduler();
 
     this.flightSchedule = sched;
     this.flightRecorder = flightRecorder;
+    this.flightPlan = flightPlan;
+
     this.jobName = flightSchedule.getShortName();
-    this.triggerName = flightSchedule.getShortName();
     this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
-    this.flightPlan = opts;
+    this.triggerName = flightSchedule.getShortName();
     flightRecorder.addFlightLog(sched.getRocketClass(), new FlightLog());
   }
 

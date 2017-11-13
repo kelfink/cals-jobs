@@ -98,7 +98,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   }
 
   /**
-   * MOVE this responsibility to another unit.
+   * <strong>MOVE</strong> this responsibility to another unit.
    * 
    * @param initialMode obvious
    * @param hoursInPast number of hours in past

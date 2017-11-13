@@ -86,6 +86,7 @@ import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
+import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
@@ -248,8 +249,8 @@ public class HyperCube extends NeutronGuiceModule {
    * @param <T> Person persistence type
    * @throws NeutronException checked exception
    */
-  public static <T extends BasePersonRocket<?, ?>> T newRocket(final Class<T> klass,
-      String... args) throws NeutronException {
+  public static <T extends BasePersonRocket<?, ?>> T newRocket(final Class<T> klass, String... args)
+      throws NeutronException {
     return newRocket(klass, FlightPlan.parseCommandLine(args));
   }
 
@@ -281,7 +282,7 @@ public class HyperCube extends NeutronGuiceModule {
     // Singleton:
     bind(ObjectMapper.class).toInstance(ObjectMapperUtils.createObjectMapper());
     bind(ElasticsearchDao.class).asEagerSingleton();
-    bind(FlightRecorder.class).asEagerSingleton();
+    bind(AtomFlightRecorder.class).to(FlightRecorder.class).asEagerSingleton();
     bind(AtomFlightPlanManager.class).to(FlightPlanRegistry.class).asEagerSingleton();
     bind(AtomRocketFactory.class).to(RocketFactory.class).asEagerSingleton();
   }
