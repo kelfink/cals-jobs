@@ -55,7 +55,7 @@ public class LaunchSchedulerTest extends Goddard {
     target.setScheduler(scheduler);
     target.setFlightPlan(flightPlan);
 
-    target.getScheduleRegistry().put(Mach1TestRocket.class, launchPad);
+    target.getLaunchPads().put(Mach1TestRocket.class, launchPad);
   }
 
   @Test
@@ -145,7 +145,7 @@ public class LaunchSchedulerTest extends Goddard {
   @Test
   public void addExecutingJob_Args__TriggerKey__NeutronRocket() throws Exception {
     NeutronRocket rocket = mock(NeutronRocket.class);
-    target.trackInFlightRocket(key, rocket);
+    target.markRocketAsInFlight(key, rocket);
   }
 
   @Test

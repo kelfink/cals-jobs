@@ -142,8 +142,8 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public void trackInFlightRocket(final TriggerKey key, NeutronRocket job) {
-    rocketsInFlight.put(key, job);
+  public void markRocketAsInFlight(final TriggerKey key, NeutronRocket rocket) {
+    rocketsInFlight.put(key, rocket);
   }
 
   public void removeExecutingJob(final TriggerKey key) {
@@ -178,13 +178,13 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public Map<Class<?>, AtomLaunchPad> getScheduleRegistry() {
+  public Map<Class<?>, AtomLaunchPad> getLaunchPads() {
     return scheduleRegistry;
   }
 
   @Override
   public boolean isLaunchVetoed(String className) throws NeutronException {
-    return this.getScheduleRegistry().get(NeutronClassFinder.classForName(className))
+    return this.getLaunchPads().get(NeutronClassFinder.classForName(className))
         .isVetoExecution();
   }
 

@@ -15,20 +15,20 @@ import gov.ca.cwds.neutron.launch.LaunchPad;
 public interface AtomLaunchScheduler {
 
   /**
-   * Run a registered job.
+   * Launch a registered rocket.
    * 
-   * @param klass batch job class
-   * @param opts command line arguments
-   * @return job progress
+   * @param klass rocket class
+   * @param flightPlan command line arguments
+   * @return rocket flight progress
    * @throws NeutronException unexpected runtime error
    */
-  FlightLog launchScheduledFlight(Class<?> klass, FlightPlan opts) throws NeutronException;
+  FlightLog launchScheduledFlight(Class<?> klass, FlightPlan flightPlan) throws NeutronException;
 
-  FlightLog launchScheduledFlight(String jobName, FlightPlan opts) throws NeutronException;
+  FlightLog launchScheduledFlight(String jobName, FlightPlan flightPlan) throws NeutronException;
 
-  void trackInFlightRocket(TriggerKey key, NeutronRocket rocket);
+  void markRocketAsInFlight(TriggerKey key, NeutronRocket rocket);
 
-  LaunchPad scheduleLaunch(Class<?> klazz, StandardFlightSchedule sched, FlightPlan opts);
+  LaunchPad scheduleLaunch(Class<?> klazz, StandardFlightSchedule sched, FlightPlan flightPlan);
 
   boolean isLaunchVetoed(String className) throws NeutronException;
 
@@ -36,9 +36,9 @@ public interface AtomLaunchScheduler {
 
   void startScheduler() throws NeutronException;
 
-  Map<Class<?>, AtomLaunchPad> getScheduleRegistry();
-
   Scheduler getScheduler();
+
+  Map<Class<?>, AtomLaunchPad> getLaunchPads();
 
   AtomFlightPlanManager getFlightPlanManger();
 

@@ -12,12 +12,12 @@ public interface AtomRocketFactory extends JobFactory {
    * Build a registered rocket.
    * 
    * @param klass rocket class
-   * @param opts command line arguments
+   * @param flightPlan command line arguments
    * @return the rocket
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  BasePersonRocket createJob(final Class<?> klass, final FlightPlan opts)
+  BasePersonRocket createJob(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException;
 
   /**

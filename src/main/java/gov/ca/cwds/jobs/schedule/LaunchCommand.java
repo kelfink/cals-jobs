@@ -212,7 +212,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   protected void exposeJMX() {
     LOGGER.warn("\n>>>>>>> ENABLE JMX! <<<<<<<\n");
     final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-    for (AtomLaunchPad pad : launchScheduler.getScheduleRegistry().values()) {
+    for (AtomLaunchPad pad : launchScheduler.getLaunchPads().values()) {
       exporter.export("Neutron:rocket=" + pad.getFlightSchedule().getShortName(), pad);
     }
 
@@ -235,8 +235,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   }
 
   /**
-   * Too many responsibilities: initialize Quartz, register jobs, expose operations to JMX, even
-   * initialize HTTP ...
+   * Prepare launch pads and start the scheduler.
    * 
    * @throws NeutronException on initialization error
    */
@@ -250,6 +249,11 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
       configureInitialMode(now);
 
+      // **MOVE** this responsibility to another class.
+      if (commonFlightPlan.isDropIndex()) {
+        esDao.deleteIndex(esDao.getConfig().getElasticsearchAlias());
+      }
+
       // Prepare launch pads and flight plans.
       for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
         final Class<?> klass = sched.getRocketClass();
@@ -257,17 +261,8 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
         handleTimeFile(flightPlan, fmt, now, sched);
 
         final LaunchPad pad = new LaunchPad(launchScheduler, sched, flightPlan);
-        launchScheduler.getScheduleRegistry().put(klass, pad);
+        launchScheduler.getLaunchPads().put(klass, pad);
         launchScheduler.getFlightPlanManger().addFlightPlan(klass, flightPlan);
-      }
-
-      // **MOVE** this responsibility to another class.
-      if (commonFlightPlan.isDropIndex()) {
-        esDao.deleteIndex(esDao.getConfig().getElasticsearchAlias());
-      }
-
-      // Schedule flights.
-      for (AtomLaunchPad pad : launchScheduler.getScheduleRegistry().values()) {
         pad.schedule();
       }
 
@@ -360,11 +355,11 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   }
 
   public Map<Class<?>, AtomLaunchPad> getScheduleRegistry() {
-    return launchScheduler.getScheduleRegistry();
+    return launchScheduler.getLaunchPads();
   }
 
   public void trackInFlightRocket(TriggerKey key, NeutronRocket rocket) {
-    launchScheduler.trackInFlightRocket(key, rocket);
+    launchScheduler.markRocketAsInFlight(key, rocket);
   }
 
   /**

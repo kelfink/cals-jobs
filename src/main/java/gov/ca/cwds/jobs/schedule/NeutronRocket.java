@@ -33,6 +33,8 @@ public class NeutronRocket implements InterruptableJob {
   @SuppressWarnings("rawtypes")
   private final BasePersonRocket rocket;
 
+  private final int instanceNumber = instanceCounter.incrementAndGet();
+
   private final FlightRecorder flightRecorder;
 
   private final StandardFlightSchedule flightSchedule;
@@ -54,7 +56,6 @@ public class NeutronRocket implements InterruptableJob {
     this.rocket = rocket;
     this.flightSchedule = flightSchedule;
     this.flightRecorder = flightRecorder;
-    instanceCounter.incrementAndGet();
   }
 
   @SuppressWarnings("rawtypes")
@@ -62,8 +63,7 @@ public class NeutronRocket implements InterruptableJob {
   public void execute(JobExecutionContext context) throws JobExecutionException {
     final JobDataMap map = context.getJobDetail().getJobDataMap();
     final String rocketName = context.getTrigger().getJobKey().getName();
-    LOGGER.warn(">>>>>> Execute {}, instance # {}", rocket.getClass().getName(),
-        instanceCounter.get());
+    LOGGER.warn(">>>>>> Execute {}, instance # {}", rocket.getClass().getName(), instanceNumber);
 
     try (final BasePersonRocket job = rocket) {
       flightLog = rocket.getFlightLog();
@@ -76,6 +76,7 @@ public class NeutronRocket implements InterruptableJob {
       context.setResult(flightLog);
 
       job.run();
+      flightLog.done();
       LOGGER.info("HAPPY LANDING! {}", rocket.getClass().getName());
     } catch (Exception e) {
       flightLog.fail();
@@ -83,7 +84,6 @@ public class NeutronRocket implements InterruptableJob {
       throw new JobExecutionException("FAILED TO LAUNCH! {}", e);
     } finally {
       LOGGER.info("FLIGHT SUMMARY: {}", flightLog);
-      flightLog.done();
       flightRecorder.addFlightLog(getClass(), flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
       MDC.remove("rocketLog");
@@ -106,6 +106,10 @@ public class NeutronRocket implements InterruptableJob {
   @SuppressWarnings("rawtypes")
   public BasePersonRocket getRocket() {
     return rocket;
+  }
+
+  public int getInstanceNumber() {
+    return instanceNumber;
   }
 
 }
