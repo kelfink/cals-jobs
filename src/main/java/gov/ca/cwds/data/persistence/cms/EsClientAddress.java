@@ -1516,4 +1516,8 @@ public class EsClientAddress implements PersistentObject, ApiGroupNormalizer<Rep
     this.clientEthnicityCode = clientEthnicityCode;
   }
 
+  public void setAdrReplicationOperation(CmsReplicationOperation adrReplicationOperation) {
+    this.adrReplicationOperation = adrReplicationOperation;
+  }
+
 }

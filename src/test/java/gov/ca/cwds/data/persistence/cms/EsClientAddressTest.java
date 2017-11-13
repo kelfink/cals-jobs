@@ -211,6 +211,27 @@ public class EsClientAddressTest extends Goddard<ReplicatedClient, EsClientAddre
   }
 
   @Test
+  public void normalize_Args__Map2() throws Exception {
+    target.setCltId(TEST_CLIENT_ID);
+    target.setAdrId(TEST_CLIENT_ID);
+    target.setClaId(TEST_CLIENT_ID);
+
+    target.setClaReplicationOperation(CmsReplicationOperation.D);
+    target.setAdrReplicationOperation(CmsReplicationOperation.D);
+
+    when(rs.getString("CLA_IDENTIFIER")).thenReturn(TEST_CLIENT_ID);
+    when(rs.getString("ADR_IDENTIFIER")).thenReturn(TEST_CLIENT_ID);
+
+    final Map<Object, ReplicatedClient> map = new HashMap<Object, ReplicatedClient>();
+    ReplicatedClient rc = new ReplicatedClient();
+    rc.setId(DEFAULT_CLIENT_ID);
+    map.put(DEFAULT_CLIENT_ID, rc);
+
+    final ReplicatedClient actual = target.normalize(map);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
   public void getNormalizationGroupKey_Args__() throws Exception {
     final Object actual = target.getNormalizationGroupKey();
     Object expected = DEFAULT_CLIENT_ID;

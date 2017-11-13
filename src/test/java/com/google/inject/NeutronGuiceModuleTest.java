@@ -11,6 +11,7 @@ import org.junit.Test;
 import gov.ca.cwds.jobs.Goddard;
 
 public class NeutronGuiceModuleTest extends Goddard {
+
   public static class TestNeutronGuiceModule extends NeutronGuiceModule {
 
     @Override
@@ -41,6 +42,14 @@ public class NeutronGuiceModuleTest extends Goddard {
     Object actual = target.binder();
     Object expected = null;
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void binder_Args__2() throws Exception {
+    Binder binder = mock(Binder.class);
+    target.setTestBinder(binder);
+    Object actual = target.binder();
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
