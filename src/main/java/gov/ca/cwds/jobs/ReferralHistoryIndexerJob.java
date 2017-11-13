@@ -15,22 +15,18 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
@@ -50,7 +46,6 @@ import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
-import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
@@ -549,34 +544,9 @@ public class ReferralHistoryIndexerJob
   }
 
   @Override
-  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp,
-      ReplicatedPersonReferrals referrals) throws NeutronException {
-    final StringBuilder buf = new StringBuilder();
-    buf.append("{\"referrals\":[");
-
-    final List<ElasticSearchPersonReferral> esPersonReferrals = referrals.getReferrals();
-    esp.setReferrals(esPersonReferrals);
-
-    if (esPersonReferrals != null && !esPersonReferrals.isEmpty()) {
-      buf.append(esPersonReferrals.stream().map(ElasticTransformer::jsonify)
-          .sorted(String::compareTo).collect(Collectors.joining(",")));
-    }
-
-    buf.append("]}");
-
-    final String updateJson = buf.toString();
-    String insertJson;
-    try {
-      insertJson = mapper.writeValueAsString(esp);
-    } catch (JsonProcessingException e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}", e.getMessage());
-    }
-
-    final String alias = esDao.getConfig().getElasticsearchAlias();
-    final String docType = esDao.getConfig().getElasticsearchDocType();
-
-    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON).upsert(
-        new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
+  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonReferrals p)
+      throws NeutronException {
+    return prepareUpsertRequest(esp, p, p.getReferrals());
   }
 
   @Override
