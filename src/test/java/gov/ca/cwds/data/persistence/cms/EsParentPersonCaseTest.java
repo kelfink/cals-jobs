@@ -2,6 +2,7 @@ package gov.ca.cwds.data.persistence.cms;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -16,18 +17,21 @@ import org.junit.Test;
 import gov.ca.cwds.data.es.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPersonParent;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
-public class EsParentPersonCaseTest {
+public class EsParentPersonCaseTest extends Goddard {
 
   private static final String DEFAULT_PARENT_ID = "pare1234567";
 
   private EsParentPersonCase target;
 
+  @Override
   @Before
-  public void setup() {
+  public void setup() throws Exception {
+    super.setup();
     target = new EsParentPersonCase();
   }
 
@@ -405,6 +409,20 @@ public class EsParentPersonCaseTest {
   public void getNormalizationGroupKey_Args__() throws Exception {
     Object actual = target.getNormalizationGroupKey();
     Object expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void hashCode_Args__() throws Exception {
+    int actual = target.hashCode();
+    assertThat(actual, not(equalTo(0)));
+  }
+
+  @Test
+  public void equals_Args__Object() throws Exception {
+    Object obj = null;
+    boolean actual = target.equals(obj);
+    boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 

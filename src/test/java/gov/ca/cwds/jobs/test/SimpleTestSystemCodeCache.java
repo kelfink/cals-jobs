@@ -60,6 +60,9 @@ public class SimpleTestSystemCodeCache implements SystemCodeCache {
     if (196 == id.intValue()) {
       return new SystemCode(id.shortValue(), null, null, null, "Daughter/Mother (Birth)", null,
           null, "CLNTRELC", null);
+    } else if (241 == id.intValue()) {
+      return new SystemCode(id.shortValue(), null, null, null, "Guardian/Ward", null, null,
+          "CLNTRELC", null);
     }
 
     return null;

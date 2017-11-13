@@ -30,6 +30,13 @@ public class CmsRelationshipTest {
   }
 
   @Test
+  public void instantiation2() throws Exception {
+    Short relCode = (short) 196;
+    CmsRelationship target = new CmsRelationship(relCode);
+    assertThat(target, notNullValue());
+  }
+
+  @Test
   public void getSysCodeId_Args__() throws Exception {
     Short relCode = (short) 196;
     CmsRelationship target = new CmsRelationship(relCode);
