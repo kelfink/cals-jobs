@@ -63,13 +63,16 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   private FlightPlan commonFlightPlan;
 
-  private Injector injector; // HACK: make an interface for DI?
+  /**
+   * <strong>HACK</strong>: make an interface for DI
+   */
+  private Injector injector;
 
   /**
    * Only used to drop and create indexes.
    * 
    * <p>
-   * HACK: **move to another module**
+   * <strong>MOVE</strong> this responsibility to another unit.
    * </p>
    */
   private ElasticsearchDao esDao;
@@ -79,7 +82,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   private NeutronRestServer restServer = new NeutronRestServer();
 
-  private FlightRecorder flightRecorder = new FlightRecorder();
+  private FlightRecorder flightRecorder;
 
   private AtomLaunchScheduler launchScheduler;
 
@@ -463,7 +466,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * @param args command line arguments
    * @param <T> Person persistence type
    */
-  public static <T extends BasePersonRocket<?, ?>> void runStandalone(final Class<T> klass,
+  public static <T extends BasePersonRocket<?, ?>> void launchSingle(final Class<T> klass,
       String... args) {
     standardFlightPlan = parseCommandLine(args);
     System.setProperty("LAUNCH_DIR",

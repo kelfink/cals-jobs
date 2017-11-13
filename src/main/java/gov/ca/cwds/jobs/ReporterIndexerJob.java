@@ -64,7 +64,7 @@ public class ReporterIndexerJob extends BasePersonRocket<ReplicatedReporter, Rep
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.runStandalone(ReporterIndexerJob.class, args);
+    LaunchCommand.launchSingle(ReporterIndexerJob.class, args);
   }
 
 }

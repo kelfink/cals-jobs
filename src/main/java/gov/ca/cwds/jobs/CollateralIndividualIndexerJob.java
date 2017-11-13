@@ -60,7 +60,7 @@ public final class CollateralIndividualIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.runStandalone(CollateralIndividualIndexerJob.class, args);
+    LaunchCommand.launchSingle(CollateralIndividualIndexerJob.class, args);
   }
 
 }

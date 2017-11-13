@@ -60,7 +60,7 @@ public class EducationProviderContactIndexerJob extends
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.runStandalone(EducationProviderContactIndexerJob.class, args);
+    LaunchCommand.launchSingle(EducationProviderContactIndexerJob.class, args);
   }
 
 }

@@ -60,7 +60,7 @@ public class SubstituteCareProviderIndexJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.runStandalone(SubstituteCareProviderIndexJob.class, args);
+    LaunchCommand.launchSingle(SubstituteCareProviderIndexJob.class, args);
   }
 
 }

@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
+import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
@@ -31,7 +32,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   private Scheduler scheduler;
 
-  private final FlightRecorder flightRecorder;
+  private final AtomFlightRecorder flightRecorder;
 
   private final AtomRocketFactory rocketFactory;
 
@@ -55,8 +56,8 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   private final Map<TriggerKey, NeutronRocket> rocketsInFlight = new ConcurrentHashMap<>();
 
   @Inject
-  public LaunchScheduler(final FlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
-      final AtomFlightPlanManager flightPlanMgr) {
+  public LaunchScheduler(final AtomFlightRecorder flightRecorder,
+      final AtomRocketFactory rocketFactory, final AtomFlightPlanManager flightPlanMgr) {
     this.flightRecorder = flightRecorder;
     this.rocketFactory = rocketFactory;
     this.flightPlanManger = flightPlanMgr;

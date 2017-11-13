@@ -3,7 +3,6 @@ package gov.ca.cwds.neutron.atom;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 
 public interface AtomLaunchPad extends ApiMarker {
@@ -58,7 +57,7 @@ public interface AtomLaunchPad extends ApiMarker {
 
   StandardFlightSchedule getFlightSchedule();
 
-  FlightRecorder getFlightRecorder();
+  AtomFlightRecorder getFlightRecorder();
 
 
   boolean isVetoExecution();

@@ -50,7 +50,7 @@ public class OrigAttorneyIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.runStandalone(OrigAttorneyIndexerJob.class, args);
+    LaunchCommand.launchSingle(OrigAttorneyIndexerJob.class, args);
   }
 
 }

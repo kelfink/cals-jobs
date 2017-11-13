@@ -251,7 +251,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.runStandalone(ClientIndexerJob.class, args);
+    LaunchCommand.launchSingle(ClientIndexerJob.class, args);
   }
 
 }

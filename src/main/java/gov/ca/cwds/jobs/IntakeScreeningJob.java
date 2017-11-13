@@ -161,7 +161,7 @@ public class IntakeScreeningJob extends BasePersonRocket<IntakeParticipant, EsIn
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.runStandalone(IntakeScreeningJob.class, args);
+    LaunchCommand.launchSingle(IntakeScreeningJob.class, args);
   }
 
 }

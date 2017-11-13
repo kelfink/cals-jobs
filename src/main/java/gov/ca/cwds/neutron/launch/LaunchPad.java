@@ -19,10 +19,10 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.schedule.NeutronRocket;
 import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
+import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.flight.FlightLog;
@@ -39,18 +39,18 @@ public class LaunchPad implements VoxLaunchPadMBean {
 
   private transient AtomLaunchScheduler launchScheduler;
   private final StandardFlightSchedule flightSchedule;
-  private final FlightRecorder flightRecorder;
+  private final AtomFlightRecorder flightRecorder;
   private final String jobName;
   private final String triggerName;
 
-  private FlightPlan flightPlan;
+  private AtomFlightRecorder flightPlan;
   private boolean vetoExecution;
   private volatile JobKey jobKey;
   private volatile JobDetail jd;
 
   @Inject
   public LaunchPad(final AtomLaunchScheduler launchScheduler, StandardFlightSchedule sched,
-      final FlightRecorder flightRecorder, final FlightPlan flightPlan) {
+      final AtomFlightRecorder flightRecorder, final FlightPlan flightPlan) {
     this.launchScheduler = launchScheduler;
     this.scheduler = launchScheduler.getScheduler();
 
@@ -219,7 +219,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
   }
 
   @Override
-  public FlightRecorder getFlightRecorder() {
+  public AtomFlightRecorder getFlightRecorder() {
     return flightRecorder;
   }
 

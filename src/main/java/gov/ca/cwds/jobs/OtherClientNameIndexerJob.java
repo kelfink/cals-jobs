@@ -194,7 +194,7 @@ public class OtherClientNameIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.runStandalone(OtherClientNameIndexerJob.class, args);
+    LaunchCommand.launchSingle(OtherClientNameIndexerJob.class, args);
   }
 
 }

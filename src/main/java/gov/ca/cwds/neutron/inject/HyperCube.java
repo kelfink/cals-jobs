@@ -465,7 +465,7 @@ public class HyperCube extends NeutronGuiceModule {
   @Provides
   @Singleton
   protected AtomLaunchScheduler configureQuartz(final Injector injector,
-      final FlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
+      final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
       final AtomFlightPlanManager flightPlanMgr) throws SchedulerException {
     final boolean initialMode = LaunchCommand.isInitialMode();
     final LaunchScheduler launchScheduler =

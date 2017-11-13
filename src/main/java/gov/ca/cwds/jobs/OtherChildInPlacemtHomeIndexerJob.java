@@ -60,7 +60,7 @@ public class OtherChildInPlacemtHomeIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.runStandalone(OtherChildInPlacemtHomeIndexerJob.class, args);
+    LaunchCommand.launchSingle(OtherChildInPlacemtHomeIndexerJob.class, args);
   }
 
 }
