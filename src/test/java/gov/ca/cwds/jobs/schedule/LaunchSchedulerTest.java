@@ -114,7 +114,7 @@ public class LaunchSchedulerTest extends Goddard {
   public void scheduleJob_Args__Class__DefaultFlightSchedule__FlightPlan() throws Exception {
     Class<?> klass = Mach1TestRocket.class;
     StandardFlightSchedule sched = StandardFlightSchedule.CLIENT;
-    LaunchPad actual = target.scheduleLaunch(klass, sched, flightPlan);
+    LaunchPad actual = target.scheduleLaunch(sched, flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 

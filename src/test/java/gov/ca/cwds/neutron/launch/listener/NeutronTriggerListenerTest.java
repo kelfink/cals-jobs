@@ -68,8 +68,7 @@ public class NeutronTriggerListenerTest extends Goddard {
     when(trigger.getKey()).thenReturn(triggerKey);
     when(jobDataMap.getString(any(String.class))).thenReturn(TestIndexerJob.class.getName());
 
-    neutronScheduler.scheduleLaunch(TestIndexerJob.class, StandardFlightSchedule.CLIENT,
-        flightPlan);
+    neutronScheduler.scheduleLaunch(StandardFlightSchedule.CLIENT, flightPlan);
     target = new NeutronTriggerListener(neutronScheduler);
   }
 

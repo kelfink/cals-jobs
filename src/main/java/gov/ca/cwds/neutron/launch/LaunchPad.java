@@ -140,7 +140,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
   @Override
   @Managed(description = "Show rocket status")
   public String status() {
-    LOGGER.debug("Show job status");
+    LOGGER.warn("Show rocket status");
     return flightRecorder.getLastFlightLog(this.flightSchedule.getRocketClass()).toString();
   }
 
@@ -150,6 +150,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
   @Override
   @Managed(description = "Show rocket history")
   public String history() {
+    LOGGER.warn("Show rocket history");
     StringBuilder buf = new StringBuilder();
     flightRecorder.getHistory(this.flightSchedule.getRocketClass()).stream().forEach(buf::append);
     return buf.toString();

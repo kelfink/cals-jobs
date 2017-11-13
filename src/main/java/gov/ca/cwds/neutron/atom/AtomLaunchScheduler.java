@@ -28,7 +28,8 @@ public interface AtomLaunchScheduler {
 
   void markRocketAsInFlight(TriggerKey key, NeutronRocket rocket);
 
-  LaunchPad scheduleLaunch(Class<?> klazz, StandardFlightSchedule sched, FlightPlan flightPlan);
+  LaunchPad scheduleLaunch(StandardFlightSchedule sched, FlightPlan flightPlan)
+      throws NeutronException;
 
   boolean isLaunchVetoed(String className) throws NeutronException;
 

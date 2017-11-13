@@ -41,9 +41,9 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   private FlightPlan flightPlan;
 
   /**
-   * Scheduled jobs.
+   * Schedule launch pads.
    */
-  private final Map<Class<?>, AtomLaunchPad> scheduleRegistry = new ConcurrentHashMap<>();
+  private final Map<Class<?>, AtomLaunchPad> launchPads = new ConcurrentHashMap<>();
 
   /**
    * Possibly not necessary. Listeners and running jobs should handle this, but we still need a
@@ -92,8 +92,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightLog launch(Class<?> klass, FlightPlan flightPlan)
-      throws NeutronException {
+  public FlightLog launch(Class<?> klass, FlightPlan flightPlan) throws NeutronException {
     try {
       LOGGER.info("Run scheduled rocket: {}", klass.getName());
       final BasePersonRocket<?, ?> rocket = fuelRocket(klass, flightPlan);
@@ -105,19 +104,21 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   @Override
-  public FlightLog launch(String rocketName, FlightPlan flightPlan)
-      throws NeutronException {
+  public FlightLog launch(String rocketName, FlightPlan flightPlan) throws NeutronException {
     return launch(NeutronClassFinder.classForName(rocketName), flightPlan);
   }
 
   @Override
-  public LaunchPad scheduleLaunch(Class<?> klazz, StandardFlightSchedule sched,
-      FlightPlan flightPlan) {
+  public LaunchPad scheduleLaunch(StandardFlightSchedule sched, FlightPlan flightPlan)
+      throws NeutronException {
     LOGGER.debug("LAUNCH COORDINATOR: LAST CHANGE LOCATION: {}", flightPlan.getLastRunLoc());
-    final LaunchPad nj = new LaunchPad(this, sched, flightPlan);
-    flightPlanManger.addFlightPlan(klazz, flightPlan);
-    scheduleRegistry.put(klazz, nj);
-    return nj;
+    final LaunchPad pad = new LaunchPad(this, sched, flightPlan);
+    final Class<?> klass = sched.getRocketClass();
+    flightPlanManger.addFlightPlan(klass, flightPlan);
+    launchPads.put(klass, pad);
+    pad.schedule();
+
+    return pad;
   }
 
   @Override
@@ -179,7 +180,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   @Override
   public Map<Class<?>, AtomLaunchPad> getLaunchPads() {
-    return scheduleRegistry;
+    return launchPads;
   }
 
   @Override

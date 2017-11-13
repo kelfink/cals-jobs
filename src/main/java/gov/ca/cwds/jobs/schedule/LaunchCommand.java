@@ -35,7 +35,6 @@ import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.inject.HyperCube;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import gov.ca.cwds.neutron.launch.LaunchPad;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.NeutronStringUtil;
@@ -254,17 +253,14 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
         esDao.deleteIndex(esDao.getConfig().getElasticsearchAlias());
       }
 
-      // Prepare launch pads and flight plans.
+      // Prepare launch pads.
       for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
-        final Class<?> klass = sched.getRocketClass();
         final FlightPlan flightPlan = new FlightPlan(commonFlightPlan);
         handleTimeFile(flightPlan, fmt, now, sched);
-
-        final LaunchPad pad = new LaunchPad(launchScheduler, sched, flightPlan);
-        launchScheduler.getLaunchPads().put(klass, pad);
-        launchScheduler.getFlightPlanManger().addFlightPlan(klass, flightPlan);
-        pad.schedule();
+        launchScheduler.scheduleLaunch(sched, flightPlan);
       }
+
+      initializeManagementInterfaces();
 
       // Cindy: "Let's light this candle!"
       if (!LaunchCommand.settings.isTestMode()) {
@@ -272,7 +268,6 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
         launchScheduler.getScheduler().start();
       }
 
-      initializeManagementInterfaces();
     } catch (IOException | SchedulerException | ParseException e) {
       try {
         launchScheduler.getScheduler().shutdown(false);
