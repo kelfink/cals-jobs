@@ -86,9 +86,14 @@ public class IntakeParticipantTest {
   @Test
   public void getEsScreenings_Args__() throws Exception {
     IntakeParticipant target = new IntakeParticipant();
+
+    IntakeScreening s = new IntakeScreening();
+    s.setId("abc1234567");
+    target.addScreening(s);
+
     ElasticSearchPersonScreening[] actual = target.getEsScreenings();
     ElasticSearchPersonScreening[] expected = new ElasticSearchPersonScreening[0];
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
