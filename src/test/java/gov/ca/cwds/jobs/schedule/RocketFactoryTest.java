@@ -71,7 +71,7 @@ public class RocketFactoryTest extends Goddard {
   public void createJob_Args__Class__FlightPlan() throws Exception {
     Class<?> klass = Mach1TestRocket.class;
     FlightPlan opts_ = mock(FlightPlan.class);
-    BasePersonRocket actual = target.createJob(klass, opts_);
+    BasePersonRocket actual = target.fuelRocket(klass, opts_);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -79,7 +79,7 @@ public class RocketFactoryTest extends Goddard {
   public void createJob_Args__String__FlightPlan() throws Exception {
     String jobName = Mach1TestRocket.class.getName();
     FlightPlan opts_ = mock(FlightPlan.class);
-    BasePersonRocket actual = target.createJob(jobName, opts_);
+    BasePersonRocket actual = target.fuelRocket(jobName, opts_);
     assertThat(actual, is(notNullValue()));
   }
 

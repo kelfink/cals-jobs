@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.neutron.rocket;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -26,18 +26,19 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
- * Abstract base class for all Neutron jobs based on last successful run time.
+ * Abstract base class for all Neutron rockets that rely on a last <strong>successful</strong> run
+ * time file.
  * 
  * @author CWDS API Team
  */
-public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJobControl {
+public abstract class LastRunRocket implements Rocket, AtomShared, AtomJobControl {
 
   private static final long serialVersionUID = 1L;
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(LastSuccessfulRunJob.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(LastRunRocket.class);
 
   /**
-   * Command line options for this job.
+   * Command line options for this rocket.
    */
   protected FlightPlan flightPlan;
 
@@ -49,7 +50,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
    * @param lastJobRunTimeFilename location of last run time file
    * @param flightPlan job options
    */
-  public LastSuccessfulRunJob(String lastJobRunTimeFilename, final FlightPlan flightPlan) {
+  public LastRunRocket(String lastJobRunTimeFilename, final FlightPlan flightPlan) {
     this.lastRunTimeFilename = StringUtils.isBlank(lastJobRunTimeFilename)
         ? flightPlan.getLastRunLoc() : lastJobRunTimeFilename;
     this.flightPlan = flightPlan;
@@ -69,14 +70,13 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
 
   @Override
   public final void run() {
-    LOGGER.warn("LastSuccessfulRunJob.run(): lastRunTimeFilename: {}", lastRunTimeFilename);
+    LOGGER.warn("run: lastRunTimeFilename: {}", lastRunTimeFilename);
     final FlightLog flightLog = getFlightLog();
     flightLog.start();
 
     try {
       final Date lastRunTime = determineLastSuccessfulRunTime();
       flightLog.setLastChangeSince(lastRunTime);
-
       writeLastSuccessfulRunTime(executeJob(lastRunTime));
     } catch (Exception e) {
       fail();
@@ -86,7 +86,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
     try {
       finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
     } finally {
-      flightLog.done();
+      // all done
     }
 
     // SLF4J does not yet support conditional invocation.
@@ -125,7 +125,7 @@ public abstract class LastSuccessfulRunJob implements Rocket, AtomShared, AtomJo
 
   /**
    * Calculate last successful run date/time, per
-   * {@link LastSuccessfulRunJob#calcLastRunDate(Date, FlightPlan)}.
+   * {@link LastRunRocket#calcLastRunDate(Date, FlightPlan)}.
    * 
    * @param lastSuccessfulRunTime last successful run
    * @return appropriate date to detect changes

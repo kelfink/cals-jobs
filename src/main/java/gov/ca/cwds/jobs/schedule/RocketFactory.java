@@ -27,24 +27,24 @@ public class RocketFactory implements AtomRocketFactory {
 
   private Injector injector;
 
-  private final FlightPlan baseFlightPlan;
-
   private FlightPlanRegistry flightPlanRegistry;
+
+  private final FlightPlan baseFlightPlan;
 
   private final FlightRecorder flightRecorder;
 
   @Inject
-  public RocketFactory(final Injector injector, final FlightPlan flightPlan,
+  public RocketFactory(final Injector injector, final FlightPlan baseFlightPlan,
       final FlightPlanRegistry flightPlanRegistry, final FlightRecorder flightRecorder) {
     this.injector = injector;
-    this.baseFlightPlan = flightPlan;
+    this.baseFlightPlan = baseFlightPlan;
     this.flightPlanRegistry = flightPlanRegistry;
     this.flightRecorder = flightRecorder;
   }
 
   @SuppressWarnings("rawtypes")
   @Override
-  public BasePersonRocket createJob(Class<?> klass, final FlightPlan flightPlan)
+  public BasePersonRocket fuelRocket(Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
@@ -52,15 +52,15 @@ public class RocketFactory implements AtomRocketFactory {
       ret.init(flightPlan.getLastRunLoc(), flightPlan);
       return ret;
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO CREATE ROCKET!: {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "FAILED TO PREPARE ROCKET!: {}", e.getMessage());
     }
   }
 
   @SuppressWarnings("rawtypes")
   @Override
-  public BasePersonRocket createJob(String rocketName, final FlightPlan flightPlan)
+  public BasePersonRocket fuelRocket(String rocketName, final FlightPlan flightPlan)
       throws NeutronException {
-    return createJob(NeutronClassFinder.classForName(rocketName), flightPlan);
+    return fuelRocket(NeutronClassFinder.classForName(rocketName), flightPlan);
   }
 
   @SuppressWarnings("unchecked")
@@ -80,7 +80,7 @@ public class RocketFactory implements AtomRocketFactory {
     NeutronRocket ret;
     try {
       final FlightPlan flightPlan = flightPlanRegistry.getFlightPlan(klazz);
-      ret = new NeutronRocket(createJob(klazz, flightPlan),
+      ret = new NeutronRocket(fuelRocket(klazz, flightPlan),
           StandardFlightSchedule.lookupByClass(klazz), flightRecorder);
     } catch (NeutronException e) {
       throw new SchedulerException("NO ROCKET SETTINGS!", e);

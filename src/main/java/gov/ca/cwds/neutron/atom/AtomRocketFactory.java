@@ -17,7 +17,7 @@ public interface AtomRocketFactory extends JobFactory {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  BasePersonRocket createJob(final Class<?> klass, final FlightPlan flightPlan)
+  BasePersonRocket fuelRocket(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException;
 
   /**
@@ -29,7 +29,7 @@ public interface AtomRocketFactory extends JobFactory {
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonRocket createJob(final String rocketName, final FlightPlan flightPlan)
+  public BasePersonRocket fuelRocket(final String rocketName, final FlightPlan flightPlan)
       throws NeutronException;
 
 }

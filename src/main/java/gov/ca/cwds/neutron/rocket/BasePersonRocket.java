@@ -45,7 +45,6 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
-import gov.ca.cwds.jobs.LastSuccessfulRunJob;
 import gov.ca.cwds.jobs.component.BulkProcessorBuilder;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
@@ -95,7 +94,7 @@ import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
  * @see FlightPlan
  */
 public abstract class BasePersonRocket<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends LastSuccessfulRunJob implements AutoCloseable, AtomPersonDocPrep<T>,
+    extends LastRunRocket implements AutoCloseable, AtomPersonDocPrep<T>,
     AtomInitialLoad<T, M>, AtomTransform<T, M>, AtomSecurity, AtomValidateDocument {
 
   private static final long serialVersionUID = 1L;
@@ -550,7 +549,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
    * @param lastRunDt last time the batch ran successfully.
    * @return List of results to process
    * @throws NeutronException oops!
-   * @see gov.ca.cwds.jobs.LastSuccessfulRunJob#executeJob(java.util.Date)
+   * @see gov.ca.cwds.neutron.rocket.LastRunRocket#executeJob(java.util.Date)
    */
   protected Date doLastRun(Date lastRunDt) throws NeutronException {
     LOGGER.info("LAST RUN MODE!");
@@ -591,7 +590,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
    * 
    * {@inheritDoc}
    * 
-   * @see gov.ca.cwds.jobs.LastSuccessfulRunJob#executeJob(java.util.Date)
+   * @see gov.ca.cwds.neutron.rocket.LastRunRocket#executeJob(java.util.Date)
    */
   @Override
   public Date executeJob(Date lastSuccessfulRunTime) throws NeutronException {

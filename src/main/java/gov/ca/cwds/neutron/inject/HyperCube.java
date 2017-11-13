@@ -481,7 +481,7 @@ public class HyperCube extends NeutronGuiceModule {
     final Scheduler scheduler = factory.getScheduler();
 
     // MORE: inject scheduler and rocket factory.
-    scheduler.setJobFactory(injector.getInstance(RocketFactory.class));
+    scheduler.setJobFactory(rocketFactory);
     launchScheduler.setScheduler(scheduler);
 
     // Scheduler listeners.

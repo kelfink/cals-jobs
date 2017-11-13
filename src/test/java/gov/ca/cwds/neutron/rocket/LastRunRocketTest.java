@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.neutron.rocket;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -27,11 +27,12 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.rocket.LastRunRocket;
 
-public class LastSuccessfulRunJobTest
+public class LastRunRocketTest
     extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
-  private static class TestLastSuccessfulRunJob extends LastSuccessfulRunJob {
+  private static class TestLastSuccessfulRunJob extends LastRunRocket {
 
     ElasticsearchDao esDao;
 
@@ -88,7 +89,7 @@ public class LastSuccessfulRunJobTest
 
   @Test
   public void type() throws Exception {
-    assertThat(LastSuccessfulRunJob.class, notNullValue());
+    assertThat(LastRunRocket.class, notNullValue());
   }
 
   @Test

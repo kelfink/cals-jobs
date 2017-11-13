@@ -64,17 +64,17 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   }
 
   /**
-   * Build a registered job.
+   * Prepare a registered rocket.
    * 
-   * @param klass batch job class
+   * @param klass rocket class
    * @param flightPlan command line arguments
-   * @return the job
+   * @return a fueled rocket
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
   public BasePersonRocket fuelRocket(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronException {
-    return this.rocketFactory.createJob(klass, flightPlan);
+    return this.rocketFactory.fuelRocket(klass, flightPlan);
   }
 
   /**
@@ -88,7 +88,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
   @SuppressWarnings("rawtypes")
   public BasePersonRocket fuelRocket(final String jobName, final FlightPlan flightPlan)
       throws NeutronException {
-    return this.rocketFactory.createJob(jobName, flightPlan);
+    return this.rocketFactory.fuelRocket(jobName, flightPlan);
   }
 
   @Override
@@ -184,8 +184,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
 
   @Override
   public boolean isLaunchVetoed(String className) throws NeutronException {
-    return this.getLaunchPads().get(NeutronClassFinder.classForName(className))
-        .isVetoExecution();
+    return this.getLaunchPads().get(NeutronClassFinder.classForName(className)).isVetoExecution();
   }
 
   @Override
@@ -193,6 +192,7 @@ public class LaunchScheduler implements AtomLaunchScheduler {
     return flightPlanManger;
   }
 
+  @Override
   public AtomFlightRecorder getFlightRecorder() {
     return flightRecorder;
   }
