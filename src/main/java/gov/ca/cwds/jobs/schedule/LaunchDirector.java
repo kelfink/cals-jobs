@@ -57,10 +57,10 @@ public class LaunchDirector implements AtomLaunchDirector {
 
   @Inject
   public LaunchDirector(final AtomFlightRecorder flightRecorder,
-      final AtomRocketFactory rocketFactory, final AtomFlightPlanManager flightPlanMgr) {
+      final AtomRocketFactory rocketFactory, final AtomFlightPlanManager flightPlanManager) {
     this.flightRecorder = flightRecorder;
     this.rocketFactory = rocketFactory;
-    this.flightPlanManger = flightPlanMgr;
+    this.flightPlanManger = flightPlanManager;
   }
 
   /**

@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
 
@@ -22,7 +21,7 @@ import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.LaunchDirector;
 import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
@@ -30,20 +29,18 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 
 public class LaunchPadTest extends Goddard {
 
-  Scheduler scheduler;
   StandardFlightSchedule sched;
-  FlightRecorder history;
   LaunchPad target;
 
   @Override
   @Before
   public void setup() throws Exception {
     super.setup();
-    scheduler = mock(Scheduler.class);
-    launchScheduler.setScheduler(scheduler);
-    when(launchScheduler.getScheduler()).thenReturn(scheduler);
+
+    flightPlan = new FlightPlan();
+    when(launchScheduler.getFlightRecorder()).thenReturn(flightRecorder);
+
     sched = StandardFlightSchedule.CLIENT;
-    history = new FlightRecorder();
     target = new LaunchPad(launchScheduler, sched, flightPlan);
   }
 
@@ -100,7 +97,7 @@ public class LaunchPadTest extends Goddard {
     final FlightLog track = new FlightLog();
     jdm.put("track", track);
     when(jd.getJobDataMap()).thenReturn(jdm);
-    history.logFlight(ClientIndexerJob.class, track);
+    flightRecorder.logFlight(ClientIndexerJob.class, track);
     target.status();
   }
 
@@ -118,6 +115,8 @@ public class LaunchPadTest extends Goddard {
 
   @Test
   public void history_Args__() throws Exception {
+    launchScheduler = new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager);
+    launchScheduler.setScheduler(scheduler);
     String actual = target.history();
     assertThat(actual, is(notNullValue()));
   }
