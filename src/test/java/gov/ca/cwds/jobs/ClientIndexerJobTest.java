@@ -22,9 +22,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
@@ -79,8 +82,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedClientDao(sessionFactory);
-    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, sessionFactory,
-        flightPlan);
+    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
   }
 
   @Test
@@ -90,8 +92,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void instantiation() throws Exception {
-    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, sessionFactory,
-        flightPlan);
+    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
     assertThat(target, notNullValue());
   }
 
@@ -191,8 +192,8 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     when(con.createStatement()).thenThrow(SQLException.class);
     final Pair<String, String> p = pair;
 
-    TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile,
-        mapper, sessionFactory, flightRecorder, flightPlan);
+    TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
+        sessionFactory, flightRecorder, flightPlan);
     target.setTxn(transaction);
     target.pullRange(p);
   }
@@ -263,8 +264,8 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     rep.setBirthCity("Glasgow");
 
     dao = mock(ReplicatedClientDao.class);
-    TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile,
-        mapper, sessionFactory, flightRecorder, flightPlan);
+    TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
+        sessionFactory, flightRecorder, flightPlan);
     target.setTxn(transaction);
     when(dao.find(any())).thenReturn(rep);
 
@@ -304,6 +305,43 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
   public void getMQTName_Args__() throws Exception {
     final String actual = target.getMQTName();
     final String expected = "MQT_CLIENT_ADDRESS";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void handleRangeResults_Args__ResultSet() throws Exception {
+    target.handleRangeResults(rs);
+  }
+
+  @Test
+  public void validateAddresses_Args__ReplicatedClient__ElasticSearchPerson() throws Exception {
+    ReplicatedClient client = new ReplicatedClient();
+    ElasticSearchPerson person = new ElasticSearchPerson();
+
+    ReplicatedAddress repAddr = new ReplicatedAddress();
+    repAddr.setId(DEFAULT_CLIENT_ID);
+    repAddr.setCity("Provo");
+    repAddr.setZip("80604");
+
+    ReplicatedClientAddress ca = new ReplicatedClientAddress();
+    ca.addAddress(repAddr);
+    client.addClientAddress(ca);
+
+    ElasticSearchPersonAddress espAddr = new ElasticSearchPersonAddress();
+    espAddr.setId(DEFAULT_CLIENT_ID);
+    espAddr.setCity("Provo");
+    espAddr.setZip("80604");
+    esp.getAddresses().add(espAddr);
+
+    boolean actual = target.validateAddresses(client, person);
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void nextThreadNumber_Args__() throws Exception {
+    int actual = target.nextThreadNumber();
+    int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 
