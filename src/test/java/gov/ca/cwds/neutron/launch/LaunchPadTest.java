@@ -22,8 +22,9 @@ import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
+import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.flight.FlightLog;
 
@@ -173,7 +174,7 @@ public class LaunchPadTest extends Goddard {
 
   @Test
   public void getFlightRecorder_Args__() throws Exception {
-    FlightRecorder actual = target.getFlightRecorder();
+    AtomFlightRecorder actual = target.getFlightRecorder();
     assertThat(actual, is(notNullValue()));
   }
 

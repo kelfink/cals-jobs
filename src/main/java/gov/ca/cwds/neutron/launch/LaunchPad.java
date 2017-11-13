@@ -43,7 +43,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
   private final String jobName;
   private final String triggerName;
 
-  private AtomFlightRecorder flightPlan;
+  private FlightPlan flightPlan;
   private boolean vetoExecution;
   private volatile JobKey jobKey;
   private volatile JobDetail jd;
