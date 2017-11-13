@@ -27,7 +27,6 @@ import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
-import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
@@ -147,12 +146,6 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void setOpts_Args__JobOptions() throws Exception {
     target.setFlightPlan(flightPlan);
-  }
-
-  @Test
-  public void provideLaunchDirector_Args__() throws Exception {
-    final AtomLaunchCommand actual = target.provideCommandCenter();
-    assertThat(actual, is(notNullValue()));
   }
 
   @Test
