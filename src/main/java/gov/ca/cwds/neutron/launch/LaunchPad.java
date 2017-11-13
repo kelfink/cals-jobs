@@ -66,7 +66,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
     flightLog.setRocketName(sched.getShortName());
 
     // Seed the flight log history.
-    flightRecorder.addFlightLog(sched.getRocketClass(), flightLog);
+    flightRecorder.logFlight(sched.getRocketClass(), flightLog);
   }
 
   /**

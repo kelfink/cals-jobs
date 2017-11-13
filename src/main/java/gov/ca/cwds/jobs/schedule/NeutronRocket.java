@@ -14,6 +14,7 @@ import org.slf4j.MDC;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
@@ -35,7 +36,7 @@ public class NeutronRocket implements InterruptableJob {
   @SuppressWarnings("rawtypes")
   private final BasePersonRocket rocket;
 
-  private final FlightRecorder flightRecorder;
+  private final AtomFlightRecorder flightRecorder;
 
   private final StandardFlightSchedule flightSchedule;
 
@@ -52,7 +53,7 @@ public class NeutronRocket implements InterruptableJob {
    */
   public <T extends PersistentObject, M extends ApiGroupNormalizer<?>> NeutronRocket(
       final BasePersonRocket<T, M> rocket, final StandardFlightSchedule flightSchedule,
-      final FlightRecorder flightRecorder) {
+      final AtomFlightRecorder flightRecorder) {
     this.rocket = rocket;
     this.flightSchedule = flightSchedule;
     this.flightRecorder = flightRecorder;
@@ -65,17 +66,17 @@ public class NeutronRocket implements InterruptableJob {
     final String rocketName = context.getTrigger().getJobKey().getName();
     LOGGER.warn("\n>>>>>> LAUNCH! {}, instance # {}", rocket.getClass().getName(), instanceNumber);
 
-    try (final BasePersonRocket job = rocket) {
+    try (final BasePersonRocket flight = rocket) {
       flightLog = rocket.getFlightLog();
       flightLog.setRocketName(rocketName);
       flightLog.start();
       MDC.put("rocketLog", rocketName);
 
-      map.put("opts", job.getFlightPlan());
+      map.put("opts", flight.getFlightPlan());
       map.put("track", flightLog);
       context.setResult(flightLog);
 
-      job.run();
+      flight.run();
       flightLog.done();
       LOGGER.info("HAPPY LANDING! {}", rocket.getClass().getName());
     } catch (Exception e) {
@@ -83,7 +84,7 @@ public class NeutronRocket implements InterruptableJob {
       LOGGER.error("LAUNCH FAILURE! {}", e);
       throw new JobExecutionException("FAILED TO LAUNCH! {}", e);
     } finally {
-      flightRecorder.addFlightLog(flightSchedule.getRocketClass(), flightLog);
+      flightRecorder.logFlight(flightSchedule.getRocketClass(), flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
       MDC.remove("rocketLog");
       LOGGER.info("FLIGHT SUMMARY: {}", flightLog);

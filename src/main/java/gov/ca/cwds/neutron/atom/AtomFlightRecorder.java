@@ -13,7 +13,7 @@ public interface AtomFlightRecorder {
 
   Map<Class<?>, CircularFifoQueue<FlightLog>> getFlightLogHistory();
 
-  void addFlightLog(Class<?> klazz, FlightLog flightLog);
+  void logFlight(Class<?> klazz, FlightLog flightLog);
 
   FlightLog getLastFlightLog(final Class<?> klazz);
 

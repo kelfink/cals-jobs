@@ -14,6 +14,7 @@ import com.google.inject.Singleton;
 
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -31,7 +32,7 @@ public class RocketFactory implements AtomRocketFactory {
 
   private final FlightPlan baseFlightPlan;
 
-  private final FlightRecorder flightRecorder;
+  private final AtomFlightRecorder flightRecorder;
 
   @Inject
   public RocketFactory(final Injector injector, final FlightPlan baseFlightPlan,

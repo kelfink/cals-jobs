@@ -100,7 +100,7 @@ public class LaunchPadTest extends Goddard {
     final FlightLog track = new FlightLog();
     jdm.put("track", track);
     when(jd.getJobDataMap()).thenReturn(jdm);
-    history.addFlightLog(ClientIndexerJob.class, track);
+    history.logFlight(ClientIndexerJob.class, track);
     target.status();
   }
 

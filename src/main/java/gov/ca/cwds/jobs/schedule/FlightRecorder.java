@@ -38,7 +38,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder, Serializab
   }
 
   @Override
-  public void addFlightLog(Class<?> klazz, FlightLog flightLog) {
+  public void logFlight(Class<?> klazz, FlightLog flightLog) {
     lastFlightLogs.put(klazz, flightLog);
 
     if (!flightHistory.containsKey(klazz)) {
