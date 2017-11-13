@@ -37,13 +37,13 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder {
   }
 
   @Override
-  public void addFlightLog(Class<?> klazz, FlightLog track) {
-    lastFlightLogs.put(klazz, track);
+  public void addFlightLog(Class<?> klazz, FlightLog flightLog) {
+    lastFlightLogs.put(klazz, flightLog);
 
     if (!flightHistory.containsKey(klazz)) {
       flightHistory.put(klazz, new CircularFifoQueue<>(QUEUE_SIZE));
     }
-    flightHistory.get(klazz).add(track);
+    flightHistory.get(klazz).add(flightLog);
   }
 
   @Override

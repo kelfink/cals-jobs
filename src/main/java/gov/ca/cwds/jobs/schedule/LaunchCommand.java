@@ -266,7 +266,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
         esDao.deleteIndex(esDao.getConfig().getElasticsearchAlias());
       }
 
-      // Start rockets.
+      // Schedule flights.
       for (AtomLaunchPad pad : launchScheduler.getScheduleRegistry().values()) {
         pad.schedule();
       }
@@ -282,7 +282,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       try {
         launchScheduler.getScheduler().shutdown(false);
       } catch (SchedulerException e2) {
-        LOGGER.warn("FAILED TO STOP SCHEDULER! {}", e2.getMessage(), e2);
+        LOGGER.warn("FAILED TO START SCHEDULER! {}", e2.getMessage(), e2);
       }
       throw JobLogs.checked(LOGGER, e, "INIT ERROR: {}", e.getMessage());
     }
@@ -351,7 +351,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     return launchScheduler;
   }
 
-  public void setLaunchScheduler(LaunchScheduler launchScheduler) {
+  public void setLaunchScheduler(AtomLaunchScheduler launchScheduler) {
     this.launchScheduler = launchScheduler;
   }
 

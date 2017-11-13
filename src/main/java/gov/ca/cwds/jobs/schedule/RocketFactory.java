@@ -34,10 +34,10 @@ public class RocketFactory implements AtomRocketFactory {
   private final FlightRecorder flightRecorder;
 
   @Inject
-  public RocketFactory(final Injector injector, final FlightPlan opts,
+  public RocketFactory(final Injector injector, final FlightPlan flightPlan,
       final FlightPlanRegistry flightPlanRegistry, final FlightRecorder flightRecorder) {
     this.injector = injector;
-    this.baseFlightPlan = opts;
+    this.baseFlightPlan = flightPlan;
     this.flightPlanRegistry = flightPlanRegistry;
     this.flightRecorder = flightRecorder;
   }
@@ -48,8 +48,6 @@ public class RocketFactory implements AtomRocketFactory {
       throws NeutronException {
     try {
       LOGGER.info("Create registered job: {}", klass.getName());
-
-      // DAVE-OTOLOGY: is there a cleaner way to call this??
       final BasePersonRocket ret = (BasePersonRocket<?, ?>) injector.getInstance(klass);
       ret.init(flightPlan.getLastRunLoc(), flightPlan);
       return ret;
@@ -81,9 +79,9 @@ public class RocketFactory implements AtomRocketFactory {
     LOGGER.warn("LAUNCH! {}", klazz);
     NeutronRocket ret;
     try {
-      final FlightPlan opts = flightPlanRegistry.getFlightPlan(klazz);
-      ret = new NeutronRocket(createJob(klazz, opts), StandardFlightSchedule.lookupByClass(klazz),
-          flightRecorder);
+      final FlightPlan flightPlan = flightPlanRegistry.getFlightPlan(klazz);
+      ret = new NeutronRocket(createJob(klazz, flightPlan),
+          StandardFlightSchedule.lookupByClass(klazz), flightRecorder);
     } catch (NeutronException e) {
       throw new SchedulerException("NO ROCKET SETTINGS!", e);
     }

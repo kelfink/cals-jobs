@@ -348,7 +348,7 @@ public class HyperCube extends NeutronGuiceModule {
 
   @Provides
   @Singleton
-  public AtomLaunchCommand provideLaunchDirector() {
+  public AtomLaunchCommand provideCommandCenter() {
     return LaunchCommand.getInstance();
   }
 
@@ -485,11 +485,11 @@ public class HyperCube extends NeutronGuiceModule {
     launchScheduler.setScheduler(scheduler);
 
     // Scheduler listeners.
-    final ListenerManager listenerMgr = launchScheduler.getScheduler().getListenerManager();
-    listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
-    listenerMgr.addTriggerListener(new NeutronTriggerListener(launchScheduler));
-    listenerMgr.addJobListener(initialMode
-        ? StandardFlightSchedule.buildInitialLoadJobChainListener() : new NeutronJobListener());
+    final ListenerManager mgr = launchScheduler.getScheduler().getListenerManager();
+    mgr.addSchedulerListener(new NeutronSchedulerListener());
+    mgr.addTriggerListener(new NeutronTriggerListener(launchScheduler));
+    mgr.addJobListener(initialMode ? StandardFlightSchedule.buildInitialLoadJobChainListener()
+        : new NeutronJobListener());
     return launchScheduler;
   }
 

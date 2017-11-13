@@ -151,7 +151,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void provideLaunchDirector_Args__() throws Exception {
-    final AtomLaunchCommand actual = target.provideLaunchDirector();
+    final AtomLaunchCommand actual = target.provideCommandCenter();
     assertThat(actual, is(notNullValue()));
   }
 
