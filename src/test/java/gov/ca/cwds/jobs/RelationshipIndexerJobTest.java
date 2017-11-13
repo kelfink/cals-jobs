@@ -21,8 +21,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonRelationship;
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
 import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
 
-public class RelationshipIndexerJobTest
-    extends Goddard<ReplicatedRelationships, EsRelationship> {
+public class RelationshipIndexerJobTest extends Goddard<ReplicatedRelationships, EsRelationship> {
 
   ReplicatedRelationshipsDao dao;
   RelationshipIndexerJob target;
@@ -32,8 +31,8 @@ public class RelationshipIndexerJobTest
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedRelationshipsDao(sessionFactory);
-    target = new RelationshipIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory,
-        flightRecorder, flightPlan);
+    target =
+        new RelationshipIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory, flightPlan);
   }
 
   @Test

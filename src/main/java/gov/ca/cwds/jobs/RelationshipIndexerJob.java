@@ -11,14 +11,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
@@ -32,7 +29,6 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
@@ -40,7 +36,6 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
-import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
@@ -75,18 +70,16 @@ public class RelationshipIndexerJob
    * 
    * @param dao Relationship View DAO
    * @param esDao ElasticSearch DAO
-   * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
+   * @param lastRunFile last run file
    * @param mapper Jackson ObjectMapper
    * @param sessionFactory Hibernate session factory
-   * @param jobHistory job history
-   * @param opts command line options
+   * @param flightPlan command line options
    */
   @Inject
   public RelationshipIndexerJob(final ReplicatedRelationshipsDao dao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
-      FlightPlan opts) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, opts);
+      @LastRunFile String lastRunFile, final ObjectMapper mapper,
+      @CmsSessionFactory SessionFactory sessionFactory, FlightPlan flightPlan) {
+    super(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
     EsRelationship.SonarQubeMemoryBloatComplaintCache.getInstance().clearCache();
   }
 
@@ -233,33 +226,7 @@ public class RelationshipIndexerJob
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedRelationships p)
       throws NeutronException {
-    final StringBuilder buf = new StringBuilder();
-    buf.append("{\"relationships\":[");
-
-    if (!p.getRelations().isEmpty()) {
-      try {
-        buf.append(p.getRelations().stream().map(ElasticTransformer::jsonify)
-            .sorted(String::compareTo).collect(Collectors.joining(",")));
-      } catch (Exception e) {
-        throw JobLogs.runtime(LOGGER, e, "ERROR SERIALIZING RELATIONSHIPS! {}", e.getMessage());
-      }
-    }
-
-    buf.append("]}");
-
-    String insertJson;
-    try {
-      insertJson = mapper.writeValueAsString(esp);
-    } catch (JsonProcessingException e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO WRITE OBJECT TO JSON! {}", e.getMessage());
-    }
-    final String updateJson = buf.toString();
-
-    final String alias = esDao.getConfig().getElasticsearchAlias();
-    final String docType = esDao.getConfig().getElasticsearchDocType();
-
-    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON).upsert(
-        new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
+    return prepareUpsertRequest(esp, p, p.getRelations());
   }
 
   @Override

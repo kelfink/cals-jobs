@@ -478,8 +478,9 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     }
 
     try (final LaunchCommand launchCommand = buildCommandCenter(standardFlightPlan);
-        final T job = HyperCube.newRocket(klass, args)) {
-      job.run();
+        final T rocket = HyperCube.newRocket(klass, args)) {
+      rocket.setFlightPlan(standardFlightPlan);
+      rocket.run();
       launchCommand.fatalError = false; // We made it. Almost.
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
