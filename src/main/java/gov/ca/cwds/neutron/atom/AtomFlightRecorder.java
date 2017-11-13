@@ -5,11 +5,12 @@ import java.util.Map;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
+import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightSummary;
 
-public interface AtomFlightRecorder {
+public interface AtomFlightRecorder extends ApiMarker {
 
   Map<Class<?>, CircularFifoQueue<FlightLog>> getFlightLogHistory();
 
