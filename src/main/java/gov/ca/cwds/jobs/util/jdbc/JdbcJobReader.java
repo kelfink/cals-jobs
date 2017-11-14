@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobReader;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -47,7 +48,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
    * {@code connection.prepareStatement(query)}.
    */
   @Override
-  public void init() {
+  public void init() throws NeutronException {
     try {
       final Connection con = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
           .getService(ConnectionProvider.class).getConnection();
@@ -62,7 +63,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
       resultSet = statement.executeQuery();
     } catch (SQLException e) {
       destroy();
-      throw JobLogs.runtime(LOGGER, e, "JDBC READ INIT ERROR! {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "JDBC READ INIT ERROR! {}", e.getMessage());
     }
   }
 
@@ -76,7 +77,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
   }
 
   @Override
-  public void destroy() {
+  public void destroy() throws NeutronException {
     try {
       if (statement != null) {
         statement.close();

@@ -31,6 +31,11 @@ public interface AtomLaunchPad extends ApiMarker {
    */
   String status();
 
+  /**
+   * Show history of last N flights.
+   * 
+   * @return flight history
+   */
   String history();
 
   /**
@@ -41,7 +46,7 @@ public interface AtomLaunchPad extends ApiMarker {
   String logs();
 
   /**
-   * Aborts a flying rocket.
+   * Abort a rocket <strong>in flight</strong>.
    * 
    * @throws NeutronException general error
    */

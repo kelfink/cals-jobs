@@ -41,12 +41,11 @@ public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAc
   private String rocket;
 
   private VoxLaunchPadMBean mbean;
-
   private JMXConnector jmxConnector;
   private MBeanServerConnection mbeanServerConnection;
 
   public VoxJMXCommandClient() {
-    // default
+    // default ctor
   }
 
   public VoxJMXCommandClient(final String host, final String port) {
@@ -72,7 +71,7 @@ public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAc
     }
   }
 
-  public VoxLaunchPadMBean proxy(String rocketName) throws NeutronException {
+  public final VoxLaunchPadMBean proxy(String rocketName) throws NeutronException {
     try {
       final ObjectName mbeanName = new ObjectName("Neutron:rocket=" + rocketName);
       return MBeanServerInvocationHandler.newProxyInstance(mbeanServerConnection, mbeanName,
@@ -82,7 +81,7 @@ public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAc
     }
   }
 
-  public void launch(final VoxCommandInstruction cmd) throws NeutronException {
+  public final void launch(final VoxCommandInstruction cmd) throws NeutronException {
     try {
       LOGGER.info("CONNECT JMX...");
       this.setHost(cmd.getHost());

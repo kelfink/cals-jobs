@@ -3,14 +3,21 @@ package gov.ca.cwds.neutron.vox.jmx;
 import java.util.HashMap;
 import java.util.Map;
 
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandFlightHistory;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandLastRunStatus;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandShutdown;
 
 public enum VoxCommandType {
 
-  LAST_RUN_STATUS(VoxCommandLastRunStatus.class, "status"),
+  STATUS(VoxCommandLastRunStatus.class, "status"),
 
-  SHUTDOWN_COMMAND_CENTER(VoxCommandShutdown.class, "shutdown");
+  SHUTDOWN(VoxCommandShutdown.class, "shutdown"),
+
+  HISTORY(VoxCommandFlightHistory.class, "history"),
+
+  DISABLE(VoxCommandLastRunStatus.class, "disable")
+
+  ;
 
   private final Class<? extends VoxCommandAction> klass;
   private final String key;

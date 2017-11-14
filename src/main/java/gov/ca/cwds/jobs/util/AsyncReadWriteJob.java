@@ -115,7 +115,7 @@ public class AsyncReadWriteJob<I extends Serializable, O extends Serializable>
   }
 
   @Override
-  public void destroy() {
+  public void destroy() throws NeutronException {
     reader.destroy();
     writer.destroy();
   }

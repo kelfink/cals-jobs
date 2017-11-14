@@ -2,10 +2,9 @@ package gov.ca.cwds.neutron.vox.jmx.cmd;
 
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.vox.jmx.VoxCommandAction;
 import gov.ca.cwds.neutron.vox.jmx.VoxJMXCommandClient;
 
-public class VoxCommandLastRunStatus extends VoxJMXCommandClient implements VoxCommandAction {
+public class VoxCommandLastRunStatus extends VoxJMXCommandClient {
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(VoxCommandLastRunStatus.class);
 

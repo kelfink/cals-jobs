@@ -7,7 +7,7 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.vox.VoxCommandInstruction;
 
-public class VoxCommandFactory implements ApiMarker {
+public final class VoxCommandFactory implements ApiMarker {
 
   private static final long serialVersionUID = 1L;
   private static final ConditionalLogger LOGGER = new JetPackLogger(VoxCommandFactory.class);

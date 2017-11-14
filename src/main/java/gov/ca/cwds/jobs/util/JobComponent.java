@@ -16,7 +16,9 @@ public interface JobComponent {
 
   /**
    * Close and de-allocate exclusive resources. Default is no-op.
+   * 
+   * @throws NeutronException checked exception
    */
-  default void destroy() {}
+  default void destroy() throws NeutronException {}
 
 }
