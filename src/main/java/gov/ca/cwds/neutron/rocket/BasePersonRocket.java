@@ -94,8 +94,8 @@ import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
  * @see FlightPlan
  */
 public abstract class BasePersonRocket<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends LastRunRocket implements AutoCloseable, AtomPersonDocPrep<T>,
-    AtomInitialLoad<T, M>, AtomTransform<T, M>, AtomSecurity, AtomValidateDocument {
+    extends LastRunRocket implements AutoCloseable, AtomPersonDocPrep<T>, AtomInitialLoad<T, M>,
+    AtomTransform<T, M>, AtomSecurity, AtomValidateDocument {
 
   private static final long serialVersionUID = 1L;
 
@@ -600,12 +600,18 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
 
       // If index name is provided, use it, else take alias from ES config.
       final String indexNameOverride = getFlightPlan().getIndexName();
-      final String effectiveIndexName = StringUtils.isBlank(indexNameOverride)
-          ? esDao.getConfig().getElasticsearchAlias() : indexNameOverride;
+      final String effectiveIndexName =
+          StringUtils.isBlank(indexNameOverride) ? esDao.getConfig().getElasticsearchAlias()
+              : indexNameOverride;
       getFlightPlan().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
 
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
       LOGGER.debug("Last successsful run time: {}", lastRun); // NOSONAR
+
+      // Drop index first if requested
+      if (getFlightPlan().isDropIndex()) {
+        esDao.deleteIndex(effectiveIndexName);
+      }
 
       // If the index is missing, create it.
       LOGGER.debug("Create index if missing, effectiveIndexName: {}", effectiveIndexName);
@@ -979,6 +985,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     this.flightLog = track;
   }
 
+  @Override
   public ObjectMapper getMapper() {
     return mapper;
   }
