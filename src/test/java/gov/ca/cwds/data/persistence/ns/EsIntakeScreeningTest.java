@@ -17,18 +17,43 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 import gov.ca.cwds.jobs.Goddard;
 
 public class EsIntakeScreeningTest extends Goddard {
-
   public static final String DEFAULT_SCREENING_ID = "scr1234567";
+
+  private static final class TestEsIntakeScreening extends EsIntakeScreening {
+    @Override
+    public void addParticipantRoles(IntakeScreening s, IntakeParticipant otherPartc) {
+      super.addParticipantRoles(s, otherPartc);
+    }
+
+    @Override
+    public IntakeParticipant handleOtherParticipant(IntakeScreening s) {
+      return super.handleOtherParticipant(s);
+    }
+
+    @Override
+    public IntakeAllegation makeAllegation(IntakeScreening s) {
+      return super.makeAllegation(s);
+    }
+
+    @Override
+    public void handleAllegations(String thisPartcId, IntakeScreening s,
+        IntakeParticipant otherPartc) {
+      super.handleAllegations(thisPartcId, s, otherPartc);
+    }
+
+  }
 
   EsIntakeScreening target;
 
   @Override
   @Before
-  public void setup() {
-    target = new EsIntakeScreening();
+  public void setup() throws Exception {
+    super.setup();
+    target = new TestEsIntakeScreening();
     target.setThisLegacyId(Goddard.DEFAULT_CLIENT_ID);
     target.setThisParticipantId("1");
   }
@@ -52,17 +77,14 @@ public class EsIntakeScreeningTest extends Goddard {
 
   @Test
   public void fillParticipant_Args__IntakeParticipant__boolean() throws Exception {
-    IntakeParticipant p = new IntakeParticipant();
+    final IntakeParticipant p = new IntakeParticipant();
     p.setId("1");
     p.setLegacyId(Goddard.DEFAULT_CLIENT_ID);
-
     boolean isOther = false;
-    IntakeParticipant actual = target.fillParticipant(p, isOther);
-
-    IntakeParticipant expected = new IntakeParticipant();
+    final IntakeParticipant actual = target.fillParticipant(p, isOther);
+    final IntakeParticipant expected = new IntakeParticipant();
     expected.setId("1");
     expected.setLegacyId(Goddard.DEFAULT_CLIENT_ID);
-
     // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, notNullValue());
   }
@@ -77,7 +99,6 @@ public class EsIntakeScreeningTest extends Goddard {
   @Test
   public void fillScreening_Args__IntakeScreening() throws Exception {
     IntakeScreening s = new IntakeScreening();
-
     target.setStartedAt(new Date());
     target.setEndedAt(new Date());
     IntakeScreening actual = target.fillScreening(s);
@@ -94,18 +115,15 @@ public class EsIntakeScreeningTest extends Goddard {
   @Test
   public void normalize_Args__Map() throws Exception {
     Map<Object, IntakeParticipant> map = new HashMap<Object, IntakeParticipant>();
-
     IntakeParticipant p = new IntakeParticipant();
     p.setId(DEFAULT_CLIENT_ID);
     p.setLegacyId(DEFAULT_CLIENT_ID);
     map.put(DEFAULT_SCREENING_ID, p);
-
     IntakeScreening s = new IntakeScreening();
     s.setId(DEFAULT_SCREENING_ID);
     s.setEndedAt(new Date());
     s.setStartedAt(new Date());
     p.addScreening(s);
-
     IntakeAllegation alg = new IntakeAllegation();
     alg.setId(DEFAULT_CLIENT_ID);
     List<String> types = new ArrayList<>();
@@ -114,27 +132,21 @@ public class EsIntakeScreeningTest extends Goddard {
     types.add("greed");
     alg.setAllegationTypes(types);
     s.addAllegation(alg);
-
     target.setOtherParticipantId("xyz1234567");
     target.setAllegationId(DEFAULT_SCREENING_ID);
-
     target.setAddressId("2");
     target.setAddressType("Home");
     target.setZip("12345");
     target.setCity("Nowhere");
     target.setStreetAddress("1523 Main Street");
-
     target.setPhoneNumberId("3");
     target.setPhoneNumber("9164408791");
     target.setPhoneType("Home");
-
     target.setFirstName("Joseph");
     target.setLastName("Muller");
-
     target.setFlgPerpetrator(true);
     target.setFlgVictim(true);
     target.setFlgReporter(true);
-
     IntakeParticipant actual = target.normalize(map);
     assertThat(actual, notNullValue());
   }
@@ -688,8 +700,50 @@ public class EsIntakeScreeningTest extends Goddard {
 
   @Test
   public void setPhoneType_Args__String() throws Exception {
-    String phoneType = null;
+    final String phoneType = PhoneType.Cell.name();
     target.setPhoneType(phoneType);
+  }
+
+  @Test
+  public void addParticipantRoles_Args__IntakeScreening__IntakeParticipant() throws Exception {
+    final IntakeScreening s = new IntakeScreening();
+    s.setId(DEFAULT_SCREENING_ID);
+
+    IntakeParticipant otherPartc = new IntakeParticipant();
+    otherPartc.setId(DEFAULT_CLIENT_ID);
+
+    target.addParticipantRoles(s, otherPartc);
+  }
+
+  @Test
+  public void handleOtherParticipant_Args__IntakeScreening() throws Exception {
+    final IntakeScreening s = new IntakeScreening();
+    s.setId(DEFAULT_SCREENING_ID);
+
+    IntakeParticipant actual = target.handleOtherParticipant(s);
+    IntakeParticipant expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void makeAllegation_Args__IntakeScreening() throws Exception {
+    final IntakeScreening s = new IntakeScreening();
+    s.setId(DEFAULT_SCREENING_ID);
+
+    IntakeAllegation actual = target.makeAllegation(s);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void handleAllegations_Args__String__IntakeScreening__IntakeParticipant()
+      throws Exception {
+    String thisPartcId = DEFAULT_CLIENT_ID;
+    final IntakeScreening s = new IntakeScreening();
+
+    final IntakeParticipant otherPartc = new IntakeParticipant();
+    otherPartc.setId(DEFAULT_CLIENT_ID);
+
+    target.handleAllegations(thisPartcId, s, otherPartc);
   }
 
 }

@@ -299,7 +299,7 @@ public class EsIntakeScreening extends CommonScreening
     return fillScreening(null);
   }
 
-  private void addParticipantRoles(IntakeScreening s, IntakeParticipant otherPartc) {
+  protected void addParticipantRoles(IntakeScreening s, IntakeParticipant otherPartc) {
     if (!ArrayUtils.isEmpty(roles)) {
       for (String role : roles) {
         s.addParticipantRole(otherPartc.getId(), role);
@@ -307,7 +307,7 @@ public class EsIntakeScreening extends CommonScreening
     }
   }
 
-  private IntakeParticipant handleOtherParticipant(IntakeScreening s) {
+  protected IntakeParticipant handleOtherParticipant(IntakeScreening s) {
     IntakeParticipant otherPartc = null;
     if (isNotBlank(otherParticipantId)) {
       if (s.getParticipants().containsKey(otherParticipantId)) {
@@ -322,7 +322,7 @@ public class EsIntakeScreening extends CommonScreening
     return otherPartc;
   }
 
-  private IntakeAllegation makeAllegation(IntakeScreening s) {
+  protected IntakeAllegation makeAllegation(IntakeScreening s) {
     IntakeAllegation alg;
     if (s.getAllegations().containsKey(allegationId)) {
       alg = s.getAllegations().get(allegationId);
@@ -335,7 +335,7 @@ public class EsIntakeScreening extends CommonScreening
     return alg;
   }
 
-  private void handleAllegations(String thisPartcId, IntakeScreening s,
+  protected void handleAllegations(String thisPartcId, IntakeScreening s,
       IntakeParticipant otherPartc) {
     final IntakeAllegation alg = makeAllegation(s);
 
