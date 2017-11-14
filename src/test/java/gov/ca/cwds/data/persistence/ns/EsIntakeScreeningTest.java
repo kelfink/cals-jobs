@@ -54,8 +54,9 @@ public class EsIntakeScreeningTest extends Goddard {
   public void setup() throws Exception {
     super.setup();
     target = new TestEsIntakeScreening();
-    target.setThisLegacyId(Goddard.DEFAULT_CLIENT_ID);
+    target.setThisLegacyId(DEFAULT_CLIENT_ID);
     target.setThisParticipantId("1");
+    target.setScreeningId(DEFAULT_SCREENING_ID);
   }
 
   @Test
@@ -108,8 +109,7 @@ public class EsIntakeScreeningTest extends Goddard {
   @Test
   public void fillScreening_Args__() throws Exception {
     IntakeScreening actual = target.fillScreening();
-    IntakeScreening expected = new IntakeScreening();
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -227,7 +227,7 @@ public class EsIntakeScreeningTest extends Goddard {
   @Test
   public void getScreeningId_Args__() throws Exception {
     final String actual = target.getScreeningId();
-    String expected = null;
+    String expected = DEFAULT_SCREENING_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -711,6 +711,7 @@ public class EsIntakeScreeningTest extends Goddard {
 
     IntakeParticipant otherPartc = new IntakeParticipant();
     otherPartc.setId(DEFAULT_CLIENT_ID);
+    otherPartc.addScreening(s);
 
     target.addParticipantRoles(s, otherPartc);
   }
@@ -719,6 +720,16 @@ public class EsIntakeScreeningTest extends Goddard {
   public void handleOtherParticipant_Args__IntakeScreening() throws Exception {
     final IntakeScreening s = new IntakeScreening();
     s.setId(DEFAULT_SCREENING_ID);
+
+    IntakeParticipant actual = target.handleOtherParticipant(s);
+    IntakeParticipant expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void handleOtherParticipant_Args__IntakeScreening__2() throws Exception {
+    final IntakeScreening s = new IntakeScreening();
+    s.setId("7xA1234567");
 
     IntakeParticipant actual = target.handleOtherParticipant(s);
     IntakeParticipant expected = null;
@@ -742,6 +753,7 @@ public class EsIntakeScreeningTest extends Goddard {
 
     final IntakeParticipant otherPartc = new IntakeParticipant();
     otherPartc.setId(DEFAULT_CLIENT_ID);
+    otherPartc.addScreening(s);
 
     target.handleAllegations(thisPartcId, s, otherPartc);
   }
