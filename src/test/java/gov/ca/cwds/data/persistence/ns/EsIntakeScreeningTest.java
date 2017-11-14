@@ -713,6 +713,8 @@ public class EsIntakeScreeningTest extends Goddard {
     otherPartc.setId(DEFAULT_CLIENT_ID);
     otherPartc.addScreening(s);
 
+    final String[] roles = {"county supervisor", "social worker"};
+    target.setRoles(roles);
     target.addParticipantRoles(s, otherPartc);
   }
 
