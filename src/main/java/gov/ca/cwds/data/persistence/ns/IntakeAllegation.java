@@ -20,9 +20,6 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
  */
 public class IntakeAllegation implements PersistentObject {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private String id;
@@ -30,12 +27,12 @@ public class IntakeAllegation implements PersistentObject {
   private List<String> allegationTypes = new ArrayList<>();
 
   /**
-   * Not yet available from Intake PG.
+   * <strong>FUTURE:</strong> Not yet available from Intake PostgreSQL.
    */
   private String allegationDescription;
 
   /**
-   * Not yet available from Intake PG.
+   * <strong>FUTURE:</strong> Not yet available from Intake PostgreSQL.
    */
   private String dispositionDescription;
 

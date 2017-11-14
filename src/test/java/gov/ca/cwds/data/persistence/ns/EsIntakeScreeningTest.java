@@ -743,6 +743,19 @@ public class EsIntakeScreeningTest extends Goddard {
     final IntakeScreening s = new IntakeScreening();
     s.setId(DEFAULT_SCREENING_ID);
 
+    IntakeAllegation alg = new IntakeAllegation();
+    alg.setId("cyz1234567");
+    s.addAllegation(alg);
+
+    IntakeAllegation actual = target.makeAllegation(s);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void makeAllegation_Args__IntakeScreening__2() throws Exception {
+    final IntakeScreening s = new IntakeScreening();
+    s.setId(DEFAULT_SCREENING_ID);
+
     IntakeAllegation actual = target.makeAllegation(s);
     assertThat(actual, is(notNullValue()));
   }
