@@ -21,11 +21,11 @@ import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 /**
  * <p>
  * Expose to JMX:
+ * </p>
  * <ul>
  * <li>Command Center methods</li>
  * <li>Guice bean attributes</li>
  * </ul>
- * </p>
  */
 @Singleton
 public class XRaySpex implements AtomCommandCenterConsole {
