@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.rocket.syscode;
+package gov.ca.cwds.neutron.rocket.syscode;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.jobs.Goddard;
+import gov.ca.cwds.neutron.rocket.syscode.SystemCodesLoaderModule;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 public class SystemCodesLoaderModuleTest extends Goddard {

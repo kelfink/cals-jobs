@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.rocket.referral;
+package gov.ca.cwds.neutron.rocket.referral;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -17,6 +17,7 @@ import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
+import gov.ca.cwds.neutron.rocket.referral.ReferralJobRanges;
 
 public class ReferralJobRangesTest extends Goddard {
 

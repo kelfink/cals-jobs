@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.rocket.syscode;
+package gov.ca.cwds.neutron.rocket.syscode;
 
 import org.hibernate.SessionFactory;
 

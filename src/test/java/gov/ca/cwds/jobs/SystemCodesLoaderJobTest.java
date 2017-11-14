@@ -15,9 +15,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.rocket.syscode.NsSystemCode;
-import gov.ca.cwds.jobs.rocket.syscode.NsSystemCodeDao;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
+import gov.ca.cwds.neutron.rocket.syscode.NsSystemCode;
+import gov.ca.cwds.neutron.rocket.syscode.NsSystemCodeDao;
 import gov.ca.cwds.rest.api.domain.cms.SystemCode;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.api.domain.cms.SystemMeta;
