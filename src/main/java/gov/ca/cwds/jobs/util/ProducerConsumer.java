@@ -43,7 +43,6 @@ public abstract class ProducerConsumer<T> implements Serializable {
     } finally {
       producer.interrupt();
     }
-
   }
 
   private void producer() {

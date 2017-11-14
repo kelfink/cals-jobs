@@ -68,11 +68,11 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
   }
 
   @Override
-  public T read() {
+  public T read() throws NeutronException {
     try {
       return resultSet.next() ? rowMapper.mapRow(resultSet) : null;
     } catch (SQLException e) {
-      throw JobLogs.runtime(LOGGER, e, "JDBC READ ERROR! {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "JDBC READ ERROR! {}", e.getMessage());
     }
   }
 
@@ -84,7 +84,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
         statement = null;
       }
     } catch (SQLException e) {
-      throw JobLogs.runtime(LOGGER, e, "JDBC DESTROY ERROR! {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "JDBC DESTROY ERROR! {}", e.getMessage());
     } finally {
       sessionFactory.close();
     }
