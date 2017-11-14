@@ -26,12 +26,23 @@ import gov.ca.cwds.jobs.SafetyAlertIndexerJob;
 import gov.ca.cwds.jobs.ServiceProviderIndexerJob;
 import gov.ca.cwds.jobs.SubstituteCareProviderIndexJob;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
+import gov.ca.cwds.neutron.rocket.IndexResetRocket;
 
 public enum StandardFlightSchedule {
 
-  //
-  // Person document roots.
-  //
+  /**
+   * Client. Essential document root.
+   */
+  RESET_INDEX(IndexResetRocket.class, // klazz
+      "reset_index", // rocketName
+      1, // initialLoadOrder
+      2, // startDelaySeconds
+      20, // periodSeconds
+      10000, // lastRunPriority
+      null, // nestedElement
+      true, // runLastChange
+      true // runInitialLoad
+  ),
 
   /**
    * Client. Essential document root.
