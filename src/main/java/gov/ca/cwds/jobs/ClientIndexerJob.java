@@ -112,6 +112,17 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
     return " ORDER BY x.clt_identifier ";
   }
 
+  /**
+   * Send all recs for same client id to the index queue.
+   * 
+   * @param grpRecs recs for same client id
+   */
+  protected void normalizeAndQueueIndex(final List<EsClientAddress> grpRecs) {
+    grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
+        .collect(Collectors.groupingBy(EsClientAddress::getNormalizationGroupKey)).entrySet()
+        .stream().map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
+  }
+
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
@@ -125,17 +136,6 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
-  }
-
-  /**
-   * Send all recs for same client id to the index queue.
-   * 
-   * @param grpRecs recs for same client id
-   */
-  protected void normalizeAndQueueIndex(final List<EsClientAddress> grpRecs) {
-    grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
-        .collect(Collectors.groupingBy(EsClientAddress::getNormalizationGroupKey)).entrySet()
-        .stream().map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
   }
 
   /**
