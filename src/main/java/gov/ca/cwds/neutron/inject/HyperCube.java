@@ -282,11 +282,16 @@ public class HyperCube extends NeutronGuiceModule {
     bind(ObjectMapper.class).toInstance(ObjectMapperUtils.createObjectMapper());
     bind(ElasticsearchDao.class).asEagerSingleton();
 
+    // Command Center:
     bind(AtomFlightRecorder.class).to(FlightRecorder.class).asEagerSingleton();
     bind(AtomFlightPlanManager.class).to(FlightPlanRegistry.class).asEagerSingleton();
     bind(AtomRocketFactory.class).to(RocketFactory.class).asEagerSingleton();
+    bind(AtomCommandControlManager.class).to(XRaySpex.class);
   }
 
+  /**
+   * Initialize all Data Access Objects (DAO).
+   */
   protected void bindDaos() {
     LOGGER.info("make DAOs");
 

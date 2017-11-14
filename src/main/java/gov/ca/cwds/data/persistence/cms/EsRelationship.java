@@ -28,7 +28,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.neutron.util.NeutronDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -369,19 +369,19 @@ public class EsRelationship
   }
 
   public Date getThisLegacyLastUpdated() {
-    return NeutronDateUtil.freshDate(thisLegacyLastUpdated);
+    return NeutronDateUtils.freshDate(thisLegacyLastUpdated);
   }
 
   public void setThisLegacyLastUpdated(Date thisLegacyLastUpdated) {
-    this.thisLegacyLastUpdated = NeutronDateUtil.freshDate(thisLegacyLastUpdated);
+    this.thisLegacyLastUpdated = NeutronDateUtils.freshDate(thisLegacyLastUpdated);
   }
 
   public Date getRelatedLegacyLastUpdated() {
-    return NeutronDateUtil.freshDate(relatedLegacyLastUpdated);
+    return NeutronDateUtils.freshDate(relatedLegacyLastUpdated);
   }
 
   public void setRelatedLegacyLastUpdated(Date relatedLegacyLastUpdated) {
-    this.relatedLegacyLastUpdated = NeutronDateUtil.freshDate(relatedLegacyLastUpdated);
+    this.relatedLegacyLastUpdated = NeutronDateUtils.freshDate(relatedLegacyLastUpdated);
   }
 
   public CmsReplicationOperation getThisReplicationOperation() {
@@ -393,11 +393,11 @@ public class EsRelationship
   }
 
   public Date getThisReplicationDate() {
-    return NeutronDateUtil.freshDate(thisReplicationDate);
+    return NeutronDateUtils.freshDate(thisReplicationDate);
   }
 
   public void setThisReplicationDate(Date thisReplicationDate) {
-    this.thisReplicationDate = NeutronDateUtil.freshDate(thisReplicationDate);
+    this.thisReplicationDate = NeutronDateUtils.freshDate(thisReplicationDate);
   }
 
   public CmsReplicationOperation getRelatedReplicationOperation() {
@@ -409,11 +409,11 @@ public class EsRelationship
   }
 
   public Date getRelatedReplicationDate() {
-    return NeutronDateUtil.freshDate(relatedReplicationDate);
+    return NeutronDateUtils.freshDate(relatedReplicationDate);
   }
 
   public void setRelatedReplicationDate(Date relatedReplicationDate) {
-    this.relatedReplicationDate = NeutronDateUtil.freshDate(relatedReplicationDate);
+    this.relatedReplicationDate = NeutronDateUtils.freshDate(relatedReplicationDate);
   }
 
   @Override

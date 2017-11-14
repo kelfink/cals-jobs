@@ -2,9 +2,9 @@ package gov.ca.cwds.neutron.util;
 
 import java.io.File;
 
-public final class NeutronStringUtil {
+public final class NeutronStringUtils {
 
-  private NeutronStringUtil() {
+  private NeutronStringUtils() {
     // static methods only
   }
 

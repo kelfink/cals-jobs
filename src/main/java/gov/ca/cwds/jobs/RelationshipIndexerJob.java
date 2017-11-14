@@ -251,7 +251,7 @@ public class RelationshipIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.launchSingle(RelationshipIndexerJob.class, args);
+    LaunchCommand.launchOneWayTrip(RelationshipIndexerJob.class, args);
   }
 
 }

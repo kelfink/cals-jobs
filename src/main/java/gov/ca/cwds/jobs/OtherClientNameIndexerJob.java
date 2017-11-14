@@ -194,7 +194,7 @@ public class OtherClientNameIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.launchSingle(OtherClientNameIndexerJob.class, args);
+    LaunchCommand.launchOneWayTrip(OtherClientNameIndexerJob.class, args);
   }
 
 }

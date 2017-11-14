@@ -9,7 +9,7 @@ import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.neutron.util.NeutronDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtils;
 
 @Embeddable
 public class EmbeddableStaffWorker implements ApiMarker {
@@ -56,11 +56,11 @@ public class EmbeddableStaffWorker implements ApiMarker {
   }
 
   public Date getWorkerLastUpdated() {
-    return NeutronDateUtil.freshDate(workerLastUpdated);
+    return NeutronDateUtils.freshDate(workerLastUpdated);
   }
 
   public void setWorkerLastUpdated(Date workerLastUpdated) {
-    this.workerLastUpdated = NeutronDateUtil.freshDate(workerLastUpdated);
+    this.workerLastUpdated = NeutronDateUtils.freshDate(workerLastUpdated);
   }
 
 }

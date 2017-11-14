@@ -29,8 +29,8 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
-import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
+import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.inject.HyperCube;
@@ -41,7 +41,7 @@ import gov.ca.cwds.neutron.launch.NeutronRocket;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
-import gov.ca.cwds.neutron.util.NeutronStringUtil;
+import gov.ca.cwds.neutron.util.NeutronStringUtils;
 
 /**
  * Run stand-alone rockets or serve up rockets with Quartz. The master of ceremonies, AKA, Jimmy
@@ -104,7 +104,9 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   }
 
   /**
+   * <p>
    * <strong>MOVE</strong> this responsibility to another unit.
+   * </p>
    * 
    * @param initialMode obvious
    * @param hoursInPast number of hours in past
@@ -145,7 +147,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       return JobLogs.stackToString(e);
     }
 
-    return "Timestamps reset for initial load";
+    return "Reset timestamp files for initial load!";
   }
 
   @Managed(description = "Reset for last change.")
@@ -154,19 +156,11 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     resetTimestamps(false, hoursInPast);
   }
 
-  @Override
-  @Managed(description = "Stop the scheduler")
-  public void stopScheduler(boolean waitForJobsToComplete) throws NeutronException {
-    this.launchScheduler.stopScheduler(waitForJobsToComplete);
-  }
-
-  @Override
-  @Managed(description = "Start the scheduler")
-  public void startScheduler() throws NeutronException {
-    this.launchScheduler.startScheduler();
-  }
-
   /**
+   * <p>
+   * <strong>MOVE</strong> this responsibility to another unit.
+   * </p>
+   * 
    * Find the job's time file under the base directory.
    * 
    * @param flightPlan base options
@@ -196,6 +190,18 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       FileUtils.writeStringToFile(f,
           fmt.format(overrideLastRunTime ? flightPlan.getOverrideLastRunTime() : now));
     }
+  }
+
+  @Override
+  @Managed(description = "Stop the scheduler")
+  public void stopScheduler(boolean waitForJobsToComplete) throws NeutronException {
+    this.launchScheduler.stopScheduler(waitForJobsToComplete);
+  }
+
+  @Override
+  @Managed(description = "Start the scheduler")
+  public void startScheduler() throws NeutronException {
+    this.launchScheduler.startScheduler();
   }
 
   protected void configureInitialMode(final Date now) {
@@ -418,9 +424,10 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * 
    * @return launch command instance with dependencies injected
    */
-  protected static synchronized LaunchCommand startSchedulerMode() {
+  protected static synchronized LaunchCommand startSchedulerMode() throws NeutronException {
     LOGGER.info("STARTING LAUNCH COMMAND ...");
 
+    // HACK: inject a mock scheduler instead.
     if (standardFlightPlan.isSimulateLaunch()) {
       return instance; // Test "main" methods
     }
@@ -438,9 +445,9 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       instance.fatalError = false; // Good to go
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
-      // Close orphaned resources forcibly, if necessary, by system exit.
+      // Forcibly close orphaned resources, if necessary, by system exit.
       instance.fatalError = true;
-      throw JobLogs.runtime(LOGGER, e, "LAUNCH COMMAND FAILED TO START!: {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "COMMAND CENTER CRITICAL ERROR!: {}", e.getMessage());
     }
 
     LOGGER.info("LAUNCH COMMAND STARTED!");
@@ -460,11 +467,11 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * @param args command line arguments
    * @param <T> Person persistence type
    */
-  public static <T extends BasePersonRocket<?, ?>> void launchSingle(final Class<T> klass,
+  public static <T extends BasePersonRocket<?, ?>> void launchOneWayTrip(final Class<T> klass,
       String... args) {
     standardFlightPlan = parseCommandLine(args);
     System.setProperty("LAUNCH_DIR",
-        NeutronStringUtil.filePath(standardFlightPlan.getLastRunLoc()));
+        NeutronStringUtils.filePath(standardFlightPlan.getLastRunLoc()));
 
     LaunchCommand.settings.setSchedulerMode(false);
     LaunchCommand.settings.setInitialMode(!standardFlightPlan.isLastRunMode());
@@ -520,14 +527,15 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   }
 
   /**
-   * OPTION: configure individual rockets, like Rundeck.
+   * Customize flight configurations per rocket type.
    * <p>
-   * Perhaps load a configuration file with settings per rockets.
+   * OPTION: load an optional configuration file per rocket.
    * </p>
    * 
    * @param args command line
+   * @throws Exception unhandled error
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     standardFlightPlan = parseCommandLine(args);
     LaunchCommand.settings.setBaseDirectory(standardFlightPlan.getBaseDirectory());
     System.setProperty("LAUNCH_DIR", LaunchCommand.settings.getBaseDirectory());

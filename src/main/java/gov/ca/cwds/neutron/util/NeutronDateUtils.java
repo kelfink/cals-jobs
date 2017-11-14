@@ -2,9 +2,9 @@ package gov.ca.cwds.neutron.util;
 
 import java.util.Date;
 
-public class NeutronDateUtil {
+public class NeutronDateUtils {
 
-  private NeutronDateUtil() {
+  private NeutronDateUtils() {
     // no-op
   }
 

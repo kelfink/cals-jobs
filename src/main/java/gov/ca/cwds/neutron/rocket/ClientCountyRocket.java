@@ -191,7 +191,7 @@ public class ClientCountyRocket extends ClientIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.launchSingle(ClientCountyRocket.class, args);
+    LaunchCommand.launchOneWayTrip(ClientCountyRocket.class, args);
   }
 
 }

@@ -18,7 +18,7 @@ import com.google.common.collect.ImmutableList;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.atom.AtomJobControl;
 import gov.ca.cwds.neutron.enums.FlightStatus;
-import gov.ca.cwds.neutron.util.NeutronDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtils;
 
 /**
  * Track rocket flight progress and record counts.
@@ -402,11 +402,11 @@ public class FlightLog implements ApiMarker, AtomJobControl {
   }
 
   public Date getLastChangeSince() {
-    return NeutronDateUtil.freshDate(lastChangeSince);
+    return NeutronDateUtils.freshDate(lastChangeSince);
   }
 
   public void setLastChangeSince(Date lastChangeSince) {
-    this.lastChangeSince = NeutronDateUtil.freshDate(lastChangeSince);
+    this.lastChangeSince = NeutronDateUtils.freshDate(lastChangeSince);
   }
 
   public void addAffectedDocumentId(String docId) {

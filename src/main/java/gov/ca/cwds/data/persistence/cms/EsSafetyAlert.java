@@ -18,7 +18,7 @@ import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.neutron.util.NeutronDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -191,7 +191,7 @@ public class EsSafetyAlert implements PersistentObject, ApiGroupNormalizer<Repli
    * @return last change date
    */
   public Date getLastChanged() {
-    return NeutronDateUtil.freshDate(lastChanged);
+    return NeutronDateUtils.freshDate(lastChanged);
   }
 
   /**
@@ -201,7 +201,7 @@ public class EsSafetyAlert implements PersistentObject, ApiGroupNormalizer<Repli
    * @param lastChanged last change date
    */
   public void setLastChanged(Date lastChanged) {
-    this.lastChanged = NeutronDateUtil.freshDate(lastChanged);
+    this.lastChanged = NeutronDateUtils.freshDate(lastChanged);
   }
 
   public String getClientId() {
@@ -229,11 +229,11 @@ public class EsSafetyAlert implements PersistentObject, ApiGroupNormalizer<Repli
   }
 
   public Date getActivationDate() {
-    return NeutronDateUtil.freshDate(activationDate);
+    return NeutronDateUtils.freshDate(activationDate);
   }
 
   public void setActivationDate(Date activationDate) {
-    this.activationDate = NeutronDateUtil.freshDate(activationDate);
+    this.activationDate = NeutronDateUtils.freshDate(activationDate);
   }
 
   public Integer getActivationCountyCode() {
@@ -253,11 +253,11 @@ public class EsSafetyAlert implements PersistentObject, ApiGroupNormalizer<Repli
   }
 
   public Date getDeactivationDate() {
-    return NeutronDateUtil.freshDate(deactivationDate);
+    return NeutronDateUtils.freshDate(deactivationDate);
   }
 
   public void setDeactivationDate(Date deactivationDate) {
-    this.deactivationDate = NeutronDateUtil.freshDate(deactivationDate);
+    this.deactivationDate = NeutronDateUtils.freshDate(deactivationDate);
   }
 
   public Integer getDeactivationCountyCode() {
@@ -285,11 +285,11 @@ public class EsSafetyAlert implements PersistentObject, ApiGroupNormalizer<Repli
   }
 
   public Date getLastUpdatedTimestamp() {
-    return NeutronDateUtil.freshDate(lastUpdatedTimestamp);
+    return NeutronDateUtils.freshDate(lastUpdatedTimestamp);
   }
 
   public void setLastUpdatedTimestamp(Date lastUpdatedTimestamp) {
-    this.lastUpdatedTimestamp = NeutronDateUtil.freshDate(lastUpdatedTimestamp);
+    this.lastUpdatedTimestamp = NeutronDateUtils.freshDate(lastUpdatedTimestamp);
   }
 
   public String getLastUpdatedOperation() {
@@ -301,11 +301,11 @@ public class EsSafetyAlert implements PersistentObject, ApiGroupNormalizer<Repli
   }
 
   public Date getReplicationTimestamp() {
-    return NeutronDateUtil.freshDate(replicationTimestamp);
+    return NeutronDateUtils.freshDate(replicationTimestamp);
   }
 
   public void setReplicationTimestamp(Date replicationTimestamp) {
-    this.replicationTimestamp = NeutronDateUtil.freshDate(replicationTimestamp);
+    this.replicationTimestamp = NeutronDateUtils.freshDate(replicationTimestamp);
   }
 
   @Override

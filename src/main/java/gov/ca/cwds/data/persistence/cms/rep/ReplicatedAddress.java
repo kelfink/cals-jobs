@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.cms.BaseAddress;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
-import gov.ca.cwds.neutron.util.NeutronDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -62,7 +62,7 @@ public class ReplicatedAddress extends BaseAddress implements CmsReplicatedEntit
 
   @Override
   public Date getReplicationDate() {
-    return NeutronDateUtil.freshDate(replicatedEntity.getReplicationDate());
+    return NeutronDateUtils.freshDate(replicatedEntity.getReplicationDate());
   }
 
   @Override
@@ -72,7 +72,7 @@ public class ReplicatedAddress extends BaseAddress implements CmsReplicatedEntit
 
   @Override
   public void setReplicationDate(Date replicationDate) {
-    this.replicatedEntity.setReplicationDate(NeutronDateUtil.freshDate(replicationDate));
+    this.replicatedEntity.setReplicationDate(NeutronDateUtils.freshDate(replicationDate));
   }
 
   @Override

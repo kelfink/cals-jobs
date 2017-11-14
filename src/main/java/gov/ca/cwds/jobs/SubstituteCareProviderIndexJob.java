@@ -60,7 +60,7 @@ public class SubstituteCareProviderIndexJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.launchSingle(SubstituteCareProviderIndexJob.class, args);
+    LaunchCommand.launchOneWayTrip(SubstituteCareProviderIndexJob.class, args);
   }
 
 }

@@ -570,7 +570,7 @@ public class ReferralHistoryIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.launchSingle(ReferralHistoryIndexerJob.class, args);
+    LaunchCommand.launchOneWayTrip(ReferralHistoryIndexerJob.class, args);
   }
 
 }

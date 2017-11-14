@@ -31,7 +31,7 @@ import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
-import gov.ca.cwds.neutron.util.NeutronDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -85,7 +85,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
 
   @Override
   public Date getBirthDate() {
-    return NeutronDateUtil.freshDate(birthDate);
+    return NeutronDateUtils.freshDate(birthDate);
   }
 
   @Override
@@ -136,7 +136,7 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
   }
 
   public void setBirthDate(Date birthDate) {
-    this.birthDate = NeutronDateUtil.freshDate(birthDate);
+    this.birthDate = NeutronDateUtils.freshDate(birthDate);
   }
 
   public void setGender(String gender) {
@@ -259,11 +259,11 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
   }
 
   public Date getLegacyLastUpdated() {
-    return NeutronDateUtil.freshDate(legacyLastUpdated);
+    return NeutronDateUtils.freshDate(legacyLastUpdated);
   }
 
   public void setLegacyLastUpdated(Date legacyLastUpdated) {
-    this.legacyLastUpdated = NeutronDateUtil.freshDate(legacyLastUpdated);
+    this.legacyLastUpdated = NeutronDateUtils.freshDate(legacyLastUpdated);
   }
 
   public String getLegacyTable() {

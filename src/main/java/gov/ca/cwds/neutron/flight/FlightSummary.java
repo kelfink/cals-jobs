@@ -7,7 +7,7 @@ import java.util.Map;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
-import gov.ca.cwds.neutron.util.NeutronDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtils;
 
 public class FlightSummary implements ApiMarker {
 
@@ -168,19 +168,19 @@ public class FlightSummary implements ApiMarker {
   }
 
   public Date getFirstStart() {
-    return NeutronDateUtil.freshDate(firstStart);
+    return NeutronDateUtils.freshDate(firstStart);
   }
 
   public void setFirstStart(Date firstStart) {
-    this.firstStart = NeutronDateUtil.freshDate(firstStart);
+    this.firstStart = NeutronDateUtils.freshDate(firstStart);
   }
 
   public Date getLastEnd() {
-    return NeutronDateUtil.freshDate(lastEnd);
+    return NeutronDateUtils.freshDate(lastEnd);
   }
 
   public void setLastEnd(Date lastEnd) {
-    this.lastEnd = NeutronDateUtil.freshDate(lastEnd);
+    this.lastEnd = NeutronDateUtils.freshDate(lastEnd);
   }
 
   @Override

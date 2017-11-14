@@ -60,7 +60,7 @@ public class ServiceProviderIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.launchSingle(ServiceProviderIndexerJob.class, args);
+    LaunchCommand.launchOneWayTrip(ServiceProviderIndexerJob.class, args);
   }
 
 }

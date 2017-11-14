@@ -12,7 +12,7 @@ import javax.persistence.Embeddable;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.neutron.util.NeutronDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtils;
 
 @Embeddable
 public class EmbeddableAccessLimitation implements ApiMarker {
@@ -48,11 +48,11 @@ public class EmbeddableAccessLimitation implements ApiMarker {
   }
 
   public Date getLimitedAccessDate() {
-    return NeutronDateUtil.freshDate(limitedAccessDate);
+    return NeutronDateUtils.freshDate(limitedAccessDate);
   }
 
   public void setLimitedAccessDate(Date limitedAccessDate) {
-    this.limitedAccessDate = NeutronDateUtil.freshDate(limitedAccessDate);
+    this.limitedAccessDate = NeutronDateUtils.freshDate(limitedAccessDate);
   }
 
   public String getLimitedAccessDescription() {

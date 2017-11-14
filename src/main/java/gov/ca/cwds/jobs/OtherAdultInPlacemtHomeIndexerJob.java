@@ -58,7 +58,7 @@ public class OtherAdultInPlacemtHomeIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.launchSingle(OtherAdultInPlacemtHomeIndexerJob.class, args);
+    LaunchCommand.launchOneWayTrip(OtherAdultInPlacemtHomeIndexerJob.class, args);
   }
 
 }

@@ -119,7 +119,7 @@ public class SanityCheckRocket extends
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.launchSingle(SanityCheckRocket.class, args);
+    LaunchCommand.launchOneWayTrip(SanityCheckRocket.class, args);
   }
 
 }

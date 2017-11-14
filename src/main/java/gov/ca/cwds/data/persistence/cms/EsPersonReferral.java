@@ -35,7 +35,7 @@ import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.neutron.atom.AtomSecurity;
-import gov.ca.cwds.neutron.util.NeutronDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -517,7 +517,7 @@ public class EsPersonReferral
    * @return last change date
    */
   public Date getLastChange() {
-    return NeutronDateUtil.freshDate(lastChange);
+    return NeutronDateUtils.freshDate(lastChange);
   }
 
   /**
@@ -527,7 +527,7 @@ public class EsPersonReferral
    * @param lastChange last change date
    */
   public void setLastChange(Date lastChange) {
-    this.lastChange = NeutronDateUtil.freshDate(lastChange);
+    this.lastChange = NeutronDateUtils.freshDate(lastChange);
   }
 
   public String getClientId() {
@@ -547,19 +547,19 @@ public class EsPersonReferral
   }
 
   public Date getStartDate() {
-    return NeutronDateUtil.freshDate(startDate);
+    return NeutronDateUtils.freshDate(startDate);
   }
 
   public void setStartDate(Date startDate) {
-    this.startDate = NeutronDateUtil.freshDate(startDate);
+    this.startDate = NeutronDateUtils.freshDate(startDate);
   }
 
   public Date getEndDate() {
-    return NeutronDateUtil.freshDate(endDate);
+    return NeutronDateUtils.freshDate(endDate);
   }
 
   public void setEndDate(Date endDate) {
-    this.endDate = NeutronDateUtil.freshDate(endDate);
+    this.endDate = NeutronDateUtils.freshDate(endDate);
   }
 
   public Integer getReferralResponseType() {
@@ -699,51 +699,51 @@ public class EsPersonReferral
   }
 
   public Date getReferralLastUpdated() {
-    return NeutronDateUtil.freshDate(referralLastUpdated);
+    return NeutronDateUtils.freshDate(referralLastUpdated);
   }
 
   public void setReferralLastUpdated(Date referralLastUpdated) {
-    this.referralLastUpdated = NeutronDateUtil.freshDate(referralLastUpdated);
+    this.referralLastUpdated = NeutronDateUtils.freshDate(referralLastUpdated);
   }
 
   public Date getReporterLastUpdated() {
-    return NeutronDateUtil.freshDate(reporterLastUpdated);
+    return NeutronDateUtils.freshDate(reporterLastUpdated);
   }
 
   public void setReporterLastUpdated(Date reporterLastUpdated) {
-    this.reporterLastUpdated = NeutronDateUtil.freshDate(reporterLastUpdated);
+    this.reporterLastUpdated = NeutronDateUtils.freshDate(reporterLastUpdated);
   }
 
   public Date getWorkerLastUpdated() {
-    return NeutronDateUtil.freshDate(this.worker.getWorkerLastUpdated());
+    return NeutronDateUtils.freshDate(this.worker.getWorkerLastUpdated());
   }
 
   public void setWorkerLastUpdated(Date workerLastUpdated) {
-    this.worker.setWorkerLastUpdated(NeutronDateUtil.freshDate(workerLastUpdated));
+    this.worker.setWorkerLastUpdated(NeutronDateUtils.freshDate(workerLastUpdated));
   }
 
   public Date getAllegationLastUpdated() {
-    return NeutronDateUtil.freshDate(allegationLastUpdated);
+    return NeutronDateUtils.freshDate(allegationLastUpdated);
   }
 
   public void setAllegationLastUpdated(Date allegationLastUpdated) {
-    this.allegationLastUpdated = NeutronDateUtil.freshDate(allegationLastUpdated);
+    this.allegationLastUpdated = NeutronDateUtils.freshDate(allegationLastUpdated);
   }
 
   public Date getVictimLastUpdated() {
-    return NeutronDateUtil.freshDate(victimLastUpdated);
+    return NeutronDateUtils.freshDate(victimLastUpdated);
   }
 
   public void setVictimLastUpdated(Date victimLastUpdated) {
-    this.victimLastUpdated = NeutronDateUtil.freshDate(victimLastUpdated);
+    this.victimLastUpdated = NeutronDateUtils.freshDate(victimLastUpdated);
   }
 
   public Date getPerpetratorLastUpdated() {
-    return NeutronDateUtil.freshDate(perpetratorLastUpdated);
+    return NeutronDateUtils.freshDate(perpetratorLastUpdated);
   }
 
   public void setPerpetratorLastUpdated(Date perpetratorLastUpdated) {
-    this.perpetratorLastUpdated = NeutronDateUtil.freshDate(perpetratorLastUpdated);
+    this.perpetratorLastUpdated = NeutronDateUtils.freshDate(perpetratorLastUpdated);
   }
 
   public String getVictimSensitivityIndicator() {

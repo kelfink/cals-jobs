@@ -179,7 +179,7 @@ public class SafetyAlertIndexerJob
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.launchSingle(SafetyAlertIndexerJob.class, args);
+    LaunchCommand.launchOneWayTrip(SafetyAlertIndexerJob.class, args);
   }
 
 }

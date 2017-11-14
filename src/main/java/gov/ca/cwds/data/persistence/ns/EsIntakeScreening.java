@@ -26,7 +26,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
-import gov.ca.cwds.neutron.util.NeutronDateUtil;
+import gov.ca.cwds.neutron.util.NeutronDateUtils;
 
 /**
  * Entity bean for PostgreSQL view, VW_SCREENING_HISTORY.
@@ -466,7 +466,7 @@ public class EsIntakeScreening extends CommonScreening
    * @return last change date
    */
   public Date getLastChange() {
-    return NeutronDateUtil.freshDate(lastChange);
+    return NeutronDateUtils.freshDate(lastChange);
   }
 
   /**
@@ -476,7 +476,7 @@ public class EsIntakeScreening extends CommonScreening
    * @param lastChange last change date
    */
   public void setLastChange(Date lastChange) {
-    this.lastChange = NeutronDateUtil.freshDate(lastChange);
+    this.lastChange = NeutronDateUtils.freshDate(lastChange);
   }
 
   public String getThisParticipantId() {
@@ -512,19 +512,19 @@ public class EsIntakeScreening extends CommonScreening
   }
 
   public Date getStartedAt() {
-    return NeutronDateUtil.freshDate(startedAt);
+    return NeutronDateUtils.freshDate(startedAt);
   }
 
   public void setStartedAt(Date startedAt) {
-    this.startedAt = NeutronDateUtil.freshDate(startedAt);
+    this.startedAt = NeutronDateUtils.freshDate(startedAt);
   }
 
   public Date getEndedAt() {
-    return NeutronDateUtil.freshDate(endedAt);
+    return NeutronDateUtils.freshDate(endedAt);
   }
 
   public void setEndedAt(Date endedAt) {
-    this.endedAt = NeutronDateUtil.freshDate(endedAt);
+    this.endedAt = NeutronDateUtils.freshDate(endedAt);
   }
 
   public String getReferralId() {
@@ -552,11 +552,11 @@ public class EsIntakeScreening extends CommonScreening
   }
 
   public Date getBirthDt() {
-    return NeutronDateUtil.freshDate(birthDt);
+    return NeutronDateUtils.freshDate(birthDt);
   }
 
   public void setBirthDt(Date birthDt) {
-    this.birthDt = NeutronDateUtil.freshDate(birthDt);
+    this.birthDt = NeutronDateUtils.freshDate(birthDt);
   }
 
   public String getFirstName() {
