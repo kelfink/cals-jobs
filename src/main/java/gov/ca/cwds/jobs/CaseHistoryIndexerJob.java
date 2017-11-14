@@ -5,8 +5,6 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.SessionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -36,8 +34,6 @@ public abstract class CaseHistoryIndexerJob
     implements NeutronRowMapper<EsPersonCase> {
 
   private static final long serialVersionUID = 1L;
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(CaseHistoryIndexerJob.class);
 
   /**
    * Construct batch job instance with all required dependencies.
