@@ -19,7 +19,6 @@ import org.weakref.jmx.Managed;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
@@ -64,14 +63,14 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   private Injector injector;
 
-  /**
-   * Only used to drop and create indexes.
-   * 
-   * <p>
-   * <strong>MOVE</strong> this responsibility to another unit.
-   * </p>
-   */
-  private ElasticsearchDao esDao;
+  // /**
+  // * Only used to drop and create indexes.
+  // *
+  // * <p>
+  // * <strong>MOVE</strong> this responsibility to another unit.
+  // * </p>
+  // */
+  // private ElasticsearchDao esDao;
 
   private FlightRecorder flightRecorder;
 
@@ -87,11 +86,9 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   @Inject
   public LaunchCommand(final FlightRecorder flightRecorder,
-      final AtomLaunchDirector launchScheduler, final ElasticsearchDao esDao,
-      final AtomCommandControlManager cmdControlManager) {
+      final AtomLaunchDirector launchScheduler, final AtomCommandControlManager cmdControlManager) {
     this.flightRecorder = flightRecorder;
     this.launchScheduler = launchScheduler;
-    this.esDao = esDao;
     this.cmdControlManager = cmdControlManager;
   }
 
@@ -223,10 +220,10 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
       configureInitialMode(now);
 
-      // **MOVE** this responsibility to another class.
-      if (commonFlightPlan.isDropIndex()) {
-        esDao.deleteIndex(esDao.getConfig().getElasticsearchAlias());
-      }
+      // // **MOVE** this responsibility to another class.
+      // if (commonFlightPlan.isDropIndex()) {
+      // esDao.deleteIndex(esDao.getConfig().getElasticsearchAlias());
+      // }
 
       // Prepare launch pads.
       for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
@@ -286,15 +283,15 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     return LaunchCommand.settings.isInitialMode();
   }
 
-  public ElasticsearchDao getEsDao() {
-    return esDao;
-  }
-
-  public void setEsDao(ElasticsearchDao esDao) {
-    if (this.esDao == null) {
-      this.esDao = esDao;
-    }
-  }
+  // public ElasticsearchDao getEsDao() {
+  // return esDao;
+  // }
+  //
+  // public void setEsDao(ElasticsearchDao esDao) {
+  // if (this.esDao == null) {
+  // this.esDao = esDao;
+  // }
+  // }
 
   public FlightPlan getCommonFlightPlan() {
     return commonFlightPlan;

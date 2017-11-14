@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
-import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -55,7 +54,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     flightPlan.setLastRunLoc(lastRunFile);
 
     final AtomCommandControlManager ctrlMgr = mock(AtomCommandControlManager.class);
-    target = new LaunchCommand(flightRecorder, launchScheduler, esDao, ctrlMgr);
+    target = new LaunchCommand(flightRecorder, launchScheduler, ctrlMgr);
     target.setCommonFlightPlan(flightPlan);
     target.setLaunchScheduler(launchScheduler);
 
@@ -128,16 +127,16 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void getEsDao_Args__() throws Exception {
-    ElasticsearchDao actual = target.getEsDao();
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
-  public void setEsDao_Args__ElasticsearchDao() throws Exception {
-    target.setEsDao(esDao);
-  }
+  // @Test
+  // public void getEsDao_Args__() throws Exception {
+  // ElasticsearchDao actual = target.getEsDao();
+  // assertThat(actual, is(notNullValue()));
+  // }
+  //
+  // @Test
+  // public void setEsDao_Args__ElasticsearchDao() throws Exception {
+  // target.setEsDao(esDao);
+  // }
 
   @Test
   public void instantiation() throws Exception {
