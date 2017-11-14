@@ -52,9 +52,9 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
+import gov.ca.cwds.neutron.atom.AtomDocumentSecurity;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.atom.AtomPersonDocPrep;
-import gov.ca.cwds.neutron.atom.AtomDocumentSecurity;
 import gov.ca.cwds.neutron.atom.AtomTransform;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.enums.NeutronColumn;
@@ -600,9 +600,8 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
 
       // If index name is provided, use it, else take alias from ES config.
       final String indexNameOverride = getFlightPlan().getIndexName();
-      final String effectiveIndexName =
-          StringUtils.isBlank(indexNameOverride) ? esDao.getConfig().getElasticsearchAlias()
-              : indexNameOverride;
+      final String effectiveIndexName = StringUtils.isBlank(indexNameOverride)
+          ? esDao.getConfig().getElasticsearchAlias() : indexNameOverride;
       getFlightPlan().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
 
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
@@ -622,6 +621,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
 
       // Smart/auto mode. If last run date is older than 25 years, assume initial load.
       // Written when DevOps started using Rundeck and was unable to pass parameters to jobs.
+      // **MOVE** to another unit.
       final Calendar cal = Calendar.getInstance();
       cal.add(Calendar.YEAR, -25);
       final boolean autoInitialLoad =
