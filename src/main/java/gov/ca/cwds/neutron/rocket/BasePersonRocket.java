@@ -594,10 +594,10 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
    */
   @Override
   public Date executeJob(Date lastSuccessfulRunTime) throws NeutronException {
+    LOGGER.info("RUNNING JOB: {}", getClass().getName());
     Date ret;
-    try {
-      LOGGER.info("RUNNING JOB: {}", getClass().getName());
 
+    try {
       // If index name is provided, use it, else take alias from ES config.
       final String indexNameOverride = getFlightPlan().getIndexName();
       final String effectiveIndexName = StringUtils.isBlank(indexNameOverride)

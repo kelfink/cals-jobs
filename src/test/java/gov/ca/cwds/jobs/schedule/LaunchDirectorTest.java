@@ -22,6 +22,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
+import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.flight.FlightLog;
@@ -120,7 +121,7 @@ public class LaunchDirectorTest extends Goddard {
   public void scheduleJob_Args__Class__DefaultFlightSchedule__FlightPlan() throws Exception {
     Class<?> klass = Mach1TestRocket.class;
     StandardFlightSchedule sched = StandardFlightSchedule.CLIENT;
-    LaunchPad actual = target.scheduleLaunch(sched, flightPlan);
+    AtomLaunchPad actual = target.scheduleLaunch(sched, flightPlan);
     assertThat(actual, is(notNullValue()));
   }
 

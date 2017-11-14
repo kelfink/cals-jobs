@@ -1,8 +1,10 @@
 package gov.ca.cwds.neutron.launch;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobKey;
@@ -34,24 +36,27 @@ public enum StandardFlightSchedule {
   /**
    * Client. Essential document root.
    */
-  CLIENT(ClientIndexerJob.class, "client", 1, 5, 20, 1000, null),
+  CLIENT(ClientIndexerJob.class, "client", 1, 5, 20, 1000, null, true, true),
 
-  REPORTER(ReporterIndexerJob.class, "reporter", 2, 10, 30, 950, null),
+  REPORTER(ReporterIndexerJob.class, "reporter", 2, 10, 30, 950, null, true, true),
 
   COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, "collateral_individual", 3, 20, 30,
-      90, null),
+      90, null, true, true),
 
-  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, "service_provider", 4, 25, 120, 85, null),
+  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, "service_provider", 4, 25, 120, 85, null, true,
+      true),
 
   SUBSTITUTE_CARE_PROVIDER(SubstituteCareProviderIndexJob.class, "substitute_care_provider", 5, 30,
-      120, 80, null),
+      120, 80, null, true, true),
 
   EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, "education_provider", 6, 42, 120, 75,
-      null),
+      null, true, true),
 
-  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, "other_adult", 7, 50, 120, 70, null),
+  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, "other_adult", 7, 50, 120, 70, null,
+      true, true),
 
-  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, "other_child", 8, 55, 120, 65, null),
+  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, "other_child", 8, 55, 120, 65, null,
+      true, true),
 
   //
   // JSON elements inside document.
@@ -60,37 +65,37 @@ public enum StandardFlightSchedule {
   /**
    * Client name aliases.
    */
-  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, "other_client_name", 20, 90, 45, 300, "akas"),
+  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, "other_client_name", 20, 90, 45, 300, "akas", true, true),
 
   /**
    * Child cases.
    */
-  CHILD_CASE(ChildCaseHistoryIndexerJob.class, "child_case", 25, 70, 30, 550, "cases"),
+  CHILD_CASE(ChildCaseHistoryIndexerJob.class, "child_case", 25, 70, 30, 550, "cases", true, true),
 
   /**
    * Parent cases.
    */
-  PARENT_CASE(ParentCaseHistoryIndexerJob.class, "parent_case", 30, 90, 30, 500, "cases"),
+  PARENT_CASE(ParentCaseHistoryIndexerJob.class, "parent_case", 30, 90, 30, 500, "cases", true, true),
 
   /**
    * Relationships.
    */
-  RELATIONSHIP(RelationshipIndexerJob.class, "relationship", 40, 90, 30, 600, "relationships"),
+  RELATIONSHIP(RelationshipIndexerJob.class, "relationship", 40, 90, 30, 600, "relationships", true, true),
 
   /**
    * Referrals.
    */
-  REFERRAL(ReferralHistoryIndexerJob.class, "referral", 50, 45, 30, 700, "referrals"),
+  REFERRAL(ReferralHistoryIndexerJob.class, "referral", 50, 45, 30, 700, "referrals", true, true),
 
   /**
    * Safety alerts.
    */
-  SAFETY_ALERT(SafetyAlertIndexerJob.class, "safety_alert", 60, 90, 45, 350, "safety_alerts"),
+  SAFETY_ALERT(SafetyAlertIndexerJob.class, "safety_alert", 60, 90, 45, 350, "safety_alerts", true, true),
 
   /**
    * Screenings.
    */
-  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 70, 90, 20, 800, "screenings")
+  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 70, 90, 20, 800, "screenings", true, true)
 
   // /**
   // * Validation.
@@ -100,6 +105,10 @@ public enum StandardFlightSchedule {
   ;
 
   private final Class<?> klazz;
+
+  private final boolean runLastChange;
+
+  private final boolean runInitialLoad;
 
   private final String shortName;
 
@@ -116,6 +125,7 @@ public enum StandardFlightSchedule {
   private static final Map<String, StandardFlightSchedule> mapName = new ConcurrentHashMap<>();
 
   private static final Map<Class<?>, StandardFlightSchedule> mapClass = new ConcurrentHashMap<>();
+
   static {
     for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
       mapName.put(sched.shortName, sched);
@@ -123,15 +133,18 @@ public enum StandardFlightSchedule {
     }
   }
 
-  private StandardFlightSchedule(Class<?> klazz, String shortName, int initialLoadOrder,
-      int startDelaySeconds, int periodSeconds, int lastRunPriority, String jsonElement) {
+  private StandardFlightSchedule(Class<?> klazz, String rocketName, int initialLoadOrder,
+      int startDelaySeconds, int periodSeconds, int lastRunPriority, String nestedElement,
+      boolean runLastChange, boolean runInitialLoad) {
     this.klazz = klazz;
-    this.shortName = shortName;
+    this.shortName = rocketName;
     this.initialLoadOrder = initialLoadOrder;
     this.startDelaySeconds = startDelaySeconds;
     this.waitPeriodSeconds = periodSeconds;
     this.lastRunPriority = lastRunPriority;
-    this.jsonElement = jsonElement;
+    this.jsonElement = nestedElement;
+    this.runLastChange = runLastChange;
+    this.runInitialLoad = runInitialLoad;
   }
 
   /**
@@ -155,6 +168,16 @@ public enum StandardFlightSchedule {
     }
 
     return ret;
+  }
+
+  public static List<StandardFlightSchedule> getInitialLoadRockets() {
+    return Arrays.asList(values()).stream().sequential()
+        .filter(StandardFlightSchedule::isRunInitialLoad).collect(Collectors.toList());
+  }
+
+  public static List<StandardFlightSchedule> getLastChangeRockets() {
+    return Arrays.asList(values()).stream().sequential()
+        .filter(StandardFlightSchedule::isRunLastChange).collect(Collectors.toList());
   }
 
   public Class<?> getRocketClass() {
@@ -197,8 +220,16 @@ public enum StandardFlightSchedule {
     return initialLoadOrder;
   }
 
-  public boolean isInitialLoad() {
-    return initialLoadOrder > 0;
+  public Class<?> getKlazz() {
+    return klazz;
+  }
+
+  public boolean isRunLastChange() {
+    return runLastChange;
+  }
+
+  public boolean isRunInitialLoad() {
+    return runInitialLoad;
   }
 
 }
