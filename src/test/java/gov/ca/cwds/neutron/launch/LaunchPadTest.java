@@ -81,7 +81,7 @@ public class LaunchPadTest extends Goddard {
   @Test(expected = NeutronException.class)
   public void unschedule_Args___T__SchedulerException() throws Exception {
     doThrow(SchedulerException.class).when(scheduler).pauseTrigger(any(TriggerKey.class));
-    when(scheduler.interrupt(any(JobKey.class))).thenThrow(SchedulerException.class);
+    when(scheduler.unscheduleJob(any(TriggerKey.class))).thenThrow(SchedulerException.class);
     target.unschedule();
   }
 
