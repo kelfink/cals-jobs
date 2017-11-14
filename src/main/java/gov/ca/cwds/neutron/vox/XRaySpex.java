@@ -18,6 +18,15 @@ import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 
+/**
+ * <p>
+ * Expose:
+ * <ul>
+ * <li>Expose Command Center methods to JMX</li>
+ * <li>Expose Guice bean attributes to JMX.</li>
+ * </ul>
+ * </p>
+ */
 @Singleton
 public class XRaySpex implements AtomCommandCenterConsole {
 
@@ -61,9 +70,6 @@ public class XRaySpex implements AtomCommandCenterConsole {
     jettyServer.start();
   }
 
-  /**
-   * Expose Command Center methods to JMX. Expose Guice bean attributes to JMX.
-   */
   protected void exposeJMX() {
     LOGGER.warn("\n>>>>>>> ENABLE JMX! <<<<<<<\n");
     final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());

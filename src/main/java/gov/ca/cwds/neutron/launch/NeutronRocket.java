@@ -20,7 +20,7 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
- * Quartz for scheduled flights.
+ * Implementation of Quartz InterruptableJob for scheduled flights.
  * 
  * @author CWDS API Team
  * @see LaunchCommand
