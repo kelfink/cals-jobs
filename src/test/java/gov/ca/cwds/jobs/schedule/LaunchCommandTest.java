@@ -33,6 +33,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
+import gov.ca.cwds.neutron.inject.AtomCommandControlManager;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
@@ -54,7 +55,8 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     flightPlan.setBaseDirectory("/var/lib/jenkins/");
     flightPlan.setLastRunLoc(lastRunFile);
 
-    target = new LaunchCommand(flightRecorder, launchScheduler, esDao);
+    final AtomCommandControlManager ctrlMgr = mock(AtomCommandControlManager.class);
+    target = new LaunchCommand(flightRecorder, launchScheduler, esDao, ctrlMgr);
     target.setCommonFlightPlan(flightPlan);
     target.setLaunchScheduler(launchScheduler);
 
@@ -243,16 +245,6 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     Date now = new Date();
     StandardFlightSchedule sched = StandardFlightSchedule.REFERRAL;
     target.handleTimeFile(flightPlan, fmt, now, sched);
-  }
-
-  @Test
-  public void exposeREST_Args__() throws Exception {
-    target.exposeREST();
-  }
-
-  @Test(expected = NullPointerException.class)
-  public void exposeJMX_Args__() throws Exception {
-    target.exposeJMX();
   }
 
   @Test

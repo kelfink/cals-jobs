@@ -2,7 +2,6 @@ package gov.ca.cwds.jobs.schedule;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,12 +14,10 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.weakref.jmx.MBeanExporter;
 import org.weakref.jmx.Managed;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.config.FlightPlan;
@@ -28,15 +25,14 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
-import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
+import gov.ca.cwds.neutron.inject.AtomCommandControlManager;
 import gov.ca.cwds.neutron.inject.HyperCube;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
-import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.NeutronStringUtils;
 
@@ -77,14 +73,11 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   private ElasticsearchDao esDao;
 
-  /**
-   * REST administration. Started if enabled in #.
-   */
-  private NeutronRestServer restServer = new NeutronRestServer();
-
   private FlightRecorder flightRecorder;
 
   private AtomLaunchDirector launchScheduler;
+
+  private AtomCommandControlManager cmdControlManager;
 
   private boolean fatalError;
 
@@ -94,10 +87,12 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   @Inject
   public LaunchCommand(final FlightRecorder flightRecorder,
-      final AtomLaunchDirector launchScheduler, final ElasticsearchDao esDao) {
+      final AtomLaunchDirector launchScheduler, final ElasticsearchDao esDao,
+      final AtomCommandControlManager cmdControlManager) {
     this.flightRecorder = flightRecorder;
     this.launchScheduler = launchScheduler;
     this.esDao = esDao;
+    this.cmdControlManager = cmdControlManager;
   }
 
   /**
@@ -209,35 +204,8 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     }
   }
 
-  protected void exposeREST() {
-    // Jetty for REST administration.
-    Thread jettyServer = new Thread(restServer::run);
-    jettyServer.start();
-  }
-
-  protected void exposeJMX() {
-    LOGGER.warn("\n>>>>>>> ENABLE JMX! <<<<<<<\n");
-    final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-    for (AtomLaunchPad pad : launchScheduler.getLaunchPads().values()) {
-      exporter.export("Neutron:rocket=" + pad.getFlightSchedule().getShortName(), pad);
-    }
-
-    // Expose Command Center methods to JMX.
-    exporter.export("Neutron:runner=Launch_Command", this);
-    LOGGER.info("MBeans: {}", exporter.getExportedObjects());
-
-    // Expose Guice bean attributes to JMX.
-    Manager.manage("Neutron_Guice", injector);
-  }
-
   protected void initCommandControl() {
-    if (LaunchCommand.settings.isExposeJmx()) {
-      exposeJMX();
-    }
-
-    if (LaunchCommand.settings.isExposeRest()) {
-      exposeREST();
-    }
+    this.cmdControlManager.initCommandControl();
   }
 
   /**
