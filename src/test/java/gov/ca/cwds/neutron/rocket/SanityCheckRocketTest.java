@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.neutron.rocket;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
+import gov.ca.cwds.jobs.Goddard;
 
 public class SanityCheckRocketTest
     extends Goddard<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {

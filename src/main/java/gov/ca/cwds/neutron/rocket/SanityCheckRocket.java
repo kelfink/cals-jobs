@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.neutron.rocket;
 
 import java.util.Date;
 
@@ -27,7 +27,6 @@ import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
-import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
  * Test Elasticsearch mass search capability for automatic validation.
