@@ -423,6 +423,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * Run continuous, scheduler mode.
    * 
    * @return launch command instance with dependencies injected
+   * @throws NeutronException on launch error
    */
   protected static synchronized LaunchCommand startSchedulerMode() throws NeutronException {
     LOGGER.info("STARTING LAUNCH COMMAND ...");
