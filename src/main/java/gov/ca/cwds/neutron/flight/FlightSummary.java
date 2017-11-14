@@ -7,6 +7,7 @@ import java.util.Map;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
+import gov.ca.cwds.neutron.util.NeutronDateUtil;
 
 public class FlightSummary implements ApiMarker {
 
@@ -34,27 +35,27 @@ public class FlightSummary implements ApiMarker {
   /**
    * Running count of records prepared for bulk indexing.
    */
-  private int recsBulkPrepared;
+  private int bulkPrepared;
 
   /**
    * Running count of records prepared for bulk deletion.
    */
-  private int recsBulkDeleted;
+  private int bulkDeleted;
 
   /**
    * Running count of records before bulk indexing.
    */
-  private int recsBulkBefore;
+  private int bulkBefore;
 
   /**
    * Running count of records after bulk indexing.
    */
-  private int recsBulkAfter;
+  private int bulkAfter;
 
   /**
    * Running count of errors during bulk indexing.
    */
-  private int recsBulkError;
+  private int bulkError;
 
   public FlightSummary(final StandardFlightSchedule flightSchedule) {
     this.flightSchedule = flightSchedule;
@@ -62,10 +63,10 @@ public class FlightSummary implements ApiMarker {
 
   public void accumulate(final FlightLog flightLog) {
     totalRuns++;
-    this.recsBulkDeleted += flightLog.getCurrentBulkDeleted();
-    this.recsBulkPrepared += flightLog.getCurrentBulkPrepared();
-    this.recsBulkError += flightLog.getCurrentBulkError();
-    this.recsBulkAfter += flightLog.getCurrentBulkAfter();
+    this.bulkDeleted += flightLog.getCurrentBulkDeleted();
+    this.bulkPrepared += flightLog.getCurrentBulkPrepared();
+    this.bulkError += flightLog.getCurrentBulkError();
+    this.bulkAfter += flightLog.getCurrentBulkAfter();
 
     this.rowsNormalized += flightLog.getCurrentNormalized();
 
@@ -126,60 +127,60 @@ public class FlightSummary implements ApiMarker {
     this.rowsNormalized = rowsNormalized;
   }
 
-  public int getRecsBulkPrepared() {
-    return recsBulkPrepared;
+  public int getBulkPrepared() {
+    return bulkPrepared;
   }
 
-  public void setRecsBulkPrepared(int recsBulkPrepared) {
-    this.recsBulkPrepared = recsBulkPrepared;
+  public void setBulkPrepared(int recsBulkPrepared) {
+    this.bulkPrepared = recsBulkPrepared;
   }
 
-  public int getRecsBulkDeleted() {
-    return recsBulkDeleted;
+  public int getBulkDeleted() {
+    return bulkDeleted;
   }
 
-  public void setRecsBulkDeleted(int recsBulkDeleted) {
-    this.recsBulkDeleted = recsBulkDeleted;
+  public void setBulkDeleted(int recsBulkDeleted) {
+    this.bulkDeleted = recsBulkDeleted;
   }
 
-  public int getRecsBulkBefore() {
-    return recsBulkBefore;
+  public int getBulkBefore() {
+    return bulkBefore;
   }
 
-  public void setRecsBulkBefore(int recsBulkBefore) {
-    this.recsBulkBefore = recsBulkBefore;
+  public void setBulkBefore(int recsBulkBefore) {
+    this.bulkBefore = recsBulkBefore;
   }
 
-  public int getRecsBulkAfter() {
-    return recsBulkAfter;
+  public int getBulkAfter() {
+    return bulkAfter;
   }
 
-  public void setRecsBulkAfter(int recsBulkAfter) {
-    this.recsBulkAfter = recsBulkAfter;
+  public void setBulkAfter(int recsBulkAfter) {
+    this.bulkAfter = recsBulkAfter;
   }
 
-  public int getRecsBulkError() {
-    return recsBulkError;
+  public int getBulkError() {
+    return bulkError;
   }
 
-  public void setRecsBulkError(int recsBulkError) {
-    this.recsBulkError = recsBulkError;
+  public void setBulkError(int recsBulkError) {
+    this.bulkError = recsBulkError;
   }
 
   public Date getFirstStart() {
-    return firstStart;
+    return NeutronDateUtil.freshDate(firstStart);
   }
 
-  public void setFirstStart(Date earliestStart) {
-    this.firstStart = earliestStart;
+  public void setFirstStart(Date firstStart) {
+    this.firstStart = NeutronDateUtil.freshDate(firstStart);
   }
 
   public Date getLastEnd() {
-    return lastEnd;
+    return NeutronDateUtil.freshDate(lastEnd);
   }
 
   public void setLastEnd(Date lastEnd) {
-    this.lastEnd = lastEnd;
+    this.lastEnd = NeutronDateUtil.freshDate(lastEnd);
   }
 
   @Override
@@ -188,9 +189,9 @@ public class FlightSummary implements ApiMarker {
         + firstStart + "\n\tlastEnd=" + lastEnd + "\n\tstatus=" + status + "\n\ttotalRuns="
         + totalRuns + "\n\trecsSentToIndexQueue=" + recsSentToIndexQueue
         + "\n\trecsSentToBulkProcessor=" + recsSentToBulkProcessor + "\n\trowsNormalized="
-        + rowsNormalized + "\n\trecsBulkPrepared=" + recsBulkPrepared + "\n\trecsBulkDeleted="
-        + recsBulkDeleted + "\n\trecsBulkBefore=" + recsBulkBefore + "\n\trecsBulkAfter="
-        + recsBulkAfter + "\n\trecsBulkError=" + recsBulkError + "\n]";
+        + rowsNormalized + "\n\trecsBulkPrepared=" + bulkPrepared + "\n\trecsBulkDeleted="
+        + bulkDeleted + "\n\trecsBulkBefore=" + bulkBefore + "\n\trecsBulkAfter=" + bulkAfter
+        + "\n\trecsBulkError=" + bulkError + "\n]";
   }
 
 }

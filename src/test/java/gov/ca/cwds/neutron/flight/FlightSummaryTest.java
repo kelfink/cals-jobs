@@ -72,7 +72,7 @@ public class FlightSummaryTest {
     target.accumulate(flightLog);
     LOGGER.info("summary: {}", target);
 
-    assertThat(target.getRecsBulkPrepared(), is(not(0)));
+    assertThat(target.getBulkPrepared(), is(not(0)));
   }
 
   @Test
@@ -141,7 +141,7 @@ public class FlightSummaryTest {
 
   @Test
   public void getRecsBulkPrepared_Args__() throws Exception {
-    int actual = target.getRecsBulkPrepared();
+    int actual = target.getBulkPrepared();
     int expected = 0;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -149,12 +149,12 @@ public class FlightSummaryTest {
   @Test
   public void setRecsBulkPrepared_Args__int() throws Exception {
     int recsBulkPrepared = 0;
-    target.setRecsBulkPrepared(recsBulkPrepared);
+    target.setBulkPrepared(recsBulkPrepared);
   }
 
   @Test
   public void getRecsBulkDeleted_Args__() throws Exception {
-    int actual = target.getRecsBulkDeleted();
+    int actual = target.getBulkDeleted();
     int expected = 0;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -162,12 +162,12 @@ public class FlightSummaryTest {
   @Test
   public void setRecsBulkDeleted_Args__int() throws Exception {
     int recsBulkDeleted = 0;
-    target.setRecsBulkDeleted(recsBulkDeleted);
+    target.setBulkDeleted(recsBulkDeleted);
   }
 
   @Test
   public void getRecsBulkBefore_Args__() throws Exception {
-    int actual = target.getRecsBulkBefore();
+    int actual = target.getBulkBefore();
     int expected = 0;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -175,12 +175,12 @@ public class FlightSummaryTest {
   @Test
   public void setRecsBulkBefore_Args__int() throws Exception {
     int recsBulkBefore = 0;
-    target.setRecsBulkBefore(recsBulkBefore);
+    target.setBulkBefore(recsBulkBefore);
   }
 
   @Test
   public void getRecsBulkAfter_Args__() throws Exception {
-    int actual = target.getRecsBulkAfter();
+    int actual = target.getBulkAfter();
     int expected = 0;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -188,12 +188,12 @@ public class FlightSummaryTest {
   @Test
   public void setRecsBulkAfter_Args__int() throws Exception {
     int recsBulkAfter = 0;
-    target.setRecsBulkAfter(recsBulkAfter);
+    target.setBulkAfter(recsBulkAfter);
   }
 
   @Test
   public void getRecsBulkError_Args__() throws Exception {
-    int actual = target.getRecsBulkError();
+    int actual = target.getBulkError();
     int expected = 0;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -201,7 +201,7 @@ public class FlightSummaryTest {
   @Test
   public void setRecsBulkError_Args__int() throws Exception {
     int recsBulkError = 0;
-    target.setRecsBulkError(recsBulkError);
+    target.setBulkError(recsBulkError);
   }
 
   @Test

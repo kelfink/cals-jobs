@@ -154,7 +154,7 @@ public final class NeutronDB2Util {
           .append(monitor.getApplicationTimeMillis()).append("monitor.moreData: 0: ")
           .append(monitor.moreData(0)).append("monitor.moreData: 1: ").append(monitor.moreData(1))
           .append("monitor.moreData: 2: ").append(monitor.moreData(2));
-      LOGGER.info("DB2 monitor report: {}", () -> buf.toString());
+      LOGGER.info("DB2 monitor report: {}", buf::toString);
     }
   }
 
