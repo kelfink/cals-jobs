@@ -85,8 +85,8 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   }
 
   @Inject
-  public LaunchCommand(final FlightRecorder flightRecorder,
-      final AtomLaunchDirector launchDirector, final AtomCommandControlManager cmdControlManager) {
+  public LaunchCommand(final FlightRecorder flightRecorder, final AtomLaunchDirector launchDirector,
+      final AtomCommandControlManager cmdControlManager) {
     this.flightRecorder = flightRecorder;
     this.launchDirector = launchDirector;
     this.cmdControlManager = cmdControlManager;
@@ -439,7 +439,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       launchCommand.fatalError = false; // We made it. Almost.
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
-      // Close orphaned resources forcibly, if necessary, by system exit.
+      // Forcibly close orphaned resources, if necessary, by system exit.
       instance.fatalError = true;
       throw JobLogs.runtime(LOGGER, e, "STANDALONE ROCKET FAILED!: {}", e.getMessage());
     }
