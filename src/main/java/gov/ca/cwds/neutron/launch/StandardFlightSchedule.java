@@ -47,26 +47,26 @@ public enum StandardFlightSchedule {
   /**
    * Client. Essential document root.
    */
-  CLIENT(ClientIndexerJob.class, "client", 1, 5, 20, 1000, null, true, true),
+  CLIENT(ClientIndexerJob.class, "client", 5, 5, 20, 1000, null, true, true),
 
-  REPORTER(ReporterIndexerJob.class, "reporter", 2, 10, 30, 950, null, true, true),
+  REPORTER(ReporterIndexerJob.class, "reporter", 10, 10, 30, 950, null, true, true),
 
-  COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, "collateral_individual", 3, 20, 30,
+  COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, "collateral_individual", 15, 20, 30,
       90, null, true, true),
 
-  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, "service_provider", 4, 25, 120, 85, null, true,
+  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, "service_provider", 20, 25, 120, 85, null, true,
       true),
 
   SUBSTITUTE_CARE_PROVIDER(SubstituteCareProviderIndexJob.class, "substitute_care_provider", 5, 30,
-      120, 80, null, true, true),
+      25, 80, null, true, true),
 
-  EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, "education_provider", 6, 42, 120, 75,
-      null, true, true),
+  EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, "education_provider", 30, 42, 120,
+      75, null, true, true),
 
-  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, "other_adult", 7, 50, 120, 70, null,
+  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, "other_adult", 35, 50, 120, 70, null,
       true, true),
 
-  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, "other_child", 8, 55, 120, 65, null,
+  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, "other_child", 40, 55, 120, 65, null,
       true, true),
 
   //
@@ -76,37 +76,37 @@ public enum StandardFlightSchedule {
   /**
    * Client name aliases.
    */
-  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, "other_client_name", 20, 90, 45, 300, "akas", true, true),
+  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, "other_client_name", 45, 90, 45, 300, "akas", true, true),
 
   /**
    * Child cases.
    */
-  CHILD_CASE(ChildCaseHistoryIndexerJob.class, "child_case", 25, 70, 30, 550, "cases", true, true),
+  CHILD_CASE(ChildCaseHistoryIndexerJob.class, "child_case", 50, 70, 30, 550, "cases", true, true),
 
   /**
    * Parent cases.
    */
-  PARENT_CASE(ParentCaseHistoryIndexerJob.class, "parent_case", 30, 90, 30, 500, "cases", true, true),
+  PARENT_CASE(ParentCaseHistoryIndexerJob.class, "parent_case", 55, 90, 30, 500, "cases", true, true),
 
   /**
    * Relationships.
    */
-  RELATIONSHIP(RelationshipIndexerJob.class, "relationship", 40, 90, 30, 600, "relationships", true, true),
+  RELATIONSHIP(RelationshipIndexerJob.class, "relationship", 60, 90, 30, 600, "relationships", true, true),
 
   /**
    * Referrals.
    */
-  REFERRAL(ReferralHistoryIndexerJob.class, "referral", 50, 45, 30, 700, "referrals", true, true),
+  REFERRAL(ReferralHistoryIndexerJob.class, "referral", 65, 45, 30, 700, "referrals", true, true),
 
   /**
    * Safety alerts.
    */
-  SAFETY_ALERT(SafetyAlertIndexerJob.class, "safety_alert", 60, 90, 45, 350, "safety_alerts", true, true),
+  SAFETY_ALERT(SafetyAlertIndexerJob.class, "safety_alert", 70, 90, 45, 350, "safety_alerts", true, true),
 
   /**
    * Screenings.
    */
-  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 70, 90, 20, 800, "screenings", true, true)
+  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 75, 90, 20, 800, "screenings", true, true)
 
   // /**
   // * Validation.
