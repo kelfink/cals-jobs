@@ -24,12 +24,12 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
  * 
  * @author CWDS API Team
  */
-public class InitialLoadIndexRocket
+public class IndexResetRocket
     extends BasePersonRocket<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
 
   private static final long serialVersionUID = 1L;
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(InitialLoadIndexRocket.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(IndexResetRocket.class);
 
   /**
    * Construct rocket with all required dependencies.
@@ -41,14 +41,14 @@ public class InitialLoadIndexRocket
    * @param flightPlan command line options
    */
   @Inject
-  public InitialLoadIndexRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
+  public IndexResetRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       final ElasticsearchDao esDao, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightPlan flightPlan) {
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, sessionFactory, flightPlan);
   }
 
   @Override
-  public Date executeJob(Date lastSuccessfulRunTime) {
+  public Date executeJob(Date lastRunDate) {
     LOGGER.info("INDEX CHECK!");
 
     try {
@@ -73,7 +73,7 @@ public class InitialLoadIndexRocket
       JobLogs.checked(LOGGER, e, "ES INDEX MANAGEMENT ERROR! {}", e.getMessage());
     }
 
-    return lastSuccessfulRunTime;
+    return lastRunDate;
   }
 
   /**
@@ -82,7 +82,7 @@ public class InitialLoadIndexRocket
    * @param args command line arguments
    */
   public static void main(String... args) {
-    LaunchCommand.launchOneWayTrip(InitialLoadIndexRocket.class, args);
+    LaunchCommand.launchOneWayTrip(IndexResetRocket.class, args);
   }
 
 }

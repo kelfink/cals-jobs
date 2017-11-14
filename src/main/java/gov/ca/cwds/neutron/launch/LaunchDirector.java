@@ -29,6 +29,9 @@ public class LaunchDirector implements AtomLaunchDirector {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LaunchDirector.class);
 
+  /**
+   * Quartz scheduler. Could hide this implementation behind an interface.
+   */
   private Scheduler scheduler;
 
   private final AtomFlightRecorder flightRecorder;
@@ -45,7 +48,7 @@ public class LaunchDirector implements AtomLaunchDirector {
   private final Map<Class<?>, AtomLaunchPad> launchPads = new ConcurrentHashMap<>();
 
   /**
-   * Possibly not necessary. Listeners and running jobs should handle this, but we still need a
+   * Might not be necessary. Listeners and running jobs should handle this, but we still need a
    * single place to track rockets in flight.
    * 
    * <p>
@@ -79,19 +82,19 @@ public class LaunchDirector implements AtomLaunchDirector {
   /**
    * Create a registered rocket.
    * 
-   * @param jobName batch job class
+   * @param rocketName batch job class
    * @param flightPlan command line arguments
-   * @return the job
+   * @return a fueled rocket
    * @throws NeutronException unexpected runtime error
    */
   @SuppressWarnings("rawtypes")
-  public BasePersonRocket fuelRocket(final String jobName, final FlightPlan flightPlan)
+  public BasePersonRocket fuelRocket(final String rocketName, final FlightPlan flightPlan)
       throws NeutronException {
-    return this.rocketFactory.fuelRocket(jobName, flightPlan);
+    return this.rocketFactory.fuelRocket(rocketName, flightPlan);
   }
 
   @Override
-  public FlightLog launch(Class<?> klass, FlightPlan flightPlan) throws NeutronException {
+  public FlightLog launch(Class<?> klass, final FlightPlan flightPlan) throws NeutronException {
     try {
       LOGGER.info("Run scheduled rocket: {}", klass.getName());
       final BasePersonRocket<?, ?> rocket = fuelRocket(klass, flightPlan);
@@ -103,12 +106,12 @@ public class LaunchDirector implements AtomLaunchDirector {
   }
 
   @Override
-  public FlightLog launch(String rocketName, FlightPlan flightPlan) throws NeutronException {
+  public FlightLog launch(String rocketName, final FlightPlan flightPlan) throws NeutronException {
     return launch(NeutronClassFinder.classForName(rocketName), flightPlan);
   }
 
   @Override
-  public LaunchPad scheduleLaunch(StandardFlightSchedule sched, FlightPlan flightPlan)
+  public AtomLaunchPad scheduleLaunch(StandardFlightSchedule sched, FlightPlan flightPlan)
       throws NeutronException {
     LOGGER.debug("LAUNCH COORDINATOR: LAST CHANGE LOCATION: {}", flightPlan.getLastRunLoc());
     final LaunchPad pad = new LaunchPad(this, sched, flightPlan);
@@ -146,6 +149,11 @@ public class LaunchDirector implements AtomLaunchDirector {
     rocketsInFlight.put(key, rocket);
   }
 
+  /**
+   * QUESTION: is this needed?
+   * 
+   * @param key trigger key
+   */
   public void removeExecutingJob(final TriggerKey key) {
     if (rocketsInFlight.containsKey(key)) {
       rocketsInFlight.remove(key);
@@ -164,8 +172,8 @@ public class LaunchDirector implements AtomLaunchDirector {
     return flightPlan;
   }
 
-  public void setFlightPlan(FlightPlan opts) {
-    this.flightPlan = opts;
+  public void setFlightPlan(FlightPlan flightPlan) {
+    this.flightPlan = flightPlan;
   }
 
   @Override

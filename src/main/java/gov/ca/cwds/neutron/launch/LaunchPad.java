@@ -36,15 +36,15 @@ public class LaunchPad implements VoxLaunchPadMBean {
   private transient Scheduler scheduler;
 
   private transient AtomLaunchDirector launchDirector;
-  private final StandardFlightSchedule flightSchedule;
   private final AtomFlightRecorder flightRecorder;
 
+  private final StandardFlightSchedule flightSchedule;
   private FlightPlan flightPlan;
 
   private final String rocketName;
   private final String triggerName;
-  private final TriggerKey triggerKey;
 
+  private final TriggerKey triggerKey;
   private volatile JobKey jobKey;
   private volatile JobDetail jd;
 
