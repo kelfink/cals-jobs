@@ -204,10 +204,6 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     }
   }
 
-  protected void initCommandControl() {
-    this.cmdControlManager.initCommandControl();
-  }
-
   /**
    * Prepare launch pads and start the scheduler.
    * 
@@ -235,7 +231,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
         launchScheduler.scheduleLaunch(sched, flightPlan);
       }
 
-      initCommandControl();
+      cmdControlManager.initCommandControl();
 
       // Cindy: "Let's light this candle!"
       if (!LaunchCommand.settings.isTestMode()) {

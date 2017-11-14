@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.weakref.jmx.MBeanExporter;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
@@ -20,18 +22,23 @@ public class XRaySpex implements AtomCommandControlManager {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(XRaySpex.class);
 
+  private final Injector injector;
   private final LaunchCommandSettings settings;
-  private final AtomLaunchDirector launchScheduler;
+  private final AtomLaunchDirector launchDirector;
+
+  private Thread jettyServer;
 
   /**
-   * REST administration. Started if enabled in #.
+   * REST administration. Started if enabled in {@link LaunchCommandSettings}.
    */
   private NeutronRestServer restServer = new NeutronRestServer();
 
   @Inject
-  public XRaySpex(final LaunchCommandSettings settings, final AtomLaunchDirector launchScheduler) {
+  public XRaySpex(final LaunchCommandSettings settings, final AtomLaunchDirector launchDirector,
+      final Injector injector) {
     this.settings = settings;
-    this.launchScheduler = launchScheduler;
+    this.launchDirector = launchDirector;
+    this.injector = injector;
   }
 
   @Override
@@ -45,29 +52,36 @@ public class XRaySpex implements AtomCommandControlManager {
     }
   }
 
+  /**
+   * Jetty for REST administration.
+   */
   protected void exposeREST() {
-    // Jetty for REST administration.
-    Thread jettyServer = new Thread(restServer::run);
+    jettyServer = new Thread(restServer::run);
     jettyServer.start();
   }
 
+  /**
+   * Expose Command Center methods to JMX. Expose Guice bean attributes to JMX.
+   */
   protected void exposeJMX() {
     LOGGER.warn("\n>>>>>>> ENABLE JMX! <<<<<<<\n");
     final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-    for (AtomLaunchPad pad : launchScheduler.getLaunchPads().values()) {
+    for (AtomLaunchPad pad : launchDirector.getLaunchPads().values()) {
       exporter.export("Neutron:rocket=" + pad.getFlightSchedule().getShortName(), pad);
     }
 
-    // Expose Command Center methods to JMX.
     exporter.export("Neutron:runner=Launch_Command", this);
     LOGGER.info("MBeans: {}", exporter.getExportedObjects());
 
-    // Expose Guice bean attributes to JMX.
-    // Manager.manage("Neutron_Guice", injector);
+    Manager.manage("Neutron_Guice", injector);
   }
 
   public LaunchCommandSettings getSettings() {
     return settings;
+  }
+
+  public Thread getJettyServer() {
+    return jettyServer;
   }
 
 }

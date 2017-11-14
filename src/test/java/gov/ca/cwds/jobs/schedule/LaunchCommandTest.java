@@ -247,11 +247,6 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   }
 
   @Test
-  public void initializeManagementInterfaces_Args__() throws Exception {
-    target.initCommandControl();
-  }
-
-  @Test
   public void initScheduler_Args__() throws Exception {
     LaunchCommand.getSettings().setExposeJmx(false);
     target.initScheduler();
