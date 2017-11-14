@@ -197,4 +197,8 @@ public enum StandardFlightSchedule {
     return initialLoadOrder;
   }
 
+  public boolean isInitialLoad() {
+    return initialLoadOrder > 0;
+  }
+
 }
