@@ -16,7 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.collect.ImmutableList;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.neutron.atom.AtomJobControl;
+import gov.ca.cwds.neutron.atom.AtomRocketControl;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.util.NeutronDateUtils;
 
@@ -30,7 +30,7 @@ import gov.ca.cwds.neutron.util.NeutronDateUtils;
  * 
  * @author CWDS API Team
  */
-public class FlightLog implements ApiMarker, AtomJobControl {
+public class FlightLog implements ApiMarker, AtomRocketControl {
 
   /**
    * Default serialization.

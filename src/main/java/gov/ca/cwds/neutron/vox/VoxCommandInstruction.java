@@ -17,7 +17,7 @@ import joptsimple.OptionSet;
  * 
  * @author CWDS API Team
  */
-public class VoxCommandInstruction implements ApiMarker {
+public final class VoxCommandInstruction implements ApiMarker {
 
   private static final long serialVersionUID = 1L;
 

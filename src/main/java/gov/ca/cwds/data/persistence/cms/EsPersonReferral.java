@@ -34,7 +34,7 @@ import gov.ca.cwds.data.persistence.cms.rep.EmbeddableAccessLimitation;
 import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.neutron.atom.AtomSecurity;
+import gov.ca.cwds.neutron.atom.AtomDocumentSecurity;
 import gov.ca.cwds.neutron.util.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
@@ -476,7 +476,7 @@ public class EsPersonReferral
     // A referral may have multiple allegations.
     final ElasticSearchPersonAllegation allegation = makeAllegation();
 
-    if (AtomSecurity.isNotSealedSensitive(opts, perpetratorSensitivityIndicator)) {
+    if (AtomDocumentSecurity.isNotSealedSensitive(opts, perpetratorSensitivityIndicator)) {
       allegation.setPerpetrator(makePerpetrator());
 
       // NOTE: #148091785: deprecated person fields.
@@ -486,7 +486,7 @@ public class EsPersonReferral
       allegation.setPerpetratorLastName(ifNull(this.perpetratorLastName));
     }
 
-    if (AtomSecurity.isNotSealedSensitive(opts, victimSensitivityIndicator)) {
+    if (AtomDocumentSecurity.isNotSealedSensitive(opts, victimSensitivityIndicator)) {
       allegation.setVictim(makeVictim());
 
       // NOTE: #148091785: deprecated person fields.

@@ -54,7 +54,7 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.atom.AtomPersonDocPrep;
-import gov.ca.cwds.neutron.atom.AtomSecurity;
+import gov.ca.cwds.neutron.atom.AtomDocumentSecurity;
 import gov.ca.cwds.neutron.atom.AtomTransform;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.enums.NeutronColumn;
@@ -95,7 +95,7 @@ import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
  */
 public abstract class BasePersonRocket<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends LastRunRocket implements AutoCloseable, AtomPersonDocPrep<T>, AtomInitialLoad<T, M>,
-    AtomTransform<T, M>, AtomSecurity, AtomValidateDocument {
+    AtomTransform<T, M>, AtomDocumentSecurity, AtomValidateDocument {
 
   private static final long serialVersionUID = 1L;
 

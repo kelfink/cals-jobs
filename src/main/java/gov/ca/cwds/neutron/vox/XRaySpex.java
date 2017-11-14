@@ -1,4 +1,4 @@
-package gov.ca.cwds.neutron.inject;
+package gov.ca.cwds.neutron.vox;
 
 import java.lang.management.ManagementFactory;
 
@@ -12,13 +12,14 @@ import com.google.inject.Singleton;
 import com.google.inject.tools.jmx.Manager;
 
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.atom.AtomCommandCenterConsole;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 
 @Singleton
-public class XRaySpex implements AtomCommandControlManager {
+public class XRaySpex implements AtomCommandCenterConsole {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(XRaySpex.class);
 

@@ -28,10 +28,10 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
+import gov.ca.cwds.neutron.atom.AtomCommandCenterConsole;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
-import gov.ca.cwds.neutron.inject.AtomCommandControlManager;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
@@ -53,7 +53,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     flightPlan.setBaseDirectory("/var/lib/jenkins/");
     flightPlan.setLastRunLoc(lastRunFile);
 
-    final AtomCommandControlManager ctrlMgr = mock(AtomCommandControlManager.class);
+    final AtomCommandCenterConsole ctrlMgr = mock(AtomCommandCenterConsole.class);
     target = new LaunchCommand(flightRecorder, launchScheduler, ctrlMgr);
     target.setCommonFlightPlan(flightPlan);
     target.setLaunchDirector(launchScheduler);

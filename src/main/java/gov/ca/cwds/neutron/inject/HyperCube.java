@@ -80,6 +80,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
+import gov.ca.cwds.neutron.atom.AtomCommandCenterConsole;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
@@ -98,6 +99,7 @@ import gov.ca.cwds.neutron.launch.listener.NeutronSchedulerListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
+import gov.ca.cwds.neutron.vox.XRaySpex;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
@@ -287,7 +289,7 @@ public class HyperCube extends NeutronGuiceModule {
     bind(AtomFlightRecorder.class).to(FlightRecorder.class).asEagerSingleton();
     bind(AtomFlightPlanManager.class).to(FlightPlanRegistry.class).asEagerSingleton();
     bind(AtomRocketFactory.class).to(RocketFactory.class).asEagerSingleton();
-    bind(AtomCommandControlManager.class).to(XRaySpex.class);
+    bind(AtomCommandCenterConsole.class).to(XRaySpex.class);
   }
 
   /**

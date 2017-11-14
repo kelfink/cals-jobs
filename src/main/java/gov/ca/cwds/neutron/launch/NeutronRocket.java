@@ -20,7 +20,7 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
- * Wrapper for scheduled flights.
+ * Quartz for scheduled flights.
  * 
  * @author CWDS API Team
  * @see LaunchCommand

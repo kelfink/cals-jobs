@@ -8,7 +8,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
  * 
  * @author CWDS API Team
  */
-public interface AtomSecurity extends ApiMarker {
+public interface AtomDocumentSecurity extends ApiMarker {
 
   /**
    * Determine if limited access records must be deleted from ES.

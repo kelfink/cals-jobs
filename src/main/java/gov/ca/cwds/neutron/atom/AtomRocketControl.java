@@ -9,7 +9,7 @@ import gov.ca.cwds.neutron.flight.FlightLog;
  * @author CWDS API Team
  * @see FlightLog
  */
-public interface AtomJobControl extends ApiMarker {
+public interface AtomRocketControl extends ApiMarker {
 
   /**
    * Is the job still running?

@@ -21,12 +21,12 @@ import com.google.inject.Injector;
 
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.neutron.atom.AtomCommandCenterConsole;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
-import gov.ca.cwds.neutron.inject.AtomCommandControlManager;
 import gov.ca.cwds.neutron.inject.HyperCube;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
@@ -58,6 +58,8 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   private FlightPlan commonFlightPlan;
 
+  private boolean shutdownRequested;
+
   /**
    * <strong>HACK</strong>: make an interface for DI
    */
@@ -76,7 +78,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   private AtomLaunchDirector launchDirector;
 
-  private AtomCommandControlManager cmdControlManager;
+  private AtomCommandCenterConsole cmdControlManager;
 
   private boolean fatalError;
 
@@ -86,7 +88,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   @Inject
   public LaunchCommand(final FlightRecorder flightRecorder, final AtomLaunchDirector launchDirector,
-      final AtomCommandControlManager cmdControlManager) {
+      final AtomCommandCenterConsole cmdControlManager) {
     this.flightRecorder = flightRecorder;
     this.launchDirector = launchDirector;
     this.cmdControlManager = cmdControlManager;
@@ -366,6 +368,17 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       final int exitCode = this.fatalError ? -1 : 0;
       LOGGER.info("Process exit code: {}", exitCode);
       Runtime.getRuntime().exit(exitCode); // NOSONAR
+    }
+  }
+
+  @Override
+  public void shutdown() throws NeutronException {
+    try {
+      this.shutdownRequested = true;
+      launchDirector.stopScheduler(false);
+      close();
+    } catch (Exception e) {
+      throw JobLogs.checked(LOGGER, e, "FAILED TO SHUTDOWN!: {}", e.getMessage());
     }
   }
 

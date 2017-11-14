@@ -37,7 +37,7 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
  * @param <M> de-normalized type
  */
 public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends AtomHibernate<T, M>, AtomShared, AtomJobControl {
+    extends AtomHibernate<T, M>, AtomShared, AtomRocketControl {
 
   /**
    * Restrict initial load key ranges from command line.

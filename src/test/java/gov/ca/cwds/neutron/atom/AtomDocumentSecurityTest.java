@@ -9,14 +9,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.neutron.atom.AtomSecurity;
+import gov.ca.cwds.neutron.atom.AtomDocumentSecurity;
 
-public class AtomSecurityTest {
+public class AtomDocumentSecurityTest {
 
-  private static final class TestAtomSecurity implements AtomSecurity {
+  private static final class TestAtomSecurity implements AtomDocumentSecurity {
   }
 
-  AtomSecurity target = new TestAtomSecurity();
+  AtomDocumentSecurity target = new TestAtomSecurity();
 
   @Before
   public void setup() throws Exception {
@@ -25,7 +25,7 @@ public class AtomSecurityTest {
 
   @Test
   public void type() throws Exception {
-    assertThat(AtomSecurity.class, notNullValue());
+    assertThat(AtomDocumentSecurity.class, notNullValue());
   }
 
   @Test
@@ -44,7 +44,7 @@ public class AtomSecurityTest {
   public void isNotSealedSensitive_Args__JobOptions__N() throws Exception {
     FlightPlan opts = new FlightPlan();
     String indicator = "N";
-    boolean actual = AtomSecurity.isNotSealedSensitive(opts, indicator);
+    boolean actual = AtomDocumentSecurity.isNotSealedSensitive(opts, indicator);
     boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -54,7 +54,7 @@ public class AtomSecurityTest {
     FlightPlan opts = new FlightPlan();
     opts.setLoadSealedAndSensitive(true);
     String indicator = "R";
-    boolean actual = AtomSecurity.isNotSealedSensitive(opts, indicator);
+    boolean actual = AtomDocumentSecurity.isNotSealedSensitive(opts, indicator);
     boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }

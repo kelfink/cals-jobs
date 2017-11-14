@@ -7,4 +7,6 @@ public interface AtomLaunchCommand {
   void stopScheduler(boolean waitForJobsToComplete) throws NeutronException;
 
   void startScheduler() throws NeutronException;
+
+  void shutdown() throws NeutronException;
 }

@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import gov.ca.cwds.jobs.component.Rocket;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.neutron.atom.AtomJobControl;
+import gov.ca.cwds.neutron.atom.AtomRocketControl;
 import gov.ca.cwds.neutron.atom.AtomShared;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
@@ -31,7 +31,7 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
  * 
  * @author CWDS API Team
  */
-public abstract class LastRunRocket implements Rocket, AtomShared, AtomJobControl {
+public abstract class LastRunRocket implements Rocket, AtomShared, AtomRocketControl {
 
   private static final long serialVersionUID = 1L;
 
