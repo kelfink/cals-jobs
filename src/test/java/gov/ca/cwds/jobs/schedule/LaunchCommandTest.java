@@ -19,7 +19,6 @@ import org.quartz.Scheduler;
 import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.weakref.jmx.JmxException;
 
 import com.google.inject.Injector;
 
@@ -255,11 +254,6 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   @Test
   public void initScheduler_Args__() throws Exception {
     LaunchCommand.getSettings().setExposeJmx(false);
-    target.initScheduler();
-  }
-
-  @Test(expected = JmxException.class)
-  public void initScheduler_Args___T__NeutronException() throws Exception {
     target.initScheduler();
   }
 
