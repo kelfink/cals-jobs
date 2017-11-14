@@ -89,6 +89,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
+import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
@@ -372,6 +373,12 @@ public class HyperCube extends NeutronGuiceModule {
 
   protected SystemCodeCache scaffoldSystemCodeCache() {
     return null;
+  }
+
+  @Provides
+  @Singleton
+  public LaunchCommandSettings commandCenterSettings() {
+    return LaunchCommand.getSettings();
   }
 
   @Provides

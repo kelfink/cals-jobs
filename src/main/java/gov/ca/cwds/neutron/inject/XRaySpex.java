@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.weakref.jmx.MBeanExporter;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
@@ -14,6 +15,7 @@ import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 
+@Singleton
 public class XRaySpex implements AtomCommandControlManager {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(XRaySpex.class);
