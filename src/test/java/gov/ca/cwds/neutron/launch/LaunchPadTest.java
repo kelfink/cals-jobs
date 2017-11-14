@@ -177,7 +177,7 @@ public class LaunchPadTest extends Goddard {
 
   @Test
   public void getJobName_Args__() throws Exception {
-    String actual = target.getJobName();
+    String actual = target.getRocketName();
     assertThat(actual, is(notNullValue()));
   }
 

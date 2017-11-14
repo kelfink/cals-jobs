@@ -74,7 +74,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   private FlightRecorder flightRecorder;
 
-  private AtomLaunchDirector launchScheduler;
+  private AtomLaunchDirector launchDirector;
 
   private AtomCommandControlManager cmdControlManager;
 
@@ -86,9 +86,9 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   @Inject
   public LaunchCommand(final FlightRecorder flightRecorder,
-      final AtomLaunchDirector launchScheduler, final AtomCommandControlManager cmdControlManager) {
+      final AtomLaunchDirector launchDirector, final AtomCommandControlManager cmdControlManager) {
     this.flightRecorder = flightRecorder;
-    this.launchScheduler = launchScheduler;
+    this.launchDirector = launchDirector;
     this.cmdControlManager = cmdControlManager;
   }
 
@@ -184,13 +184,13 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   @Override
   @Managed(description = "Stop the scheduler")
   public void stopScheduler(boolean waitForJobsToComplete) throws NeutronException {
-    this.launchScheduler.stopScheduler(waitForJobsToComplete);
+    this.launchDirector.stopScheduler(waitForJobsToComplete);
   }
 
   @Override
   @Managed(description = "Start the scheduler")
   public void startScheduler() throws NeutronException {
-    this.launchScheduler.startScheduler();
+    this.launchDirector.startScheduler();
   }
 
   protected void configureInitialMode(final Date now) {
@@ -225,7 +225,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
         final FlightPlan flightPlan = new FlightPlan(commonFlightPlan);
         handleTimeFile(flightPlan, fmt, now, sched);
-        launchScheduler.scheduleLaunch(sched, flightPlan);
+        launchDirector.scheduleLaunch(sched, flightPlan);
       }
 
       cmdControlManager.initCommandControl();
@@ -233,12 +233,12 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       // Cindy: "Let's light this candle!"
       if (!LaunchCommand.settings.isTestMode()) {
         LOGGER.warn("start scheduler ...");
-        launchScheduler.getScheduler().start();
+        launchDirector.getScheduler().start();
       }
 
     } catch (IOException | SchedulerException | ParseException e) {
       try {
-        launchScheduler.getScheduler().shutdown(false);
+        launchDirector.getScheduler().shutdown(false);
       } catch (SchedulerException e2) {
         LOGGER.warn("FAILED TO START SCHEDULER! {}", e2.getMessage(), e2);
       }
@@ -306,15 +306,15 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   }
 
   public AtomLaunchDirector getNeutronScheduler() {
-    return launchScheduler;
+    return launchDirector;
   }
 
-  public void setLaunchScheduler(AtomLaunchDirector launchScheduler) {
-    this.launchScheduler = launchScheduler;
+  public void setLaunchDirector(AtomLaunchDirector launchScheduler) {
+    this.launchDirector = launchScheduler;
   }
 
   public Scheduler getScheduler() {
-    return launchScheduler.getScheduler();
+    return launchDirector.getScheduler();
   }
 
   /**

@@ -38,13 +38,17 @@ public class LaunchPad implements VoxLaunchPadMBean {
   private transient AtomLaunchDirector launchDirector;
   private final StandardFlightSchedule flightSchedule;
   private final AtomFlightRecorder flightRecorder;
-  private final String jobName;
-  private final String triggerName;
 
   private FlightPlan flightPlan;
-  private boolean vetoExecution;
+
+  private final String rocketName;
+  private final String triggerName;
+  private final TriggerKey triggerKey;
+
   private volatile JobKey jobKey;
   private volatile JobDetail jd;
+
+  private boolean vetoExecution;
 
   @Inject
   public LaunchPad(final AtomLaunchDirector director, StandardFlightSchedule sched,
@@ -56,9 +60,10 @@ public class LaunchPad implements VoxLaunchPadMBean {
     this.flightSchedule = sched;
     this.flightPlan = flightPlan;
 
-    this.jobName = flightSchedule.getShortName();
-    this.jobKey = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
+    this.rocketName = flightSchedule.getShortName();
+    this.jobKey = new JobKey(rocketName, NeutronSchedulerConstants.GRP_LST_CHG);
     this.triggerName = flightSchedule.getShortName();
+    triggerKey = new TriggerKey(triggerName, NeutronSchedulerConstants.GRP_LST_CHG);
 
     final FlightLog flightLog = new FlightLog();
     flightLog.setRocketName(sched.getShortName());
@@ -89,15 +94,16 @@ public class LaunchPad implements VoxLaunchPadMBean {
    * {@inheritDoc}
    */
   @Override
-  @Managed(description = "Schedule rocket on repeat")
+  @Managed(description = "Schedule rocket for periodic launch")
   public void schedule() throws NeutronException {
     try {
       if (scheduler.checkExists(this.jobKey)) {
-        LOGGER.warn("ROCKET ALREADY SCHEDULED! {}", jobName);
+        LOGGER.warn("ROCKET ALREADY SCHEDULED! rocket: {}", rocketName);
         return;
       }
 
-      jd = newJob(NeutronRocket.class).withIdentity(jobName, NeutronSchedulerConstants.GRP_LST_CHG)
+      jd = newJob(NeutronRocket.class)
+          .withIdentity(rocketName, NeutronSchedulerConstants.GRP_LST_CHG)
           .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS,
               flightSchedule.getRocketClass().getName())
           .build();
@@ -114,9 +120,9 @@ public class LaunchPad implements VoxLaunchPadMBean {
               .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
               .build();
       scheduler.scheduleJob(jd, trg);
-      LOGGER.info("Scheduled trigger {}", jobName);
+      LOGGER.info("Scheduled trigger {}", rocketName);
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO SCHEDULE LAUNCH! rocket: {}", jobName);
+      throw JobLogs.checked(LOGGER, e, "FAILED TO SCHEDULE LAUNCH! rocket: {}", rocketName);
     }
   }
 
@@ -127,12 +133,10 @@ public class LaunchPad implements VoxLaunchPadMBean {
   @Managed(description = "Unschedule rocket")
   public void unschedule() throws NeutronException {
     try {
-      LOGGER.warn("unschedule rocket");
-      final TriggerKey triggerKey =
-          new TriggerKey(triggerName, NeutronSchedulerConstants.GRP_LST_CHG);
-      scheduler.pauseTrigger(triggerKey);
+      LOGGER.warn("unschedule launch");
+      scheduler.unscheduleJob(triggerKey);
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO UNSCHEDULE LAUNCH! rocket: {}", jobName);
+      throw JobLogs.checked(LOGGER, e, "FAILED TO UNSCHEDULE LAUNCH! rocket: {}", rocketName);
     }
   }
 
@@ -140,7 +144,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
    * {@inheritDoc}
    */
   @Override
-  @Managed(description = "Show rocket status")
+  @Managed(description = "Show rocket's last flight status")
   public String status() {
     LOGGER.warn("Show rocket status");
     return flightRecorder.getLastFlightLog(this.flightSchedule.getRocketClass()).toString();
@@ -150,7 +154,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
    * {@inheritDoc}
    */
   @Override
-  @Managed(description = "Show rocket history")
+  @Managed(description = "Show rocket's flight history")
   public String history() {
     LOGGER.warn("Show rocket history");
     StringBuilder buf = new StringBuilder();
@@ -165,7 +169,8 @@ public class LaunchPad implements VoxLaunchPadMBean {
   @Managed(description = "Show rocket log")
   public String logs() {
     StringBuilder buf = new StringBuilder();
-    flightRecorder.getHistory(this.flightSchedule.getRocketClass()).stream().forEach(buf::append);
+    buf.append("log stuff");
+    // IMPL ME!
     return buf.toString();
   }
 
@@ -173,19 +178,51 @@ public class LaunchPad implements VoxLaunchPadMBean {
    * {@inheritDoc}
    */
   @Override
-  @Managed(description = "Stop flying rocket")
+  @Managed(description = "Abort flying rocket")
   public void stop() throws NeutronException {
     try {
-      LOGGER.warn("Stop flying rocket");
+      LOGGER.warn("Abort flying rocket {}", rocketName);
       unschedule();
-      final JobKey key = new JobKey(jobName, NeutronSchedulerConstants.GRP_LST_CHG);
+      final JobKey key = new JobKey(rocketName, NeutronSchedulerConstants.GRP_LST_CHG);
       scheduler.interrupt(key);
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO STOP ROCKET! rocket: {}", jobName);
+      throw JobLogs.checked(LOGGER, e, "FAILED TO ABORT ROCKET! rocket: {}", rocketName);
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
+  @Managed(description = "Pause rocket")
+  public void pause() throws NeutronException {
+    try {
+      LOGGER.warn("Pause rocket {}", rocketName);
+      scheduler.pauseTrigger(triggerKey);
+    } catch (Exception e) {
+      throw JobLogs.checked(LOGGER, e, "FAILED TO PAUSE ROCKET! rocket: {}", rocketName);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  @Managed(description = "Resume rocket")
+  public void resume() throws NeutronException {
+    try {
+      LOGGER.warn("Resume rocket {}", rocketName);
+      scheduler.resumeTrigger(triggerKey);
+    } catch (Exception e) {
+      throw JobLogs.checked(LOGGER, e, "FAILED TO PAUSE ROCKET! rocket: {}", rocketName);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  @Managed(description = "Shutdown command center")
   public void shutdown() throws NeutronException {
     LOGGER.warn("Shutdown command center");
     launchDirector.stopScheduler(false);
@@ -227,8 +264,8 @@ public class LaunchPad implements VoxLaunchPadMBean {
   }
 
   @Override
-  public String getJobName() {
-    return jobName;
+  public String getRocketName() {
+    return rocketName;
   }
 
   @Override
@@ -243,6 +280,10 @@ public class LaunchPad implements VoxLaunchPadMBean {
 
   public AtomLaunchDirector getLaunchDirector() {
     return launchDirector;
+  }
+
+  public TriggerKey getTriggerKey() {
+    return triggerKey;
   }
 
 }

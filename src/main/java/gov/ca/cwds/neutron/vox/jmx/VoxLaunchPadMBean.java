@@ -7,7 +7,7 @@ import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 
 public interface VoxLaunchPadMBean extends AtomLaunchPad {
 
-  String getJobName();
+  String getRocketName();
 
   String getTriggerName();
 
