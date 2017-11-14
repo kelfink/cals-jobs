@@ -43,7 +43,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
   }
 
   /**
-   * SonarQube complains loudly about this "vulnerability" with
+   * SonarQube complains loudly about a "vulnerability" with
    * {@code connection.prepareStatement(query)}.
    */
   @Override

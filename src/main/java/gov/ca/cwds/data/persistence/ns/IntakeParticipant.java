@@ -78,15 +78,6 @@ public class IntakeParticipant implements PersistentObject, ApiPersonAware,
   @JsonIgnore
   private Map<String, IntakeScreening> screenings = new LinkedHashMap<>();
 
-  /**
-   * Update section JSON is the participant's screenings.
-   * 
-   * @return JSON to update document only
-   */
-  public String buildUpdateJson() {
-    return "";
-  }
-
   @Override
   public Serializable getPrimaryKey() {
     return StringUtils.isNotBlank(legacyId) ? legacyId : id;

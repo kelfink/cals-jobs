@@ -35,14 +35,6 @@ public class IntakeParticipantTest {
   }
 
   @Test
-  public void buildUpdateJson_Args__() throws Exception {
-    IntakeParticipant target = new IntakeParticipant();
-    String actual = target.buildUpdateJson();
-    String expected = "";
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void getPrimaryKey_Args__() throws Exception {
     IntakeParticipant target = new IntakeParticipant();
     target.setId("1234");
