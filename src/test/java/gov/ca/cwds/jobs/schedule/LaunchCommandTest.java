@@ -34,7 +34,6 @@ import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
-import gov.ca.cwds.neutron.launch.NeutronRocket;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
@@ -212,12 +211,6 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   }
 
   @Test
-  public void addExecutingJob_Args__TriggerKey__NeutronRocket() throws Exception {
-    final NeutronRocket job = mock(NeutronRocket.class);
-    target.trackInFlightRocket(key, job);
-  }
-
-  @Test
   public void getInstance_Args__() throws Exception {
     LaunchCommand actual = LaunchCommand.getInstance();
     assertThat(actual, is(notNullValue()));
@@ -281,12 +274,6 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   @Test
   public void setLaunchScheduler_Args__LaunchScheduler() throws Exception {
     target.setLaunchScheduler(launchScheduler);
-  }
-
-  @Test
-  public void trackInFlightRocket_Args__TriggerKey__NeutronRocket() throws Exception {
-    NeutronRocket rocket = mock(NeutronRocket.class);
-    target.trackInFlightRocket(key, rocket);
   }
 
   @Test

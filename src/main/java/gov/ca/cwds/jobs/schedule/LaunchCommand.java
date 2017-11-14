@@ -7,14 +7,12 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weakref.jmx.MBeanExporter;
@@ -37,7 +35,6 @@ import gov.ca.cwds.neutron.inject.HyperCube;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
-import gov.ca.cwds.neutron.launch.NeutronRocket;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
@@ -357,14 +354,6 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   public Scheduler getScheduler() {
     return launchScheduler.getScheduler();
-  }
-
-  public Map<Class<?>, AtomLaunchPad> getScheduleRegistry() {
-    return launchScheduler.getLaunchPads();
-  }
-
-  public void trackInFlightRocket(TriggerKey key, NeutronRocket rocket) {
-    launchScheduler.markRocketAsInFlight(key, rocket);
   }
 
   /**
