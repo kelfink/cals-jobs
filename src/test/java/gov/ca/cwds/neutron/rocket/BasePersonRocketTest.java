@@ -47,7 +47,6 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.schedule.LaunchCommandSettings;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -55,6 +54,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 
 public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 

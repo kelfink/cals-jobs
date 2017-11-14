@@ -33,6 +33,10 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
+import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
+import gov.ca.cwds.neutron.launch.NeutronRocket;
+import gov.ca.cwds.neutron.launch.RocketFactory;
+import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
 public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
@@ -260,7 +264,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void initializeManagementInterfaces_Args__() throws Exception {
-    target.initializeManagementInterfaces();
+    target.initCommandControl();
   }
 
   @Test

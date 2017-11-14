@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.neutron.launch;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -22,6 +22,8 @@ import com.google.inject.Injector;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
+import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
+import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 public class RocketFactoryTest extends Goddard {

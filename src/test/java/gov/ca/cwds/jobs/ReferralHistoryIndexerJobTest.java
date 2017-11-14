@@ -40,9 +40,9 @@ import gov.ca.cwds.jobs.config.FlightPlanTest;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.rocket.referral.MinClientReferral;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
+import gov.ca.cwds.neutron.launch.FlightRecorder;
 
 public class ReferralHistoryIndexerJobTest
     extends Goddard<ReplicatedPersonReferrals, EsPersonReferral> {

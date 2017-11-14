@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.neutron.launch;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +21,6 @@ import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import gov.ca.cwds.neutron.launch.LaunchPad;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronClassFinder;
 

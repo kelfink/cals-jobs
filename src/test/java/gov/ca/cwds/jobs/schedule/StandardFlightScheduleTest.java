@@ -9,6 +9,8 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.quartz.listeners.JobChainingJobListener;
 
+import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
+
 public class StandardFlightScheduleTest {
   @Test
   public void type() throws Exception {

@@ -19,10 +19,10 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
+import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 

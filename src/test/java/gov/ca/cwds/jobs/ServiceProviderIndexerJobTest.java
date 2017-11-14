@@ -18,7 +18,7 @@ import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.config.FlightPlanTest;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.neutron.launch.FlightRecorder;
 
 /**
  * @author CWDS API Team

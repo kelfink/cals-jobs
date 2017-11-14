@@ -20,8 +20,8 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
+import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 public class TestIndexerJob

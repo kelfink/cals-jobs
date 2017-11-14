@@ -21,8 +21,6 @@ import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.schedule.LaunchDirector;
-import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.flight.FlightLog;

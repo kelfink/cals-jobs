@@ -21,7 +21,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
+import gov.ca.cwds.neutron.launch.FlightRecorder;
 
 public class CaseHistoryIndexerJobTest extends Goddard {
 

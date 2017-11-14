@@ -4,9 +4,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.neutron.vox.jmx.VoxCommandType;
 import gov.ca.cwds.neutron.vox.jmx.VoxJmxDefaults;
 import joptsimple.OptionParser;

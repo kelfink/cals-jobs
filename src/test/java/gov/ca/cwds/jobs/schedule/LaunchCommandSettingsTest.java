@@ -7,6 +7,8 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
+import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
+
 public class LaunchCommandSettingsTest {
 
   @Test

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.neutron.launch;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.neutron.launch;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,6 +14,7 @@ import org.slf4j.MDC;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;

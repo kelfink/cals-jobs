@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightSummary;
+import gov.ca.cwds.neutron.launch.FlightRecorder;
+import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
 public class FlightRecorderTest {
 

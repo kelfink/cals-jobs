@@ -22,11 +22,11 @@ import com.google.inject.Injector;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.schedule.RocketFactory;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
+import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 

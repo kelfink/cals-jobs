@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.schedule;
+package gov.ca.cwds.neutron.launch;
 
 import org.quartz.Job;
 import org.quartz.JobDetail;

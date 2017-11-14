@@ -17,10 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightSummary;
+import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
 public class FlightSummaryTest {
 

@@ -5,8 +5,8 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.neutron.enums.FlightStatus;
+import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
 public class FlightSummary implements ApiMarker {
 

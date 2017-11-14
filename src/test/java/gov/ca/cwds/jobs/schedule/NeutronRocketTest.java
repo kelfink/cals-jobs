@@ -24,6 +24,7 @@ import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.launch.NeutronRocket;
 
 public class NeutronRocketTest extends Goddard {
 

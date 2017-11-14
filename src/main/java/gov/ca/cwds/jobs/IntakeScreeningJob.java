@@ -25,9 +25,9 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
+import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 

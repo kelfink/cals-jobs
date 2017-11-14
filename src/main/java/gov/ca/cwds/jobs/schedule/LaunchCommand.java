@@ -35,6 +35,10 @@ import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.inject.HyperCube;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.launch.FlightRecorder;
+import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
+import gov.ca.cwds.neutron.launch.NeutronRocket;
+import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.NeutronStringUtil;
@@ -223,7 +227,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     Manager.manage("Neutron_Guice", injector);
   }
 
-  protected void initializeManagementInterfaces() {
+  protected void initCommandControl() {
     if (LaunchCommand.settings.isExposeJmx()) {
       exposeJMX();
     }
@@ -260,7 +264,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
         launchScheduler.scheduleLaunch(sched, flightPlan);
       }
 
-      initializeManagementInterfaces();
+      initCommandControl();
 
       // Cindy: "Let's light this candle!"
       if (!LaunchCommand.settings.isTestMode()) {
