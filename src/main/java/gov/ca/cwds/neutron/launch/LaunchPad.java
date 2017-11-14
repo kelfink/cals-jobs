@@ -76,7 +76,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
    * {@inheritDoc}
    */
   @Override
-  @Managed(description = "Run rocket now, show results immediately")
+  @Managed(description = "Launch rocket now, show results immediately")
   public String run(String cmdLine) throws NeutronException {
     try {
       LOGGER.info("RUN JOB: {}", flightSchedule.getShortName());

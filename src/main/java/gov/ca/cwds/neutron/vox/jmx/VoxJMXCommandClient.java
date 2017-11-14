@@ -53,7 +53,7 @@ public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAc
     this.port = port;
   }
 
-  public void connect() throws NeutronException {
+  public final void connect() throws NeutronException {
     try {
       jmxConnector = makeConnector.apply(host, port);
       mbeanServerConnection = jmxConnector.getMBeanServerConnection();
