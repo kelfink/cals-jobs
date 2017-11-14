@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Arrays;
 
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.UserType;
@@ -22,7 +23,7 @@ public class StringArrayType implements UserType {
 
   @Override
   public int[] sqlTypes() {
-    return arrayTypes;
+    return Arrays.copyOf(arrayTypes, arrayTypes.length);
   }
 
   @Override
