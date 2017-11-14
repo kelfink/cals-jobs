@@ -134,6 +134,10 @@ public enum StandardFlightSchedule {
     this.jsonElement = jsonElement;
   }
 
+  /**
+   * 
+   * @return Quartz JobChainingJobListener
+   */
   public static JobChainingJobListener buildInitialLoadJobChainListener() {
     final JobChainingJobListener ret = new JobChainingJobListener("initial_load");
 
