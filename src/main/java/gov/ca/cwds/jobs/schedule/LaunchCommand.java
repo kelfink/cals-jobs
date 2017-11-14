@@ -363,16 +363,17 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   @Override
   public void close() throws Exception {
-    if (!isTestMode() && (!isSchedulerMode() || instance.fatalError)) {
+    if (!isTestMode() && (!isSchedulerMode() || fatalError || shutdownRequested)) {
       // Shutdown all remaining resources, even those not attached to this job.
       final int exitCode = this.fatalError ? -1 : 0;
-      LOGGER.info("Process exit code: {}", exitCode);
-      Runtime.getRuntime().exit(exitCode); // NOSONAR
+      LOGGER.warn("Exit code: {}", exitCode);
+      System.exit(exitCode); // NOSONAR
     }
   }
 
   @Override
   public void shutdown() throws NeutronException {
+    LOGGER.info("\n>>>>>>>>>> SHUTDOWN REQUESTED!");
     try {
       this.shutdownRequested = true;
       launchDirector.stopScheduler(false);
@@ -389,7 +390,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * @throws NeutronException on launch error
    */
   protected static synchronized LaunchCommand startSchedulerMode() throws NeutronException {
-    LOGGER.info("STARTING LAUNCH COMMAND ...");
+    LOGGER.info("STARTING COMMAND CENTER ...");
 
     // HACK: inject a mock scheduler instead.
     if (standardFlightPlan.isSimulateLaunch()) {

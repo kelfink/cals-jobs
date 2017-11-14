@@ -20,10 +20,10 @@ import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
 
 /**
  * <p>
- * Expose:
+ * Expose to JMX:
  * <ul>
- * <li>Expose Command Center methods to JMX</li>
- * <li>Expose Guice bean attributes to JMX.</li>
+ * <li>Command Center methods</li>
+ * <li>Guice bean attributes</li>
  * </ul>
  * </p>
  */
