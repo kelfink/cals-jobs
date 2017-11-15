@@ -163,6 +163,8 @@ public enum StandardFlightSchedule {
   }
 
   /**
+   * The JobChainingJobListener executes Quartz jobs in sequence by blocking scheduled triggers.
+   * Appropriate for initial load.
    * 
    * @return Quartz JobChainingJobListener
    */
