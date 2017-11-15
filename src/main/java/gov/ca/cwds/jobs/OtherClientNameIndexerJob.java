@@ -192,8 +192,9 @@ public class OtherClientNameIndexerJob
    * Batch job entry point.
    * 
    * @param args command line arguments
+   * @throws Exception on launch error
    */
-  public static void main(String... args) {
+  public static void main(String... args) throws Exception {
     LaunchCommand.launchOneWayTrip(OtherClientNameIndexerJob.class, args);
   }
 

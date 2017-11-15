@@ -31,7 +31,7 @@ import gov.ca.cwds.neutron.rocket.IndexResetRocket;
 public enum StandardFlightSchedule {
 
   /**
-   * Client. Essential document root.
+   * If requested, drop and create Elasticsearch indexes.
    */
   RESET_INDEX(IndexResetRocket.class, // klazz
       "reset_index", // rocketName

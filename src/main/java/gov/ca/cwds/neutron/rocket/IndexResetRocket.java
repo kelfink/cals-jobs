@@ -80,8 +80,9 @@ public class IndexResetRocket
    * Batch job entry point.
    * 
    * @param args command line arguments
+   * @throws Exception unhandled launch error
    */
-  public static void main(String... args) {
+  public static void main(String... args) throws Exception {
     LaunchCommand.launchOneWayTrip(IndexResetRocket.class, args);
   }
 

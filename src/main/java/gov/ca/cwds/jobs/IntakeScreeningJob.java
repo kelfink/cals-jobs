@@ -156,11 +156,12 @@ public class IntakeScreeningJob extends BasePersonRocket<IntakeParticipant, EsIn
   }
 
   /**
-   * Batch job entry point.
+   * Rocket entry point.
    * 
    * @param args command line arguments
+   * @throws Exception on launch error
    */
-  public static void main(String... args) {
+  public static void main(String... args) throws Exception {
     LaunchCommand.launchOneWayTrip(IntakeScreeningJob.class, args);
   }
 

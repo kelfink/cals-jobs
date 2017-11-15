@@ -33,8 +33,8 @@ import gov.ca.cwds.neutron.launch.FlightRecorder;
  * 
  * @author CWDS API Team
  */
-public class SanityCheckRocket extends
-    BasePersonRocket<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
+public class SanityCheckRocket
+    extends BasePersonRocket<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
 
   private static final long serialVersionUID = 1L;
 
@@ -113,11 +113,12 @@ public class SanityCheckRocket extends
   }
 
   /**
-   * Batch job entry point.
+   * Rocket entry point.
    * 
    * @param args command line arguments
+   * @throws Exception on launch error
    */
-  public static void main(String... args) {
+  public static void main(String... args) throws Exception {
     LaunchCommand.launchOneWayTrip(SanityCheckRocket.class, args);
   }
 

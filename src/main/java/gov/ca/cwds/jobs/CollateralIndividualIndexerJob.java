@@ -31,7 +31,7 @@ public final class CollateralIndividualIndexerJob
   private static final long serialVersionUID = 1L;
 
   /**
-   * Construct batch job instance with all required dependencies.
+   * Construct rocket with required dependencies.
    * 
    * @param dao collateral individual DAO
    * @param esDao ElasticSearch DAO
@@ -55,11 +55,12 @@ public final class CollateralIndividualIndexerJob
   }
 
   /**
-   * Batch job entry point.
+   * Rocket entry point.
    * 
    * @param args command line arguments
+   * @throws Exception on launch error
    */
-  public static void main(String... args) {
+  public static void main(String... args) throws Exception {
     LaunchCommand.launchOneWayTrip(CollateralIndividualIndexerJob.class, args);
   }
 

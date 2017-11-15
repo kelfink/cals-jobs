@@ -31,7 +31,7 @@ public class EducationProviderContactIndexerJob extends
   private static final long serialVersionUID = 1L;
 
   /**
-   * Construct batch job instance with all required dependencies.
+   * Construct rocket with all required dependencies.
    * 
    * @param dao Education Provider DAO
    * @param esDao ElasticSearch DAO
@@ -55,11 +55,12 @@ public class EducationProviderContactIndexerJob extends
   }
 
   /**
-   * Batch job entry point.
+   * Rocket entry point.
    * 
    * @param args command line arguments
+   * @throws Exception on launch error
    */
-  public static void main(String... args) {
+  public static void main(String... args) throws Exception {
     LaunchCommand.launchOneWayTrip(EducationProviderContactIndexerJob.class, args);
   }
 

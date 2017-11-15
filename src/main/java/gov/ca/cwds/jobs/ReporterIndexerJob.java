@@ -62,8 +62,9 @@ public class ReporterIndexerJob extends BasePersonRocket<ReplicatedReporter, Rep
    * Batch job entry point.
    * 
    * @param args command line arguments
+   * @throws Exception on launch error
    */
-  public static void main(String... args) {
+  public static void main(String... args) throws Exception {
     LaunchCommand.launchOneWayTrip(ReporterIndexerJob.class, args);
   }
 

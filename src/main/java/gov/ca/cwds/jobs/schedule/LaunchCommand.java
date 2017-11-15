@@ -303,7 +303,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     return instance;
   }
 
-  protected static FlightPlan parseCommandLine(String... args) {
+  protected static FlightPlan parseCommandLine(String... args) throws NeutronException {
     FlightPlan ret;
     try {
       ret = FlightPlan.parseCommandLine(args);
@@ -408,7 +408,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * @param <T> Person persistence type
    */
   public static <T extends BasePersonRocket<?, ?>> void launchOneWayTrip(final Class<T> klass,
-      String... args) {
+      String... args) throws NeutronException {
     standardFlightPlan = parseCommandLine(args);
     System.setProperty("LAUNCH_DIR",
         NeutronStringUtils.filePath(standardFlightPlan.getLastRunLoc()));
