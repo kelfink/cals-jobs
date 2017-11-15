@@ -111,9 +111,9 @@ public class LaunchPad implements VoxLaunchPadMBean {
       // Initial mode: run only **once**.
       final Trigger trg = LaunchCommand.isInitialMode()
           ? newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_FULL_LOAD)
-              .withPriority(flightSchedule.getInitialLoadOrder()).build()
-          // .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
-          // .build()
+              .withPriority(flightSchedule.getInitialLoadOrder())
+              .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
+              .build()
           : newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
               .withPriority(flightSchedule.getLastRunPriority())
               .withSchedule(simpleSchedule()
