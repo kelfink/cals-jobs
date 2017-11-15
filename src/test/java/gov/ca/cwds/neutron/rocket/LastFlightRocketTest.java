@@ -29,9 +29,9 @@ import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 
-public class LastRunRocketTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
+public class LastFlightRocketTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
-  private static class TestLastSuccessfulRunJob extends LastRunRocket {
+  private static class TestLastSuccessfulRunJob extends LastFlightRocket {
 
     ElasticsearchDao esDao;
 
@@ -88,7 +88,7 @@ public class LastRunRocketTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void type() throws Exception {
-    assertThat(LastRunRocket.class, notNullValue());
+    assertThat(LastFlightRocket.class, notNullValue());
   }
 
   @Test

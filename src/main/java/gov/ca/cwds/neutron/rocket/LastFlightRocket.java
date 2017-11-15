@@ -31,11 +31,11 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
  * 
  * @author CWDS API Team
  */
-public abstract class LastRunRocket implements Rocket, AtomShared, AtomRocketControl {
+public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocketControl {
 
   private static final long serialVersionUID = 1L;
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(LastRunRocket.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(LastFlightRocket.class);
 
   /**
    * Command line options for this rocket.
@@ -50,7 +50,7 @@ public abstract class LastRunRocket implements Rocket, AtomShared, AtomRocketCon
    * @param lastJobRunTimeFilename location of last run time file
    * @param flightPlan job options
    */
-  public LastRunRocket(String lastJobRunTimeFilename, final FlightPlan flightPlan) {
+  public LastFlightRocket(String lastJobRunTimeFilename, final FlightPlan flightPlan) {
     this.lastRunTimeFilename = StringUtils.isBlank(lastJobRunTimeFilename)
         ? flightPlan.getLastRunLoc() : lastJobRunTimeFilename;
     this.flightPlan = flightPlan;
@@ -125,7 +125,7 @@ public abstract class LastRunRocket implements Rocket, AtomShared, AtomRocketCon
 
   /**
    * Calculate last successful run date/time, per
-   * {@link LastRunRocket#calcLastRunDate(Date, FlightPlan)}.
+   * {@link LastFlightRocket#calcLastRunDate(Date, FlightPlan)}.
    * 
    * @param lastSuccessfulRunTime last successful run
    * @return appropriate date to detect changes

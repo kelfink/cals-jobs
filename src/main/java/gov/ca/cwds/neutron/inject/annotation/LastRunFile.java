@@ -7,13 +7,13 @@ import java.lang.annotation.Target;
 
 import com.google.inject.BindingAnnotation;
 
-import gov.ca.cwds.neutron.rocket.LastRunRocket;
+import gov.ca.cwds.neutron.rocket.LastFlightRocket;
 
 /**
  * Marker annotation identifies batch jobs that implement the "last run" policy.
  * 
  * @author CWDS API Team
- * @see LastRunRocket
+ * @see LastFlightRocket
  */
 @BindingAnnotation
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
