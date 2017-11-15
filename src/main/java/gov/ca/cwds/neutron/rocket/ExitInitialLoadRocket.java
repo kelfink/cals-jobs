@@ -49,18 +49,21 @@ public class ExitInitialLoadRocket
 
   @Override
   public Date executeJob(Date lastRunDate) {
-    LOGGER.warn("EXIT INITIAL LOAD!");
-    final AtomFlightRecorder flightRecorder = launchDirector.getFlightRecorder();
+    if (LaunchCommand.isInitialMode()) {
+      LOGGER.warn("EXIT INITIAL LOAD!");
+      final AtomFlightRecorder flightRecorder = launchDirector.getFlightRecorder();
 
-    try {
-      for (StandardFlightSchedule sched : StandardFlightSchedule.getInitialLoadRockets()) {
-        LOGGER.warn("Rocket summary: {}", flightRecorder.getFlightSummary(sched));
+      try {
+        for (StandardFlightSchedule sched : StandardFlightSchedule.getInitialLoadRockets()) {
+          LOGGER.warn("Rocket summary: {}", flightRecorder.getFlightSummary(sched));
+        }
+
+        LaunchCommand.getInstance().shutdown();
+      } catch (Exception e) {
+        JobLogs.checked(LOGGER, e, "ES INDEX MANAGEMENT ERROR! {}", e.getMessage());
       }
-
-      LaunchCommand.getInstance().shutdown();
-    } catch (Exception e) {
-      JobLogs.checked(LOGGER, e, "ES INDEX MANAGEMENT ERROR! {}", e.getMessage());
     }
+
     return lastRunDate;
   }
 
