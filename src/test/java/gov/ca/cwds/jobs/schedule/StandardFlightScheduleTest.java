@@ -57,7 +57,7 @@ public class StandardFlightScheduleTest {
   @Test
   public void getJsonElement_Args__() throws Exception {
     StandardFlightSchedule target = StandardFlightSchedule.REFERRAL;
-    String actual = target.getJsonElement();
+    String actual = target.getNestedElement();
     String expected = "referrals";
     assertThat(actual, is(equalTo(expected)));
   }

@@ -94,9 +94,14 @@ public class LaunchDirector implements AtomLaunchDirector {
   }
 
   @Override
+  public void prepareLaunchPads() {
+    // TODO Auto-generated method stub
+  }
+
+  @Override
   public FlightLog launch(Class<?> klass, final FlightPlan flightPlan) throws NeutronException {
     try {
-      LOGGER.info("Run scheduled rocket: {}", klass.getName());
+      LOGGER.info("LAUNCH SCHEDULED ROCKET! {}", klass.getName());
       final BasePersonRocket<?, ?> rocket = fuelRocket(klass, flightPlan);
       rocket.run();
       return rocket.getFlightLog();
@@ -113,7 +118,6 @@ public class LaunchDirector implements AtomLaunchDirector {
   @Override
   public AtomLaunchPad scheduleLaunch(StandardFlightSchedule sched, FlightPlan flightPlan)
       throws NeutronException {
-    LOGGER.debug("LAUNCH COORDINATOR: LAST CHANGE LOCATION: {}", flightPlan.getLastRunLoc());
     final LaunchPad pad = new LaunchPad(this, sched, flightPlan);
     final Class<?> klass = sched.getRocketClass();
     launchPads.put(klass, pad);

@@ -116,6 +116,11 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     }
   }
 
+  /**
+   * Return String output to JMX or other interface.
+   * 
+   * @return readable output
+   */
   @Managed(description = "Reset for initial load.")
   public String resetTimestampsForInitialLoad() {
     LOGGER.warn("RESET TIMESTAMPS FOR INITIAL LOAD!");
@@ -123,8 +128,6 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       resetTimestamps(true, 0);
     } catch (IOException e) {
       LOGGER.error("FAILED TO RESET TIMESTAMPS! {}", e.getMessage(), e);
-
-      // Return String output to JMX or other interface.
       return JobLogs.stackToString(e);
     }
 
@@ -150,8 +153,8 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * @param sched this schedule
    * @throws IOException on file error
    */
-  protected void handleTimeFile(final FlightPlan flightPlan, final DateFormat fmt, final Date now,
-      final StandardFlightSchedule sched) throws IOException {
+  protected void handleSchedulerModeTimeFile(final FlightPlan flightPlan, final DateFormat fmt,
+      final Date now, final StandardFlightSchedule sched) throws IOException {
     final StringBuilder buf = new StringBuilder();
 
     buf.append(flightPlan.getBaseDirectory()).append(File.separatorChar)
@@ -211,7 +214,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       // Prepare launch pads.
       for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
         final FlightPlan flightPlan = new FlightPlan(commonFlightPlan);
-        handleTimeFile(flightPlan, fmt, now, sched);
+        handleSchedulerModeTimeFile(flightPlan, fmt, now, sched);
         launchDirector.scheduleLaunch(sched, flightPlan);
       }
 
@@ -227,7 +230,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       try {
         launchDirector.getScheduler().shutdown(false);
       } catch (SchedulerException e2) {
-        LOGGER.warn("FAILED TO START SCHEDULER! {}", e2.getMessage(), e2);
+        LOGGER.warn("SCHEDULER FALSE START! {}", e2.getMessage(), e2);
       }
       throw JobLogs.checked(LOGGER, e, "INIT ERROR: {}", e.getMessage());
     }
@@ -403,9 +406,10 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * the JVM.
    * </p>
    * 
-   * @param klass batch job class
+   * @param klass rocket class
    * @param args command line arguments
    * @param <T> Person persistence type
+   * @throws NeutronException rocket failure
    */
   public static <T extends BasePersonRocket<?, ?>> void launchOneWayTrip(final Class<T> klass,
       String... args) throws NeutronException {

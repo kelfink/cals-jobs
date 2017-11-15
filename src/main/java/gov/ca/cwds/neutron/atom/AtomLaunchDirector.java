@@ -25,6 +25,8 @@ public interface AtomLaunchDirector {
 
   FlightLog launch(String jobName, FlightPlan flightPlan) throws NeutronException;
 
+  void prepareLaunchPads();
+
   void markRocketAsInFlight(TriggerKey key, NeutronRocket rocket);
 
   AtomLaunchPad scheduleLaunch(StandardFlightSchedule sched, FlightPlan flightPlan)

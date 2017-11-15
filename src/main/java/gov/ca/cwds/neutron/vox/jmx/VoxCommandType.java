@@ -18,7 +18,13 @@ public enum VoxCommandType {
 
   LOGS(VoxCommandFetchLogs.class, "logs"),
 
-  DISABLE(VoxCommandLastRunStatus.class, "disable")
+  DISABLE(VoxCommandLastRunStatus.class, "disable"),
+
+  ENABLE(VoxCommandLastRunStatus.class, "enable"),
+
+  PAUSE(VoxCommandLastRunStatus.class, "pause"),
+
+  RESUME(VoxCommandLastRunStatus.class, "resume")
 
   ;
 

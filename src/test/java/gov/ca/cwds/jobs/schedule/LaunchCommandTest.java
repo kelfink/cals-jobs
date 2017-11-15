@@ -154,7 +154,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     final DateFormat fmt = new SimpleDateFormat("yyyy-mm-dd");
     final Date now = new Date();
     final StandardFlightSchedule sched = StandardFlightSchedule.CLIENT;
-    target.handleTimeFile(flightPlan, fmt, now, sched);
+    target.handleSchedulerModeTimeFile(flightPlan, fmt, now, sched);
   }
 
   @Test
@@ -242,7 +242,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
     Date now = new Date();
     StandardFlightSchedule sched = StandardFlightSchedule.REFERRAL;
-    target.handleTimeFile(flightPlan, fmt, now, sched);
+    target.handleSchedulerModeTimeFile(flightPlan, fmt, now, sched);
   }
 
   @Test

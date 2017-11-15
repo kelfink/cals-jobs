@@ -131,7 +131,7 @@ public enum StandardFlightSchedule {
 
   private final int lastRunPriority;
 
-  private final String jsonElement;
+  private final String nestedElement;
 
   private static final Map<String, StandardFlightSchedule> mapName = new ConcurrentHashMap<>();
 
@@ -153,7 +153,7 @@ public enum StandardFlightSchedule {
     this.startDelaySeconds = startDelaySeconds;
     this.waitPeriodSeconds = periodSeconds;
     this.lastRunPriority = lastRunPriority;
-    this.jsonElement = nestedElement;
+    this.nestedElement = nestedElement;
     this.runLastChange = runLastChange;
     this.runInitialLoad = runInitialLoad;
   }
@@ -200,7 +200,7 @@ public enum StandardFlightSchedule {
   }
 
   public boolean isNewDocument() {
-    return StringUtils.isBlank(this.jsonElement);
+    return StringUtils.isBlank(this.nestedElement);
   }
 
   public int getStartDelaySeconds() {
@@ -215,8 +215,8 @@ public enum StandardFlightSchedule {
     return lastRunPriority;
   }
 
-  public String getJsonElement() {
-    return jsonElement;
+  public String getNestedElement() {
+    return nestedElement;
   }
 
   public static StandardFlightSchedule lookupByJobName(String key) {
