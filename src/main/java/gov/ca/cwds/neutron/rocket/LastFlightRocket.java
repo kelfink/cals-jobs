@@ -182,6 +182,8 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
 
   /**
    * Marks the job as completed. Close resources, notify listeners, or even close JVM.
+   * 
+   * @throws NeutronException rocket landing failure
    */
   protected abstract void finish() throws NeutronException;
 

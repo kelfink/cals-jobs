@@ -67,8 +67,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     super.setup();
 
     dao = new TestNormalizedEntityDao(sessionFactory);
-    target = new TestIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory,
-        flightRecorder);
+    target = new TestIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory, flightRecorder);
     target.setFlightPlan(flightPlan);
     target.setFlightLog(flightRecord);
   }
@@ -333,7 +332,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     target.finish();
   }
 
-  @Test(expected = JobsException.class)
+  @Test(expected = NeutronException.class)
   public void finish_Args__error() throws Exception {
     target.setFakeMarkDone(true);
     target.setFakeFinish(false);
