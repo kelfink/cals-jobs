@@ -38,6 +38,7 @@ public class ExitInitialLoadRocket
    * @param dao random DAO for parent class
    * @param esDao ElasticSearch DAO
    * @param mapper Jackson ObjectMapper
+   * @param launchDirector command launch director
    * @param flightPlan command line options
    */
   @Inject
