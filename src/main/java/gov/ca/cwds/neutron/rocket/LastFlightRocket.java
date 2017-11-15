@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 
 import gov.ca.cwds.jobs.component.Rocket;
 import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.atom.AtomRocketControl;
 import gov.ca.cwds.neutron.atom.AtomShared;
@@ -85,8 +86,8 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
 
     try {
       finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
-    } finally {
-      // all done
+    } catch (NeutronException e) {
+      throw new JobsException("ABORT LANDING!", e);
     }
 
     // SLF4J does not yet support conditional invocation.
@@ -182,7 +183,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
   /**
    * Marks the job as completed. Close resources, notify listeners, or even close JVM.
    */
-  protected abstract void finish();
+  protected abstract void finish() throws NeutronException;
 
   /**
    * Getter for last job run time.

@@ -87,8 +87,8 @@ public class NeutronRocket implements InterruptableJob {
     } finally {
       flightRecorder.logFlight(flightSchedule.getRocketClass(), flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
-      MDC.remove("rocketLog");
       LOGGER.info("FLIGHT SUMMARY: {}\n{}", rocketName, flightLog);
+      MDC.remove("rocketLog");
     }
   }
 

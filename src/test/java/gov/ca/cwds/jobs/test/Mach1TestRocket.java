@@ -157,7 +157,7 @@ public class Mach1TestRocket extends BasePersonRocket<TestNormalizedEntity, Test
   }
 
   @Override
-  public synchronized void finish() {
+  public synchronized void finish() throws NeutronException {
     if (!fakeFinish) {
       super.finish();
     }

@@ -24,8 +24,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
-public class TestIndexerJob
-    extends BasePersonRocket<TestNormalizedEntity, TestDenormalizedEntity>
+public class TestIndexerJob extends BasePersonRocket<TestNormalizedEntity, TestDenormalizedEntity>
     implements ApiGroupNormalizer<TestDenormalizedEntity> {
 
   private boolean fakeMarkDone;
@@ -118,7 +117,7 @@ public class TestIndexerJob
   }
 
   @Override
-  public synchronized void finish() {
+  public synchronized void finish() throws NeutronException {
     if (!fakeFinish) {
       super.finish();
     }
