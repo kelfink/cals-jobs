@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -29,28 +30,63 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void buildInitialLoadJobChainListener_Args__() throws Exception {
     JobChainingJobListener actual = StandardFlightSchedule.buildInitialLoadJobChainListener();
-    JobChainingJobListener expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void getInitialLoadRockets_Args__() throws Exception {
     List<StandardFlightSchedule> actual = StandardFlightSchedule.getInitialLoadRockets();
-    List<StandardFlightSchedule> expected = null;
+
+    List<StandardFlightSchedule> expected = new ArrayList<>();
+    expected.add(StandardFlightSchedule.CLIENT);
+    expected.add(StandardFlightSchedule.REPORTER);
+    expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL);
+    expected.add(StandardFlightSchedule.SERVICE_PROVIDER);
+    expected.add(StandardFlightSchedule.SUBSTITUTE_CARE_PROVIDER);
+    expected.add(StandardFlightSchedule.EDUCATION_PROVIDER);
+    expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME);
+    expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME);
+    expected.add(StandardFlightSchedule.OTHER_CLIENT_NAME);
+    expected.add(StandardFlightSchedule.CHILD_CASE);
+    expected.add(StandardFlightSchedule.PARENT_CASE);
+    expected.add(StandardFlightSchedule.RELATIONSHIP);
+    expected.add(StandardFlightSchedule.REFERRAL);
+    expected.add(StandardFlightSchedule.SAFETY_ALERT);
+    expected.add(StandardFlightSchedule.INTAKE_SCREENING);
+
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getLastChangeRockets_Args__() throws Exception {
     List<StandardFlightSchedule> actual = StandardFlightSchedule.getLastChangeRockets();
-    List<StandardFlightSchedule> expected = null;
+
+    List<StandardFlightSchedule> expected = new ArrayList<>();
+    expected.add(StandardFlightSchedule.RESET_INDEX);
+    expected.add(StandardFlightSchedule.CLIENT);
+    expected.add(StandardFlightSchedule.REPORTER);
+    expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL);
+    expected.add(StandardFlightSchedule.SERVICE_PROVIDER);
+    expected.add(StandardFlightSchedule.SUBSTITUTE_CARE_PROVIDER);
+    expected.add(StandardFlightSchedule.EDUCATION_PROVIDER);
+    expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME);
+    expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME);
+    expected.add(StandardFlightSchedule.OTHER_CLIENT_NAME);
+    expected.add(StandardFlightSchedule.CHILD_CASE);
+    expected.add(StandardFlightSchedule.PARENT_CASE);
+    expected.add(StandardFlightSchedule.RELATIONSHIP);
+    expected.add(StandardFlightSchedule.REFERRAL);
+    expected.add(StandardFlightSchedule.SAFETY_ALERT);
+    expected.add(StandardFlightSchedule.INTAKE_SCREENING);
+    expected.add(StandardFlightSchedule.EXIT_INITIAL_LOAD);
+
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getRocketName_Args__() throws Exception {
     String actual = target.getRocketName();
-    String expected = null;
+    String expected = "client";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -72,21 +108,21 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void getStartDelaySeconds_Args__() throws Exception {
     int actual = target.getStartDelaySeconds();
-    int expected = 0;
+    int expected = 5;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getWaitPeriodSeconds_Args__() throws Exception {
     int actual = target.getWaitPeriodSeconds();
-    int expected = 0;
+    int expected = 20;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getLastRunPriority_Args__() throws Exception {
     int actual = target.getLastRunPriority();
-    int expected = 0;
+    int expected = 1000;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -117,12 +153,20 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void getInitialLoadOrder_Args__() throws Exception {
     int actual = target.getInitialLoadOrder();
-    int expected = 0;
+    int expected = 5;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void isRunLastChange_Args__() throws Exception {
+    boolean actual = target.isRunLastChange();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isRunLastChange_Args__2() throws Exception {
+    target = StandardFlightSchedule.EXIT_INITIAL_LOAD;
     boolean actual = target.isRunLastChange();
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
@@ -131,7 +175,7 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void isRunInitialLoad_Args__() throws Exception {
     boolean actual = target.isRunInitialLoad();
-    boolean expected = false;
+    boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
