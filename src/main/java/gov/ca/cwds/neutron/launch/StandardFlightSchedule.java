@@ -71,7 +71,7 @@ public enum StandardFlightSchedule {
       true, true),
 
   //
-  // JSON elements inside document.
+  // JSON elements inside ES document.
   //
 
   /**
@@ -87,7 +87,7 @@ public enum StandardFlightSchedule {
   /**
    * Parent cases.
    */
-  PARENT_CASE(ParentCaseHistoryIndexerJob.class, "parent_case", 55, 90, 30, 500, "cases", true, true),
+  PARENT_CASE(ParentCaseHistoryIndexerJob.class, "parent_case", 55, 90, 30, 575, "cases", true, true),
 
   /**
    * Relationships.
@@ -102,12 +102,12 @@ public enum StandardFlightSchedule {
   /**
    * Safety alerts.
    */
-  SAFETY_ALERT(SafetyAlertIndexerJob.class, "safety_alert", 70, 90, 45, 350, "safety_alerts", true, true),
+  SAFETY_ALERT(SafetyAlertIndexerJob.class, "safety_alert", 70, 90, 45, 800, "safety_alerts", true, true),
 
   /**
    * Screenings.
    */
-  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 75, 90, 20, 800, "screenings", true, true),
+  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 75, 90, 20, 900, "screenings", true, true),
 
   // /**
   // * Validation.
@@ -163,8 +163,8 @@ public enum StandardFlightSchedule {
   }
 
   /**
-   * The JobChainingJobListener executes Quartz jobs in sequence by blocking scheduled triggers.
-   * Appropriate for initial load.
+   * A JobChainingJobListener executes Quartz jobs in sequence by blocking scheduled triggers.
+   * Appropriate for initial load, not last change.
    * 
    * @return Quartz JobChainingJobListener
    */
@@ -180,7 +180,8 @@ public enum StandardFlightSchedule {
     for (int i = 0; i < len; i++) {
       sched = arr[i];
       ret.addJobChainLink(new JobKey(sched.rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD),
-          i != (len - 1) ? new JobKey(arr[i + 1].rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
+          i != (len - 1)
+              ? new JobKey(arr[i + 1].rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
               : new JobKey("verify", NeutronSchedulerConstants.GRP_FULL_LOAD));
     }
 
