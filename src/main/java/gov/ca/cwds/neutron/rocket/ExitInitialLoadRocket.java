@@ -11,6 +11,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
+import gov.ca.cwds.neutron.flight.FlightSummary;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -47,6 +48,13 @@ public class ExitInitialLoadRocket
     this.launchDirector = launchDirector;
   }
 
+  protected void logError(StandardFlightSchedule sched, FlightSummary summary) {
+    if (summary.getBulkError() > 0 || summary.getBulkAfter() == 0) {
+      LOGGER.error("\n\n\t>>>>>>>>>>> ERRORS? NO RECORDS?\n ROCKET: {}, error: {}, bulk after: {}",
+          sched.getShortName(), summary.getBulkError(), summary.getBulkAfter());
+    }
+  }
+
   @Override
   public Date executeJob(Date lastRunDate) {
     if (LaunchCommand.isInitialMode()) {
@@ -55,7 +63,9 @@ public class ExitInitialLoadRocket
 
       try {
         for (StandardFlightSchedule sched : StandardFlightSchedule.getInitialLoadRockets()) {
-          LOGGER.warn("Rocket summary: {}", flightRecorder.getFlightSummary(sched));
+          final FlightSummary summary = flightRecorder.getFlightSummary(sched);
+          LOGGER.info("ROCKET SUMMARY:\n {}", summary);
+          logError(sched, summary);
         }
 
         LaunchCommand.getInstance().shutdown();
