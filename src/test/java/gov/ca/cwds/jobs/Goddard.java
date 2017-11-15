@@ -314,8 +314,8 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
         .thenReturn(mach1Rocket);
 
     when(launchDirector.getScheduler()).thenReturn(scheduler);
-    when(scheduler.getListenerManager()).thenReturn(listenerManager);
     when(launchDirector.getFlightPlanManger()).thenReturn(flightPlanManager);
+    when(launchDirector.getFlightRecorder()).thenReturn(flightRecorder);
 
     when(launchDirector.launch(any(Class.class), any(FlightPlan.class))).thenReturn(flightRecord);
     when(launchDirector.launch(any(String.class), any(FlightPlan.class))).thenReturn(flightRecord);
@@ -323,6 +323,8 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(rocketFactory.fuelRocket(any(Class.class), any(FlightPlan.class))).thenReturn(mach1Rocket);
     when(rocketFactory.fuelRocket(any(String.class), any(FlightPlan.class)))
         .thenReturn(mach1Rocket);
+
+    when(scheduler.getListenerManager()).thenReturn(listenerManager);
 
     markTestDone();
   }

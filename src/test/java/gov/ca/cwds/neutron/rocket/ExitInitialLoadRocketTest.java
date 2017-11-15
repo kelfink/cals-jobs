@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.util.Date;
 
@@ -12,6 +13,8 @@ import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.jobs.Goddard;
+import gov.ca.cwds.neutron.flight.FlightSummary;
+import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
 public class ExitInitialLoadRocketTest extends Goddard {
 
@@ -43,6 +46,13 @@ public class ExitInitialLoadRocketTest extends Goddard {
     Date actual = target.executeJob(lastRunDate);
     Date expected = lastRunDate;
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void logError_Args__StandardFlightSchedule__FlightSummary() throws Exception {
+    StandardFlightSchedule sched = StandardFlightSchedule.CHILD_CASE;
+    FlightSummary summary = mock(FlightSummary.class);
+    target.logError(sched, summary);
   }
 
 }

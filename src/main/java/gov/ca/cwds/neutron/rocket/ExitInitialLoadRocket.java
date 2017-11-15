@@ -60,6 +60,7 @@ public class ExitInitialLoadRocket
 
   @Override
   public Date executeJob(Date lastRunDate) {
+    nameThread("exit_initial_load");
     if (LaunchCommand.isInitialMode()) {
       LOGGER.warn("EXIT INITIAL LOAD!");
       final AtomFlightRecorder flightRecorder = launchDirector.getFlightRecorder();
