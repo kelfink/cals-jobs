@@ -94,7 +94,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
    * {@inheritDoc}
    */
   @Override
-  @Managed(description = "Schedule rocket for periodic launch")
+  @Managed(description = "Schedule rocket launch")
   public void schedule() throws NeutronException {
     try {
       if (scheduler.checkExists(this.jobKey)) {
@@ -107,16 +107,17 @@ public class LaunchPad implements VoxLaunchPadMBean {
           .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS,
               flightSchedule.getRocketClass().getName())
           .build();
+
       // Initial mode: run only **once**.
-      final Trigger trg = !LaunchCommand.isInitialMode()
-          ? newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
+      final Trigger trg = LaunchCommand.isInitialMode()
+          ? newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_FULL_LOAD)
+              .withPriority(flightSchedule.getInitialLoadOrder()).build()
+          // .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
+          // .build()
+          : newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
               .withPriority(flightSchedule.getLastRunPriority())
               .withSchedule(simpleSchedule()
                   .withIntervalInSeconds(flightSchedule.getWaitPeriodSeconds()).repeatForever())
-              .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
-              .build()
-          : newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_FULL_LOAD)
-              .withPriority(flightSchedule.getLastRunPriority())
               .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
               .build();
       scheduler.scheduleJob(jd, trg);

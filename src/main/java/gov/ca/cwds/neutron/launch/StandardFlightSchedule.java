@@ -119,7 +119,7 @@ public enum StandardFlightSchedule {
   /**
    * Exit the initial load process.
    */
-  EXIT_INITIAL_LOAD(ExitInitialLoadRocket.class, "exit_initial_load", 66666, 140, 200000000, 10000, null, false, true);
+  EXIT_INITIAL_LOAD(ExitInitialLoadRocket.class, "exit_initial_load", 66666, 140, 2000000, 10000, null, false, true);
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(StandardFlightSchedule.class);
 
