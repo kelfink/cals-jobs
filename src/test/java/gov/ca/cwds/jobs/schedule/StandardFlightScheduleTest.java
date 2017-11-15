@@ -102,7 +102,7 @@ public class StandardFlightScheduleTest {
   public void getInitialLoadOrder_Args__() throws Exception {
     StandardFlightSchedule target = StandardFlightSchedule.CLIENT;
     int actual = target.getInitialLoadOrder();
-    int expected = 1;
+    int expected = 5;
     assertThat(actual, is(equalTo(expected)));
   }
 
