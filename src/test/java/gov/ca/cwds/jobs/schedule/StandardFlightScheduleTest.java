@@ -20,7 +20,7 @@ public class StandardFlightScheduleTest {
   @Test
   public void getName_Args__() throws Exception {
     StandardFlightSchedule target = StandardFlightSchedule.CHILD_CASE;
-    String actual = target.getShortName();
+    String actual = target.getRocketName();
     assertThat(actual, is(notNullValue()));
   }
 
@@ -79,7 +79,7 @@ public class StandardFlightScheduleTest {
   @Test
   public void getShortName_Args__() throws Exception {
     StandardFlightSchedule target = StandardFlightSchedule.CLIENT;
-    String actual = target.getShortName();
+    String actual = target.getRocketName();
     String expected = "client";
     assertThat(actual, is(equalTo(expected)));
   }

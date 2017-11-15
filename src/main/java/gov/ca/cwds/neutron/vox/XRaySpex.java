@@ -74,7 +74,7 @@ public class XRaySpex implements AtomCommandCenterConsole {
     LOGGER.warn("\n>>>>>>> ENABLE JMX! <<<<<<<\n");
     final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
     for (AtomLaunchPad pad : launchDirector.getLaunchPads().values()) {
-      exporter.export("Neutron:rocket=" + pad.getFlightSchedule().getShortName(), pad);
+      exporter.export("Neutron:rocket=" + pad.getFlightSchedule().getRocketName(), pad);
     }
 
     exporter.export("Neutron:runner=Launch_Command", this);

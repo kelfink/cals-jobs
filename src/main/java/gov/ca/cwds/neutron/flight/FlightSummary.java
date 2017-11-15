@@ -185,7 +185,7 @@ public class FlightSummary implements ApiMarker {
 
   @Override
   public String toString() {
-    return "FlightSummary [\n\trocketName=" + flightSchedule.getShortName() + "\n\tfirstStart="
+    return "FlightSummary [\n\trocketName=" + flightSchedule.getRocketName() + "\n\tfirstStart="
         + firstStart + "\n\tlastEnd=" + lastEnd + "\n\tstatus=" + status + "\n\ttotalRuns="
         + totalRuns + "\n\trecsSentToIndexQueue=" + recsSentToIndexQueue
         + "\n\trecsSentToBulkProcessor=" + recsSentToBulkProcessor + "\n\trowsNormalized="

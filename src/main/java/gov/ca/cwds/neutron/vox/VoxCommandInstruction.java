@@ -49,7 +49,7 @@ public final class VoxCommandInstruction implements ApiMarker {
     final String port =
         options.has("p") ? (String) options.valueOf("p") : VoxJmxDefaults.DEFAULT_PORT;
     final String rocket = options.has("r") ? (String) options.valueOf("r")
-        : StandardFlightSchedule.CLIENT.getShortName();
+        : StandardFlightSchedule.CLIENT.getRocketName();
     final String cmd =
         options.has("c") ? (String) options.valueOf("c") : VoxCommandType.STATUS.getKey();
 

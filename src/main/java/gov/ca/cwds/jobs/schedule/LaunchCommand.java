@@ -103,7 +103,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
       // Find the rocket's time file under the base directory:
       final StringBuilder buf = new StringBuilder();
-      buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getShortName())
+      buf.append(opts.getBaseDirectory()).append(File.separatorChar).append(sched.getRocketName())
           .append(".time");
       opts.setLastRunLoc(buf.toString());
 
@@ -158,12 +158,12 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     final StringBuilder buf = new StringBuilder();
 
     buf.append(flightPlan.getBaseDirectory()).append(File.separatorChar)
-        .append(sched.getShortName()).append(".time");
+        .append(sched.getRocketName()).append(".time");
     final String timeFileLoc =
         buf.toString().replaceAll(File.separator + File.separator, File.separator);
     flightPlan.setLastRunLoc(timeFileLoc);
     LOGGER.debug("base directory: {}, job name: {}, last run loc: {}",
-        flightPlan.getBaseDirectory(), sched.getShortName(), flightPlan.getLastRunLoc());
+        flightPlan.getBaseDirectory(), sched.getRocketName(), flightPlan.getLastRunLoc());
 
     // If timestamp file doesn't exist, create it.
     final File f = new File(timeFileLoc); // NOSONAR

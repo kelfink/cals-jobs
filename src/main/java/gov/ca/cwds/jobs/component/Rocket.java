@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.component;
 import gov.ca.cwds.data.std.ApiMarker;
 
 /**
- * Marker interface for batch Rockets.
+ * Marker interface for Neutron Rockets.
  * 
  * <p>
  * In Jimmy Neutron's world, "jobs" are "rockets."

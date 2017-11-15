@@ -125,7 +125,7 @@ public enum StandardFlightSchedule {
 
   private final boolean runInitialLoad;
 
-  private final String shortName;
+  private final String rocketName;
 
   private final int initialLoadOrder;
 
@@ -143,7 +143,7 @@ public enum StandardFlightSchedule {
 
   static {
     for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
-      mapName.put(sched.shortName, sched);
+      mapName.put(sched.rocketName, sched);
       mapClass.put(sched.klazz, sched);
     }
   }
@@ -152,7 +152,7 @@ public enum StandardFlightSchedule {
       int startDelaySeconds, int periodSeconds, int lastRunPriority, String nestedElement,
       boolean runLastChange, boolean runInitialLoad) {
     this.klazz = klazz;
-    this.shortName = rocketName;
+    this.rocketName = rocketName;
     this.initialLoadOrder = initialLoadOrder;
     this.startDelaySeconds = startDelaySeconds;
     this.waitPeriodSeconds = periodSeconds;
@@ -179,8 +179,8 @@ public enum StandardFlightSchedule {
     final int len = arr.length;
     for (int i = 0; i < len; i++) {
       sched = arr[i];
-      ret.addJobChainLink(new JobKey(sched.shortName, NeutronSchedulerConstants.GRP_FULL_LOAD),
-          i != (len - 1) ? new JobKey(arr[i + 1].shortName, NeutronSchedulerConstants.GRP_FULL_LOAD)
+      ret.addJobChainLink(new JobKey(sched.rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD),
+          i != (len - 1) ? new JobKey(arr[i + 1].rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
               : new JobKey("verify", NeutronSchedulerConstants.GRP_FULL_LOAD));
     }
 
@@ -201,8 +201,8 @@ public enum StandardFlightSchedule {
     return klazz;
   }
 
-  public String getShortName() {
-    return shortName;
+  public String getRocketName() {
+    return rocketName;
   }
 
   public boolean isNewDocument() {

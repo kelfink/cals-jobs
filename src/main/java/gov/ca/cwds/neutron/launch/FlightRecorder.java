@@ -22,7 +22,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder, Serializab
 
   private static final long serialVersionUID = 1L;
 
-  private static final int QUEUE_SIZE = 200;
+  private static final int KEEP_LAST_FLIGHTS = 200;
 
   private final Map<Class<?>, CircularFifoQueue<FlightLog>> flightHistory =
       new ConcurrentHashMap<>();
@@ -42,7 +42,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder, Serializab
     lastFlightLogs.put(klazz, flightLog);
 
     if (!flightHistory.containsKey(klazz)) {
-      flightHistory.put(klazz, new CircularFifoQueue<>(QUEUE_SIZE));
+      flightHistory.put(klazz, new CircularFifoQueue<>(KEEP_LAST_FLIGHTS));
     }
     flightHistory.get(klazz).add(flightLog);
   }

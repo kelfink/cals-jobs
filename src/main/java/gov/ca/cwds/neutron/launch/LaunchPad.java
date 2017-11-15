@@ -60,13 +60,13 @@ public class LaunchPad implements VoxLaunchPadMBean {
     this.flightSchedule = sched;
     this.flightPlan = flightPlan;
 
-    this.rocketName = flightSchedule.getShortName();
+    this.rocketName = flightSchedule.getRocketName();
     this.jobKey = new JobKey(rocketName, NeutronSchedulerConstants.GRP_LST_CHG);
-    this.triggerName = flightSchedule.getShortName();
+    this.triggerName = flightSchedule.getRocketName();
     triggerKey = new TriggerKey(triggerName, NeutronSchedulerConstants.GRP_LST_CHG);
 
     final FlightLog flightLog = new FlightLog();
-    flightLog.setRocketName(sched.getShortName());
+    flightLog.setRocketName(sched.getRocketName());
 
     // Seed the flight log history.
     flightRecorder.logFlight(sched.getRocketClass(), flightLog);
@@ -79,7 +79,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
   @Managed(description = "Launch rocket now, show results immediately")
   public String run(String cmdLine) throws NeutronException {
     try {
-      LOGGER.info("RUN JOB: {}", flightSchedule.getShortName());
+      LOGGER.info("RUN JOB: {}", flightSchedule.getRocketName());
       final FlightPlan plan =
           FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       final FlightLog flightLog = this.launchDirector.launch(flightSchedule.getRocketClass(), plan);

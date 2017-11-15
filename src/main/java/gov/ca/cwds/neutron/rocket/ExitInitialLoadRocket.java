@@ -50,9 +50,11 @@ public class ExitInitialLoadRocket
   }
 
   protected void logError(StandardFlightSchedule sched, FlightSummary summary) {
-    if (summary.getBulkError() > 0 || summary.getBulkAfter() == 0) {
+    if (summary == null) {
+      LOGGER.error("\n\n\t>>>>>>>>>>> NULL SUMMARY??  rocket: {}", sched.getRocketName());
+    } else if (summary.getBulkError() > 0 || summary.getBulkAfter() == 0) {
       LOGGER.error("\n\n\t>>>>>>>>>>> ERRORS? NO RECORDS?\n ROCKET: {}, error: {}, bulk after: {}",
-          sched.getShortName(), summary.getBulkError(), summary.getBulkAfter());
+          sched.getRocketName(), summary.getBulkError(), summary.getBulkAfter());
     }
   }
 
@@ -65,7 +67,7 @@ public class ExitInitialLoadRocket
       try {
         for (StandardFlightSchedule sched : StandardFlightSchedule.getInitialLoadRockets()) {
           final FlightSummary summary = flightRecorder.getFlightSummary(sched);
-          LOGGER.info("ROCKET SUMMARY:\n {}", summary);
+          LOGGER.info("ROCKET SUMMARY:\n{}", summary);
           logError(sched, summary);
         }
 
