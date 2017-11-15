@@ -38,30 +38,6 @@ public class StandardFlightScheduleTest extends Goddard {
     List<StandardFlightSchedule> actual = StandardFlightSchedule.getInitialLoadRockets();
 
     List<StandardFlightSchedule> expected = new ArrayList<>();
-    expected.add(StandardFlightSchedule.CLIENT);
-    expected.add(StandardFlightSchedule.REPORTER);
-    expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL);
-    expected.add(StandardFlightSchedule.SERVICE_PROVIDER);
-    expected.add(StandardFlightSchedule.SUBSTITUTE_CARE_PROVIDER);
-    expected.add(StandardFlightSchedule.EDUCATION_PROVIDER);
-    expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME);
-    expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME);
-    expected.add(StandardFlightSchedule.OTHER_CLIENT_NAME);
-    expected.add(StandardFlightSchedule.CHILD_CASE);
-    expected.add(StandardFlightSchedule.PARENT_CASE);
-    expected.add(StandardFlightSchedule.RELATIONSHIP);
-    expected.add(StandardFlightSchedule.REFERRAL);
-    expected.add(StandardFlightSchedule.SAFETY_ALERT);
-    expected.add(StandardFlightSchedule.INTAKE_SCREENING);
-
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  public void getLastChangeRockets_Args__() throws Exception {
-    List<StandardFlightSchedule> actual = StandardFlightSchedule.getLastChangeRockets();
-
-    List<StandardFlightSchedule> expected = new ArrayList<>();
     expected.add(StandardFlightSchedule.RESET_INDEX);
     expected.add(StandardFlightSchedule.CLIENT);
     expected.add(StandardFlightSchedule.REPORTER);
@@ -79,6 +55,30 @@ public class StandardFlightScheduleTest extends Goddard {
     expected.add(StandardFlightSchedule.SAFETY_ALERT);
     expected.add(StandardFlightSchedule.INTAKE_SCREENING);
     expected.add(StandardFlightSchedule.EXIT_INITIAL_LOAD);
+
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getLastChangeRockets_Args__() throws Exception {
+    List<StandardFlightSchedule> actual = StandardFlightSchedule.getLastChangeRockets();
+
+    List<StandardFlightSchedule> expected = new ArrayList<>();
+    expected.add(StandardFlightSchedule.CLIENT);
+    expected.add(StandardFlightSchedule.REPORTER);
+    expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL);
+    expected.add(StandardFlightSchedule.SERVICE_PROVIDER);
+    expected.add(StandardFlightSchedule.SUBSTITUTE_CARE_PROVIDER);
+    expected.add(StandardFlightSchedule.EDUCATION_PROVIDER);
+    expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME);
+    expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME);
+    expected.add(StandardFlightSchedule.OTHER_CLIENT_NAME);
+    expected.add(StandardFlightSchedule.CHILD_CASE);
+    expected.add(StandardFlightSchedule.PARENT_CASE);
+    expected.add(StandardFlightSchedule.RELATIONSHIP);
+    expected.add(StandardFlightSchedule.REFERRAL);
+    expected.add(StandardFlightSchedule.SAFETY_ALERT);
+    expected.add(StandardFlightSchedule.INTAKE_SCREENING);
 
     assertThat(actual, is(equalTo(expected)));
   }
@@ -136,16 +136,16 @@ public class StandardFlightScheduleTest extends Goddard {
 
   @Test
   public void lookupByJobName_Args__String() throws Exception {
-    String key = null;
-    StandardFlightSchedule actual = StandardFlightSchedule.lookupByJobName(key);
-    StandardFlightSchedule expected = null;
+    String key = StandardFlightSchedule.CHILD_CASE.getRocketName();
+    StandardFlightSchedule actual = StandardFlightSchedule.lookupByRocketName(key);
+    StandardFlightSchedule expected = StandardFlightSchedule.CHILD_CASE;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void lookupByClass_Args__Class() throws Exception {
     Class<?> key = StandardFlightSchedule.CLIENT.getRocketClass();
-    StandardFlightSchedule actual = StandardFlightSchedule.lookupByClass(key);
+    StandardFlightSchedule actual = StandardFlightSchedule.lookupByRocketClass(key);
     StandardFlightSchedule expected = StandardFlightSchedule.CLIENT;
     assertThat(actual, is(equalTo(expected)));
   }

@@ -226,11 +226,11 @@ public enum StandardFlightSchedule {
     return nestedElement;
   }
 
-  public static StandardFlightSchedule lookupByJobName(String key) {
+  public static StandardFlightSchedule lookupByRocketName(String key) {
     return mapName.get(key);
   }
 
-  public static StandardFlightSchedule lookupByClass(Class<?> key) {
+  public static StandardFlightSchedule lookupByRocketClass(Class<?> key) {
     return mapClass.get(key);
   }
 
