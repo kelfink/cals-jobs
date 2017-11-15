@@ -26,6 +26,8 @@ import gov.ca.cwds.jobs.SafetyAlertIndexerJob;
 import gov.ca.cwds.jobs.ServiceProviderIndexerJob;
 import gov.ca.cwds.jobs.SubstituteCareProviderIndexJob;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.rocket.ExitInitialLoadRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetRocket;
 
@@ -119,6 +121,8 @@ public enum StandardFlightSchedule {
    */
   EXIT_INITIAL_LOAD(ExitInitialLoadRocket.class, "exit_initial_load", 66666, 140, 200000000, 10000, null, false, true);
 
+  private static final ConditionalLogger LOGGER = new JetPackLogger(StandardFlightSchedule.class);
+
   private final Class<?> klazz;
 
   private final boolean runLastChange;
@@ -179,6 +183,7 @@ public enum StandardFlightSchedule {
     final int len = arr.length;
     for (int i = 0; i < len; i++) {
       sched = arr[i];
+      LOGGER.info("intial load order: {}", sched.getRocketName());
       ret.addJobChainLink(new JobKey(sched.rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD),
           i != (len - 1)
               ? new JobKey(arr[i + 1].rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
