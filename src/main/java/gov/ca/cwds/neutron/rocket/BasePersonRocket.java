@@ -823,13 +823,14 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
 
   @Override
   protected synchronized void finish() {
-    LOGGER.info("FINISH JOB!");
+    LOGGER.info("FINISH JOB! {}", this.getClass().getName());
     try {
       done();
       close();
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(LOGGER, e, "ERROR FINISHING JOB! {}", e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "ERROR FINISHING JOB! {}, {}", this.getClass().getName(),
+          e.getMessage());
     }
     LOGGER.info("JOB FINISHED!");
   }
