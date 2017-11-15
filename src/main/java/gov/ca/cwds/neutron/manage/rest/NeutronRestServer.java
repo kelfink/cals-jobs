@@ -98,7 +98,7 @@ public class NeutronRestServer extends Application {
     return isJettyRunning;
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     new NeutronRestServer().run();
   }
 
