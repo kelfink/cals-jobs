@@ -54,9 +54,9 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     flightPlan.setLastRunLoc(lastRunFile);
 
     final AtomCommandCenterConsole ctrlMgr = mock(AtomCommandCenterConsole.class);
-    target = new LaunchCommand(flightRecorder, launchScheduler, ctrlMgr);
+    target = new LaunchCommand(flightRecorder, launchDirector, ctrlMgr);
     target.setCommonFlightPlan(flightPlan);
-    target.setLaunchDirector(launchScheduler);
+    target.setLaunchDirector(launchDirector);
 
     Function<FlightPlan, Injector> makeLaunchCommand = mock(Function.class);
     injector = mock(Injector.class);
@@ -202,7 +202,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void setNeutronScheduler_Args__LaunchScheduler() throws Exception {
-    target.setLaunchDirector(launchScheduler);
+    target.setLaunchDirector(launchDirector);
   }
 
   @Test
@@ -253,7 +253,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void setLaunchScheduler_Args__LaunchScheduler() throws Exception {
-    target.setLaunchDirector(launchScheduler);
+    target.setLaunchDirector(launchDirector);
   }
 
   @Test

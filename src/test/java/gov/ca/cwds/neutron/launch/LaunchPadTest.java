@@ -36,10 +36,10 @@ public class LaunchPadTest extends Goddard {
     super.setup();
 
     flightPlan = new FlightPlan();
-    when(launchScheduler.getFlightRecorder()).thenReturn(flightRecorder);
+    when(launchDirector.getFlightRecorder()).thenReturn(flightRecorder);
 
     sched = StandardFlightSchedule.CLIENT;
-    target = new LaunchPad(launchScheduler, sched, flightPlan);
+    target = new LaunchPad(launchDirector, sched, flightPlan);
   }
 
   @Test
@@ -67,7 +67,7 @@ public class LaunchPadTest extends Goddard {
   @Test(expected = NeutronException.class)
   public void schedule_Args___T__SchedulerException() throws Exception {
     when(scheduler.getJobDetail(any(JobKey.class))).thenThrow(SchedulerException.class);
-    when(launchScheduler.launch(any(Class.class), any(FlightPlan.class)))
+    when(launchDirector.launch(any(Class.class), any(FlightPlan.class)))
         .thenThrow(SchedulerException.class);
     when(scheduler.checkExists(any(JobKey.class))).thenThrow(SchedulerException.class);
     target.schedule();
@@ -113,8 +113,8 @@ public class LaunchPadTest extends Goddard {
 
   @Test
   public void history_Args__() throws Exception {
-    launchScheduler = new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager);
-    launchScheduler.setScheduler(scheduler);
+    launchDirector = new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager);
+    launchDirector.setScheduler(scheduler);
     String actual = target.history();
     assertThat(actual, is(notNullValue()));
   }

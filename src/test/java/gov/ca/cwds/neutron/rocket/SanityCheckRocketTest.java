@@ -25,7 +25,7 @@ public class SanityCheckRocketTest
     super.setup();
     dao = new ReplicatedOtherAdultInPlacemtHomeDao(this.sessionFactory);
     target = new SanityCheckRocket(dao, esDao, MAPPER, sessionFactory, flightRecorder, flightPlan,
-        launchScheduler);
+        launchDirector);
   }
 
   @Test

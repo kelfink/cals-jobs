@@ -18,9 +18,12 @@ public interface AtomFlightRecorder extends ApiMarker {
 
   FlightLog getLastFlightLog(final Class<?> klazz);
 
+  FlightLog getLastFlightLog(StandardFlightSchedule sched);
+
   List<FlightLog> getHistory(final Class<?> klazz);
 
   void summarizeFlight(StandardFlightSchedule flightSchedule, FlightLog flightLog);
 
   FlightSummary getFlightSummary(StandardFlightSchedule flightSchedule);
+
 }

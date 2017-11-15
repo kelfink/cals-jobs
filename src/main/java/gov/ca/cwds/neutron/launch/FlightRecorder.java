@@ -53,6 +53,11 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder, Serializab
   }
 
   @Override
+  public FlightLog getLastFlightLog(StandardFlightSchedule sched) {
+    return getLastFlightLog(sched.getRocketClass());
+  }
+
+  @Override
   public List<FlightLog> getHistory(final Class<?> klazz) {
     return flightHistory.containsKey(klazz) ? new ArrayList<>(flightHistory.get(klazz))
         : new ArrayList<>();
