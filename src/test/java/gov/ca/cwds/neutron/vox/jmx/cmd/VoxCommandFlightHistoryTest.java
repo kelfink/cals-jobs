@@ -11,9 +11,9 @@ import org.junit.Test;
 
 import gov.ca.cwds.neutron.vox.jmx.VoxLaunchPadMBean;
 
-public class VoxCommandLastRunStatusTest {
+public class VoxCommandFlightHistoryTest {
 
-  static final class TestVoxCommandLastRunStatus extends VoxCommandLastRunStatus {
+  static final class TestVoxCommandFlightHistory extends VoxCommandFlightHistory {
 
     VoxLaunchPadMBean mbean;
 
@@ -30,18 +30,18 @@ public class VoxCommandLastRunStatusTest {
   }
 
   VoxLaunchPadMBean mbean;
-  VoxCommandLastRunStatus target;
+  VoxCommandFlightHistory target;
 
   @Before
   public void setup() throws Exception {
     mbean = mock(VoxLaunchPadMBean.class);
-    target = new VoxCommandLastRunStatus();
+    target = new TestVoxCommandFlightHistory();
     target.setMbean(mbean);
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(VoxCommandLastRunStatus.class, notNullValue());
+    assertThat(VoxCommandFlightHistory.class, notNullValue());
   }
 
   @Test
@@ -51,7 +51,7 @@ public class VoxCommandLastRunStatusTest {
 
   @Test
   public void run_Args__() throws Exception {
-    when(mbean.status()).thenReturn("some flight log");
+    when(mbean.history()).thenReturn("some history");
     String actual = target.run();
     assertThat(actual, is(notNullValue()));
   }
