@@ -311,7 +311,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     try {
       ret = FlightPlan.parseCommandLine(args);
     } catch (Exception e) {
-      throw JobLogs.runtime(LOGGER, e, "CMD LINE ERROR! {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "CMD LINE ERROR! {}", e.getMessage());
     }
 
     return ret;
@@ -481,8 +481,9 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   public static void main(String[] args) throws Exception {
     standardFlightPlan = parseCommandLine(args);
-    LaunchCommand.settings.setBaseDirectory(standardFlightPlan.getBaseDirectory());
-    System.setProperty("LAUNCH_DIR", LaunchCommand.settings.getBaseDirectory());
+    final String baseDir = standardFlightPlan.getBaseDirectory();
+    LaunchCommand.settings.setBaseDirectory(baseDir);
+    System.setProperty("LAUNCH_DIR", baseDir);
     startSchedulerMode();
   }
 
