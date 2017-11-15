@@ -87,7 +87,7 @@ public enum StandardFlightSchedule {
   /**
    * Parent cases.
    */
-  PARENT_CASE(ParentCaseHistoryIndexerJob.class, "parent_case", 55, 90, 30, 575, "cases", true, true),
+  PARENT_CASE(ParentCaseHistoryIndexerJob.class, "parent_case", 55, 80, 30, 575, "cases", true, true),
 
   /**
    * Relationships.
@@ -117,7 +117,7 @@ public enum StandardFlightSchedule {
   /**
    * Exit the initial load process.
    */
-  EXIT_INITIAL_LOAD(ExitInitialLoadRocket.class, "exit_initial_load", 66666, 130, 200000000, 10000, null, false, true);
+  EXIT_INITIAL_LOAD(ExitInitialLoadRocket.class, "exit_initial_load", 66666, 140, 200000000, 10000, null, false, true);
 
   private final Class<?> klazz;
 
