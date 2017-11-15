@@ -30,7 +30,7 @@ public class ExitInitialLoadRocket
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(ExitInitialLoadRocket.class);
 
-  private final LaunchDirector launchDirector;
+  private transient LaunchDirector launchDirector;
 
   /**
    * Construct rocket with all required dependencies.
