@@ -15,7 +15,7 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
- * Drop and creates ES indexes, if requested.
+ * Exits the initial load job cycle.
  * 
  * @author CWDS API Team
  */
@@ -29,7 +29,7 @@ public class ExitInitialLoadRocket
   /**
    * Construct rocket with all required dependencies.
    * 
-   * @param dao OtherAdultInPlacemtHome DAO
+   * @param dao random DAO for parent class
    * @param esDao ElasticSearch DAO
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options

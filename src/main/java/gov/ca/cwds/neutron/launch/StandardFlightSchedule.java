@@ -26,6 +26,7 @@ import gov.ca.cwds.jobs.SafetyAlertIndexerJob;
 import gov.ca.cwds.jobs.ServiceProviderIndexerJob;
 import gov.ca.cwds.jobs.SubstituteCareProviderIndexJob;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
+import gov.ca.cwds.neutron.rocket.ExitInitialLoadRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetRocket;
 
 public enum StandardFlightSchedule {
@@ -36,11 +37,11 @@ public enum StandardFlightSchedule {
   RESET_INDEX(IndexResetRocket.class, // klazz
       "reset_index", // rocketName
       1, // initialLoadOrder
-      2, // startDelaySeconds
-      20, // periodSeconds
+      1, // startDelaySeconds
+      200000000, // periodSeconds
       10000, // lastRunPriority
       null, // nestedElement
-      true, // runLastChange
+      false, // runLastChange
       true // runInitialLoad
   ),
 
@@ -106,14 +107,17 @@ public enum StandardFlightSchedule {
   /**
    * Screenings.
    */
-  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 75, 90, 20, 800, "screenings", true, true)
+  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 75, 90, 20, 800, "screenings", true, true),
 
   // /**
   // * Validation.
   // */
   // , SANITY_CHECK(SanityCheckRocket.class, "sanity_check", 100, 90, 10, 1, null)
 
-  ;
+  /**
+   * Exit the initial load process.
+   */
+  EXIT_INITIAL_LOAD(ExitInitialLoadRocket.class, "intake_screening", 75, 90, 20, 800, "screenings", true, false);
 
   private final Class<?> klazz;
 

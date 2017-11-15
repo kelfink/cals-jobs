@@ -59,7 +59,6 @@ import gov.ca.cwds.neutron.atom.AtomTransform;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.enums.NeutronColumn;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
-import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
@@ -614,18 +613,6 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
       LOGGER.debug("Last successsful run time: {}", lastRun); // NOSONAR
 
-      // Drop index first if requested
-      if (getFlightPlan().isDropIndex()) {
-        esDao.deleteIndex(effectiveIndexName);
-      }
-
-      // If the index is missing, create it.
-      LOGGER.debug("Create index if missing, effectiveIndexName: {}", effectiveIndexName);
-      final String documentType = esDao.getConfig().getElasticsearchDocType();
-      esDao.createIndexIfNeeded(effectiveIndexName, documentType,
-          NeutronElasticsearchDefaults.ES_PEOPLE_INDEX_SETTINGS.getValue(),
-          NeutronElasticsearchDefaults.ES_PERSON_MAPPING.getValue());
-
       // Smart/auto mode. If last run date is older than 25 years, assume initial load.
       // Written when DevOps started using Rundeck and was unable to pass parameters to jobs.
       // **MOVE** to another unit.
@@ -663,7 +650,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       }
       // CHECKSTYLE:ON
       ret = new Date(this.getFlightLog().getStartTime());
-    } catch (NeutronException | RuntimeException | IOException e) {
+    } catch (NeutronException | RuntimeException e) {
       fail();
       throw JobLogs.checked(LOGGER, e, "ROCKET EXPLODED! {}", e.getMessage());
     } finally {
