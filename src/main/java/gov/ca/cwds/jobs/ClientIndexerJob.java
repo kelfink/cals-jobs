@@ -38,7 +38,7 @@ import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
- * Job to load Clients from CMS into ElasticSearch.
+ * Rocket to load Clients from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */
@@ -161,6 +161,13 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
     }
   }
 
+  /**
+   * Validate that addresses are found in ES and vice versa.
+   * 
+   * @param client client address to check
+   * @param person person document
+   * @return true if addresses pass validation
+   */
   public boolean validateAddresses(final ReplicatedClient client,
       final ElasticSearchPerson person) {
     final String clientId = person.getId();
@@ -197,7 +204,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
     final String clientId = person.getId();
     LOGGER.info("Validate client: {}", clientId);
 
-    // WARNING: Initialize transaction. Fix DAO impl instead.
+    // HACK: Initialize transaction. Fix DAO impl instead.
     getOrCreateTransaction();
     final ReplicatedClient client = getJobDao().find(clientId);
 

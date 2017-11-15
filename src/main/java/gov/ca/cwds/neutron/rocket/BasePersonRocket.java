@@ -120,6 +120,10 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
 
   /**
    * Hibernate session factory.
+   * 
+   * <p>
+   * OPTION: get this from Hibernate.
+   * </p>
    */
   protected final SessionFactory sessionFactory;
 
@@ -146,6 +150,9 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
    * 
    * <p>
    * <strong>MOVE</strong> to another unit.
+   * </p>
+   * <p>
+   * <strong>OPTION:</strong> size by environment (production size or small test data set).
    * </p>
    */
   protected LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(125000);

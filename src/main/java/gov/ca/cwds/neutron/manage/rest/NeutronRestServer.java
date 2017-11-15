@@ -34,7 +34,7 @@ public class NeutronRestServer extends Application {
 
   @Override
   public Set<Class<?>> getClasses() {
-    Set<Class<?>> s = new HashSet<>();
+    final Set<Class<?>> s = new HashSet<>();
     s.add(NeutronCommandResource.class);
     return s;
   }
@@ -99,11 +99,7 @@ public class NeutronRestServer extends Application {
   }
 
   public static void main(String[] args) throws Exception {
-    try {
-      new NeutronRestServer().run();
-    } catch (Exception e) {
-      LOGGER.error("HTTP SERVER ERROR! {}", e.getMessage(), e);
-    }
+    new NeutronRestServer().run();
   }
 
 }
