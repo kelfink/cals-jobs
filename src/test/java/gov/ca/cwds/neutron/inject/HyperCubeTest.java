@@ -17,7 +17,9 @@ import org.hibernate.cfg.Configuration;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.inject.Binder;
 import com.google.inject.Injector;
+import com.google.inject.binder.AnnotatedBindingBuilder;
 
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.jobs.Goddard;
@@ -78,6 +80,12 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     @Override
     protected Configuration additionalDaos(Configuration config) {
       return config.addAnnotatedClass(TestNormalizedEntityDao.class);
+    }
+
+    @Override
+    protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
+      final AnnotatedBindingBuilder<T> builder = mock(AnnotatedBindingBuilder.class);
+      return super.bind(clazz);
     }
 
   }
@@ -236,16 +244,17 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     assertThat(actual, is(notNullValue()));
   }
 
+  @Test
+  public void bindDaos_Args__() throws Exception {
+    final Binder binder = mock(Binder.class);
+    target.setTestBinder(binder);
+    target.bindDaos(); // can only call from module
+  }
+
   // @Test
   // @Ignore
   // public void configure_Args__() throws Exception {
   // target.configure(); // can only call from module
-  // }
-  //
-  // @Test
-  // @Ignore
-  // public void bindDaos_Args__() throws Exception {
-  // target.bindDaos(); // can only call from module
   // }
 
   // @Test(expected = NeutronException.class)
