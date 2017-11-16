@@ -26,9 +26,9 @@ public class BulkProcessorBuilder implements ApiMarker {
   private static final int ES_BYTES_MB = 14;
 
   /**
-   * Track job progress.
+   * Track rocket progress.
    */
-  protected final FlightLog track;
+  protected final FlightLog flightLog;
 
   /**
    * Elasticsearch client DAO.
@@ -39,11 +39,11 @@ public class BulkProcessorBuilder implements ApiMarker {
    * Constructor.
    * 
    * @param esDao ES DAO
-   * @param track progress tracker
+   * @param flightLog progress tracker
    */
-  public BulkProcessorBuilder(final ElasticsearchDao esDao, final FlightLog track) {
+  public BulkProcessorBuilder(final ElasticsearchDao esDao, final FlightLog flightLog) {
     this.esDao = esDao;
-    this.track = track;
+    this.flightLog = flightLog;
   }
 
   /**
@@ -57,7 +57,7 @@ public class BulkProcessorBuilder implements ApiMarker {
    * @return an ES bulk processor
    */
   public BulkProcessor buildBulkProcessor() {
-    return BulkProcessor.builder(esDao.getClient(), new NeutronBulkProcessorListener(this.track))
+    return BulkProcessor.builder(esDao.getClient(), new NeutronBulkProcessorListener(this.flightLog))
         .setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(ES_BYTES_MB, ByteSizeUnit.MB))
         .setConcurrentRequests(1).setName("jobs_bp") // disappears in ES 5.6.3
         .build();
