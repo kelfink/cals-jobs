@@ -16,7 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.data.es.Elasticsearch5xDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.jobs.exception.JobsException;
+import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.JobWriter;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * @author CWDS Elasticsearch Team
@@ -72,15 +74,13 @@ public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T
   }
 
   @Override
-  public void destroy() {
+  public void destroy() throws NeutronException {
     try {
       bulkProcessor.awaitClose(3000, TimeUnit.MILLISECONDS);
       esDao.close();
-    } catch (InterruptedException e) { // NOSONAR
+    } catch (InterruptedException | IOException e) { // NOSONAR
       Thread.interrupted();
-      throw new JobsException(e);
-    } catch (IOException e) {
-      throw new JobsException(e);
+      JobLogs.checked(LOGGER, e, "ERROR ON DESTROY! {}", e.getMessage());
     }
   }
 }
