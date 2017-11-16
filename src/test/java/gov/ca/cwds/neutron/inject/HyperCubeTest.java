@@ -5,10 +5,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
+import java.util.function.Function;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -28,14 +31,17 @@ import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
+import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
+import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
+import gov.ca.cwds.neutron.atom.AtomRocketFactory;
+import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
-
   public static class TestHyperCube extends HyperCube {
-
     Goddard lastTest;
     Configuration configuration;
 
@@ -85,13 +91,13 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     @Override
     protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
       final AnnotatedBindingBuilder<T> builder = mock(AnnotatedBindingBuilder.class);
-      return super.bind(clazz);
+      when(builder.annotatedWith(any(Annotation.class))).thenReturn(builder);
+      return builder;
     }
 
   }
 
   public static Goddard<TestNormalizedEntity, TestDenormalizedEntity> lastTester;
-
   HyperCube target;
 
   public HyperCube makeOurOwnCube(FlightPlan plan) {
@@ -105,15 +111,15 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     flightPlan = new FlightPlan();
     flightPlan.setEsConfigLoc("config/local.yaml");
     target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()), lastRunFile);
-
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
-
-    // final Binder binder = mock(Binder.class);
-    // target.setTestBinder(binder);
-
     HyperCube.setCubeMaker(opts -> this.makeOurOwnCube(opts));
     lastTester = this;
+
+    final Injector injector = mock(Injector.class);
+    when(injector.getInstance(RocketFactory.class)).thenReturn(rocketFactory);
+    when(injector.getInstance(Mach1TestRocket.class)).thenReturn(mach1Rocket);
+    HyperCube.setInjector(injector);
   }
 
   @Test
@@ -174,7 +180,6 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   public void elasticsearchClient_Args__boom() throws Exception {
     final ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
     final TransportClient transportClient = target.makeTransportClient(config, false);
-
     Client actual = target.elasticsearchClient();
     assertThat(actual, is(notNullValue()));
   }
@@ -187,8 +192,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void getInjector_Args__() throws Exception {
     Injector actual = HyperCube.getInjector();
-    Injector expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -235,11 +239,6 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     final String[] args = new String[] {"-c", "config/local.yaml", "-l",
         "/Users/CWS-NS3/client_indexer_time.txt", "-t", "4", "-S"};
 
-    final Injector injector = mock(Injector.class);
-    when(injector.getInstance(RocketFactory.class)).thenReturn(rocketFactory);
-    when(injector.getInstance(Mach1TestRocket.class)).thenReturn(mach1Rocket);
-    HyperCube.setInjector(injector);
-
     final Object actual = HyperCube.newRocket(klass, args);
     assertThat(actual, is(notNullValue()));
   }
@@ -280,7 +279,6 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   // ERROR:
   // H2 credentials on Jenkins.
   // =================================
-
   // @Test
   // @Ignore
   // public void makeCmsSessionFactory_Args__() throws Exception {
@@ -294,5 +292,149 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   // final SessionFactory actual = target.makeNsSessionFactory();
   // assertThat(actual, is(notNullValue()));
   // }
+
+  @Test
+  public void makeHibernateConfiguration_Args__() throws Exception {
+    Configuration actual = target.makeHibernateConfiguration();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void init_Args__() throws Exception {
+    target.init();
+  }
+
+  @Test
+  public void buildCube_Args__FlightPlan() throws Exception {
+    HyperCube actual = HyperCube.buildCube(flightPlan);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  // @Test
+  // public void buildInjectorFunctional_Args__FlightPlan() throws Exception {
+  // Injector actual = HyperCube.buildInjectorFunctional(flightPlan);
+  // assertThat(actual, is(notNullValue()));
+  // }
+
+  @Test
+  public void newRocket_Args__Class__FlightPlan() throws Exception {
+    Object actual = HyperCube.newRocket(Mach1TestRocket.class, flightPlan);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void newRocket_Args__Class__FlightPlan_T__NeutronException() throws Exception {
+    HyperCube.newRocket(Mach1TestRocket.class, flightPlan);
+  }
+
+  @Test
+  public void newRocket_Args__Class__StringArray() throws Exception {
+    final String[] args = new String[] {"-c", "config/local.yaml", "-l",
+        "/Users/CWS-NS3/client_indexer_time.txt", "-t", "4", "-S"};
+
+    Object actual = HyperCube.newRocket(Mach1TestRocket.class, args);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  // @Test
+  // public void configure_Args__() throws Exception {
+  // final Binder binder = mock(Binder.class);
+  // target.setTestBinder(binder);
+  // target.configure();
+  // }
+
+  @Test
+  public void additionalDaos_Args__Configuration() throws Exception {
+    Configuration config = mock(Configuration.class);
+    Configuration actual = target.additionalDaos(config);
+    Configuration expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void makeCmsSessionFactory_Args__() throws Exception {
+    SessionFactory actual = target.makeCmsSessionFactory();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void makeNsSessionFactory_Args__() throws Exception {
+    SessionFactory actual = target.makeNsSessionFactory();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void isScaffoldSystemCodeCache_Args__() throws Exception {
+    boolean actual = target.isScaffoldSystemCodeCache();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void scaffoldSystemCodeCache_Args__() throws Exception {
+    SystemCodeCache actual = target.scaffoldSystemCodeCache();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void commandCenterSettings_Args__() throws Exception {
+    LaunchCommandSettings actual = target.commandCenterSettings();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void configureQuartz_Args__Injector__AtomFlightRecorder__AtomRocketFactory__AtomFlightPlanManager()
+      throws Exception {
+    Injector injector = mock(Injector.class);
+    AtomFlightRecorder flightRecorder = mock(AtomFlightRecorder.class);
+    AtomRocketFactory rocketFactory = mock(AtomRocketFactory.class);
+    AtomFlightPlanManager flightPlanMgr = mock(AtomFlightPlanManager.class);
+    AtomLaunchDirector actual =
+        target.configureQuartz(injector, flightRecorder, rocketFactory, flightPlanMgr);
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getFlightPlan_Args__() throws Exception {
+    FlightPlan actual = target.getFlightPlan();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setFlightPlan_Args__FlightPlan() throws Exception {
+    FlightPlan opts = mock(FlightPlan.class);
+    target.setFlightPlan(opts);
+  }
+
+  @Test
+  public void getInstance_Args__() throws Exception {
+    HyperCube actual = HyperCube.getInstance();
+    HyperCube expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setInstance_Args__HyperCube() throws Exception {
+    HyperCube instance = mock(HyperCube.class);
+    HyperCube.setInstance(instance);
+  }
+
+  @Test
+  public void getCubeMaker_Args__() throws Exception {
+    Function<FlightPlan, HyperCube> actual = HyperCube.getCubeMaker();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void setCubeMaker_Args__Function() throws Exception {
+    Function<FlightPlan, HyperCube> cubeMaker = mock(Function.class);
+    HyperCube.setCubeMaker(cubeMaker);
+  }
+
+  @Test
+  public void setInjector_Args__Injector() throws Exception {
+    Injector injector = mock(Injector.class);
+    HyperCube.setInjector(injector);
+  }
 
 }
