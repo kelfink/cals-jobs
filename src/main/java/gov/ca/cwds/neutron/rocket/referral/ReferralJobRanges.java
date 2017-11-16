@@ -56,17 +56,18 @@ public class ReferralJobRanges {
   }
 
   /**
-   * Get key ranges by platform and job size.
+   * Get key ranges by platform and range size.
    * 
-   * @param job referrals job
+   * @param rocket referrals range rocket
    * @return key pairs
    * @throws NeutronException on parse error
    */
   public List<Pair<String, String>> getPartitionRanges(
-      BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> job) throws NeutronException {
+      BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> rocket)
+      throws NeutronException {
     List<Pair<String, String>> ret = new ArrayList<>();
 
-    if (job.isLargeDataSet()) {
+    if (rocket.isLargeDataSet()) {
       LOGGER.info("z/OS, LARGE data set, ORDER: a,z,A,Z,0,9");
 
       try (@SuppressWarnings("unchecked")
@@ -77,8 +78,8 @@ public class ReferralJobRanges {
         throw JobLogs.checked(LOGGER, e, "FAILED TO LOAD REFERRAL RANGES!");
       }
 
-      limitRange(job, ret);
-    } else if (job.isDB2OnZOS()) {
+      ret = limitRange(rocket, ret);
+    } else if (rocket.isDB2OnZOS()) {
       LOGGER.info("z/OS, small data set, ORDER: a,z,A,Z,0,9");
       ret.add(Pair.of("aaaaaaaaaa", "9999999999"));
     } else {
