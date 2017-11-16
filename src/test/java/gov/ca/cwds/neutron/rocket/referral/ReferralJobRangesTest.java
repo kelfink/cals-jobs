@@ -17,7 +17,6 @@ import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
-import gov.ca.cwds.neutron.rocket.referral.ReferralJobRanges;
 
 public class ReferralJobRangesTest extends Goddard {
 
@@ -56,7 +55,7 @@ public class ReferralJobRangesTest extends Goddard {
     when(flightPlan.isRangeGiven()).thenReturn(true);
     when(flightPlan.getStartBucket()).thenReturn(1L);
     when(flightPlan.getEndBucket()).thenReturn(4L);
-    checkPartitionRanges("CWSRSQ", true, 3562, true);
+    checkPartitionRanges("CWSRSQ", true, 3, true);
   }
 
   @Test
@@ -64,7 +63,7 @@ public class ReferralJobRangesTest extends Goddard {
     when(flightPlan.isRangeGiven()).thenReturn(true);
     when(flightPlan.getStartBucket()).thenReturn(1L);
     when(flightPlan.getEndBucket()).thenReturn(4L);
-    checkPartitionRanges("CWSREP", true, 3562, true);
+    checkPartitionRanges("CWSREP", true, 3, true);
   }
 
   @Test
@@ -79,15 +78,15 @@ public class ReferralJobRangesTest extends Goddard {
 
   @Test
   public void getPartitionRanges_Args__BasePersonIndexerJob() throws Exception {
-    BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> job =
+    BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> rocket =
         mock(BasePersonRocket.class);
 
-    when(job.getFlightPlan()).thenReturn(flightPlan);
+    when(rocket.getFlightPlan()).thenReturn(flightPlan);
     when(flightPlan.isRangeGiven()).thenReturn(false);
     when(flightPlan.getStartBucket()).thenReturn(1L);
     when(flightPlan.getEndBucket()).thenReturn(1L);
 
-    final List actual = target.getPartitionRanges(job);
+    final List actual = target.getPartitionRanges(rocket);
     final List expected = new ArrayList<>();
     expected.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
     assertThat(actual, is(equalTo(expected)));
