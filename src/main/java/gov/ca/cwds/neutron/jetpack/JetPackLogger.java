@@ -31,6 +31,10 @@ public class JetPackLogger implements ConditionalLogger {
     this.logger = LoggerFactory.getLogger(klass);
   }
 
+  public JetPackLogger(Logger logger) {
+    this.logger = logger;
+  }
+
   /**
    * Convert lambda Supplier arguments to Object array for the SLF4J method signatures.
    * 

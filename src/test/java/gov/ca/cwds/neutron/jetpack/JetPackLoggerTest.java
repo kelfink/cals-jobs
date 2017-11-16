@@ -5,12 +5,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
 import org.slf4j.Marker;
-
-import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 
 public class JetPackLoggerTest {
 
@@ -25,11 +25,17 @@ public class JetPackLoggerTest {
 
   @Test
   public void trace_Args__String__SupplierArray() throws Exception {
+    final Logger log = mock(Logger.class);
+    when(log.isTraceEnabled()).thenReturn(true);
+    target = new JetPackLogger(log);
     target.trace("{} {}", () -> "Shrink", () -> "Ray");
   }
 
   @Test
   public void debug_Args__String__SupplierArray() throws Exception {
+    final Logger log = mock(Logger.class);
+    when(log.isDebugEnabled()).thenReturn(true);
+    target = new JetPackLogger(log);
     target.debug("{} {}", () -> "Hyper", () -> "Cube");
   }
 
