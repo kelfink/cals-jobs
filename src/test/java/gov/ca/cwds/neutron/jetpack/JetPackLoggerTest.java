@@ -32,9 +32,25 @@ public class JetPackLoggerTest {
   }
 
   @Test
+  public void trace_Args__String__SupplierArray__2() throws Exception {
+    final Logger log = mock(Logger.class);
+    when(log.isTraceEnabled()).thenReturn(false);
+    target = new JetPackLogger(log);
+    target.trace("{} {}", () -> "Shrink", () -> "Ray");
+  }
+
+  @Test
   public void debug_Args__String__SupplierArray() throws Exception {
     final Logger log = mock(Logger.class);
     when(log.isDebugEnabled()).thenReturn(true);
+    target = new JetPackLogger(log);
+    target.debug("{} {}", () -> "Hyper", () -> "Cube");
+  }
+
+  @Test
+  public void debug_Args__String__SupplierArray__2() throws Exception {
+    final Logger log = mock(Logger.class);
+    when(log.isDebugEnabled()).thenReturn(false);
     target = new JetPackLogger(log);
     target.debug("{} {}", () -> "Hyper", () -> "Cube");
   }
@@ -52,6 +68,30 @@ public class JetPackLoggerTest {
   @Test
   public void error_Args__String__SupplierArray() throws Exception {
     target.error("{} {}", () -> "X-Ray", () -> "Specs");
+  }
+
+  @Test
+  public void info_Args__String__SupplierArray__2() throws Exception {
+    final Logger log = mock(Logger.class);
+    when(log.isInfoEnabled()).thenReturn(false);
+    target = new JetPackLogger(log);
+    target.info("first name: {}, last name: {}", () -> "Jimmy", () -> "Neutron");
+  }
+
+  @Test
+  public void warn_Args__String__SupplierArray__2() throws Exception {
+    final Logger log = mock(Logger.class);
+    when(log.isWarnEnabled()).thenReturn(false);
+    target = new JetPackLogger(log);
+    target.warn("{} {}", () -> "Burping", () -> "Soda");
+  }
+
+  @Test
+  public void error_Args__String__SupplierArray__2() throws Exception {
+    final Logger log = mock(Logger.class);
+    when(log.isErrorEnabled()).thenReturn(false);
+    target = new JetPackLogger(log);
+    target.error("{} {}", () -> "X-Ray", () -> "Spex");
   }
 
   @Test
