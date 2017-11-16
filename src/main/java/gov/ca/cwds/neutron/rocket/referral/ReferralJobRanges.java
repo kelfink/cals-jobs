@@ -45,17 +45,10 @@ public class ReferralJobRanges {
     final FlightPlan flightPlan = rocket.getFlightPlan();
 
     if (flightPlan.isRangeGiven()) {
-      LOGGER.warn("KEY RANGE GIVEN!");
-      final List<Pair<String, String>> list = new ArrayList<>();
       final int start = ((int) flightPlan.getStartBucket()) - 1;
       final int end = ((int) flightPlan.getEndBucket()) - 1;
-
       LOGGER.warn("KEY RANGES: {} to {}", start + 1, end + 1);
-      for (int i = start; i <= end; i++) {
-        list.add(allKeyPairs.get(i));
-      }
-
-      ret = list;
+      ret = allKeyPairs.subList(start, end);
     }
 
     LOGGER.warn("SELECTED RANGE: {}", ret);
