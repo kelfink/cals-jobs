@@ -119,7 +119,6 @@ public class LaunchPad implements VoxLaunchPadMBean {
                 .build());
         LOGGER.info("Scheduled trigger {}", rocketName);
       } else {
-        // HACK: move this logic to another location.
         if (flightSchedule.getInitialLoadOrder() == 1) {
           jd = newJob(NeutronRocket.class)
               .withIdentity(rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
