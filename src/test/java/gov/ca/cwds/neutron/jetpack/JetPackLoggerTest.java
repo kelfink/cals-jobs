@@ -12,6 +12,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 
+import gov.ca.cwds.jobs.test.TestIndexerJob;
+
 public class JetPackLoggerTest {
 
   JetPackLogger target;
@@ -27,7 +29,8 @@ public class JetPackLoggerTest {
   public void trace_Args__String__SupplierArray() throws Exception {
     final Logger log = mock(Logger.class);
     when(log.isTraceEnabled()).thenReturn(true);
-    target = new JetPackLogger(log);
+    target = new JetPackLogger(TestIndexerJob.class);
+    target.setLogger(log);
     target.trace("{} {}", () -> "Shrink", () -> "Ray");
   }
 
@@ -35,7 +38,8 @@ public class JetPackLoggerTest {
   public void trace_Args__String__SupplierArray__2() throws Exception {
     final Logger log = mock(Logger.class);
     when(log.isTraceEnabled()).thenReturn(false);
-    target = new JetPackLogger(log);
+    target = new JetPackLogger(TestIndexerJob.class);
+    target.setLogger(log);
     target.trace("{} {}", () -> "Shrink", () -> "Ray");
   }
 
@@ -43,7 +47,8 @@ public class JetPackLoggerTest {
   public void debug_Args__String__SupplierArray() throws Exception {
     final Logger log = mock(Logger.class);
     when(log.isDebugEnabled()).thenReturn(true);
-    target = new JetPackLogger(log);
+    target = new JetPackLogger(TestIndexerJob.class);
+    target.setLogger(log);
     target.debug("{} {}", () -> "Hyper", () -> "Cube");
   }
 
@@ -51,7 +56,8 @@ public class JetPackLoggerTest {
   public void debug_Args__String__SupplierArray__2() throws Exception {
     final Logger log = mock(Logger.class);
     when(log.isDebugEnabled()).thenReturn(false);
-    target = new JetPackLogger(log);
+    target = new JetPackLogger(TestIndexerJob.class);
+    target.setLogger(log);
     target.debug("{} {}", () -> "Hyper", () -> "Cube");
   }
 
@@ -74,7 +80,8 @@ public class JetPackLoggerTest {
   public void info_Args__String__SupplierArray__2() throws Exception {
     final Logger log = mock(Logger.class);
     when(log.isInfoEnabled()).thenReturn(false);
-    target = new JetPackLogger(log);
+    target = new JetPackLogger(TestIndexerJob.class);
+    target.setLogger(log);
     target.info("first name: {}, last name: {}", () -> "Jimmy", () -> "Neutron");
   }
 
@@ -82,7 +89,8 @@ public class JetPackLoggerTest {
   public void warn_Args__String__SupplierArray__2() throws Exception {
     final Logger log = mock(Logger.class);
     when(log.isWarnEnabled()).thenReturn(false);
-    target = new JetPackLogger(log);
+    target = new JetPackLogger(TestIndexerJob.class);
+    target.setLogger(log);
     target.warn("{} {}", () -> "Burping", () -> "Soda");
   }
 
@@ -90,7 +98,8 @@ public class JetPackLoggerTest {
   public void error_Args__String__SupplierArray__2() throws Exception {
     final Logger log = mock(Logger.class);
     when(log.isErrorEnabled()).thenReturn(false);
-    target = new JetPackLogger(log);
+    target = new JetPackLogger(TestIndexerJob.class);
+    target.setLogger(log);
     target.error("{} {}", () -> "X-Ray", () -> "Spex");
   }
 

@@ -25,14 +25,10 @@ public class JetPackLogger implements ConditionalLogger {
   /**
    * Delegate SLF4J Logger.
    */
-  private final Logger logger;
+  private Logger logger;
 
   public JetPackLogger(Class<?> klass) {
     this.logger = LoggerFactory.getLogger(klass);
-  }
-
-  public JetPackLogger(Logger logger) {
-    this.logger = logger;
   }
 
   /**
@@ -384,6 +380,14 @@ public class JetPackLogger implements ConditionalLogger {
   @Override
   public void error(Marker marker, String msg, Throwable t) {
     logger.error(marker, msg, t);
+  }
+
+  public Logger getLogger() {
+    return logger;
+  }
+
+  public void setLogger(Logger logger) {
+    this.logger = logger;
   }
 
 }
