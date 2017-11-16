@@ -94,7 +94,7 @@ public final class NeutronDB2Util {
         .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
 
       final DatabaseMetaData meta = con.getMetaData();
-      LOGGER.info("meta:\nproduct name: {}\nproduction version: {}\nmajor: {}\nminor: {}",
+      LOGGER.warn("meta:\nproduct name: {}\nproduction version: {}\nmajor: {}\nminor: {}",
           meta.getDatabaseProductName(), meta.getDatabaseProductVersion(),
           meta.getDatabaseMajorVersion(), meta.getDatabaseMinorVersion());
 

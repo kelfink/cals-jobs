@@ -125,8 +125,8 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * @throws NeutronException on error
    */
   default boolean isLargeDataSet() throws NeutronException {
-    return isDB2OnZOS() && (getDBSchemaName().toUpperCase().endsWith("RSQ")
-        || getDBSchemaName().toUpperCase().endsWith("REP"));
+    final String schema = getDBSchemaName().toUpperCase().trim();
+    return isDB2OnZOS() && (schema.endsWith("RSQ") || schema.endsWith("REP"));
   }
 
   /**
