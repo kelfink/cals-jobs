@@ -3,7 +3,6 @@ package gov.ca.cwds.neutron.rocket;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -11,9 +10,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
-import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
@@ -37,14 +34,12 @@ public class IndexResetRocket
    * @param dao OtherAdultInPlacemtHome DAO
    * @param esDao ElasticSearch DAO
    * @param mapper Jackson ObjectMapper
-   * @param sessionFactory Hibernate session factory
    * @param flightPlan command line options
    */
   @Inject
   public IndexResetRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      final ElasticsearchDao esDao, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightPlan flightPlan) {
-    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, sessionFactory, flightPlan);
+      final ElasticsearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan) {
+    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, dao.getSessionFactory(), flightPlan);
   }
 
   @Override
@@ -85,16 +80,6 @@ public class IndexResetRocket
     }
 
     return lastRunDate;
-  }
-
-  /**
-   * Batch job entry point.
-   * 
-   * @param args command line arguments
-   * @throws Exception unhandled launch error
-   */
-  public static void main(String... args) throws Exception {
-    LaunchCommand.launchOneWayTrip(IndexResetRocket.class, args);
   }
 
 }
