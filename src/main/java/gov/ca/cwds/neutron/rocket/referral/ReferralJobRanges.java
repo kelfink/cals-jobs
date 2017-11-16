@@ -41,7 +41,7 @@ public class ReferralJobRanges {
   private List<Pair<String, String>> limitRange(
       BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> rocket,
       final List<Pair<String, String>> allKeyPairs) {
-    List<Pair<String, String>> ret = new ArrayList<>();
+    List<Pair<String, String>> ret = allKeyPairs;
     final FlightPlan flightPlan = rocket.getFlightPlan();
 
     if (flightPlan.isRangeGiven()) {

@@ -238,7 +238,6 @@ public class ReferralHistoryIndexerJob
   protected void readClients(final PreparedStatement stmtInsClient,
       final PreparedStatement stmtSelClient, final List<MinClientReferral> listClientReferralKeys,
       final Pair<String, String> p) throws SQLException {
-
     // Prepare client list.
     stmtInsClient.setMaxRows(0);
     stmtInsClient.setQueryTimeout(0);
