@@ -2,6 +2,7 @@ package gov.ca.cwds.data.persistence.cms;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -111,6 +112,22 @@ public class ReplicatedSafetyAlertsTest {
     ReplicatedSafetyAlerts target = new ReplicatedSafetyAlerts();
     String actual = target.getSsn();
     String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void hashCode_Args__() throws Exception {
+    ReplicatedSafetyAlerts target = new ReplicatedSafetyAlerts();
+    int actual = target.hashCode();
+    assertThat(actual, is(not(0)));
+  }
+
+  @Test
+  public void equals_Args__Object() throws Exception {
+    ReplicatedSafetyAlerts target = new ReplicatedSafetyAlerts();
+    Object obj = null;
+    boolean actual = target.equals(obj);
+    boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 
