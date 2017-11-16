@@ -173,7 +173,8 @@ public enum StandardFlightSchedule {
    * @return Quartz JobChainingJobListener
    */
   public static JobChainingJobListener buildInitialLoadJobChainListener() {
-    final JobChainingJobListener ret = new JobChainingJobListener("initial_load");
+    final JobChainingJobListener ret =
+        new JobChainingJobListener(NeutronSchedulerConstants.GRP_FULL_LOAD);
 
     final StandardFlightSchedule[] arr =
         Arrays.copyOf(StandardFlightSchedule.values(), StandardFlightSchedule.values().length);
@@ -181,13 +182,14 @@ public enum StandardFlightSchedule {
 
     StandardFlightSchedule sched;
     final int len = arr.length;
+
     for (int i = 0; i < len; i++) {
       sched = arr[i];
       LOGGER.info("intial load order: {}", sched.getRocketName());
       ret.addJobChainLink(new JobKey(sched.rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD),
           i != (len - 1)
               ? new JobKey(arr[i + 1].rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
-              : new JobKey("verify", NeutronSchedulerConstants.GRP_FULL_LOAD));
+              : new JobKey("exit_initial_load", NeutronSchedulerConstants.GRP_FULL_LOAD));
     }
 
     return ret;

@@ -106,22 +106,42 @@ public class LaunchPad implements VoxLaunchPadMBean {
           .withIdentity(rocketName, NeutronSchedulerConstants.GRP_LST_CHG)
           .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS,
               flightSchedule.getRocketClass().getName())
-          .build();
+          .storeDurably().build();
 
-      // Initial mode: run only **once**.
-      final Trigger trg = LaunchCommand.isInitialMode()
-          ? newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_FULL_LOAD)
-              .withPriority(flightSchedule.getInitialLoadOrder())
-              .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
-              .build()
-          : newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
-              .withPriority(flightSchedule.getLastRunPriority())
-              .withSchedule(simpleSchedule()
-                  .withIntervalInSeconds(flightSchedule.getWaitPeriodSeconds()).repeatForever())
-              .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
-              .build();
-      scheduler.scheduleJob(jd, trg);
-      LOGGER.info("Scheduled trigger {}", rocketName);
+      if (!LaunchCommand.isInitialMode()) {
+        scheduler.scheduleJob(jd,
+            newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
+                .withPriority(flightSchedule.getLastRunPriority())
+                .withSchedule(simpleSchedule()
+                    .withIntervalInSeconds(flightSchedule.getWaitPeriodSeconds()).repeatForever())
+                .startAt(DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
+                .build());
+        LOGGER.info("Scheduled trigger {}", rocketName);
+      } else {
+        // HACK: move this logic to another location.
+        if (flightSchedule.getInitialLoadOrder() == 1) {
+          jd = newJob(NeutronRocket.class)
+              .withIdentity(rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
+              .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS,
+                  flightSchedule.getRocketClass().getName())
+              .storeDurably().build();
+
+          final Trigger trigger =
+              newTrigger().withIdentity(rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
+                  .startAt(
+                      DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
+                  .build();
+          scheduler.scheduleJob(jd, trigger);
+        } else {
+          jd = newJob(NeutronRocket.class)
+              .withIdentity(rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
+              .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS,
+                  flightSchedule.getRocketClass().getName())
+              .storeDurably().build();
+          scheduler.addJob(jd, false, false);
+        }
+      }
+
     } catch (Exception e) {
       throw JobLogs.checked(LOGGER, e, "FAILED TO SCHEDULE LAUNCH! rocket: {}", rocketName);
     }
