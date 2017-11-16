@@ -74,7 +74,7 @@ public class ReferralJobRanges {
           IOUtils.readLines(this.getClass().getResourceAsStream("/referral_ranges.tsv")).stream()) {
         ret = lines.sequential().map(this::splitLine).collect(Collectors.toList());
       } catch (Exception e) {
-        throw JobLogs.checked(LOGGER, e, "Failed to load referral ranges!");
+        throw JobLogs.checked(LOGGER, e, "FAILED TO LOAD REFERRAL RANGES!");
       }
 
       limitRange(job, ret);
