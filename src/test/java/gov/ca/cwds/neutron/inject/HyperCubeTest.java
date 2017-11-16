@@ -351,17 +351,17 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void makeCmsSessionFactory_Args__() throws Exception {
-    SessionFactory actual = target.makeCmsSessionFactory();
-    assertThat(actual, is(notNullValue()));
-  }
+  // @Test
+  // public void makeCmsSessionFactory_Args__() throws Exception {
+  // SessionFactory actual = target.makeCmsSessionFactory();
+  // assertThat(actual, is(notNullValue()));
+  // }
 
-  @Test
-  public void makeNsSessionFactory_Args__() throws Exception {
-    SessionFactory actual = target.makeNsSessionFactory();
-    assertThat(actual, is(notNullValue()));
-  }
+  // @Test
+  // public void makeNsSessionFactory_Args__() throws Exception {
+  // SessionFactory actual = target.makeNsSessionFactory();
+  // assertThat(actual, is(notNullValue()));
+  // }
 
   @Test
   public void isScaffoldSystemCodeCache_Args__() throws Exception {
