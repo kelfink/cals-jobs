@@ -6,10 +6,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +34,7 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
 
     LaunchCommand.getSettings().setInitialMode(true);
     dao = new ReplicatedClientDao(sessionFactory);
-    target = new ClientCountyRocket(dao, esDao, lastRunFile, MAPPER, sessionFactory,
-        flightPlan);
+    target = new ClientCountyRocket(dao, esDao, lastRunFile, MAPPER, sessionFactory, flightPlan);
     pair = Pair.of("aaaaaaaaaa", "9999999999");
 
     when(proc.getOutputParameterValue(any(String.class))).thenReturn(new Integer(0));
@@ -55,7 +52,6 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
 
   @Test
   public void extract_Args__ResultSet() throws Exception {
-    ResultSet rs = mock(ResultSet.class);
     EsClientAddress actual = target.extract(rs);
     assertThat(actual, is(notNullValue()));
   }
@@ -121,13 +117,24 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
   }
 
   @Test
-  public void callProc_Args__() throws Exception {
+  public void callProc_Args__1() throws Exception {
+    target.callProc();
+  }
+
+  @Test(expected = JobsException.class)
+  public void callProc_Args__2() throws Exception {
+    when(proc.getOutputParameterValue(any(String.class))).thenReturn(null);
+    target.callProc();
+  }
+
+  @Test(expected = JobsException.class)
+  public void callProc_Args__3() throws Exception {
+    when(proc.getOutputParameterValue(any(String.class))).thenReturn(new Integer(255));
     target.callProc();
   }
 
   @Test
   public void threadRetrieveByJdbc_Args__() throws Exception {
-    // NeutronThreadUtil.catchYourBreath();
     target.threadRetrieveByJdbc();
   }
 
