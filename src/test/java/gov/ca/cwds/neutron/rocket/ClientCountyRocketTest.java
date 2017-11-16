@@ -134,6 +134,12 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
   }
 
   @Test
+  public void callProc_Args__4() throws Exception {
+    LaunchCommand.getSettings().setInitialMode(false);
+    target.callProc();
+  }
+
+  @Test
   public void threadRetrieveByJdbc_Args__() throws Exception {
     target.threadRetrieveByJdbc();
   }
