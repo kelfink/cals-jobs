@@ -102,6 +102,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
         return;
       }
 
+      final String rocketClass = flightSchedule.getRocketClass().getName();
       jd = newJob(NeutronRocket.class)
           .withIdentity(rocketName, NeutronSchedulerConstants.GRP_LST_CHG)
           .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS,
@@ -122,9 +123,8 @@ public class LaunchPad implements VoxLaunchPadMBean {
         if (flightSchedule.getInitialLoadOrder() == 1) {
           jd = newJob(NeutronRocket.class)
               .withIdentity(rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
-              .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS,
-                  flightSchedule.getRocketClass().getName())
-              .storeDurably().build();
+              .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS, rocketClass).storeDurably()
+              .build();
 
           final Trigger trigger =
               newTrigger().withIdentity(rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
@@ -135,9 +135,8 @@ public class LaunchPad implements VoxLaunchPadMBean {
         } else {
           jd = newJob(NeutronRocket.class)
               .withIdentity(rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
-              .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS,
-                  flightSchedule.getRocketClass().getName())
-              .storeDurably().build();
+              .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS, rocketClass).storeDurably()
+              .build();
           scheduler.addJob(jd, false, false);
         }
       }
