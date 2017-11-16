@@ -39,17 +39,18 @@ public class ReferralJobRanges {
   }
 
   private List<Pair<String, String>> limitRange(
-      BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> job,
+      BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> rocket,
       final List<Pair<String, String>> allKeyPairs) {
     List<Pair<String, String>> ret = new ArrayList<>();
-    final FlightPlan opts = job.getFlightPlan();
-    if (opts.isRangeGiven()) {
+    final FlightPlan flightPlan = rocket.getFlightPlan();
+
+    if (flightPlan.isRangeGiven()) {
       final List<Pair<String, String>> list = new ArrayList<>();
 
-      final int start = ((int) opts.getStartBucket()) - 1;
-      final int end = ((int) opts.getEndBucket()) - 1;
+      final int start = ((int) flightPlan.getStartBucket()) - 1;
+      final int end = ((int) flightPlan.getEndBucket()) - 1;
 
-      LOGGER.info("KEY RANGES: {} to {}", start + 1, end + 1);
+      LOGGER.debug("KEY RANGES: {} to {}", start + 1, end + 1);
       for (int i = start; i <= end; i++) {
         list.add(allKeyPairs.get(i));
       }
@@ -68,8 +69,7 @@ public class ReferralJobRanges {
    * @throws NeutronException on parse error
    */
   public List<Pair<String, String>> getPartitionRanges(
-      BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> job)
-      throws NeutronException {
+      BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> job) throws NeutronException {
     List<Pair<String, String>> ret = new ArrayList<>();
 
     if (job.isLargeDataSet()) {
