@@ -26,6 +26,7 @@ import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.jobs.Goddard;
 
 public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddress> {
+
   ReplicatedClient target;
 
   @Override
