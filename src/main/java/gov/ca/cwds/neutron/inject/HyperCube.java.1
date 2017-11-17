@@ -2,6 +2,8 @@ package gov.ca.cwds.neutron.inject;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
 
@@ -28,6 +30,7 @@ import com.google.inject.Injector;
 import com.google.inject.NeutronGuiceModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.common.ApiFileAssistant;
@@ -53,7 +56,6 @@ import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
-import gov.ca.cwds.data.persistence.cms.EsClient;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
@@ -79,28 +81,25 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.schedule.FlightPlanRegistry;
+import gov.ca.cwds.jobs.schedule.FlightRecorder;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.jobs.schedule.LaunchScheduler;
+import gov.ca.cwds.jobs.schedule.RocketFactory;
+import gov.ca.cwds.jobs.schedule.StandardFlightSchedule;
 import gov.ca.cwds.jobs.util.elastic.XPackUtils;
-import gov.ca.cwds.neutron.atom.AtomCommandCenterConsole;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
-import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
+import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
+import gov.ca.cwds.neutron.atom.AtomLaunchScheduler;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
-import gov.ca.cwds.neutron.launch.FlightRecorder;
-import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
-import gov.ca.cwds.neutron.launch.LaunchDirector;
-import gov.ca.cwds.neutron.launch.RocketFactory;
-import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.neutron.launch.listener.NeutronJobListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronSchedulerListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
-import gov.ca.cwds.neutron.vox.XRaySpex;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
@@ -284,18 +283,21 @@ public class HyperCube extends NeutronGuiceModule {
 
     // Singleton:
     bind(ObjectMapper.class).toInstance(ObjectMapperUtils.createObjectMapper());
-    bind(ElasticsearchDao.class).asEagerSingleton();
 
-    // Command Center:
-    bind(AtomFlightRecorder.class).to(FlightRecorder.class).asEagerSingleton();
+    // try {
+    // bind(ElasticsearchDao.class).annotatedWith(Names.named("people.index"))
+    // .toInstance(elasticsearchDaoPeopleIndex());
+    // bind(ElasticsearchDao.class).annotatedWith(Names.named("people.summary.index"))
+    // .toInstance(elasticsearchDaoPeopleSummaryIndex());
+    // } catch (Exception e) {
+    // JobLogs.runtime(LOGGER, e, e.getMessage());
+    // }
+
+    bind(FlightRecorder.class).asEagerSingleton();
     bind(AtomFlightPlanManager.class).to(FlightPlanRegistry.class).asEagerSingleton();
     bind(AtomRocketFactory.class).to(RocketFactory.class).asEagerSingleton();
-    bind(AtomCommandCenterConsole.class).to(XRaySpex.class);
   }
 
-  /**
-   * Initialize all Data Access Objects (DAO).
-   */
   protected void bindDaos() {
     LOGGER.info("make DAOs");
 
@@ -331,9 +333,9 @@ public class HyperCube extends NeutronGuiceModule {
     LOGGER.info("make CMS session factory");
     Configuration config = makeHibernateConfiguration().configure(getHibernateConfigCms())
         .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsClientAddress.class)
-        .addAnnotatedClass(EsClient.class).addAnnotatedClass(EsRelationship.class)
-        .addAnnotatedClass(EsPersonReferral.class).addAnnotatedClass(EsChildPersonCase.class)
-        .addAnnotatedClass(EsParentPersonCase.class).addAnnotatedClass(ReplicatedAttorney.class)
+        .addAnnotatedClass(EsRelationship.class).addAnnotatedClass(EsPersonReferral.class)
+        .addAnnotatedClass(EsChildPersonCase.class).addAnnotatedClass(EsParentPersonCase.class)
+        .addAnnotatedClass(ReplicatedAttorney.class)
         .addAnnotatedClass(ReplicatedCollateralIndividual.class)
         .addAnnotatedClass(ReplicatedEducationProviderContact.class)
         .addAnnotatedClass(ReplicatedOtherAdultInPlacemtHome.class)
@@ -353,6 +355,12 @@ public class HyperCube extends NeutronGuiceModule {
     return makeHibernateConfiguration().configure(getHibernateConfigNs())
         .addAnnotatedClass(EsIntakeScreening.class).addAnnotatedClass(IntakeScreening.class)
         .buildSessionFactory();
+  }
+
+  @Provides
+  @Singleton
+  public AtomLaunchCommand provideLaunchDirector() {
+    return LaunchCommand.getInstance();
   }
 
   @Provides
@@ -380,20 +388,15 @@ public class HyperCube extends NeutronGuiceModule {
 
   @Provides
   @Singleton
-  public LaunchCommandSettings commandCenterSettings() {
-    return LaunchCommand.getSettings();
-  }
-
-  @Provides
-  @Singleton
   public CmsSystemCodeSerializer provideCmsSystemCodeSerializer(SystemCodeCache systemCodeCache) {
     return new CmsSystemCodeSerializer(systemCodeCache);
   }
 
-  protected TransportClient makeTransportClient(final ElasticsearchConfiguration config,
-      boolean es55) {
+  protected TransportClient makeTransportClient(final ElasticsearchConfiguration config)
+      throws NeutronException {
     TransportClient ret;
-    if (es55) {
+
+    if (StringUtils.isNotBlank(config.getUser()) && StringUtils.isNotBlank(config.getPassword())) {
       LOGGER.warn("ENABLE X-PACK");
       final Settings.Builder settings =
           Settings.builder().put("cluster.name", config.getElasticsearchCluster());
@@ -403,59 +406,111 @@ public class HyperCube extends NeutronGuiceModule {
       ret = new PreBuiltTransportClient(
           Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build());
     }
+
+    try {
+      ret.addTransportAddress(
+          new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
+              Integer.parseInt(config.getElasticsearchPort())));
+    } catch (Exception e) {
+      LOGGER.error("Error initializing Elasticsearch client for {}:{}:{}, {}",
+          config.getElasticsearchHost(), config.getElasticsearchCluster(),
+          config.getElasticsearchAlias(), e.getMessage(), e);
+      if (ret != null) {
+        ret.close();
+      }
+      throw JobLogs.checked(LOGGER, e, "Error initializing Elasticsearch client: " + e.getMessage(),
+          e);
+    }
+
     return ret;
   }
 
   /**
-   * Elasticsearch 5x. Instantiate the singleton ElasticSearch client on demand.
+   * ElasticSearchDao for people index.
+   * 
+   * @return initialized singleton ElasticSearchDao for people index
+   * @throws NeutronException on ES connection error
+   */
+  @Provides
+  @Named("es.dao.people")
+  public ElasticsearchDao elasticsearchDaoPeopleIndex(Map<String, ElasticsearchDao> esDaos)
+      throws NeutronException {
+    return esDaos.get("peopleIndex");
+  }
+
+  /**
+   * ElasticSearchDao for people-summary index.
+   * 
+   * @return initialized singleton ElasticSearchDao for people-summary index
+   * @throws NeutronException on ES connection error
+   */
+  @Provides
+  @Named("es.dao.people.summary")
+  public ElasticsearchDao elasticsearchDaoPeopleSummaryIndex(Map<String, ElasticsearchDao> esDaos)
+      throws NeutronException {
+    return esDaos.get("peopleIndex");
+  }
+
+  /**
+   * ElasticSearchDao instances.
+   * 
+   * @return initialized singleton ElasticSearchDao instances.
+   * @throws NeutronException on ES connection error
+   */
+  @Provides
+  public Map<String, ElasticsearchDao> elasticsearchDaos(
+      Map<String, ElasticsearchConfiguration> configs, Map<String, Client> clients)
+      throws NeutronException {
+    Map<String, ElasticsearchDao> esDaos = new HashMap<>();
+    for (String configName : configs.keySet()) {
+      esDaos.put(configName,
+          new ElasticsearchDao(clients.get(configName), configs.get(configName)));
+    }
+    return esDaos;
+  }
+
+  /**
+   * Elasticsearch 5x. Instantiate the singleton ElasticSearch clients on demand.
    * 
    * <p>
    * Initializes X-Pack security.
    * </p>
    * 
-   * @return initialized singleton ElasticSearch client
+   * @return initialized singleton ElasticSearch clients
    * @throws NeutronException on ES connection error
    */
   @Provides
-  public Client elasticsearchClient() throws NeutronException {
-    TransportClient client = null;
+  public Map<String, Client> elasticsearchClients() throws NeutronException {
+    Map<String, Client> clients = null;
+
     if (esConfig != null) {
       LOGGER.debug("Create NEW ES client");
-      try {
-        final ElasticsearchConfiguration config = elasticSearchConfig();
-        client = makeTransportClient(config, StringUtils.isNotBlank(config.getUser())
-            && StringUtils.isNotBlank(config.getPassword()));
-        client.addTransportAddress(
-            new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
-                Integer.parseInt(config.getElasticsearchPort())));
-      } catch (Exception e) {
-        LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
-        if (client != null) {
-          client.close();
-        }
-        throw JobLogs.checked(LOGGER, e,
-            "Error initializing Elasticsearch client: " + e.getMessage(), e);
+      final Map<String, ElasticsearchConfiguration> configs = elasticSearchConfigs();
+
+      for (String configName : configs.keySet()) {
+        Client client = makeTransportClient(configs.get(configName));
+        clients.put(configName, client);
       }
     }
-    return client;
+    return clients;
   }
 
   /**
-   * Read Elasticsearch configuration on demand.
+   * Read Elasticsearch configurations on demand.
    * 
-   * @return ES configuration
+   * @return ES configurations
    * @throws NeutronException on error
    */
   @Provides
-  public ElasticsearchConfiguration elasticSearchConfig() throws NeutronException {
-    ElasticsearchConfiguration ret = null;
+  public Map<String, ElasticsearchConfiguration> elasticSearchConfigs() throws NeutronException {
+    Map<String, ElasticsearchConfiguration> ret = new HashMap<>();
     if (esConfig != null) {
       LOGGER.debug("Create NEW ES configuration");
       try {
-        ret = new ObjectMapper(new YAMLFactory()).readValue(esConfig,
-            ElasticsearchConfiguration.class);
+        ret = new ObjectMapper(new YAMLFactory()).readValue(esConfig, Map.class);
       } catch (Exception e) {
-        throw JobLogs.checked(LOGGER, e, "ERROR READING ES CONFIG! {}", e.getMessage(), e);
+        throw JobLogs.checked(LOGGER, e, "ERROR READING ES CONFIG FROM FILE: {}, {}",
+            esConfig.getAbsolutePath(), e.getMessage(), e);
       }
     }
     return ret;
@@ -473,11 +528,12 @@ public class HyperCube extends NeutronGuiceModule {
    */
   @Provides
   @Singleton
-  protected AtomLaunchDirector configureQuartz(final Injector injector,
-      final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
+  protected AtomLaunchScheduler configureQuartz(final Injector injector,
+      final FlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
       final AtomFlightPlanManager flightPlanMgr) throws SchedulerException {
     final boolean initialMode = LaunchCommand.isInitialMode();
-    final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr);
+    final LaunchScheduler launchScheduler =
+        new LaunchScheduler(flightRecorder, rocketFactory, flightPlanMgr);
 
     final Properties p = new Properties();
     p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
@@ -489,16 +545,17 @@ public class HyperCube extends NeutronGuiceModule {
     final Scheduler scheduler = factory.getScheduler();
 
     // MORE: inject scheduler and rocket factory.
-    scheduler.setJobFactory(rocketFactory);
-    ret.setScheduler(scheduler);
+    scheduler.setJobFactory(injector.getInstance(RocketFactory.class));
+    launchScheduler.setScheduler(scheduler);
 
     // Scheduler listeners.
-    final ListenerManager mgr = ret.getScheduler().getListenerManager();
-    mgr.addSchedulerListener(new NeutronSchedulerListener());
-    mgr.addTriggerListener(new NeutronTriggerListener(ret));
-    mgr.addJobListener(initialMode ? StandardFlightSchedule.buildInitialLoadJobChainListener()
-        : new NeutronJobListener());
-    return ret;
+    final ListenerManager listenerMgr = launchScheduler.getScheduler().getListenerManager();
+    listenerMgr.addSchedulerListener(new NeutronSchedulerListener());
+    listenerMgr.addTriggerListener(new NeutronTriggerListener(launchScheduler));
+    listenerMgr
+        .addJobListener(initialMode ? StandardFlightSchedule.buildInitialLoadJobChainListener()
+            : new NeutronJobListener());
+    return launchScheduler;
   }
 
   @SuppressWarnings("javadoc")

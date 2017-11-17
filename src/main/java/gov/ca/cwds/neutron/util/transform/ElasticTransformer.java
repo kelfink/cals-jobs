@@ -21,20 +21,25 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import gov.ca.cwds.dao.ApiClientCaseAware;
 import gov.ca.cwds.dao.ApiClientCountyAware;
 import gov.ca.cwds.dao.ApiClientRaceAndEthnicityAware;
+import gov.ca.cwds.dao.ApiClientSafetyAlertsAware;
 import gov.ca.cwds.dao.ApiLegacyAware;
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
+import gov.ca.cwds.dao.ApiOtherClientNamesAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
+import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 import gov.ca.cwds.data.es.ElasticSearchPersonLanguage;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
 import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
+import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
@@ -401,7 +406,7 @@ public final class ElasticTransformer {
     return esRace;
   }
 
-  protected static ElasticSearchSystemCode handleClientCountyC(ApiPersonAware p) {
+  protected static ElasticSearchSystemCode handleClientCounty(ApiPersonAware p) {
     ElasticSearchSystemCode esCounty = null;
     if (p instanceof ApiClientCountyAware) {
       ApiClientCountyAware countyAware = (ApiClientCountyAware) p;
@@ -411,6 +416,39 @@ public final class ElasticTransformer {
           SystemCodeCache.global().getSystemCodeShortDescription(countyAware.getClientCounty()));
     }
     return esCounty;
+  }
+
+  protected static List<ElasticSearchSafetyAlert> handleSafetyAlerts(ApiPersonAware p) {
+    List<ElasticSearchSafetyAlert> alerts = null;
+    if (p instanceof ApiClientSafetyAlertsAware) {
+      ApiClientSafetyAlertsAware alertsAware = (ApiClientSafetyAlertsAware) p;
+      List<ElasticSearchSafetyAlert> safetyAlerts = alertsAware.getClientSafetyAlerts();
+      if (safetyAlerts != null && !safetyAlerts.isEmpty()) {
+        alerts = safetyAlerts;
+      }
+    }
+    return alerts;
+  }
+
+  protected static List<ElasticSearchPersonAka> handleAkas(ApiPersonAware p) {
+    List<ElasticSearchPersonAka> akas = null;
+    if (p instanceof ApiOtherClientNamesAware) {
+      ApiOtherClientNamesAware akasAware = (ApiOtherClientNamesAware) p;
+      List<ElasticSearchPersonAka> clientAkas = akasAware.getOtherClientNames();
+      if (clientAkas != null && !clientAkas.isEmpty()) {
+        akas = clientAkas;
+      }
+    }
+    return akas;
+  }
+
+  protected static String handleOpenCase(ApiPersonAware p) {
+    String openCaseId = null;
+    if (p instanceof ApiClientCaseAware) {
+      ApiClientCaseAware caseAware = (ApiClientCaseAware) p;
+      openCaseId = caseAware.getOpenCaseId();
+    }
+    return openCaseId;
   }
 
   /**
@@ -464,10 +502,23 @@ public final class ElasticTransformer {
     ret.setSensitivityIndicator(p.getSensitivityIndicator());
 
     // Set client county
-    ret.setClientCounty(handleClientCountyC(p));
+    ret.setClientCounty(handleClientCounty(p));
 
     // Set race/ethnicity
     ret.setCleintRace(handleRaceEthnicity(p));
+
+    // Index number
+    ret.setIndexNumber(
+        StringUtils.isBlank(p.getClientIndexNumber()) ? null : p.getClientIndexNumber());
+
+    // AKAs
+    ret.setAkas(handleAkas(p));
+
+    // Safety alerts
+    ret.setSafetyAlerts(handleSafetyAlerts(p));
+
+    // Open case id
+    ret.setOpenCaseId(handleOpenCase(p));
 
     return ret;
   }

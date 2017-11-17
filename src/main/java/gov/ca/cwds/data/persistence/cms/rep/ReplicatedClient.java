@@ -2,8 +2,10 @@ package gov.ca.cwds.data.persistence.cms.rep;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,10 +23,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import gov.ca.cwds.dao.ApiClientCaseAware;
 import gov.ca.cwds.dao.ApiClientCountyAware;
 import gov.ca.cwds.dao.ApiClientRaceAndEthnicityAware;
+import gov.ca.cwds.dao.ApiClientSafetyAlertsAware;
+import gov.ca.cwds.dao.ApiOtherClientNamesAware;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
+import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseClient;
@@ -84,7 +91,8 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     ApiMultipleLanguagesAware, ApiMultipleAddressesAware, ApiMultiplePhonesAware,
-    CmsReplicatedEntity, ApiClientCountyAware, ApiClientRaceAndEthnicityAware {
+    CmsReplicatedEntity, ApiClientCountyAware, ApiClientRaceAndEthnicityAware,
+    ApiClientSafetyAlertsAware, ApiOtherClientNamesAware, ApiClientCaseAware {
 
   /**
    * Default serialization version. Increment by class version.
@@ -102,11 +110,17 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @Transient
   private List<Short> clientRaces = new ArrayList<>();
 
-  /**
-   * Only set to transient to prevent Hibernate from loading it.
-   */
+  @Transient
+  private Map<String, ElasticSearchPersonAka> akas = new HashMap<>();
+
+  @Transient
+  private Map<String, ElasticSearchSafetyAlert> safetyAlerts = new HashMap<>();
+
   @Transient
   private Short clientCountyId;
+
+  @Transient
+  private String openCaseId;
 
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
@@ -173,6 +187,53 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     }
   }
 
+  public Map<String, ElasticSearchPersonAka> getAkas() {
+    return akas;
+  }
+
+  public void setAkas(Map<String, ElasticSearchPersonAka> akas) {
+    this.akas = akas;
+  }
+
+  public void addAka(ElasticSearchPersonAka aka) {
+    if (aka != null) {
+      akas.put(aka.getId(), aka);
+    }
+  }
+
+  public Map<String, ElasticSearchSafetyAlert> getSafetyAlerts() {
+    return safetyAlerts;
+  }
+
+  public void setSafetyAlerts(Map<String, ElasticSearchSafetyAlert> safetyAlerts) {
+    this.safetyAlerts = safetyAlerts;
+  }
+
+  public void addSafetyAlert(ElasticSearchSafetyAlert safetyAlert) {
+    if (safetyAlert != null) {
+      safetyAlerts.put(safetyAlert.getId(), safetyAlert);
+    }
+  }
+
+  /**
+   * Get id of open case for this client
+   * 
+   * @return Open case id if any
+   */
+  @Override
+  public String getOpenCaseId() {
+    return openCaseId;
+  }
+
+  /**
+   * Set id of open case for this client
+   * 
+   * @param openCaseId Open case id if any
+   */
+  public void setOpenCaseId(String openCaseId) {
+    this.openCaseId = openCaseId;
+  }
+
   // ============================
   // ApiMultipleAddressesAware:
   // ============================
@@ -218,6 +279,24 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getLastUpdatedTime(),
         LegacyTable.CLIENT);
+  }
+
+  // ==================================
+  // ApiOtherClientNamesAware:
+  // ==================================
+
+  @Override
+  public List<ElasticSearchPersonAka> getOtherClientNames() {
+    return new ArrayList<>(this.akas.values());
+  }
+
+  // ==================================
+  // ApiClientSafetyAlertsAware:
+  // ==================================
+
+  @Override
+  public List<ElasticSearchSafetyAlert> getClientSafetyAlerts() {
+    return new ArrayList<>(this.safetyAlerts.values());
   }
 
   // ==================================

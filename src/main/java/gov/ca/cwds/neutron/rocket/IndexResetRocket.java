@@ -54,8 +54,9 @@ public class IndexResetRocket
     try {
       // If index name is provided, use it, else take alias from ES config.
       final String indexNameOverride = getFlightPlan().getIndexName();
-      final String effectiveIndexName = StringUtils.isBlank(indexNameOverride)
-          ? esDao.getConfig().getElasticsearchAlias() : indexNameOverride;
+      final String effectiveIndexName =
+          StringUtils.isBlank(indexNameOverride) ? esDao.getConfig().getElasticsearchAlias()
+              : indexNameOverride;
       getFlightPlan().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
 
       // Drop index first, if requested.
@@ -64,11 +65,21 @@ public class IndexResetRocket
       }
 
       // If the index is missing, create it.
-      LOGGER.debug("Create index if missing, effectiveIndexName: {}", effectiveIndexName);
       final String documentType = esDao.getConfig().getElasticsearchDocType();
-      esDao.createIndexIfNeeded(effectiveIndexName, documentType,
-          NeutronElasticsearchDefaults.ES_PEOPLE_INDEX_SETTINGS.getValue(),
-          NeutronElasticsearchDefaults.ES_PERSON_MAPPING.getValue());
+
+      final String settingFile = StringUtils.isNotBlank(esDao.getConfig().getIndexSettingFile())
+          ? esDao.getConfig().getIndexSettingFile()
+          : NeutronElasticsearchDefaults.ES_PEOPLE_INDEX_SETTINGS.getValue();
+
+      final String mappingFile = StringUtils.isNotBlank(esDao.getConfig().getDocumentMappingFile())
+          ? esDao.getConfig().getDocumentMappingFile()
+          : NeutronElasticsearchDefaults.ES_PEOPLE_INDEX_SETTINGS.getValue();
+
+      LOGGER.debug(
+          "Create index if missing, effectiveIndexName: {}, settingFile: {}, mappingFile: {}",
+          effectiveIndexName, settingFile, mappingFile);
+
+      esDao.createIndexIfNeeded(effectiveIndexName, documentType, settingFile, mappingFile);
     } catch (Exception e) {
       JobLogs.checked(LOGGER, e, "ES INDEX MANAGEMENT ERROR! {}", e.getMessage());
     }

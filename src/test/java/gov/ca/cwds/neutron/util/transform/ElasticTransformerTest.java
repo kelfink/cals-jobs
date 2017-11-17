@@ -231,9 +231,9 @@ public class ElasticTransformerTest extends Goddard {
   }
 
   @Test
-  public void handleClientCountyC_Args__ApiPersonAware() throws Exception {
+  public void handleClientCounty_Args__ApiPersonAware() throws Exception {
     ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    ElasticSearchSystemCode actual = ElasticTransformer.handleClientCountyC(p);
+    ElasticSearchSystemCode actual = ElasticTransformer.handleClientCounty(p);
     ElasticSearchSystemCode expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
