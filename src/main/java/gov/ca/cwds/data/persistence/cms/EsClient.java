@@ -499,7 +499,7 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
 
   @Column(name = "SAL_ACTV_RNC")
   @Type(type = "short")
-  private Integer safetyAlertActivationReasonCode;
+  private Short safetyAlertActivationReasonCode;
 
   @Column(name = "SAL_ACTV_DT")
   @Type(type = "date")
@@ -507,7 +507,7 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
 
   @Column(name = "SAL_ACTV_GEC")
   @Type(type = "short")
-  private Integer safetyAlertActivationCountyCode;
+  private Short safetyAlertActivationCountyCode;
 
   @Column(name = "SAL_ACTV_TXT")
   private String safetyAlertActivationExplanation;
@@ -517,8 +517,8 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   private Date safetyAlertDeactivationDate;
 
   @Column(name = "SAL_DACT_GEC")
-  @Type(type = "integer")
-  private Integer safetyAlertDeactivationCountyCode;
+  @Type(type = "short")
+  private Short safetyAlertDeactivationCountyCode;
 
   @Column(name = "SAL_DACT_TXT")
   private String safetyAlertDeactivationExplanation;
@@ -726,11 +726,11 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
     // Safety alert
     //
     ret.safetyAlertId = rs.getString("SAL_THIRD_ID");
-    ret.safetyAlertActivationCountyCode = rs.getInt("SAL_ACTV_GEC");
+    ret.safetyAlertActivationCountyCode = rs.getShort("SAL_ACTV_GEC");
     ret.safetyAlertActivationDate = rs.getDate("SAL_ACTV_DT");
     ret.safetyAlertActivationExplanation = rs.getString("SAL_ACTV_TXT");
-    ret.safetyAlertActivationReasonCode = rs.getInt("SAL_ACTV_RNC");
-    ret.safetyAlertDeactivationCountyCode = rs.getInt("SAL_DACT_GEC");
+    ret.safetyAlertActivationReasonCode = rs.getShort("SAL_ACTV_RNC");
+    ret.safetyAlertDeactivationCountyCode = rs.getShort("SAL_DACT_GEC");
     ret.safetyAlertDeactivationDate = rs.getDate("SAL_DACT_DT");
     ret.safetyAlertDeactivationExplanation = rs.getString("SAL_DACT_TXT");
     ret.safetyAlertLastUpdatedId = rs.getString("SAL_LST_UPD_ID");
@@ -1684,11 +1684,11 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
     this.safetyAlertId = safetyAlertId;
   }
 
-  public Integer getSafetyAlertActivationReasonCode() {
+  public Short getSafetyAlertActivationReasonCode() {
     return safetyAlertActivationReasonCode;
   }
 
-  public void setSafetyAlertActivationReasonCode(Integer safetyAlertActivationReasonCode) {
+  public void setSafetyAlertActivationReasonCode(Short safetyAlertActivationReasonCode) {
     this.safetyAlertActivationReasonCode = safetyAlertActivationReasonCode;
   }
 
@@ -1700,11 +1700,11 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
     this.safetyAlertActivationDate = safetyAlertActivationDate;
   }
 
-  public Integer getSafetyAlertActivationCountyCode() {
+  public Short getSafetyAlertActivationCountyCode() {
     return safetyAlertActivationCountyCode;
   }
 
-  public void setSafetyAlertActivationCountyCode(Integer safetyAlertActivationCountyCode) {
+  public void setSafetyAlertActivationCountyCode(Short safetyAlertActivationCountyCode) {
     this.safetyAlertActivationCountyCode = safetyAlertActivationCountyCode;
   }
 
@@ -1724,11 +1724,11 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
     this.safetyAlertDeactivationDate = safetyAlertDeactivationDate;
   }
 
-  public Integer getSafetyAlertDeactivationCountyCode() {
+  public Short getSafetyAlertDeactivationCountyCode() {
     return safetyAlertDeactivationCountyCode;
   }
 
-  public void setSafetyAlertDeactivationCountyCode(Integer safetyAlertDeactivationCountyCode) {
+  public void setSafetyAlertDeactivationCountyCode(Short safetyAlertDeactivationCountyCode) {
     this.safetyAlertDeactivationCountyCode = safetyAlertDeactivationCountyCode;
   }
 
