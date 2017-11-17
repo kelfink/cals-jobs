@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -131,6 +132,32 @@ public class EsClientTest extends Goddard {
     when(rs.getString("CLT_TRBA_CLT_B")).thenReturn("Y");
     when(rs.getString("CLT_UNEMPLY_CD")).thenReturn("Y");
     when(rs.getString("CLT_ZIPPY_IND")).thenReturn("Y");
+
+    when(rs.getShort("ONM_NAME_TPC")).thenReturn(shortZero);
+    when(rs.getShort("SAL_ACTV_GEC")).thenReturn(shortZero);
+    when(rs.getShort("SAL_ACTV_RNC")).thenReturn(shortZero);
+    when(rs.getShort("SAL_DACT_GEC")).thenReturn(shortZero);
+
+    when(rs.getString("ONM_IBMSNAP_OPERATION")).thenReturn("U");
+    when(rs.getString("SAL_IBMSNAP_OPERATION")).thenReturn("U");
+
+    when(rs.getString("ONM_FIRST_NM")).thenReturn("David");
+    when(rs.getString("ONM_LAST_NM")).thenReturn("Smith");
+    when(rs.getString("ONM_LST_UPD_ID")).thenReturn("0X3");
+    when(rs.getString("ONM_MIDDLE_NM")).thenReturn("X");
+    when(rs.getString("ONM_NMPRFX_DSC")).thenReturn("X");
+    when(rs.getString("ONM_SUFX_TLDSC")).thenReturn("phd");
+    when(rs.getString("ONM_THIRD_ID")).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString("SAL_ACTV_TXT")).thenReturn("X");
+    when(rs.getString("SAL_DACT_TXT")).thenReturn("X");
+    when(rs.getString("SAL_LST_UPD_ID")).thenReturn("3fa");
+    when(rs.getString("SAL_THIRD_ID")).thenReturn(DEFAULT_CLIENT_ID);
+
+    final long time = new Date().getTime();
+    when(rs.getTimestamp("ONM_IBMSNAP_LOGMARKER")).thenReturn(new Timestamp(time));
+    when(rs.getTimestamp("SAL_IBMSNAP_LOGMARKER")).thenReturn(new Timestamp(time));
+    when(rs.getTimestamp("ONM_LST_UPD_TS")).thenReturn(new Timestamp(time));
+    when(rs.getTimestamp("SAL_LST_UPD_TS")).thenReturn(new Timestamp(time));
   }
 
   @Test
