@@ -23,7 +23,7 @@ public class BulkProcessorBuilder implements ApiMarker {
 
   private static final int ES_BULK_SIZE = 5000;
 
-  private static final int ES_BYTES_MB = 14;
+  private static final int ES_BYTES_MB = 10;
 
   /**
    * Track rocket progress.
@@ -54,10 +54,15 @@ public class BulkProcessorBuilder implements ApiMarker {
    * thread, if desired.
    * </p>
    * 
+   * <p>
+   * NEXT: make configurable.
+   * </p>
+   * 
    * @return an ES bulk processor
    */
   public BulkProcessor buildBulkProcessor() {
-    return BulkProcessor.builder(esDao.getClient(), new NeutronBulkProcessorListener(this.flightLog))
+    return BulkProcessor
+        .builder(esDao.getClient(), new NeutronBulkProcessorListener(this.flightLog))
         .setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(ES_BYTES_MB, ByteSizeUnit.MB))
         .setConcurrentRequests(1).setName("jobs_bp") // disappears in ES 5.6.3
         .build();
