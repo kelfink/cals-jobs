@@ -77,6 +77,14 @@ public class ReferralJobRangesTest extends Goddard {
   }
 
   @Test
+  public void getPartitionRanges__boom() throws Exception {
+    when(flightPlan.isRangeGiven()).thenReturn(true);
+    when(flightPlan.getStartBucket()).thenReturn(1L);
+    when(flightPlan.getEndBucket()).thenReturn(4L);
+    checkPartitionRanges("CWSRSQ", true, 3, true);
+  }
+
+  @Test
   public void getPartitionRanges_Args__BasePersonIndexerJob() throws Exception {
     BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral> rocket =
         mock(BasePersonRocket.class);
