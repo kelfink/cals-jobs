@@ -5,7 +5,6 @@ import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,43 +16,34 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
-import gov.ca.cwds.neutron.launch.FlightRecorder;
 
 /**
- * Job to load case history from CMS into ElasticSearch for 'focus child' person.
+ * Rocket to load case history from CMS into ElasticSearch for 'focus child' person.
  * 
  * @author CWDS API Team
  */
 public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
   private static final Logger LOGGER = LoggerFactory.getLogger(ChildCaseHistoryIndexerJob.class);
 
   /**
-   * Construct batch job instance with all required dependencies.
+   * Construct rocket with all required dependencies.
    * 
-   * @param clientDao Case history view DAO
-   * @param elasticsearchDao ElasticSearch DAO
-   * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
+   * @param dao Case history view DAO
+   * @param esDao ElasticSearch DAO
+   * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
-   * @param sessionFactory Hibernate session factory
-   * @param jobHistory job history
-   * @param opts command line options
+   * @param flightPlan command line options
    */
   @Inject
-  public ChildCaseHistoryIndexerJob(final ReplicatedPersonCasesDao clientDao,
-      final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
-      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-      FlightRecorder jobHistory, FlightPlan opts) {
-    super(clientDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory,
-        opts);
+  public ChildCaseHistoryIndexerJob(final ReplicatedPersonCasesDao dao,
+      final ElasticsearchDao esDao, @LastRunFile final String lastRunFile,
+      final ObjectMapper mapper, FlightPlan flightPlan) {
+    super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   @Override
@@ -132,7 +122,7 @@ public class ChildCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
   }
 
   /**
-   * Batch job entry point.
+   * Rocket entry point.
    * 
    * @param args command line arguments
    * @throws Exception unhandled launch error

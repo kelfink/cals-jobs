@@ -48,16 +48,16 @@ public class IntakeScreeningJob extends BasePersonRocket<IntakeParticipant, EsIn
   /**
    * Construct rocket with all required dependencies.
    * 
-   * @param normDao Intake Screening DAO
+   * @param dao Intake Screening DAO
    * @param viewDao view Dao
    * @param esDao ElasticSearch DAO
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
    */
   @Inject
-  public IntakeScreeningJob(final IntakeParticipantDao normDao, final EsIntakeScreeningDao viewDao,
+  public IntakeScreeningJob(final IntakeParticipantDao dao, final EsIntakeScreeningDao viewDao,
       final ElasticsearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan) {
-    super(normDao, esDao, flightPlan.getLastRunLoc(), mapper, normDao.getSessionFactory(),
+    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, dao.getSessionFactory(),
         flightPlan);
     this.viewDao = viewDao;
   }

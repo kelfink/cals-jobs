@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -14,18 +13,16 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
-import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
-import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
- * Job to load case history from CMS into ElasticSearch.
+ * Rocket to load case history from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */
@@ -36,22 +33,19 @@ public abstract class CaseHistoryIndexerJob
   private static final long serialVersionUID = 1L;
 
   /**
-   * Construct batch job instance with all required dependencies.
+   * Construct rocket with all required dependencies.
    * 
    * @param dao Case history view DAO
    * @param esDao ElasticSearch DAO
-   * @param lastJobRunTimeFilename last run date in format yyyy-MM-dd HH:mm:ss
+   * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
-   * @param sessionFactory Hibernate session factory
-   * @param jobHistory job history
-   * @param opts command line options
+   * @param flightPlan command line options
    */
   @Inject
   public CaseHistoryIndexerJob(final ReplicatedPersonCasesDao dao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory,
-      FlightPlan opts) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, opts);
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper,
+      FlightPlan flightPlan) {
+    super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
   }
 
   @Override

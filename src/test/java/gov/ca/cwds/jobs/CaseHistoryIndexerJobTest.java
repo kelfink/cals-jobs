@@ -30,7 +30,7 @@ public class CaseHistoryIndexerJobTest extends Goddard {
     public TestCaseHistoryIndexerJob(ReplicatedPersonCasesDao dao, ElasticsearchDao esDao,
         String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
         FlightRecorder jobHistory, FlightPlan opts) {
-      super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
+      super(dao, esDao, lastJobRunTimeFilename, mapper, opts);
     }
 
   }

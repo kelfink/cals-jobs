@@ -74,8 +74,7 @@ public class RelationshipIndexerJob
    */
   @Inject
   public RelationshipIndexerJob(final ReplicatedRelationshipsDao dao, final ElasticsearchDao esDao,
-      @LastRunFile String lastRunFile, final ObjectMapper mapper,
-      FlightPlan flightPlan) {
+      @LastRunFile String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
     EsRelationship.SonarQubeMemoryBloatComplaintCache.getInstance().clearCache();
   }
