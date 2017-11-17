@@ -417,6 +417,7 @@ public class HyperCube extends NeutronGuiceModule {
    * @throws NeutronException on ES connection error
    */
   @Provides
+  @Singleton
   public Client elasticsearchClient() throws NeutronException {
     TransportClient client = null;
     if (esConfig != null) {
@@ -429,12 +430,11 @@ public class HyperCube extends NeutronGuiceModule {
             new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
                 Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {
-        LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
         if (client != null) {
           client.close();
         }
-        throw JobLogs.checked(LOGGER, e,
-            "Error initializing Elasticsearch client: " + e.getMessage(), e);
+        throw JobLogs.checked(LOGGER, e, "Error initializing Elasticsearch client: {}",
+            e.getMessage(), e);
       }
     }
     return client;

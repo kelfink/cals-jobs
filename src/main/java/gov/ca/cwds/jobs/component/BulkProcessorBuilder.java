@@ -16,9 +16,6 @@ import gov.ca.cwds.neutron.launch.listener.NeutronBulkProcessorListener;
  */
 public class BulkProcessorBuilder implements ApiMarker {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final int ES_BULK_SIZE = 5000;
