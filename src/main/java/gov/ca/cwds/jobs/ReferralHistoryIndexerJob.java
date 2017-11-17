@@ -61,9 +61,6 @@ public class ReferralHistoryIndexerJob
     extends BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral>
     implements NeutronRowMapper<EsPersonReferral> {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
@@ -545,7 +542,7 @@ public class ReferralHistoryIndexerJob
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonReferrals p)
       throws NeutronException {
-    return prepareUpsertRequest(esp, p, p.getReferrals());
+    return prepareUpdateRequest(esp, p, p.getReferrals(), true);
   }
 
   @Override
