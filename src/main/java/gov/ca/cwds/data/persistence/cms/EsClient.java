@@ -46,7 +46,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * 
  * NOTE: #145240149: find ALL client/address recs affected by changes.
  *
- * REFRESH TABLE cwsrsq.ES_REL_CLN_RELT_CLIENT ;
+ * REFRESH TABLE CWSRSQ.ES_REL_CLN_RELT_CLIENT ;
  * 
  * @author CWDS API Team
  */
@@ -76,9 +76,6 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 public class EsClient implements PersistentObject, ApiGroupNormalizer<ReplicatedClient>,
     Comparable<EsClient>, Comparator<EsClient> {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
   @Type(type = "timestamp")
@@ -2093,16 +2090,14 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
     activation.setActivationReasonDescription(SystemCodeCache.global()
         .getSystemCodeShortDescription(this.safetyAlertActivationReasonCode));
     activation.setActivationReasonId(this.safetyAlertActivationReasonCode != null
-        ? this.safetyAlertActivationReasonCode.toString()
-        : null);
+        ? this.safetyAlertActivationReasonCode.toString() : null);
 
     ElasticSearchSystemCode activationCounty = new ElasticSearchSystemCode();
     activation.setActivationCounty(activationCounty);
     activationCounty.setDescription(SystemCodeCache.global()
         .getSystemCodeShortDescription(this.safetyAlertActivationCountyCode));
     activationCounty.setId(this.safetyAlertActivationCountyCode != null
-        ? this.safetyAlertActivationCountyCode.toString()
-        : null);
+        ? this.safetyAlertActivationCountyCode.toString() : null);
 
     activation.setActivationDate(DomainChef.cookDate(this.safetyAlertActivationDate));
     activation.setActivationExplanation(this.safetyAlertActivationExplanation);
@@ -2118,8 +2113,7 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
     deactivationCounty.setDescription(SystemCodeCache.global()
         .getSystemCodeShortDescription(this.safetyAlertDeactivationCountyCode));
     deactivationCounty.setId(this.safetyAlertDeactivationCountyCode != null
-        ? this.safetyAlertDeactivationCountyCode.toString()
-        : null);
+        ? this.safetyAlertDeactivationCountyCode.toString() : null);
 
     deactivation.setDeactivationDate(DomainChef.cookDate(this.safetyAlertDeactivationDate));
     deactivation.setDeactivationExplanation(this.safetyAlertDeactivationExplanation);
