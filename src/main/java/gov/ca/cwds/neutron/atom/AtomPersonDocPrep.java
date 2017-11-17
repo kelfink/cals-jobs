@@ -83,6 +83,7 @@ public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker
    * @param updateOnly update only, no upsert (i.e., don't create a new document)
    * @return upsert request
    * @throws NeutronException general error
+   * @param <E> Element type
    */
   default <E> UpdateRequest prepareUpdateRequest(ElasticSearchPerson esp, T p, List<E> elements,
       boolean updateOnly) throws NeutronException {
@@ -122,6 +123,7 @@ public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker
    * @param elements elements to send
    * @return upsert request
    * @throws NeutronException general error
+   * @param <E> Element type
    */
   default <E> UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T p, List<E> elements)
       throws NeutronException {
