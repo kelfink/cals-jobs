@@ -95,7 +95,7 @@ public class SafetyAlertIndexerJob
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedSafetyAlerts p)
       throws NeutronException {
-    return prepareUpsertRequest(esp, p, p.getSafetyAlerts());
+    return prepareUpdateRequest(esp, p, p.getSafetyAlerts(), true);
   }
 
   @Override

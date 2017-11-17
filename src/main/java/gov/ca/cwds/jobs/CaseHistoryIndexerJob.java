@@ -108,7 +108,7 @@ public abstract class CaseHistoryIndexerJob
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonCases p)
       throws NeutronException {
-    return prepareUpsertRequest(esp, p, p.getCases());
+    return prepareUpdateRequest(esp, p, p.getCases(), true);
   }
 
   @Override

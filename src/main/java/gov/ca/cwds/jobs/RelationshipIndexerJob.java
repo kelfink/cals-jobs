@@ -226,7 +226,7 @@ public class RelationshipIndexerJob
   @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedRelationships p)
       throws NeutronException {
-    return prepareUpsertRequest(esp, p, p.getRelations());
+    return prepareUpdateRequest(esp, p, p.getRelations(), true);
   }
 
   @Override
