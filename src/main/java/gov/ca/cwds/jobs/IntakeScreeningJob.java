@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.persistence.Table;
 
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,17 +21,15 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
 import gov.ca.cwds.data.persistence.ns.IntakeParticipant;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
-import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
- * Job loads Intake Screenings from PostgreSQL into ElasticSearch.
+ * Rocket loads Intake Screenings from PostgreSQL into ElasticSearch.
  * 
  * @author CWDS API Team
  */
@@ -49,21 +46,19 @@ public class IntakeScreeningJob extends BasePersonRocket<IntakeParticipant, EsIn
   private transient EsIntakeScreeningDao viewDao;
 
   /**
-   * Construct batch job instance with all required dependencies.
+   * Construct rocket with all required dependencies.
    * 
-   * @param normalizedDao Intake Screening DAO
+   * @param normDao Intake Screening DAO
    * @param viewDao view Dao
    * @param esDao ElasticSearch DAO
    * @param mapper Jackson ObjectMapper
-   * @param sessionFactory Hibernate session factory
-   * @param jobHistory job history
-   * @param opts command line options
+   * @param flightPlan command line options
    */
   @Inject
-  public IntakeScreeningJob(final IntakeParticipantDao normalizedDao,
-      final EsIntakeScreeningDao viewDao, final ElasticsearchDao esDao, final ObjectMapper mapper,
-      @NsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory, FlightPlan opts) {
-    super(normalizedDao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, opts);
+  public IntakeScreeningJob(final IntakeParticipantDao normDao, final EsIntakeScreeningDao viewDao,
+      final ElasticsearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan) {
+    super(normDao, esDao, flightPlan.getLastRunLoc(), mapper, normDao.getSessionFactory(),
+        flightPlan);
     this.viewDao = viewDao;
   }
 

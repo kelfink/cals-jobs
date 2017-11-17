@@ -8,8 +8,6 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import gov.ca.cwds.data.ApiTypedIdentifier;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
@@ -89,36 +87,31 @@ public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker
   default <E> UpdateRequest prepareUpdateRequest(ElasticSearchPerson esp, T p, List<E> elements,
       boolean updateOnly) throws NeutronException {
     final StringBuilder buf = new StringBuilder();
-    buf.append("{\"").append(getOptionalElementName()).append("\":[");
-
-    if (!elements.isEmpty()) {
-      try {
-        buf.append(elements.stream().map(ElasticTransformer::jsonify).sorted(String::compareTo)
-            .collect(Collectors.joining(",")));
-      } catch (Exception e) {
-        throw JobLogs.runtime(getLogger(), e, "ERROR SERIALIZING NESTED ELEMENTS! {}",
-            e.getMessage());
-      }
-    }
-    buf.append("]}");
-
     String insertJson;
     try {
+      buf.append("{\"").append(getOptionalElementName()).append("\":[");
+
+      if (!elements.isEmpty()) {
+        buf.append(elements.stream().map(ElasticTransformer::jsonify).sorted(String::compareTo)
+            .collect(Collectors.joining(",")));
+      }
+
+      buf.append("]}");
       insertJson = getMapper().writeValueAsString(esp);
-    } catch (JsonProcessingException e) {
-      throw JobLogs.checked(getLogger(), e, "FAILED TO WRITE OBJECT TO JSON! {}", e.getMessage());
+    } catch (Exception e) {
+      throw JobLogs.checked(getLogger(), e, "NESTED ELEMENT ERROR! {}", e.getMessage());
     }
 
     final String updateJson = buf.toString();
+    final String id = esp.getId();
     final ElasticsearchConfiguration config = getEsDao().getConfig();
     final String alias = config.getElasticsearchAlias();
     final String docType = config.getElasticsearchDocType();
     final UpdateRequest ur =
-        new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON);
+        new UpdateRequest(alias, docType, id).doc(updateJson, XContentType.JSON);
 
     return updateOnly ? ur
-        : ur.upsert(
-            new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
+        : ur.upsert(new IndexRequest(alias, docType, id).source(insertJson, XContentType.JSON));
   }
 
   /**

@@ -47,8 +47,7 @@ public class SafetyAlertIndexerJobTest extends Goddard {
     dao = new ReplicatedSafetyAlertsDao(sessionFactory);
     SimpleTestSystemCodeCache.init();
 
-    target = new SafetyAlertIndexerJob(dao, esDao, lastRunFile, mapper, sessionFactory,
-        flightPlan);
+    target = new SafetyAlertIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   @Test

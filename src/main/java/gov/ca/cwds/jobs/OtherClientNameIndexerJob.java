@@ -8,9 +8,6 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.hibernate.SessionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -23,18 +20,16 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
-import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
- * Job to load Other Client Name from CMS into ElasticSearch.
+ * Rocket to load Other Client Name from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */
@@ -43,8 +38,6 @@ public class OtherClientNameIndexerJob
     implements NeutronRowMapper<ReplicatedOtherClientName> {
 
   private static final long serialVersionUID = 1L;
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(OtherClientNameIndexerJob.class);
 
   private static final String INSERT_CLIENT_LAST_CHG =
       "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT CLT.IDENTIFIER AS CLIENT_ID\n"
@@ -55,22 +48,19 @@ public class OtherClientNameIndexerJob
   private transient ReplicatedOtherClientNameDao denormDao;
 
   /**
-   * Construct batch job instance with all required dependencies.
+   * Construct rocket with all required dependencies.
    * 
    * @param dao Relationship View DAO
    * @param denormDao de-normalized DAO
    * @param esDao ElasticSearch DAO
    * @param mapper Jackson ObjectMapper
-   * @param sessionFactory Hibernate session factory
-   * @param jobHistory job history
-   * @param opts command line options
+   * @param flightPlan command line options
    */
   @Inject
   public OtherClientNameIndexerJob(final ReplicatedAkaDao dao,
       final ReplicatedOtherClientNameDao denormDao, final ElasticsearchDao esDao,
-      final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-      FlightRecorder jobHistory, FlightPlan opts) {
-    super(dao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, opts);
+      final ObjectMapper mapper, FlightPlan flightPlan) {
+    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, dao.getSessionFactory(), flightPlan);
     this.denormDao = denormDao;
   }
 
@@ -161,7 +151,7 @@ public class OtherClientNameIndexerJob
   }
 
   /**
-   * Batch job entry point.
+   * Rocket entry point.
    * 
    * @param args command line arguments
    * @throws Exception on launch error

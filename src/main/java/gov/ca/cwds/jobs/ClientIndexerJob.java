@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +24,6 @@ import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -61,20 +59,18 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   /**
-   * Construct batch job instance with all required dependencies.
+   * Construct rocket with all required dependencies.
    * 
    * @param dao Client DAO
    * @param esDao ElasticSearch DAO
    * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
-   * @param sessionFactory Hibernate session factory
    * @param flightPlan command line options
    */
   @Inject
   public ClientIndexerJob(final ReplicatedClientDao dao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastRunFile, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
+    super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
   }
 
   @Override
@@ -113,9 +109,9 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
   }
 
   /**
-   * Send all recs for same client id to the index queue.
+   * Send all records for same client id to the index queue.
    * 
-   * @param grpRecs recs for same client id
+   * @param grpRecs records for same client id
    */
   protected void normalizeAndQueueIndex(final List<EsClientAddress> grpRecs) {
     grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
@@ -253,7 +249,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
   }
 
   /**
-   * Batch job entry point.
+   * Rocket entry point.
    * 
    * @param args command line arguments
    * @throws Exception unhandled launch error

@@ -55,7 +55,7 @@ public class ReferralHistoryIndexerJobTest
     public TestReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao,
         ElasticsearchDao esDao, String lastJobRunTimeFilename, ObjectMapper mapper,
         SessionFactory sessionFactory, FlightRecorder jobHistory, FlightPlan opts) {
-      super(clientDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory, opts);
+      super(clientDao, esDao, lastJobRunTimeFilename, mapper, opts);
     }
 
     public static DB2SystemMonitor monitorStart(final Connection con) {

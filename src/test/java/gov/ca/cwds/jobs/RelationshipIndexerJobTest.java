@@ -32,7 +32,7 @@ public class RelationshipIndexerJobTest extends Goddard<ReplicatedRelationships,
     super.setup();
     dao = new ReplicatedRelationshipsDao(sessionFactory);
     target =
-        new RelationshipIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory, flightPlan);
+        new RelationshipIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan);
   }
 
   @Test

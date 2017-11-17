@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -20,7 +19,6 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsSafetyAlert;
 import gov.ca.cwds.data.persistence.cms.ReplicatedSafetyAlerts;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -48,14 +46,13 @@ public class SafetyAlertIndexerJob
    * @param esDao ES SAO
    * @param lastRunFile Last runtime file
    * @param mapper Object mapper
-   * @param sessionFactory Session factory
    * @param flightPlan command line opts
    */
   @Inject
   public SafetyAlertIndexerJob(ReplicatedSafetyAlertsDao dao, ElasticsearchDao esDao,
       @LastRunFile String lastRunFile, ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
+      FlightPlan flightPlan) {
+    super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
   }
 
   @Override

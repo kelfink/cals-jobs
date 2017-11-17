@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,6 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
 import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -66,20 +64,19 @@ public class RelationshipIndexerJob
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   /**
-   * Construct batch job instance with all required dependencies.
+   * Construct rocket with all required dependencies.
    * 
    * @param dao Relationship View DAO
    * @param esDao ElasticSearch DAO
    * @param lastRunFile last run file
    * @param mapper Jackson ObjectMapper
-   * @param sessionFactory Hibernate session factory
    * @param flightPlan command line options
    */
   @Inject
   public RelationshipIndexerJob(final ReplicatedRelationshipsDao dao, final ElasticsearchDao esDao,
       @LastRunFile String lastRunFile, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
+      FlightPlan flightPlan) {
+    super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
     EsRelationship.SonarQubeMemoryBloatComplaintCache.getInstance().clearCache();
   }
 

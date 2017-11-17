@@ -63,7 +63,7 @@ public class ClientCountyRocket extends ClientIndexerJob
   public ClientCountyRocket(final ReplicatedClientDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
+    super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   /**

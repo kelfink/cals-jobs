@@ -46,7 +46,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     public TestClientIndexerJob(ReplicatedClientDao dao, ElasticsearchDao esDao,
         String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
         FlightRecorder jobHistory, FlightPlan opts) {
-      super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, opts);
+      super(dao, esDao, lastJobRunTimeFilename, mapper, opts);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
     when(rs.next()).thenReturn(true, true, false);
     dao = new ReplicatedClientDao(sessionFactory);
-    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
+    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   @Test
@@ -94,7 +94,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void instantiation() throws Exception {
-    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
+    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
     assertThat(target, notNullValue());
   }
 

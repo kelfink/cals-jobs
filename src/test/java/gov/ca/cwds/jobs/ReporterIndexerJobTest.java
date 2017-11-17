@@ -32,8 +32,7 @@ public class ReporterIndexerJobTest
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedReporterDao(sessionFactory);
-    target = new ReporterIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory,
-        flightRecorder, flightPlan);
+    target = new ReporterIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan);
   }
 
   @Test

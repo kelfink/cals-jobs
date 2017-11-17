@@ -46,7 +46,7 @@ public class OtherClientNameIndexerJobTest extends Goddard {
     normDao = new ReplicatedAkaDao(sessionFactory);
     denormDao = new ReplicatedOtherClientNameDao(sessionFactory);
     target = new OtherClientNameIndexerJob(normDao, denormDao, esDao, MAPPER,
-        sessionFactory, flightRecorder, flightPlan);
+        flightPlan);
   }
 
   @Test
