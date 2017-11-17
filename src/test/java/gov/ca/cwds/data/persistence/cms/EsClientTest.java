@@ -34,6 +34,7 @@ public class EsClientTest extends Goddard {
     super.setup();
     target = new EsClient();
     target.setCltId(DEFAULT_CLIENT_ID);
+    target.setSafetyAlertId(DEFAULT_CLIENT_ID);
 
     final Short shortZero = Short.valueOf((short) 0);
     when(rs.first()).thenReturn(true);
@@ -1409,7 +1410,7 @@ public class EsClientTest extends Goddard {
   @Test
   public void getSafetyAlertId_Args__() throws Exception {
     String actual = target.getSafetyAlertId();
-    String expected = null;
+    String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
