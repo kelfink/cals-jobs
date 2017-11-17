@@ -19,6 +19,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
+import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker, AtomShared {
 
@@ -75,10 +76,21 @@ public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker
     return new ArrayList<>();
   }
 
-  default <E> UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T p, List<E> elements)
-      throws NeutronException {
+  /**
+   * Prepare an upsert request.
+   * 
+   * @param esp ES person
+   * @param p normalized person doc
+   * @param elements elements to send
+   * @param updateOnly update only, no upsert (i.e., don't create a new document)
+   * @return upsert request
+   * @throws NeutronException general error
+   */
+  default <E> UpdateRequest prepareUpdateRequest(ElasticSearchPerson esp, T p, List<E> elements,
+      boolean updateOnly) throws NeutronException {
     final StringBuilder buf = new StringBuilder();
     buf.append("{\"").append(getOptionalElementName()).append("\":[");
+
     if (!elements.isEmpty()) {
       try {
         buf.append(elements.stream().map(ElasticTransformer::jsonify).sorted(String::compareTo)
@@ -98,11 +110,29 @@ public interface AtomPersonDocPrep<T extends PersistentObject> extends ApiMarker
     }
 
     final String updateJson = buf.toString();
-    final String alias = getEsDao().getConfig().getElasticsearchAlias();
-    final String docType = getEsDao().getConfig().getElasticsearchDocType();
+    final ElasticsearchConfiguration config = getEsDao().getConfig();
+    final String alias = config.getElasticsearchAlias();
+    final String docType = config.getElasticsearchDocType();
+    final UpdateRequest ur =
+        new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON);
 
-    return new UpdateRequest(alias, docType, esp.getId()).doc(updateJson, XContentType.JSON).upsert(
-        new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
+    return updateOnly ? ur
+        : ur.upsert(
+            new IndexRequest(alias, docType, esp.getId()).source(insertJson, XContentType.JSON));
+  }
+
+  /**
+   * Prepare an upsert request.
+   * 
+   * @param esp ES person
+   * @param p normalized person doc
+   * @param elements elements to send
+   * @return upsert request
+   * @throws NeutronException general error
+   */
+  default <E> UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, T p, List<E> elements)
+      throws NeutronException {
+    return prepareUpdateRequest(esp, p, elements, false);
   }
 
 }

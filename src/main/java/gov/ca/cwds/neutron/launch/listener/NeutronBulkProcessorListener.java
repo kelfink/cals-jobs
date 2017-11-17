@@ -13,31 +13,31 @@ public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronBulkProcessorListener.class);
 
   /**
-   * Track job progress.
+   * Track rocket's flight progress.
    */
-  protected final FlightLog track;
+  protected final FlightLog flightLog;
 
-  public NeutronBulkProcessorListener(FlightLog track) {
-    this.track = track;
+  public NeutronBulkProcessorListener(FlightLog flightLog) {
+    this.flightLog = flightLog;
   }
 
   @Override
   public void beforeBulk(long executionId, BulkRequest request) {
     final int numActions = request.numberOfActions();
-    track.addToBulkBefore(numActions);
+    flightLog.addToBulkBefore(numActions);
     LOGGER.debug("Ready to execute bulk of {} actions", numActions);
   }
 
   @Override
   public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
     final int numActions = request.numberOfActions();
-    track.addToBulkAfter(numActions);
+    flightLog.addToBulkAfter(numActions);
     LOGGER.info("Executed bulk of {} actions", numActions);
   }
 
   @Override
   public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-    track.trackBulkError();
+    flightLog.trackBulkError();
     LOGGER.error("ERROR EXECUTING BULK", failure);
   }
 
