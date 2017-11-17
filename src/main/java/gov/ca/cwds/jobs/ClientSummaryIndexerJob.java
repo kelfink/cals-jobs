@@ -48,7 +48,7 @@ public class ClientSummaryIndexerJob extends InitialLoadJdbcRocket<ReplicatedCli
 
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ClientIndexerJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ClientSummaryIndexerJob.class);
 
   private static final String INSERT_CLIENT_LAST_CHG =
       "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT CLT.IDENTIFIER \nFROM CLIENT_T clt\n"
