@@ -3,7 +3,6 @@ package gov.ca.cwds.neutron.rocket;
 import java.util.Date;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -52,9 +51,8 @@ public class SanityCheckRocket
    */
   @Inject
   public SanityCheckRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      final ElasticsearchDao esDao, final ObjectMapper mapper,
-      FlightPlan flightPlan, AtomLaunchDirector launchScheduler,
-      @LastRunFile String lastRunFile) {
+      final ElasticsearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan,
+      AtomLaunchDirector launchScheduler, @LastRunFile String lastRunFile) {
     super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
     this.launchScheduler = launchScheduler;
   }
@@ -64,13 +62,13 @@ public class SanityCheckRocket
     LOGGER.info("MSEARCH!");
     final Client esClient = this.esDao.getClient();
 
-    final SearchRequestBuilder srb2 = esClient.prepareSearch().setQuery(QueryBuilders
-        .multiMatchQuery("N6dhOan15A", "cases.focus_child.legacy_descriptor.legacy_id"));
-    final MultiSearchResponse sr =
-        esClient.prepareMultiSearch()
-            .add(esClient.prepareSearch().setQuery(QueryBuilders.idsQuery().addIds("Ahr3T2S0BN",
-                "Bn0LhX6aah", "DUy4ET400b", "AkxX6G50Ki", "E5pf1dg0Py", "CtMFii209X")))
-            .add(srb2).get();
+    // final SearchRequestBuilder srb2 = esClient.prepareSearch().setQuery(QueryBuilders
+    // .multiMatchQuery("N6dhOan15A", "cases.focus_child.legacy_descriptor.legacy_id"));
+    final MultiSearchResponse sr = esClient.prepareMultiSearch()
+        .add(esClient.prepareSearch()
+            .setQuery(QueryBuilders.idsQuery().addIds("OpvBkr00ND", "Jw3ny5K00h", "EuCrckE04M")))
+        // .add(srb2)
+        .get();
 
     long totalHits = 0;
     for (MultiSearchResponse.Item item : sr.getResponses()) {
