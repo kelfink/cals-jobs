@@ -45,7 +45,7 @@ public class LastFlightRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     }
 
     @Override
-    public Date executeJob(Date lastSuccessfulRunTime) {
+    public Date launch(Date lastSuccessfulRunTime) {
       return null;
     }
 

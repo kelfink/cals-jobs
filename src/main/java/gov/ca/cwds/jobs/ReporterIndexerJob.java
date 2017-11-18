@@ -39,7 +39,7 @@ public class ReporterIndexerJob extends BasePersonRocket<ReplicatedReporter, Rep
   public ReporterIndexerJob(final ReplicatedReporterDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper,
       FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
+    super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   @Override

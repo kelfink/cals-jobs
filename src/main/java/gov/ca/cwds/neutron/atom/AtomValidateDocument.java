@@ -7,6 +7,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.slf4j.Logger;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -18,7 +19,7 @@ public interface AtomValidateDocument extends AtomShared {
     try {
       return ElasticSearchPerson.MAPPER.readValue(json, ElasticSearchPerson.class);
     } catch (IOException e) {
-      throw JobLogs.checked(getLogger(), e, "FAILED TO READ PERSON DOC! {}", e.getMessage(), e);
+      throw JobLogs.checked(getLogger(), e, "ERROR READING PERSON DOC! {}", e.getMessage(), e);
     }
   }
 
@@ -26,21 +27,23 @@ public interface AtomValidateDocument extends AtomShared {
     int docId = 0;
     String json;
     ElasticSearchPerson person;
+    final Logger logger = getLogger();
+
     try {
       for (SearchHit hit : hits.getHits()) {
         docId = hit.docId();
         json = hit.getSourceAsString();
 
-        getLogger().info("docId: {}", docId);
-        getLogger().trace("json: {}", json);
+        logger.info("docId: {}", docId);
+        logger.trace("json: {}", json);
 
         person = ElasticSearchPerson.readPerson(json);
-        getLogger().trace("person: {}", person);
+        logger.trace("person: {}", person);
 
         validateDocument(person);
       }
     } catch (IOException e) {
-      throw JobLogs.checked(getLogger(), e, "ERROR READING DOCUMENT! doc id: {}", docId);
+      throw JobLogs.checked(logger, e, "ERROR READING DOCUMENT! doc id: {}", docId);
     }
   }
 

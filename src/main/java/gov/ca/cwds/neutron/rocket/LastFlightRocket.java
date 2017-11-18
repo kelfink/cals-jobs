@@ -48,24 +48,24 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
   /**
    * Construct from last successful run date-time.
    * 
-   * @param lastJobRunTimeFilename location of last run time file
+   * @param lastGoodRunTimeFilename location of last run time file
    * @param flightPlan job options
    */
-  public LastFlightRocket(String lastJobRunTimeFilename, final FlightPlan flightPlan) {
-    this.lastRunTimeFilename = StringUtils.isBlank(lastJobRunTimeFilename)
-        ? flightPlan.getLastRunLoc() : lastJobRunTimeFilename;
+  public LastFlightRocket(String lastGoodRunTimeFilename, final FlightPlan flightPlan) {
+    this.lastRunTimeFilename = StringUtils.isBlank(lastGoodRunTimeFilename)
+        ? flightPlan.getLastRunLoc() : lastGoodRunTimeFilename;
     this.flightPlan = flightPlan;
   }
 
   /**
    * HACK for dependency injection issue. (re-?) initialize the job.
    * 
-   * @param lastJobRunTimeFilename last run file location
-   * @param flightPlan launch options
+   * @param lastGoodRunTimeFilename last run file location
+   * @param flightPlan flight plan
    */
-  public void init(String lastJobRunTimeFilename, final FlightPlan flightPlan) {
-    this.lastRunTimeFilename = StringUtils.isBlank(lastJobRunTimeFilename)
-        ? flightPlan.getLastRunLoc() : lastJobRunTimeFilename;
+  public void init(String lastGoodRunTimeFilename, final FlightPlan flightPlan) {
+    this.lastRunTimeFilename = StringUtils.isBlank(lastGoodRunTimeFilename)
+        ? flightPlan.getLastRunLoc() : lastGoodRunTimeFilename;
     this.flightPlan = flightPlan;
   }
 
@@ -78,7 +78,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
     try {
       final Date lastRunTime = determineLastSuccessfulRunTime();
       flightLog.setLastChangeSince(lastRunTime);
-      writeLastSuccessfulRunTime(executeJob(lastRunTime));
+      writeLastSuccessfulRunTime(launch(lastRunTime));
     } catch (Exception e) {
       fail();
       LOGGER.error("FAIL JOB!", e);
@@ -172,23 +172,23 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
   }
 
   /**
-   * Execute the batch job. Child classes must provide an implementation.
+   * Launch the rocket. Child classes must provide an implementation.
    * 
    * @param lastSuccessfulRunTime The last successful run
    * @return The time of the latest run if successful.
    * @throws NeutronException if job fails
    */
-  public abstract Date executeJob(Date lastSuccessfulRunTime) throws NeutronException;
+  public abstract Date launch(Date lastSuccessfulRunTime) throws NeutronException;
 
   /**
-   * Marks the job as completed. Close resources, notify listeners, or even close JVM.
+   * Marks the rocket as completed. Close resources, notify listeners, or even close JVM.
    * 
    * @throws NeutronException rocket landing failure
    */
   protected abstract void finish() throws NeutronException;
 
   /**
-   * Getter for last job run time.
+   * Getter for last run time.
    * 
    * @return last time the job ran successfully, in format
    *         {@link NeutronDateTimeFormat#LAST_RUN_DATE_FORMAT}
@@ -198,9 +198,9 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
   }
 
   /**
-   * Getter for this job's options.
+   * Getter for this rocket's flight plan.
    * 
-   * @return this job's options
+   * @return this rocket's flight plan
    */
   @Override
   public FlightPlan getFlightPlan() {
@@ -208,9 +208,9 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
   }
 
   /**
-   * Setter for this job's options.
+   * Setter for this rocket's flight plan.
    * 
-   * @param flightPlan this job's options
+   * @param flightPlan this rocket's flight plan
    */
   public void setFlightPlan(FlightPlan flightPlan) {
     this.flightPlan = flightPlan;

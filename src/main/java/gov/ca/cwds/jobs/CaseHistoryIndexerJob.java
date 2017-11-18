@@ -45,7 +45,7 @@ public abstract class CaseHistoryIndexerJob
   public CaseHistoryIndexerJob(final ReplicatedPersonCasesDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper,
       FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
+    super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   @Override

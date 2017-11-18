@@ -451,7 +451,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
     when(flightPlan.isLastRunMode()).thenReturn(true);
 
-    final Date actual = target.executeJob(lastRunTime);
+    final Date actual = target.launch(lastRunTime);
     assertThat(actual, notNullValue());
     markTestDone();
   }
@@ -468,7 +468,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     cal.add(Calendar.YEAR, -50);
     lastRunTime = cal.getTime();
 
-    final Date actual = target.executeJob(lastRunTime);
+    final Date actual = target.launch(lastRunTime);
     assertThat(actual, notNullValue());
     markTestDone();
   }
@@ -479,7 +479,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
     when(esDao.getConfig()).thenThrow(JobsException.class);
 
-    final Date actual = target.executeJob(lastRunTime);
+    final Date actual = target.launch(lastRunTime);
     markTestDone();
     assertThat(actual, notNullValue());
   }
@@ -886,7 +886,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     final Set<String> deletionResults = new HashSet<>();
     deletionResults.add(DEFAULT_CLIENT_ID);
     final BulkProcessor bp = mock(BulkProcessor.class);
-    target.handleDeletes(deletionResults, bp);
+    target.deleteRestricted(deletionResults, bp);
   }
 
 }

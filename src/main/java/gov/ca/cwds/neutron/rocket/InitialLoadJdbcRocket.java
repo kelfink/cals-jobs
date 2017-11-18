@@ -17,7 +17,7 @@ public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extend
 
   public InitialLoadJdbcRocket(BaseDaoImpl<T> jobDao, ElasticsearchDao esDao, String lastRunFile,
       ObjectMapper mapper, SessionFactory sessionFactory, FlightPlan flightPlan) {
-    super(jobDao, esDao, lastRunFile, mapper, sessionFactory, flightPlan);
+    super(jobDao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   @Override

@@ -40,7 +40,7 @@ public class SanityCheckRocketTest
   @Test
   public void executeJob_Args__Date() throws Exception {
     Date lastSuccessfulRunTime = new Date();
-    Date actual = target.executeJob(lastSuccessfulRunTime);
+    Date actual = target.launch(lastSuccessfulRunTime);
     assertThat(actual, is(notNullValue()));
   }
 

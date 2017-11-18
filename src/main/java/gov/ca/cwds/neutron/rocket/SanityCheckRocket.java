@@ -53,12 +53,12 @@ public class SanityCheckRocket
   public SanityCheckRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       final ElasticsearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchScheduler, @LastRunFile String lastRunFile) {
-    super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
+    super(dao, esDao, lastRunFile, mapper, flightPlan);
     this.launchScheduler = launchScheduler;
   }
 
   @Override
-  public Date executeJob(Date lastSuccessfulRunTime) {
+  public Date launch(Date lastSuccessfulRunTime) {
     LOGGER.info("MSEARCH!");
     final Client esClient = this.esDao.getClient();
 

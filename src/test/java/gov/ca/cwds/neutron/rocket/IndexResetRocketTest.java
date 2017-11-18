@@ -40,7 +40,7 @@ public class IndexResetRocketTest
   @Test
   public void executeJob_Args__Date() throws Exception {
     Date lastRunDate = new Date();
-    Date actual = target.executeJob(lastRunDate);
+    Date actual = target.launch(lastRunDate);
     Date expected = lastRunDate;
     assertThat(actual, is(equalTo(expected)));
   }

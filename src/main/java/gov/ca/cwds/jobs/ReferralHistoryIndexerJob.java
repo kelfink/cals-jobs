@@ -165,7 +165,7 @@ public class ReferralHistoryIndexerJob
   @Inject
   public ReferralHistoryIndexerJob(ReplicatedPersonReferralsDao dao, ElasticsearchDao esDao,
       @LastRunFile String lastRunFile, ObjectMapper mapper, FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
+    super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   @Override

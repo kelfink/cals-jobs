@@ -45,7 +45,7 @@ public class ExitInitialLoadRocket
   public ExitInitialLoadRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       final ElasticsearchDao esDao, final ObjectMapper mapper, LaunchDirector launchDirector,
       FlightPlan flightPlan) {
-    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, dao.getSessionFactory(), flightPlan);
+    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan);
     this.launchDirector = launchDirector;
   }
 
@@ -59,7 +59,7 @@ public class ExitInitialLoadRocket
   }
 
   @Override
-  public Date executeJob(Date lastRunDate) {
+  public Date launch(Date lastRunDate) {
     nameThread("exit_initial_load");
     if (LaunchCommand.isInitialMode()) {
       LOGGER.warn("EXIT INITIAL LOAD!");

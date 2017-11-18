@@ -57,8 +57,7 @@ public class IntakeScreeningJob extends BasePersonRocket<IntakeParticipant, EsIn
   @Inject
   public IntakeScreeningJob(final IntakeParticipantDao dao, final EsIntakeScreeningDao viewDao,
       final ElasticsearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan) {
-    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, dao.getSessionFactory(),
-        flightPlan);
+    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan);
     this.viewDao = viewDao;
   }
 

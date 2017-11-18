@@ -39,7 +39,7 @@ public class TestIndexerJob extends BasePersonRocket<TestNormalizedEntity, TestD
   public TestIndexerJob(final TestNormalizedEntityDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, null);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, null);
   }
 
   @Override

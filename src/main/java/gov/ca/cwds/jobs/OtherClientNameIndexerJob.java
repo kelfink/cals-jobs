@@ -60,7 +60,7 @@ public class OtherClientNameIndexerJob
   public OtherClientNameIndexerJob(final ReplicatedAkaDao dao,
       final ReplicatedOtherClientNameDao denormDao, final ElasticsearchDao esDao,
       final ObjectMapper mapper, FlightPlan flightPlan) {
-    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, dao.getSessionFactory(), flightPlan);
+    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan);
     this.denormDao = denormDao;
   }
 

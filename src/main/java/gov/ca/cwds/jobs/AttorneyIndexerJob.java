@@ -37,7 +37,7 @@ public class AttorneyIndexerJob extends BasePersonRocket<ReplicatedAttorney, Rep
   @Inject
   public AttorneyIndexerJob(final ReplicatedAttorneyDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
+    super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   /**

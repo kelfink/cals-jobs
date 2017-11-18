@@ -40,7 +40,7 @@ public class OtherAdultInPlacemtHomeIndexerJob
   public OtherAdultInPlacemtHomeIndexerJob(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       final ElasticsearchDao esDao, @LastRunFile final String lastRunFile,
       final ObjectMapper mapper, FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
+    super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   @Override

@@ -68,7 +68,7 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 
 /**
- * Base person batch job to load clients from CMS into ElasticSearch.
+ * Base person rocket to documents from CMS into ElasticSearch.
  * 
  * <p>
  * This class implements {@link AutoCloseable} and automatically closes common resources, such as
@@ -142,7 +142,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
    * <strong>MOVE</strong> to another unit.
    * </p>
    */
-  protected LinkedBlockingDeque<M> queueNormalize = new LinkedBlockingDeque<>(50000);
+  protected LinkedBlockingDeque<M> queueNormalize = new LinkedBlockingDeque<>(2000);
 
   /**
    * Queue of normalized records waiting to publish to Elasticsearch.
@@ -154,27 +154,25 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
    * <strong>OPTION:</strong> size by environment (production size or small test data set).
    * </p>
    */
-  protected LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(125000);
+  protected LinkedBlockingDeque<T> queueIndex = new LinkedBlockingDeque<>(5000);
 
   /**
-   * Construct batch job instance with all required dependencies.
+   * Construct rocket with all required dependencies.
    * 
    * @param jobDao Person DAO, such as {@link ReplicatedClientDao}
    * @param esDao ElasticSearch DAO
    * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
-   * @param sessionFactory Hibernate session factory
    * @param flightPlan command line options
    */
   @Inject
   public BasePersonRocket(final BaseDaoImpl<T> jobDao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastRunFile, final ObjectMapper mapper,
-      SessionFactory sessionFactory, FlightPlan flightPlan) {
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
     super(lastRunFile, flightPlan);
     this.jobDao = jobDao;
     this.esDao = esDao;
     this.mapper = mapper;
-    this.sessionFactory = sessionFactory;
+    this.sessionFactory = jobDao.getSessionFactory();
     this.bulkProcessorBuilder = new BulkProcessorBuilder(esDao, flightLog);
     this.flightLog.setRocketName(getClass().getSimpleName());
   }
@@ -449,7 +447,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
   }
 
   /**
-   * The "load" part of ETL. Read from normalized record queue and push to ES.
+   * The "load" part of ETL. Read from the normalized record queue and index into ES.
    */
   protected void threadIndex() {
     nameThread("es_indexer");
@@ -473,7 +471,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     } catch (Exception e) {
       fail();
       Thread.currentThread().interrupt();
-      throw JobLogs.runtime(LOGGER, e, "Indexer: fatal error {}", e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "FATAL INDEXING ERROR: {}", e.getMessage());
     } finally {
       doneIndex();
     }
@@ -524,7 +522,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
    * @param deletionResults documents to remove from Elasticsearch
    * @param bp bulk processor
    */
-  protected void handleDeletes(final Set<String> deletionResults, final BulkProcessor bp) {
+  protected void deleteRestricted(final Set<String> deletionResults, final BulkProcessor bp) {
     if (!deletionResults.isEmpty()) {
       LOGGER.warn("Found {} people to delete, IDs: {}", deletionResults.size(), deletionResults);
 
@@ -555,10 +553,11 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
    * @param lastRunDt last time the batch ran successfully.
    * @return List of results to process
    * @throws NeutronException oops!
-   * @see gov.ca.cwds.neutron.rocket.LastFlightRocket#executeJob(java.util.Date)
+   * @see gov.ca.cwds.neutron.rocket.LastFlightRocket#launch(java.util.Date)
    */
   protected Date doLastRun(Date lastRunDt) throws NeutronException {
     LOGGER.info("LAST RUN MODE!");
+
     try {
       final BulkProcessor bp = buildBulkProcessor();
       final Set<String> deletionResults = new HashSet<>();
@@ -572,7 +571,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
         });
       }
 
-      handleDeletes(deletionResults, bp);
+      deleteRestricted(deletionResults, bp); // last run only
       awaitBulkProcessorClose(bp);
       validateDocuments();
       return new Date(getFlightLog().getStartTime());
@@ -582,6 +581,28 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     } finally {
       done();
     }
+  }
+
+  private boolean determineMode(final Date lastRun) {
+    LOGGER.debug("Last successsful run time: {}", lastRun); // NOSONAR
+
+    // Smart/auto mode. If last run date is older than 25 years, assume initial load.
+    // Written when DevOps started using Rundeck and was unable to pass parameters to jobs.
+    final Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.YEAR, -25);
+    final boolean autoInitialLoad =
+        this.getFlightLog().isInitialLoad() || lastRun.before(cal.getTime());
+
+    // Configure queue sizes for last run or initial load.
+    if (autoInitialLoad) {
+      queueNormalize = new LinkedBlockingDeque<>(2000);
+      queueIndex = new LinkedBlockingDeque<>(5000);
+    } else {
+      queueNormalize = new LinkedBlockingDeque<>(50000);
+      queueIndex = new LinkedBlockingDeque<>(125000);
+    }
+
+    return autoInitialLoad;
   }
 
   /**
@@ -596,10 +617,10 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
    * 
    * {@inheritDoc}
    * 
-   * @see gov.ca.cwds.neutron.rocket.LastFlightRocket#executeJob(java.util.Date)
+   * @see gov.ca.cwds.neutron.rocket.LastFlightRocket#launch(java.util.Date)
    */
   @Override
-  public Date executeJob(Date lastSuccessfulRunTime) throws NeutronException {
+  public Date launch(Date lastSuccessfulRunTime) throws NeutronException {
     LOGGER.info("RUNNING JOB: {}", getClass().getName());
     Date ret;
 
@@ -609,28 +630,9 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       final String effectiveIndexName = StringUtils.isBlank(indexNameOverride)
           ? esDao.getConfig().getElasticsearchAlias() : indexNameOverride;
       getFlightPlan().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
-
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
-      LOGGER.debug("Last successsful run time: {}", lastRun); // NOSONAR
 
-      // Smart/auto mode. If last run date is older than 25 years, assume initial load.
-      // Written when DevOps started using Rundeck and was unable to pass parameters to jobs.
-      // **MOVE** to another unit.
-      final Calendar cal = Calendar.getInstance();
-      cal.add(Calendar.YEAR, -25);
-      final boolean autoInitialLoad =
-          this.getFlightLog().isInitialLoad() || lastRun.before(cal.getTime());
-
-      // Configure queue sizes for last run or initial load.
-      if (autoInitialLoad) {
-        queueNormalize = new LinkedBlockingDeque<>(2000);
-        queueIndex = new LinkedBlockingDeque<>(5000);
-      } else {
-        queueNormalize = new LinkedBlockingDeque<>(50000);
-        queueIndex = new LinkedBlockingDeque<>(125000);
-      }
-
-      if (autoInitialLoad) {
+      if (determineMode(lastRun)) {
         getFlightLog().setInitialLoad(true);
         refreshMQT();
         if (isInitialLoadJdbc()) {
@@ -717,7 +719,6 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
         NeutronJdbcUtil.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
     final List<M> deletionRecs = q.list();
-
     if (deletionRecs != null && !deletionRecs.isEmpty()) {
       for (M rec : deletionRecs) {
         // Assuming group key represents ID of client to delete. This is true for client,

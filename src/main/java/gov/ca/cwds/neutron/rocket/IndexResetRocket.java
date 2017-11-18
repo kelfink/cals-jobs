@@ -39,11 +39,11 @@ public class IndexResetRocket
   @Inject
   public IndexResetRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       final ElasticsearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan) {
-    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, dao.getSessionFactory(), flightPlan);
+    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan);
   }
 
   @Override
-  public Date executeJob(Date lastRunDate) {
+  public Date launch(Date lastRunDate) {
     LOGGER.info("INDEX CHECK!");
 
     try {
