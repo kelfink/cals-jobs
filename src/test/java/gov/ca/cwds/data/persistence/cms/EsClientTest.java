@@ -158,6 +158,7 @@ public class EsClientTest extends Goddard {
     when(rs.getString("ONM_NMPRFX_DSC")).thenReturn("X");
     when(rs.getString("ONM_SUFX_TLDSC")).thenReturn("phd");
     when(rs.getString("ONM_THIRD_ID")).thenReturn(DEFAULT_CLIENT_ID);
+
     when(rs.getString("SAL_ACTV_TXT")).thenReturn("X");
     when(rs.getString("SAL_DACT_TXT")).thenReturn("X");
     when(rs.getString("SAL_LST_UPD_ID")).thenReturn("3fa");
@@ -200,6 +201,7 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void normalize_Args__Map() throws Exception {
+    target.extract(rs);
     target.setAdrId(DEFAULT_CLIENT_ID);
     target.setClaId(DEFAULT_CLIENT_ID);
     target.setAdrReplicationOperation(CmsReplicationOperation.U);
