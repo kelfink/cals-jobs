@@ -35,6 +35,7 @@ public class EsClientTest extends Goddard {
     target = new EsClient();
     target.setCltId(DEFAULT_CLIENT_ID);
     target.setSafetyAlertId(DEFAULT_CLIENT_ID);
+    target.setAkaId(DEFAULT_CLIENT_ID);
 
     final Short shortZero = Short.valueOf((short) 0);
     when(rs.first()).thenReturn(true);
@@ -55,12 +56,15 @@ public class EsClientTest extends Goddard {
     when(rs.getShort("CLT_P_LANG_TPC")).thenReturn(shortZero);
     when(rs.getShort("CLT_RLGN_TPC")).thenReturn(shortZero);
     when(rs.getShort("CLT_S_LANG_TC")).thenReturn(shortZero);
+
     when(rs.getBigDecimal("ADR_EMRG_TELNO")).thenReturn(BigDecimal.ZERO);
     when(rs.getBigDecimal("ADR_MSG_TEL_NO")).thenReturn(BigDecimal.ZERO);
     when(rs.getBigDecimal("ADR_PRM_TEL_NO")).thenReturn(BigDecimal.ZERO);
+
     when(rs.getInt("ADR_EMRG_EXTNO")).thenReturn(0);
     when(rs.getInt("ADR_MSG_EXT_NO")).thenReturn(0);
     when(rs.getInt("ADR_PRM_EXT_NO")).thenReturn(0);
+
     when(rs.getString("ADR_ADDR_DSC")).thenReturn("somewhere");
     when(rs.getString("ADR_CITY_NM")).thenReturn("Windelsberg");
     when(rs.getString("ADR_FRG_ADRT_B")).thenReturn("Y");
@@ -73,6 +77,7 @@ public class EsClientTest extends Goddard {
     when(rs.getString("ADR_STREET_NO")).thenReturn("1234");
     when(rs.getString("ADR_UNIT_NO")).thenReturn("ste 210");
     when(rs.getString("ADR_ZIP_NO")).thenReturn("Y");
+
     when(rs.getString("CLA_BK_INMT_ID")).thenReturn("Y");
     when(rs.getString("CLA_FKADDRS_T")).thenReturn(DEFAULT_CLIENT_ID);
     when(rs.getString("CLA_FKCLIENT_T")).thenReturn(DEFAULT_CLIENT_ID);
@@ -133,6 +138,10 @@ public class EsClientTest extends Goddard {
     when(rs.getString("CLT_TRBA_CLT_B")).thenReturn("Y");
     when(rs.getString("CLT_UNEMPLY_CD")).thenReturn("Y");
     when(rs.getString("CLT_ZIPPY_IND")).thenReturn("Y");
+
+    when(rs.getString("CLA_IDENTIFIER")).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString("ADR_IDENTIFIER")).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString("SAL_THIRD_ID")).thenReturn(DEFAULT_CLIENT_ID);
 
     when(rs.getShort("ONM_NAME_TPC")).thenReturn(shortZero);
     when(rs.getShort("SAL_ACTV_GEC")).thenReturn(shortZero);
@@ -1566,7 +1575,7 @@ public class EsClientTest extends Goddard {
   @Test
   public void getAkaId_Args__() throws Exception {
     String actual = target.getAkaId();
-    String expected = null;
+    String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1578,8 +1587,9 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAkaFirstName_Args__() throws Exception {
+    target.setAkaFirstName("fred");
     String actual = target.getAkaFirstName();
-    String expected = null;
+    String expected = "fred";
     assertThat(actual, is(equalTo(expected)));
   }
 
