@@ -200,6 +200,11 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void normalize_Args__Map() throws Exception {
+    target.setAdrId(DEFAULT_CLIENT_ID);
+    target.setClaId(DEFAULT_CLIENT_ID);
+    target.setAdrReplicationOperation(CmsReplicationOperation.U);
+    target.setClaReplicationOperation(CmsReplicationOperation.U);
+
     final Map<Object, ReplicatedClient> map = new HashMap<Object, ReplicatedClient>();
     final ReplicatedClient rep = new ReplicatedClient();
     rep.setId(DEFAULT_CLIENT_ID);
