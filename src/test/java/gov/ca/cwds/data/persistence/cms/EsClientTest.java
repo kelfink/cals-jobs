@@ -215,29 +215,29 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltAdjudicatedDelinquentIndicator_Args__() throws Exception {
-    String actual = target.getCltAdjudicatedDelinquentIndicator();
-    String expected = null;
+    final String actual = target.getCltAdjudicatedDelinquentIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltAdoptionStatusCode_Args__() throws Exception {
-    String actual = target.getCltAdoptionStatusCode();
-    String expected = null;
+    final String actual = target.getCltAdoptionStatusCode();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltAlienRegistrationNumber_Args__() throws Exception {
-    String actual = target.getCltAlienRegistrationNumber();
-    String expected = null;
+    final String actual = target.getCltAlienRegistrationNumber();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltBirthCity_Args__() throws Exception {
-    String actual = target.getCltBirthCity();
-    String expected = null;
+    final String actual = target.getCltBirthCity();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -257,8 +257,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltBirthFacilityName_Args__() throws Exception {
-    String actual = target.getCltBirthFacilityName();
-    String expected = null;
+    final String actual = target.getCltBirthFacilityName();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -271,8 +271,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltBirthplaceVerifiedIndicator_Args__() throws Exception {
-    String actual = target.getCltBirthplaceVerifiedIndicator();
-    String expected = null;
+    final String actual = target.getCltBirthplaceVerifiedIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -284,43 +284,43 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltChildClientIndicatorVar_Args__() throws Exception {
-    String actual = target.getCltChildClientIndicatorVar();
-    String expected = null;
+    final String actual = target.getCltChildClientIndicatorVar();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltClientIndexNumber_Args__() throws Exception {
-    String actual = target.getCltClientIndexNumber();
-    String expected = null;
+    final String actual = target.getCltClientIndexNumber();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltCommentDescription_Args__() throws Exception {
-    String actual = target.getCltCommentDescription();
-    String expected = null;
+    final String actual = target.getCltCommentDescription();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltCommonFirstName_Args__() throws Exception {
-    String actual = target.getCltCommonFirstName();
-    String expected = null;
+    final String actual = target.getCltCommonFirstName();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltCommonLastName_Args__() throws Exception {
-    String actual = target.getCltCommonLastName();
-    String expected = null;
+    final String actual = target.getCltCommonLastName();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltCommonMiddleName_Args__() throws Exception {
-    String actual = target.getCltCommonMiddleName();
-    String expected = null;
+    final String actual = target.getCltCommonMiddleName();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -339,8 +339,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltConfidentialityInEffectIndicator_Args__() throws Exception {
-    String actual = target.getCltConfidentialityInEffectIndicator();
-    String expected = null;
+    final String actual = target.getCltConfidentialityInEffectIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -365,8 +365,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltCurrCaChildrenServIndicator_Args__() throws Exception {
-    String actual = target.getCltCurrCaChildrenServIndicator();
-    String expected = null;
+    final String actual = target.getCltCurrCaChildrenServIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -378,15 +378,15 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltCurrentlyOtherDescription_Args__() throws Exception {
-    String actual = target.getCltCurrentlyOtherDescription();
-    String expected = null;
+    final String actual = target.getCltCurrentlyOtherDescription();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltCurrentlyRegionalCenterIndicator_Args__() throws Exception {
-    String actual = target.getCltCurrentlyRegionalCenterIndicator();
-    String expected = null;
+    final String actual = target.getCltCurrentlyRegionalCenterIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -399,29 +399,29 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltDeathDateVerifiedIndicator_Args__() throws Exception {
-    String actual = target.getCltDeathDateVerifiedIndicator();
-    String expected = null;
+    final String actual = target.getCltDeathDateVerifiedIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltDeathPlace_Args__() throws Exception {
-    String actual = target.getCltDeathPlace();
-    String expected = null;
+    final String actual = target.getCltDeathPlace();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltDeathReasonText_Args__() throws Exception {
-    String actual = target.getCltDeathReasonText();
-    String expected = null;
+    final String actual = target.getCltDeathReasonText();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltDriverLicenseNumber_Args__() throws Exception {
-    String actual = target.getCltDriverLicenseNumber();
-    String expected = null;
+    final String actual = target.getCltDriverLicenseNumber();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -434,36 +434,36 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltEmailAddress_Args__() throws Exception {
-    String actual = target.getCltEmailAddress();
-    String expected = null;
+    final String actual = target.getCltEmailAddress();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltEstimatedDobCode_Args__() throws Exception {
-    String actual = target.getCltEstimatedDobCode();
-    String expected = null;
+    final String actual = target.getCltEstimatedDobCode();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltEthUnableToDetReasonCode_Args__() throws Exception {
-    String actual = target.getCltEthUnableToDetReasonCode();
-    String expected = null;
+    final String actual = target.getCltEthUnableToDetReasonCode();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltGenderCode_Args__() throws Exception {
-    String actual = target.getCltGenderCode();
-    String expected = null;
+    final String actual = target.getCltGenderCode();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltHealthSummaryText_Args__() throws Exception {
-    String actual = target.getCltHealthSummaryText();
-    String expected = null;
+    final String actual = target.getCltHealthSummaryText();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -475,8 +475,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltHispUnableToDetReasonCode_Args__() throws Exception {
-    String actual = target.getCltHispUnableToDetReasonCode();
-    String expected = null;
+    final String actual = target.getCltHispUnableToDetReasonCode();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -488,8 +488,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltHispanicOriginCode_Args__() throws Exception {
-    String actual = target.getCltHispanicOriginCode();
-    String expected = null;
+    final String actual = target.getCltHispanicOriginCode();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -501,8 +501,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltId_Args__() throws Exception {
-    String actual = target.getCltId();
-    String expected = DEFAULT_CLIENT_ID;
+    final String actual = target.getCltId();
+    final String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -534,36 +534,36 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltIncapacitatedParentCode_Args__() throws Exception {
-    String actual = target.getCltIncapacitatedParentCode();
-    String expected = null;
+    final String actual = target.getCltIncapacitatedParentCode();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltIndividualHealthCarePlanIndicator_Args__() throws Exception {
-    String actual = target.getCltIndividualHealthCarePlanIndicator();
-    String expected = null;
+    final String actual = target.getCltIndividualHealthCarePlanIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltLimitationOnScpHealthIndicator_Args__() throws Exception {
-    String actual = target.getCltLimitationOnScpHealthIndicator();
-    String expected = null;
+    final String actual = target.getCltLimitationOnScpHealthIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltLiterateCode_Args__() throws Exception {
-    String actual = target.getCltLiterateCode();
-    String expected = null;
+    final String actual = target.getCltLiterateCode();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltMaritalCohabitatnHstryIndicatorVar_Args__() throws Exception {
-    String actual = target.getCltMaritalCohabitatnHstryIndicatorVar();
-    String expected = null;
+    final String actual = target.getCltMaritalCohabitatnHstryIndicatorVar();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -576,8 +576,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltMilitaryStatusCode_Args__() throws Exception {
-    String actual = target.getCltMilitaryStatusCode();
-    String expected = null;
+    final String actual = target.getCltMilitaryStatusCode();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -590,8 +590,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltNamePrefixDescription_Args__() throws Exception {
-    String actual = target.getCltNamePrefixDescription();
-    String expected = null;
+    final String actual = target.getCltNamePrefixDescription();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -604,29 +604,29 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltOutstandingWarrantIndicator_Args__() throws Exception {
-    String actual = target.getCltOutstandingWarrantIndicator();
-    String expected = null;
+    final String actual = target.getCltOutstandingWarrantIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltPrevCaChildrenServIndicator_Args__() throws Exception {
-    String actual = target.getCltPrevCaChildrenServIndicator();
-    String expected = null;
+    final String actual = target.getCltPrevCaChildrenServIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltPrevOtherDescription_Args__() throws Exception {
-    String actual = target.getCltPrevOtherDescription();
-    String expected = null;
+    final String actual = target.getCltPrevOtherDescription();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltPrevRegionalCenterIndicator_Args__() throws Exception {
-    String actual = target.getCltPrevRegionalCenterIndicator();
-    String expected = null;
+    final String actual = target.getCltPrevRegionalCenterIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -690,8 +690,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltSensitiveHlthInfoOnFileIndicator_Args__() throws Exception {
-    String actual = target.getCltSensitiveHlthInfoOnFileIndicator();
-    String expected = null;
+    final String actual = target.getCltSensitiveHlthInfoOnFileIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -703,8 +703,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltSensitivityIndicator_Args__() throws Exception {
-    String actual = target.getCltSensitivityIndicator();
-    String expected = null;
+    final String actual = target.getCltSensitivityIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -716,8 +716,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltSoc158PlacementCode_Args__() throws Exception {
-    String actual = target.getCltSoc158PlacementCode();
-    String expected = null;
+    final String actual = target.getCltSoc158PlacementCode();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -729,8 +729,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltSoc158SealedClientIndicator_Args__() throws Exception {
-    String actual = target.getCltSoc158SealedClientIndicator();
-    String expected = null;
+    final String actual = target.getCltSoc158SealedClientIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -742,8 +742,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltSocialSecurityNumChangedCode_Args__() throws Exception {
-    String actual = target.getCltSocialSecurityNumChangedCode();
-    String expected = null;
+    final String actual = target.getCltSocialSecurityNumChangedCode();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -755,8 +755,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltSocialSecurityNumber_Args__() throws Exception {
-    String actual = target.getCltSocialSecurityNumber();
-    String expected = null;
+    final String actual = target.getCltSocialSecurityNumber();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -768,8 +768,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltSuffixTitleDescription_Args__() throws Exception {
-    String actual = target.getCltSuffixTitleDescription();
-    String expected = null;
+    final String actual = target.getCltSuffixTitleDescription();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -781,8 +781,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltTribalAncestryClientIndicatorVar_Args__() throws Exception {
-    String actual = target.getCltTribalAncestryClientIndicatorVar();
-    String expected = null;
+    final String actual = target.getCltTribalAncestryClientIndicatorVar();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -794,8 +794,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltTribalMembrshpVerifctnIndicatorVar_Args__() throws Exception {
-    String actual = target.getCltTribalMembrshpVerifctnIndicatorVar();
-    String expected = null;
+    final String actual = target.getCltTribalMembrshpVerifctnIndicatorVar();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -807,8 +807,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltUnemployedParentCode_Args__() throws Exception {
-    String actual = target.getCltUnemployedParentCode();
-    String expected = null;
+    final String actual = target.getCltUnemployedParentCode();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -820,8 +820,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltZippyCreatedIndicator_Args__() throws Exception {
-    String actual = target.getCltZippyCreatedIndicator();
-    String expected = null;
+    final String actual = target.getCltZippyCreatedIndicator();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -859,8 +859,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getCltLastUpdatedId_Args__() throws Exception {
-    String actual = target.getCltLastUpdatedId();
-    String expected = null;
+    final String actual = target.getCltLastUpdatedId();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -911,8 +911,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getClaLastUpdatedId_Args__() throws Exception {
-    String actual = target.getClaLastUpdatedId();
-    String expected = null;
+    final String actual = target.getClaLastUpdatedId();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -937,8 +937,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getClaFkAddress_Args__() throws Exception {
-    String actual = target.getClaFkAddress();
-    String expected = null;
+    final String actual = target.getClaFkAddress();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -950,8 +950,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getClaFkClient_Args__() throws Exception {
-    String actual = target.getClaFkClient();
-    String expected = null;
+    final String actual = target.getClaFkClient();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -963,8 +963,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getClaFkReferral_Args__() throws Exception {
-    String actual = target.getClaFkReferral();
-    String expected = null;
+    final String actual = target.getClaFkReferral();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -989,8 +989,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getClaHomelessInd_Args__() throws Exception {
-    String actual = target.getClaHomelessInd();
-    String expected = null;
+    final String actual = target.getClaHomelessInd();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1002,8 +1002,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getClaBkInmtId_Args__() throws Exception {
-    String actual = target.getClaBkInmtId();
-    String expected = null;
+    final String actual = target.getClaBkInmtId();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1041,8 +1041,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAdrId_Args__() throws Exception {
-    String actual = target.getAdrId();
-    String expected = null;
+    final String actual = target.getAdrId();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1054,8 +1054,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAdrCity_Args__() throws Exception {
-    String actual = target.getAdrCity();
-    String expected = null;
+    final String actual = target.getAdrCity();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1093,8 +1093,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAdrFrgAdrtB_Args__() throws Exception {
-    String actual = target.getAdrFrgAdrtB();
-    String expected = null;
+    final String actual = target.getAdrFrgAdrtB();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1145,8 +1145,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAdrHeaderAddress_Args__() throws Exception {
-    String actual = target.getAdrHeaderAddress();
-    String expected = null;
+    final String actual = target.getAdrHeaderAddress();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1185,29 +1185,29 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAdrStreetName_Args__() throws Exception {
-    String actual = target.getAdrStreetName();
-    String expected = null;
+    final String actual = target.getAdrStreetName();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getAdrStreetNumber_Args__() throws Exception {
-    String actual = target.getAdrStreetNumber();
-    String expected = null;
+    final String actual = target.getAdrStreetNumber();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getAdrZip_Args__() throws Exception {
-    String actual = target.getAdrZip();
-    String expected = null;
+    final String actual = target.getAdrZip();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getAdrAddressDescription_Args__() throws Exception {
-    String actual = target.getAdrAddressDescription();
-    String expected = null;
+    final String actual = target.getAdrAddressDescription();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1226,15 +1226,15 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAdrPostDirCd_Args__() throws Exception {
-    String actual = target.getAdrPostDirCd();
-    String expected = null;
+    final String actual = target.getAdrPostDirCd();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getAdrPreDirCd_Args__() throws Exception {
-    String actual = target.getAdrPreDirCd();
-    String expected = null;
+    final String actual = target.getAdrPreDirCd();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1254,15 +1254,15 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAdrUnitNumber_Args__() throws Exception {
-    String actual = target.getAdrUnitNumber();
-    String expected = null;
+    final String actual = target.getAdrUnitNumber();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getClaId_Args__() throws Exception {
-    String actual = target.getClaId();
-    String expected = null;
+    final String actual = target.getClaId();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1302,8 +1302,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getNormalizationGroupKey_Args__() throws Exception {
-    String actual = target.getNormalizationGroupKey();
-    String expected = DEFAULT_CLIENT_ID;
+    final String actual = target.getNormalizationGroupKey();
+    final String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1365,15 +1365,15 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getClientCountyId_Args__() throws Exception {
-    String actual = target.getClientCountyId();
-    String expected = null;
+    final String actual = target.getClientCountyId();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getClientEthnicityId_Args__() throws Exception {
-    String actual = target.getClientEthnicityId();
-    String expected = null;
+    final String actual = target.getClientEthnicityId();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1386,8 +1386,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getClientCountyRule_Args__() throws Exception {
-    String actual = target.getClientCountyRule();
-    String expected = null;
+    final String actual = target.getClientCountyRule();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1423,8 +1423,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getSafetyAlertId_Args__() throws Exception {
-    String actual = target.getSafetyAlertId();
-    String expected = DEFAULT_CLIENT_ID;
+    final String actual = target.getSafetyAlertId();
+    final String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1475,8 +1475,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getSafetyAlertActivationExplanation_Args__() throws Exception {
-    String actual = target.getSafetyAlertActivationExplanation();
-    String expected = null;
+    final String actual = target.getSafetyAlertActivationExplanation();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1514,8 +1514,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getSafetyAlertDeactivationExplanation_Args__() throws Exception {
-    String actual = target.getSafetyAlertDeactivationExplanation();
-    String expected = null;
+    final String actual = target.getSafetyAlertDeactivationExplanation();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1527,8 +1527,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getSafetyAlertLastUpdatedId_Args__() throws Exception {
-    String actual = target.getSafetyAlertLastUpdatedId();
-    String expected = null;
+    final String actual = target.getSafetyAlertLastUpdatedId();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1579,8 +1579,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAkaId_Args__() throws Exception {
-    String actual = target.getAkaId();
-    String expected = DEFAULT_CLIENT_ID;
+    final String actual = target.getAkaId();
+    final String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1593,8 +1593,8 @@ public class EsClientTest extends Goddard {
   @Test
   public void getAkaFirstName_Args__() throws Exception {
     target.setAkaFirstName("fred");
-    String actual = target.getAkaFirstName();
-    String expected = "fred";
+    final String actual = target.getAkaFirstName();
+    final String expected = "fred";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1606,8 +1606,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAkaLastName_Args__() throws Exception {
-    String actual = target.getAkaLastName();
-    String expected = null;
+    final String actual = target.getAkaLastName();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1619,8 +1619,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAkaMiddleName_Args__() throws Exception {
-    String actual = target.getAkaMiddleName();
-    String expected = null;
+    final String actual = target.getAkaMiddleName();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1632,8 +1632,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAkaNamePrefixDescription_Args__() throws Exception {
-    String actual = target.getAkaNamePrefixDescription();
-    String expected = null;
+    final String actual = target.getAkaNamePrefixDescription();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1658,8 +1658,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAkaSuffixTitleDescription_Args__() throws Exception {
-    String actual = target.getAkaSuffixTitleDescription();
-    String expected = null;
+    final String actual = target.getAkaSuffixTitleDescription();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1671,8 +1671,8 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void getAkaLastUpdatedId_Args__() throws Exception {
-    String actual = target.getAkaLastUpdatedId();
-    String expected = null;
+    final String actual = target.getAkaLastUpdatedId();
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
