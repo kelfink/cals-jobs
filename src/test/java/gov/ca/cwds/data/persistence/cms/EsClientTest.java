@@ -201,11 +201,21 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void normalize_Args__Map() throws Exception {
-    target.extract(rs);
     target.setAdrId(DEFAULT_CLIENT_ID);
     target.setClaId(DEFAULT_CLIENT_ID);
     target.setAdrReplicationOperation(CmsReplicationOperation.U);
     target.setClaReplicationOperation(CmsReplicationOperation.U);
+
+    target.setAkaFirstName("fred");
+    target.setAkaLastName("meyer");
+    target.setAkaMiddleName("xavier");
+    target.setAkaNamePrefixDescription("mr");
+    target.setAkaNameType((short) 1313);
+    target.setAkaReplicationTimestamp(new Date());
+    target.setAkaLastUpdatedTimestamp(new Timestamp(new Date().getTime()));
+    target.setAkaSuffixTitleDescription("phd");
+    target.setAkaLastUpdatedOperation(CmsReplicationOperation.I);
+    target.setAkaLastUpdatedId("0x5");
 
     final Map<Object, ReplicatedClient> map = new HashMap<Object, ReplicatedClient>();
     final ReplicatedClient rep = new ReplicatedClient();
