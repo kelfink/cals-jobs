@@ -251,7 +251,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void iterateRangeResults_Args__ResultSet() throws Exception {
-    target.handleRangeResults(rs);
+    target.initialLoadProcessRangeResults(rs);
   }
 
   @Test
@@ -312,12 +312,12 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void handleRangeResults_Args__ResultSet() throws Exception {
-    target.handleRangeResults(rs);
+    target.initialLoadProcessRangeResults(rs);
   }
 
   @Test
   public void handleRangeResults_Args__ResultSet__2() throws Exception {
-    target.handleRangeResults(rs);
+    target.initialLoadProcessRangeResults(rs);
   }
 
   @Test

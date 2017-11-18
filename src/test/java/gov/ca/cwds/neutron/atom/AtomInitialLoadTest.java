@@ -111,7 +111,7 @@ public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDen
 
   @Test
   public void handleRangeResults_Args__ResultSet() throws Exception {
-    target.handleRangeResults(rs);
+    target.initialLoadProcessRangeResults(rs);
   }
 
   @Test
@@ -129,7 +129,7 @@ public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDen
 
   @Test
   public void bigRetrieveByJdbc_Args__() throws Exception {
-    target.bigRetrieveByJdbc();
+    target.pullMultiThreadJdbc();
   }
 
   @Test

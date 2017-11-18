@@ -177,7 +177,7 @@ public class ClientCountyRocket extends ClientIndexerJob
    */
   @Override
   protected void threadRetrieveByJdbc() {
-    bigRetrieveByJdbc();
+    pullMultiThreadJdbc();
   }
 
   @Override

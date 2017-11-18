@@ -11,21 +11,11 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 import gov.ca.cwds.neutron.flight.FlightLog;
 
 /**
- * Common features of all Elasticsearch indexing jobs.
+ * Shared features of all Elasticsearch indexing rockets.
  * 
  * @author CWDS API Team
  */
 public interface AtomShared extends ApiMarker {
-
-  /**
-   * @return the rocket's progress tracker
-   */
-  FlightLog getFlightLog();
-
-  /**
-   * @return Elasticsearch DAO
-   */
-  ElasticsearchDao getEsDao();
 
   /**
    * Make logger available to interfaces.
@@ -34,12 +24,31 @@ public interface AtomShared extends ApiMarker {
    */
   Logger getLogger();
 
+  /**
+   * Track the rocket's flight progress.
+   * 
+   * @return the rocket's progress tracker
+   */
+  FlightLog getFlightLog();
+
+  /**
+   * Elasticsearch operations.
+   * 
+   * @return Elasticsearch DAO
+   */
+  ElasticsearchDao getEsDao();
+
+  /**
+   * Jackson ObjectMapper suitable for Elasticsearch document operations.
+   * 
+   * @return Jackson ObjectMapper
+   */
   ObjectMapper getMapper();
 
   /**
-   * Getter for the job's command line options.
+   * Getter for the rocket's flight plan.
    * 
-   * @return this job's options
+   * @return this rocket's flight plan
    */
   FlightPlan getFlightPlan();
 

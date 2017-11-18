@@ -60,12 +60,13 @@ public class SanityCheckRocket
   @Override
   public Date launch(Date lastSuccessfulRunTime) {
     LOGGER.info("MSEARCH!");
-    final Client esClient = this.esDao.getClient();
+    final Client client = this.esDao.getClient();
 
     // final SearchRequestBuilder srb2 = esClient.prepareSearch().setQuery(QueryBuilders
     // .multiMatchQuery("N6dhOan15A", "cases.focus_child.legacy_descriptor.legacy_id"));
-    final MultiSearchResponse sr = esClient.prepareMultiSearch()
-        .add(esClient.prepareSearch()
+
+    final MultiSearchResponse sr = client.prepareMultiSearch()
+        .add(client.prepareSearch()
             .setQuery(QueryBuilders.idsQuery().addIds("OpvBkr00ND", "Jw3ny5K00h", "EuCrckE04M")))
         // .add(srb2)
         .get();

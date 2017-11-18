@@ -12,7 +12,7 @@ import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
  * 
  * @author CWDS API Team
  * @param <T> normalized type
- * @param <M> de-normalized type
+ * @param <M> denormalized type
  */
 public interface AtomTransform<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends AtomShared {
@@ -27,8 +27,8 @@ public interface AtomTransform<T extends PersistentObject, M extends ApiGroupNor
   }
 
   /**
-   * Return the job's entity class for its de-normalized source view or materialized query table, if
-   * any, or null if not using a de-normalized source.
+   * Return the job's entity class for its denormalized source view or materialized query table, if
+   * any, or null if not using a denormalized source.
    * 
    * @return entity class of view or materialized query table
    */
@@ -37,7 +37,7 @@ public interface AtomTransform<T extends PersistentObject, M extends ApiGroupNor
   }
 
   /**
-   * True if the Job class reduces de-normalized results to normalized ones.
+   * True if the Job class reduces denormalized results to normalized ones.
    * 
    * @return true if class overrides {@link #normalize(List)}
    */
@@ -47,7 +47,7 @@ public interface AtomTransform<T extends PersistentObject, M extends ApiGroupNor
 
   /**
    * Default normalize method just returns the input. Child classes may customize this method to
-   * normalize de-normalized result sets (view records) to normalized entities (parent/child)
+   * normalize denormalized result sets (view records) to normalized entities (parent/child)
    * records.
    * 
    * @param recs entity records
@@ -60,7 +60,7 @@ public interface AtomTransform<T extends PersistentObject, M extends ApiGroupNor
   }
 
   /**
-   * Increment the number normalized records.
+   * Increment the count of normalized records.
    */
   default void incrementNormalizeCount() {
     JobLogs.logEvery(getFlightLog().trackNormalized(), "Normalize", "single");

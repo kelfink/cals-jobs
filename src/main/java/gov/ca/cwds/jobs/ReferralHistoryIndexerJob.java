@@ -504,7 +504,8 @@ public class ReferralHistoryIndexerJob
   }
 
   /**
-   * Referrals is a huge job, and so it fetches partition ranges from a file.
+   * Referrals is an <strong>enormous</strong> task and fetches partition ranges from a file instead
+   * of bloating a Java file.
    * 
    * @see ReferralJobRanges
    */

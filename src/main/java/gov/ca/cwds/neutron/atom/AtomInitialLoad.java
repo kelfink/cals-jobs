@@ -17,6 +17,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.procedure.ProcedureCall;
+import org.slf4j.Logger;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
@@ -34,25 +35,25 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
  * @author CWDS API Team
  *
  * @param <T> normalized type
- * @param <M> de-normalized type
+ * @param <M> denormalized type
  */
 public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends AtomHibernate<T, M>, AtomShared, AtomRocketControl {
 
   /**
-   * Restrict initial load key ranges from command line.
+   * Restrict initial load key ranges from flight plan (command line).
    * 
    * @param allKeyPairs all key ranges for this job
    * @return list of key pairs to execute
    */
   default List<Pair<String, String>> limitRange(final List<Pair<String, String>> allKeyPairs) {
     List<Pair<String, String>> ret;
-    final FlightPlan opts = getFlightPlan();
-    if (opts != null && opts.isRangeGiven()) {
+    final FlightPlan flightPlan = getFlightPlan();
+    if (flightPlan != null && flightPlan.isRangeGiven()) {
       final List<Pair<String, String>> list = new ArrayList<>();
 
-      final int start = ((int) opts.getStartBucket()) - 1;
-      final int end = ((int) opts.getEndBucket()) - 1;
+      final int start = ((int) flightPlan.getStartBucket()) - 1;
+      final int end = ((int) flightPlan.getEndBucket()) - 1;
 
       for (int i = start; i <= end; i++) {
         list.add(allKeyPairs.get(i));
@@ -131,10 +132,10 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
   /**
    * Process results sets from {@link #pullRange(Pair)}.
    * 
-   * @param rs result set
+   * @param rs result set for this key range
    * @throws SQLException on database error
    */
-  default void handleRangeResults(final ResultSet rs) throws SQLException {
+  default void initialLoadProcessRangeResults(final ResultSet rs) throws SQLException {
     // Provide your own solution, for now.
   }
 
@@ -165,7 +166,7 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
         final ResultSet rs = stmt.executeQuery(query); // NOSONAR
-        handleRangeResults(rs);
+        initialLoadProcessRangeResults(rs);
         con.commit();
       }
     } catch (Exception e) {
@@ -189,14 +190,15 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
    * The "extract" part of ETL. Single producer, chained consumers. This job normalizes **without**
    * the transform thread.
    */
-  default void bigRetrieveByJdbc() {
+  default void pullMultiThreadJdbc() {
     nameThread("extract_main");
-    getLogger().info("BEGIN: main extract thread");
+    final Logger log = getLogger();
+    log.info("BEGIN: main extract thread");
     doneTransform(); // no transform/normalize thread
 
     try {
       final List<Pair<String, String>> ranges = getPartitionRanges();
-      getLogger().info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
+      log.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
       final ForkJoinPool threadPool =
           new ForkJoinPool(NeutronThreadUtil.calcReaderThreads(getFlightPlan()));
@@ -213,12 +215,12 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
 
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(getLogger(), e, "BATCH ERROR! {}", e.getMessage());
+      throw JobLogs.runtime(log, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
     }
 
-    getLogger().info("DONE: main extract thread");
+    log.info("DONE: main extract thread");
   }
 
   /**

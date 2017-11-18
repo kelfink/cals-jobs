@@ -143,7 +143,7 @@ public class ClientSummaryIndexerJob extends InitialLoadJdbcRocket<ReplicatedCli
    * {@inheritDoc}
    */
   @Override
-  public void handleRangeResults(final ResultSet rs) throws SQLException {
+  public void initialLoadProcessRangeResults(final ResultSet rs) throws SQLException {
     int cntr = 0;
     EsClient m;
     Object lastId = new Object();
@@ -221,7 +221,7 @@ public class ClientSummaryIndexerJob extends InitialLoadJdbcRocket<ReplicatedCli
    */
   @Override
   protected void threadRetrieveByJdbc() {
-    bigRetrieveByJdbc();
+    pullMultiThreadJdbc();
   }
 
   @Override
