@@ -595,7 +595,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     LaunchCommand.setSettings(settings);
 
     final TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 1000; i++) {
       target.queueIndex.add(entity);
     }
 

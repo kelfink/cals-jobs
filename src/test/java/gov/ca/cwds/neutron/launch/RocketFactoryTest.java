@@ -22,8 +22,6 @@ import com.google.inject.Injector;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
-import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
-import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 public class RocketFactoryTest extends Goddard {
@@ -53,7 +51,7 @@ public class RocketFactoryTest extends Goddard {
     when(jd.getJobDataMap()).thenReturn(jobDataMap);
     when(jobDataMap.getString(any())).thenReturn(Mach1TestRocket.class.getName());
 
-    rocket = new Mach1TestRocket(testNormalizedEntityDao, esDao, lastRunFile, MAPPER);
+    rocket = mach1Rocket;
     when(injector.getInstance(any(Class.class))).thenReturn(rocket);
 
     target = new RocketFactory(injector, opts, flightPlanRegistry, flightRecorder);

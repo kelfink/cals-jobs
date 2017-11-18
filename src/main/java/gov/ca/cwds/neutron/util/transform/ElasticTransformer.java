@@ -92,7 +92,7 @@ public final class ElasticTransformer {
 
   public static void pushToBulkProcessor(final FlightLog flightLog, final BulkProcessor bp,
       final DocWriteRequest<?> t) {
-    JobLogs.logEvery(flightLog.trackQueuedToIndex(), "add to es bulk", "push doc");
+    JobLogs.logEvery(flightLog.trackQueuedToIndex(), "add to ES bulk", "push doc");
     bp.add(t);
   }
 
@@ -166,7 +166,7 @@ public final class ElasticTransformer {
       json = ElasticTransformer.prepareUpsertJson(docPrep, esp, t, docPrep.getOptionalElementName(),
           docPrep.getOptionalCollection(esp, t), docPrep.keepCollections());
     } catch (Exception e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "ERROR PREPARING UPSERT: {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "ERROR PREPARING UPSERT: {}", e.getMessage());
     }
 
     // "Upsert": update if doc exists, insert if it does not.
@@ -398,57 +398,57 @@ public final class ElasticTransformer {
   }
 
   protected static ElasticSearchRaceAndEthnicity handleRaceEthnicity(ApiPersonAware p) {
-    ElasticSearchRaceAndEthnicity esRace = null;
+    ElasticSearchRaceAndEthnicity ret = null;
     if (p instanceof ApiClientRaceAndEthnicityAware) {
       ApiClientRaceAndEthnicityAware raceAware = (ApiClientRaceAndEthnicityAware) p;
-      esRace = raceAware.getRaceAndEthnicity();
+      ret = raceAware.getRaceAndEthnicity();
     }
-    return esRace;
+    return ret;
   }
 
   protected static ElasticSearchSystemCode handleClientCounty(ApiPersonAware p) {
-    ElasticSearchSystemCode esCounty = null;
+    ElasticSearchSystemCode ret = null;
     if (p instanceof ApiClientCountyAware) {
       ApiClientCountyAware countyAware = (ApiClientCountyAware) p;
-      esCounty = new ElasticSearchSystemCode();
-      esCounty.setId(countyAware.getClientCounty().toString());
-      esCounty.setDescription(
+      ret = new ElasticSearchSystemCode();
+      ret.setId(countyAware.getClientCounty().toString());
+      ret.setDescription(
           SystemCodeCache.global().getSystemCodeShortDescription(countyAware.getClientCounty()));
     }
-    return esCounty;
+    return ret;
   }
 
   protected static List<ElasticSearchSafetyAlert> handleSafetyAlerts(ApiPersonAware p) {
-    List<ElasticSearchSafetyAlert> alerts = null;
+    List<ElasticSearchSafetyAlert> ret = null;
     if (p instanceof ApiClientSafetyAlertsAware) {
       ApiClientSafetyAlertsAware alertsAware = (ApiClientSafetyAlertsAware) p;
       List<ElasticSearchSafetyAlert> safetyAlerts = alertsAware.getClientSafetyAlerts();
       if (safetyAlerts != null && !safetyAlerts.isEmpty()) {
-        alerts = safetyAlerts;
+        ret = safetyAlerts;
       }
     }
-    return alerts;
+    return ret;
   }
 
   protected static List<ElasticSearchPersonAka> handleAkas(ApiPersonAware p) {
-    List<ElasticSearchPersonAka> akas = null;
+    List<ElasticSearchPersonAka> ret = null;
     if (p instanceof ApiOtherClientNamesAware) {
       ApiOtherClientNamesAware akasAware = (ApiOtherClientNamesAware) p;
       List<ElasticSearchPersonAka> clientAkas = akasAware.getOtherClientNames();
       if (clientAkas != null && !clientAkas.isEmpty()) {
-        akas = clientAkas;
+        ret = clientAkas;
       }
     }
-    return akas;
+    return ret;
   }
 
   protected static String handleOpenCase(ApiPersonAware p) {
-    String openCaseId = null;
+    String ret = null;
     if (p instanceof ApiClientCaseAware) {
       ApiClientCaseAware caseAware = (ApiClientCaseAware) p;
-      openCaseId = caseAware.getOpenCaseId();
+      ret = caseAware.getOpenCaseId();
     }
-    return openCaseId;
+    return ret;
   }
 
   /**

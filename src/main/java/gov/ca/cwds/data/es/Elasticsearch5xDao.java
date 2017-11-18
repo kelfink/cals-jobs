@@ -138,7 +138,7 @@ public class Elasticsearch5xDao implements Closeable, ApiMarker {
         Thread.sleep(2000); // NOSONAR
       }
     } catch (InterruptedException | IOException e) {
-      throw JobLogs.buildCheckedException(LOGGER, e, "CREATE INDEX FAILED! {}", e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "CREATE INDEX FAILED! {}", e.getMessage());
     }
   }
 

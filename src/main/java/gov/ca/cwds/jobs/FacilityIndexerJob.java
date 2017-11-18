@@ -105,8 +105,8 @@ public class FacilityIndexerJob extends AbstractModule {
             new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
                 Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {
-        throw JobLogs.buildCheckedException(LOGGER, e,
-            "Error initializing Elasticsearch client: {}", e.getMessage());
+        throw JobLogs.checked(LOGGER, e, "Error initializing Elasticsearch client: {}",
+            e.getMessage());
       }
     }
     return client;
@@ -127,8 +127,8 @@ public class FacilityIndexerJob extends AbstractModule {
         configuration =
             new ObjectMapper(new YAMLFactory()).readValue(config, JobConfiguration.class);
       } catch (Exception e) {
-        throw JobLogs.buildCheckedException(LOGGER, e,
-            "Error initializing Elasticsearch client: {}", e.getMessage());
+        throw JobLogs.checked(LOGGER, e, "Error initializing Elasticsearch client: {}",
+            e.getMessage());
       }
     }
     return configuration;

@@ -480,7 +480,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
   }
 
   /**
-   * Reusable method to poll index queue, track counts, and bulk prepare documents.
+   * Poll the index queue, track counts, and bulk prepare documents.
    * 
    * @param bp ES bulk processor
    * @param cntr record count

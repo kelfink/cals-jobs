@@ -14,16 +14,13 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
@@ -41,14 +38,9 @@ public class NeutronJdbcUtilTest extends Goddard<TestNormalizedEntity, TestDenor
       implements AtomHibernate<TestNormalizedEntity, TestDenormalizedEntity> {
 
     public TestAtomHibernate(final TestNormalizedEntityDao mainDao, final ElasticsearchDao esDao,
-        @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
-        @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
-      super(mainDao, esDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
-    }
-
-    @Override
-    public BaseDaoImpl getJobDao() {
-      return null;
+        @LastRunFile final String lastRunFile, final ObjectMapper mapper,
+        FlightRecorder flightRecorder) {
+      super(mainDao, esDao, lastRunFile, mapper, mainDao.getSessionFactory(), flightRecorder);
     }
 
     @Override
@@ -58,14 +50,16 @@ public class NeutronJdbcUtilTest extends Goddard<TestNormalizedEntity, TestDenor
 
   }
 
+  TestNormalizedEntityDao dao;
   AtomInitialLoad initialLoad;
 
   @Override
   @Before
   public void setup() throws Exception {
     super.setup();
-    initialLoad = new TestAtomHibernate(null, esDao, lastRunFile, MAPPER, sessionFactory,
-        flightRecorder);
+
+    dao = new TestNormalizedEntityDao(sessionFactory);
+    initialLoad = new TestAtomHibernate(dao, esDao, lastRunFile, MAPPER, flightRecorder);
   }
 
   @Test
