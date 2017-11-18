@@ -22,4 +22,12 @@ public class RocketSpecification {
 
   private boolean validateDocument;
 
+  private String primaryKeyColumn;
+
+  private String legacySourceTable;
+
+  private Class<?> denormalizedClass;
+
+  private Class<?> normalizedClass;
+
 }

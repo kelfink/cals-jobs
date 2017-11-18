@@ -121,6 +121,10 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   /**
    * Detect large data sets on the mainframe.
    * 
+   * <p>
+   * HACK: also checks schema name. Add a "database version" table or something.
+   * </p>
+   * 
    * @return true if is large data set on z/OS
    * @throws NeutronException on error
    */

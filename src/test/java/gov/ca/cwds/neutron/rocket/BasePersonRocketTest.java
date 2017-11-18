@@ -135,13 +135,6 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   }
 
   @Test
-  public void getJobTotalBuckets_Args__() throws Exception {
-    int actual = target.getJobTotalBuckets();
-    int expected = 1;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void isViewNormalizer_Args__() throws Exception {
     boolean actual = target.isViewNormalizer();
     boolean expected = true;

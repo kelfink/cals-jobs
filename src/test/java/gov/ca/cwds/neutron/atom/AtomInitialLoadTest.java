@@ -82,13 +82,6 @@ public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDen
   }
 
   @Test
-  public void getJobTotalBuckets_Args__() throws Exception {
-    int actual = target.getJobTotalBuckets();
-    int expected = 1;
-    assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
   public void isDelete_Args__Object() throws Exception {
     TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     boolean actual = target.isDelete(t);

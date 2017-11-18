@@ -331,7 +331,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     } catch (Exception e) {
       fail();
       Thread.currentThread().interrupt();
-      throw JobLogs.checked(LOGGER, e, "GENERAL EXCEPTION: {}", e);
+      throw JobLogs.checked(LOGGER, e, "JDBC EXCEPTION: {}", e);
     } finally {
       done();
       this.finish(); // OK for initial load.
@@ -583,7 +583,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     }
   }
 
-  private boolean determineMode(final Date lastRun) {
+  private boolean determineFlightMode(final Date lastRun) {
     LOGGER.debug("Last successsful run time: {}", lastRun); // NOSONAR
 
     // Smart/auto mode. If last run date is older than 25 years, assume initial load.
@@ -632,8 +632,8 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       getFlightPlan().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
 
-      if (determineMode(lastRun)) {
-        getFlightLog().setInitialLoad(true);
+      if (determineFlightMode(lastRun)) {
+        flightLog.setInitialLoad(true);
         refreshMQT();
         if (isInitialLoadJdbc()) {
           doInitialLoadJdbc();
@@ -648,10 +648,10 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Updating last successful run time to {}",
             new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
-                .format(getFlightLog().getStartTime()));
+                .format(flightLog.getStartTime()));
       }
       // CHECKSTYLE:ON
-      ret = new Date(this.getFlightLog().getStartTime());
+      ret = new Date(flightLog.getStartTime());
     } catch (NeutronException | RuntimeException e) {
       fail();
       throw JobLogs.checked(LOGGER, e, "ROCKET EXPLODED! {}", e.getMessage());
@@ -766,7 +766,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       final List<M> recs = q.list();
       LOGGER.info("FOUND {} RECORDS", recs.size());
 
-      // Convert de-normalized rows to normalized persistence objects.
+      // Convert denormalized rows to normalized persistence objects.
       final List<M> groupRecs = new ArrayList<>();
       for (M m : recs) {
         if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
@@ -966,7 +966,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
   /**
    * Only used for testing.
    * 
-   * @param queueIndex impl index queue
+   * @param queueIndex index queue implementation
    */
   protected void setQueueIndex(LinkedBlockingDeque<T> queueIndex) {
     this.queueIndex = queueIndex;
@@ -986,6 +986,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     return mapper;
   }
 
+  @SuppressWarnings("javadoc")
   public void setMapper(ObjectMapper mapper) {
     this.mapper = mapper;
   }

@@ -95,15 +95,6 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
   }
 
   /**
-   * Override to customize the default number of buckets by job.
-   * 
-   * @return default total buckets
-   */
-  default int getJobTotalBuckets() {
-    return NeutronIntegerDefaults.DEFAULT_BUCKETS.getValue();
-  }
-
-  /**
    * Mark a record for deletion. Intended for replicated records with deleted flag.
    * 
    * @param t bean to check
