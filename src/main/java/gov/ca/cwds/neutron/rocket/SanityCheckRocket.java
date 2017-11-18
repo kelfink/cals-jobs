@@ -9,7 +9,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.hibernate.SessionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -18,15 +17,14 @@ import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
-import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
+import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import gov.ca.cwds.neutron.launch.FlightRecorder;
 
 /**
  * Test Elasticsearch mass search capability for automatic validation.
@@ -43,22 +41,21 @@ public class SanityCheckRocket
   private transient AtomLaunchDirector launchScheduler;
 
   /**
-   * Construct batch job instance with all required dependencies.
+   * Construct rocket with all required dependencies.
    * 
    * @param dao OtherAdultInPlacemtHome DAO
    * @param esDao ElasticSearch DAO
    * @param mapper Jackson ObjectMapper
-   * @param sessionFactory Hibernate session factory
-   * @param jobHistory job history
-   * @param opts command line options
+   * @param flightPlan command line options
    * @param launchScheduler launch scheduler
+   * @param lastRunFile last run file
    */
   @Inject
   public SanityCheckRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       final ElasticsearchDao esDao, final ObjectMapper mapper,
-      @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory, FlightPlan opts,
-      AtomLaunchDirector launchScheduler) {
-    super(dao, esDao, opts.getLastRunLoc(), mapper, sessionFactory, opts);
+      FlightPlan flightPlan, AtomLaunchDirector launchScheduler,
+      @LastRunFile String lastRunFile) {
+    super(dao, esDao, lastRunFile, mapper, dao.getSessionFactory(), flightPlan);
     this.launchScheduler = launchScheduler;
   }
 
