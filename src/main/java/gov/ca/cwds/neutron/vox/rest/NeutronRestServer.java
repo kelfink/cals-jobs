@@ -1,4 +1,4 @@
-package gov.ca.cwds.neutron.manage.rest;
+package gov.ca.cwds.neutron.vox.rest;
 
 import java.util.ArrayList;
 import java.util.HashSet;

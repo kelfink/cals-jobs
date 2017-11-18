@@ -5,4 +5,4 @@
  * @author CWS-NS3
  *
  */
-package gov.ca.cwds.neutron.manage.rest;
+package gov.ca.cwds.neutron.vox.rest;

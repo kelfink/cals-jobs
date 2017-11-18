@@ -1,4 +1,4 @@
-package gov.ca.cwds.neutron.manage.rest;
+package gov.ca.cwds.neutron.vox.rest;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -7,7 +7,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.neutron.manage.rest.NeutronCommandResource;
+import gov.ca.cwds.neutron.vox.rest.NeutronCommandResource;
 
 public class NeutronCommandResourceTest {
 

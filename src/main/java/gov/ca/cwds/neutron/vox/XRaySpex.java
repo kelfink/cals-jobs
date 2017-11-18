@@ -16,7 +16,7 @@ import gov.ca.cwds.neutron.atom.AtomCommandCenterConsole;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomLaunchPad;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
-import gov.ca.cwds.neutron.manage.rest.NeutronRestServer;
+import gov.ca.cwds.neutron.vox.rest.NeutronRestServer;
 
 /**
  * <p>
