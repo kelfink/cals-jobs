@@ -365,7 +365,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return this.recsBulkBefore.getAndAdd(addMe);
   }
 
-  public int trackQueuedToIndex() {
+  public int markQueuedToIndex() {
     return this.recsSentToIndexQueue.incrementAndGet();
   }
 

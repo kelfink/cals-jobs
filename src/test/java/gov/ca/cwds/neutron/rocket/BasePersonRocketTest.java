@@ -641,7 +641,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
     final FlightLog track = mock(FlightLog.class);
     when(track.trackBulkPrepared()).thenThrow(IOException.class);
-    when(track.trackQueuedToIndex()).thenThrow(IOException.class);
+    when(track.markQueuedToIndex()).thenThrow(IOException.class);
 
     target.setFlightLog(track);
     target.prepareDocumentTrapException(bp, p);

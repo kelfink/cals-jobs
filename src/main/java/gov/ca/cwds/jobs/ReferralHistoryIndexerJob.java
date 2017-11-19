@@ -138,20 +138,23 @@ public class ReferralHistoryIndexerJob
    * This Neutron job reuses threads for performance, since thread creation is expensive.
    * </p>
    */
-  private transient ThreadLocal<List<EsPersonReferral>> allocAllegations = new ThreadLocal<>();
+  protected transient ThreadLocal<List<EsPersonReferral>> allocAllegations = new ThreadLocal<>();
 
-  private transient ThreadLocal<Map<String, EsPersonReferral>> allocReferrals = new ThreadLocal<>();
-
-  private transient ThreadLocal<List<MinClientReferral>> allocClientReferralKeys =
+  protected transient ThreadLocal<Map<String, EsPersonReferral>> allocReferrals =
       new ThreadLocal<>();
 
-  private transient ThreadLocal<List<EsPersonReferral>> allocReadyToNorm = new ThreadLocal<>();
+  protected transient ThreadLocal<List<MinClientReferral>> allocClientReferralKeys =
+      new ThreadLocal<>();
 
-  private final AtomicInteger rowsReadReferrals = new AtomicInteger(0);
+  protected transient ThreadLocal<List<EsPersonReferral>> allocReadyToNorm = new ThreadLocal<>();
 
-  private final AtomicInteger rowsReadAllegations = new AtomicInteger(0);
+  protected final AtomicInteger rowsReadReferrals = new AtomicInteger(0);
 
-  private final AtomicInteger nextThreadNum = new AtomicInteger(0);
+  protected final AtomicInteger rowsReadAllegations = new AtomicInteger(0);
+
+  protected final AtomicInteger nextThreadNum = new AtomicInteger(0);
+
+  private boolean monitorDb2;
 
   /**
    * Construct rocket with all required dependencies.
@@ -340,20 +343,52 @@ public class ReferralHistoryIndexerJob
     return cntr;
   }
 
+  protected DB2SystemMonitor buildMonitor(final Connection con) {
+    DB2SystemMonitor ret = null;
+    if (monitorDb2) {
+      ret = NeutronDB2Util.monitorStart(con);
+    }
+    return ret;
+  }
+
+  protected void monitorStopAndReport(DB2SystemMonitor monitor) throws SQLException {
+    if (monitor != null) {
+      NeutronDB2Util.monitorStopAndReport(monitor);
+    }
+  }
+
+  /**
+   * Release heap objects early and often. Good time to <strong>request</strong> garbage collection,
+   * not demand it. Java GC runs in a dedicated thread anyway.
+   * <p>
+   * SonarQube disagrees.
+   * </p>
+   * The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
+   * memory is exhausted. Yes, this is a good place to drop a hint to GC that it
+   * <strong>might</strong> want to clean up memory.
+   * 
+   * @param listAllegations EsPersonReferral
+   * @param mapReferrals k=id, v=EsPersonReferral
+   * @param listClientReferralKeys client/referral id pairs
+   * @param listReadyToNorm EsPersonReferral
+   */
   protected void cleanUpMemory(final List<EsPersonReferral> listAllegations,
       Map<String, EsPersonReferral> mapReferrals, List<MinClientReferral> listClientReferralKeys,
       List<EsPersonReferral> listReadyToNorm) {
-    // Release heap objects early and often.
     releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
-
-    // Good time to *request* garbage collection, not *demand* it. GC runs in another thread.
-    // SonarQube disagrees.
-    // The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
-    // memory is exhausted. Yes, this is a good place to drop a hint to GC that it *might* want to
-    // clean up memory.
     System.gc(); // NOSONAR
   }
 
+  /**
+   * Pour referrals, allegations, and client/referral keys into the caldron and brew into a
+   * referrals element per client.
+   * 
+   * @param listAllegations bundle allegations
+   * @param mapReferrals k=referral id, v=EsPersonReferral
+   * @param listClientReferralKeys client/referral key pairs
+   * @param listReadyToNorm denormalized records
+   * @return normalized record count
+   */
   protected int mapReduce(final List<EsPersonReferral> listAllegations,
       final Map<String, EsPersonReferral> mapReferrals,
       final List<MinClientReferral> listClientReferralKeys,
@@ -446,7 +481,7 @@ public class ReferralHistoryIndexerJob
   }
 
   /**
-   * The "extract" part of ETL. Parallel stream produces runs partition ranges in separate threads.
+   * The "extract" part of ETL. Runs partition/key ranges in separate threads.
    * 
    * <p>
    * Note that this job normalizes <strong>without</strong> the transform thread.
@@ -457,9 +492,9 @@ public class ReferralHistoryIndexerJob
     nameThread("read_main");
     LOGGER.info("BEGIN: main read thread");
 
-    // WARNING: static setter is OK in standalone job but NOT permitted in continuous mode.
+    // WARNING: static setter is OK in standalone job but NOT wise in continuous mode.
     EsPersonReferral.setOpts(getFlightPlan());
-    doneTransform(); // normalize in place **without** the transform thread
+    doneTransform(); // normalize in place **WITHOUT** the transform thread
 
     try {
       final List<Pair<String, String>> ranges = getPartitionRanges();
@@ -470,6 +505,7 @@ public class ReferralHistoryIndexerJob
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
+        // Pull each range independently on the next available thread.
         tasks.add(threadPool.submit(() -> pullNextRange(p)));
       }
 
@@ -480,7 +516,7 @@ public class ReferralHistoryIndexerJob
 
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "ERROR IN THREADED RETRIEVAL! {}", e.getMessage());
     } finally {
       doneRetrieve();
     }
@@ -544,7 +580,7 @@ public class ReferralHistoryIndexerJob
     return new EsPersonReferral(rs);
   }
 
-  private void releaseLocalMemory(final List<EsPersonReferral> listAllegations,
+  protected void releaseLocalMemory(final List<EsPersonReferral> listAllegations,
       final Map<String, EsPersonReferral> mapReferrals,
       final List<MinClientReferral> listClientReferralKeys,
       final List<EsPersonReferral> listReadyToNorm) {
@@ -552,6 +588,14 @@ public class ReferralHistoryIndexerJob
     listClientReferralKeys.clear();
     listReadyToNorm.clear();
     mapReferrals.clear();
+  }
+
+  public boolean isMonitorDb2() {
+    return monitorDb2;
+  }
+
+  public void setMonitorDb2(boolean monitorDb2) {
+    this.monitorDb2 = monitorDb2;
   }
 
   /**

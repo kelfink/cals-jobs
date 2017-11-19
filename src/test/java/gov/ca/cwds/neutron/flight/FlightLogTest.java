@@ -40,7 +40,7 @@ public class FlightLogTest {
 
   @Test
   public void trackQueuedToIndex_Args__() throws Exception {
-    int actual = target.trackQueuedToIndex();
+    int actual = target.markQueuedToIndex();
     int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }

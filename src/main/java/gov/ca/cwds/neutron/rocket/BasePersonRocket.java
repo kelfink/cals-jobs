@@ -189,14 +189,14 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
   }
 
   /**
-   * Adds an object to the index queue and trap InterruptedException. Suitable for streams and
-   * lambda.
+   * Adds a normalized object to the index queue and trap InterruptedException. Suitable for streams
+   * and lambda.
    * 
    * @param norm normalized object to add to index queue
    */
   protected void addToIndexQueue(T norm) {
     try {
-      JobLogs.logEvery(flightLog.trackQueuedToIndex(), "add to index queue", "recs");
+      JobLogs.logEvery(flightLog.markQueuedToIndex(), "add to index queue", "recs");
       queueIndex.putLast(norm);
     } catch (InterruptedException e) {
       fail();

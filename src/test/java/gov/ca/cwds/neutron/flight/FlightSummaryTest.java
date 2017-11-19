@@ -54,10 +54,10 @@ public class FlightSummaryTest {
     flightLog.addToNormalized(45);
     flightLog.addToBulkDeleted(4);
 
-    flightLog.trackQueuedToIndex();
-    flightLog.trackQueuedToIndex();
-    flightLog.trackQueuedToIndex();
-    flightLog.trackQueuedToIndex();
+    flightLog.markQueuedToIndex();
+    flightLog.markQueuedToIndex();
+    flightLog.markQueuedToIndex();
+    flightLog.markQueuedToIndex();
 
     flightLog.trackBulkError();
     flightLog.trackBulkError();
