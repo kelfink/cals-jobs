@@ -218,6 +218,10 @@ public class ReferralHistoryIndexerJob
 
   /**
    * Initial mode only. Allocate memory once per thread and reuse it.
+   * 
+   * <p>
+   * NEXT: calculate container sizes by bundle size.
+   * </p>
    */
   protected void allocateThreadMemory() {
     if (allocAllegations.get() == null) {

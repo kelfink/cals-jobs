@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,10 +32,10 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.referral.MinClientReferral;
 
 /**
- * Rocket to load person referrals from CMS into ElasticSearch.
+ * Rocket indexes person referrals from CMS into ElasticSearch.
  * 
  * <p>
- * Turn-around time for database objects is too long. Embed SQL in Java instead.
+ * <strong>NEW APPROACH:</strong> re-index the *Client* document with referral elements.
  * </p>
  * 
  * @author CWDS API Team
@@ -45,6 +46,9 @@ public class ReferralRocket extends ReferralHistoryIndexerJob
   private static final long serialVersionUID = 1L;
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(ReferralRocket.class);
+
+  protected transient ThreadLocal<Map<String, ElasticSearchPerson>> allocPersonDocByClientId =
+      new ThreadLocal<>();
 
   /**
    * Construct rocket with all required dependencies.
@@ -61,13 +65,26 @@ public class ReferralRocket extends ReferralHistoryIndexerJob
     super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
-  protected void retrieveClientDocuments(final List<MinClientReferral> listClientReferralKeys)
-      throws NeutronException {
+  @Override
+  protected void allocateThreadMemory() {
+    super.allocateThreadMemory();
+    if (allocPersonDocByClientId.get() == null) {
+      allocPersonDocByClientId.set(new HashMap<>(10709)); // Prime
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  protected Map<String, ElasticSearchPerson> retrieveClientDocuments(
+      final List<MinClientReferral> listClientReferralKeys) throws NeutronException {
     LOGGER.info("Retrieve client documents");
     long totalHits = 0;
+
     final Client client = this.esDao.getClient();
     final List<String> clientIds = listClientReferralKeys.stream()
         .map(MinClientReferral::getClientId).distinct().collect(Collectors.toList());
+    final Map<String, ElasticSearchPerson> personDocByClientId = allocPersonDocByClientId.get();
+    personDocByClientId.clear();
+
     final MultiSearchResponse sr = client.prepareMultiSearch().add(client.prepareSearch()
         .setQuery(QueryBuilders.idsQuery().addIds(clientIds.toArray(new String[0])))).get();
 
@@ -78,9 +95,9 @@ public class ReferralRocket extends ReferralHistoryIndexerJob
 
       try {
         for (SearchHit hit : hits.getHits()) {
-          final String json = hit.getSourceAsString();
-          final ElasticSearchPerson person = readPerson(json);
-          LOGGER.debug("person: {}", () -> person);
+          final ElasticSearchPerson person = readPerson(hit.getSourceAsString());
+          LOGGER.trace("person: {}", () -> person);
+          personDocByClientId.put(person.getId(), person);
         }
       } catch (NeutronException e) {
         LOGGER.error("ERROR READING DOCUMENTS!", e);
@@ -89,18 +106,23 @@ public class ReferralRocket extends ReferralHistoryIndexerJob
     }
 
     LOGGER.info("total hits: {}", totalHits);
+    return personDocByClientId;
   }
 
+  /**
+   * <strong>NEW APPROACH:</strong> re-index the *Client* document with referral elements.
+   * 
+   * @param norm normalized referrals
+   */
   @Override
   protected void addToIndexQueue(ReplicatedPersonReferrals norm) {
-    // NEW APPROACH: re-index the *Client* document with referral elements.
     try {
       JobLogs.logEvery(flightLog.markQueuedToIndex(), "add to index queue", "recs");
       queueIndex.putLast(norm);
     } catch (InterruptedException e) {
       fail();
       Thread.currentThread().interrupt();
-      throw JobLogs.runtime(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "INTERRUPTED ADD TO INDEX QUEUE! {}", e.getMessage());
     }
   }
 
