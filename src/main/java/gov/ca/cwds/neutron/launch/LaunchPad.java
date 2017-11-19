@@ -107,9 +107,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
           .withIdentity(rocketName,
               LaunchCommand.isInitialMode() ? NeutronSchedulerConstants.GRP_FULL_LOAD
                   : NeutronSchedulerConstants.GRP_LST_CHG)
-          .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS,
-              flightSchedule.getRocketClass().getName())
-          .storeDurably().build();
+          .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS, rocketClass).storeDurably().build();
 
       if (!LaunchCommand.isInitialMode()) {
         scheduler.scheduleJob(jd,
@@ -135,7 +133,7 @@ public class LaunchPad implements VoxLaunchPadMBean {
       }
 
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "FAILED TO SCHEDULE LAUNCH! rocket: {}", rocketName);
+      throw JobLogs.checked(LOGGER, e, "FAILURE TO LAUNCH! rocket: {}", rocketName);
     }
   }
 

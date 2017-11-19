@@ -70,7 +70,7 @@ public class ElasticTransformerTest extends Goddard {
   @Test
   public void handleLanguage_Args__ApiPersonAware() throws Exception {
     ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    List<ElasticSearchPersonLanguage> actual = ElasticTransformer.handleLanguage(p);
+    List<ElasticSearchPersonLanguage> actual = ElasticTransformer.buildLanguage(p);
     List<ElasticSearchPersonLanguage> expected = new ArrayList<>();
     expected.add(new ElasticSearchPersonLanguage("1249", null, false));
     assertThat(actual, is(equalTo(expected)));
@@ -79,7 +79,7 @@ public class ElasticTransformerTest extends Goddard {
   @Test
   public void handlePhone_Args__ApiPersonAware() throws Exception {
     ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    List<ElasticSearchPersonPhone> actual = ElasticTransformer.handlePhone(p);
+    List<ElasticSearchPersonPhone> actual = ElasticTransformer.buildPhone(p);
     List<ElasticSearchPersonPhone> expected = null;
     assertThat(actual, notNullValue());
   }
@@ -91,14 +91,14 @@ public class ElasticTransformerTest extends Goddard {
         new SimpleAddress("Provo", "Utah", "UT", "206 Hinckley Center", "84602");
     p.addAddress(addr);
 
-    final List<ElasticSearchPersonAddress> actual = ElasticTransformer.handleAddress(p);
+    final List<ElasticSearchPersonAddress> actual = ElasticTransformer.buildAddress(p);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void handleScreening_Args__ApiPersonAware() throws Exception {
     final ApiPersonAware p = new TestOnlyApiPersonAware();
-    List<ElasticSearchPersonScreening> actual = ElasticTransformer.handleScreening(p);
+    List<ElasticSearchPersonScreening> actual = ElasticTransformer.buildScreening(p);
     List<ElasticSearchPersonScreening> expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -128,7 +128,7 @@ public class ElasticTransformerTest extends Goddard {
   @Test
   public void handleLegacyDescriptor_Args__ApiPersonAware() throws Exception {
     final ApiPersonAware p = new TestOnlyApiPersonAware();
-    ElasticSearchLegacyDescriptor actual = ElasticTransformer.handleLegacyDescriptor(p);
+    ElasticSearchLegacyDescriptor actual = ElasticTransformer.buildLegacyDescriptor(p);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -225,7 +225,7 @@ public class ElasticTransformerTest extends Goddard {
   @Test
   public void handleRaceEthnicity_Args__ApiPersonAware() throws Exception {
     ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    ElasticSearchRaceAndEthnicity actual = ElasticTransformer.handleRaceEthnicity(p);
+    ElasticSearchRaceAndEthnicity actual = ElasticTransformer.buildRaceEthnicity(p);
     ElasticSearchRaceAndEthnicity expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
@@ -233,7 +233,7 @@ public class ElasticTransformerTest extends Goddard {
   @Test
   public void handleClientCounty_Args__ApiPersonAware() throws Exception {
     ApiPersonAware p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    ElasticSearchSystemCode actual = ElasticTransformer.handleClientCounty(p);
+    ElasticSearchSystemCode actual = ElasticTransformer.buildClientCounty(p);
     ElasticSearchSystemCode expected = null;
     assertThat(actual, is(equalTo(expected)));
   }

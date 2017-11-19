@@ -1,7 +1,5 @@
 package gov.ca.cwds.neutron.rocket;
 
-import org.hibernate.SessionFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.BaseDaoImpl;
@@ -15,9 +13,9 @@ public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extend
 
   private static final long serialVersionUID = 1L;
 
-  public InitialLoadJdbcRocket(BaseDaoImpl<T> jobDao, ElasticsearchDao esDao, String lastRunFile,
-      ObjectMapper mapper, SessionFactory sessionFactory, FlightPlan flightPlan) {
-    super(jobDao, esDao, lastRunFile, mapper, flightPlan);
+  public InitialLoadJdbcRocket(BaseDaoImpl<T> dao, ElasticsearchDao esDao, String lastRunFile,
+      ObjectMapper mapper, FlightPlan flightPlan) {
+    super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   @Override

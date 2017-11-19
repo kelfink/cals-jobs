@@ -116,6 +116,7 @@ public class ReferralRocket extends ReferralHistoryIndexerJob
    */
   @Override
   protected void addToIndexQueue(ReplicatedPersonReferrals norm) {
+    final Map<String, ElasticSearchPerson> map = allocPersonDocByClientId.get();
     try {
       JobLogs.logEvery(flightLog.markQueuedToIndex(), "add to index queue", "recs");
       queueIndex.putLast(norm);

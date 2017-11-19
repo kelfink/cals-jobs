@@ -8,7 +8,6 @@ import static org.mockito.Mockito.mock;
 
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class XPackUtilsTest {
@@ -19,13 +18,13 @@ public class XPackUtilsTest {
   }
 
   @Test
-  @Ignore
+  // @Ignore
   public void secureClient_Args__String__String__SettingsBuilder() throws Exception {
     String user = null;
     String password = null;
     Settings.Builder settings = mock(Settings.Builder.class);
 
-    // when(settings.)
+    // when(settings.get(Node.NODE_NAME_SETTING.))
 
     TransportClient actual = XPackUtils.secureClient(user, password, settings);
     TransportClient expected = null;

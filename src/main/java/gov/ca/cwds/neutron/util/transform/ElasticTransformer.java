@@ -312,7 +312,7 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  protected static List<ElasticSearchPersonLanguage> handleLanguage(ApiPersonAware p) {
+  protected static List<ElasticSearchPersonLanguage> buildLanguage(ApiPersonAware p) {
     List<ElasticSearchPersonLanguage> ret = null;
 
     if (p instanceof ApiMultipleLanguagesAware) {
@@ -336,7 +336,7 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  protected static List<ElasticSearchPersonPhone> handlePhone(ApiPersonAware p) {
+  protected static List<ElasticSearchPersonPhone> buildPhone(ApiPersonAware p) {
     List<ElasticSearchPersonPhone> ret = null;
     if (p instanceof ApiMultiplePhonesAware) {
       ret = new ArrayList<>();
@@ -353,7 +353,7 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  protected static List<ElasticSearchPersonAddress> handleAddress(ApiPersonAware p) {
+  protected static List<ElasticSearchPersonAddress> buildAddress(ApiPersonAware p) {
     List<ElasticSearchPersonAddress> ret = null;
 
     if (p instanceof ApiMultipleAddressesAware) {
@@ -378,7 +378,7 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  protected static List<ElasticSearchPersonScreening> handleScreening(ApiPersonAware p) {
+  protected static List<ElasticSearchPersonScreening> buildScreening(ApiPersonAware p) {
     List<ElasticSearchPersonScreening> ret = null;
     if (p instanceof ApiScreeningAware) {
       ret = new ArrayList<>();
@@ -389,7 +389,7 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  protected static ElasticSearchLegacyDescriptor handleLegacyDescriptor(ApiPersonAware p) {
+  protected static ElasticSearchLegacyDescriptor buildLegacyDescriptor(ApiPersonAware p) {
     ElasticSearchLegacyDescriptor ret = null;
     if (p instanceof ApiLegacyAware) {
       ret = ((ApiLegacyAware) p).getLegacyDescriptor();
@@ -397,7 +397,7 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  protected static ElasticSearchRaceAndEthnicity handleRaceEthnicity(ApiPersonAware p) {
+  protected static ElasticSearchRaceAndEthnicity buildRaceEthnicity(ApiPersonAware p) {
     ElasticSearchRaceAndEthnicity ret = null;
     if (p instanceof ApiClientRaceAndEthnicityAware) {
       ApiClientRaceAndEthnicityAware raceAware = (ApiClientRaceAndEthnicityAware) p;
@@ -406,7 +406,7 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  protected static ElasticSearchSystemCode handleClientCounty(ApiPersonAware p) {
+  protected static ElasticSearchSystemCode buildClientCounty(ApiPersonAware p) {
     ElasticSearchSystemCode ret = null;
     if (p instanceof ApiClientCountyAware) {
       ApiClientCountyAware countyAware = (ApiClientCountyAware) p;
@@ -418,7 +418,7 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  protected static List<ElasticSearchSafetyAlert> handleSafetyAlerts(ApiPersonAware p) {
+  protected static List<ElasticSearchSafetyAlert> buildSafetyAlerts(ApiPersonAware p) {
     List<ElasticSearchSafetyAlert> ret = null;
     if (p instanceof ApiClientSafetyAlertsAware) {
       ApiClientSafetyAlertsAware alertsAware = (ApiClientSafetyAlertsAware) p;
@@ -430,7 +430,7 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  protected static List<ElasticSearchPersonAka> handleAkas(ApiPersonAware p) {
+  protected static List<ElasticSearchPersonAka> buildAkas(ApiPersonAware p) {
     List<ElasticSearchPersonAka> ret = null;
     if (p instanceof ApiOtherClientNamesAware) {
       ApiOtherClientNamesAware akasAware = (ApiOtherClientNamesAware) p;
@@ -442,7 +442,7 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  protected static String handleOpenCase(ApiPersonAware p) {
+  protected static String buildOpenCase(ApiPersonAware p) {
     String ret = null;
     if (p instanceof ApiClientCaseAware) {
       ApiClientCaseAware caseAware = (ApiClientCaseAware) p;
@@ -493,32 +493,32 @@ public final class ElasticTransformer {
         p.getClass().getName(), // type
         mapper.writeValueAsString(p), // source
         null, // omit highlights
-        handleAddress(p), handlePhone(p), handleLanguage(p), handleScreening(p));
+        buildAddress(p), buildPhone(p), buildLanguage(p), buildScreening(p));
 
     // Legacy descriptor
-    ret.setLegacyDescriptor(handleLegacyDescriptor(p));
+    ret.setLegacyDescriptor(buildLegacyDescriptor(p));
 
     // Sealed and sensitive.
     ret.setSensitivityIndicator(p.getSensitivityIndicator());
 
     // Set client county
-    ret.setClientCounty(handleClientCounty(p));
+    ret.setClientCounty(buildClientCounty(p));
 
     // Set race/ethnicity
-    ret.setCleintRace(handleRaceEthnicity(p));
+    ret.setCleintRace(buildRaceEthnicity(p));
 
     // Index number
     ret.setIndexNumber(
         StringUtils.isBlank(p.getClientIndexNumber()) ? null : p.getClientIndexNumber());
 
     // AKAs
-    ret.setAkas(handleAkas(p));
+    ret.setAkas(buildAkas(p));
 
     // Safety alerts
-    ret.setSafetyAlerts(handleSafetyAlerts(p));
+    ret.setSafetyAlerts(buildSafetyAlerts(p));
 
     // Open case id
-    ret.setOpenCaseId(handleOpenCase(p));
+    ret.setOpenCaseId(buildOpenCase(p));
 
     return ret;
   }
