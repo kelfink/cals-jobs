@@ -38,14 +38,12 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
- * Entity bean for view VW_LST_CLIENT_ADDRESS.
+ * Entity bean for the skinny index.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.
  * </p>
  * 
- * NOTE: #145240149: find ALL client/address recs affected by changes.
- *
  * REFRESH TABLE CWSRSQ.ES_REL_CLN_RELT_CLIENT ;
  * 
  * @author CWDS API Team
@@ -82,9 +80,9 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   @Column(name = "LAST_CHG", updatable = false)
   private Date lastChange;
 
-  // ================
+  // ==============================
   // CLIENT_T: (client)
-  // ================
+  // ==============================
 
   @Column(name = "CLT_ADJDEL_IND")
   private String cltAdjudicatedDelinquentIndicator;
@@ -321,9 +319,9 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   @Column(name = "CLT_LST_UPD_TS")
   private Date cltLastUpdatedTime;
 
-  // ================
+  // =======================
   // CL_ADDRT: (address)
-  // ================
+  // =======================
 
   @Enumerated(EnumType.STRING)
   @Column(name = "CLA_IBMSNAP_OPERATION", updatable = false)
@@ -371,9 +369,9 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   @Column(name = "CLA_EFF_STRTDT")
   private Date claEffectiveStartDate;
 
-  // ================
+  // =======================
   // ADDRS_T: (address)
-  // ================
+  // =======================
 
   @Id
   @Column(name = "ADR_IDENTIFIER")
@@ -459,9 +457,9 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   @Column(name = "ADR_UNIT_NO")
   private String adrUnitNumber;
 
-  // ================
+  // ================================
   // CLIENT_CNTY: (client county)
-  // ================
+  // ================================
 
   @Id
   @Column(name = "CLC_CLIENT_ID")
@@ -474,9 +472,9 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   @Column(name = "CLC_CNTY_RULE")
   private String clientCountyRule;
 
-  // ================
+  // ================================
   // CLSCP_ET: (race & ethnicity)
-  // ================
+  // ================================
 
   @Id
   @Column(name = "ETH_IDENTIFIER")
@@ -486,9 +484,9 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   @Column(name = "ETHNICITY_CODE")
   private Short clientEthnicityCode;
 
-  // ================
+  // ================================
   // SAF_ALRT: (safety alerts)
-  // ================
+  // ================================
 
   @Id
   @Column(name = "SAL_THIRD_ID")
@@ -535,9 +533,9 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   @Type(type = "timestamp")
   private Date safetyAlertReplicationTimestamp;
 
-  // ================
-  // OCL_NM_T: (other client name / aka)
-  // ================
+  // =====================================
+  // OCL_NM_T: (other client name / AKA)
+  // =====================================
 
   @Id
   @Column(name = "ONM_THIRD_ID")
@@ -577,9 +575,9 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   @Type(type = "timestamp")
   private Date akaReplicationTimestamp;
 
-  // ================
+  // ====================================
   // CASE_T: (is there an open case)
-  // ================
+  // =====================================
 
   @Column(name = "CAS_IDENTIFIER")
   private String openCaseId;
@@ -1690,11 +1688,11 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   }
 
   public Date getSafetyAlertActivationDate() {
-    return safetyAlertActivationDate;
+    return NeutronDateUtils.freshDate(safetyAlertActivationDate);
   }
 
   public void setSafetyAlertActivationDate(Date safetyAlertActivationDate) {
-    this.safetyAlertActivationDate = safetyAlertActivationDate;
+    this.safetyAlertActivationDate = NeutronDateUtils.freshDate(safetyAlertActivationDate);
   }
 
   public Short getSafetyAlertActivationCountyCode() {
@@ -1714,11 +1712,11 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   }
 
   public Date getSafetyAlertDeactivationDate() {
-    return safetyAlertDeactivationDate;
+    return NeutronDateUtils.freshDate(safetyAlertDeactivationDate);
   }
 
   public void setSafetyAlertDeactivationDate(Date safetyAlertDeactivationDate) {
-    this.safetyAlertDeactivationDate = safetyAlertDeactivationDate;
+    this.safetyAlertDeactivationDate = NeutronDateUtils.freshDate(safetyAlertDeactivationDate);
   }
 
   public Short getSafetyAlertDeactivationCountyCode() {
@@ -1746,11 +1744,12 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   }
 
   public Date getSafetyAlertLastUpdatedTimestamp() {
-    return safetyAlertLastUpdatedTimestamp;
+    return NeutronDateUtils.freshDate(safetyAlertLastUpdatedTimestamp);
   }
 
   public void setSafetyAlertLastUpdatedTimestamp(Date safetyAlertLastUpdatedTimestamp) {
-    this.safetyAlertLastUpdatedTimestamp = safetyAlertLastUpdatedTimestamp;
+    this.safetyAlertLastUpdatedTimestamp =
+        NeutronDateUtils.freshDate(safetyAlertLastUpdatedTimestamp);
   }
 
   public CmsReplicationOperation getSafetyAlertLastUpdatedOperation() {
@@ -1763,11 +1762,12 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   }
 
   public Date getSafetyAlertReplicationTimestamp() {
-    return safetyAlertReplicationTimestamp;
+    return NeutronDateUtils.freshDate(safetyAlertReplicationTimestamp);
   }
 
   public void setSafetyAlertReplicationTimestamp(Date safetyAlertReplicationTimestamp) {
-    this.safetyAlertReplicationTimestamp = safetyAlertReplicationTimestamp;
+    this.safetyAlertReplicationTimestamp =
+        NeutronDateUtils.freshDate(safetyAlertReplicationTimestamp);
   }
 
   public String getAkaId() {
@@ -1835,11 +1835,11 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   }
 
   public Date getAkaLastUpdatedTimestamp() {
-    return akaLastUpdatedTimestamp;
+    return NeutronDateUtils.freshDate(akaLastUpdatedTimestamp);
   }
 
   public void setAkaLastUpdatedTimestamp(Date akaLastUpdatedTimestamp) {
-    this.akaLastUpdatedTimestamp = akaLastUpdatedTimestamp;
+    this.akaLastUpdatedTimestamp = NeutronDateUtils.freshDate(akaLastUpdatedTimestamp);
   }
 
   public CmsReplicationOperation getAkaLastUpdatedOperation() {
@@ -1851,15 +1851,15 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   }
 
   public Date getAkaReplicationTimestamp() {
-    return akaReplicationTimestamp;
+    return NeutronDateUtils.freshDate(akaReplicationTimestamp);
   }
 
   public void setAkaReplicationTimestamp(Date akaReplicationTimestamp) {
-    this.akaReplicationTimestamp = akaReplicationTimestamp;
+    this.akaReplicationTimestamp = NeutronDateUtils.freshDate(akaReplicationTimestamp);
   }
 
   public void setLastChange(Date lastChange) {
-    this.lastChange = lastChange;
+    this.lastChange = NeutronDateUtils.freshDate(lastChange);
   }
 
   public void setCltAdjudicatedDelinquentIndicator(String cltAdjudicatedDelinquentIndicator) {
@@ -1883,7 +1883,7 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   }
 
   public void setCltBirthDate(Date cltBirthDate) {
-    this.cltBirthDate = cltBirthDate;
+    this.cltBirthDate = NeutronDateUtils.freshDate(cltBirthDate);
   }
 
   public void setCltBirthFacilityName(String cltBirthFacilityName) {
@@ -1927,7 +1927,7 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   }
 
   public void setCltDeathDate(Date cltDeathDate) {
-    this.cltDeathDate = cltDeathDate;
+    this.cltDeathDate = NeutronDateUtils.freshDate(cltDeathDate);
   }
 
   public void setCltDeathDateVerifiedIndicator(String cltDeathDateVerifiedIndicator) {
@@ -1963,7 +1963,8 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   }
 
   public void setCltFatherParentalRightTermDate(Date cltFatherParentalRightTermDate) {
-    this.cltFatherParentalRightTermDate = cltFatherParentalRightTermDate;
+    this.cltFatherParentalRightTermDate =
+        NeutronDateUtils.freshDate(cltFatherParentalRightTermDate);
   }
 
   public void setCltGenderCode(String cltGenderCode) {
@@ -2004,7 +2005,8 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   }
 
   public void setCltMotherParentalRightTermDate(Date cltMotherParentalRightTermDate) {
-    this.cltMotherParentalRightTermDate = cltMotherParentalRightTermDate;
+    this.cltMotherParentalRightTermDate =
+        NeutronDateUtils.freshDate(cltMotherParentalRightTermDate);
   }
 
   public void setCltNamePrefixDescription(String cltNamePrefixDescription) {
@@ -2028,7 +2030,7 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
   }
 
   public void setAdrReplicationDate(Date adrReplicationDate) {
-    this.adrReplicationDate = adrReplicationDate;
+    this.adrReplicationDate = NeutronDateUtils.freshDate(adrReplicationDate);
   }
 
   public void setAdrPrimaryExtension(Integer adrPrimaryExtension) {
@@ -2102,7 +2104,6 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
     activation.setActivationDate(DomainChef.cookDate(this.safetyAlertActivationDate));
     activation.setActivationExplanation(this.safetyAlertActivationExplanation);
 
-
     ElasticSearchSafetyAlert.Deactivation deactivation =
         new ElasticSearchSafetyAlert.Deactivation();
     alert.setDeactivation(deactivation);
@@ -2157,10 +2158,10 @@ public class EsClient implements PersistentObject, ApiGroupNormalizer<Replicated
       aka.setNameType(SystemCodeCache.global().getSystemCodeShortDescription(this.akaNameType));
     }
 
-
     aka.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.akaId,
         this.akaLastUpdatedTimestamp, LegacyTable.ALIAS_OR_OTHER_CLIENT_NAME));
 
     return aka;
   }
+
 }
