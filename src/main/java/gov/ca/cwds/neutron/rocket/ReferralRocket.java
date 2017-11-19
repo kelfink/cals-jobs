@@ -1,10 +1,13 @@
 package gov.ca.cwds.neutron.rocket;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -28,8 +31,8 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.referral.MinClientReferral;
+import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 
 /**
  * Rocket indexes person referrals from CMS into ElasticSearch.
@@ -112,19 +115,16 @@ public class ReferralRocket extends ReferralHistoryIndexerJob
   /**
    * <strong>NEW APPROACH:</strong> re-index the *Client* document with referral elements.
    * 
+   * @param bp ES bulk processor
    * @param norm normalized referrals
    */
   @Override
-  protected void addToIndexQueue(ReplicatedPersonReferrals norm) {
-    final Map<String, ElasticSearchPerson> map = allocPersonDocByClientId.get();
-    try {
-      JobLogs.logEvery(flightLog.markQueuedToIndex(), "add to index queue", "recs");
-      queueIndex.putLast(norm);
-    } catch (InterruptedException e) {
-      fail();
-      Thread.currentThread().interrupt();
-      throw JobLogs.runtime(LOGGER, e, "INTERRUPTED ADD TO INDEX QUEUE! {}", e.getMessage());
-    }
+  protected void prepareDocument(final BulkProcessor bp, ReplicatedPersonReferrals t)
+      throws IOException {
+    Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
+        .map(p -> prepareUpsertRequestNoChecked(p, t)).forEach(x -> { // NOSONAR
+          ElasticTransformer.pushToBulkProcessor(flightLog, bp, x);
+        });
   }
 
   @Override
