@@ -115,8 +115,7 @@ public class ReferralRocket extends ReferralHistoryIndexerJob
   /**
    * <strong>NEW APPROACH:</strong> re-index the *Client* document with referral elements.
    * 
-   * @param bp ES bulk processor
-   * @param norm normalized referrals
+   * {@inheritDoc}
    */
   @Override
   protected void prepareDocument(final BulkProcessor bp, ReplicatedPersonReferrals t)
