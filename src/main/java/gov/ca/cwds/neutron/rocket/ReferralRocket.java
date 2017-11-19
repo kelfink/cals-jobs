@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.neutron.rocket;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,10 +15,14 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -39,8 +43,9 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.rocket.referral.MinClientReferral;
 import gov.ca.cwds.neutron.rocket.referral.ReferralJobRanges;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
@@ -54,13 +59,14 @@ import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
  * 
  * @author CWDS API Team
  */
-public class ReferralHistoryIndexerJob
-    extends BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral>
+public class ReferralRocket extends BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral>
     implements NeutronRowMapper<EsPersonReferral> {
 
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(ReferralRocket.class);
+
+  private boolean monitorDb2;
 
   protected static final String INSERT_CLIENT_FULL =
       "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"
@@ -163,7 +169,7 @@ public class ReferralHistoryIndexerJob
    * @param flightPlan command line options
    */
   @Inject
-  public ReferralHistoryIndexerJob(ReplicatedPersonReferralsDao dao, ElasticsearchDao esDao,
+  public ReferralRocket(ReplicatedPersonReferralsDao dao, ElasticsearchDao esDao,
       @LastRunFile String lastRunFile, ObjectMapper mapper, FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
@@ -225,10 +231,39 @@ public class ReferralHistoryIndexerJob
     }
   }
 
+  protected void retrieveClientDocuments(final List<MinClientReferral> listClientReferralKeys) {
+    LOGGER.info("Retrieve client documents");
+    long totalHits = 0;
+    final Client client = this.esDao.getClient();
+    final List<String> clientIds = listClientReferralKeys.stream()
+        .map(MinClientReferral::getClientId).distinct().collect(Collectors.toList());
+    final MultiSearchResponse sr = client.prepareMultiSearch().add(client.prepareSearch()
+        .setQuery(QueryBuilders.idsQuery().addIds(clientIds.toArray(new String[0])))).get();
+
+    for (MultiSearchResponse.Item item : sr.getResponses()) {
+      final SearchResponse response = item.getResponse();
+      final SearchHits hits = response.getHits();
+      totalHits += hits.getTotalHits();
+
+      try {
+        for (SearchHit hit : hits.getHits()) {
+          final String json = hit.getSourceAsString();
+          LOGGER.info("json: {}", json);
+          final ElasticSearchPerson person = readPerson(json);
+          LOGGER.info("person: {}", person);
+        }
+      } catch (NeutronException e) {
+        LOGGER.warn("whatever", e);
+      }
+    }
+
+    LOGGER.info("total hits: {}", totalHits);
+  }
+
   protected void readClients(final PreparedStatement stmtInsClient,
       final PreparedStatement stmtSelClient, final List<MinClientReferral> listClientReferralKeys,
       final Pair<String, String> p) throws SQLException {
-    // Prepare client list.
+    // Prepare client list for this bundle.
     stmtInsClient.setMaxRows(0);
     stmtInsClient.setQueryTimeout(0);
     stmtInsClient.setString(1, p.getLeft());
@@ -237,7 +272,7 @@ public class ReferralHistoryIndexerJob
     final int cntInsClientReferral = stmtInsClient.executeUpdate();
     LOGGER.info("bundle client/referrals: {}", cntInsClientReferral);
 
-    // Prepare retrieval.
+    // Find referrals for those clients.
     stmtSelClient.setMaxRows(0);
     stmtSelClient.setQueryTimeout(0);
     stmtSelClient.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
@@ -259,10 +294,11 @@ public class ReferralHistoryIndexerJob
     EsPersonReferral m;
     LOGGER.info("pull referrals");
     final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
+
     while (!isFailed() && rs.next() && (m = EsPersonReferral.extractReferral(rs)) != null) {
-      JobLogs.logEvery(++cntr, "read", "bundle referral");
+      JobLogs.logEvery(++cntr, "read", "bundle referral"); // this thread only
       JobLogs.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
-          "referrals");
+          "referrals"); // all referral threads
       mapReferrals.put(m.getReferralId(), m);
     }
   }
@@ -278,9 +314,9 @@ public class ReferralHistoryIndexerJob
     LOGGER.info("pull allegations");
     final ResultSet rs = stmtSelAllegation.executeQuery(); // NOSONAR
     while (!isFailed() && rs.next() && (m = EsPersonReferral.extractAllegation(rs)) != null) {
-      JobLogs.logEvery(++cntr, "read", "bundle allegation");
+      JobLogs.logEvery(++cntr, "read", "bundle allegation"); // just this thread
       JobLogs.logEvery(LOGGER, 15000, rowsReadAllegations.incrementAndGet(), "Total read",
-          "allegations");
+          "allegations"); // across all referral threads
       listAllegations.add(m);
     }
   }
@@ -310,7 +346,9 @@ public class ReferralHistoryIndexerJob
     if (repl != null) {
       ++ret;
       repl.setClientId(clientId);
-      addToIndexQueue(repl);
+
+      // NEXT: retrieve doc, modify, index.
+      addToIndexQueue(repl); // CHANGE THIS
     }
 
     return ret;
@@ -324,8 +362,7 @@ public class ReferralHistoryIndexerJob
 
     int cntr = 0;
     for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
-      // Loop referrals for this client:
-
+      // Loop referrals for this client.
       final String clientId = rc.getKey();
       if (StringUtils.isNotBlank(clientId)) {
         listReadyToNorm.clear();
@@ -340,20 +377,38 @@ public class ReferralHistoryIndexerJob
     return cntr;
   }
 
+  /**
+   * Release heap objects early and often. Good time to <strong>request</strong> garbage collection,
+   * not demand it. Java GC runs in a dedicated thread anyway.
+   * <p>
+   * SonarQube disagrees.
+   * </p>
+   * The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
+   * memory is exhausted. Yes, this is a good place to drop a hint to GC that it
+   * <strong>might</strong> want to clean up memory.
+   * 
+   * @param listAllegations EsPersonReferral
+   * @param mapReferrals k=id, v=EsPersonReferral
+   * @param listClientReferralKeys client/referral id pairs
+   * @param listReadyToNorm EsPersonReferral
+   */
   protected void cleanUpMemory(final List<EsPersonReferral> listAllegations,
       Map<String, EsPersonReferral> mapReferrals, List<MinClientReferral> listClientReferralKeys,
       List<EsPersonReferral> listReadyToNorm) {
-    // Release heap objects early and often.
     releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
-
-    // Good time to *request* garbage collection, not *demand* it. GC runs in another thread.
-    // SonarQube disagrees.
-    // The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
-    // memory is exhausted. Yes, this is a good place to drop a hint to GC that it *might* want to
-    // clean up memory.
     System.gc(); // NOSONAR
   }
 
+  /**
+   * Pour referrals, allegations, and client/referral keys into the caldron and brew into a
+   * referrals element per client.
+   * 
+   * @param listAllegations bundle allegations
+   * @param mapReferrals k=referral id, v=EsPersonReferral
+   * @param listClientReferralKeys client/referral key pairs
+   * @param listReadyToNorm denormalized records
+   * @return normalized record count
+   */
   protected int mapReduce(final List<EsPersonReferral> listAllegations,
       final Map<String, EsPersonReferral> mapReferrals,
       final List<MinClientReferral> listClientReferralKeys,
@@ -379,12 +434,30 @@ public class ReferralHistoryIndexerJob
     return cntr;
   }
 
+  protected DB2SystemMonitor buildMonitor(final Connection con) {
+    DB2SystemMonitor ret = null;
+    if (monitorDb2) {
+      ret = NeutronDB2Util.monitorStart(con);
+    }
+    return ret;
+  }
+
+  protected void monitorStopAndReport(DB2SystemMonitor monitor) throws SQLException {
+    if (monitor != null) {
+      NeutronDB2Util.monitorStopAndReport(monitor);
+    }
+  }
+
   /**
    * Read all records from a single partition (key range) in buckets. Then sort results and
    * normalize.
    * 
    * <p>
    * Each call to this method should run in its own thread.
+   * </p>
+   * 
+   * <p>
+   * NEW APPROACH: retrieve documents, modify, re-index.
    * </p>
    * 
    * @param p partition (key) range to read
@@ -396,8 +469,8 @@ public class ReferralHistoryIndexerJob
     nameThread(threadName);
     LOGGER.info("BEGIN");
     getFlightLog().markRangeStart(p);
+    allocateThreadMemory(); // allocate thread local memory.
 
-    allocateThreadMemory(); // allocate thread local memory, if not done prior.
     final List<EsPersonReferral> listAllegations = allocAllegations.get();
     final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
     final List<MinClientReferral> listClientReferralKeys = allocClientReferralKeys.get();
@@ -407,12 +480,11 @@ public class ReferralHistoryIndexerJob
     releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
 
     try (final Connection con = getConnection()) {
-      con.setSchema(getDBSchemaName());
+      final String schema = getDBSchemaName();
+      con.setSchema(schema);
       con.setAutoCommit(false);
       NeutronDB2Util.enableParallelism(con);
-
-      final DB2SystemMonitor monitor = NeutronDB2Util.monitorStart(con);
-      final String schema = getDBSchemaName();
+      final DB2SystemMonitor monitor = buildMonitor(con);
 
       try (
           final PreparedStatement stmtInsClient =
@@ -423,14 +495,10 @@ public class ReferralHistoryIndexerJob
               con.prepareStatement(getInitialLoadQuery(schema).replaceAll("\\s+", " ").trim());
           final PreparedStatement stmtSelAllegation =
               con.prepareStatement(SELECT_ALLEGATION.replaceAll("\\s+", " ").trim())) {
-
-        // Read separate components for this key bundle.
         readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
         readReferrals(stmtSelReferral, mapReferrals);
         readAllegations(stmtSelAllegation, listAllegations);
-
-        // Retrieved all data.
-        NeutronDB2Util.monitorStopAndReport(monitor);
+        monitorStopAndReport(monitor);
         con.commit();
       }
     } catch (Exception e) {
@@ -446,7 +514,7 @@ public class ReferralHistoryIndexerJob
   }
 
   /**
-   * The "extract" part of ETL. Parallel stream produces runs partition ranges in separate threads.
+   * The "extract" part of ETL. Runs partition/key ranges in separate threads.
    * 
    * <p>
    * Note that this job normalizes <strong>without</strong> the transform thread.
@@ -457,9 +525,9 @@ public class ReferralHistoryIndexerJob
     nameThread("read_main");
     LOGGER.info("BEGIN: main read thread");
 
-    // WARNING: static setter is OK in standalone job but NOT permitted in continuous mode.
+    // WARNING: static setter is OK in standalone job but NOT wise in continuous mode.
     EsPersonReferral.setOpts(getFlightPlan());
-    doneTransform(); // normalize in place **without** the transform thread
+    doneTransform(); // normalize in place **WITHOUT** the transform thread
 
     try {
       final List<Pair<String, String>> ranges = getPartitionRanges();
@@ -470,6 +538,7 @@ public class ReferralHistoryIndexerJob
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
+        // Pull each range independently on the next available thread.
         tasks.add(threadPool.submit(() -> pullNextRange(p)));
       }
 
@@ -480,7 +549,7 @@ public class ReferralHistoryIndexerJob
 
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "ERROR IN THREADED RETRIEVAL! {}", e.getMessage());
     } finally {
       doneRetrieve();
     }
@@ -504,8 +573,8 @@ public class ReferralHistoryIndexerJob
   }
 
   /**
-   * Referrals is an <strong>enormous</strong> task and fetches partition ranges from a file instead
-   * of bloating a Java file.
+   * Referrals is an <strong>enormous</strong> rocket and fetches partition ranges from a file
+   * instead of bloating a Java file.
    * 
    * @see ReferralJobRanges
    */
@@ -561,7 +630,15 @@ public class ReferralHistoryIndexerJob
    * @throws Exception on launch error
    */
   public static void main(String... args) throws Exception {
-    LaunchCommand.launchOneWayTrip(ReferralHistoryIndexerJob.class, args);
+    LaunchCommand.launchOneWayTrip(ReferralRocket.class, args);
+  }
+
+  public boolean isMonitorDb2() {
+    return monitorDb2;
+  }
+
+  public void setMonitorDb2(boolean monitorDb2) {
+    this.monitorDb2 = monitorDb2;
   }
 
 }

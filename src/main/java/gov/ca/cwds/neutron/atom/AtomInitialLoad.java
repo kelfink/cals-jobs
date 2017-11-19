@@ -140,7 +140,7 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
         "extract_" + nextThreadNumber() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);
     getLogger().info("BEGIN: extract thread {}", threadName);
-    getFlightLog().trackRangeStart(p);
+    getFlightLog().markRangeStart(p);
 
     try (Connection con = getJobDao().getSessionFactory().getSessionFactoryOptions()
         .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {

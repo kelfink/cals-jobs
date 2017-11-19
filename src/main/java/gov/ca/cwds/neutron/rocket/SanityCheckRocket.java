@@ -59,16 +59,17 @@ public class SanityCheckRocket
 
   @Override
   public Date launch(Date lastSuccessfulRunTime) {
-    LOGGER.info("MSEARCH!");
+    LOGGER.info("SANITY CHECK!");
     final Client client = this.esDao.getClient();
 
-    // final SearchRequestBuilder srb2 = esClient.prepareSearch().setQuery(QueryBuilders
+    // Example: find cases.
+    // final SearchRequestBuilder srbCase = esClient.prepareSearch().setQuery(QueryBuilders
     // .multiMatchQuery("N6dhOan15A", "cases.focus_child.legacy_descriptor.legacy_id"));
 
     final MultiSearchResponse sr = client.prepareMultiSearch()
         .add(client.prepareSearch()
             .setQuery(QueryBuilders.idsQuery().addIds("OpvBkr00ND", "Jw3ny5K00h", "EuCrckE04M")))
-        // .add(srb2)
+        // .add(srbCase)
         .get();
 
     long totalHits = 0;

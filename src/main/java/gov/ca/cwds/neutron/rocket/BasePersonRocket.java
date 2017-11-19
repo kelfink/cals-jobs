@@ -851,7 +851,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
   protected List<T> pullBucketRange(String minId, String maxId) {
     LOGGER.info("PULL BUCKET RANGE {} to {}", minId, maxId);
     final Pair<String, String> p = Pair.of(minId, maxId);
-    getFlightLog().trackRangeStart(p);
+    getFlightLog().markRangeStart(p);
 
     final Class<?> entityClass =
         getDenormalizedClass() != null ? getDenormalizedClass() : getJobDao().getEntityClass();
@@ -886,7 +886,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       session.flush();
       results.close();
       txn.commit();
-      getFlightLog().trackRangeComplete(p);
+      getFlightLog().markRangeComplete(p);
       return ret.build();
     } catch (HibernateException e) {
       fail();

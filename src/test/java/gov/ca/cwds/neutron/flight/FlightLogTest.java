@@ -76,13 +76,13 @@ public class FlightLogTest {
   @Test
   public void trackRangeStart_Args__Pair() throws Exception {
     Pair<String, String> pair = Pair.of("1", "2");
-    target.trackRangeStart(pair);
+    target.markRangeStart(pair);
   }
 
   @Test
   public void trackRangeComplete_Args__Pair() throws Exception {
     Pair<String, String> pair = Pair.of("1", "2");
-    target.trackRangeComplete(pair);
+    target.markRangeComplete(pair);
   }
 
   @Test

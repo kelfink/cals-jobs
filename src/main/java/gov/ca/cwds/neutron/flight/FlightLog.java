@@ -385,11 +385,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return this.recsBulkError.incrementAndGet();
   }
 
-  public void trackRangeStart(final Pair<String, String> pair) {
+  public void markRangeStart(final Pair<String, String> pair) {
     initialLoadRangesStarted.add(pair);
   }
 
-  public void trackRangeComplete(final Pair<String, String> pair) {
+  public void markRangeComplete(final Pair<String, String> pair) {
     initialLoadRangesCompleted.add(pair);
   }
 

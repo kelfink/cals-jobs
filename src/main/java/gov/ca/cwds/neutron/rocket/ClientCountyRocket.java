@@ -95,7 +95,7 @@ public class ClientCountyRocket extends ClientIndexerJob
       stmt.setQueryTimeout(0);
 
       getOrCreateTransaction(); // HACK: fix Hibernate DAO.
-      getFlightLog().trackRangeStart(p);
+      getFlightLog().markRangeStart(p);
       final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
           .replaceAll(":toId", p.getRight());
       getLogger().info("query: {}", query);

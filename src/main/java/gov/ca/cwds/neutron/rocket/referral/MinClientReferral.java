@@ -6,20 +6,17 @@ import java.sql.SQLException;
 import gov.ca.cwds.data.std.ApiMarker;
 
 /**
- * Carrier bean for client referral keys.
+ * Convenient carrier bean for client referral keys.
  * 
  * @author CWDS API Team
  */
 public class MinClientReferral implements ApiMarker {
 
-  /**
-   * Default serialization.
-   */
   private static final long serialVersionUID = 1L;
 
-  String clientId;
-  String referralId;
-  String sensitivity;
+  private String clientId;
+  private String referralId;
+  private String sensitivity;
 
   public MinClientReferral(String clientId, String referralId, String sensitivity) {
     this.clientId = clientId;
