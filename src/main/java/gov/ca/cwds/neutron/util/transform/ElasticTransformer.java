@@ -92,7 +92,7 @@ public final class ElasticTransformer {
 
   public static void pushToBulkProcessor(final FlightLog flightLog, final BulkProcessor bp,
       final DocWriteRequest<?> t) {
-    JobLogs.logEvery(flightLog.markQueuedToIndex(), "add to ES bulk", "push doc");
+    JobLogs.logEvery(flightLog.incrementBulkPrepared(), "add to ES bulk", "index doc");
     bp.add(t);
   }
 

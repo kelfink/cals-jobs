@@ -256,7 +256,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
         getFlightLog().trackBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);
-        getFlightLog().trackBulkPrepared();
+        getFlightLog().incrementBulkPrepared();
       }
     } catch (Exception e) {
       throw JobLogs.runtime(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey()); // NOSONAR

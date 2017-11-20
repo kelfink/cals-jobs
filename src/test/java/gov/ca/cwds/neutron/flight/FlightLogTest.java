@@ -61,7 +61,7 @@ public class FlightLogTest {
 
   @Test
   public void trackBulkPrepared_Args__() throws Exception {
-    int actual = target.trackBulkPrepared();
+    int actual = target.incrementBulkPrepared();
     int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
