@@ -76,7 +76,7 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
 
   /**
    * Get the view or materialized query table name, if used. Any child classes relying on a
-   * de-normalized view must define the name.
+   * denormalized view must define the name.
    * 
    * @return name of view or materialized query table or null if none
    */

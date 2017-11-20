@@ -138,4 +138,14 @@ public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDen
     target.refreshMQT();
   }
 
+  @Test
+  public void initialLoadProcessRangeResults_Args__ResultSet() throws Exception {
+    target.initialLoadProcessRangeResults(rs);
+  }
+
+  @Test
+  public void pullMultiThreadJdbc_Args__() throws Exception {
+    target.pullMultiThreadJdbc();
+  }
+
 }
