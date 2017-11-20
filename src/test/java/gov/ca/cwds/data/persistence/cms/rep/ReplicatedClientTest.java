@@ -11,22 +11,25 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
+import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.jobs.Goddard;
 
 public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddress> {
-
   ReplicatedClient target;
 
   @Override
@@ -180,10 +183,75 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     clientRaces.add((short) 825);
     clientRaces.add((short) 824);
     clientRaces.add((short) 3164);
-
     target.setClientRaces(clientRaces);
     ElasticSearchRaceAndEthnicity actual = target.getRaceAndEthnicity();
     assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void getAkas_Args__() throws Exception {
+    Map<String, ElasticSearchPersonAka> actual = target.getAkas();
+    Map<String, ElasticSearchPersonAka> expected = new HashMap<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setAkas_Args__Map() throws Exception {
+    Map<String, ElasticSearchPersonAka> akas = new HashMap<String, ElasticSearchPersonAka>();
+    target.setAkas(akas);
+  }
+
+  @Test
+  public void addAka_Args__ElasticSearchPersonAka() throws Exception {
+    ElasticSearchPersonAka aka = mock(ElasticSearchPersonAka.class);
+    target.addAka(aka);
+  }
+
+  @Test
+  public void getSafetyAlerts_Args__() throws Exception {
+    Map<String, ElasticSearchSafetyAlert> actual = target.getSafetyAlerts();
+    Map<String, ElasticSearchSafetyAlert> expected = new HashMap<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setSafetyAlerts_Args__Map() throws Exception {
+    Map<String, ElasticSearchSafetyAlert> safetyAlerts =
+        new HashMap<String, ElasticSearchSafetyAlert>();
+    target.setSafetyAlerts(safetyAlerts);
+  }
+
+  @Test
+  public void addSafetyAlert_Args__ElasticSearchSafetyAlert() throws Exception {
+    ElasticSearchSafetyAlert safetyAlert = mock(ElasticSearchSafetyAlert.class);
+    target.addSafetyAlert(safetyAlert);
+  }
+
+  @Test
+  public void getOpenCaseId_Args__() throws Exception {
+    String actual = target.getOpenCaseId();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setOpenCaseId_Args__String() throws Exception {
+    String openCaseId = null;
+    target.setOpenCaseId(openCaseId);
+  }
+
+  @Test
+  public void getOtherClientNames_Args__() throws Exception {
+    List<ElasticSearchPersonAka> actual = target.getOtherClientNames();
+    List<ElasticSearchPersonAka> expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getClientSafetyAlerts_Args__() throws Exception {
+    List<ElasticSearchSafetyAlert> actual = target.getClientSafetyAlerts();
+    List<ElasticSearchSafetyAlert> expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
   }
 
 }
