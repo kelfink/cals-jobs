@@ -2,6 +2,7 @@ package gov.ca.cwds.data.persistence.cms.rep;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -69,6 +70,26 @@ public class ReplicatedAddressTest {
   public void setReplicationDate_Args__Date() throws Exception {
     Date replicationDate = mock(Date.class);
     target.setReplicationDate(replicationDate);
+  }
+
+  @Test
+  public void getReplicatedEntity_Args__() throws Exception {
+    EmbeddableCmsReplicatedEntity actual = target.getReplicatedEntity();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void hashCode_Args__() throws Exception {
+    int actual = target.hashCode();
+    assertThat(actual, is(not(0)));
+  }
+
+  @Test
+  public void equals_Args__Object() throws Exception {
+    Object obj = null;
+    boolean actual = target.equals(obj);
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
   }
 
 }
