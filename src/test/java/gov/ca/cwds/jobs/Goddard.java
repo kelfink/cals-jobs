@@ -155,6 +155,12 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public ObjectMapper mapper;
   public Pair<String, String> pair;
 
+  public SearchHits hits;
+  public SearchHit hit;
+  public SearchHit[] hitArray;
+  public SearchResponse sr;
+
+
   @Before
   public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
@@ -284,10 +290,11 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     final MultiSearchResponse.Item[] items = new MultiSearchResponse.Item[1];
     items[0] = item;
 
-    final SearchHits hits = mock(SearchHits.class);
-    final SearchHit hit = mock(SearchHit.class);
-    final SearchHit[] hitArray = {hit};
-    final SearchResponse sr = mock(SearchResponse.class);
+    hits = mock(SearchHits.class);
+    hit = mock(SearchHit.class);
+    hitArray = new SearchHit[1];
+    hitArray[0] = hit;
+    sr = mock(SearchResponse.class);
 
     when(client.prepareMultiSearch()).thenReturn(mBuilder);
     when(client.prepareSearch()).thenReturn(sBuilder);

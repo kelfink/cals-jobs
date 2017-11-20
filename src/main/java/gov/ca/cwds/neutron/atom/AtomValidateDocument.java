@@ -18,7 +18,7 @@ public interface AtomValidateDocument extends AtomShared {
   default ElasticSearchPerson readPerson(String json) throws NeutronException {
     try {
       return ElasticSearchPerson.MAPPER.readValue(json, ElasticSearchPerson.class);
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw JobLogs.checked(getLogger(), e, "ERROR READING PERSON DOC! {}", e.getMessage(), e);
     }
   }
