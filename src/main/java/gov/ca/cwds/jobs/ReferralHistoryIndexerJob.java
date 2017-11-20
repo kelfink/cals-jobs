@@ -90,7 +90,7 @@ public class ReferralHistoryIndexerJob
       "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM GT_REFR_CLT RC";
 
   protected static final String SELECT_ALLEGATION = "SELECT \n"
-      + " RC.FKREFERL_T         AS REFERRAL_ID," + " ALG.IDENTIFIER        AS ALLEGATION_ID,\n"
+      + " RC.FKREFERL_T         AS REFERRAL_ID,\n" + " ALG.IDENTIFIER        AS ALLEGATION_ID,\n"
       + " ALG.ALG_DSPC          AS ALLEGATION_DISPOSITION,\n"
       + " ALG.ALG_TPC           AS ALLEGATION_TYPE,\n"
       + " ALG.LST_UPD_TS        AS ALLEGATION_LAST_UPDATED,\n"
@@ -101,8 +101,9 @@ public class ReferralHistoryIndexerJob
       + " CLP.LST_UPD_TS        AS PERPETRATOR_LAST_UPDATED,\n"
       + " CLV.IDENTIFIER        AS VICTIM_ID,\n"
       + " CLV.SENSTV_IND        AS VICTIM_SENSITIVITY_IND,\n"
-      + " TRIM(CLV.COM_FST_NM)  AS VICTIM_FIRST_NM," + " TRIM(CLV.COM_LST_NM)  AS VICTIM_LAST_NM,\n"
-      + " CLV.LST_UPD_TS        AS VICTIM_LAST_UPDATED," + " CURRENT TIMESTAMP AS LAST_CHG \n"
+      + " TRIM(CLV.COM_FST_NM)  AS VICTIM_FIRST_NM,\n"
+      + " TRIM(CLV.COM_LST_NM)  AS VICTIM_LAST_NM,\n"
+      + " CLV.LST_UPD_TS        AS VICTIM_LAST_UPDATED,\n" + " CURRENT TIMESTAMP AS LAST_CHG \n"
       + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM GT_REFR_CLT rc1) RC \n"
       + "JOIN ALLGTN_T       ALG  ON ALG.FKREFERL_T = RC.FKREFERL_T \n"
       + "JOIN CLIENT_T       CLV  ON CLV.IDENTIFIER = ALG.FKCLIENT_T \n"
@@ -418,6 +419,10 @@ public class ReferralHistoryIndexerJob
     return cntr;
   }
 
+  protected String getClientSeedQuery() {
+    return INSERT_CLIENT_FULL;
+  }
+
   /**
    * Read all records from a single partition (key range) in buckets. Then sort results and
    * normalize.
@@ -455,14 +460,13 @@ public class ReferralHistoryIndexerJob
 
       try (
           final PreparedStatement stmtInsClient =
-              con.prepareStatement(INSERT_CLIENT_FULL.replaceAll("\\s+", " ").trim());
+              con.prepareStatement(getClientSeedQuery().replaceAll("\\s+", " ").trim());
           final PreparedStatement stmtSelClient =
               con.prepareStatement(SELECT_CLIENT.replaceAll("\\s+", " ").trim());
           final PreparedStatement stmtSelReferral =
               con.prepareStatement(getInitialLoadQuery(schema).replaceAll("\\s+", " ").trim());
           final PreparedStatement stmtSelAllegation =
               con.prepareStatement(SELECT_ALLEGATION.replaceAll("\\s+", " ").trim())) {
-
         // Read separate components for this key bundle.
         readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
         readReferrals(stmtSelReferral, mapReferrals);
