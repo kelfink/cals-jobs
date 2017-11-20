@@ -36,7 +36,8 @@ public class RestrictedReferralRocket extends ReferralHistoryIndexerJob
       "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"
           + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc\n"
           + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T\n"
-          + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ? AND c.SENSTV_IND IN ('S', 'R')";
+          + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ? "
+          + "AND rc.FKREFERL_T IN (SELECT RFL.IDENTIFIER FROM REFERL_T RFL WHERE RFL.LMT_ACSSCD IN ('S', 'R'))";
 
   /**
    * Construct rocket with all required dependencies.
