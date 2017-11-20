@@ -651,4 +651,60 @@ public class ReferralHistoryIndexerJobTest
     assertThat(actual, is(equalTo(expected)));
   }
 
+  @Test
+  public void buildMonitor_Args__Connection() throws Exception {
+    Connection con = mock(Connection.class);
+    DB2SystemMonitor actual = target.buildMonitor(con);
+    DB2SystemMonitor expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void monitorStopAndReport_Args__DB2SystemMonitor() throws Exception {
+    DB2SystemMonitor monitor = mock(DB2SystemMonitor.class);
+    target.monitorStopAndReport(monitor);
+  }
+
+  @Test
+  public void monitorStopAndReport_Args__DB2SystemMonitor_T__SQLException() throws Exception {
+    DB2SystemMonitor monitor = mock(DB2SystemMonitor.class);
+    doThrow(SQLException.class).when(monitor).stop();
+    try {
+      target.monitorStopAndReport(monitor);
+      fail("Expected exception was not thrown!");
+    } catch (SQLException e) {
+    }
+  }
+
+  @Test
+  public void getClientSeedQuery_Args__() throws Exception {
+    String actual = target.getClientSeedQuery();
+    String expected =
+        "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc\n\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T\n\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void releaseLocalMemory_Args__List__Map__List__List() throws Exception {
+    List<EsPersonReferral> listAllegations = new ArrayList<EsPersonReferral>();
+    Map<String, EsPersonReferral> mapReferrals = new HashMap<String, EsPersonReferral>();
+    List<MinClientReferral> listClientReferralKeys = new ArrayList<MinClientReferral>();
+    List<EsPersonReferral> listReadyToNorm = new ArrayList<EsPersonReferral>();
+    target.releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys,
+        listReadyToNorm);
+  }
+
+  @Test
+  public void isMonitorDb2_Args__() throws Exception {
+    boolean actual = target.isMonitorDb2();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setMonitorDb2_Args__boolean() throws Exception {
+    boolean monitorDb2 = false;
+    target.setMonitorDb2(monitorDb2);
+  }
+
 }
