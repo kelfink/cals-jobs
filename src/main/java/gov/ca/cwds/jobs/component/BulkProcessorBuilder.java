@@ -18,9 +18,9 @@ public class BulkProcessorBuilder implements ApiMarker {
 
   private static final long serialVersionUID = 1L;
 
-  private static final int ES_BULK_SIZE = 5000;
+  private static final int ES_BULK_SIZE = 1000;
 
-  private static final int ES_BYTES_MB = 10;
+  private static final int ES_BYTES_MB = 5;
 
   /**
    * Track rocket progress.

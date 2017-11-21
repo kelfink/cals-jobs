@@ -94,9 +94,6 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     CmsReplicatedEntity, ApiClientCountyAware, ApiClientRaceAndEthnicityAware,
     ApiClientSafetyAlertsAware, ApiOtherClientNamesAware, ApiClientCaseAware {
 
-  /**
-   * Default serialization version. Increment by class version.
-   */
   private static final long serialVersionUID = 1L;
 
   private static final String HISPANIC_CODE_OTHER_ID = "02";

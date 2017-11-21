@@ -67,7 +67,8 @@ public class ReferralHistoryIndexerJob
           + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc"
           + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?"
-  // + "\nAND c.IDENTIFIER = '0006uNfB2P'"
+          + "\nAND c.IBMSNAP_OPERATION != 'D' AND rc.IBMSNAP_OPERATION != 'D'"
+  // + "\nAND c.IDENTIFIER = '0006uNfB2P'" // TESTING ONLY
   ;
 
   protected static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO GT_ID (IDENTIFIER)\n"
