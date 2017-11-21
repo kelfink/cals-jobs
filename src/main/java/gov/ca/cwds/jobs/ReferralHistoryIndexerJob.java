@@ -63,10 +63,12 @@ public class ReferralHistoryIndexerJob
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
   protected static final String INSERT_CLIENT_FULL =
-      "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\n"
-          + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc\n"
-          + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T\n"
-          + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
+      "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)"
+          + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc"
+          + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
+          + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?"
+  // + "\nAND c.IDENTIFIER = '0006uNfB2P'"
+  ;
 
   protected static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO GT_ID (IDENTIFIER)\n"
       + "WITH step1 AS (\nSELECT ALG.FKREFERL_T AS REFERRAL_ID\n"
@@ -333,7 +335,6 @@ public class ReferralHistoryIndexerJob
     int cntr = 0;
     for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
       // Loop referrals for this client:
-
       final String clientId = rc.getKey();
       if (StringUtils.isNotBlank(clientId)) {
         listReadyToNorm.clear();
@@ -341,6 +342,8 @@ public class ReferralHistoryIndexerJob
           cntr = normalizeClientReferrals(cntr, rc1, clientId, mapReferrals, listReadyToNorm,
               mapAllegationByReferral);
         }
+      } else {
+        LOGGER.warn("HUH??? CLIENT ID IS NULL???");
       }
     }
 

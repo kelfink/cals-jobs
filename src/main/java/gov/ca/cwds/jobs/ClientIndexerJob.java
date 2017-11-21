@@ -105,7 +105,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
 
   @Override
   public String getJdbcOrderBy() {
-    return " ORDER BY x.clt_identifier ";
+    return " ORDER BY X.CLT_IDENTIFIER ";
   }
 
   /**
@@ -124,14 +124,18 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
     final StringBuilder buf = new StringBuilder();
 
     buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
-        .append(" x WHERE x.clt_identifier BETWEEN ':fromId' AND ':toId' ");
+        .append(" x WHERE x.clt_identifier BETWEEN ':fromId' AND ':toId' ")
+    // .append(" AND x.clt_identifier = '9phKLwb0X5'") // testing only
+    ;
 
     if (!getFlightPlan().isLoadSealedAndSensitive()) {
       buf.append(" AND x.CLT_SENSTV_IND = 'N' ");
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
-    return buf.toString();
+    final String sql = buf.toString();
+    LOGGER.info("CLIENT INITIAL LOAD SQL: {}", sql);
+    return sql;
   }
 
   /**
@@ -154,6 +158,11 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
 
       grpRecs.add(m);
       lastId = m.getNormalizationGroupKey();
+    }
+
+    // Catch the last group.
+    if (!grpRecs.isEmpty()) {
+      normalizeAndQueueIndex(grpRecs);
     }
   }
 
@@ -200,7 +209,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
     final String clientId = person.getId();
     LOGGER.info("Validate client: {}", clientId);
 
-    // HACK: Initialize transaction. Fix DAO impl instead.
+    // HACK: Initialize transaction. Fix DAO implementation instead.
     getOrCreateTransaction();
     final ReplicatedClient client = getJobDao().find(clientId);
 

@@ -47,14 +47,14 @@ public class FlightLogTest {
 
   @Test
   public void trackNormalized_Args__() throws Exception {
-    int actual = target.trackNormalized();
+    int actual = target.incrementNormalized();
     int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void trackBulkDeleted_Args__() throws Exception {
-    int actual = target.trackBulkDeleted();
+    int actual = target.incrementBulkDeleted();
     int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }

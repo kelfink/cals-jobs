@@ -206,7 +206,7 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
 
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(log, e, "BATCH ERROR! {}", e.getMessage());
+      throw JobLogs.runtime(log, e, "ERROR IN MULTI-THREAD JDBC! {}", e.getMessage());
     } finally {
       doneRetrieve();
     }

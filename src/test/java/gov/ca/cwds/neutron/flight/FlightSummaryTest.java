@@ -63,10 +63,10 @@ public class FlightSummaryTest {
     flightLog.trackBulkError();
     flightLog.trackBulkError();
 
-    flightLog.trackBulkDeleted();
-    flightLog.trackBulkDeleted();
-    flightLog.trackBulkDeleted();
-    flightLog.trackBulkDeleted();
+    flightLog.incrementBulkDeleted();
+    flightLog.incrementBulkDeleted();
+    flightLog.incrementBulkDeleted();
+    flightLog.incrementBulkDeleted();
     flightLog.done();
 
     target.accumulate(flightLog);
