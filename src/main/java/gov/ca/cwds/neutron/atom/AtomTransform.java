@@ -27,8 +27,8 @@ public interface AtomTransform<T extends PersistentObject, M extends ApiGroupNor
   }
 
   /**
-   * Return the job's entity class for its denormalized source view or materialized query table, if
-   * any, or null if not using a denormalized source.
+   * Return the rocket's entity class for its denormalized source view or materialized query table,
+   * if any, or null if not using a denormalized source.
    * 
    * @return entity class of view or materialized query table
    */
@@ -37,7 +37,7 @@ public interface AtomTransform<T extends PersistentObject, M extends ApiGroupNor
   }
 
   /**
-   * True if the Job class reduces denormalized results to normalized ones.
+   * True if the Rocket class reduces denormalized results to normalized ones.
    * 
    * @return true if class overrides {@link #normalize(List)}
    */
@@ -60,17 +60,17 @@ public interface AtomTransform<T extends PersistentObject, M extends ApiGroupNor
   }
 
   /**
-   * Increment the count of normalized records.
+   * Increment normalized record count.
    */
   default void incrementNormalizeCount() {
-    JobLogs.logEvery(getFlightLog().trackNormalized(), "Normalize", "single");
+    JobLogs.logEvery(getFlightLog().incrementNormalized(), "Normalize", "single");
   }
 
   /**
    * Normalize view records for a single grouping (such as all the same client) into a normalized
    * entity bean, consisting of a parent object and its child objects.
    * 
-   * @param recs de-normalized view beans
+   * @param recs denormalized view beans
    * @return normalized entity bean instance
    */
   default T normalizeSingle(List<M> recs) {

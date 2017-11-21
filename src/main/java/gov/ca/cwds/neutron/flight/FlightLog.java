@@ -369,11 +369,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return this.recsSentToIndexQueue.incrementAndGet();
   }
 
-  public int trackNormalized() {
+  public int incrementNormalized() {
     return this.rowsNormalized.incrementAndGet();
   }
 
-  public int trackBulkDeleted() {
+  public int incrementBulkDeleted() {
     return this.recsBulkDeleted.incrementAndGet();
   }
 

@@ -253,7 +253,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     try {
       if (isDelete(t)) {
         ret = bulkDelete((String) t.getPrimaryKey()); // NOTE: cannot assume String PK.
-        getFlightLog().trackBulkDeleted();
+        getFlightLog().incrementBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);
         getFlightLog().incrementBulkPrepared();
@@ -712,6 +712,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
   @SuppressWarnings("unchecked")
   protected void loadRecsForDeletion(final Class<?> entityClass, final Session session,
       final Date lastRunTime, Set<String> deletionResults) {
+    LOGGER.warn("DELETE RESTRICTED RECORDS!");
     final String namedQueryNameForDeletion =
         entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
     final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
@@ -791,6 +792,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
         loadRecsForDeletion(entityClass, session, lastRunTime, deletionResults);
       }
 
+      groupRecs.clear();
       session.clear();
       txn.commit();
       return results.build();

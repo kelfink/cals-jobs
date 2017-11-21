@@ -31,6 +31,12 @@ public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
   @Override
   public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
     final int numActions = request.numberOfActions();
+    if (response.hasFailures()) {
+      LOGGER.error("\n\t>>>>>>BULK FAILURES??? status: {}, errors: {}\n", response.status(),
+          response.buildFailureMessage());
+      flightLog.trackBulkError();
+    }
+
     flightLog.addToBulkAfter(numActions);
     LOGGER.info("Executed bulk of {} actions", numActions);
   }

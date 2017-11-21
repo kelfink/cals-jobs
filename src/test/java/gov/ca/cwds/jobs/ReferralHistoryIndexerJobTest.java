@@ -134,15 +134,15 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void getViewName_Args__() throws Exception {
-    String actual = target.getInitialLoadViewName();
-    String expected = "VW_MQT_REFRL_ONLY";
+    final String actual = target.getInitialLoadViewName();
+    final String expected = "VW_MQT_REFRL_ONLY";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getJdbcOrderBy_Args__() throws Exception {
-    String actual = target.getJdbcOrderBy().trim();
-    String expected = "";
+    final String actual = target.getJdbcOrderBy().trim();
+    final String expected = "";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -221,14 +221,14 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void getInitialLoadViewName_Args__() throws Exception {
-    String actual = target.getInitialLoadViewName();
+    final String actual = target.getInitialLoadViewName();
     assertThat(actual, notNullValue());
   }
 
   @Test
   public void getInitialLoadQuery_Args__String() throws Exception {
     String dbSchemaName = "CWSRS1";
-    String actual = target.getInitialLoadQuery(dbSchemaName);
+    final String actual = target.getInitialLoadQuery(dbSchemaName);
     assertThat(actual, notNullValue());
   }
 
@@ -236,7 +236,7 @@ public class ReferralHistoryIndexerJobTest
   public void getInitialLoadQuery_Args__no_sealed() throws Exception {
     String dbSchemaName = "CWSRS1";
     target.getFlightPlan().setLoadSealedAndSensitive(false);
-    String actual = target.getInitialLoadQuery(dbSchemaName);
+    final String actual = target.getInitialLoadQuery(dbSchemaName);
     assertThat(actual, notNullValue());
   }
 
@@ -528,8 +528,8 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void getOptionalElementName() throws Exception {
-    String actual = target.getOptionalElementName();
-    String expected = "referrals";
+    final String actual = target.getOptionalElementName();
+    final String expected = "referrals";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -646,9 +646,65 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void getOptionalElementName_Args__() throws Exception {
-    String actual = target.getOptionalElementName();
-    String expected = "referrals";
+    final String actual = target.getOptionalElementName();
+    final String expected = "referrals";
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void buildMonitor_Args__Connection() throws Exception {
+    Connection con = mock(Connection.class);
+    DB2SystemMonitor actual = target.buildMonitor(con);
+    DB2SystemMonitor expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void monitorStopAndReport_Args__DB2SystemMonitor() throws Exception {
+    DB2SystemMonitor monitor = mock(DB2SystemMonitor.class);
+    target.monitorStopAndReport(monitor);
+  }
+
+  @Test
+  public void monitorStopAndReport_Args__DB2SystemMonitor_T__SQLException() throws Exception {
+    DB2SystemMonitor monitor = mock(DB2SystemMonitor.class);
+    doThrow(SQLException.class).when(monitor).stop();
+    try {
+      target.monitorStopAndReport(monitor);
+      fail("Expected exception was not thrown!");
+    } catch (SQLException e) {
+    }
+  }
+
+  @Test
+  public void getClientSeedQuery_Args__() throws Exception {
+    final String actual = target.getClientSeedQuery();
+    final String expected =
+        "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void releaseLocalMemory_Args__List__Map__List__List() throws Exception {
+    List<EsPersonReferral> listAllegations = new ArrayList<EsPersonReferral>();
+    Map<String, EsPersonReferral> mapReferrals = new HashMap<String, EsPersonReferral>();
+    List<MinClientReferral> listClientReferralKeys = new ArrayList<MinClientReferral>();
+    List<EsPersonReferral> listReadyToNorm = new ArrayList<EsPersonReferral>();
+    target.releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys,
+        listReadyToNorm);
+  }
+
+  @Test
+  public void isMonitorDb2_Args__() throws Exception {
+    boolean actual = target.isMonitorDb2();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setMonitorDb2_Args__boolean() throws Exception {
+    boolean monitorDb2 = false;
+    target.setMonitorDb2(monitorDb2);
   }
 
 }
