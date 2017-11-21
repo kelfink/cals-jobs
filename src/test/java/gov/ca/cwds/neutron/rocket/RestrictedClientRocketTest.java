@@ -40,7 +40,7 @@ public class RestrictedClientRocketTest extends Goddard<ReplicatedClient, EsClie
     final String dbSchemaName = "CWSRS1";
     final String actual = target.getInitialLoadQuery(dbSchemaName);
     final String expected =
-        "SELECT x.* FROM CWSRS1.MQT_CLIENT_ADDRESS x WHERE x.clt_identifier BETWEEN ':fromId' AND ':toId'  AND x.CLT_SENSTV_IND in ('S','R')  ORDER BY x.clt_identifier  FOR READ ONLY WITH UR ";
+        "SELECT x.* FROM CWSRS1.MQT_CLIENT_ADDRESS x WHERE x.clt_identifier BETWEEN ':fromId' AND ':toId'  AND x.CLT_SENSTV_IND in ('S','R')  ORDER BY X.CLT_IDENTIFIER  FOR READ ONLY WITH UR ";
     assertThat(actual, is(equalTo(expected)));
   }
 
