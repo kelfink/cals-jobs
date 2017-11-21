@@ -111,7 +111,7 @@ public class ReferralHistoryIndexerJob
       + " FOR READ ONLY WITH UR ";
 
   protected static final String SELECT_REFERRAL = "SELECT RFL.IDENTIFIER        AS REFERRAL_ID,\n"
-      + " RFL.REF_RCV_DT        AS START_DATE," + " RFL.REFCLSR_DT        AS END_DATE,\n"
+      + " RFL.REF_RCV_DT        AS START_DATE,\n" + " RFL.REFCLSR_DT        AS END_DATE,\n"
       + " RFL.RFR_RSPC          AS REFERRAL_RESPONSE_TYPE,\n"
       + " RFL.LMT_ACSSCD        AS LIMITED_ACCESS_CODE,\n"
       + " RFL.LMT_ACS_DT        AS LIMITED_ACCESS_DATE,\n"
@@ -196,7 +196,7 @@ public class ReferralHistoryIndexerJob
     final StringBuilder buf = new StringBuilder();
     buf.append(SELECT_REFERRAL);
 
-    if (!getFlightPlan().isLoadSealedAndSensitive()) {
+    if (getFlightPlan().isLoadSealedAndSensitive()) {
       buf.append(" WHERE RFL.LMT_ACSSCD = 'N' ");
     }
 
