@@ -196,7 +196,7 @@ public class ReferralHistoryIndexerJob
     final StringBuilder buf = new StringBuilder();
     buf.append(SELECT_REFERRAL);
 
-    if (getFlightPlan().isLoadSealedAndSensitive()) {
+    if (!getFlightPlan().isLoadSealedAndSensitive()) {
       buf.append(" WHERE RFL.LMT_ACSSCD = 'N' ");
     }
 
