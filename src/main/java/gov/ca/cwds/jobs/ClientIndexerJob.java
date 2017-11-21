@@ -125,7 +125,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
 
     buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
         .append(" x WHERE x.clt_identifier BETWEEN ':fromId' AND ':toId' ")
-    // .append(" AND x.clt_identifier = '9phKLwb0X5'") // testing only
+    // .append(" AND x.clt_identifier = '9phKLwb0X5'") // TESTING ONLY
     ;
 
     if (!getFlightPlan().isLoadSealedAndSensitive()) {

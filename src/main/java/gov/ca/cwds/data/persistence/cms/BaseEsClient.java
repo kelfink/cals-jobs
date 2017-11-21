@@ -567,7 +567,7 @@ public abstract class BaseEsClient
   @Override
   public ReplicatedClient normalize(Map<Object, ReplicatedClient> map) {
     final boolean isClientAdded = map.containsKey(this.cltId);
-    ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : new ReplicatedClient();
+    final ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : new ReplicatedClient();
 
     if (!isClientAdded) {
       // Populate core client attributes.
