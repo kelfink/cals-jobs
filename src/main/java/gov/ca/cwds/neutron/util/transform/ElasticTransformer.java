@@ -520,6 +520,9 @@ public final class ElasticTransformer {
     // Open case id
     ret.setOpenCaseId(buildOpenCase(p));
 
+    // Update time stamp
+    ret.setIndexUpdateTime(DomainChef.cookStrictTimestamp(new Date()));
+
     return ret;
   }
 

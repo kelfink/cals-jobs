@@ -19,7 +19,7 @@ import org.junit.Test;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
-import gov.ca.cwds.data.persistence.cms.EsClient;
+import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
@@ -30,10 +30,10 @@ import gov.ca.cwds.jobs.exception.JobsException;
  * @author CWDS API Team
  */
 @SuppressWarnings("javadoc")
-public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsClient> {
+public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsClientPerson> {
 
   ReplicatedClientDao dao;
-  ClientSummaryIndexerJob target;
+  ClientPersonIndexerJob target;
 
   @Override
   @Before
@@ -42,7 +42,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
     when(rs.next()).thenReturn(true, true, false);
     dao = new ReplicatedClientDao(sessionFactory);
-    target = new ClientSummaryIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
+    target = new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   @Test
@@ -58,8 +58,8 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
   @Test
   public void extract_Args__ResultSet() throws Exception {
     when(rs.getString("CLT_IBMSNAP_OPERATION")).thenReturn("I");
-    final EsClient actual = target.extract(rs);
-    final EsClient expected = new EsClient();
+    final EsClientPerson actual = target.extract(rs);
+    final EsClientPerson expected = new EsClientPerson();
     final short s = (short) 0;
     // expected.setCltBirthCountryCodeType(s);
     // expected.setCltBirthStateCodeType(s);
@@ -87,7 +87,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
   @Test
   public void getDenormalizedClass_Args__() throws Exception {
     Object actual = target.getDenormalizedClass();
-    Object expected = EsClient.class;
+    Object expected = EsClientPerson.class;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -100,7 +100,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
   @Test
   public void normalize_Args__List() throws Exception {
-    List<EsClient> recs = new ArrayList<EsClient>();
+    List<EsClientPerson> recs = new ArrayList<EsClientPerson>();
     List<ReplicatedClient> actual = target.normalize(recs);
     List<ReplicatedClient> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
@@ -131,7 +131,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
   @Test
   public void normalizeAndQueueIndex() throws Exception {
-    List<EsClient> grpRecs = new ArrayList<EsClient>();
+    List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
     target.normalizeAndQueueIndex(grpRecs);
   }
 
@@ -202,7 +202,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
   @Test
   public void normalizeAndQueueIndex_Args__List() throws Exception {
-    List<EsClient> grpRecs = new ArrayList<EsClient>();
+    List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
     target.normalizeAndQueueIndex(grpRecs);
   }
 

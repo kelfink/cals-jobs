@@ -21,7 +21,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.cms.EsClient;
+import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -37,16 +37,16 @@ import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
- * Rocket to load Client summary data from CMS into ElasticSearch.
+ * Rocket to load Client person data from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */
-public class ClientSummaryIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, EsClient>
-    implements NeutronRowMapper<EsClient>, AtomValidateDocument {
+public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, EsClientPerson>
+    implements NeutronRowMapper<EsClientPerson>, AtomValidateDocument {
 
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ClientSummaryIndexerJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ClientPersonIndexerJob.class);
 
   private static final String INSERT_CLIENT_LAST_CHG =
       "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT CLT.IDENTIFIER \nFROM CLIENT_T clt\n"
@@ -69,9 +69,8 @@ public class ClientSummaryIndexerJob extends InitialLoadJdbcRocket<ReplicatedCli
    * @param flightPlan command line options
    */
   @Inject
-  public ClientSummaryIndexerJob(final ReplicatedClientDao dao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastRunFile, final ObjectMapper mapper,
-      FlightPlan flightPlan) {
+  public ClientPersonIndexerJob(final ReplicatedClientDao dao, final ElasticsearchDao esDao,
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
@@ -86,13 +85,13 @@ public class ClientSummaryIndexerJob extends InitialLoadJdbcRocket<ReplicatedCli
   }
 
   @Override
-  public EsClient extract(ResultSet rs) throws SQLException {
-    return EsClient.extract(rs);
+  public EsClientPerson extract(ResultSet rs) throws SQLException {
+    return EsClientPerson.extract(rs);
   }
 
   @Override
   public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
-    return EsClient.class;
+    return EsClientPerson.class;
   }
 
   @Override
@@ -115,10 +114,10 @@ public class ClientSummaryIndexerJob extends InitialLoadJdbcRocket<ReplicatedCli
    * 
    * @param grpRecs recs for same client id
    */
-  protected void normalizeAndQueueIndex(final List<EsClient> grpRecs) {
+  protected void normalizeAndQueueIndex(final List<EsClientPerson> grpRecs) {
     grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
-        .collect(Collectors.groupingBy(EsClient::getNormalizationGroupKey)).entrySet().stream()
-        .map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
+        .collect(Collectors.groupingBy(EsClientPerson::getNormalizationGroupKey)).entrySet()
+        .stream().map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
   }
 
   @Override
@@ -142,9 +141,9 @@ public class ClientSummaryIndexerJob extends InitialLoadJdbcRocket<ReplicatedCli
   @Override
   public void initialLoadProcessRangeResults(final ResultSet rs) throws SQLException {
     int cntr = 0;
-    EsClient m;
+    EsClientPerson m;
     Object lastId = new Object();
-    final List<EsClient> grpRecs = new ArrayList<>();
+    final List<EsClientPerson> grpRecs = new ArrayList<>();
 
     // NOTE: Assumes that records are sorted by group key.
     while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
@@ -241,8 +240,8 @@ public class ClientSummaryIndexerJob extends InitialLoadJdbcRocket<ReplicatedCli
   }
 
   @Override
-  public List<ReplicatedClient> normalize(List<EsClient> recs) {
-    return EntityNormalizer.<ReplicatedClient, EsClient>normalizeList(recs);
+  public List<ReplicatedClient> normalize(List<EsClientPerson> recs) {
+    return EntityNormalizer.<ReplicatedClient, EsClientPerson>normalizeList(recs);
   }
 
   @Override
@@ -262,7 +261,7 @@ public class ClientSummaryIndexerJob extends InitialLoadJdbcRocket<ReplicatedCli
    * @throws Exception unhandled launch error
    */
   public static void main(String... args) throws Exception {
-    LaunchCommand.launchOneWayTrip(ClientSummaryIndexerJob.class, args);
+    LaunchCommand.launchOneWayTrip(ClientPersonIndexerJob.class, args);
   }
 
 }

@@ -26,13 +26,13 @@ import gov.ca.cwds.jobs.Goddard;
 
 public class EsClientTest extends Goddard {
 
-  EsClient target;
+  EsClientPerson target;
 
   @Override
   @Before
   public void setup() throws Exception {
     super.setup();
-    target = new EsClient();
+    target = new EsClientPerson();
     target.setCltId(DEFAULT_CLIENT_ID);
     target.setSafetyAlertId(DEFAULT_CLIENT_ID);
     target.setAkaId(DEFAULT_CLIENT_ID);
@@ -173,7 +173,7 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void type() throws Exception {
-    assertThat(EsClient.class, notNullValue());
+    assertThat(EsClientPerson.class, notNullValue());
   }
 
   @Test
@@ -183,14 +183,14 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void extract_Args__ResultSet() throws Exception {
-    final EsClient actual = EsClient.extract(rs);
+    final EsClientPerson actual = EsClientPerson.extract(rs);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test(expected = SQLException.class)
   public void extract_Args__ResultSet_T__SQLException() throws Exception {
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
-    EsClient.extract(rs);
+    EsClientPerson.extract(rs);
   }
 
   @Test
@@ -1328,9 +1328,9 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void compare_Args__EsClient__EsClient() throws Exception {
-    EsClient o1 = new EsClient();
+    EsClientPerson o1 = new EsClientPerson();
     o1.setCltId(DEFAULT_CLIENT_ID);
-    EsClient o2 = new EsClient();
+    EsClientPerson o2 = new EsClientPerson();
     o2.setCltId(DEFAULT_CLIENT_ID);
 
     int actual = target.compare(o1, o2);
@@ -1340,7 +1340,7 @@ public class EsClientTest extends Goddard {
 
   @Test
   public void compareTo_Args__EsClient() throws Exception {
-    EsClient o = new EsClient();
+    EsClientPerson o = new EsClientPerson();
     o.setCltId(DEFAULT_CLIENT_ID);
 
     int actual = target.compareTo(o);

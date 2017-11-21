@@ -33,7 +33,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
- * Entity bean for the skinny index.
+ * Entity bean for the person index.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.
@@ -45,28 +45,29 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  */
 @Entity
 @Table(name = "VW_LST_CLIENT_ADDRESS")
-@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClient.findAllUpdatedAfter",
+@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfter",
     query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
         + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
         + "WHERE x1.LAST_CHG > :after " + ") ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
-    resultClass = EsClient.class, readOnly = true)
+    resultClass = EsClientPerson.class, readOnly = true)
 
 @NamedNativeQuery(
-    name = "gov.ca.cwds.data.persistence.cms.EsClient.findAllUpdatedAfterWithUnlimitedAccess",
+    name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfterWithUnlimitedAccess",
     query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
         + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
         + "WHERE x1.LAST_CHG > :after "
         + ") AND x.CLT_SENSTV_IND = 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR",
-    resultClass = EsClient.class, readOnly = true)
+    resultClass = EsClientPerson.class, readOnly = true)
 
 @NamedNativeQuery(
-    name = "gov.ca.cwds.data.persistence.cms.EsClient.findAllUpdatedAfterWithLimitedAccess",
+    name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfterWithLimitedAccess",
     query = "SELECT x.* FROM {h-schema}VW_LST_CLIENT_ADDRESS x WHERE x.CLT_IDENTIFIER IN ( "
         + "SELECT x1.CLT_IDENTIFIER FROM {h-schema}VW_LST_CLIENT_ADDRESS x1 "
         + "WHERE x1.LAST_CHG > :after "
         + ") AND x.CLT_SENSTV_IND != 'N' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ",
-    resultClass = EsClient.class, readOnly = true)
-public class EsClient extends BaseEsClient implements Comparable<EsClient>, Comparator<EsClient> {
+    resultClass = EsClientPerson.class, readOnly = true)
+public class EsClientPerson extends BaseEsClient
+    implements Comparable<EsClientPerson>, Comparator<EsClientPerson> {
 
   private static final long serialVersionUID = 1L;
 
@@ -175,8 +176,8 @@ public class EsClient extends BaseEsClient implements Comparable<EsClient>, Comp
    * @return a populated EsClient
    * @throws SQLException if unable to convert types or stream breaks, etc.
    */
-  public static EsClient extract(final ResultSet rs) throws SQLException {
-    final EsClient ret = new EsClient();
+  public static EsClientPerson extract(final ResultSet rs) throws SQLException {
+    final EsClientPerson ret = new EsClientPerson();
     BaseEsClient.extract(ret, rs);
 
     //
@@ -261,12 +262,12 @@ public class EsClient extends BaseEsClient implements Comparable<EsClient>, Comp
   }
 
   @Override
-  public int compare(EsClient o1, EsClient o2) {
+  public int compare(EsClientPerson o1, EsClientPerson o2) {
     return o1.getCltId().compareTo(o2.getCltId());
   }
 
   @Override
-  public int compareTo(EsClient o) {
+  public int compareTo(EsClientPerson o) {
     return compare(this, o);
   }
 
@@ -526,14 +527,16 @@ public class EsClient extends BaseEsClient implements Comparable<EsClient>, Comp
     activation.setActivationReasonDescription(SystemCodeCache.global()
         .getSystemCodeShortDescription(this.safetyAlertActivationReasonCode));
     activation.setActivationReasonId(this.safetyAlertActivationReasonCode != null
-        ? this.safetyAlertActivationReasonCode.toString() : null);
+        ? this.safetyAlertActivationReasonCode.toString()
+        : null);
 
     ElasticSearchSystemCode activationCounty = new ElasticSearchSystemCode();
     activation.setActivationCounty(activationCounty);
     activationCounty.setDescription(SystemCodeCache.global()
         .getSystemCodeShortDescription(this.safetyAlertActivationCountyCode));
     activationCounty.setId(this.safetyAlertActivationCountyCode != null
-        ? this.safetyAlertActivationCountyCode.toString() : null);
+        ? this.safetyAlertActivationCountyCode.toString()
+        : null);
 
     activation.setActivationDate(DomainChef.cookDate(this.safetyAlertActivationDate));
     activation.setActivationExplanation(this.safetyAlertActivationExplanation);
@@ -548,7 +551,8 @@ public class EsClient extends BaseEsClient implements Comparable<EsClient>, Comp
     deactivationCounty.setDescription(SystemCodeCache.global()
         .getSystemCodeShortDescription(this.safetyAlertDeactivationCountyCode));
     deactivationCounty.setId(this.safetyAlertDeactivationCountyCode != null
-        ? this.safetyAlertDeactivationCountyCode.toString() : null);
+        ? this.safetyAlertDeactivationCountyCode.toString()
+        : null);
 
     deactivation.setDeactivationDate(DomainChef.cookDate(this.safetyAlertDeactivationDate));
     deactivation.setDeactivationExplanation(this.safetyAlertDeactivationExplanation);
