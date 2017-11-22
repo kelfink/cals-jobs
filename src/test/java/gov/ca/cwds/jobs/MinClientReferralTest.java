@@ -29,7 +29,7 @@ public class MinClientReferralTest
   @Before
   public void setup() throws Exception {
     super.setup();
-    target = new MinClientReferral(clientId, referralId, sensitivity);
+    target = new MinClientReferral(clientId, referralId, sensitivity, null);
   }
 
   @Test

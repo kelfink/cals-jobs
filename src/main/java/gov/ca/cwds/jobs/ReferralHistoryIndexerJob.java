@@ -69,7 +69,7 @@ public class ReferralHistoryIndexerJob
           + "\nFROM REFR_CLT rc"
           + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?"
-          + "\nAND  c.IBMSNAP_OPERATION != 'D' "
+          + "\nAND  c.IBMSNAP_OPERATION != 'D' " // don't updated a deleted document
        // + "\nAND rc.IBMSNAP_OPERATION != 'D'"
           ;
 //@formatter:on
@@ -83,33 +83,33 @@ public class ReferralHistoryIndexerJob
       + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID"
       + "     FROM ALLGTN_T ALG "
       + "     WHERE ALG.IBMSNAP_LOGMARKER > ?"
-      + "     AND alg.IBMSNAP_OPERATION IN ('I','U')"
+   // + "     AND alg.IBMSNAP_OPERATION IN ('I','U')"
       + " ), "
       + " step2 AS ("
       + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID "
       + "     FROM CLIENT_T C "
       + "     JOIN ALLGTN_T ALG ON (C.IDENTIFIER = ALG.FKCLIENT_0 OR C.IDENTIFIER = ALG.FKCLIENT_T)"
       + "     WHERE C.IBMSNAP_LOGMARKER > ?"
-      + "     AND   c.IBMSNAP_OPERATION IN ('I','U')"
-      + "     AND alg.IBMSNAP_OPERATION IN ('I','U')"
+   // + "     AND   c.IBMSNAP_OPERATION IN ('I','U')"
+   // + "     AND alg.IBMSNAP_OPERATION IN ('I','U')"
       + " ), "
       + " step3 AS ("
       + "     SELECT RCT.FKREFERL_T AS REFERRAL_ID "
       + "     FROM REFR_CLT RCT "
       + "     WHERE RCT.IBMSNAP_LOGMARKER > ?"
-      + "     AND rct.IBMSNAP_OPERATION IN ('I','U')"
+   // + "     AND rct.IBMSNAP_OPERATION IN ('I','U')"
       + " ), "
       + " step4 AS ("
       + "     SELECT RFL.IDENTIFIER AS REFERRAL_ID "
       + "     FROM REFERL_T RFL "
       + "     WHERE RFL.IBMSNAP_LOGMARKER > ?"
-      + "     AND rfl.IBMSNAP_OPERATION IN ('I','U')"
+   // + "     AND rfl.IBMSNAP_OPERATION IN ('I','U')"
       + " ), "
       + " step5 AS ("
       + "     SELECT RPT.FKREFERL_T AS REFERRAL_ID "
       + "     FROM REPTR_T RPT "
       + "     WHERE RPT.IBMSNAP_LOGMARKER > ?"
-      + "     AND rpt.IBMSNAP_OPERATION IN ('I','U')"
+   // + "     AND rpt.IBMSNAP_OPERATION IN ('I','U')"
       + " ), "
       + " hoard AS ("
       + "     SELECT s1.REFERRAL_ID FROM STEP1 s1 UNION ALL"
@@ -121,8 +121,12 @@ public class ReferralHistoryIndexerJob
       + " SELECT DISTINCT g.REFERRAL_ID FROM hoard g ";
 //@formatter:on
 
+//@formatter:off
   protected static final String SELECT_CLIENT =
-      "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM GT_REFR_CLT RC";
+        "SELECT rc.FKCLIENT_T, rc.FKREFERL_T, rc.SENSTV_IND, c.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION \n" 
+      + "FROM GT_REFR_CLT RC \n"
+      + "JOIN CLIENT_T C ON C.IDENTIFIER = RC.FKCLIENT_T";
+//@formatter:on
 
 //@formatter:off
   protected static final String SELECT_ALLEGATION = "SELECT \n"
@@ -141,7 +145,8 @@ public class ReferralHistoryIndexerJob
       + " TRIM(CLV.COM_FST_NM)  AS VICTIM_FIRST_NM,\n"
       + " TRIM(CLV.COM_LST_NM)  AS VICTIM_LAST_NM,\n"
       + " CLV.LST_UPD_TS        AS VICTIM_LAST_UPDATED,\n" 
-      + " CURRENT TIMESTAMP AS LAST_CHG \n"
+      + " CURRENT TIMESTAMP     AS LAST_CHG, \n"
+      + " ALG.IBMSNAP_LOGMARKER AS ALG_IBMSNAP_LOGMARKER \n"
       + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM GT_REFR_CLT rc1) RC \n"
       + "JOIN ALLGTN_T       ALG  ON ALG.FKREFERL_T = RC.FKREFERL_T \n"
       + "JOIN CLIENT_T       CLV  ON CLV.IDENTIFIER = ALG.FKCLIENT_T \n"
@@ -169,7 +174,9 @@ public class ReferralHistoryIndexerJob
       + " TRIM(STP.LAST_NM)     AS WORKER_LAST_NM,\n"
       + " STP.LST_UPD_TS        AS WORKER_LAST_UPDATED,\n"
       + " RFL.GVR_ENTC          AS REFERRAL_COUNTY,\n" 
-      + " CURRENT TIMESTAMP     AS LAST_CHG \n"
+      + " CURRENT TIMESTAMP     AS LAST_CHG, \n"
+      + " RFL.IBMSNAP_OPERATION AS RFL_IBMSNAP_OPERATION, \n"
+      + " RPT.IBMSNAP_OPERATION AS RPT_IBMSNAP_OPERATION \n"
       + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM GT_REFR_CLT rc1) RC \n"
       + "JOIN REFERL_T          RFL  ON RFL.IDENTIFIER = RC.FKREFERL_T \n"
       + "LEFT JOIN REPTR_T      RPT  ON RPT.FKREFERL_T = RFL.IDENTIFIER \n"
@@ -373,25 +380,23 @@ public class ReferralHistoryIndexerJob
       final List<EsPersonReferral> listReadyToNorm,
       final Map<String, List<MinClientReferral>> mapReferralByClient,
       final Map<String, List<EsPersonReferral>> mapAllegationByReferral) {
-    LOGGER.info("Normalize all: START");
+    LOGGER.debug("Normalize all: START");
+    int countNormalized = 0;
 
-    int cntr = 0;
     for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
       // Loop referrals for this client:
       final String clientId = rc.getKey();
       if (StringUtils.isNotBlank(clientId)) {
-        listReadyToNorm.clear();
+        listReadyToNorm.clear(); // next client id
         for (MinClientReferral rc1 : rc.getValue()) {
-          cntr = normalizeClientReferrals(cntr, rc1, clientId, mapReferrals, listReadyToNorm,
-              mapAllegationByReferral);
+          countNormalized = normalizeClientReferrals(countNormalized, rc1, clientId, mapReferrals,
+              listReadyToNorm, mapAllegationByReferral);
         }
-      } else {
-        LOGGER.warn("HUH??? CLIENT ID IS NULL???");
       }
     }
 
-    LOGGER.info("Normalize all: END");
-    return cntr;
+    LOGGER.debug("Normalize all: END");
+    return countNormalized;
   }
 
   protected DB2SystemMonitor buildMonitor(final Connection con) {

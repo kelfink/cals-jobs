@@ -11,6 +11,8 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -30,6 +32,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonNestedPerson;
 import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.es.ElasticSearchPersonReporter;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.EmbeddableAccessLimitation;
 import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -144,15 +147,15 @@ public class EsPersonReferral
   @Type(type = "timestamp")
   private Date reporterLastUpdated;
 
-  // =================
+  // =====================
   // SOCIAL WORKER:
-  // =================
+  // =====================
 
   private EmbeddableStaffWorker worker = new EmbeddableStaffWorker();
 
-  // =============
+  // =====================
   // ALLEGATION:
-  // =============
+  // =====================
 
   @Id
   @Column(name = "ALLEGATION_ID")
@@ -170,9 +173,9 @@ public class EsPersonReferral
   @Type(type = "timestamp")
   private Date allegationLastUpdated;
 
-  // =============
+  // =====================
   // VICTIM:
-  // =============
+  // =====================
 
   @Id
   @Column(name = "VICTIM_ID")
@@ -199,9 +202,9 @@ public class EsPersonReferral
 
   private EmbeddableAccessLimitation accessLimitation = new EmbeddableAccessLimitation();
 
-  // =============
+  // =====================
   // PERPETRATOR:
-  // =============
+  // =====================
 
   @Column(name = "PERPETRATOR_ID")
   private String perpetratorId;
@@ -221,10 +224,36 @@ public class EsPersonReferral
   @Column(name = "PERPETRATOR_SENSITIVITY_IND")
   private String perpetratorSensitivityIndicator;
 
+  // =====================
+  // REPLICATION:
+  // =====================
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "RFL_IBMSNAP_OPERATION", updatable = false)
+  private CmsReplicationOperation referralReplicationOperation;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "RCT_IBMSNAP_OPERATION", updatable = false)
+  private CmsReplicationOperation referralClientReplicationOperation;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "ALG_IBMSNAP_OPERATION", updatable = false)
+  private CmsReplicationOperation allegationReplicationOperation;
+
+  // =====================
+  // CTOR:
+  // =====================
+
   public EsPersonReferral() {
     // Default no-op.
   }
 
+  /**
+   * Construct from incoming result set.
+   * 
+   * @param rs result set
+   * @throws SQLException on database read error
+   */
   public EsPersonReferral(final ResultSet rs) throws SQLException {
     this.referralId = ifNull(rs.getString(COLUMN_REFERRAL_ID));
     this.startDate = rs.getDate("START_DATE");
@@ -263,10 +292,17 @@ public class EsPersonReferral
 
     this.county = rs.getInt("REFERRAL_COUNTY");
     this.lastChange = rs.getDate("LAST_CHG");
+
+    setReferralReplicationOperation(
+        CmsReplicationOperation.strToRepOp(rs.getString("RFL_IBMSNAP_OPERATION")));
+    setReferralClientReplicationOperation(
+        CmsReplicationOperation.strToRepOp(rs.getString("RCT_IBMSNAP_OPERATION")));
+    setAllegationReplicationOperation(
+        CmsReplicationOperation.strToRepOp(rs.getString("ALG_IBMSNAP_OPERATION")));
   }
 
   /**
-   * Extract allegation.
+   * Extract allegation. Reuses this class to extract only those fields required for Allegations.
    * 
    * @param rs allegation result set
    * @return allegation side of referral
@@ -297,7 +333,7 @@ public class EsPersonReferral
   }
 
   /**
-   * Extract referral.
+   * Extract referral. Reuses this class to extract only those fields required for Allegations.
    * 
    * <p>
    * IBM strongly recommends retrieving column results by position and not by column name.
@@ -331,6 +367,9 @@ public class EsPersonReferral
     ret.county = rs.getInt("REFERRAL_COUNTY");
     ret.lastChange = rs.getDate("LAST_CHG");
 
+    ret.setReferralReplicationOperation(
+        CmsReplicationOperation.strToRepOp(rs.getString("RFL_IBMSNAP_OPERATION")));
+
     return ret;
   }
 
@@ -354,9 +393,7 @@ public class EsPersonReferral
     this.endDate = ref.endDate;
     this.referralResponseType = ref.referralResponseType;
     this.referralLastUpdated = ref.referralLastUpdated;
-
     this.accessLimitation = ref.accessLimitation;
-
     this.reporterFirstName = ifNull(ref.reporterFirstName);
     this.reporterId = ifNull(ref.reporterId);
     this.reporterLastName = ifNull(ref.reporterLastName);
@@ -853,4 +890,32 @@ public class EsPersonReferral
   public void setWorker(EmbeddableStaffWorker worker) {
     this.worker = worker;
   }
+
+  public CmsReplicationOperation getReferralReplicationOperation() {
+    return referralReplicationOperation;
+  }
+
+  public void setReferralReplicationOperation(
+      CmsReplicationOperation referralReplicationOperation) {
+    this.referralReplicationOperation = referralReplicationOperation;
+  }
+
+  public CmsReplicationOperation getReferralClientReplicationOperation() {
+    return referralClientReplicationOperation;
+  }
+
+  public void setReferralClientReplicationOperation(
+      CmsReplicationOperation referralClientReplicationOperation) {
+    this.referralClientReplicationOperation = referralClientReplicationOperation;
+  }
+
+  public CmsReplicationOperation getAllegationReplicationOperation() {
+    return allegationReplicationOperation;
+  }
+
+  public void setAllegationReplicationOperation(
+      CmsReplicationOperation allegationReplicationOperation) {
+    this.allegationReplicationOperation = allegationReplicationOperation;
+  }
+
 }

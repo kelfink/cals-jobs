@@ -248,7 +248,7 @@ public class ReferralHistoryIndexerJobTest
     final Map<String, List<EsPersonReferral>> mapAllegationByReferral = new HashMap<>();
     List<EsPersonReferral> allegations = new ArrayList<>();
     List<MinClientReferral> minClientReferrals = new ArrayList<>();
-    MinClientReferral minClRef = new MinClientReferral(DEFAULT_CLIENT_ID, DEFAULT_REFERRAL_ID, "N");
+    MinClientReferral minClRef = new MinClientReferral(DEFAULT_CLIENT_ID, DEFAULT_REFERRAL_ID, "N", null);
     minClientReferrals.add(minClRef);
     mapReferralByClient.put(DEFAULT_CLIENT_ID, minClientReferrals);
     EsPersonReferral ref = new EsPersonReferral();

@@ -3,6 +3,7 @@ package gov.ca.cwds.neutron.rocket.referral;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.std.ApiMarker;
 
 /**
@@ -17,16 +18,21 @@ public class MinClientReferral implements ApiMarker {
   private String clientId;
   private String referralId;
   private String sensitivity;
+  private CmsReplicationOperation clientReplicationOperation = CmsReplicationOperation.U;
 
-  public MinClientReferral(String clientId, String referralId, String sensitivity) {
+  public MinClientReferral(String clientId, String referralId, String sensitivity,
+      String clientReplOp) {
     this.clientId = clientId;
     this.referralId = referralId;
     this.sensitivity = sensitivity;
+    this.clientReplicationOperation = CmsReplicationOperation.strToRepOp(clientReplOp);
   }
 
   public static MinClientReferral extract(final ResultSet rs) throws SQLException {
-    return new MinClientReferral(rs.getString("FKCLIENT_T"), rs.getString("FKREFERL_T"),
-        rs.getString("SENSTV_IND"));
+    final MinClientReferral ret =
+        new MinClientReferral(rs.getString("FKCLIENT_T"), rs.getString("FKREFERL_T"),
+            rs.getString("SENSTV_IND"), rs.getString("CLT_IBMSNAP_OPERATION"));
+    return ret;
   }
 
   public String getClientId() {
@@ -51,6 +57,14 @@ public class MinClientReferral implements ApiMarker {
 
   public void setSensitivity(String sensitivity) {
     this.sensitivity = sensitivity;
+  }
+
+  public CmsReplicationOperation getClientReplicationOperation() {
+    return clientReplicationOperation;
+  }
+
+  public void setClientReplicationOperation(CmsReplicationOperation clientReplicationOperation) {
+    this.clientReplicationOperation = clientReplicationOperation;
   }
 
 }
