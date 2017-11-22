@@ -2,6 +2,11 @@ package gov.ca.cwds.neutron.launch;
 
 import gov.ca.cwds.data.std.ApiMarker;
 
+/**
+ * Fixed rocket specifications define flight path and behavior.
+ * 
+ * @author CWDS API Team
+ */
 public class RocketSpecification implements ApiMarker {
 
   private static final long serialVersionUID = 1L;

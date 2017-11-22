@@ -9,6 +9,7 @@ import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.launch.RocketSpecification;
 
 /**
  * Shared features of all Elasticsearch indexing rockets.
@@ -59,6 +60,10 @@ public interface AtomShared extends ApiMarker {
    */
   default void nameThread(final String title) {
     NeutronThreadUtil.nameThread(title, this);
+  }
+
+  default RocketSpecification rocketSpecs() {
+    return new RocketSpecification();
   }
 
   default void catchYourBreath() {
