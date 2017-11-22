@@ -71,6 +71,12 @@ public class ReferralHistoryIndexerJob
   // + "\nAND c.IDENTIFIER = '0006uNfB2P'" // TESTING ONLY
   ;
 
+  /**
+   * NEXT: filter <strong>deleted<strong> Client, Referral, Referral/Client, Allegation.
+   * <p>
+   * But if you add a single criterion, like exclude deleted, then DB2 z/OS scans entire tables.
+   * </p>
+   */
   protected static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO GT_ID (IDENTIFIER)\n"
       + "WITH step1 AS (\nSELECT ALG.FKREFERL_T AS REFERRAL_ID\n"
       + " FROM ALLGTN_T ALG  WHERE ALG.IBMSNAP_LOGMARKER > ?), step2 AS (\n"
