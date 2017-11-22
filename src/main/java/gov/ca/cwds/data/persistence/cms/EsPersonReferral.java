@@ -406,7 +406,9 @@ public class EsPersonReferral
     this.worker.setWorkerLastName(ifNull(ref.getWorkerLastName()));
     this.worker.setWorkerLastUpdated(ref.getWorkerLastUpdated());
 
-    this.referralReplicationOperation = ref.referralClientReplicationOperation;
+    if (ref.referralClientReplicationOperation != null) {
+      this.referralReplicationOperation = ref.referralClientReplicationOperation;
+    }
   }
 
   private ElasticSearchPersonReporter makeReporter() {
@@ -518,30 +520,34 @@ public class EsPersonReferral
       }
 
       // A referral may have multiple allegations.
-      final ElasticSearchPersonAllegation allegation = makeAllegation();
+      if (this.allegationReplicationOperation != null
+          && this.allegationReplicationOperation != CmsReplicationOperation.D) {
+        final ElasticSearchPersonAllegation allegation = makeAllegation();
 
-      if (AtomDocumentSecurity.isNotSealedSensitive(opts, perpetratorSensitivityIndicator)) {
-        allegation.setPerpetrator(makePerpetrator());
+        if (AtomDocumentSecurity.isNotSealedSensitive(opts, perpetratorSensitivityIndicator)) {
+          allegation.setPerpetrator(makePerpetrator());
 
-        // NOTE: #148091785: deprecated person fields.
-        allegation.setPerpetratorId(this.perpetratorId);
-        allegation.setPerpetratorLegacyClientId(this.perpetratorId);
-        allegation.setPerpetratorFirstName(ifNull(this.perpetratorFirstName));
-        allegation.setPerpetratorLastName(ifNull(this.perpetratorLastName));
+          // NOTE: #148091785: deprecated person fields.
+          allegation.setPerpetratorId(this.perpetratorId);
+          allegation.setPerpetratorLegacyClientId(this.perpetratorId);
+          allegation.setPerpetratorFirstName(ifNull(this.perpetratorFirstName));
+          allegation.setPerpetratorLastName(ifNull(this.perpetratorLastName));
+        }
+
+        if (AtomDocumentSecurity.isNotSealedSensitive(opts, victimSensitivityIndicator)) {
+          allegation.setVictim(makeVictim());
+
+          // NOTE: #148091785: deprecated person fields.
+          allegation.setVictimId(this.victimId);
+          allegation.setVictimLegacyClientId(this.victimId);
+          allegation.setVictimFirstName(ifNull(this.victimFirstName));
+          allegation.setVictimLastName(ifNull(this.victimLastName));
+        }
+
+        ret.addReferral(r, allegation);
       }
-
-      if (AtomDocumentSecurity.isNotSealedSensitive(opts, victimSensitivityIndicator)) {
-        allegation.setVictim(makeVictim());
-
-        // NOTE: #148091785: deprecated person fields.
-        allegation.setVictimId(this.victimId);
-        allegation.setVictimLegacyClientId(this.victimId);
-        allegation.setVictimFirstName(ifNull(this.victimFirstName));
-        allegation.setVictimLastName(ifNull(this.victimLastName));
-      }
-
-      ret.addReferral(r, allegation);
     }
+
     return ret;
   }
 

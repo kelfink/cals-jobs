@@ -30,6 +30,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
+import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -323,7 +324,9 @@ public class ReferralHistoryIndexerJob
       JobLogs.logEvery(++cntr, "read", "bundle referral");
       JobLogs.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
           "referrals");
-      mapReferrals.put(m.getReferralId(), m);
+      if (m.getReferralClientReplicationOperation() != CmsReplicationOperation.D) {
+        mapReferrals.put(m.getReferralId(), m);
+      }
     }
   }
 
@@ -356,27 +359,29 @@ public class ReferralHistoryIndexerJob
       final Map<String, List<EsPersonReferral>> mapAllegationByReferral) {
     int ret = cntr;
     final String referralId = rc1.getReferralId();
-    final EsPersonReferral ref = mapReferrals.get(referralId);
+    final EsPersonReferral denormReferral = mapReferrals.get(referralId);
+    final boolean goodToGo = denormReferral != null
+        && denormReferral.getReferralReplicationOperation() != CmsReplicationOperation.D;
 
     // Sealed and sensitive may be excluded.
-    if (ref != null) {
+    if (goodToGo) {
       // Loop allegations for this referral:
       if (mapAllegationByReferral.containsKey(referralId)) {
         for (EsPersonReferral alg : mapAllegationByReferral.get(referralId)) {
-          alg.mergeClientReferralInfo(clientId, ref);
+          alg.mergeClientReferralInfo(clientId, denormReferral);
           listReadyToNorm.add(alg);
         }
       } else {
-        listReadyToNorm.add(ref);
+        listReadyToNorm.add(denormReferral);
       }
     }
 
-    final ReplicatedPersonReferrals repl = normalizeSingle(listReadyToNorm);
-    if (repl != null) {
-      ++ret;
-      repl.setClientId(clientId);
-      addToIndexQueue(repl);
-    }
+    // #152932457: Overwrite deleted referrals.
+    final ReplicatedPersonReferrals repl =
+        goodToGo ? normalizeSingle(listReadyToNorm) : new ReplicatedPersonReferrals(clientId);
+    ++ret;
+    repl.setClientId(clientId);
+    addToIndexQueue(repl);
 
     return ret;
   }
@@ -389,8 +394,8 @@ public class ReferralHistoryIndexerJob
     int countNormalized = 0;
 
     for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
-      // Loop referrals for this client:
       final String clientId = rc.getKey();
+      // Loop referrals for this client only.
       if (StringUtils.isNotBlank(clientId)) {
         listReadyToNorm.clear(); // next client id
         for (MinClientReferral rc1 : rc.getValue()) {

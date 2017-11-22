@@ -20,7 +20,7 @@ public final class EntityNormalizer {
    * Utility class, static methods only.
    */
   private EntityNormalizer() {
-    // Util class, static methods only.
+    // Utility class.
   }
 
   /**
