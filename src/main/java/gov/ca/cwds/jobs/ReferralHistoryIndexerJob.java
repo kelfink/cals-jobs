@@ -69,16 +69,13 @@ public class ReferralHistoryIndexerJob
           + "\nFROM REFR_CLT rc"
           + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?"
-       // + "\nAND  c.IBMSNAP_OPERATION != 'D' "
+          + "\nAND  c.IBMSNAP_OPERATION != 'D' "
        // + "\nAND rc.IBMSNAP_OPERATION != 'D'"
           ;
 //@formatter:on
 
   /**
-   * NEXT: filter <strong>deleted</strong> Client, Referral, Referral/Client, Allegation.
-   * <p>
-   * But if you add a single criterion, like exclude deleted, then DB2 z/OS scans entire tables.
-   * </p>
+   * Filter <strong>deleted</strong> Client, Referral, Referral/Client, Allegation.
    */
 //@formatter:off
   protected static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO GT_ID (IDENTIFIER)\n"
@@ -149,7 +146,7 @@ public class ReferralHistoryIndexerJob
       + "JOIN ALLGTN_T       ALG  ON ALG.FKREFERL_T = RC.FKREFERL_T \n"
       + "JOIN CLIENT_T       CLV  ON CLV.IDENTIFIER = ALG.FKCLIENT_T \n"
       + "LEFT JOIN CLIENT_T  CLP  ON CLP.IDENTIFIER = ALG.FKCLIENT_0 \n"
-      + " FOR READ ONLY WITH UR ";
+      + "FOR READ ONLY WITH UR ";
 //@formatter:on
 
 //@formatter:off
@@ -249,7 +246,7 @@ public class ReferralHistoryIndexerJob
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
-    final String ret = buf.toString().replaceAll("\\s+", " ");
+    final String ret = buf.toString().replaceAll("\\s+", " ").trim();
     LOGGER.info("REFERRAL SQL: {}", ret);
     return ret;
   }
@@ -447,25 +444,25 @@ public class ReferralHistoryIndexerJob
       final Map<String, EsPersonReferral> mapReferrals,
       final List<MinClientReferral> listClientReferralKeys,
       final List<EsPersonReferral> listReadyToNorm) {
-    int cntr = 0;
+    int countNormalized = 0;
     try {
       final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys
           .stream().sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
           .collect(Collectors.groupingBy(MinClientReferral::getClientId));
-      listClientReferralKeys.clear();
+      listClientReferralKeys.clear(); // release objects for gc
 
       final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
           .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
           .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
-      listAllegations.clear();
+      listAllegations.clear(); // release objects for gc
 
       // For each client group:
-      cntr = normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
+      countNormalized = normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
           mapAllegationByReferral);
     } finally {
       cleanUpMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
     }
-    return cntr;
+    return countNormalized;
   }
 
   protected String getClientSeedQuery() {
@@ -507,15 +504,11 @@ public class ReferralHistoryIndexerJob
       final DB2SystemMonitor monitor = NeutronDB2Util.monitorStart(con);
       final String schema = getDBSchemaName();
 
-      try (
-          final PreparedStatement stmtInsClient =
-              con.prepareStatement(getClientSeedQuery().replaceAll("\\s+", " ").trim());
-          final PreparedStatement stmtSelClient =
-              con.prepareStatement(SELECT_CLIENT.replaceAll("\\s+", " ").trim());
+      try (final PreparedStatement stmtInsClient = con.prepareStatement(getClientSeedQuery());
+          final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT);
           final PreparedStatement stmtSelReferral =
-              con.prepareStatement(getInitialLoadQuery(schema).replaceAll("\\s+", " ").trim());
-          final PreparedStatement stmtSelAllegation =
-              con.prepareStatement(SELECT_ALLEGATION.replaceAll("\\s+", " ").trim())) {
+              con.prepareStatement(getInitialLoadQuery(schema));
+          final PreparedStatement stmtSelAllegation = con.prepareStatement(SELECT_ALLEGATION)) {
         // Read separate components for this key bundle.
         readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
         readReferrals(stmtSelReferral, mapReferrals);

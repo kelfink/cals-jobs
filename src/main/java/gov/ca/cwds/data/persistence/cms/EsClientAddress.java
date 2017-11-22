@@ -25,7 +25,7 @@ import gov.ca.cwds.neutron.util.NeutronDateUtils;
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.
  * </p>
  * 
- * NOTE: #145240149: find ALL client/address recs affected by changes.
+ * #145240149: find ALL client/address records affected by changes.
  *
  * REFRESH TABLE cwsrsq.ES_REL_CLN_RELT_CLIENT ;
  * 

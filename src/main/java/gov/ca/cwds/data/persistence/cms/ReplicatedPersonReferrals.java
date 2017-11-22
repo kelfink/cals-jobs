@@ -14,7 +14,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.neutron.util.shrinkray.RetrovillePerson;
 
 /**
- * Pseudo-normalized container for CMS person referral.
+ * Normalized container for CMS person referral.
  * 
  * @author CWDS API Team
  */

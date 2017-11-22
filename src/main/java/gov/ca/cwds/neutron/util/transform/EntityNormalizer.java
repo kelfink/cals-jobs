@@ -9,23 +9,23 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
 /**
- * Transform a List of de-normalized objects from a view and transform them into a normalized
- * object. Normalize ("reduce") de-normalized type D to normalized type N.
+ * Transform a List of denormalized objects from a view and transform them into a normalized object.
+ * Normalize ("reduce") denormalized type D to normalized type N.
  * 
  * @author CWDS API Team
  */
 public final class EntityNormalizer {
 
   /**
-   * Util class, static methods only.
+   * Utility class, static methods only.
    */
   private EntityNormalizer() {
     // Util class, static methods only.
   }
 
   /**
-   * Transform a List of de-normalized objects from a view and transform them into a normalized
-   * object. Normalize a de-normalized type D to normalized type N.
+   * Transform a List of denormalized objects from a view and transform them into a normalized
+   * object. Normalize a denormalized type D to normalized type N.
    * 
    * <p>
    * The "transform" step usually runs in a single thread. Therefore, most of the time, one can
@@ -33,7 +33,7 @@ public final class EntityNormalizer {
    * alleviate concerns of thread safety.
    * </p>
    * 
-   * @param denormalized de-normalized records
+   * @param denormalized denormalized records
    * @return List of normalized objects
    * @param <N> normalized, storable in Elasticsearch, Person persistence class
    * @param <D> MQT entity class, if any, or N
