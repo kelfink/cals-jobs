@@ -293,12 +293,12 @@ public class EsPersonReferral
     this.county = rs.getInt("REFERRAL_COUNTY");
     this.lastChange = rs.getDate("LAST_CHG");
 
-    setReferralReplicationOperation(
-        CmsReplicationOperation.strToRepOp(rs.getString("RFL_IBMSNAP_OPERATION")));
-    setReferralClientReplicationOperation(
-        CmsReplicationOperation.strToRepOp(rs.getString("RCT_IBMSNAP_OPERATION")));
-    setAllegationReplicationOperation(
-        CmsReplicationOperation.strToRepOp(rs.getString("ALG_IBMSNAP_OPERATION")));
+    this.referralReplicationOperation =
+        CmsReplicationOperation.strToRepOp(rs.getString("RFL_IBMSNAP_OPERATION"));
+    this.referralClientReplicationOperation =
+        CmsReplicationOperation.strToRepOp(rs.getString("RCT_IBMSNAP_OPERATION"));
+    this.allegationReplicationOperation =
+        CmsReplicationOperation.strToRepOp(rs.getString("ALG_IBMSNAP_OPERATION"));
   }
 
   /**
