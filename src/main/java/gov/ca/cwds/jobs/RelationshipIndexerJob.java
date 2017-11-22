@@ -53,13 +53,27 @@ public class RelationshipIndexerJob
    * SQL to insert last changed client list into global temporary table for use in views,
    * VW_LST_BI_DIR_RELATION and VW_LST_REL_CLN_RELT_CLIENT.
    */
+//@formatter:off
   static final String INSERT_CLIENT_LAST_CHG =
-      "INSERT INTO GT_ID (IDENTIFIER)\nSELECT clnr.IDENTIFIER\nFROM CLN_RELT CLNR\n"
-          + "WHERE CLNR.IBMSNAP_LOGMARKER > ?\nUNION ALL\nSELECT clnr.IDENTIFIER\n"
-          + "FROM CLN_RELT CLNR\nJOIN CLIENT_T CLNS ON CLNR.FKCLIENT_T = CLNS.IDENTIFIER\n"
-          + "WHERE CLNS.IBMSNAP_LOGMARKER > ?\nUNION ALL\nSELECT clnr.IDENTIFIER\n"
-          + "FROM CLN_RELT CLNR\nJOIN CLIENT_T CLNP ON CLNR.FKCLIENT_0 = CLNP.IDENTIFIER\n"
-          + "WHERE CLNP.IBMSNAP_LOGMARKER > ?";
+      "INSERT INTO GT_ID (IDENTIFIER)\n"
+      + "SELECT clnr.IDENTIFIER\nFROM CLN_RELT CLNR\n"
+          + "WHERE clnr.IBMSNAP_LOGMARKER > ?\n"
+          + "AND clnr.IBMSNAP_OPERATION IN ('I','U')\n"
+          + "UNION ALL\n"
+          + "SELECT clnr.IDENTIFIER\n"
+          + "FROM CLN_RELT CLNR\n"
+          + "JOIN CLIENT_T CLNS ON CLNR.FKCLIENT_T = CLNS.IDENTIFIER\n"
+          + "WHERE CLNS.IBMSNAP_LOGMARKER > ?\n"
+          + "AND clnr.IBMSNAP_OPERATION IN ('I','U')\n"
+          + "AND clns.IBMSNAP_OPERATION IN ('I','U')\n"
+          + "UNION ALL\n"
+          + "SELECT clnr.IDENTIFIER\n"
+          + "FROM CLN_RELT CLNR\n"
+          + "JOIN CLIENT_T CLNP ON CLNR.FKCLIENT_0 = CLNP.IDENTIFIER\n"
+          + "WHERE CLNP.IBMSNAP_LOGMARKER > ?"
+          + "AND clnr.IBMSNAP_OPERATION IN ('I','U')\n"
+          + "AND clnp.IBMSNAP_OPERATION IN ('I','U') ";
+//@formatter:on
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
