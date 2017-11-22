@@ -62,14 +62,15 @@ public class ReferralHistoryIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
 
+//@formatter:off
   protected static final String INSERT_CLIENT_FULL =
       "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)"
-          + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc"
+          + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND"
+          + "\nFROM REFR_CLT rc"
           + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?"
-          + "\nAND c.IBMSNAP_OPERATION != 'D' AND rc.IBMSNAP_OPERATION != 'D'"
-  // + "\nAND c.IDENTIFIER = '0006uNfB2P'" // TESTING ONLY
-  ;
+          + "\nAND c.IBMSNAP_OPERATION != 'D' AND rc.IBMSNAP_OPERATION != 'D'";
+//@formatter:on
 
   /**
    * NEXT: filter <strong>deleted<strong> Client, Referral, Referral/Client, Allegation.
@@ -120,12 +121,14 @@ public class ReferralHistoryIndexerJob
       + " ) "
       + " SELECT DISTINCT g.REFERRAL_ID FROM hoard g ";
 //@formatter:on
-  
+
   protected static final String SELECT_CLIENT =
       "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM GT_REFR_CLT RC";
 
+//@formatter:off
   protected static final String SELECT_ALLEGATION = "SELECT \n"
-      + " RC.FKREFERL_T         AS REFERRAL_ID,\n" + " ALG.IDENTIFIER        AS ALLEGATION_ID,\n"
+      + " RC.FKREFERL_T         AS REFERRAL_ID,\n" 
+      + " ALG.IDENTIFIER        AS ALLEGATION_ID,\n"
       + " ALG.ALG_DSPC          AS ALLEGATION_DISPOSITION,\n"
       + " ALG.ALG_TPC           AS ALLEGATION_TYPE,\n"
       + " ALG.LST_UPD_TS        AS ALLEGATION_LAST_UPDATED,\n"
@@ -138,15 +141,20 @@ public class ReferralHistoryIndexerJob
       + " CLV.SENSTV_IND        AS VICTIM_SENSITIVITY_IND,\n"
       + " TRIM(CLV.COM_FST_NM)  AS VICTIM_FIRST_NM,\n"
       + " TRIM(CLV.COM_LST_NM)  AS VICTIM_LAST_NM,\n"
-      + " CLV.LST_UPD_TS        AS VICTIM_LAST_UPDATED,\n" + " CURRENT TIMESTAMP AS LAST_CHG \n"
+      + " CLV.LST_UPD_TS        AS VICTIM_LAST_UPDATED,\n" 
+      + " CURRENT TIMESTAMP AS LAST_CHG \n"
       + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM GT_REFR_CLT rc1) RC \n"
       + "JOIN ALLGTN_T       ALG  ON ALG.FKREFERL_T = RC.FKREFERL_T \n"
       + "JOIN CLIENT_T       CLV  ON CLV.IDENTIFIER = ALG.FKCLIENT_T \n"
       + "LEFT JOIN CLIENT_T  CLP  ON CLP.IDENTIFIER = ALG.FKCLIENT_0 \n"
       + " FOR READ ONLY WITH UR ";
+//@formatter:on
 
-  protected static final String SELECT_REFERRAL = "SELECT RFL.IDENTIFIER        AS REFERRAL_ID,\n"
-      + " RFL.REF_RCV_DT        AS START_DATE,\n" + " RFL.REFCLSR_DT        AS END_DATE,\n"
+//@formatter:off
+  protected static final String SELECT_REFERRAL = "SELECT "
+      + " RFL.IDENTIFIER        AS REFERRAL_ID,\n"
+      + " RFL.REF_RCV_DT        AS START_DATE,\n" 
+      + " RFL.REFCLSR_DT        AS END_DATE,\n"
       + " RFL.RFR_RSPC          AS REFERRAL_RESPONSE_TYPE,\n"
       + " RFL.LMT_ACSSCD        AS LIMITED_ACCESS_CODE,\n"
       + " RFL.LMT_ACS_DT        AS LIMITED_ACCESS_DATE,\n"
@@ -157,14 +165,17 @@ public class ReferralHistoryIndexerJob
       + " TRIM(RPT.RPTR_FSTNM)  AS REPORTER_FIRST_NM,\n"
       + " TRIM(RPT.RPTR_LSTNM)  AS REPORTER_LAST_NM,\n"
       + " RPT.LST_UPD_TS        AS REPORTER_LAST_UPDATED,\n"
-      + " STP.IDENTIFIER        AS WORKER_ID,\n" + " TRIM(STP.FIRST_NM)    AS WORKER_FIRST_NM,\n"
+      + " STP.IDENTIFIER        AS WORKER_ID,\n" 
+      + " TRIM(STP.FIRST_NM)    AS WORKER_FIRST_NM,\n"
       + " TRIM(STP.LAST_NM)     AS WORKER_LAST_NM,\n"
       + " STP.LST_UPD_TS        AS WORKER_LAST_UPDATED,\n"
-      + " RFL.GVR_ENTC          AS REFERRAL_COUNTY,\n" + " CURRENT TIMESTAMP     AS LAST_CHG \n"
+      + " RFL.GVR_ENTC          AS REFERRAL_COUNTY,\n" 
+      + " CURRENT TIMESTAMP     AS LAST_CHG \n"
       + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM GT_REFR_CLT rc1) RC \n"
       + "JOIN REFERL_T          RFL  ON RFL.IDENTIFIER = RC.FKREFERL_T \n"
       + "LEFT JOIN REPTR_T      RPT  ON RPT.FKREFERL_T = RFL.IDENTIFIER \n"
       + "LEFT JOIN STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER ";
+//@formatter:on
 
   /**
    * Allocate memory once for each thread and reuse per key range.
