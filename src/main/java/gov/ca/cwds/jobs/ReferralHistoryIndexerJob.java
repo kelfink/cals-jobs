@@ -146,7 +146,7 @@ public class ReferralHistoryIndexerJob
       + " TRIM(CLV.COM_LST_NM)  AS VICTIM_LAST_NM,\n"
       + " CLV.LST_UPD_TS        AS VICTIM_LAST_UPDATED,\n" 
       + " CURRENT TIMESTAMP     AS LAST_CHG, \n"
-      + " ALG.IBMSNAP_LOGMARKER AS ALG_IBMSNAP_LOGMARKER \n"
+      + " ALG.IBMSNAP_OPERATION AS ALG_IBMSNAP_OPERATION \n"
       + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM GT_REFR_CLT rc1) RC \n"
       + "JOIN ALLGTN_T       ALG  ON ALG.FKREFERL_T = RC.FKREFERL_T \n"
       + "JOIN CLIENT_T       CLV  ON CLV.IDENTIFIER = ALG.FKCLIENT_T \n"
@@ -343,6 +343,11 @@ public class ReferralHistoryIndexerJob
           "allegations");
       listAllegations.add(m);
     }
+  }
+
+  @Override
+  public List<ReplicatedPersonReferrals> normalize(List<EsPersonReferral> recs) {
+    return EntityNormalizer.<ReplicatedPersonReferrals, EsPersonReferral>normalizeList(recs);
   }
 
   protected int normalizeClientReferrals(int cntr, MinClientReferral rc1, final String clientId,
@@ -612,11 +617,6 @@ public class ReferralHistoryIndexerJob
   @Override
   public boolean mustDeleteLimitedAccessRecords() {
     return !getFlightPlan().isLoadSealedAndSensitive();
-  }
-
-  @Override
-  public List<ReplicatedPersonReferrals> normalize(List<EsPersonReferral> recs) {
-    return EntityNormalizer.<ReplicatedPersonReferrals, EsPersonReferral>normalizeList(recs);
   }
 
   @Override

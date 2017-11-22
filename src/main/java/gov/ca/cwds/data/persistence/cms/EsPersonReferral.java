@@ -329,6 +329,9 @@ public class EsPersonReferral
     ret.victimLastUpdated = rs.getTimestamp("VICTIM_LAST_UPDATED");
     ret.victimSensitivityIndicator = rs.getString("VICTIM_SENSITIVITY_IND");
 
+    ret.setAllegationReplicationOperation(
+        CmsReplicationOperation.strToRepOp(rs.getString("ALG_IBMSNAP_OPERATION")));
+
     return ret;
   }
 
@@ -402,6 +405,8 @@ public class EsPersonReferral
     this.worker.setWorkerId(ref.getWorkerId());
     this.worker.setWorkerLastName(ifNull(ref.getWorkerLastName()));
     this.worker.setWorkerLastUpdated(ref.getWorkerLastUpdated());
+
+    this.referralReplicationOperation = ref.referralClientReplicationOperation;
   }
 
   private ElasticSearchPersonReporter makeReporter() {
@@ -425,7 +430,6 @@ public class EsPersonReferral
     ret.setLastName(ifNull(this.getWorkerLastName()));
     ret.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.getWorkerId(),
         this.getWorkerLastUpdated(), LegacyTable.STAFF_PERSON));
-
     return ret;
   }
 
@@ -486,56 +490,58 @@ public class EsPersonReferral
       map.put(this.clientId, ret);
     }
 
-    final boolean isNewReferral = !ret.hasReferral(this.referralId);
-    final ElasticSearchPersonReferral r =
-        !isNewReferral ? ret.getReferral(referralId) : new ElasticSearchPersonReferral();
+    // Pivotal #152932457: **Snapshot** person ES has HOI but no referrals in legacy.
+    // Remove deleted referrals elements by overwriting them.
+    if (this.referralReplicationOperation != CmsReplicationOperation.D) {
+      final boolean isNewReferral = !ret.hasReferral(this.referralId);
+      final ElasticSearchPersonReferral r =
+          !isNewReferral ? ret.getReferral(referralId) : new ElasticSearchPersonReferral();
 
-    if (isNewReferral) {
-      r.setId(this.referralId);
-      r.setLegacyId(this.referralId);
-      r.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.referralLastUpdated));
-      r.setStartDate(DomainChef.cookDate(this.startDate));
-      r.setEndDate(DomainChef.cookDate(this.endDate));
-      r.setCountyId(this.county == null ? null : this.county.toString());
-      r.setCountyName(SystemCodeCache.global().getSystemCodeShortDescription(this.county));
-      r.setResponseTimeId(
-          this.referralResponseType == null ? null : this.referralResponseType.toString());
-      r.setResponseTime(
-          SystemCodeCache.global().getSystemCodeShortDescription(this.referralResponseType));
-      r.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.referralId,
-          this.referralLastUpdated, LegacyTable.REFERRAL));
+      if (isNewReferral) {
+        r.setId(this.referralId);
+        r.setLegacyId(this.referralId);
+        r.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.referralLastUpdated));
+        r.setStartDate(DomainChef.cookDate(this.startDate));
+        r.setEndDate(DomainChef.cookDate(this.endDate));
+        r.setCountyId(this.county == null ? null : this.county.toString());
+        r.setCountyName(SystemCodeCache.global().getSystemCodeShortDescription(this.county));
+        r.setResponseTimeId(
+            this.referralResponseType == null ? null : this.referralResponseType.toString());
+        r.setResponseTime(
+            SystemCodeCache.global().getSystemCodeShortDescription(this.referralResponseType));
+        r.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.referralId,
+            this.referralLastUpdated, LegacyTable.REFERRAL));
 
-      r.setReporter(makeReporter());
-      r.setAssignedSocialWorker(makeAssignedWorker());
-      r.setAccessLimitation(makeAccessLimitation());
+        r.setReporter(makeReporter());
+        r.setAssignedSocialWorker(makeAssignedWorker());
+        r.setAccessLimitation(makeAccessLimitation());
+      }
+
+      // A referral may have multiple allegations.
+      final ElasticSearchPersonAllegation allegation = makeAllegation();
+
+      if (AtomDocumentSecurity.isNotSealedSensitive(opts, perpetratorSensitivityIndicator)) {
+        allegation.setPerpetrator(makePerpetrator());
+
+        // NOTE: #148091785: deprecated person fields.
+        allegation.setPerpetratorId(this.perpetratorId);
+        allegation.setPerpetratorLegacyClientId(this.perpetratorId);
+        allegation.setPerpetratorFirstName(ifNull(this.perpetratorFirstName));
+        allegation.setPerpetratorLastName(ifNull(this.perpetratorLastName));
+      }
+
+      if (AtomDocumentSecurity.isNotSealedSensitive(opts, victimSensitivityIndicator)) {
+        allegation.setVictim(makeVictim());
+
+        // NOTE: #148091785: deprecated person fields.
+        allegation.setVictimId(this.victimId);
+        allegation.setVictimLegacyClientId(this.victimId);
+        allegation.setVictimFirstName(ifNull(this.victimFirstName));
+        allegation.setVictimLastName(ifNull(this.victimLastName));
+      }
+
+      ret.addReferral(r, allegation);
     }
-
-    // A referral may have multiple allegations.
-    final ElasticSearchPersonAllegation allegation = makeAllegation();
-
-    if (AtomDocumentSecurity.isNotSealedSensitive(opts, perpetratorSensitivityIndicator)) {
-      allegation.setPerpetrator(makePerpetrator());
-
-      // NOTE: #148091785: deprecated person fields.
-      allegation.setPerpetratorId(this.perpetratorId);
-      allegation.setPerpetratorLegacyClientId(this.perpetratorId);
-      allegation.setPerpetratorFirstName(ifNull(this.perpetratorFirstName));
-      allegation.setPerpetratorLastName(ifNull(this.perpetratorLastName));
-    }
-
-    if (AtomDocumentSecurity.isNotSealedSensitive(opts, victimSensitivityIndicator)) {
-      allegation.setVictim(makeVictim());
-
-      // NOTE: #148091785: deprecated person fields.
-      allegation.setVictimId(this.victimId);
-      allegation.setVictimLegacyClientId(this.victimId);
-      allegation.setVictimFirstName(ifNull(this.victimFirstName));
-      allegation.setVictimLastName(ifNull(this.victimLastName));
-    }
-
-    // #152932457: **Snapshot** NS search shows HOI for person but legacy shows no referral/cases
-    // NEXT: delete (overwrite) referrals element.
-    ret.addReferral(r, allegation);
     return ret;
   }
 
