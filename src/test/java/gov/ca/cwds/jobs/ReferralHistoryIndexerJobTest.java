@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,7 +40,6 @@ import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
-import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.rocket.referral.MinClientReferral;
 
 public class ReferralHistoryIndexerJobTest
@@ -53,9 +51,8 @@ public class ReferralHistoryIndexerJobTest
     private boolean throwOnRanges = false;
 
     public TestReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao,
-        ElasticsearchDao esDao, String lastJobRunTimeFilename, ObjectMapper mapper,
-        SessionFactory sessionFactory, FlightRecorder jobHistory, FlightPlan opts) {
-      super(clientDao, esDao, lastJobRunTimeFilename, mapper, opts);
+        ElasticsearchDao esDao, String lastRunFile, ObjectMapper mapper, FlightPlan flightPlan) {
+      super(clientDao, esDao, lastRunFile, mapper, flightPlan);
     }
 
     public static DB2SystemMonitor monitorStart(final Connection con) {
@@ -109,8 +106,8 @@ public class ReferralHistoryIndexerJobTest
     super.setup();
 
     dao = new ReplicatedPersonReferralsDao(sessionFactory);
-    target = new TestReferralHistoryIndexerJob(dao, esDao, lastRunFile, MAPPER, sessionFactory,
-        flightRecorder, FlightPlanTest.makeGeneric());
+    target = new TestReferralHistoryIndexerJob(dao, esDao, lastRunFile, MAPPER,
+        FlightPlanTest.makeGeneric());
 
     when(rs.next()).thenReturn(true, true, false);
   }
@@ -248,7 +245,8 @@ public class ReferralHistoryIndexerJobTest
     final Map<String, List<EsPersonReferral>> mapAllegationByReferral = new HashMap<>();
     List<EsPersonReferral> allegations = new ArrayList<>();
     List<MinClientReferral> minClientReferrals = new ArrayList<>();
-    MinClientReferral minClRef = new MinClientReferral(DEFAULT_CLIENT_ID, DEFAULT_REFERRAL_ID, "N", null);
+    MinClientReferral minClRef =
+        new MinClientReferral(DEFAULT_CLIENT_ID, DEFAULT_REFERRAL_ID, "N", null);
     minClientReferrals.add(minClRef);
     mapReferralByClient.put(DEFAULT_CLIENT_ID, minClientReferrals);
     EsPersonReferral ref = new EsPersonReferral();
@@ -366,22 +364,21 @@ public class ReferralHistoryIndexerJobTest
     final ResultSet rsSelReferral = mock(ResultSet.class);
     final ResultSet rsSelAllegation = mock(ResultSet.class);
 
-    final String sqlInsClient =
-        target.INSERT_CLIENT_FULL.replaceAll("#SCHEMA#", schema).replaceAll("\\s+", " ").trim();
-    final String sqlSelClient =
-        target.SELECT_CLIENT.replaceAll("#SCHEMA#", schema).replaceAll("\\s+", " ").trim();
-    final String sqlSelReferral = target.getInitialLoadQuery(schema).replaceAll("\\s+", " ").trim();
-    final String selAllegation =
-        target.SELECT_ALLEGATION.replaceAll("#SCHEMA#", schema).replaceAll("\\s+", " ").trim();
+    final String sqlInsClient = target.getClientSeedQuery();
+    final String sqlSelClient = target.SELECT_CLIENT;
+    final String sqlSelReferral = target.getInitialLoadQuery(schema);
+    final String selAllegation = target.SELECT_ALLEGATION;
 
     when(con.prepareStatement(sqlInsClient)).thenReturn(stmtInsClient);
     when(con.prepareStatement(sqlSelClient)).thenReturn(stmtSelClient);
     when(con.prepareStatement(sqlSelReferral)).thenReturn(stmtSelReferral);
     when(con.prepareStatement(selAllegation)).thenReturn(stmtSelAllegation);
+
     when(stmtInsClient.executeQuery()).thenReturn(rsInsClient);
     when(stmtSelClient.executeQuery()).thenReturn(rsSelClient);
     when(stmtSelReferral.executeQuery()).thenReturn(rsSelReferral);
     when(stmtSelAllegation.executeQuery()).thenReturn(rsSelAllegation);
+
     when(rsInsClient.next()).thenReturn(true).thenReturn(false);
     when(rsSelClient.next()).thenReturn(true).thenReturn(false);
     when(rsSelReferral.next()).thenReturn(false);
@@ -581,10 +578,10 @@ public class ReferralHistoryIndexerJobTest
     String clientId = null;
     Map<String, EsPersonReferral> mapReferrals = new HashMap<String, EsPersonReferral>();
     List<EsPersonReferral> listReadyToNorm = new ArrayList<EsPersonReferral>();
-    Map mapAllegationByReferral = new HashMap();
+    final Map mapAllegationByReferral = new HashMap<>();
     int actual = target.normalizeClientReferrals(cntr, rc1, clientId, mapReferrals, listReadyToNorm,
         mapAllegationByReferral);
-    int expected = 0;
+    int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -680,7 +677,7 @@ public class ReferralHistoryIndexerJobTest
   public void getClientSeedQuery_Args__() throws Exception {
     final String actual = target.getClientSeedQuery();
     final String expected =
-        "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?\nAND c.IBMSNAP_OPERATION != 'D' AND rc.IBMSNAP_OPERATION != 'D'";
+        "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?\nAND  c.IBMSNAP_OPERATION != 'D' ";
     assertThat(actual, is(equalTo(expected)));
   }
 

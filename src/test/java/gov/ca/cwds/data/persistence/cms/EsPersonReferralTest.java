@@ -132,13 +132,14 @@ public class EsPersonReferralTest extends Goddard {
     // referral.setCountyId("null");
     // referral.setResponseTimeId("null");
     // allegation.setDispositionId("null");
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void getLastChange_Args__() throws Exception {
-    Date actual = target.getLastChange();
-    Date expected = null;
+    final Date expected = new Date();
+    target.setLastChange(expected);
+    final Date actual = target.getLastChange();
     assertThat(actual, is(equalTo(expected)));
   }
 
