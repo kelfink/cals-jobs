@@ -17,6 +17,11 @@ public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
    */
   protected final FlightLog flightLog;
 
+  /**
+   * Construct for a single rocket and bulk processor.
+   * 
+   * @param flightLog the rocket's flight log
+   */
   public NeutronBulkProcessorListener(FlightLog flightLog) {
     this.flightLog = flightLog;
   }
@@ -31,6 +36,7 @@ public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
   @Override
   public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
     final int numActions = request.numberOfActions();
+
     if (response.hasFailures()) {
       LOGGER.error("\n\t>>>>>>BULK FAILURES??? status: {}, errors: {}\n", response.status(),
           response.buildFailureMessage());

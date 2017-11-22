@@ -196,7 +196,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
    */
   protected void addToIndexQueue(T norm) {
     try {
-      JobLogs.logEvery(flightLog.markQueuedToIndex(), "add to index queue", "recs");
+      JobLogs.logEvery(flightLog.markQueuedToIndex(), "index queue", "recs");
       queueIndex.putLast(norm);
     } catch (InterruptedException e) {
       fail();

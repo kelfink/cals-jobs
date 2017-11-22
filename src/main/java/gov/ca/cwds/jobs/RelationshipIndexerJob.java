@@ -56,23 +56,24 @@ public class RelationshipIndexerJob
 //@formatter:off
   static final String INSERT_CLIENT_LAST_CHG =
       "INSERT INTO GT_ID (IDENTIFIER)\n"
-      + "SELECT clnr.IDENTIFIER\nFROM CLN_RELT CLNR\n"
+          + "SELECT clnr.IDENTIFIER\nFROM CLN_RELT CLNR\n"
           + "WHERE clnr.IBMSNAP_LOGMARKER > ?\n"
-          + "AND clnr.IBMSNAP_OPERATION IN ('I','U')\n"
-          + "UNION ALL\n"
+       // + " AND clnr.IBMSNAP_OPERATION IN ('I','U')\n"
+       + "UNION ALL\n"
           + "SELECT clnr.IDENTIFIER\n"
           + "FROM CLN_RELT CLNR\n"
           + "JOIN CLIENT_T CLNS ON CLNR.FKCLIENT_T = CLNS.IDENTIFIER\n"
           + "WHERE CLNS.IBMSNAP_LOGMARKER > ?\n"
-          + "AND clnr.IBMSNAP_OPERATION IN ('I','U')\n"
-          + "AND clns.IBMSNAP_OPERATION IN ('I','U')\n"
-          + "UNION ALL\n"
+       // + "AND clnr.IBMSNAP_OPERATION IN ('I','U')\n"
+       // + "AND clns.IBMSNAP_OPERATION IN ('I','U')\n"
+       + "UNION ALL\n"
           + "SELECT clnr.IDENTIFIER\n"
           + "FROM CLN_RELT CLNR\n"
           + "JOIN CLIENT_T CLNP ON CLNR.FKCLIENT_0 = CLNP.IDENTIFIER\n"
           + "WHERE CLNP.IBMSNAP_LOGMARKER > ?"
-          + "AND clnr.IBMSNAP_OPERATION IN ('I','U')\n"
-          + "AND clnp.IBMSNAP_OPERATION IN ('I','U') ";
+       // + "AND clnr.IBMSNAP_OPERATION IN ('I','U')\n"
+       // + "AND clnp.IBMSNAP_OPERATION IN ('I','U') "
+          ;
 //@formatter:on
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
@@ -133,9 +134,9 @@ public class RelationshipIndexerJob
   }
 
   /**
-   * Send all recs for the same group id to the index queue.
+   * Send all records for the same group id to the index queue.
    * 
-   * @param grpRecs recs for same client id
+   * @param grpRecs records for same client id
    */
   protected void normalizeAndQueueIndex(final List<EsRelationship> grpRecs) {
     grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()

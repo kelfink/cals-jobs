@@ -69,7 +69,9 @@ public class ReferralHistoryIndexerJob
           + "\nFROM REFR_CLT rc"
           + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?"
-          + "\nAND c.IBMSNAP_OPERATION != 'D' AND rc.IBMSNAP_OPERATION != 'D'";
+       // + "\nAND  c.IBMSNAP_OPERATION != 'D' "
+       // + "\nAND rc.IBMSNAP_OPERATION != 'D'"
+          ;
 //@formatter:on
 
   /**
