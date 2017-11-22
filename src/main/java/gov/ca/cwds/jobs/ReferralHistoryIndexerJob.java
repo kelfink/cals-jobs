@@ -77,24 +77,50 @@ public class ReferralHistoryIndexerJob
    * But if you add a single criterion, like exclude deleted, then DB2 z/OS scans entire tables.
    * </p>
    */
+//@formatter:off
   protected static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO GT_ID (IDENTIFIER)\n"
-      + "WITH step1 AS (\nSELECT ALG.FKREFERL_T AS REFERRAL_ID\n"
-      + " FROM ALLGTN_T ALG  WHERE ALG.IBMSNAP_LOGMARKER > ?), step2 AS (\n"
-      + " SELECT ALG.FKREFERL_T AS REFERRAL_ID FROM CLIENT_T C \n"
-      + " JOIN ALLGTN_T ALG ON (C.IDENTIFIER = ALG.FKCLIENT_0 OR C.IDENTIFIER = ALG.FKCLIENT_T)\n"
-      + " WHERE C.IBMSNAP_LOGMARKER > ?), step3 AS (\n"
-      + " SELECT RCT.FKREFERL_T AS REFERRAL_ID FROM REFR_CLT RCT \n"
-      + " WHERE RCT.IBMSNAP_LOGMARKER > ?), step4 AS (\n"
-      + " SELECT RFL.IDENTIFIER AS REFERRAL_ID FROM REFERL_T RFL \n"
-      + " WHERE RFL.IBMSNAP_LOGMARKER > ?), step5 AS (\n"
-      + " SELECT RPT.FKREFERL_T AS REFERRAL_ID FROM REPTR_T RPT \n"
-      + " WHERE RPT.IBMSNAP_LOGMARKER > ?), hoard AS (\n"
-      + " SELECT s1.REFERRAL_ID FROM STEP1 s1 UNION ALL\n"
-      + " SELECT s2.REFERRAL_ID FROM STEP2 s2 UNION ALL\n"
-      + " SELECT s3.REFERRAL_ID FROM STEP3 s3 UNION ALL\n"
-      + " SELECT s4.REFERRAL_ID FROM STEP4 s4 UNION ALL\n"
-      + " SELECT s5.REFERRAL_ID FROM STEP5 s5 )\n" + "SELECT DISTINCT g.REFERRAL_ID from hoard g ";
-
+      + " WITH step1 AS ("
+      + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID"
+      + "     FROM ALLGTN_T ALG "
+      + "     WHERE ALG.IBMSNAP_LOGMARKER > ?"
+      + "     AND alg.IBMSNAP_OPERATION IN ('I','U')"
+      + " ), "
+      + " step2 AS ("
+      + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID "
+      + "     FROM CLIENT_T C "
+      + "     JOIN ALLGTN_T ALG ON (C.IDENTIFIER = ALG.FKCLIENT_0 OR C.IDENTIFIER = ALG.FKCLIENT_T)"
+      + "     WHERE C.IBMSNAP_LOGMARKER > ?"
+      + "     AND   c.IBMSNAP_OPERATION IN ('I','U')"
+      + "     AND alg.IBMSNAP_OPERATION IN ('I','U')"
+      + " ), "
+      + " step3 AS ("
+      + "     SELECT RCT.FKREFERL_T AS REFERRAL_ID "
+      + "     FROM REFR_CLT RCT "
+      + "     WHERE RCT.IBMSNAP_LOGMARKER > ?"
+      + "     AND rct.IBMSNAP_OPERATION IN ('I','U')"
+      + " ), "
+      + " step4 AS ("
+      + "     SELECT RFL.IDENTIFIER AS REFERRAL_ID "
+      + "     FROM REFERL_T RFL "
+      + "     WHERE RFL.IBMSNAP_LOGMARKER > ?"
+      + "     AND rfl.IBMSNAP_OPERATION IN ('I','U')"
+      + " ), "
+      + " step5 AS ("
+      + "     SELECT RPT.FKREFERL_T AS REFERRAL_ID "
+      + "     FROM REPTR_T RPT "
+      + "     WHERE RPT.IBMSNAP_LOGMARKER > ?"
+      + "     AND rpt.IBMSNAP_OPERATION IN ('I','U')"
+      + " ), "
+      + " hoard AS ("
+      + "     SELECT s1.REFERRAL_ID FROM STEP1 s1 UNION ALL"
+      + "     SELECT s2.REFERRAL_ID FROM STEP2 s2 UNION ALL"
+      + "     SELECT s3.REFERRAL_ID FROM STEP3 s3 UNION ALL"
+      + "     SELECT s4.REFERRAL_ID FROM STEP4 s4 UNION ALL"
+      + "     SELECT s5.REFERRAL_ID FROM STEP5 s5 "
+      + " ) "
+      + " SELECT DISTINCT g.REFERRAL_ID FROM hoard g ";
+//@formatter:on
+  
   protected static final String SELECT_CLIENT =
       "SELECT FKCLIENT_T, FKREFERL_T, SENSTV_IND FROM GT_REFR_CLT RC";
 
