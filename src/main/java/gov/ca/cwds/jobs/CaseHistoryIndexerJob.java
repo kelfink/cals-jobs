@@ -43,33 +43,47 @@ public abstract class CaseHistoryIndexerJob
    */
   @Inject
   public CaseHistoryIndexerJob(final ReplicatedPersonCasesDao dao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastRunFile, final ObjectMapper mapper,
-      FlightPlan flightPlan) {
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   @Override
+//@formatter:off
   public String getPrepLastChangeSQL() {
-    return "INSERT INTO GT_ID (IDENTIFIER)\nSELECT CAS.IDENTIFIER\nFROM CASE_T CAS "
-        + "\nWHERE CAS.IBMSNAP_LOGMARKER > ? \nUNION \nSELECT CAS.IDENTIFIER "
-        + "\nFROM CASE_T CAS\nLEFT JOIN CHLD_CLT CCL1 ON CCL1.FKCLIENT_T = CAS.FKCHLD_CLT "
+    return "INSERT INTO GT_ID (IDENTIFIER)"
+        + "\nSELECT CAS.IDENTIFIER"
+        + "\nFROM CASE_T CAS "
+        + "\nWHERE CAS.IBMSNAP_LOGMARKER > ? "
+        + "\nUNION "
+        + "\nSELECT CAS.IDENTIFIER "
+        + "\nFROM CASE_T CAS"
+        + "\nLEFT JOIN CHLD_CLT CCL1 ON CCL1.FKCLIENT_T = CAS.FKCHLD_CLT "
         + "\nLEFT JOIN CLIENT_T CLC1 ON CLC1.IDENTIFIER = CCL1.FKCLIENT_T "
-        + "\nWHERE CCL1.IBMSNAP_LOGMARKER > ? \nUNION\nSELECT CAS.IDENTIFIER \nFROM CASE_T CAS "
+        + "\nWHERE CCL1.IBMSNAP_LOGMARKER > ? "
+        + "\nUNION"
+        + "\nSELECT CAS.IDENTIFIER \nFROM CASE_T CAS "
         + "\nLEFT JOIN CHLD_CLT CCL2 ON CCL2.FKCLIENT_T = CAS.FKCHLD_CLT "
         + "\nLEFT JOIN CLIENT_T CLC2 ON CLC2.IDENTIFIER = CCL2.FKCLIENT_T "
-        + "\nWHERE CLC2.IBMSNAP_LOGMARKER > ? \nUNION \nSELECT CAS.IDENTIFIER "
-        + "\nFROM CASE_T CAS " + "\nLEFT JOIN CHLD_CLT CCL3 ON CCL3.FKCLIENT_T = CAS.FKCHLD_CLT "
+        + "\nWHERE CLC2.IBMSNAP_LOGMARKER > ? "
+        + "\nUNION "
+        + "\nSELECT CAS.IDENTIFIER "
+        + "\nFROM CASE_T CAS "
+        + "\nLEFT JOIN CHLD_CLT CCL3 ON CCL3.FKCLIENT_T = CAS.FKCHLD_CLT "
         + "\nLEFT JOIN CLIENT_T CLC3 ON CLC3.IDENTIFIER = CCL3.FKCLIENT_T "
         + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL3.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
         + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
-        + "\nWHERE CLR.IBMSNAP_LOGMARKER > ? \nUNION \nSELECT CAS.IDENTIFIER "
-        + "\nFROM CASE_T CAS " + "\nLEFT JOIN CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
+        + "\nWHERE CLR.IBMSNAP_LOGMARKER > ? "
+        + "\nUNION "
+        + "\nSELECT CAS.IDENTIFIER "
+        + "\nFROM CASE_T CAS "
+        + "\nLEFT JOIN CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
         + "\nLEFT JOIN CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T "
         + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
         + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
         + "\nJOIN CLIENT_T CLP ON CLP.IDENTIFIER = CLR.FKCLIENT_0 "
         + "\nWHERE CLP.IBMSNAP_LOGMARKER > ? ";
   }
+//@formatter:on
 
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
