@@ -73,7 +73,7 @@ public class ReferralHistoryIndexerJob
 //@formatter:on
 
   /**
-   * NEXT: filter <strong>deleted<strong> Client, Referral, Referral/Client, Allegation.
+   * NEXT: filter <strong>deleted</strong> Client, Referral, Referral/Client, Allegation.
    * <p>
    * But if you add a single criterion, like exclude deleted, then DB2 z/OS scans entire tables.
    * </p>
