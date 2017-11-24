@@ -14,15 +14,13 @@ import org.hibernate.annotations.NamedNativeQuery;
 @Table(name = "VW_LST_CASE_HIST")
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.findAllUpdatedAfterChild",
-    query = CaseSQLResource.SELECT_LAST_RUN_CHILD
-        // + " ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID " // DB2 won't optimize
+    query = CaseSQLResource.SELECT_LAST_RUN_CHILD + " ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID "
         + "FOR READ ONLY WITH UR ",
     resultClass = EsChildPersonCase.class, readOnly = true)
 
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.findAllUpdatedAfterParent",
-    query = CaseSQLResource.SELECT_LAST_RUN_PARENT
-        // + " ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID " // DB2 won't optimize
+    query = CaseSQLResource.SELECT_LAST_RUN_PARENT + " ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID "
         + "FOR READ ONLY WITH UR ",
     resultClass = EsChildPersonCase.class, readOnly = true)
 
