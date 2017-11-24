@@ -12,24 +12,41 @@ import org.hibernate.annotations.NamedNativeQuery;
  */
 @Entity
 @Table(name = "VW_LST_CASE_HIST")
+
+// DB2 won't optimize the query -- even though the query plan looks great! :-(
+// @NamedNativeQuery(name =
+// "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.findAllUpdatedAfter",
+// query = "SELECT x.* FROM (" + CaseSQLResource.BASE_VIEW_SELECT + ") x "
+// + " WHERE current timestamp > :after "
+// + " ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
+// resultClass = EsChildPersonCase.class, readOnly = true)
+//
+// @NamedNativeQuery(
+// name =
+// "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.findAllUpdatedAfterWithUnlimitedAccess",
+// query = "SELECT x.* FROM (" + CaseSQLResource.BASE_VIEW_SELECT + ") x "
+// + " WHERE current timestamp > :after AND x.LIMITED_ACCESS_CODE = 'N' "
+// + "ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
+// resultClass = EsChildPersonCase.class, readOnly = true)
+
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.findAllUpdatedAfter",
-    query = "SELECT x.* FROM (" + CaseSQLResource.BASE_VIEW_SELECT + ") x "
-        + " WHERE current timestamp > :after "
-        + " ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
+    query = "SELECT c.* FROM {h-schema}VW_LST_CASE_HIST c WHERE c.CASE_ID IN ("
+        + " SELECT c1.CASE_ID FROM {h-schema}VW_LST_CASE_HIST c1 " + "WHERE c1.LAST_CHG > :after "
+        + ") ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsChildPersonCase.class, readOnly = true)
 
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.findAllUpdatedAfterWithUnlimitedAccess",
-    query = "SELECT x.* FROM (" + CaseSQLResource.BASE_VIEW_SELECT + ") x "
-        + " WHERE current timestamp > :after AND x.LIMITED_ACCESS_CODE = 'N' "
-        + "ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
+    query = "SELECT c.* FROM {h-schema}VW_LST_CASE_HIST c WHERE c.CASE_ID IN ("
+        + " SELECT c1.CASE_ID FROM {h-schema}VW_LST_CASE_HIST c1 " + "WHERE c1.LAST_CHG > :after "
+        + ") AND c.LIMITED_ACCESS_CODE = 'N' ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsChildPersonCase.class, readOnly = true)
 
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.findAllUpdatedAfterWithLimitedAccess",
-    query = "SELECT x.* FROM (" + CaseSQLResource.BASE_VIEW_SELECT + ") x "
-        + " WHERE current timestamp > :after AND x.LIMITED_ACCESS_CODE != 'N' "
-        + "ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
+    query = "SELECT c.* FROM {h-schema}VW_LST_CASE_HIST c WHERE c.CASE_ID IN ("
+        + " SELECT c1.CASE_ID FROM {h-schema}VW_LST_CASE_HIST c1 " + "WHERE c1.LAST_CHG > :after "
+        + ") AND c.LIMITED_ACCESS_CODE != 'N' ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",
     resultClass = EsChildPersonCase.class, readOnly = true)
 public class EsChildPersonCase extends EsPersonCase {
 
