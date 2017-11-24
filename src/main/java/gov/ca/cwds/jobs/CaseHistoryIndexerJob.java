@@ -5,8 +5,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.FlushModeType;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.hibernate.CacheMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.NativeQuery;
@@ -119,7 +122,6 @@ public abstract class CaseHistoryIndexerJob
       final Date lastRunDt) {
     final List<EsPersonCase> ret = new ArrayList<>();
 
-    prepHibernateLastChange(session, lastRunDt);
     if (getFlightPlan().isLoadSealedAndSensitive()) {
       ret.addAll(fetchLastRunGroup(session, txn, "Child"));
       ret.addAll(fetchLastRunGroup(session, txn, "Parent"));
@@ -141,6 +143,12 @@ public abstract class CaseHistoryIndexerJob
     final Transaction txn = getOrCreateTransaction();
 
     try {
+      prepHibernateLastChange(session, lastRunTime);
+
+      session.setCacheMode(CacheMode.IGNORE);
+      session.setDefaultReadOnly(true);
+      session.setFlushMode(FlushModeType.COMMIT);
+
       final ImmutableList.Builder<ReplicatedPersonCases> results = new ImmutableList.Builder<>();
       final List<EsPersonCase> recs = fetchLastRunCaseResults(session, txn, lastRunTime);
       LOGGER.info("FOUND {} RECORDS", recs.size());
