@@ -119,7 +119,7 @@ public final class NeutronDB2Util {
           (com.ibm.db2.jcc.t4.b) ((com.mchange.v2.c3p0.impl.NewProxyConnection) con)
               .unwrap(Class.forName("com.ibm.db2.jcc.t4.b")); // NOSONAR
       final DB2Connection db2Con = nativeCon;
-      LOGGER.info("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
+      LOGGER.debug("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
           nativeCon.enableRowsetSupport_);
 
       ret = db2Con.getDB2SystemMonitor();
@@ -134,7 +134,7 @@ public final class NeutronDB2Util {
   }
 
   /**
-   * Stop the DB2 monitor and report stats.
+   * Stop the DB2 monitor and report statistics.
    * 
    * @param monitor current monitor instance
    * @throws SQLException on JDBC error
@@ -154,7 +154,7 @@ public final class NeutronDB2Util {
           .append(monitor.getApplicationTimeMillis()).append("monitor.moreData: 0: ")
           .append(monitor.moreData(0)).append("monitor.moreData: 1: ").append(monitor.moreData(1))
           .append("monitor.moreData: 2: ").append(monitor.moreData(2));
-      LOGGER.info("DB2 monitor report: {}", buf::toString);
+      LOGGER.debug("DB2 monitor report: {}", buf::toString);
     }
   }
 
