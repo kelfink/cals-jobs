@@ -7,8 +7,8 @@ public class CaseSQLResource implements ApiMarker {
   private static final long serialVersionUID = 1L;
 
 //@formatter:off
-  public static final String BASE_VIEW_SELECT = 
-      "SELECT \n"
+  public static final String SELECT_LAST_RUN_CHILD = 
+        "SELECT \n"
       + " CAS.IDENTIFIER AS CASE_ID, \n"
       + " CAS.START_DT   AS START_DATE, \n"
       + " CAS.END_DT     AS END_DATE, \n"
@@ -58,9 +58,12 @@ public class CaseSQLResource implements ApiMarker {
       + "LEFT JOIN {h-schema}STFPERST STF ON STF.IDENTIFIER = CAS.FKSTFPERST \n"
       + "WHERE CAS.IDENTIFIER IN ( \n"
       + "  SELECT GT.IDENTIFIER FROM {h-schema}GT_ID GT \n"
-      + ") \n"
-   + "UNION \n"
-      + "SELECT \n"
+      + ") \n";
+//@formatter:on
+
+//@formatter:off
+  public static final String SELECT_LAST_RUN_PARENT = 
+        "SELECT \n"
       + "  CAS.IDENTIFIER AS CASE_ID, \n"
       + "  CAS.START_DT   AS START_DATE, \n"
       + "  CAS.END_DT     AS END_DATE, \n"

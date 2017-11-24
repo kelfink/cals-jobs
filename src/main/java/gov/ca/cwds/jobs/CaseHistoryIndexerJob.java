@@ -1,11 +1,18 @@
 package gov.ca.cwds.jobs;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.NativeQuery;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
@@ -18,6 +25,9 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
@@ -31,6 +41,9 @@ public abstract class CaseHistoryIndexerJob
     implements NeutronRowMapper<EsPersonCase> {
 
   private static final long serialVersionUID = 1L;
+
+  private static final ConditionalLogger LOGGER =
+      new JetPackLogger(ChildCaseHistoryIndexerJob.class);
 
   /**
    * Construct rocket with all required dependencies.
@@ -88,6 +101,87 @@ public abstract class CaseHistoryIndexerJob
      + "\n) x";
   }
 //@formatter:on
+
+  @SuppressWarnings("unchecked")
+  protected List<EsPersonCase> fetchLastRunGroup(final Session session, final Transaction txn,
+      String queryType) {
+    LOGGER.info("CASE LAST RUN QUERY: query type: {}", queryType);
+    final Class<?> entityClass = getDenormalizedClass(); // view entity class
+    final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter" + queryType;
+
+    final NativeQuery<EsPersonCase> q = session.getNamedNativeQuery(namedQueryName);
+    final List<EsPersonCase> recs = q.list();
+    LOGGER.info("FOUND {} RECORDS", recs.size());
+    return recs;
+  }
+
+  protected List<EsPersonCase> fetchLastRunCaseResults(final Session session, final Transaction txn,
+      final Date lastRunDt) {
+    final List<EsPersonCase> ret = new ArrayList<>();
+
+    prepHibernateLastChange(session, lastRunDt);
+    if (getFlightPlan().isLoadSealedAndSensitive()) {
+      ret.addAll(fetchLastRunGroup(session, txn, "Child"));
+      ret.addAll(fetchLastRunGroup(session, txn, "Parent"));
+    } else {
+      ret.addAll(fetchLastRunGroup(session, txn, "WithUnlimitedAccess"));
+    }
+
+    return ret;
+  }
+
+  @Override
+  protected List<ReplicatedPersonCases> extractLastRunRecsFromView(final Date lastRunTime,
+      final Set<String> deletionResults) {
+    LOGGER.info("CASE: PULL LAST RUN: last successful run: {}", lastRunTime);
+    final Class<?> entityClass = getDenormalizedClass(); // view entity class
+    Object lastId = new Object();
+
+    final Session session = jobDao.getSessionFactory().getCurrentSession();
+    final Transaction txn = getOrCreateTransaction();
+
+    try {
+      final ImmutableList.Builder<ReplicatedPersonCases> results = new ImmutableList.Builder<>();
+      final List<EsPersonCase> recs = fetchLastRunCaseResults(session, txn, lastRunTime);
+      LOGGER.info("FOUND {} RECORDS", recs.size());
+
+      // Convert denormalized rows to normalized persistence objects.
+      final List<EsPersonCase> groupRecs = new ArrayList<>();
+      for (EsPersonCase m : recs) {
+        if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
+          results.add(normalizeSingle(groupRecs));
+          groupRecs.clear();
+        }
+
+        groupRecs.add(m);
+        lastId = m.getNormalizationGroupKey();
+        if (lastId == null) {
+          // Could be a data error (invalid data in db).
+          LOGGER.warn("NULL Normalization Group Key: {}", m);
+          lastId = new Object();
+        }
+      }
+
+      if (!groupRecs.isEmpty()) {
+        results.add(normalizeSingle(groupRecs));
+      }
+
+      if (mustDeleteLimitedAccessRecords()) {
+        loadRecsForDeletion(entityClass, session, lastRunTime, deletionResults);
+      }
+
+      session.clear();
+      txn.commit();
+      groupRecs.clear();
+      return results.build();
+    } catch (Exception h) {
+      fail();
+      txn.rollback();
+      throw JobLogs.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
+    } finally {
+      doneRetrieve();
+    }
+  }
 
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
