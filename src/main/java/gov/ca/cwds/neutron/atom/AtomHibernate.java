@@ -144,7 +144,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
       try {
         return c.prepareStatement(getPrepLastChangeSQL());
       } catch (SQLException e) {
-        throw JobLogs.runtime(getLogger(), e, "FAILED TO PREPARE STATEMENT", e.getMessage());
+        throw JobLogs.runtime(getLogger(), e, "FAILED TO PREPARE STATEMENT! {}", e.getMessage());
       }
     };
   }

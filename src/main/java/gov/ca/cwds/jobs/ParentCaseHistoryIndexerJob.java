@@ -4,7 +4,12 @@ import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +20,7 @@ import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
+import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -45,6 +51,20 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
       final ElasticsearchDao esDao, @LastRunFile final String lastRunFile,
       final ObjectMapper mapper, FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
+  }
+
+  @Override
+  protected List<EsPersonCase> fetchLastRunCaseResults(final Session session, final Transaction txn,
+      final Date lastRunDt) {
+    final List<EsPersonCase> ret = new ArrayList<>();
+
+    if (getFlightPlan().isLoadSealedAndSensitive()) {
+      ret.addAll(fetchLastRunGroup(session, txn, ""));
+    } else {
+      ret.addAll(fetchLastRunGroup(session, txn, "LimitedAccess"));
+    }
+
+    return ret;
   }
 
   @Override

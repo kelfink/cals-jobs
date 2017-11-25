@@ -25,7 +25,7 @@ import org.hibernate.annotations.NamedNativeQuery;
     resultClass = EsChildPersonCase.class, readOnly = true)
 
 @NamedNativeQuery(
-    name = "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.findAllUpdatedAfterWithUnlimitedAccess",
+    name = "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.findAllUpdatedAfterWithLimitedAccess",
     query = "SELECT x.* FROM (" + CaseSQLResource.SELECT_LAST_RUN_CHILD + ") x "
         + " WHERE (1 = 1 OR current timestamp != :after) AND x.LIMITED_ACCESS_CODE = 'N' "
         + "ORDER BY FOCUS_CHILD_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",

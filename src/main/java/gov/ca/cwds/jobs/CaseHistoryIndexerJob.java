@@ -127,7 +127,7 @@ public abstract class CaseHistoryIndexerJob
       ret.addAll(fetchLastRunGroup(session, txn, "Child"));
       ret.addAll(fetchLastRunGroup(session, txn, "Parent"));
     } else {
-      ret.addAll(fetchLastRunGroup(session, txn, "WithUnlimitedAccess"));
+      ret.addAll(fetchLastRunGroup(session, txn, "WithLimitedAccess"));
     }
 
     return ret;

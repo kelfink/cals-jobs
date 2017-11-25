@@ -80,7 +80,6 @@ public final class NeutronJdbcUtil {
     con.setSchema(getDBSchemaName());
     con.setAutoCommit(false);
     NeutronDB2Util.enableParallelism(con);
-
     return con;
   }
 
@@ -89,6 +88,7 @@ public final class NeutronJdbcUtil {
     final Work work = new WorkPrepareLastChange(lastRunTime, sql, func);
     session.clear(); // Fixes Hibernate "duplicate object" bug
     session.doWork(work);
+    session.clear();
   }
 
   private static List<Pair<String, String>> buildPartitionsRanges(int partitions) {
