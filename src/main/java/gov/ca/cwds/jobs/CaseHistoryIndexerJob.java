@@ -109,6 +109,7 @@ public abstract class CaseHistoryIndexerJob
   protected List<EsPersonCase> fetchLastRunGroup(final Session session, final Transaction txn,
       String queryType) {
     LOGGER.info("CASE LAST RUN QUERY: query type: {}", queryType);
+    session.clear();
     final Class<?> entityClass = getDenormalizedClass(); // view entity class
     final String namedQueryName = entityClass.getName() + ".findAllUpdatedAfter" + queryType;
 
@@ -144,13 +145,14 @@ public abstract class CaseHistoryIndexerJob
 
     try {
       prepHibernateLastChange(session, lastRunTime);
-
+      session.clear();
       session.setCacheMode(CacheMode.IGNORE);
       session.setDefaultReadOnly(true);
       session.setFlushMode(FlushModeType.COMMIT);
 
       final ImmutableList.Builder<ReplicatedPersonCases> results = new ImmutableList.Builder<>();
       final List<EsPersonCase> recs = fetchLastRunCaseResults(session, txn, lastRunTime);
+      txn.commit();
       LOGGER.info("FOUND {} RECORDS", recs.size());
 
       // Convert denormalized rows to normalized persistence objects.
@@ -178,8 +180,6 @@ public abstract class CaseHistoryIndexerJob
         loadRecsForDeletion(entityClass, session, lastRunTime, deletionResults);
       }
 
-      session.clear();
-      txn.commit();
       groupRecs.clear();
       return results.build();
     } catch (Exception h) {

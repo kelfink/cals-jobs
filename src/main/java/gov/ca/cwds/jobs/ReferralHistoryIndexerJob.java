@@ -70,8 +70,7 @@ public class ReferralHistoryIndexerJob
           + "\nFROM REFR_CLT rc"
           + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?"
-          + "\nAND  c.IBMSNAP_OPERATION != 'D' " // don't updated a deleted document
-       // + "\nAND rc.IBMSNAP_OPERATION != 'D'"
+          + "\nAND c.IBMSNAP_OPERATION != 'D' " // don't update a deleted Client document
           ;
 //@formatter:on
 
@@ -84,33 +83,27 @@ public class ReferralHistoryIndexerJob
       + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID"
       + "     FROM ALLGTN_T ALG "
       + "     WHERE ALG.IBMSNAP_LOGMARKER > ?"
-   // + "     AND alg.IBMSNAP_OPERATION IN ('I','U')"
       + " ), "
       + " step2 AS ("
       + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID "
       + "     FROM CLIENT_T C "
       + "     JOIN ALLGTN_T ALG ON (C.IDENTIFIER = ALG.FKCLIENT_0 OR C.IDENTIFIER = ALG.FKCLIENT_T)"
       + "     WHERE C.IBMSNAP_LOGMARKER > ?"
-   // + "     AND   c.IBMSNAP_OPERATION IN ('I','U')"
-   // + "     AND alg.IBMSNAP_OPERATION IN ('I','U')"
       + " ), "
       + " step3 AS ("
       + "     SELECT RCT.FKREFERL_T AS REFERRAL_ID "
       + "     FROM REFR_CLT RCT "
       + "     WHERE RCT.IBMSNAP_LOGMARKER > ?"
-   // + "     AND rct.IBMSNAP_OPERATION IN ('I','U')"
       + " ), "
       + " step4 AS ("
       + "     SELECT RFL.IDENTIFIER AS REFERRAL_ID "
       + "     FROM REFERL_T RFL "
       + "     WHERE RFL.IBMSNAP_LOGMARKER > ?"
-   // + "     AND rfl.IBMSNAP_OPERATION IN ('I','U')"
       + " ), "
       + " step5 AS ("
       + "     SELECT RPT.FKREFERL_T AS REFERRAL_ID "
       + "     FROM REPTR_T RPT "
       + "     WHERE RPT.IBMSNAP_LOGMARKER > ?"
-   // + "     AND rpt.IBMSNAP_OPERATION IN ('I','U')"
       + " ), "
       + " hoard AS ("
       + "     SELECT s1.REFERRAL_ID FROM STEP1 s1 UNION ALL"
@@ -606,7 +599,7 @@ public class ReferralHistoryIndexerJob
 
   /**
    * Referrals is an <strong>enormous</strong> task and fetches partition ranges from a file instead
-   * of bloating a Java file.
+   * of bloating a Java class.
    * 
    * @see ReferralJobRanges
    */

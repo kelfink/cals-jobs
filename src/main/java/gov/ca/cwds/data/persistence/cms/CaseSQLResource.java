@@ -57,7 +57,7 @@ public class CaseSQLResource implements ApiMarker {
       + "LEFT JOIN {h-schema}CLIENT_T CLP ON CLP.IDENTIFIER = CLR.FKCLIENT_T \n"
       + "LEFT JOIN {h-schema}STFPERST STF ON STF.IDENTIFIER = CAS.FKSTFPERST \n"
       + "WHERE CAS.IDENTIFIER IN ( \n"
-      + "  SELECT GT.IDENTIFIER FROM {h-schema}GT_ID GT \n"
+      + "   SELECT GT.IDENTIFIER FROM {h-schema}GT_ID GT \n"
       + ") \n";
 //@formatter:on
 
@@ -111,7 +111,7 @@ public class CaseSQLResource implements ApiMarker {
       + "LEFT JOIN {h-schema}CLIENT_T CLP ON CLP.IDENTIFIER = CLR.FKCLIENT_0 \n"
       + "LEFT JOIN {h-schema}STFPERST STF ON STF.IDENTIFIER = CAS.FKSTFPERST \n"
       + "WHERE CAS.IDENTIFIER IN ( \n"
-      + "  SELECT GT.IDENTIFIER FROM {h-schema}GT_ID GT \n"
+      + "   SELECT GT.IDENTIFIER FROM {h-schema}GT_ID GT \n"
       + ") \n";
 //@formatter:on
 
