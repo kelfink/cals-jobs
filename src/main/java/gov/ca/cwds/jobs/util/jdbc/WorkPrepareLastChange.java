@@ -43,25 +43,40 @@ public class WorkPrepareLastChange implements Work {
     this.prepStmtMaker = prepStmtMaker;
   }
 
+  /**
+   * Apply the {@link #prepStmtMaker} function to the connection.
+   * 
+   * @param con current database connection
+   * @return prepared statement
+   */
   protected PreparedStatement createPreparedStatement(Connection con) {
     return prepStmtMaker.apply(con);
   }
 
+  /**
+   * Execute the PreparedStatement.
+   * <p>
+   * <strong>Beware</strong> that DB2 may not optimize a PreparedStatement the same as regular SQL.
+   * </p>
+   * 
+   * @param con current database connection
+   */
   @Override
   public void execute(Connection con) throws SQLException {
     con.setSchema(NeutronJdbcUtil.getDBSchemaName());
     con.setAutoCommit(false);
     NeutronDB2Util.enableParallelism(con);
 
-    final String strLastRunTime = NeutronJdbcUtil.makeSimpleTimestampString(lastRunTime);
+    // final String strLastRunTime = NeutronJdbcUtil.makeSimpleTimestampString(lastRunTime);
+    final String strLastRunTime = NeutronJdbcUtil.makeTimestampString(lastRunTime);
     try (final PreparedStatement stmt = createPreparedStatement(con)) {
       for (int i = 1; i <= StringUtils.countMatches(sql, "?"); i++) {
-        stmt.setString(i, strLastRunTime);
+        stmt.setString(i, strLastRunTime); // String or Timestamp, that is the question.
       }
 
-      LOGGER.debug("Find keys new/changed since {}", lastRunTime);
+      LOGGER.debug("Find keys new/changed since {}", strLastRunTime);
       final int cntNewChanged = stmt.executeUpdate();
-      LOGGER.info("Total keys {} changed since {}", cntNewChanged, lastRunTime);
+      LOGGER.info("Total keys {} changed since {}", cntNewChanged, strLastRunTime);
     }
   }
 

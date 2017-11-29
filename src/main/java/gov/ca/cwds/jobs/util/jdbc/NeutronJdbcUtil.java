@@ -55,10 +55,10 @@ public final class NeutronJdbcUtil {
 
   public static String makeTimestampString(final Date date) {
     final StringBuilder buf = new StringBuilder();
-    buf.append("'")
+    buf.append("TIMESTAMP('")
         .append(new SimpleDateFormat(NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT.getFormat())
             .format(date))
-        .append("'");
+        .append("')");
     return buf.toString();
   }
 
