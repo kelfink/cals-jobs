@@ -3,14 +3,15 @@ package gov.ca.cwds.neutron.launch.listener;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 
 public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronBulkProcessorListener.class);
+  private static final ConditionalLogger LOGGER =
+      new JetPackLogger(NeutronBulkProcessorListener.class);
 
   /**
    * Track rocket's flight progress.
@@ -38,8 +39,9 @@ public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
     final int numActions = request.numberOfActions();
 
     if (response.hasFailures()) {
+      String failure = response.buildFailureMessage();
       LOGGER.error("\n\t>>>>>>BULK FAILURES??? status: {}, errors: {}\n", response.status(),
-          response.buildFailureMessage());
+          failure);
       flightLog.trackBulkError();
     }
 
