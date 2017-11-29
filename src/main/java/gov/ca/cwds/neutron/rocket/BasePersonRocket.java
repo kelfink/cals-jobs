@@ -398,7 +398,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       JobLogs.logEvery(++cntr, "Transformed", "recs");
 
       // NOTE: Assumes that records are sorted by group key.
-      // End of group. Normalize these group recs.
+      // End of group. Normalize these group records.
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1
           && (t = normalizeSingle(grpRecs)) != null) {
         LOGGER.trace("queueIndex.putLast: id: {}", t.getPrimaryKey());
