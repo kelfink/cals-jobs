@@ -30,7 +30,6 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
-import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
@@ -295,6 +294,8 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     }
   }
 
+  protected abstract EsPersonCase mapRows(ResultSet rs) throws SQLException;
+
   protected void readReferrals(final PreparedStatement stmtSelReferral,
       final Map<String, EsPersonCase> mapReferrals) throws SQLException {
     stmtSelReferral.setMaxRows(0);
@@ -305,13 +306,13 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     EsPersonCase m;
     LOGGER.info("pull referrals");
     final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
-    while (!isFailed() && rs.next() && (m = EsPersonCase.extractReferral(rs)) != null) {
+    while (!isFailed() && rs.next() && (m = mapRows(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "bundle referral");
       JobLogs.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
           "referrals");
-      if (m.getReferralClientReplicationOperation() != CmsReplicationOperation.D) {
-        mapReferrals.put(m.getReferralId(), m);
-      }
+      // if (m.getReferralClientReplicationOperation() != CmsReplicationOperation.D) {
+      // mapReferrals.put(m.getReferralId(), m);
+      // }
     }
   }
 
@@ -327,14 +328,15 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     final String referralId = rc1.getReferralId();
     final EsPersonCase denormReferral = mapReferrals.get(referralId);
     final boolean goodToGo = denormReferral != null
-        && denormReferral.getReferralReplicationOperation() != CmsReplicationOperation.D;
+    // && denormReferral.getReferralReplicationOperation() != CmsReplicationOperation.D
+    ;
 
     // Sealed and sensitive may be excluded.
     if (goodToGo) {
       // Loop allegations for this referral:
       if (mapAllegationByReferral.containsKey(referralId)) {
         for (EsPersonCase alg : mapAllegationByReferral.get(referralId)) {
-          alg.mergeClientReferralInfo(clientId, denormReferral);
+          // alg.mergeClientReferralInfo(clientId, denormReferral);
           listReadyToNorm.add(alg);
         }
       } else {
@@ -346,7 +348,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     final ReplicatedPersonCases repl =
         goodToGo ? normalizeSingle(listReadyToNorm) : new ReplicatedPersonCases(clientId);
     ++ret;
-    repl.setClientId(clientId);
+    // repl.setClientId(clientId);
     addToIndexQueue(repl);
 
     return ret;
@@ -432,9 +434,9 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
           .collect(Collectors.groupingBy(MinClientReferral::getClientId));
       listClientReferralKeys.clear(); // release objects for gc
 
-      final Map<String, List<EsPersonCase>> mapAllegationByReferral = listAllegations.stream()
-          .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
-          .collect(Collectors.groupingBy(EsPersonCase::getReferralId));
+      final Map<String, List<EsPersonCase>> mapAllegationByReferral =
+          listAllegations.stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
+              .collect(Collectors.groupingBy(EsPersonCase::getCaseId));
       listAllegations.clear(); // release objects for gc
 
       // For each client group:
@@ -488,12 +490,10 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
       try (final PreparedStatement stmtInsClient = con.prepareStatement(getClientSeedQuery());
           final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT);
           final PreparedStatement stmtSelReferral =
-              con.prepareStatement(getInitialLoadQuery(schema));
-          final PreparedStatement stmtSelAllegation = con.prepareStatement(SELECT_ALLEGATION)) {
+              con.prepareStatement(getInitialLoadQuery(schema))) {
         // Read separate components for this key bundle.
         readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
         readReferrals(stmtSelReferral, mapReferrals);
-        readAllegations(stmtSelAllegation, listAllegations);
 
         // All data retrieved.
         NeutronDB2Util.monitorStopAndReport(monitor);
@@ -522,9 +522,6 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
   protected void threadRetrieveByJdbc() {
     nameThread("read_main");
     LOGGER.info("BEGIN: main read thread");
-
-    // WARNING: static setter is OK in *standalone* rocket but NOT wise in continuous mode.
-    EsPersonCase.setOpts(getFlightPlan());
     doneTransform(); // normalize in place **WITHOUT** the transform thread
 
     try {
