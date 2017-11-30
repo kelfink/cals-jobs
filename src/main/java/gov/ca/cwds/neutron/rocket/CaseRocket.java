@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs;
+package gov.ca.cwds.neutron.rocket;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -55,13 +55,13 @@ import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
  * 
  * @author CWDS API Team
  */
-public class ReferralHistoryIndexerJob
+public class CaseRocket
     extends BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral>
     implements NeutronRowMapper<EsPersonReferral> {
 
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ReferralHistoryIndexerJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CaseRocket.class);
 
 //@formatter:off
   protected static final String INSERT_CLIENT_FULL =
@@ -213,7 +213,7 @@ public class ReferralHistoryIndexerJob
    * @param flightPlan command line options
    */
   @Inject
-  public ReferralHistoryIndexerJob(ReplicatedPersonReferralsDao dao, ElasticsearchDao esDao,
+  public CaseRocket(ReplicatedPersonReferralsDao dao, ElasticsearchDao esDao,
       @LastRunFile String lastRunFile, ObjectMapper mapper, FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
@@ -660,7 +660,7 @@ public class ReferralHistoryIndexerJob
    * @throws Exception on launch error
    */
   public static void main(String... args) throws Exception {
-    LaunchCommand.launchOneWayTrip(ReferralHistoryIndexerJob.class, args);
+    LaunchCommand.launchOneWayTrip(CaseRocket.class, args);
   }
 
 }

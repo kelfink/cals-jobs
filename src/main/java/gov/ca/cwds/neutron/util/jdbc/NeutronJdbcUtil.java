@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.util.jdbc;
+package gov.ca.cwds.neutron.util.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,6 +20,9 @@ import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.jdbc.Work;
 
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
+import gov.ca.cwds.jobs.util.jdbc.NeutronStreamUtil;
+import gov.ca.cwds.jobs.util.jdbc.WorkPrepareLastChange;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
@@ -50,7 +53,7 @@ public final class NeutronJdbcUtil {
       "7ki4MYoAzi", "7NYwtxJ7Lu", "8guC2hG4ak", "8JpJrxB37S", "9cRG3VmH6i", "9GwwRzY7D3", Z_OS_END};
 
   private NeutronJdbcUtil() {
-    // Default, no-op. Static utility class.
+    // Static utility class.
   }
 
   public static String makeTimestampString(final Date date) {

@@ -11,6 +11,7 @@ import org.hibernate.jdbc.Work;
 
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
 
 /**
  * Execute SQL prior to retrieving records, typically for last change runs.
