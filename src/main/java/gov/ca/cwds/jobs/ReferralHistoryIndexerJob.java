@@ -47,11 +47,7 @@ import gov.ca.cwds.neutron.rocket.referral.ReferralJobRanges;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
- * Rocket to load person referrals from CMS into ElasticSearch.
- * 
- * <p>
- * Turn-around time for database objects is too long. Embed SQL in Java instead.
- * </p>
+ * Rocket to index person referrals from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */

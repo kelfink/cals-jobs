@@ -24,12 +24,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.ibm.db2.jcc.DB2SystemMonitor;
 
-import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
+import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
-import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
+import gov.ca.cwds.data.persistence.cms.EsPersonCase;
+import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.FlightPlan;
@@ -41,23 +41,17 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.rocket.referral.MinClientReferral;
-import gov.ca.cwds.neutron.rocket.referral.ReferralJobRanges;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
- * Rocket to load person referrals from CMS into ElasticSearch.
- * 
- * <p>
- * Turn-around time for database objects is too long. Embed SQL in Java instead.
- * </p>
+ * Rocket to index person cases from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */
-public class CaseRocket
-    extends BasePersonRocket<ReplicatedPersonReferrals, EsPersonReferral>
-    implements NeutronRowMapper<EsPersonReferral> {
+public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases, EsPersonCase>
+    implements NeutronRowMapper<EsPersonCase> {
 
   private static final long serialVersionUID = 1L;
 
@@ -185,15 +179,14 @@ public class CaseRocket
    * Neutron rocket reuses threads for performance, since thread creation is expensive.
    * </p>
    */
-  protected transient ThreadLocal<List<EsPersonReferral>> allocAllegations = new ThreadLocal<>();
+  protected transient ThreadLocal<List<EsPersonCase>> allocAllegations = new ThreadLocal<>();
 
-  protected transient ThreadLocal<Map<String, EsPersonReferral>> allocReferrals =
-      new ThreadLocal<>();
+  protected transient ThreadLocal<Map<String, EsPersonCase>> allocReferrals = new ThreadLocal<>();
 
   protected transient ThreadLocal<List<MinClientReferral>> allocClientReferralKeys =
       new ThreadLocal<>();
 
-  protected transient ThreadLocal<List<EsPersonReferral>> allocReadyToNorm = new ThreadLocal<>();
+  protected transient ThreadLocal<List<EsPersonCase>> allocReadyToNorm = new ThreadLocal<>();
 
   protected final AtomicInteger rowsReadReferrals = new AtomicInteger(0);
 
@@ -206,22 +199,21 @@ public class CaseRocket
   /**
    * Construct rocket with all required dependencies.
    * 
-   * @param dao DAO for {@link ReplicatedPersonReferrals}
+   * @param dao DAO for {@link ReplicatedPersonCases}
    * @param esDao ElasticSearch DAO
    * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
    */
   @Inject
-  public CaseRocket(ReplicatedPersonReferralsDao dao, ElasticsearchDao esDao,
+  public CaseRocket(ReplicatedPersonCasesDao dao, ElasticsearchDao esDao,
       @LastRunFile String lastRunFile, ObjectMapper mapper, FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
   @Override
   public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
-    EsPersonReferral.setOpts(getFlightPlan()); // WARNING: change for continuous mode
-    return EsPersonReferral.class;
+    return EsPersonCase.class;
   }
 
   @Override
@@ -304,16 +296,16 @@ public class CaseRocket
   }
 
   protected void readReferrals(final PreparedStatement stmtSelReferral,
-      final Map<String, EsPersonReferral> mapReferrals) throws SQLException {
+      final Map<String, EsPersonCase> mapReferrals) throws SQLException {
     stmtSelReferral.setMaxRows(0);
     stmtSelReferral.setQueryTimeout(0);
     stmtSelReferral.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
 
     int cntr = 0;
-    EsPersonReferral m;
+    EsPersonCase m;
     LOGGER.info("pull referrals");
     final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
-    while (!isFailed() && rs.next() && (m = EsPersonReferral.extractReferral(rs)) != null) {
+    while (!isFailed() && rs.next() && (m = EsPersonCase.extractReferral(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "bundle referral");
       JobLogs.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
           "referrals");
@@ -323,36 +315,17 @@ public class CaseRocket
     }
   }
 
-  protected void readAllegations(final PreparedStatement stmtSelAllegation,
-      final List<EsPersonReferral> listAllegations) throws SQLException {
-    stmtSelAllegation.setMaxRows(0);
-    stmtSelAllegation.setQueryTimeout(0);
-    stmtSelAllegation.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
-
-    int cntr = 0;
-    EsPersonReferral m;
-    LOGGER.info("pull allegations");
-    final ResultSet rs = stmtSelAllegation.executeQuery(); // NOSONAR
-    while (!isFailed() && rs.next() && (m = EsPersonReferral.extractAllegation(rs)) != null) {
-      JobLogs.logEvery(++cntr, "read", "bundle allegation");
-      JobLogs.logEvery(LOGGER, 15000, rowsReadAllegations.incrementAndGet(), "Total read",
-          "allegations");
-      listAllegations.add(m);
-    }
-  }
-
   @Override
-  public List<ReplicatedPersonReferrals> normalize(List<EsPersonReferral> recs) {
-    return EntityNormalizer.<ReplicatedPersonReferrals, EsPersonReferral>normalizeList(recs);
+  public List<ReplicatedPersonCases> normalize(List<EsPersonCase> recs) {
+    return EntityNormalizer.<ReplicatedPersonCases, EsPersonCase>normalizeList(recs);
   }
 
   protected int normalizeClientReferrals(int cntr, MinClientReferral rc1, final String clientId,
-      final Map<String, EsPersonReferral> mapReferrals,
-      final List<EsPersonReferral> listReadyToNorm,
-      final Map<String, List<EsPersonReferral>> mapAllegationByReferral) {
+      final Map<String, EsPersonCase> mapReferrals, final List<EsPersonCase> listReadyToNorm,
+      final Map<String, List<EsPersonCase>> mapAllegationByReferral) {
     int ret = cntr;
     final String referralId = rc1.getReferralId();
-    final EsPersonReferral denormReferral = mapReferrals.get(referralId);
+    final EsPersonCase denormReferral = mapReferrals.get(referralId);
     final boolean goodToGo = denormReferral != null
         && denormReferral.getReferralReplicationOperation() != CmsReplicationOperation.D;
 
@@ -360,7 +333,7 @@ public class CaseRocket
     if (goodToGo) {
       // Loop allegations for this referral:
       if (mapAllegationByReferral.containsKey(referralId)) {
-        for (EsPersonReferral alg : mapAllegationByReferral.get(referralId)) {
+        for (EsPersonCase alg : mapAllegationByReferral.get(referralId)) {
           alg.mergeClientReferralInfo(clientId, denormReferral);
           listReadyToNorm.add(alg);
         }
@@ -370,8 +343,8 @@ public class CaseRocket
     }
 
     // #152932457: Overwrite deleted referrals.
-    final ReplicatedPersonReferrals repl =
-        goodToGo ? normalizeSingle(listReadyToNorm) : new ReplicatedPersonReferrals(clientId);
+    final ReplicatedPersonCases repl =
+        goodToGo ? normalizeSingle(listReadyToNorm) : new ReplicatedPersonCases(clientId);
     ++ret;
     repl.setClientId(clientId);
     addToIndexQueue(repl);
@@ -379,10 +352,10 @@ public class CaseRocket
     return ret;
   }
 
-  protected int normalizeQueryResults(final Map<String, EsPersonReferral> mapReferrals,
-      final List<EsPersonReferral> listReadyToNorm,
+  protected int normalizeQueryResults(final Map<String, EsPersonCase> mapReferrals,
+      final List<EsPersonCase> listReadyToNorm,
       final Map<String, List<MinClientReferral>> mapReferralByClient,
-      final Map<String, List<EsPersonReferral>> mapAllegationByReferral) {
+      final Map<String, List<EsPersonCase>> mapAllegationByReferral) {
     LOGGER.debug("Normalize all: START");
     int countNormalized = 0;
 
@@ -426,14 +399,14 @@ public class CaseRocket
    * memory is exhausted. Yes, this is a good place to drop a hint to GC that it
    * <strong>might</strong> want to clean up memory.
    * 
-   * @param listAllegations EsPersonReferral
-   * @param mapReferrals k=id, v=EsPersonReferral
+   * @param listAllegations EsPersonCase
+   * @param mapReferrals k=id, v=EsPersonCase
    * @param listClientReferralKeys client/referral id pairs
-   * @param listReadyToNorm EsPersonReferral
+   * @param listReadyToNorm EsPersonCase
    */
-  protected void cleanUpMemory(final List<EsPersonReferral> listAllegations,
-      Map<String, EsPersonReferral> mapReferrals, List<MinClientReferral> listClientReferralKeys,
-      List<EsPersonReferral> listReadyToNorm) {
+  protected void cleanUpMemory(final List<EsPersonCase> listAllegations,
+      Map<String, EsPersonCase> mapReferrals, List<MinClientReferral> listClientReferralKeys,
+      List<EsPersonCase> listReadyToNorm) {
     releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
     System.gc(); // NOSONAR
   }
@@ -443,15 +416,15 @@ public class CaseRocket
    * referrals element per client.
    * 
    * @param listAllegations bundle allegations
-   * @param mapReferrals k=referral id, v=EsPersonReferral
+   * @param mapReferrals k=referral id, v=EsPersonCase
    * @param listClientReferralKeys client/referral key pairs
    * @param listReadyToNorm denormalized records
    * @return normalized record count
    */
-  protected int mapReduce(final List<EsPersonReferral> listAllegations,
-      final Map<String, EsPersonReferral> mapReferrals,
+  protected int mapReduce(final List<EsPersonCase> listAllegations,
+      final Map<String, EsPersonCase> mapReferrals,
       final List<MinClientReferral> listClientReferralKeys,
-      final List<EsPersonReferral> listReadyToNorm) {
+      final List<EsPersonCase> listReadyToNorm) {
     int countNormalized = 0;
     try {
       final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys
@@ -459,9 +432,9 @@ public class CaseRocket
           .collect(Collectors.groupingBy(MinClientReferral::getClientId));
       listClientReferralKeys.clear(); // release objects for gc
 
-      final Map<String, List<EsPersonReferral>> mapAllegationByReferral = listAllegations.stream()
+      final Map<String, List<EsPersonCase>> mapAllegationByReferral = listAllegations.stream()
           .sorted((e1, e2) -> e1.getReferralId().compareTo(e2.getReferralId()))
-          .collect(Collectors.groupingBy(EsPersonReferral::getReferralId));
+          .collect(Collectors.groupingBy(EsPersonCase::getReferralId));
       listAllegations.clear(); // release objects for gc
 
       // For each client group:
@@ -496,10 +469,10 @@ public class CaseRocket
     getFlightLog().markRangeStart(p);
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
-    final List<EsPersonReferral> listAllegations = allocAllegations.get();
-    final Map<String, EsPersonReferral> mapReferrals = allocReferrals.get();
+    final List<EsPersonCase> listAllegations = allocAllegations.get();
+    final Map<String, EsPersonCase> mapReferrals = allocReferrals.get();
     final List<MinClientReferral> listClientReferralKeys = allocClientReferralKeys.get();
-    final List<EsPersonReferral> listReadyToNorm = allocReadyToNorm.get();
+    final List<EsPersonCase> listReadyToNorm = allocReadyToNorm.get();
 
     // Clear collections, free memory before starting.
     releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
@@ -551,7 +524,7 @@ public class CaseRocket
     LOGGER.info("BEGIN: main read thread");
 
     // WARNING: static setter is OK in *standalone* rocket but NOT wise in continuous mode.
-    EsPersonReferral.setOpts(getFlightPlan());
+    EsPersonCase.setOpts(getFlightPlan());
     doneTransform(); // normalize in place **WITHOUT** the transform thread
 
     try {
@@ -599,15 +572,9 @@ public class CaseRocket
     return true;
   }
 
-  /**
-   * Referrals is an <strong>enormous</strong> task and fetches partition ranges from a file instead
-   * of bloating a Java class.
-   * 
-   * @see ReferralJobRanges
-   */
   @Override
   public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
-    return new ReferralJobRanges().getPartitionRanges(this);
+    return NeutronJdbcUtil.getCommonPartitionRanges64(this);
   }
 
   /**
@@ -625,20 +592,18 @@ public class CaseRocket
   }
 
   @Override
-  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonReferrals p)
+  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonCases p)
       throws NeutronException {
-    return prepareUpdateRequest(esp, p, p.getReferrals(), true);
+    return prepareUpdateRequest(esp, p, p.getCases(), true);
   }
 
   @Override
-  public EsPersonReferral extract(final ResultSet rs) throws SQLException {
-    return new EsPersonReferral(rs);
-  }
+  public abstract EsPersonCase extract(final ResultSet rs) throws SQLException;
 
-  protected void releaseLocalMemory(final List<EsPersonReferral> listAllegations,
-      final Map<String, EsPersonReferral> mapReferrals,
+  protected void releaseLocalMemory(final List<EsPersonCase> listAllegations,
+      final Map<String, EsPersonCase> mapReferrals,
       final List<MinClientReferral> listClientReferralKeys,
-      final List<EsPersonReferral> listReadyToNorm) {
+      final List<EsPersonCase> listReadyToNorm) {
     listAllegations.clear();
     listClientReferralKeys.clear();
     listReadyToNorm.clear();

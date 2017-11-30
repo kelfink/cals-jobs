@@ -138,7 +138,7 @@ public abstract class EsPersonCase
    * Default constructor.
    */
   public EsPersonCase() {
-    // Default no-arg constructor
+    // Default, no-arg constructor
   }
 
   public String getCaseId() {
