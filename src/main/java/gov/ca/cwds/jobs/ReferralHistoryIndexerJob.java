@@ -524,8 +524,8 @@ public class ReferralHistoryIndexerJob
       }
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(LOGGER, e, "ERROR HANDING RANGE {} - {}: {}", p.getLeft(), p.getRight(),
-          e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "ERROR HANDLING RANGE {} - {}: {}", p.getLeft(),
+          p.getRight(), e.getMessage());
     }
 
     int cntr = mapReduce(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
