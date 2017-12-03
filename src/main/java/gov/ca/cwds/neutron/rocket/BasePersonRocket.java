@@ -421,7 +421,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
 
   /**
    * The "transform" part of ETL. Single-thread consumer, second stage of initial load. Convert
-   * de-normalized records to normalized ones and pass to the index queue.
+   * denormalized records to normalized ones and pass to the index queue.
    */
   protected void threadNormalize() {
     nameThread("normalize");
