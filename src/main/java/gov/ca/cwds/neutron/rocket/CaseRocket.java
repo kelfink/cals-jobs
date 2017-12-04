@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
@@ -56,14 +55,14 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CaseRocket.class);
 
-
-//@formatter:off
-  private static final String SELECT_INITIAL_CASES = 
-      "WITH step1 as (\n"
+  //@formatter:off
+  protected static final String INSERT_CLIENT_FULL =
+      "INSERT INTO GT_REFR_CLT (FKCASE_T, FKCLIENT_T, SENSTV_IND)"
+      + "WITH step1 as (\n"
           + " SELECT DISTINCT CAS.FKCHLD_CLT AS CLIENT_ID, CAS.IDENTIFIER AS CASE_ID, CLC.SENSTV_IND\n"
-          + " FROM CWSRSQ.CASE_T CAS\n"
-          + " JOIN CWSRSQ.CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT\n"
-          + " JOIN CWSRSQ.CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T\n"
+          + " FROM CASE_T CAS\n"
+          + " JOIN CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT\n"
+          + " JOIN CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T\n"
           + " WHERE CAS.IBMSNAP_OPERATION IN ('I','U')\n"
           + " AND CLC.IBMSNAP_OPERATION IN ('I','U')\n"
           + " AND CLC.IDENTIFIER BETWEEN ? AND ?\n"
@@ -72,30 +71,18 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
           + " UNION\n"
           + " SELECT DISTINCT CLR.FKCLIENT_0 AS CLIENT_ID, d.CASE_ID, cli.SENSTV_IND\n"
           + " FROM step1 d\n"
-          + " JOIN CWSRSQ.CLN_RELT CLR ON CLR.FKCLIENT_T = d.CLIENT_ID\n"
-          + " JOIN CWSRSQ.CLIENT_T CLI ON CLI.IDENTIFIER = CLR.FKCLIENT_0\n"
+          + " JOIN CLN_RELT CLR ON CLR.FKCLIENT_T = d.CLIENT_ID\n"
+          + " JOIN CLIENT_T CLI ON CLI.IDENTIFIER = CLR.FKCLIENT_0\n"
           + " WHERE CLI.IBMSNAP_OPERATION IN ('I','U')\n"
           + " UNION\n"
           + " SELECT DISTINCT CLR.FKCLIENT_T AS CLIENT_ID, d.CASE_ID, cli.SENSTV_IND\n"
           + " FROM step1 d\n"
-          + " JOIN CWSRSQ.CLN_RELT CLR ON CLR.FKCLIENT_0 = d.CLIENT_ID\n"
-          + " JOIN CWSRSQ.CLIENT_T CLI ON CLI.IDENTIFIER = CLR.FKCLIENT_T\n"
+          + " JOIN CLN_RELT CLR ON CLR.FKCLIENT_0 = d.CLIENT_ID\n"
+          + " JOIN CLIENT_T CLI ON CLI.IDENTIFIER = CLR.FKCLIENT_T\n"
           + " WHERE CLI.IBMSNAP_OPERATION IN ('I','U')\n"
      + ")\n"
      + "SELECT x.CLIENT_ID, x.CASE_ID, x.SENSTV_IND\n"
-     + "FROM step2 x\n"
-     + "FOR READ ONLY WITH UR";
-//@formatter:on
-
-  //@formatter:off
-  protected static final String INSERT_CLIENT_FULL =
-      "INSERT INTO GT_REFR_CLT (FKCASE_T, FKCLIENT_T, SENSTV_IND)"
-          + "\nSELECT rc.FKCASE_T, rc.FKCLIENT_T, c.SENSTV_IND"
-          + "\nFROM REFR_CLT rc"
-          + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
-          + "\nWHERE rc.FKCLIENT_T BETWEEN ? AND ?"
-          + "\nAND c.IBMSNAP_OPERATION IN ('I','U') " // don't update a deleted Client document
-          ;
+     + "FROM step2 x\n";
 //@formatter:on
 
   /**
@@ -197,8 +184,6 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
   protected final AtomicInteger rowsReadAllegations = new AtomicInteger(0);
 
   protected final AtomicInteger nextThreadNum = new AtomicInteger(0);
-
-  private boolean monitorDb2;
 
   /**
    * Construct rocket with all required dependencies.
@@ -474,7 +459,6 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
       con.setAutoCommit(false);
       NeutronDB2Util.enableParallelism(con);
 
-      final DB2SystemMonitor monitor = NeutronDB2Util.monitorStart(con);
       final String schema = getDBSchemaName();
 
       try (final PreparedStatement stmtInsClient = con.prepareStatement(getClientSeedQuery());
@@ -486,7 +470,6 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
         readReferrals(stmtSelReferral, mapReferrals);
 
         // All data retrieved.
-        NeutronDB2Util.monitorStopAndReport(monitor);
         con.commit();
       }
     } catch (Exception e) {
