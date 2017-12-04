@@ -65,7 +65,7 @@ public class ReferralHistoryIndexerJob
           + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND"
           + "\nFROM REFR_CLT rc"
           + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
-          + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?"
+          + "\nWHERE rc.FKCLIENT_T BETWEEN ? AND ?"
           + "\nAND c.IBMSNAP_OPERATION IN ('I','U') " // don't update a deleted Client document
           ;
 //@formatter:on

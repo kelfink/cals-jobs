@@ -37,7 +37,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
- * Job to load family relationships from CMS into ElasticSearch.
+ * Rocket loads family relationships from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */

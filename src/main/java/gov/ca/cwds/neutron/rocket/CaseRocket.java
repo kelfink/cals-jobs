@@ -56,35 +56,66 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CaseRocket.class);
 
+
 //@formatter:off
+  private static final String SELECT_INITIAL_CASES = 
+      "WITH step1 as (\n"
+          + " SELECT DISTINCT CAS.FKCHLD_CLT AS CLIENT_ID, CAS.IDENTIFIER AS CASE_ID, CLC.SENSTV_IND\n"
+          + " FROM CWSRSQ.CASE_T CAS\n"
+          + " JOIN CWSRSQ.CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT\n"
+          + " JOIN CWSRSQ.CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T\n"
+          + " WHERE CAS.IBMSNAP_OPERATION IN ('I','U')\n"
+          + " AND CLC.IBMSNAP_OPERATION IN ('I','U')\n"
+          + " AND CLC.IDENTIFIER BETWEEN ? AND ?\n"
+     + "), step2 as (\n"
+          + " SELECT DISTINCT d.CLIENT_ID, d.CASE_ID, d.SENSTV_IND FROM step1 d\n"
+          + " UNION\n"
+          + " SELECT DISTINCT CLR.FKCLIENT_0 AS CLIENT_ID, d.CASE_ID, cli.SENSTV_IND\n"
+          + " FROM step1 d\n"
+          + " JOIN CWSRSQ.CLN_RELT CLR ON CLR.FKCLIENT_T = d.CLIENT_ID\n"
+          + " JOIN CWSRSQ.CLIENT_T CLI ON CLI.IDENTIFIER = CLR.FKCLIENT_0\n"
+          + " WHERE CLI.IBMSNAP_OPERATION IN ('I','U')\n"
+          + " UNION\n"
+          + " SELECT DISTINCT CLR.FKCLIENT_T AS CLIENT_ID, d.CASE_ID, cli.SENSTV_IND\n"
+          + " FROM step1 d\n"
+          + " JOIN CWSRSQ.CLN_RELT CLR ON CLR.FKCLIENT_0 = d.CLIENT_ID\n"
+          + " JOIN CWSRSQ.CLIENT_T CLI ON CLI.IDENTIFIER = CLR.FKCLIENT_T\n"
+          + " WHERE CLI.IBMSNAP_OPERATION IN ('I','U')\n"
+     + ")\n"
+     + "SELECT x.CLIENT_ID, x.CASE_ID, x.SENSTV_IND\n"
+     + "FROM step2 x\n"
+     + "FOR READ ONLY WITH UR";
+//@formatter:on
+
+  //@formatter:off
   protected static final String INSERT_CLIENT_FULL =
-      "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)"
-          + "\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND"
+      "INSERT INTO GT_REFR_CLT (FKCASE_T, FKCLIENT_T, SENSTV_IND)"
+          + "\nSELECT rc.FKCASE_T, rc.FKCLIENT_T, c.SENSTV_IND"
           + "\nFROM REFR_CLT rc"
           + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
-          + "\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?"
+          + "\nWHERE rc.FKCLIENT_T BETWEEN ? AND ?"
           + "\nAND c.IBMSNAP_OPERATION IN ('I','U') " // don't update a deleted Client document
           ;
 //@formatter:on
 
   /**
-   * Filter <strong>deleted</strong> Client, Referral, Referral/Client, Allegation.
+   * Filter <strong>deleted</strong> Client, Case, Referral/Client, Allegation.
    */
 //@formatter:off
   protected static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO GT_ID (IDENTIFIER)\n"
       + " WITH step1 AS (\n"
-      + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID\n"
+      + "     SELECT ALG.FKCASE_T AS REFERRAL_ID\n"
       + "     FROM ALLGTN_T ALG \n"
       + "     WHERE ALG.IBMSNAP_LOGMARKER > ?\n"
       + " ), "
       + " step2 AS (\n"
-      + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID \n"
+      + "     SELECT ALG.FKCASE_T AS REFERRAL_ID \n"
       + "     FROM CLIENT_T C \n"
       + "     JOIN ALLGTN_T ALG ON (C.IDENTIFIER = ALG.FKCLIENT_0 OR C.IDENTIFIER = ALG.FKCLIENT_T)\n"
       + "     WHERE C.IBMSNAP_LOGMARKER > ?\n"
       + " ),\n"
       + " step3 AS (\n"
-      + "     SELECT RCT.FKREFERL_T AS REFERRAL_ID \n"
+      + "     SELECT RCT.FKCASE_T AS REFERRAL_ID \n"
       + "     FROM REFR_CLT RCT \n"
       + "     WHERE RCT.IBMSNAP_LOGMARKER > ?\n"
       + " ), \n"
@@ -94,7 +125,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
       + "     WHERE RFL.IBMSNAP_LOGMARKER > ?\n"
       + " ), "
       + " step5 AS (\n"
-      + "     SELECT RPT.FKREFERL_T AS REFERRAL_ID \n"
+      + "     SELECT RPT.FKCASE_T AS REFERRAL_ID \n"
       + "     FROM REPTR_T RPT \n"
       + "     WHERE RPT.IBMSNAP_LOGMARKER > ?\n"
       + " ), \n"
@@ -110,39 +141,13 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
 //@formatter:off
   protected static final String SELECT_CLIENT =
-        "SELECT rc.FKCLIENT_T, rc.FKREFERL_T, rc.SENSTV_IND, c.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION \n" 
+        "SELECT rc.FKCLIENT_T, rc.FKCASE_T, rc.SENSTV_IND, c.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION \n" 
       + "FROM GT_REFR_CLT RC \n"
       + "JOIN CLIENT_T C ON C.IDENTIFIER = RC.FKCLIENT_T";
 //@formatter:on
 
 //@formatter:off
-  protected static final String SELECT_ALLEGATION = "SELECT \n"
-      + " RC.FKREFERL_T         AS REFERRAL_ID,\n" 
-      + " ALG.IDENTIFIER        AS ALLEGATION_ID,\n"
-      + " ALG.ALG_DSPC          AS ALLEGATION_DISPOSITION,\n"
-      + " ALG.ALG_TPC           AS ALLEGATION_TYPE,\n"
-      + " ALG.LST_UPD_TS        AS ALLEGATION_LAST_UPDATED,\n"
-      + " CLP.IDENTIFIER        AS PERPETRATOR_ID,\n"
-      + " CLP.SENSTV_IND        AS PERPETRATOR_SENSITIVITY_IND,\n"
-      + " TRIM(CLP.COM_FST_NM)  AS PERPETRATOR_FIRST_NM,\n"
-      + " TRIM(CLP.COM_LST_NM)  AS PERPETRATOR_LAST_NM,\n"
-      + " CLP.LST_UPD_TS        AS PERPETRATOR_LAST_UPDATED,\n"
-      + " CLV.IDENTIFIER        AS VICTIM_ID,\n"
-      + " CLV.SENSTV_IND        AS VICTIM_SENSITIVITY_IND,\n"
-      + " TRIM(CLV.COM_FST_NM)  AS VICTIM_FIRST_NM,\n"
-      + " TRIM(CLV.COM_LST_NM)  AS VICTIM_LAST_NM,\n"
-      + " CLV.LST_UPD_TS        AS VICTIM_LAST_UPDATED,\n" 
-      + " CURRENT TIMESTAMP     AS LAST_CHG, \n"
-      + " ALG.IBMSNAP_OPERATION AS ALG_IBMSNAP_OPERATION \n"
-      + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM GT_REFR_CLT rc1) RC \n"
-      + "JOIN ALLGTN_T       ALG  ON ALG.FKREFERL_T = RC.FKREFERL_T \n"
-      + "JOIN CLIENT_T       CLV  ON CLV.IDENTIFIER = ALG.FKCLIENT_T \n"
-      + "LEFT JOIN CLIENT_T  CLP  ON CLP.IDENTIFIER = ALG.FKCLIENT_0 \n"
-      + "FOR READ ONLY WITH UR ";
-//@formatter:on
-
-//@formatter:off
-  protected static final String SELECT_REFERRAL = "SELECT "
+  protected static final String SELECT_CASE = "SELECT "
       + " RFL.IDENTIFIER        AS REFERRAL_ID,\n"
       + " RFL.REF_RCV_DT        AS START_DATE,\n" 
       + " RFL.REFCLSR_DT        AS END_DATE,\n"
@@ -152,7 +157,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
       + " TRIM(RFL.LMT_ACSDSC)  AS LIMITED_ACCESS_DESCRIPTION,\n"
       + " RFL.L_GVR_ENTC        AS LIMITED_ACCESS_GOVERNMENT_ENT,\n"
       + " RFL.LST_UPD_TS        AS REFERRAL_LAST_UPDATED,\n"
-      + " TRIM(RPT.FKREFERL_T)  AS REPORTER_ID,\n"
+      + " TRIM(RPT.FKCASE_T)  AS REPORTER_ID,\n"
       + " TRIM(RPT.RPTR_FSTNM)  AS REPORTER_FIRST_NM,\n"
       + " TRIM(RPT.RPTR_LSTNM)  AS REPORTER_LAST_NM,\n"
       + " RPT.LST_UPD_TS        AS REPORTER_LAST_UPDATED,\n"
@@ -164,9 +169,9 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
       + " CURRENT TIMESTAMP     AS LAST_CHG, \n"
       + " RFL.IBMSNAP_OPERATION AS RFL_IBMSNAP_OPERATION, \n"
       + " RPT.IBMSNAP_OPERATION AS RPT_IBMSNAP_OPERATION \n"
-      + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM GT_REFR_CLT rc1) RC \n"
-      + "JOIN REFERL_T          RFL  ON RFL.IDENTIFIER = RC.FKREFERL_T \n"
-      + "LEFT JOIN REPTR_T      RPT  ON RPT.FKREFERL_T = RFL.IDENTIFIER \n"
+      + "FROM (SELECT DISTINCT rc1.FKCASE_T FROM GT_REFR_CLT rc1) RC \n"
+      + "JOIN REFERL_T          RFL  ON RFL.IDENTIFIER = RC.FKCASE_T \n"
+      + "LEFT JOIN REPTR_T      RPT  ON RPT.FKCASE_T = RFL.IDENTIFIER \n"
       + "LEFT JOIN STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER ";
 //@formatter:on
 
@@ -231,7 +236,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
-    buf.append(SELECT_REFERRAL);
+    buf.append(SELECT_CASE);
 
     if (!getFlightPlan().isLoadSealedAndSensitive()) {
       buf.append(" WHERE RFL.LMT_ACSSCD = 'N' ");
@@ -239,7 +244,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     final String ret = buf.toString().replaceAll("\\s+", " ").trim();
-    LOGGER.info("REFERRAL SQL: {}", ret);
+    LOGGER.info("CASE SQL: {}", ret);
     return ret;
   }
 
@@ -280,7 +285,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     stmtInsClient.setString(2, p.getRight());
 
     final int cntInsClientReferral = stmtInsClient.executeUpdate();
-    LOGGER.info("bundle client/referrals: {}", cntInsClientReferral);
+    LOGGER.info("bundle client/cases: {}", cntInsClientReferral);
 
     // Prepare retrieval.
     stmtSelClient.setMaxRows(0);
@@ -304,12 +309,11 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
     int cntr = 0;
     EsPersonCase m;
-    LOGGER.info("pull referrals");
+    LOGGER.info("pull cases");
     final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
     while (!isFailed() && rs.next() && (m = mapRows(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "bundle referral");
-      JobLogs.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read",
-          "referrals");
+      JobLogs.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read", "cases");
       // if (m.getReferralClientReplicationOperation() != CmsReplicationOperation.D) {
       // mapReferrals.put(m.getReferralId(), m);
       // }
@@ -344,7 +348,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
       }
     }
 
-    // #152932457: Overwrite deleted referrals.
+    // #152932457: Overwrite deleted cases.
     final ReplicatedPersonCases repl =
         goodToGo ? normalizeSingle(listReadyToNorm) : new ReplicatedPersonCases(clientId);
     ++ret;
@@ -363,7 +367,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
     for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
       final String clientId = rc.getKey();
-      // Loop referrals for this client only.
+      // Loop cases for this client only.
       if (StringUtils.isNotBlank(clientId)) {
         listReadyToNorm.clear(); // next client id
         for (MinClientReferral rc1 : rc.getValue()) {
@@ -375,20 +379,6 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
     LOGGER.debug("Normalize all: END");
     return countNormalized;
-  }
-
-  protected DB2SystemMonitor buildMonitor(final Connection con) {
-    DB2SystemMonitor ret = null;
-    if (monitorDb2) {
-      ret = NeutronDB2Util.monitorStart(con);
-    }
-    return ret;
-  }
-
-  protected void monitorStopAndReport(DB2SystemMonitor monitor) throws SQLException {
-    if (monitor != null) {
-      NeutronDB2Util.monitorStopAndReport(monitor);
-    }
   }
 
   /**
@@ -414,8 +404,8 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
   }
 
   /**
-   * Pour referrals, allegations, and client/referral keys into the caldron and brew into a
-   * referrals element per client.
+   * Pour cases, allegations, and client/referral keys into the caldron and brew into a cases
+   * element per client.
    * 
    * @param listAllegations bundle allegations
    * @param mapReferrals k=referral id, v=EsPersonCase
@@ -548,7 +538,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
       doneRetrieve();
     }
 
-    LOGGER.info("DONE: read {} ES referral rows", this.rowsReadReferrals.get());
+    LOGGER.info("DONE: read {} ES case rows", this.rowsReadReferrals.get());
   }
 
   /**
@@ -559,10 +549,47 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     return false;
   }
 
+//@formatter:off
   @Override
   public String getPrepLastChangeSQL() {
-    return INSERT_CLIENT_LAST_CHG;
+    return 
+     "INSERT INTO GT_ID (IDENTIFIER)"
+     + "\nSELECT DISTINCT X.IDENTIFIER FROM ( "
+         + "\nSELECT CAS.IDENTIFIER"
+          + "\n FROM CASE_T CAS "
+          + "\nWHERE CAS.IBMSNAP_LOGMARKER > ? "
+      + "\nUNION\n"
+          + "SELECT CAS.IDENTIFIER "
+          + "\nFROM CASE_T CAS"
+          + "\nLEFT JOIN CHLD_CLT CCL1 ON CCL1.FKCLIENT_T = CAS.FKCHLD_CLT  "
+          + "\nLEFT JOIN CLIENT_T CLC1 ON CLC1.IDENTIFIER = CCL1.FKCLIENT_T "
+          + "\nWHERE CCL1.IBMSNAP_LOGMARKER > ? "
+      + "\nUNION"
+          + "\n SELECT CAS.IDENTIFIER "
+          + "\n FROM CASE_T CAS "
+          + "\nLEFT JOIN CHLD_CLT CCL2 ON CCL2.FKCLIENT_T = CAS.FKCHLD_CLT  "
+          + "\nLEFT JOIN CLIENT_T CLC2 ON CLC2.IDENTIFIER = CCL2.FKCLIENT_T "
+          + "\nWHERE CLC2.IBMSNAP_LOGMARKER > ? "
+      + "\nUNION "
+          + "\nSELECT CAS.IDENTIFIER "
+          + "\nFROM CASE_T CAS "
+          + "\nLEFT JOIN CHLD_CLT CCL3 ON CCL3.FKCLIENT_T = CAS.FKCHLD_CLT  "
+          + "\nLEFT JOIN CLIENT_T CLC3 ON CLC3.IDENTIFIER = CCL3.FKCLIENT_T "
+          + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL3.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
+          + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
+          + "\nWHERE CLR.IBMSNAP_LOGMARKER > ? "
+      + "\nUNION "
+          + "\nSELECT CAS.IDENTIFIER "
+          + "\nFROM CASE_T CAS "
+          + "\nLEFT JOIN CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
+          + "\nLEFT JOIN CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T "
+          + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
+          + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
+          + "\nJOIN CLIENT_T CLP ON CLP.IDENTIFIER = CLR.FKCLIENT_0 "
+          + "\nWHERE CLP.IBMSNAP_LOGMARKER > ? "
+     + "\n) x";
   }
+//@formatter:on
 
   @Override
   public boolean isInitialLoadJdbc() {
@@ -585,7 +612,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
   @Override
   public String getOptionalElementName() {
-    return "referrals";
+    return "cases";
   }
 
   @Override
@@ -605,14 +632,6 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     listClientReferralKeys.clear();
     listReadyToNorm.clear();
     mapReferrals.clear();
-  }
-
-  public boolean isMonitorDb2() {
-    return monitorDb2;
-  }
-
-  public void setMonitorDb2(boolean monitorDb2) {
-    this.monitorDb2 = monitorDb2;
   }
 
   /**
