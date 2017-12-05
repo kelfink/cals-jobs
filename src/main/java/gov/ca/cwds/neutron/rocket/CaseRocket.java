@@ -89,41 +89,42 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
    * Filter <strong>deleted</strong> Client, Case, Referral/Client, Allegation.
    */
 //@formatter:off
-  protected static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO GT_ID (IDENTIFIER)\n"
-      + " WITH step1 AS (\n"
-      + "     SELECT ALG.FKCASE_T AS REFERRAL_ID\n"
-      + "     FROM ALLGTN_T ALG \n"
-      + "     WHERE ALG.IBMSNAP_LOGMARKER > ?\n"
-      + " ), "
-      + " step2 AS (\n"
-      + "     SELECT ALG.FKCASE_T AS REFERRAL_ID \n"
-      + "     FROM CLIENT_T C \n"
-      + "     JOIN ALLGTN_T ALG ON (C.IDENTIFIER = ALG.FKCLIENT_0 OR C.IDENTIFIER = ALG.FKCLIENT_T)\n"
-      + "     WHERE C.IBMSNAP_LOGMARKER > ?\n"
-      + " ),\n"
-      + " step3 AS (\n"
-      + "     SELECT RCT.FKCASE_T AS REFERRAL_ID \n"
-      + "     FROM REFR_CLT RCT \n"
-      + "     WHERE RCT.IBMSNAP_LOGMARKER > ?\n"
-      + " ), \n"
-      + " step4 AS (\n"
-      + "     SELECT RFL.IDENTIFIER AS REFERRAL_ID \n"
-      + "     FROM REFERL_T RFL \n"
-      + "     WHERE RFL.IBMSNAP_LOGMARKER > ?\n"
-      + " ), "
-      + " step5 AS (\n"
-      + "     SELECT RPT.FKCASE_T AS REFERRAL_ID \n"
-      + "     FROM REPTR_T RPT \n"
-      + "     WHERE RPT.IBMSNAP_LOGMARKER > ?\n"
-      + " ), \n"
-      + " hoard AS (\n"
-      + "     SELECT s1.REFERRAL_ID FROM STEP1 s1 UNION ALL\n"
-      + "     SELECT s2.REFERRAL_ID FROM STEP2 s2 UNION ALL\n"
-      + "     SELECT s3.REFERRAL_ID FROM STEP3 s3 UNION ALL\n"
-      + "     SELECT s4.REFERRAL_ID FROM STEP4 s4 UNION ALL\n"
-      + "     SELECT s5.REFERRAL_ID FROM STEP5 s5 \n"
-      + " ) \n"
-      + " SELECT DISTINCT g.REFERRAL_ID FROM hoard g \n";
+  protected static final String INSERT_CLIENT_LAST_CHG =  
+      "INSERT INTO GT_ID (IDENTIFIER)"
+      + "\nSELECT DISTINCT X.IDENTIFIER FROM ( "
+          + "\nSELECT CAS.IDENTIFIER"
+           + "\n FROM CASE_T CAS "
+           + "\nWHERE CAS.IBMSNAP_LOGMARKER > ? "
+       + "\nUNION\n"
+           + "SELECT CAS.IDENTIFIER "
+           + "\nFROM CASE_T CAS"
+           + "\nLEFT JOIN CHLD_CLT CCL1 ON CCL1.FKCLIENT_T = CAS.FKCHLD_CLT  "
+           + "\nLEFT JOIN CLIENT_T CLC1 ON CLC1.IDENTIFIER = CCL1.FKCLIENT_T "
+           + "\nWHERE CCL1.IBMSNAP_LOGMARKER > ? "
+       + "\nUNION"
+           + "\n SELECT CAS.IDENTIFIER "
+           + "\n FROM CASE_T CAS "
+           + "\nLEFT JOIN CHLD_CLT CCL2 ON CCL2.FKCLIENT_T = CAS.FKCHLD_CLT  "
+           + "\nLEFT JOIN CLIENT_T CLC2 ON CLC2.IDENTIFIER = CCL2.FKCLIENT_T "
+           + "\nWHERE CLC2.IBMSNAP_LOGMARKER > ? "
+       + "\nUNION "
+           + "\nSELECT CAS.IDENTIFIER "
+           + "\nFROM CASE_T CAS "
+           + "\nLEFT JOIN CHLD_CLT CCL3 ON CCL3.FKCLIENT_T = CAS.FKCHLD_CLT  "
+           + "\nLEFT JOIN CLIENT_T CLC3 ON CLC3.IDENTIFIER = CCL3.FKCLIENT_T "
+           + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL3.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
+           + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
+           + "\nWHERE CLR.IBMSNAP_LOGMARKER > ? "
+       + "\nUNION "
+           + "\nSELECT CAS.IDENTIFIER "
+           + "\nFROM CASE_T CAS "
+           + "\nLEFT JOIN CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
+           + "\nLEFT JOIN CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T "
+           + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
+           + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
+           + "\nJOIN CLIENT_T CLP ON CLP.IDENTIFIER = CLR.FKCLIENT_0 "
+           + "\nWHERE CLP.IBMSNAP_LOGMARKER > ? "
+      + "\n) x";
 //@formatter:on
 
 //@formatter:off
@@ -179,9 +180,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
   protected transient ThreadLocal<List<EsPersonCase>> allocReadyToNorm = new ThreadLocal<>();
 
-  protected final AtomicInteger rowsReadReferrals = new AtomicInteger(0);
-
-  protected final AtomicInteger rowsReadAllegations = new AtomicInteger(0);
+  protected final AtomicInteger rowsReadCases = new AtomicInteger(0);
 
   protected final AtomicInteger nextThreadNum = new AtomicInteger(0);
 
@@ -298,7 +297,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
     while (!isFailed() && rs.next() && (m = mapRows(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "bundle referral");
-      JobLogs.logEvery(LOGGER, 10000, rowsReadReferrals.incrementAndGet(), "Total read", "cases");
+      JobLogs.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read", "cases");
       // if (m.getReferralClientReplicationOperation() != CmsReplicationOperation.D) {
       // mapReferrals.put(m.getReferralId(), m);
       // }
@@ -463,11 +462,11 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
       try (final PreparedStatement stmtInsClient = con.prepareStatement(getClientSeedQuery());
           final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT);
-          final PreparedStatement stmtSelReferral =
+          final PreparedStatement stmtSelCase =
               con.prepareStatement(getInitialLoadQuery(schema))) {
         // Read separate components for this key bundle.
         readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
-        readReferrals(stmtSelReferral, mapReferrals);
+        readReferrals(stmtSelCase, mapReferrals);
 
         // All data retrieved.
         con.commit();
@@ -485,7 +484,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
   }
 
   /**
-   * Initial load only. The "extract" part of ETL. Runs partition/key ranges in separate threads.
+   * Initial load only. The "extract" part of ETL. Processes key ranges in separate threads.
    * 
    * <p>
    * Note that this rocket normalizes <strong>without</strong> the transform thread.
@@ -521,7 +520,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
       doneRetrieve();
     }
 
-    LOGGER.info("DONE: read {} ES case rows", this.rowsReadReferrals.get());
+    LOGGER.info("DONE: read {} ES case rows", this.rowsReadCases.get());
   }
 
   /**

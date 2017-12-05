@@ -28,7 +28,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
- * Entity bean for Materialized Query Table (MQT), ES_CASE_HIST.
+ * Entity bean for Materialized Query Table (MQT), MQT_CASE_HIST.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedPersonCases}.

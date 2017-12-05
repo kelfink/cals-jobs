@@ -141,7 +141,7 @@ public class ReferralHistoryIndexerJob
       + "JOIN ALLGTN_T       ALG  ON ALG.FKREFERL_T = RC.FKREFERL_T \n"
       + "JOIN CLIENT_T       CLV  ON CLV.IDENTIFIER = ALG.FKCLIENT_T \n"
       + "LEFT JOIN CLIENT_T  CLP  ON CLP.IDENTIFIER = ALG.FKCLIENT_0 \n"
-      + "FOR READ ONLY WITH UR ";
+      + "WITH UR ";
 //@formatter:on
 
 //@formatter:off

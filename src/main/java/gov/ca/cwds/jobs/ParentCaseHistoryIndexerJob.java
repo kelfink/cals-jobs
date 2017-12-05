@@ -59,9 +59,9 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
     final List<EsPersonCase> ret = new ArrayList<>();
 
     if (getFlightPlan().isLoadSealedAndSensitive()) {
-      ret.addAll(fetchLastRunGroup(session, txn, ""));
+      ret.addAll(fetchLastRunGroup(session, ""));
     } else {
-      ret.addAll(fetchLastRunGroup(session, txn, "LimitedAccess"));
+      ret.addAll(fetchLastRunGroup(session, "LimitedAccess"));
     }
 
     return ret;

@@ -69,36 +69,36 @@ public abstract class CaseHistoryIndexerJob
     return 
      "INSERT INTO GT_ID (IDENTIFIER)"
      + "\nSELECT DISTINCT X.IDENTIFIER FROM ( "
-         + "\nSELECT CAS.IDENTIFIER"
-          + "\n FROM CASE_T CAS "
-          + "\nWHERE CAS.IBMSNAP_LOGMARKER > ? "
+         + "\nSELECT CAS.IDENTIFIER FROM CASE_T CAS WHERE CAS.IBMSNAP_LOGMARKER > ? "
       + "\nUNION\n"
           + "SELECT CAS.IDENTIFIER "
           + "\nFROM CASE_T CAS"
-          + "\nLEFT JOIN CHLD_CLT CCL1 ON CCL1.FKCLIENT_T = CAS.FKCHLD_CLT  "
-          + "\nLEFT JOIN CLIENT_T CLC1 ON CLC1.IDENTIFIER = CCL1.FKCLIENT_T "
+          + "\nJOIN CHLD_CLT CCL1 ON CCL1.FKCLIENT_T = CAS.FKCHLD_CLT  "
+          + "\nJOIN CLIENT_T CLC1 ON CLC1.IDENTIFIER = CCL1.FKCLIENT_T "
           + "\nWHERE CCL1.IBMSNAP_LOGMARKER > ? "
       + "\nUNION"
           + "\n SELECT CAS.IDENTIFIER "
           + "\n FROM CASE_T CAS "
-          + "\nLEFT JOIN CHLD_CLT CCL2 ON CCL2.FKCLIENT_T = CAS.FKCHLD_CLT  "
-          + "\nLEFT JOIN CLIENT_T CLC2 ON CLC2.IDENTIFIER = CCL2.FKCLIENT_T "
+          + "\nJOIN CHLD_CLT CCL2 ON CCL2.FKCLIENT_T = CAS.FKCHLD_CLT  "
+          + "\nJOIN CLIENT_T CLC2 ON CLC2.IDENTIFIER = CCL2.FKCLIENT_T "
           + "\nWHERE CLC2.IBMSNAP_LOGMARKER > ? "
       + "\nUNION "
           + "\nSELECT CAS.IDENTIFIER "
           + "\nFROM CASE_T CAS "
-          + "\nLEFT JOIN CHLD_CLT CCL3 ON CCL3.FKCLIENT_T = CAS.FKCHLD_CLT  "
-          + "\nLEFT JOIN CLIENT_T CLC3 ON CLC3.IDENTIFIER = CCL3.FKCLIENT_T "
-          + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL3.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
-          + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
+          + "\nJOIN CHLD_CLT CCL3 ON CCL3.FKCLIENT_T = CAS.FKCHLD_CLT  "
+          + "\nJOIN CLIENT_T CLC3 ON CLC3.IDENTIFIER = CCL3.FKCLIENT_T "
+          + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL3.FKCLIENT_T AND "
+       // + "\n((CLR.CLNTRELC BETWEEN 187 and 214) OR "
+       // + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
           + "\nWHERE CLR.IBMSNAP_LOGMARKER > ? "
       + "\nUNION "
           + "\nSELECT CAS.IDENTIFIER "
           + "\nFROM CASE_T CAS "
-          + "\nLEFT JOIN CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
-          + "\nLEFT JOIN CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T "
-          + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
-          + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
+          + "\nJOIN CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
+          + "\nJOIN CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T "
+          + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL.FKCLIENT_T AND "
+       // + "\n((CLR.CLNTRELC BETWEEN 187 and 214) OR "
+       // + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
           + "\nJOIN CLIENT_T CLP ON CLP.IDENTIFIER = CLR.FKCLIENT_0 "
           + "\nWHERE CLP.IBMSNAP_LOGMARKER > ? "
      + "\n) x";
@@ -106,8 +106,7 @@ public abstract class CaseHistoryIndexerJob
 //@formatter:on
 
   @SuppressWarnings("unchecked")
-  protected List<EsPersonCase> fetchLastRunGroup(final Session session, final Transaction txn,
-      String queryType) {
+  protected List<EsPersonCase> fetchLastRunGroup(final Session session, String queryType) {
     LOGGER.info("CASE LAST RUN QUERY: query type: {}", queryType);
     session.clear();
     final Class<?> entityClass = getDenormalizedClass(); // view entity class
@@ -124,10 +123,10 @@ public abstract class CaseHistoryIndexerJob
     final List<EsPersonCase> ret = new ArrayList<>();
 
     if (getFlightPlan().isLoadSealedAndSensitive()) {
-      ret.addAll(fetchLastRunGroup(session, txn, "Child"));
-      ret.addAll(fetchLastRunGroup(session, txn, "Parent"));
+      ret.addAll(fetchLastRunGroup(session, "Child"));
+      ret.addAll(fetchLastRunGroup(session, "Parent"));
     } else {
-      ret.addAll(fetchLastRunGroup(session, txn, "WithLimitedAccess"));
+      ret.addAll(fetchLastRunGroup(session, "WithLimitedAccess"));
     }
 
     return ret;
