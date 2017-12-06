@@ -46,6 +46,7 @@ import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
 import gov.ca.cwds.dao.cms.ReplicatedSafetyAlertsDao;
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.dao.cms.ReplicatedSubstituteCareProviderDao;
+import gov.ca.cwds.dao.cms.StaffPersonDao;
 import gov.ca.cwds.dao.ns.EsIntakeScreeningDao;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.SystemCodeDao;
@@ -53,12 +54,13 @@ import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
 import gov.ca.cwds.data.persistence.cms.EsSafetyAlert;
+import gov.ca.cwds.data.persistence.cms.StaffPerson;
 import gov.ca.cwds.data.persistence.cms.SystemCode;
 import gov.ca.cwds.data.persistence.cms.SystemMeta;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
@@ -125,8 +127,8 @@ public class HyperCube extends NeutronGuiceModule {
   private static final String HIBERNATE_CONFIG_NS = "jobs-ns-hibernate.cfg.xml";
 
   /**
-   * The <strong>singleton</strong> Guice Injector used for all Job instances during the life of
-   * this batch JVM.
+   * The <strong>singleton</strong> Guice injector used for all rocket instances during the life of
+   * this JVM.
    */
   private static Injector injector;
 
@@ -314,6 +316,7 @@ public class HyperCube extends NeutronGuiceModule {
     bind(ReplicatedPersonReferralsDao.class);
     bind(ReplicatedPersonCasesDao.class);
     bind(ReplicatedSafetyAlertsDao.class);
+    bind(StaffPersonDao.class);
 
     // PostgreSQL:
     bind(EsIntakeScreeningDao.class);
@@ -344,7 +347,8 @@ public class HyperCube extends NeutronGuiceModule {
         .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
         .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
         .addAnnotatedClass(ReplicatedAddress.class).addAnnotatedClass(SystemCode.class)
-        .addAnnotatedClass(EsSafetyAlert.class).addAnnotatedClass(SystemMeta.class);
+        .addAnnotatedClass(EsSafetyAlert.class).addAnnotatedClass(SystemMeta.class)
+        .addAnnotatedClass(StaffPerson.class);
     return additionalDaos(config).buildSessionFactory();
   }
 
@@ -482,13 +486,13 @@ public class HyperCube extends NeutronGuiceModule {
     final Properties p = new Properties();
     p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
 
-    // MORE: make configurable.
+    // NEXT: make configurable.
     p.put("org.quartz.threadPool.threadCount",
         initialMode ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
     final StdSchedulerFactory factory = new StdSchedulerFactory(p);
     final Scheduler scheduler = factory.getScheduler();
 
-    // MORE: inject scheduler and rocket factory.
+    // NEXT: inject scheduler and rocket factory.
     scheduler.setJobFactory(rocketFactory);
     ret.setScheduler(scheduler);
 

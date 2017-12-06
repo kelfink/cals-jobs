@@ -35,7 +35,11 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
- * Rocket to load case history from CMS into ElasticSearch.
+ * Rocket to load Case history from CMS into ElasticSearch.
+ * 
+ * <p>
+ * Mimics behavior of the Case History tab in CMS fat client.
+ * </p>
  * 
  * @author CWDS API Team
  */

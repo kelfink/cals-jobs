@@ -513,12 +513,10 @@ public class ReferralHistoryIndexerJob
           final PreparedStatement stmtSelReferral =
               con.prepareStatement(getInitialLoadQuery(schema));
           final PreparedStatement stmtSelAllegation = con.prepareStatement(SELECT_ALLEGATION)) {
-        // Read separate components for this key bundle.
         readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
         readReferrals(stmtSelReferral, mapReferrals);
         readAllegations(stmtSelAllegation, listAllegations);
 
-        // All data retrieved.
         NeutronDB2Util.monitorStopAndReport(monitor);
         con.commit();
       }

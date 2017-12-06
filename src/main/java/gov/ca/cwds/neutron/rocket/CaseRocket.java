@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
+import gov.ca.cwds.dao.cms.StaffPersonDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -57,7 +58,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
   //@formatter:off
   protected static final String INSERT_CLIENT_FULL =
-      "INSERT INTO GT_REFR_CLT (FKCASE_T, FKCLIENT_T, SENSTV_IND)"
+      "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)"
       + "WITH step1 as (\n"
           + " SELECT DISTINCT CAS.FKCHLD_CLT AS CLIENT_ID, CAS.IDENTIFIER AS CASE_ID, CLC.SENSTV_IND\n"
           + " FROM CASE_T CAS\n"
@@ -92,25 +93,25 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
   protected static final String INSERT_CLIENT_LAST_CHG =  
       "INSERT INTO GT_ID (IDENTIFIER)"
       + "\nSELECT DISTINCT X.IDENTIFIER FROM ( "
-          + "\nSELECT CAS.IDENTIFIER"
-           + "\n FROM CASE_T CAS "
-           + "\nWHERE CAS.IBMSNAP_LOGMARKER > ? "
+          + "\nSELECT CAS1.IDENTIFIER"
+           + "\n FROM CASE_T CAS1 "
+           + "\nWHERE CAS1.IBMSNAP_LOGMARKER > ? "
        + "\nUNION\n"
-           + "SELECT CAS.IDENTIFIER "
-           + "\nFROM CASE_T CAS"
-           + "\nLEFT JOIN CHLD_CLT CCL1 ON CCL1.FKCLIENT_T = CAS.FKCHLD_CLT  "
+           + "SELECT CAS2.IDENTIFIER "
+           + "\nFROM CASE_T CAS2"
+           + "\nLEFT JOIN CHLD_CLT CCL1 ON CCL1.FKCLIENT_T = CAS2.FKCHLD_CLT  "
            + "\nLEFT JOIN CLIENT_T CLC1 ON CLC1.IDENTIFIER = CCL1.FKCLIENT_T "
            + "\nWHERE CCL1.IBMSNAP_LOGMARKER > ? "
        + "\nUNION"
-           + "\n SELECT CAS.IDENTIFIER "
-           + "\n FROM CASE_T CAS "
-           + "\nLEFT JOIN CHLD_CLT CCL2 ON CCL2.FKCLIENT_T = CAS.FKCHLD_CLT  "
+           + "\n SELECT CAS3.IDENTIFIER "
+           + "\n FROM CASE_T CAS3 "
+           + "\nLEFT JOIN CHLD_CLT CCL2 ON CCL2.FKCLIENT_T = CAS3.FKCHLD_CLT  "
            + "\nLEFT JOIN CLIENT_T CLC2 ON CLC2.IDENTIFIER = CCL2.FKCLIENT_T "
            + "\nWHERE CLC2.IBMSNAP_LOGMARKER > ? "
        + "\nUNION "
-           + "\nSELECT CAS.IDENTIFIER "
-           + "\nFROM CASE_T CAS "
-           + "\nLEFT JOIN CHLD_CLT CCL3 ON CCL3.FKCLIENT_T = CAS.FKCHLD_CLT  "
+           + "\nSELECT CAS3.IDENTIFIER "
+           + "\nFROM CASE_T CAS3 "
+           + "\nLEFT JOIN CHLD_CLT CCL3 ON CCL3.FKCLIENT_T = CAS3.FKCHLD_CLT  "
            + "\nLEFT JOIN CLIENT_T CLC3 ON CLC3.IDENTIFIER = CCL3.FKCLIENT_T "
            + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL3.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
            + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
@@ -129,7 +130,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
 //@formatter:off
   protected static final String SELECT_CLIENT =
-        "SELECT rc.FKCLIENT_T, rc.FKCASE_T, rc.SENSTV_IND, c.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION \n" 
+        "SELECT rc.FKCLIENT_T, rc.FKREFERL_T, rc.SENSTV_IND, c.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION \n" 
       + "FROM GT_REFR_CLT RC \n"
       + "JOIN CLIENT_T C ON C.IDENTIFIER = RC.FKCLIENT_T";
 //@formatter:on
@@ -184,18 +185,22 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
   protected final AtomicInteger nextThreadNum = new AtomicInteger(0);
 
+  private StaffPersonDao staffPersonDao;
+
   /**
    * Construct rocket with all required dependencies.
    * 
    * @param dao DAO for {@link ReplicatedPersonCases}
    * @param esDao ElasticSearch DAO
+   * @param staffPersonDao staff worker DAO
    * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
    */
   @Inject
   public CaseRocket(ReplicatedPersonCasesDao dao, ElasticsearchDao esDao,
-      @LastRunFile String lastRunFile, ObjectMapper mapper, FlightPlan flightPlan) {
+      StaffPersonDao staffPersonDao, @LastRunFile String lastRunFile, ObjectMapper mapper,
+      FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
@@ -344,12 +349,12 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
   protected int normalizeQueryResults(final Map<String, EsPersonCase> mapReferrals,
       final List<EsPersonCase> listReadyToNorm,
-      final Map<String, List<MinClientReferral>> mapReferralByClient,
+      final Map<String, List<MinClientReferral>> mapCaseByClient,
       final Map<String, List<EsPersonCase>> mapAllegationByReferral) {
     LOGGER.debug("Normalize all: START");
     int countNormalized = 0;
 
-    for (Map.Entry<String, List<MinClientReferral>> rc : mapReferralByClient.entrySet()) {
+    for (Map.Entry<String, List<MinClientReferral>> rc : mapCaseByClient.entrySet()) {
       final String clientId = rc.getKey();
       // Loop cases for this client only.
       if (StringUtils.isNotBlank(clientId)) {
@@ -491,7 +496,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
    */
   @Override
   protected void threadRetrieveByJdbc() {
-    nameThread("read_main");
+    nameThread("case_main");
     LOGGER.info("BEGIN: main read thread");
     doneTransform(); // normalize in place **WITHOUT** the transform thread
 
@@ -571,6 +576,17 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
      + "\n) x";
   }
 //@formatter:on
+
+  // protected void cacheStaffWorkers() throws NeutronException {
+  // try {
+  // final List<EsIntakeScreening> results = this.dao.findAll();
+  // } catch (Exception e) {
+  // fail();
+  // throw new NeutronException("ERROR READING PG VIEW", e);
+  // } finally {
+  // doneRetrieve();
+  // }
+  // }
 
   @Override
   public boolean isInitialLoadJdbc() {

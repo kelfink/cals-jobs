@@ -22,6 +22,9 @@ public interface CmsReplicatedEntity extends ApiLegacyAware, PersistentObject {
     return t.getReplicationOperation() == CmsReplicationOperation.D;
   }
 
+  /**
+   * @return the embedded replication object
+   */
   EmbeddableCmsReplicatedEntity getReplicatedEntity();
 
   /**
