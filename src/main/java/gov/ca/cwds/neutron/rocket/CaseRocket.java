@@ -13,7 +13,6 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.slf4j.Logger;
@@ -27,6 +26,7 @@ import gov.ca.cwds.dao.cms.StaffPersonDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.cms.CaseSQLResource;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.data.persistence.cms.StaffPerson;
@@ -57,114 +57,6 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CaseRocket.class);
 
-  //@formatter:off
-  protected static final String INSERT_CLIENT_FULL =
-      "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)"
-      + "WITH step1 as (\n"
-          + " SELECT DISTINCT CAS.FKCHLD_CLT AS CLIENT_ID, CAS.IDENTIFIER AS CASE_ID, CLC.SENSTV_IND\n"
-          + " FROM CASE_T CAS\n"
-          + " JOIN CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT\n"
-          + " JOIN CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T\n"
-          + " WHERE CAS.IBMSNAP_OPERATION IN ('I','U')\n"
-          + " AND CLC.IBMSNAP_OPERATION IN ('I','U')\n"
-          + " AND CLC.IDENTIFIER BETWEEN ? AND ?\n"
-     + "), step2 as (\n"
-          + " SELECT DISTINCT d.CLIENT_ID, d.CASE_ID, d.SENSTV_IND FROM step1 d\n"
-          + " UNION\n"
-          + " SELECT DISTINCT CLR.FKCLIENT_0 AS CLIENT_ID, d.CASE_ID, cli.SENSTV_IND\n"
-          + " FROM step1 d\n"
-          + " JOIN CLN_RELT CLR ON CLR.FKCLIENT_T = d.CLIENT_ID\n"
-          + " JOIN CLIENT_T CLI ON CLI.IDENTIFIER = CLR.FKCLIENT_0\n"
-          + " WHERE CLI.IBMSNAP_OPERATION IN ('I','U')\n"
-          + " UNION\n"
-          + " SELECT DISTINCT CLR.FKCLIENT_T AS CLIENT_ID, d.CASE_ID, cli.SENSTV_IND\n"
-          + " FROM step1 d\n"
-          + " JOIN CLN_RELT CLR ON CLR.FKCLIENT_0 = d.CLIENT_ID\n"
-          + " JOIN CLIENT_T CLI ON CLI.IDENTIFIER = CLR.FKCLIENT_T\n"
-          + " WHERE CLI.IBMSNAP_OPERATION IN ('I','U')\n"
-     + ")\n"
-     + "SELECT x.CLIENT_ID, x.CASE_ID, x.SENSTV_IND\n"
-     + "FROM step2 x\n";
-//@formatter:on
-
-  /**
-   * Filter <strong>deleted</strong> Clients and Cases.
-   */
-//@formatter:off
-  protected static final String INSERT_CLIENT_LAST_CHG =  
-      "INSERT INTO GT_ID (IDENTIFIER)"
-      + "\nSELECT DISTINCT X.IDENTIFIER FROM ( "
-          + "\nSELECT CAS1.IDENTIFIER"
-           + "\n FROM CASE_T CAS1 "
-           + "\nWHERE CAS1.IBMSNAP_LOGMARKER > ? "
-       + "\nUNION\n"
-           + "SELECT CAS2.IDENTIFIER "
-           + "\nFROM CASE_T CAS2"
-           + "\nLEFT JOIN CHLD_CLT CCL1 ON CCL1.FKCLIENT_T = CAS2.FKCHLD_CLT  "
-           + "\nLEFT JOIN CLIENT_T CLC1 ON CLC1.IDENTIFIER = CCL1.FKCLIENT_T "
-           + "\nWHERE CCL1.IBMSNAP_LOGMARKER > ? "
-       + "\nUNION"
-           + "\n SELECT CAS3.IDENTIFIER "
-           + "\n FROM CASE_T CAS3 "
-           + "\nLEFT JOIN CHLD_CLT CCL2 ON CCL2.FKCLIENT_T = CAS3.FKCHLD_CLT  "
-           + "\nLEFT JOIN CLIENT_T CLC2 ON CLC2.IDENTIFIER = CCL2.FKCLIENT_T "
-           + "\nWHERE CLC2.IBMSNAP_LOGMARKER > ? "
-       + "\nUNION "
-           + "\nSELECT CAS3.IDENTIFIER "
-           + "\nFROM CASE_T CAS3 "
-           + "\nLEFT JOIN CHLD_CLT CCL3 ON CCL3.FKCLIENT_T = CAS3.FKCHLD_CLT  "
-           + "\nLEFT JOIN CLIENT_T CLC3 ON CLC3.IDENTIFIER = CCL3.FKCLIENT_T "
-           + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL3.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
-           + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
-           + "\nWHERE CLR.IBMSNAP_LOGMARKER > ? "
-       + "\nUNION "
-           + "\nSELECT CAS.IDENTIFIER "
-           + "\nFROM CASE_T CAS "
-           + "\nLEFT JOIN CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
-           + "\nLEFT JOIN CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T "
-           + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
-           + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
-           + "\nJOIN CLIENT_T CLP ON CLP.IDENTIFIER = CLR.FKCLIENT_0 "
-           + "\nWHERE CLP.IBMSNAP_LOGMARKER > ? "
-      + "\n) x";
-//@formatter:on
-
-//@formatter:off
-  protected static final String SELECT_CLIENT =
-        "SELECT rc.FKCLIENT_T, rc.FKREFERL_T, rc.SENSTV_IND, c.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION \n" 
-      + "FROM GT_REFR_CLT RC \n"
-      + "JOIN CLIENT_T C ON C.IDENTIFIER = RC.FKCLIENT_T";
-//@formatter:on
-
-//@formatter:off
-  protected static final String SELECT_CASE = "SELECT "
-      + " RFL.IDENTIFIER        AS REFERRAL_ID,\n"
-      + " RFL.REF_RCV_DT        AS START_DATE,\n" 
-      + " RFL.REFCLSR_DT        AS END_DATE,\n"
-      + " RFL.RFR_RSPC          AS REFERRAL_RESPONSE_TYPE,\n"
-      + " RFL.LMT_ACSSCD        AS LIMITED_ACCESS_CODE,\n"
-      + " RFL.LMT_ACS_DT        AS LIMITED_ACCESS_DATE,\n"
-      + " TRIM(RFL.LMT_ACSDSC)  AS LIMITED_ACCESS_DESCRIPTION,\n"
-      + " RFL.L_GVR_ENTC        AS LIMITED_ACCESS_GOVERNMENT_ENT,\n"
-      + " RFL.LST_UPD_TS        AS REFERRAL_LAST_UPDATED,\n"
-      + " TRIM(RPT.FKCASE_T)  AS REPORTER_ID,\n"
-      + " TRIM(RPT.RPTR_FSTNM)  AS REPORTER_FIRST_NM,\n"
-      + " TRIM(RPT.RPTR_LSTNM)  AS REPORTER_LAST_NM,\n"
-      + " RPT.LST_UPD_TS        AS REPORTER_LAST_UPDATED,\n"
-      + " STP.IDENTIFIER        AS WORKER_ID,\n" 
-      + " TRIM(STP.FIRST_NM)    AS WORKER_FIRST_NM,\n"
-      + " TRIM(STP.LAST_NM)     AS WORKER_LAST_NM,\n"
-      + " STP.LST_UPD_TS        AS WORKER_LAST_UPDATED,\n"
-      + " RFL.GVR_ENTC          AS REFERRAL_COUNTY,\n" 
-      + " CURRENT TIMESTAMP     AS LAST_CHG, \n"
-      + " RFL.IBMSNAP_OPERATION AS RFL_IBMSNAP_OPERATION, \n"
-      + " RPT.IBMSNAP_OPERATION AS RPT_IBMSNAP_OPERATION \n"
-      + "FROM (SELECT DISTINCT rc1.FKCASE_T FROM GT_REFR_CLT rc1) RC \n"
-      + "JOIN REFERL_T          RFL  ON RFL.IDENTIFIER = RC.FKCASE_T \n"
-      + "LEFT JOIN REPTR_T      RPT  ON RPT.FKCASE_T = RFL.IDENTIFIER \n"
-      + "LEFT JOIN STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER ";
-//@formatter:on
-
   private List<StaffPerson> caseWorkers = new ArrayList<>(88000);
 
   /**
@@ -189,6 +81,8 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
   protected final AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   private StaffPersonDao staffPersonDao;
+
+  private Map<String, StaffPerson> staffWorkers = new HashMap<>();
 
   /**
    * Construct rocket with all required dependencies.
@@ -220,7 +114,12 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
   }
 
   protected String getClientSeedQuery() {
-    return INSERT_CLIENT_FULL;
+    return CaseSQLResource.INSERT_CLIENT_FULL;
+  }
+
+  @Override
+  public String getPrepLastChangeSQL() {
+    return CaseSQLResource.INSERT_CLIENT_LAST_CHG;
   }
 
   @Override
@@ -266,10 +165,10 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
-    buf.append(SELECT_CASE);
+    buf.append(CaseSQLResource.SELECT_CASE);
 
     if (!getFlightPlan().isLoadSealedAndSensitive()) {
-      buf.append(" WHERE RFL.LMT_ACSSCD = 'N' ");
+      buf.append(" WHERE CAS.LMT_ACSSCD = 'N' ");
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
@@ -293,28 +192,16 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
     return EsPersonCase.class;
   }
 
-  protected void readClients(final PreparedStatement stmtInsClient,
-      final PreparedStatement stmtSelClient, final List<MinClientReferral> listClientReferralKeys,
-      final Pair<String, String> p) throws SQLException {
+  protected void readClients(final PreparedStatement stmtInsClient, final Pair<String, String> p)
+      throws SQLException {
     // Prepare client list.
     stmtInsClient.setMaxRows(0);
     stmtInsClient.setQueryTimeout(0);
     stmtInsClient.setString(1, p.getLeft());
     stmtInsClient.setString(2, p.getRight());
 
-    final int cntInsClientCases = stmtInsClient.executeUpdate();
-    LOGGER.info("bundle client/cases: {}", cntInsClientCases);
-
-    // Prepare retrieval.
-    stmtSelClient.setMaxRows(0);
-    stmtSelClient.setQueryTimeout(0);
-    stmtSelClient.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
-
-    LOGGER.info("pull client referral keys");
-    final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
-    while (!isFailed() && rs.next()) {
-      listClientReferralKeys.add(MinClientReferral.extract(rs));
-    }
+    final int countInsClientCases = stmtInsClient.executeUpdate();
+    LOGGER.info("bundle client/cases: {}", countInsClientCases);
   }
 
   protected abstract EsPersonCase mapRows(ResultSet rs) throws SQLException;
@@ -347,53 +234,52 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
       final Map<String, EsPersonCase> mapReferrals, final List<EsPersonCase> listReadyToNorm,
       final Map<String, List<EsPersonCase>> mapAllegationByReferral) {
     int ret = cntr;
-    final String referralId = rc1.getReferralId();
-    final EsPersonCase denormReferral = mapReferrals.get(referralId);
-    final boolean goodToGo = denormReferral != null
+    // final String referralId = rc1.getReferralId();
+    // final EsPersonCase denormReferral = mapReferrals.get(referralId);
+    // final boolean goodToGo = denormReferral != null
     // && denormReferral.getReferralReplicationOperation() != CmsReplicationOperation.D
-    ;
+    // ;
 
-    // Sealed and sensitive may be excluded.
-    if (goodToGo) {
-      // Loop allegations for this referral:
-      if (mapAllegationByReferral.containsKey(referralId)) {
-        for (EsPersonCase alg : mapAllegationByReferral.get(referralId)) {
-          // alg.mergeClientReferralInfo(clientId, denormReferral);
-          listReadyToNorm.add(alg);
-        }
-      } else {
-        listReadyToNorm.add(denormReferral);
-      }
-    }
+    // // Sealed and sensitive may be excluded.
+    // if (goodToGo) {
+    // // Loop allegations for this referral:
+    // if (mapAllegationByReferral.containsKey(referralId)) {
+    // for (EsPersonCase alg : mapAllegationByReferral.get(referralId)) {
+    // // alg.mergeClientReferralInfo(clientId, denormReferral);
+    // listReadyToNorm.add(alg);
+    // }
+    // } else {
+    // listReadyToNorm.add(denormReferral);
+    // }
+    // }
 
     // #152932457: Overwrite deleted cases.
-    final ReplicatedPersonCases repl =
-        goodToGo ? normalizeSingle(listReadyToNorm) : new ReplicatedPersonCases(clientId);
-    ++ret;
-    // repl.setClientId(clientId);
-    addToIndexQueue(repl);
+    // final ReplicatedPersonCases repl =
+    // goodToGo ? normalizeSingle(listReadyToNorm) : new ReplicatedPersonCases(clientId);
+    // ++ret;
+    // // repl.setClientId(clientId);
+    // addToIndexQueue(repl);
 
     return ret;
   }
 
-  protected int normalizeQueryResults(final Map<String, EsPersonCase> mapReferrals,
+  protected int normalizeQueryResults(final Map<String, EsPersonCase> mapRawCasesByClient,
       final List<EsPersonCase> listReadyToNorm,
-      final Map<String, List<MinClientReferral>> mapCaseByClient,
-      final Map<String, List<EsPersonCase>> mapAllegationByReferral) {
+      final Map<String, List<EsPersonCase>> mapCasesByClient) {
     LOGGER.debug("Normalize all: START");
     int countNormalized = 0;
 
-    for (Map.Entry<String, List<MinClientReferral>> rc : mapCaseByClient.entrySet()) {
-      final String clientId = rc.getKey();
-      // Loop cases for this client only.
-      if (StringUtils.isNotBlank(clientId)) {
-        listReadyToNorm.clear(); // next client id
-        for (MinClientReferral rc1 : rc.getValue()) {
-          countNormalized = normalizeClientReferrals(countNormalized, rc1, clientId, mapReferrals,
-              listReadyToNorm, mapAllegationByReferral);
-        }
-      }
-    }
+    // for (Map.Entry<String, List<MinClientReferral>> rc : mapCaseByClient.entrySet()) {
+    // final String clientId = rc.getKey();
+    // // Loop cases for this client only.
+    // if (StringUtils.isNotBlank(clientId)) {
+    // listReadyToNorm.clear(); // next client id
+    // for (MinClientReferral rc1 : rc.getValue()) {
+    // countNormalized = normalizeClientReferrals(countNormalized, rc1, clientId, mapReferrals,
+    // listReadyToNorm, mapAllegationByReferral);
+    // }
+    // }
+    // }
 
     LOGGER.debug("Normalize all: END");
     return countNormalized;
@@ -402,15 +288,12 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
   /**
    * Justification: See method cleanUpMemory in rocket {@link ReferralHistoryIndexerJob}.
    * 
-   * @param listAllegations EsPersonCase
-   * @param mapReferrals k=id, v=EsPersonCase
-   * @param listClientReferralKeys client/referral id pairs
+   * @param mapCases k=id, v=EsPersonCase
    * @param listReadyToNorm EsPersonCase
    */
-  protected void cleanUpMemory(final List<EsPersonCase> listAllegations,
-      Map<String, EsPersonCase> mapReferrals, List<MinClientReferral> listClientReferralKeys,
+  protected void cleanUpMemory(Map<String, EsPersonCase> mapCases,
       List<EsPersonCase> listReadyToNorm) {
-    releaseLocalMemory(mapReferrals, listClientReferralKeys, listReadyToNorm);
+    releaseLocalMemory(mapCases, listReadyToNorm);
     System.gc(); // NOSONAR
   }
 
@@ -418,33 +301,25 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
    * Pour cases, and client/case keys into the caldron and brew into a cases array element per
    * client.
    * 
-   * @param listAllegations bundle allegations
-   * @param mapReferrals k=referral id, v=EsPersonCase
-   * @param listClientReferralKeys client/referral key pairs
+   * @param listCases bundle allegations
+   * @param mapCases k=referral id, v=EsPersonCase
+   * @param listClientCaseKeys client/referral key pairs
    * @param listReadyToNorm denormalized records
    * @return normalized record count
    */
-  protected int mapReduce(final List<EsPersonCase> listAllegations,
-      final Map<String, EsPersonCase> mapReferrals,
-      final List<MinClientReferral> listClientReferralKeys,
-      final List<EsPersonCase> listReadyToNorm) {
+  protected int mapReduce(final List<EsPersonCase> listCases,
+      final Map<String, EsPersonCase> mapCases, final List<EsPersonCase> listReadyToNorm) {
     int countNormalized = 0;
     try {
-      final Map<String, List<MinClientReferral>> mapReferralByClient = listClientReferralKeys
-          .stream().sorted((e1, e2) -> e1.getClientId().compareTo(e2.getClientId()))
-          .collect(Collectors.groupingBy(MinClientReferral::getClientId));
-      listClientReferralKeys.clear(); // release objects for gc
-
       final Map<String, List<EsPersonCase>> mapAllegationByReferral =
-          listAllegations.stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
+          listCases.stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
               .collect(Collectors.groupingBy(EsPersonCase::getCaseId));
-      listAllegations.clear(); // release objects for gc
+      listCases.clear(); // release objects for gc
 
       // For each client group:
-      countNormalized = normalizeQueryResults(mapReferrals, listReadyToNorm, mapReferralByClient,
-          mapAllegationByReferral);
+      countNormalized = normalizeQueryResults(mapCases, listReadyToNorm, mapAllegationByReferral);
     } finally {
-      cleanUpMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
+      cleanUpMemory(mapCases, listReadyToNorm);
     }
     return countNormalized;
   }
@@ -470,27 +345,22 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
     final List<EsPersonCase> listAllegations = allocCases.get();
     final Map<String, EsPersonCase> mapReferrals = allocMapCases.get();
-    final List<MinClientReferral> listClientReferralKeys = allocClientCaseKeys.get();
+    // final List<MinClientReferral> listClientReferralKeys = allocClientCaseKeys.get();
     final List<EsPersonCase> listReadyToNorm = allocReadyToNorm.get();
 
     // Clear collections, free memory before starting.
-    releaseLocalMemory(mapReferrals, listClientReferralKeys, listReadyToNorm);
+    releaseLocalMemory(mapReferrals, listReadyToNorm);
 
     try (final Connection con = getConnection()) {
-      con.setSchema(getDBSchemaName());
+      final String schema = getDBSchemaName();
+      con.setSchema(schema);
       con.setAutoCommit(false);
       NeutronDB2Util.enableParallelism(con);
 
-      final String schema = getDBSchemaName();
-
       try (final PreparedStatement stmtInsClient = con.prepareStatement(getClientSeedQuery());
-          final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT);
           final PreparedStatement stmtSelCase = con.prepareStatement(getInitialLoadQuery(schema))) {
-        // Read separate components for this key bundle.
-        readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
+        readClients(stmtInsClient, p);
         readReferrals(stmtSelCase, mapReferrals);
-
-        // All data retrieved.
         con.commit();
       }
     } catch (Exception e) {
@@ -499,7 +369,7 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
           e.getMessage());
     }
 
-    int cntr = mapReduce(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
+    int cntr = mapReduce(listAllegations, mapReferrals, listReadyToNorm);
     getFlightLog().markRangeComplete(p);
     LOGGER.info("DONE");
     return cntr;
@@ -519,6 +389,7 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
     doneTransform(); // normalize in place **WITHOUT** the transform thread
 
     try {
+      staffWorkers = readStaffWorkers();
       final List<Pair<String, String>> ranges = getPartitionRanges();
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
@@ -545,55 +416,14 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
     LOGGER.info("DONE: read {} ES case rows", this.rowsReadCases.get());
   }
 
-//@formatter:off
-  @Override
-  public String getPrepLastChangeSQL() {
-    return 
-     "INSERT INTO GT_ID (IDENTIFIER)"
-     + "\nSELECT DISTINCT X.IDENTIFIER FROM ( "
-         + "\nSELECT CAS.IDENTIFIER"
-          + "\n FROM CASE_T CAS "
-          + "\nWHERE CAS.IBMSNAP_LOGMARKER > ? "
-      + "\nUNION\n"
-          + "SELECT CAS.IDENTIFIER "
-          + "\nFROM CASE_T CAS"
-          + "\nLEFT JOIN CHLD_CLT CCL1 ON CCL1.FKCLIENT_T = CAS.FKCHLD_CLT  "
-          + "\nLEFT JOIN CLIENT_T CLC1 ON CLC1.IDENTIFIER = CCL1.FKCLIENT_T "
-          + "\nWHERE CCL1.IBMSNAP_LOGMARKER > ? "
-      + "\nUNION"
-          + "\n SELECT CAS.IDENTIFIER "
-          + "\n FROM CASE_T CAS "
-          + "\nLEFT JOIN CHLD_CLT CCL2 ON CCL2.FKCLIENT_T = CAS.FKCHLD_CLT  "
-          + "\nLEFT JOIN CLIENT_T CLC2 ON CLC2.IDENTIFIER = CCL2.FKCLIENT_T "
-          + "\nWHERE CLC2.IBMSNAP_LOGMARKER > ? "
-      + "\nUNION "
-          + "\nSELECT CAS.IDENTIFIER "
-          + "\nFROM CASE_T CAS "
-          + "\nLEFT JOIN CHLD_CLT CCL3 ON CCL3.FKCLIENT_T = CAS.FKCHLD_CLT  "
-          + "\nLEFT JOIN CLIENT_T CLC3 ON CLC3.IDENTIFIER = CCL3.FKCLIENT_T "
-          + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL3.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
-          + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
-          + "\nWHERE CLR.IBMSNAP_LOGMARKER > ? "
-      + "\nUNION "
-          + "\nSELECT CAS.IDENTIFIER "
-          + "\nFROM CASE_T CAS "
-          + "\nLEFT JOIN CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
-          + "\nLEFT JOIN CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T "
-          + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
-          + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
-          + "\nJOIN CLIENT_T CLP ON CLP.IDENTIFIER = CLR.FKCLIENT_0 "
-          + "\nWHERE CLP.IBMSNAP_LOGMARKER > ? "
-     + "\n) x";
-  }
-//@formatter:on
-
   /**
    * @return complete list of potential case workers
    * @throws NeutronException on database error
    */
-  protected List<StaffPerson> readStaffWorkers() throws NeutronException {
+  protected Map<String, StaffPerson> readStaffWorkers() throws NeutronException {
     try {
-      return staffPersonDao.findAll();
+      return staffPersonDao.findAll().stream()
+          .collect(Collectors.toMap(StaffPerson::getId, a -> a));
     } catch (Exception e) {
       fail();
       throw new NeutronException("ERROR READING CASE WORKERS", e);
@@ -604,8 +434,7 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
   public abstract EsPersonCase extract(final ResultSet rs) throws SQLException;
 
   protected void releaseLocalMemory(final Map<String, EsPersonCase> mapCases,
-      final List<MinClientReferral> listClientCaseKeys, final List<EsPersonCase> listReadyToNorm) {
-    listClientCaseKeys.clear();
+      final List<EsPersonCase> listReadyToNorm) {
     listReadyToNorm.clear();
     mapCases.clear();
   }

@@ -6,7 +6,113 @@ public class CaseSQLResource implements ApiMarker {
 
   private static final long serialVersionUID = 1L;
 
-//@formatter:off
+  //@formatter:off
+  public static final String INSERT_CLIENT_FULL =
+      "INSERT INTO GT_ID (IDENTIFIER) \n"
+          +"SELECT c.IDENTIFIER \n"
+          +"FROM CLIENT_T C \n"
+          +"WHERE c.IDENTIFIER BETWEEN '?' AND '?' \n"
+          +"AND c.IBMSNAP_OPERATION IN ('I','U') \n"
+          +"AND ( \n"
+          +"  EXISTS (  \n"
+          +"     SELECT CAS1.FKCHLD_CLT  \n"
+          +"     FROM CASE_T CAS1  \n"
+          +"     WHERE CAS1.FKCHLD_CLT = c.IDENTIFIER \n"
+          +"  )\n"
+          +"  OR EXISTS (  \n"
+          +"      SELECT REL2.FKCLIENT_T  \n"
+          +"      FROM CLN_RELT REL2 \n"
+          +"      JOIN CASE_T   CAS2 ON CAS2.FKCHLD_CLT = REL2.FKCLIENT_0 \n"
+          +"      WHERE REL2.FKCLIENT_T = c.IDENTIFIER \n"
+          +"  ) \n"
+          +"  OR EXISTS (  \n"
+          +"      SELECT REL3.FKCLIENT_0  \n"
+          +"      FROM CLN_RELT REL3 \n"
+          +"      JOIN CASE_T   CAS3 ON CAS3.FKCHLD_CLT = REL3.FKCLIENT_T \n"
+          +"      WHERE REL3.FKCLIENT_0 = c.IDENTIFIER \n"
+          +"  ) \n"
+          +") \n";
+    //@formatter:on
+
+  /**
+   * Filter <strong>deleted</strong> Clients and Cases.
+   */
+  //@formatter:off
+  public static final String INSERT_CLIENT_LAST_CHG =  
+      "INSERT INTO GT_ID (IDENTIFIER)"
+      + "\nSELECT DISTINCT X.IDENTIFIER FROM ( "
+          + "\nSELECT CAS1.IDENTIFIER"
+           + "\n FROM CASE_T CAS1 "
+           + "\nWHERE CAS1.IBMSNAP_LOGMARKER > ? "
+       + "\nUNION\n"
+           + "SELECT CAS2.IDENTIFIER "
+           + "\nFROM CASE_T CAS2"
+           + "\nLEFT JOIN CHLD_CLT CCL1 ON CCL1.FKCLIENT_T = CAS2.FKCHLD_CLT  "
+           + "\nLEFT JOIN CLIENT_T CLC1 ON CLC1.IDENTIFIER = CCL1.FKCLIENT_T "
+           + "\nWHERE CCL1.IBMSNAP_LOGMARKER > ? "
+       + "\nUNION"
+           + "\n SELECT CAS3.IDENTIFIER "
+           + "\n FROM CASE_T CAS3 "
+           + "\nLEFT JOIN CHLD_CLT CCL2 ON CCL2.FKCLIENT_T = CAS3.FKCHLD_CLT  "
+           + "\nLEFT JOIN CLIENT_T CLC2 ON CLC2.IDENTIFIER = CCL2.FKCLIENT_T "
+           + "\nWHERE CLC2.IBMSNAP_LOGMARKER > ? "
+       + "\nUNION "
+           + "\nSELECT CAS3.IDENTIFIER "
+           + "\nFROM CASE_T CAS3 "
+           + "\nLEFT JOIN CHLD_CLT CCL3 ON CCL3.FKCLIENT_T = CAS3.FKCHLD_CLT  "
+           + "\nLEFT JOIN CLIENT_T CLC3 ON CLC3.IDENTIFIER = CCL3.FKCLIENT_T "
+           + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL3.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
+           + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
+           + "\nWHERE CLR.IBMSNAP_LOGMARKER > ? "
+       + "\nUNION "
+           + "\nSELECT CAS.IDENTIFIER "
+           + "\nFROM CASE_T CAS "
+           + "\nLEFT JOIN CHLD_CLT CCL ON CCL.FKCLIENT_T = CAS.FKCHLD_CLT "
+           + "\nLEFT JOIN CLIENT_T CLC ON CLC.IDENTIFIER = CCL.FKCLIENT_T "
+           + "\nJOIN CLN_RELT CLR ON CLR.FKCLIENT_T = CCL.FKCLIENT_T AND ((CLR.CLNTRELC BETWEEN 187 and 214) OR "
+           + "\n(CLR.CLNTRELC BETWEEN 245 and 254) OR (CLR.CLNTRELC BETWEEN 282 and 294) OR (CLR.CLNTRELC IN (272, 273, 5620, 6360, 6361))) "
+           + "\nJOIN CLIENT_T CLP ON CLP.IDENTIFIER = CLR.FKCLIENT_0 "
+           + "\nWHERE CLP.IBMSNAP_LOGMARKER > ? "
+      + "\n) x";
+  //@formatter:on
+
+  //@formatter:off
+  public static final String SELECT_CLIENT =
+        "SELECT rc.FKCLIENT_T, rc.FKREFERL_T, rc.SENSTV_IND, c.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION \n" 
+      + "FROM GT_REFR_CLT RC \n"
+      + "JOIN CLIENT_T C ON C.IDENTIFIER = RC.FKCLIENT_T";
+  //@formatter:on
+
+  //@formatter:off
+  public static final String SELECT_CASE = "SELECT "
+      + " RFL.IDENTIFIER        AS REFERRAL_ID,\n"
+      + " RFL.REF_RCV_DT        AS START_DATE,\n" 
+      + " RFL.REFCLSR_DT        AS END_DATE,\n"
+      + " RFL.RFR_RSPC          AS REFERRAL_RESPONSE_TYPE,\n"
+      + " RFL.LMT_ACSSCD        AS LIMITED_ACCESS_CODE,\n"
+      + " RFL.LMT_ACS_DT        AS LIMITED_ACCESS_DATE,\n"
+      + " TRIM(RFL.LMT_ACSDSC)  AS LIMITED_ACCESS_DESCRIPTION,\n"
+      + " RFL.L_GVR_ENTC        AS LIMITED_ACCESS_GOVERNMENT_ENT,\n"
+      + " RFL.LST_UPD_TS        AS REFERRAL_LAST_UPDATED,\n"
+      + " TRIM(RPT.FKCASE_T)  AS REPORTER_ID,\n"
+      + " TRIM(RPT.RPTR_FSTNM)  AS REPORTER_FIRST_NM,\n"
+      + " TRIM(RPT.RPTR_LSTNM)  AS REPORTER_LAST_NM,\n"
+      + " RPT.LST_UPD_TS        AS REPORTER_LAST_UPDATED,\n"
+      + " STP.IDENTIFIER        AS WORKER_ID,\n" 
+      + " TRIM(STP.FIRST_NM)    AS WORKER_FIRST_NM,\n"
+      + " TRIM(STP.LAST_NM)     AS WORKER_LAST_NM,\n"
+      + " STP.LST_UPD_TS        AS WORKER_LAST_UPDATED,\n"
+      + " RFL.GVR_ENTC          AS REFERRAL_COUNTY,\n" 
+      + " CURRENT TIMESTAMP     AS LAST_CHG, \n"
+      + " RFL.IBMSNAP_OPERATION AS RFL_IBMSNAP_OPERATION, \n"
+      + " RPT.IBMSNAP_OPERATION AS RPT_IBMSNAP_OPERATION \n"
+      + "FROM (SELECT DISTINCT rc1.FKCASE_T FROM GT_REFR_CLT rc1) RC \n"
+      + "JOIN REFERL_T          RFL  ON RFL.IDENTIFIER = RC.FKCASE_T \n"
+      + "LEFT JOIN REPTR_T      RPT  ON RPT.FKCASE_T = RFL.IDENTIFIER \n"
+      + "LEFT JOIN STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER ";
+  //@formatter:on
+
+  //@formatter:off
   public static final String SELECT_LAST_RUN_CHILD = 
         "SELECT \n"
       + " CAS.IDENTIFIER AS CASE_ID, \n"
@@ -59,9 +165,9 @@ public class CaseSQLResource implements ApiMarker {
       + "WHERE CAS.IDENTIFIER IN ( \n"
       + "   SELECT GT.IDENTIFIER FROM {h-schema}GT_ID GT \n"
       + ") \n";
-//@formatter:on
+  //@formatter:on
 
-//@formatter:off
+  //@formatter:off
   public static final String SELECT_LAST_RUN_PARENT = 
         "SELECT \n"
       + "  CAS.IDENTIFIER AS CASE_ID, \n"
@@ -114,6 +220,6 @@ public class CaseSQLResource implements ApiMarker {
       + "WHERE CAS.IDENTIFIER IN ( \n"
       + "   SELECT GT.IDENTIFIER FROM {h-schema}GT_ID GT \n"
       + ") \n";
-//@formatter:on
+  //@formatter:on
 
 }
