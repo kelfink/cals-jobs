@@ -118,8 +118,8 @@ public abstract class CaseHistoryIndexerJob
     return recs;
   }
 
-  protected List<EsPersonCase> fetchLastRunCaseResults(final Session session, final Transaction txn,
-      final Date lastRunDt) {
+  protected List<EsPersonCase> fetchLastRunCaseResults(final Session session,
+      final Date lastRunTime) {
     final List<EsPersonCase> ret = new ArrayList<>();
 
     if (getFlightPlan().isLoadSealedAndSensitive()) {
@@ -150,7 +150,7 @@ public abstract class CaseHistoryIndexerJob
       session.setFlushMode(FlushModeType.COMMIT);
 
       final ImmutableList.Builder<ReplicatedPersonCases> results = new ImmutableList.Builder<>();
-      final List<EsPersonCase> recs = fetchLastRunCaseResults(session, txn, lastRunTime);
+      final List<EsPersonCase> recs = fetchLastRunCaseResults(session, lastRunTime);
       txn.commit();
       LOGGER.info("FOUND {} RECORDS", recs.size());
 
@@ -214,11 +214,6 @@ public abstract class CaseHistoryIndexerJob
   }
 
   @Override
-  public String getOptionalElementName() {
-    return "cases";
-  }
-
-  @Override
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonCases p)
       throws NeutronException {
     return prepareUpdateRequest(esp, p, p.getCases(), true);
@@ -232,6 +227,11 @@ public abstract class CaseHistoryIndexerJob
   @Override
   public List<ReplicatedPersonCases> normalize(final List<EsPersonCase> recs) {
     return EntityNormalizer.<ReplicatedPersonCases, EsPersonCase>normalizeList(recs);
+  }
+
+  @Override
+  public String getOptionalElementName() {
+    return "cases";
   }
 
   @Override

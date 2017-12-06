@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +53,7 @@ public class ParentCaseHistoryIndexerJob extends CaseHistoryIndexerJob {
   }
 
   @Override
-  protected List<EsPersonCase> fetchLastRunCaseResults(final Session session, final Transaction txn,
-      final Date lastRunDt) {
+  protected List<EsPersonCase> fetchLastRunCaseResults(final Session session, final Date lastRunDt) {
     final List<EsPersonCase> ret = new ArrayList<>();
 
     if (getFlightPlan().isLoadSealedAndSensitive()) {

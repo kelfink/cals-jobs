@@ -86,7 +86,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 //@formatter:on
 
   /**
-   * Filter <strong>deleted</strong> Client, Case, Referral/Client, Allegation.
+   * Filter <strong>deleted</strong> Clients and Cases.
    */
 //@formatter:off
   protected static final String INSERT_CLIENT_LAST_CHG =  
@@ -285,16 +285,16 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
   protected abstract EsPersonCase mapRows(ResultSet rs) throws SQLException;
 
-  protected void readReferrals(final PreparedStatement stmtSelReferral,
+  protected void readReferrals(final PreparedStatement stmtSelCase,
       final Map<String, EsPersonCase> mapReferrals) throws SQLException {
-    stmtSelReferral.setMaxRows(0);
-    stmtSelReferral.setQueryTimeout(0);
-    stmtSelReferral.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+    stmtSelCase.setMaxRows(0);
+    stmtSelCase.setQueryTimeout(0);
+    stmtSelCase.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
 
     int cntr = 0;
     EsPersonCase m;
     LOGGER.info("pull cases");
-    final ResultSet rs = stmtSelReferral.executeQuery(); // NOSONAR
+    final ResultSet rs = stmtSelCase.executeQuery(); // NOSONAR
     while (!isFailed() && rs.next() && (m = mapRows(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "bundle referral");
       JobLogs.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read", "cases");
@@ -462,8 +462,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
       try (final PreparedStatement stmtInsClient = con.prepareStatement(getClientSeedQuery());
           final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT);
-          final PreparedStatement stmtSelCase =
-              con.prepareStatement(getInitialLoadQuery(schema))) {
+          final PreparedStatement stmtSelCase = con.prepareStatement(getInitialLoadQuery(schema))) {
         // Read separate components for this key bundle.
         readClients(stmtInsClient, stmtSelClient, listClientReferralKeys, p);
         readReferrals(stmtSelCase, mapReferrals);
@@ -583,6 +582,11 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     return NeutronJdbcUtil.getCommonPartitionRanges64(this);
   }
 
+  @Override
+  public String getOptionalElementName() {
+    return "cases";
+  }
+
   /**
    * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
    * sensitive flag must be deleted.
@@ -590,11 +594,6 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
   @Override
   public boolean mustDeleteLimitedAccessRecords() {
     return !getFlightPlan().isLoadSealedAndSensitive();
-  }
-
-  @Override
-  public String getOptionalElementName() {
-    return "cases";
   }
 
   @Override
