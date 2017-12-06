@@ -113,56 +113,6 @@ public class StaffPerson extends CmsPersistentObject
   }
 
   /**
-   * Constructor
-   * 
-   * @param id The id
-   * @param endDate The endDate
-   * @param firstName The firstName
-   * @param jobTitle The jobTitle
-   * @param lastName The lastName
-   * @param middleInitial The middleInitial
-   * @param namePrefix The namePrefix
-   * @param phoneNumber The phoneNumber
-   * @param phoneExt The phoneExt
-   * @param startDate The startDate
-   * @param nameSuffix The nameSuffix
-   * @param telecommuterIndicator The telecommuterIndicator
-   * @param cwsOffice The office
-   * @param availabilityAndLocationDescription The availabilityAndLocationDescription
-   * @param ssrsLicensingWorkerId The ssrsLicensingWorkerId
-   * @param countyCode The countyCode
-   * @param dutyWorkerIndicator The dutyWorkerIndicator
-   * @param cwsOfficeAddress The cwsOfficeAddress
-   * @param emailAddress The emailAddress
-   */
-  public StaffPerson(String id, Date endDate, String firstName, String jobTitle, String lastName,
-      String middleInitial, String namePrefix, BigDecimal phoneNumber, Integer phoneExt,
-      Date startDate, String nameSuffix, String telecommuterIndicator, String cwsOffice,
-      String availabilityAndLocationDescription, String ssrsLicensingWorkerId, String countyCode,
-      String dutyWorkerIndicator, String cwsOfficeAddress, String emailAddress) {
-    super();
-    this.id = id;
-    this.endDate = freshDate(endDate);
-    this.firstName = firstName;
-    this.jobTitle = jobTitle;
-    this.lastName = lastName;
-    this.middleInitial = middleInitial;
-    this.namePrefix = namePrefix;
-    this.phoneNumber = phoneNumber;
-    this.phoneExt = phoneExt;
-    this.startDate = freshDate(startDate);
-    this.nameSuffix = nameSuffix;
-    this.telecommuterIndicator = telecommuterIndicator;
-    this.cwsOffice = cwsOffice;
-    this.availabilityAndLocationDescription = availabilityAndLocationDescription;
-    this.ssrsLicensingWorkerId = ssrsLicensingWorkerId;
-    this.countyCode = countyCode;
-    this.dutyWorkerIndicator = dutyWorkerIndicator;
-    this.cwsOfficeAddress = cwsOfficeAddress;
-    this.emailAddress = emailAddress;
-  }
-
-  /**
    * {@inheritDoc}
    * 
    * @see gov.ca.cwds.data.persistence.PersistentObject#getPrimaryKey()

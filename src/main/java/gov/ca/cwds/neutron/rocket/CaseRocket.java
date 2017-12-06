@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,9 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
+import gov.ca.cwds.data.persistence.cms.StaffPerson;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.jobs.ReferralHistoryIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -49,7 +50,7 @@ import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
  * 
  * @author CWDS API Team
  */
-public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases, EsPersonCase>
+public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsPersonCase>
     implements NeutronRowMapper<EsPersonCase> {
 
   private static final long serialVersionUID = 1L;
@@ -164,6 +165,8 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
       + "LEFT JOIN STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER ";
 //@formatter:on
 
+  private List<StaffPerson> caseWorkers = new ArrayList<>(88000);
+
   /**
    * Allocate memory once for each thread and reuse per key range.
    * 
@@ -172,11 +175,11 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
    * Neutron rocket reuses threads for performance, since thread creation is expensive.
    * </p>
    */
-  protected transient ThreadLocal<List<EsPersonCase>> allocAllegations = new ThreadLocal<>();
+  protected transient ThreadLocal<List<EsPersonCase>> allocCases = new ThreadLocal<>();
 
-  protected transient ThreadLocal<Map<String, EsPersonCase>> allocReferrals = new ThreadLocal<>();
+  protected transient ThreadLocal<Map<String, EsPersonCase>> allocMapCases = new ThreadLocal<>();
 
-  protected transient ThreadLocal<List<MinClientReferral>> allocClientReferralKeys =
+  protected transient ThreadLocal<List<MinClientReferral>> allocClientCaseKeys =
       new ThreadLocal<>();
 
   protected transient ThreadLocal<List<EsPersonCase>> allocReadyToNorm = new ThreadLocal<>();
@@ -204,14 +207,49 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     super(dao, esDao, lastRunFile, mapper, flightPlan);
   }
 
+  // =====================
+  // FIXED SPECS:
+  // =====================
+
+  /**
+   * This rocket normalizes <strong>without</strong> the transform thread.
+   */
   @Override
-  public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
-    return EsPersonCase.class;
+  public boolean useTransformThread() {
+    return false;
+  }
+
+  protected String getClientSeedQuery() {
+    return INSERT_CLIENT_FULL;
   }
 
   @Override
   public String getInitialLoadViewName() {
     return "VW_MQT_REFRL_ONLY";
+  }
+
+  @Override
+  public boolean isInitialLoadJdbc() {
+    return true;
+  }
+
+  @Override
+  public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
+    return NeutronJdbcUtil.getCommonPartitionRanges64(this);
+  }
+
+  @Override
+  public String getOptionalElementName() {
+    return "cases";
+  }
+
+  /**
+   * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
+   * sensitive flag must be deleted.
+   */
+  @Override
+  public boolean mustDeleteLimitedAccessRecords() {
+    return !getFlightPlan().isLoadSealedAndSensitive();
   }
 
   @Override
@@ -221,6 +259,9 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
 
   /**
    * Roll your own SQL.
+   * <p>
+   * This approach requires sorted results. Either sort on the database side or here in the
+   * application.
    */
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
@@ -237,31 +278,19 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     return ret;
   }
 
-  /**
-   * Synchronize grabbing connections from the connection pool to prevent deadlocks in C3P0.
-   * 
-   * @return a connection
-   * @throws SQLException on database error
-   */
-  protected synchronized Connection getConnection() throws SQLException {
-    return jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
-        .getService(ConnectionProvider.class).getConnection();
+  // =====================
+  // NORMALIZATION:
+  // =====================
+
+  @Override
+  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonCases p)
+      throws NeutronException {
+    return prepareUpdateRequest(esp, p, p.getCases(), true);
   }
 
-  /**
-   * Initial mode only. Allocate memory once per thread and reuse it.
-   * 
-   * <p>
-   * NEXT: calculate container sizes by bundle size.
-   * </p>
-   */
-  protected void allocateThreadMemory() {
-    if (allocAllegations.get() == null) {
-      allocAllegations.set(new ArrayList<>(150000));
-      allocReadyToNorm.set(new ArrayList<>(150000));
-      allocReferrals.set(new HashMap<>(99881)); // Prime
-      allocClientReferralKeys.set(new ArrayList<>(12000));
-    }
+  @Override
+  public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
+    return EsPersonCase.class;
   }
 
   protected void readClients(final PreparedStatement stmtInsClient,
@@ -273,8 +302,8 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     stmtInsClient.setString(1, p.getLeft());
     stmtInsClient.setString(2, p.getRight());
 
-    final int cntInsClientReferral = stmtInsClient.executeUpdate();
-    LOGGER.info("bundle client/cases: {}", cntInsClientReferral);
+    final int cntInsClientCases = stmtInsClient.executeUpdate();
+    LOGGER.info("bundle client/cases: {}", cntInsClientCases);
 
     // Prepare retrieval.
     stmtSelClient.setMaxRows(0);
@@ -371,14 +400,7 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
   }
 
   /**
-   * Release heap objects early and often. Good time to <strong>request</strong> garbage collection,
-   * not demand it. Java GC runs in a dedicated thread anyway.
-   * <p>
-   * SonarQube disagrees.
-   * </p>
-   * The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
-   * memory is exhausted. Yes, this is a good place to drop a hint to GC that it
-   * <strong>might</strong> want to clean up memory.
+   * Justification: See method cleanUpMemory in rocket {@link ReferralHistoryIndexerJob}.
    * 
    * @param listAllegations EsPersonCase
    * @param mapReferrals k=id, v=EsPersonCase
@@ -388,13 +410,13 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
   protected void cleanUpMemory(final List<EsPersonCase> listAllegations,
       Map<String, EsPersonCase> mapReferrals, List<MinClientReferral> listClientReferralKeys,
       List<EsPersonCase> listReadyToNorm) {
-    releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
+    releaseLocalMemory(mapReferrals, listClientReferralKeys, listReadyToNorm);
     System.gc(); // NOSONAR
   }
 
   /**
-   * Pour cases, allegations, and client/referral keys into the caldron and brew into a cases
-   * element per client.
+   * Pour cases, and client/case keys into the caldron and brew into a cases array element per
+   * client.
    * 
    * @param listAllegations bundle allegations
    * @param mapReferrals k=referral id, v=EsPersonCase
@@ -427,10 +449,6 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     return countNormalized;
   }
 
-  protected String getClientSeedQuery() {
-    return INSERT_CLIENT_FULL;
-  }
-
   /**
    * Read all records from a single partition (key range) in buckets. Then sort results and
    * normalize.
@@ -450,13 +468,13 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     getFlightLog().markRangeStart(p);
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
-    final List<EsPersonCase> listAllegations = allocAllegations.get();
-    final Map<String, EsPersonCase> mapReferrals = allocReferrals.get();
-    final List<MinClientReferral> listClientReferralKeys = allocClientReferralKeys.get();
+    final List<EsPersonCase> listAllegations = allocCases.get();
+    final Map<String, EsPersonCase> mapReferrals = allocMapCases.get();
+    final List<MinClientReferral> listClientReferralKeys = allocClientCaseKeys.get();
     final List<EsPersonCase> listReadyToNorm = allocReadyToNorm.get();
 
     // Clear collections, free memory before starting.
-    releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
+    releaseLocalMemory(mapReferrals, listClientReferralKeys, listReadyToNorm);
 
     try (final Connection con = getConnection()) {
       con.setSchema(getDBSchemaName());
@@ -527,14 +545,6 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
     LOGGER.info("DONE: read {} ES case rows", this.rowsReadCases.get());
   }
 
-  /**
-   * This rocket normalizes <strong>without</strong> the transform thread.
-   */
-  @Override
-  public boolean useTransformThread() {
-    return false;
-  }
-
 //@formatter:off
   @Override
   public String getPrepLastChangeSQL() {
@@ -577,58 +587,43 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
   }
 //@formatter:on
 
-  // protected void cacheStaffWorkers() throws NeutronException {
-  // try {
-  // final List<EsIntakeScreening> results = this.dao.findAll();
-  // } catch (Exception e) {
-  // fail();
-  // throw new NeutronException("ERROR READING PG VIEW", e);
-  // } finally {
-  // doneRetrieve();
-  // }
-  // }
-
-  @Override
-  public boolean isInitialLoadJdbc() {
-    return true;
-  }
-
-  @Override
-  public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
-    return NeutronJdbcUtil.getCommonPartitionRanges64(this);
-  }
-
-  @Override
-  public String getOptionalElementName() {
-    return "cases";
-  }
-
   /**
-   * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
-   * sensitive flag must be deleted.
+   * @return complete list of potential case workers
+   * @throws NeutronException on database error
    */
-  @Override
-  public boolean mustDeleteLimitedAccessRecords() {
-    return !getFlightPlan().isLoadSealedAndSensitive();
-  }
-
-  @Override
-  protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, ReplicatedPersonCases p)
-      throws NeutronException {
-    return prepareUpdateRequest(esp, p, p.getCases(), true);
+  protected List<StaffPerson> readStaffWorkers() throws NeutronException {
+    try {
+      return staffPersonDao.findAll();
+    } catch (Exception e) {
+      fail();
+      throw new NeutronException("ERROR READING CASE WORKERS", e);
+    }
   }
 
   @Override
   public abstract EsPersonCase extract(final ResultSet rs) throws SQLException;
 
-  protected void releaseLocalMemory(final List<EsPersonCase> listAllegations,
-      final Map<String, EsPersonCase> mapReferrals,
-      final List<MinClientReferral> listClientReferralKeys,
-      final List<EsPersonCase> listReadyToNorm) {
-    listAllegations.clear();
-    listClientReferralKeys.clear();
+  protected void releaseLocalMemory(final Map<String, EsPersonCase> mapCases,
+      final List<MinClientReferral> listClientCaseKeys, final List<EsPersonCase> listReadyToNorm) {
+    listClientCaseKeys.clear();
     listReadyToNorm.clear();
-    mapReferrals.clear();
+    mapCases.clear();
+  }
+
+  /**
+   * Initial mode only. Allocate memory once per thread and reuse it.
+   * 
+   * <p>
+   * NEXT: calculate container sizes by bundle size.
+   * </p>
+   */
+  protected void allocateThreadMemory() {
+    if (allocCases.get() == null) {
+      allocCases.set(new ArrayList<>(150000));
+      allocReadyToNorm.set(new ArrayList<>(150000));
+      allocMapCases.set(new HashMap<>(99881)); // Prime
+      allocClientCaseKeys.set(new ArrayList<>(12000));
+    }
   }
 
   /**
@@ -639,6 +634,10 @@ public abstract class CaseRocket extends BasePersonRocket<ReplicatedPersonCases,
    */
   public static void main(String... args) throws Exception {
     LaunchCommand.launchOneWayTrip(CaseRocket.class, args);
+  }
+
+  public List<StaffPerson> getCaseWorkers() {
+    return caseWorkers;
   }
 
 }

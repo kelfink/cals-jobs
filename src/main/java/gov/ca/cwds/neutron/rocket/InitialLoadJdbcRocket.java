@@ -1,5 +1,10 @@
 package gov.ca.cwds.neutron.rocket;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.BaseDaoImpl;
@@ -35,6 +40,17 @@ public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extend
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     return buf.toString();
+  }
+
+  /**
+   * Synchronize to prevent deadlocks when grabbing connections from the C3P0 connection pool.
+   * 
+   * @return a connection.
+   * @throws SQLException on database error
+   */
+  protected synchronized Connection getConnection() throws SQLException {
+    return getJobDao().getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
+        .getService(ConnectionProvider.class).getConnection();
   }
 
 }
