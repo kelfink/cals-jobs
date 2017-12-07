@@ -243,7 +243,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
    * 
    * @param listCases cases bundle
    * @param mapCases k=referral id, v=EsPersonCase
-   * @param listClientCaseKeys client/referral key pairs
    * @param listReadyToNorm denormalized records
    * @return normalized record count
    */
