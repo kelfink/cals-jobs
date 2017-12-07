@@ -435,6 +435,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     } catch (Throwable e) { // NOSONAR
       // Intentionally catch a Throwable, not an Exception.
       // Forcibly close orphaned resources, if necessary, by system exit.
+      e.printStackTrace();
       instance.fatalError = true;
       throw JobLogs.runtime(LOGGER, e, "STANDALONE ROCKET FAILED!: {}", e.getMessage());
     }

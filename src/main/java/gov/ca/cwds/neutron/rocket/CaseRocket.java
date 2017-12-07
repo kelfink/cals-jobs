@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.rocket;
 
+import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,6 +29,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CaseSQLResource;
+import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.data.persistence.cms.StaffPerson;
@@ -50,7 +53,7 @@ import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
  * 
  * @author CWDS API Team
  */
-public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsPersonCase>
+public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsPersonCase>
     implements NeutronRowMapper<EsPersonCase> {
 
   private static final long serialVersionUID = 1L;
@@ -204,7 +207,9 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
     LOGGER.info("bundle client/cases: {}", countInsClientCases);
   }
 
-  protected abstract EsPersonCase mapRows(ResultSet rs) throws SQLException;
+  protected EsPersonCase mapRows(ResultSet rs) throws SQLException {
+    return extract(rs);
+  }
 
   protected void readReferrals(final PreparedStatement stmtSelCase,
       final Map<String, EsPersonCase> mapReferrals) throws SQLException {
@@ -345,7 +350,6 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
     final List<EsPersonCase> listAllegations = allocCases.get();
     final Map<String, EsPersonCase> mapReferrals = allocMapCases.get();
-    // final List<MinClientReferral> listClientReferralKeys = allocClientCaseKeys.get();
     final List<EsPersonCase> listReadyToNorm = allocReadyToNorm.get();
 
     // Clear collections, free memory before starting.
@@ -431,7 +435,64 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
   }
 
   @Override
-  public abstract EsPersonCase extract(final ResultSet rs) throws SQLException;
+  public EsPersonCase extract(final ResultSet rs) throws SQLException {
+    final String caseId = rs.getString("CASE_ID");
+    String focusChildId = rs.getString("FOCUS_CHILD_ID");
+
+    if (focusChildId == null) {
+      LOGGER.warn("FOCUS_CHILD_ID is null for CASE_ID: {}", caseId); // NOSONAR
+      return null;
+    }
+
+    final EsChildPersonCase ret = new EsChildPersonCase();
+
+    //
+    // Case:
+    //
+    ret.setCaseId(caseId);
+    ret.setStartDate(rs.getDate("START_DATE"));
+    ret.setEndDate(rs.getDate("END_DATE"));
+    ret.setCaseLastUpdated(rs.getTimestamp("CASE_LAST_UPDATED"));
+    ret.setCounty(rs.getInt("COUNTY"));
+    ret.setServiceComponent(rs.getInt("SERVICE_COMP"));
+
+    //
+    // Child (client):
+    //
+    ret.setFocusChildId(focusChildId);
+    ret.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
+    ret.setFocusChildLastName(ifNull(rs.getString("FOCUS_CHLD_LAST_NM")));
+    ret.setFocusChildLastUpdated(rs.getTimestamp("FOCUS_CHILD_LAST_UPDATED"));
+    ret.setFocusChildSensitivityIndicator(rs.getString("FOCUS_CHILD_SENSITIVITY_IND"));
+
+    //
+    // Parent:
+    //
+    ret.setParentId(ifNull(rs.getString("PARENT_ID")));
+    ret.setParentFirstName(ifNull(rs.getString("PARENT_FIRST_NM")));
+    ret.setParentLastName(ifNull(rs.getString("PARENT_LAST_NM")));
+    ret.setParentRelationship(rs.getInt("PARENT_RELATIONSHIP"));
+    ret.setParentLastUpdated(rs.getTimestamp("PARENT_LAST_UPDATED"));
+    ret.setParentSourceTable(rs.getString("PARENT_SOURCE_TABLE"));
+    ret.setParentSensitivityIndicator(rs.getString("PARENT_SENSITIVITY_IND"));
+
+    //
+    // Worker (staff):
+    //
+    ret.getWorker().setWorkerId(ifNull(rs.getString("WORKER_ID")));
+    ret.getWorker().setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
+    ret.getWorker().setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
+    ret.getWorker().setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
+
+    //
+    // Access Limitation:
+    //
+    ret.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
+    ret.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
+    ret.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
+    ret.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
+    return ret;
+  }
 
   protected void releaseLocalMemory(final Map<String, EsPersonCase> mapCases,
       final List<EsPersonCase> listReadyToNorm) {
@@ -455,6 +516,10 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
     }
   }
 
+  public List<StaffPerson> getCaseWorkers() {
+    return caseWorkers;
+  }
+
   /**
    * Rocket entry point.
    * 
@@ -462,11 +527,11 @@ public abstract class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonC
    * @throws Exception on launch error
    */
   public static void main(String... args) throws Exception {
-    LaunchCommand.launchOneWayTrip(CaseRocket.class, args);
-  }
-
-  public List<StaffPerson> getCaseWorkers() {
-    return caseWorkers;
+    try {
+      LaunchCommand.launchOneWayTrip(CaseRocket.class, args);
+    } catch (Throwable e) {
+      e.printStackTrace();
+    }
   }
 
 }
