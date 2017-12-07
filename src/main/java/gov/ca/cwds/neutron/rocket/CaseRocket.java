@@ -32,7 +32,6 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CaseSQLResource;
 import gov.ca.cwds.data.persistence.cms.EsCaseRelatedPerson;
-import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.data.persistence.cms.StaffPerson;
@@ -272,6 +271,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     ret.setSensitivityIndicator(rs.getString("CLIENT_SENSITIVITY_IND"));
     ret.setLastUpdatedTime(rs.getTimestamp("CLIENT_LAST_UPDATED"));
     ret.setReplicationOperation(CmsReplicationOperation.valueOf(rs.getString("CLIENT_OPERATION")));
+    ret.setReplicationDate(rs.getTimestamp("CLIENT_LOGMARKER"));
 
     return ret;
   }
@@ -289,14 +289,11 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
       LOGGER.info("pull client/case keys");
       final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
-      final Map<Object, ReplicatedClient> group = new HashMap<>();
 
-      EsClientAddress esClient;
+      ReplicatedClient rc;
       while (!isFailed() && rs.next()) {
-        group.clear();
-        esClient = EsClientAddress.extract(rs);
-        // group.put(esClient.getCltId(), esClient.normalize(group));
-        // mapClients.put(esClient.getCltId(), );
+        rc = extractClient(rs);
+        mapClients.put(rc.getId(), rc);
       }
 
     } catch (Exception e) {
