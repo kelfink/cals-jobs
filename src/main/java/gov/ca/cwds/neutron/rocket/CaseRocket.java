@@ -117,10 +117,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     return false;
   }
 
-  protected String getClientSeedQuery() {
-    return CaseSQLResource.INSERT_CLIENT_FULL;
-  }
-
   @Override
   public String getPrepLastChangeSQL() {
     return CaseSQLResource.INSERT_CLIENT_LAST_CHG;
@@ -195,9 +191,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     return EsPersonCase.class;
   }
 
-  protected void readClients(final PreparedStatement stmtInsClient, final Pair<String, String> p)
-      throws SQLException {
-    // Prepare client list.
+  protected void prepClientBundle(final PreparedStatement stmtInsClient,
+      final Pair<String, String> p) throws SQLException {
     stmtInsClient.setMaxRows(0);
     stmtInsClient.setQueryTimeout(0);
     stmtInsClient.setString(1, p.getLeft());
@@ -233,39 +228,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
   @Override
   public List<ReplicatedPersonCases> normalize(List<EsPersonCase> recs) {
     return EntityNormalizer.<ReplicatedPersonCases, EsPersonCase>normalizeList(recs);
-  }
-
-  protected int normalizeClientReferrals(int cntr, MinClientReferral rc1, final String clientId,
-      final Map<String, EsPersonCase> mapReferrals, final List<EsPersonCase> listReadyToNorm,
-      final Map<String, List<EsPersonCase>> mapCasesByClient) {
-    int ret = cntr;
-    // final String referralId = rc1.getReferralId();
-    // final EsPersonCase denormReferral = mapReferrals.get(referralId);
-    // final boolean goodToGo = denormReferral != null
-    // && denormReferral.getReferralReplicationOperation() != CmsReplicationOperation.D
-    // ;
-
-    // // Sealed and sensitive may be excluded.
-    // if (goodToGo) {
-    // // Loop allegations for this referral:
-    // if (mapCasesByClient.containsKey(referralId)) {
-    // for (EsPersonCase alg : mapCasesByClient.get(referralId)) {
-    // // alg.mergeClientReferralInfo(clientId, denormReferral);
-    // listReadyToNorm.add(alg);
-    // }
-    // } else {
-    // listReadyToNorm.add(denormReferral);
-    // }
-    // }
-
-    // #152932457: Overwrite deleted cases.
-    // final ReplicatedPersonCases repl =
-    // goodToGo ? normalizeSingle(listReadyToNorm) : new ReplicatedPersonCases(clientId);
-    // ++ret;
-    // // repl.setClientId(clientId);
-    // addToIndexQueue(repl);
-
-    return ret;
   }
 
   /**
@@ -325,12 +287,12 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     getFlightLog().markRangeStart(p);
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
-    final List<EsPersonCase> listAllegations = allocCases.get();
-    final Map<String, EsPersonCase> mapReferrals = allocMapCases.get();
+    final List<EsPersonCase> listCases = allocCases.get();
+    final Map<String, EsPersonCase> mapCases = allocMapCases.get();
     final List<EsPersonCase> listReadyToNorm = allocReadyToNorm.get();
 
     // Clear collections, free memory before starting.
-    releaseLocalMemory(mapReferrals, listReadyToNorm);
+    releaseLocalMemory(mapCases, listReadyToNorm);
 
     try (final Connection con = getConnection()) {
       final String schema = getDBSchemaName();
@@ -338,10 +300,13 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
       con.setAutoCommit(false);
       NeutronDB2Util.enableParallelism(con);
 
-      try (final PreparedStatement stmtInsClient = con.prepareStatement(getClientSeedQuery());
+      try (
+          final PreparedStatement stmtInsClient =
+              con.prepareStatement(CaseSQLResource.INSERT_CLIENT_FULL);
           final PreparedStatement stmtSelCase = con.prepareStatement(getInitialLoadQuery(schema))) {
-        readClients(stmtInsClient, p);
-        readCases(stmtSelCase, mapReferrals);
+        prepClientBundle(stmtInsClient, p);
+        readCases(stmtSelCase, mapCases);
+      } finally {
         con.commit();
       }
     } catch (Exception e) {
@@ -350,7 +315,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
           e.getMessage());
     }
 
-    int cntr = mapReduce(listAllegations, mapReferrals, listReadyToNorm);
+    int cntr = mapReduce(listCases, mapCases, listReadyToNorm);
     getFlightLog().markRangeComplete(p);
     LOGGER.info("DONE");
     return cntr;
@@ -389,7 +354,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
       }
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(LOGGER, e, "ERROR IN THREADED RETRIEVAL! {}", e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
     }
