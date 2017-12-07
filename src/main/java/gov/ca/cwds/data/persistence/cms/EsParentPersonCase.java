@@ -16,26 +16,6 @@ import org.hibernate.annotations.NamedNativeQuery;
  */
 @Entity
 @Table(name = "VW_LST_PARENT_CASE_HIST")
-// @NamedNativeQuery(
-// name = "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.findAllUpdatedAfterChild",
-// query = CaseSQLResource.SELECT_LAST_RUN_CHILD
-// + " ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID " + "FOR READ ONLY WITH UR ",
-// resultClass = EsChildPersonCase.class, readOnly = true)
-//
-// @NamedNativeQuery(
-// name = "gov.ca.cwds.data.persistence.cms.EsChildPersonCase.findAllUpdatedAfterParent",
-// query = CaseSQLResource.SELECT_LAST_RUN_PARENT
-// + " ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID " + "FOR READ ONLY WITH UR ",
-// resultClass = EsChildPersonCase.class, readOnly = true)
-//
-// @NamedNativeQuery(
-// name =
-// "gov.ca.cwds.data.persistence.cms.EsParentPersonCase.findAllUpdatedAfterWithLimitedAccess",
-// query = CaseSQLResource.SELECT_LAST_RUN_PARENT
-// + " AND c.LIMITED_ACCESS_CODE != 'N' ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID FOR READ ONLY
-// WITH UR ",
-// resultClass = EsParentPersonCase.class, readOnly = true)
-
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsParentPersonCase.findAllUpdatedAfter",
     query = "SELECT c.* FROM {h-schema}VW_LST_PARENT_CASE_HIST c "
         + " ORDER BY PARENT_PERSON_ID, CASE_ID, PARENT_ID FOR READ ONLY WITH UR ",

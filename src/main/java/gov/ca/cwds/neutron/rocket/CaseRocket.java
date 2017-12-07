@@ -38,7 +38,6 @@ import gov.ca.cwds.data.persistence.cms.StaffPerson;
 import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.jobs.ReferralHistoryIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -71,11 +70,15 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
    * Neutron rocket reuses threads for performance, since thread creation is expensive.
    * </p>
    */
-  protected transient ThreadLocal<List<EsPersonCase>> allocCases = new ThreadLocal<>();
+  protected transient ThreadLocal<List<EsChildPersonCase>> allocCases = new ThreadLocal<>();
 
-  protected transient ThreadLocal<Map<String, EsPersonCase>> allocMapCases = new ThreadLocal<>();
+  protected transient ThreadLocal<Map<String, EsChildPersonCase>> allocMapCases =
+      new ThreadLocal<>();
 
-  protected transient ThreadLocal<List<EsPersonCase>> allocReadyToNorm = new ThreadLocal<>();
+  protected transient ThreadLocal<Map<String, ReplicatedClient>> allocMapClients =
+      new ThreadLocal<>();
+
+  protected transient ThreadLocal<List<EsChildPersonCase>> allocReadyToNorm = new ThreadLocal<>();
 
   protected final AtomicInteger rowsReadCases = new AtomicInteger(0);
 
@@ -218,8 +221,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     return extract(rs);
   }
 
-  protected void readCases(final PreparedStatement stmtSelCase,
-      final Map<String, EsPersonCase> mapReferrals) throws SQLException {
+  protected void readCases(final PreparedStatement stmtSelCase) throws SQLException {
+    final List<EsChildPersonCase> cases = this.allocCases.get();
     stmtSelCase.setMaxRows(0);
     stmtSelCase.setQueryTimeout(0);
     stmtSelCase.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
@@ -231,22 +234,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     while (!isFailed() && rs.next() && (m = mapRows(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "case bundle");
       JobLogs.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read", "cases");
-      // if (m.getReferralClientReplicationOperation() != CmsReplicationOperation.D) {
-      // mapReferrals.put(m.getReferralId(), m);
-      // }
     }
-  }
-
-  /**
-   * Justification: See method cleanUpMemory in rocket {@link ReferralHistoryIndexerJob}.
-   * 
-   * @param mapCases k=id, v=EsPersonCase
-   * @param listReadyToNorm EsPersonCase
-   */
-  protected void cleanUpMemory(Map<String, EsPersonCase> mapCases,
-      List<EsPersonCase> listReadyToNorm) {
-    releaseLocalMemory(mapCases, listReadyToNorm);
-    System.gc(); // NOSONAR
   }
 
   /**
@@ -259,20 +247,20 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
    * @param listReadyToNorm denormalized records
    * @return normalized record count
    */
-  protected int mapReduce(final List<EsPersonCase> listCases,
-      final Map<String, EsPersonCase> mapCases, final List<EsPersonCase> listReadyToNorm) {
+  protected int mapReduce(final List<EsChildPersonCase> listCases,
+      final Map<String, EsChildPersonCase> mapCases,
+      final List<EsChildPersonCase> listReadyToNorm) {
     int countNormalized = 0;
+
     try {
       final Map<String, List<EsPersonCase>> mapCasesByClient =
           listCases.stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
               .collect(Collectors.groupingBy(EsPersonCase::getCaseId));
       listCases.clear(); // release objects for garbage collection
-
-      // For each client group:
-      // countNormalized = normalizeQueryResults(mapCases, listReadyToNorm, mapCasesByClient);
     } finally {
-      cleanUpMemory(mapCases, listReadyToNorm);
+      releaseThreadMemory();
     }
+
     return countNormalized;
   }
 
@@ -294,12 +282,13 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     getFlightLog().markRangeStart(p);
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
-    final List<EsPersonCase> listCases = allocCases.get();
-    final Map<String, EsPersonCase> mapCases = allocMapCases.get();
-    final List<EsPersonCase> listReadyToNorm = allocReadyToNorm.get();
+    final List<EsChildPersonCase> listCases = allocCases.get();
+    final Map<String, EsChildPersonCase> mapCases = allocMapCases.get();
+    final List<EsChildPersonCase> listReadyToNorm = allocReadyToNorm.get();
 
-    // Clear collections, free memory before starting.
-    releaseLocalMemory(mapCases, listReadyToNorm);
+    listCases.clear();
+    mapCases.clear();
+    listReadyToNorm.clear();
 
     try (final Connection con = getConnection()) {
       final String schema = getDBSchemaName();
@@ -312,8 +301,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
               con.prepareStatement(CaseSQLResource.INSERT_CLIENT_FULL);
           final PreparedStatement stmtSelCase = con.prepareStatement(getInitialLoadQuery(schema))) {
         prepClientBundle(stmtInsClient, p);
-        final Map<String, ReplicatedClient> mapClients = readClients();
-        readCases(stmtSelCase, mapCases);
+        allocMapClients.set(readClients());
+        readCases(stmtSelCase);
       } finally {
         con.commit();
       }
@@ -323,7 +312,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
           p.getRight(), e.getMessage());
     }
 
-    int cntr = mapReduce(listCases, mapCases, listReadyToNorm);
+    int cntr = 0;
+    // int cntr = mapReduce(listCases, mapCases, listReadyToNorm);
     getFlightLog().markRangeComplete(p);
     LOGGER.info("DONE");
     return cntr;
@@ -420,21 +410,35 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     // Child (client):
     //
     ret.setFocusChildId(focusChildId);
-    ret.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
-    ret.setFocusChildLastName(ifNull(rs.getString("FOCUS_CHLD_LAST_NM")));
-    ret.setFocusChildLastUpdated(rs.getTimestamp("FOCUS_CHILD_LAST_UPDATED"));
-    ret.setFocusChildSensitivityIndicator(rs.getString("FOCUS_CHILD_SENSITIVITY_IND"));
+    // ret.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
+    // ret.setFocusChildLastName(ifNull(rs.getString("FOCUS_CHLD_LAST_NM")));
+    // ret.setFocusChildLastUpdated(rs.getTimestamp("FOCUS_CHILD_LAST_UPDATED"));
+    // ret.setFocusChildSensitivityIndicator(rs.getString("FOCUS_CHILD_SENSITIVITY_IND"));
 
     //
     // Relative (client):
     //
-    ret.setParentId(ifNull(rs.getString("OTHER_ID")));
-    ret.setParentFirstName(ifNull(rs.getString("OTHER_FIRST_NM")));
-    ret.setParentLastName(ifNull(rs.getString("OTHER_LAST_NM")));
-    ret.setParentRelationship(rs.getInt("OTHER_RELATIONSHIP"));
-    ret.setParentLastUpdated(rs.getTimestamp("OTHER_LAST_UPDATED"));
-    ret.setParentSourceTable(rs.getString("OTHER_SOURCE_TABLE"));
-    ret.setParentSensitivityIndicator(rs.getString("OTHER_SENSITIVITY_IND"));
+
+    // FOCUS_IND,
+    // 0 AS REL_FOCUS_TO_OTHER,
+    // 0 AS REL_OTHER_TO_FOCUS,
+
+    final String focusInd = rs.getString("FOCUS_IND");
+
+    if (StringUtils.isBlank(focusInd) || !"Y".equalsIgnoreCase(focusInd)) {
+      ret.setParentId(ifNull(rs.getString("THIS_CLIENT_ID")));
+
+      // TODO: read from Client map.
+
+
+
+      // ret.setParentFirstName(ifNull(rs.getString("OTHER_FIRST_NM")));
+      // ret.setParentLastName(ifNull(rs.getString("OTHER_LAST_NM")));
+      // ret.setParentRelationship(rs.getInt("OTHER_RELATIONSHIP"));
+      // ret.setParentLastUpdated(rs.getTimestamp("OTHER_LAST_UPDATED"));
+      // ret.setParentSourceTable(rs.getString("OTHER_SOURCE_TABLE"));
+      // ret.setParentSensitivityIndicator(rs.getString("OTHER_SENSITIVITY_IND"));
+    }
 
     //
     // Worker (staff):
@@ -459,14 +463,22 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     return ret;
   }
 
-  protected void releaseLocalMemory(final Map<String, EsPersonCase> mapCases,
-      final List<EsPersonCase> listReadyToNorm) {
-    listReadyToNorm.clear();
-    mapCases.clear();
+  // =====================
+  // THREAD MEMORY:
+  // =====================
+
+  protected void releaseThreadMemory() {
+    clearThreadContainers();
+    System.gc(); // NOSONAR
   }
 
-  public Map<String, StaffPerson> getStaffWorkers() {
-    return staffWorkers;
+  protected void clearThreadContainers() {
+    if (allocCases.get() == null) {
+      this.allocCases.get().clear();
+      this.allocMapCases.get().clear();
+      this.allocMapClients.get().clear();
+      this.allocReadyToNorm.get().clear();
+    }
   }
 
   /**
@@ -481,6 +493,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
       allocCases.set(new ArrayList<>(150000));
       allocReadyToNorm.set(new ArrayList<>(150000));
       allocMapCases.set(new HashMap<>(99881)); // Prime
+      allocReadyToNorm.set(new ArrayList<>(150000));
+      clearThreadContainers();
     }
   }
 
