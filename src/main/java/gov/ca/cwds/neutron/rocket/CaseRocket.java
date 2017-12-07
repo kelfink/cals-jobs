@@ -32,9 +32,11 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CaseSQLResource;
 import gov.ca.cwds.data.persistence.cms.EsCaseRelatedPerson;
+import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.data.persistence.cms.StaffPerson;
+import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -47,6 +49,7 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.rocket.referral.MinClientReferral;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 import gov.ca.cwds.rest.api.domain.cms.SystemCode;
@@ -73,6 +76,9 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    * </p>
    */
   protected transient ThreadLocal<List<EsCaseRelatedPerson>> allocCases = new ThreadLocal<>();
+
+  protected transient ThreadLocal<List<MinClientReferral>> allocClientCaseKeys =
+      new ThreadLocal<>();
 
   /**
    * k=client id, v=case
@@ -244,6 +250,64 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   }
 
   /**
+   * @return complete list of potential case workers
+   * @throws NeutronException on database error
+   */
+  protected Map<String, StaffPerson> readStaffWorkers() throws NeutronException {
+    try {
+      return staffPersonDao.findAll().stream()
+          .collect(Collectors.toMap(StaffPerson::getId, w -> w));
+    } catch (Exception e) {
+      fail();
+      throw new NeutronException("ERROR READING STAFF WORKERS", e);
+    }
+  }
+
+  protected ReplicatedClient extractClient(ResultSet rs) throws SQLException {
+    ReplicatedClient ret = new ReplicatedClient();
+
+    ret.setId(rs.getString("CLIENT_ID"));
+    ret.setCommonFirstName(rs.getString("CLIENT_FIRST_NM"));
+    ret.setCommonLastName(rs.getString("CLIENT_LAST_NM"));
+    ret.setSensitivityIndicator(rs.getString("CLIENT_SENSITIVITY_IND"));
+    ret.setLastUpdatedTime(rs.getTimestamp("CLIENT_LAST_UPDATED"));
+    ret.setReplicationOperation(CmsReplicationOperation.valueOf(rs.getString("CLIENT_OPERATION")));
+
+    return ret;
+  }
+
+  protected Map<String, ReplicatedClient> readClients(final PreparedStatement stmtSelClient,
+      final Map<String, ReplicatedClient> mapClients) throws NeutronException {
+    try {
+      // Transaction begins after prior INSERT. :-(
+      // return clientDao.findByTemp().stream()
+      // .collect(Collectors.toMap(ReplicatedClient::getId, c -> c));
+
+      stmtSelClient.setMaxRows(0);
+      stmtSelClient.setQueryTimeout(0);
+      stmtSelClient.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+
+      LOGGER.info("pull client/case keys");
+      final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
+      final Map<Object, ReplicatedClient> group = new HashMap<>();
+
+      EsClientAddress esClient;
+      while (!isFailed() && rs.next()) {
+        group.clear();
+        esClient = EsClientAddress.extract(rs);
+        // group.put(esClient.getCltId(), esClient.normalize(group));
+        // mapClients.put(esClient.getCltId(), );
+      }
+
+    } catch (Exception e) {
+      fail();
+      throw new NeutronException("ERROR READING CLIENTS", e);
+    }
+
+    return mapClients;
+  }
+
+  /**
    * Pour cases, and client/case keys into the caldron and brew into a cases JSON array element per
    * client.
    * 
@@ -287,11 +351,14 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     getFlightLog().markRangeStart(p);
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
+    final List<MinClientReferral> listClientCaseKeys = this.allocClientCaseKeys.get();
     final List<EsCaseRelatedPerson> listCases = allocCases.get();
     final Map<String, EsCaseRelatedPerson> mapCases = allocMapCasesByClient.get();
+    final Map<String, ReplicatedClient> mapClients = allocMapClients.get();
 
     listCases.clear();
     mapCases.clear();
+    mapClients.clear();
 
     try (final Connection con = getConnection()) {
       final String schema = getDBSchemaName();
@@ -302,9 +369,13 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       try (
           final PreparedStatement stmtInsClient =
               con.prepareStatement(CaseSQLResource.INSERT_CLIENT_FULL);
+          final PreparedStatement stmtSelClient =
+              con.prepareStatement(CaseSQLResource.SELECT_CLIENT_FULL);
           final PreparedStatement stmtSelCase = con.prepareStatement(getInitialLoadQuery(schema))) {
         prepClientBundle(stmtInsClient, p);
-        allocMapClients.set(readClients());
+        readClients(stmtSelClient, mapClients);
+
+        // allocMapClients.set();
         readCases(stmtSelCase, listCases);
       } finally {
         con.commit();
@@ -361,30 +432,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     }
 
     LOGGER.info("DONE: read {} ES case rows", this.rowsReadCases.get());
-  }
-
-  /**
-   * @return complete list of potential case workers
-   * @throws NeutronException on database error
-   */
-  protected Map<String, StaffPerson> readStaffWorkers() throws NeutronException {
-    try {
-      return staffPersonDao.findAll().stream()
-          .collect(Collectors.toMap(StaffPerson::getId, w -> w));
-    } catch (Exception e) {
-      fail();
-      throw new NeutronException("ERROR READING STAFF WORKERS", e);
-    }
-  }
-
-  protected Map<String, ReplicatedClient> readClients() throws NeutronException {
-    try {
-      return clientDao.findByTemp().stream()
-          .collect(Collectors.toMap(ReplicatedClient::getId, c -> c));
-    } catch (Exception e) {
-      fail();
-      throw new NeutronException("ERROR READING CLIENTS", e);
-    }
   }
 
   protected boolean isParentalRelation(short code) {
