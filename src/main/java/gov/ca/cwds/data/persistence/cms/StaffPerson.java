@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
@@ -29,11 +30,15 @@ import gov.ca.cwds.data.persistence.cms.rep.EmbeddableCmsReplicatedEntityAware;
  * 
  * @author CWDS API Team
  */
-@SuppressWarnings("serial")
 @Entity
 @Table(name = "STFPERST")
+@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.StaffPerson.findAll",
+    query = "SELECT s.* FROM {h-schema}STFPERST s FOR READ ONLY WITH UR ",
+    resultClass = StaffPerson.class, readOnly = true)
 public class StaffPerson extends CmsPersistentObject
     implements CmsReplicatedEntity, EmbeddableCmsReplicatedEntityAware {
+
+  private static final long serialVersionUID = 1L;
 
   @Id
   @Column(name = "IDENTIFIER", length = 3)
