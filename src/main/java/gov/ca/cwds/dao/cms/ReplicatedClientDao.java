@@ -39,7 +39,7 @@ public class ReplicatedClientDao extends BaseDaoImpl<ReplicatedClient>
   }
 
   public List<ReplicatedClient> findByTemp() {
-    final String namedQueryName = this.constructNamedQueryName("findByTemp");
+    final String namedQueryName = this.makeNamedQueryName("findByTemp");
     final Session session = this.getSessionFactory().getCurrentSession();
     Transaction txn = session.getTransaction();
     txn = txn != null ? txn : session.beginTransaction();
@@ -60,7 +60,7 @@ public class ReplicatedClientDao extends BaseDaoImpl<ReplicatedClient>
     }
   }
 
-  protected String constructNamedQueryName(String suffix) {
+  protected String makeNamedQueryName(String suffix) {
     return this.getEntityClass().getName() + "." + suffix;
   }
 

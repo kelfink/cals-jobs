@@ -31,7 +31,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CaseSQLResource;
-import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
+import gov.ca.cwds.data.persistence.cms.EsCaseRelatedPerson;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.data.persistence.cms.StaffPerson;
@@ -49,14 +49,16 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
+import gov.ca.cwds.rest.api.domain.cms.SystemCode;
+import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
  * Rocket to index person cases from CMS into ElasticSearch.
  * 
  * @author CWDS API Team
  */
-public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsPersonCase>
-    implements NeutronRowMapper<EsPersonCase> {
+public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsCaseRelatedPerson>
+    implements NeutronRowMapper<EsCaseRelatedPerson> {
 
   private static final long serialVersionUID = 1L;
 
@@ -70,23 +72,27 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
    * Neutron rocket reuses threads for performance, since thread creation is expensive.
    * </p>
    */
-  protected transient ThreadLocal<List<EsChildPersonCase>> allocCases = new ThreadLocal<>();
+  protected transient ThreadLocal<List<EsCaseRelatedPerson>> allocCases = new ThreadLocal<>();
 
-  protected transient ThreadLocal<Map<String, EsChildPersonCase>> allocMapCases =
+  /**
+   * k=client id, v=case
+   */
+  protected transient ThreadLocal<Map<String, EsCaseRelatedPerson>> allocMapCasesByClient =
       new ThreadLocal<>();
 
+  /**
+   * k=client id, v=client
+   */
   protected transient ThreadLocal<Map<String, ReplicatedClient>> allocMapClients =
       new ThreadLocal<>();
-
-  protected transient ThreadLocal<List<EsChildPersonCase>> allocReadyToNorm = new ThreadLocal<>();
 
   protected final AtomicInteger rowsReadCases = new AtomicInteger(0);
 
   protected final AtomicInteger nextThreadNum = new AtomicInteger(0);
 
-  private StaffPersonDao staffPersonDao;
+  private transient StaffPersonDao staffPersonDao;
 
-  private ReplicatedClientDao clientDao;
+  private transient ReplicatedClientDao clientDao;
 
   private Map<String, StaffPerson> staffWorkers = new HashMap<>();
 
@@ -198,8 +204,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
   }
 
   @Override
-  public List<ReplicatedPersonCases> normalize(List<EsPersonCase> recs) {
-    return EntityNormalizer.<ReplicatedPersonCases, EsPersonCase>normalizeList(recs);
+  public List<ReplicatedPersonCases> normalize(List<EsCaseRelatedPerson> recs) {
+    return EntityNormalizer.<ReplicatedPersonCases, EsCaseRelatedPerson>normalizeList(recs);
   }
 
   // =====================
@@ -221,8 +227,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     return extract(rs);
   }
 
-  protected void readCases(final PreparedStatement stmtSelCase) throws SQLException {
-    final List<EsChildPersonCase> cases = this.allocCases.get();
+  protected void readCases(final PreparedStatement stmtSelCase,
+      final List<EsCaseRelatedPerson> cases) throws SQLException {
     stmtSelCase.setMaxRows(0);
     stmtSelCase.setQueryTimeout(0);
     stmtSelCase.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
@@ -246,15 +252,15 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
    * @param listReadyToNorm denormalized records
    * @return normalized record count
    */
-  protected int mapReduce(final List<EsChildPersonCase> listCases,
-      final Map<String, EsChildPersonCase> mapCases,
-      final List<EsChildPersonCase> listReadyToNorm) {
+  protected int mapReduce(final List<EsCaseRelatedPerson> listCases,
+      final Map<String, EsCaseRelatedPerson> mapCases,
+      final List<EsCaseRelatedPerson> listReadyToNorm) {
     int countNormalized = 0;
 
     try {
-      final Map<String, List<EsPersonCase>> mapCasesByClient =
+      final Map<String, List<EsCaseRelatedPerson>> mapCasesById =
           listCases.stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
-              .collect(Collectors.groupingBy(EsPersonCase::getCaseId));
+              .collect(Collectors.groupingBy(EsCaseRelatedPerson::getCaseId));
       listCases.clear(); // release objects for garbage collection
     } finally {
       releaseThreadMemory();
@@ -281,13 +287,11 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     getFlightLog().markRangeStart(p);
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
-    final List<EsChildPersonCase> listCases = allocCases.get();
-    final Map<String, EsChildPersonCase> mapCases = allocMapCases.get();
-    final List<EsChildPersonCase> listReadyToNorm = allocReadyToNorm.get();
+    final List<EsCaseRelatedPerson> listCases = allocCases.get();
+    final Map<String, EsCaseRelatedPerson> mapCases = allocMapCasesByClient.get();
 
     listCases.clear();
     mapCases.clear();
-    listReadyToNorm.clear();
 
     try (final Connection con = getConnection()) {
       final String schema = getDBSchemaName();
@@ -301,7 +305,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
           final PreparedStatement stmtSelCase = con.prepareStatement(getInitialLoadQuery(schema))) {
         prepClientBundle(stmtInsClient, p);
         allocMapClients.set(readClients());
-        readCases(stmtSelCase);
+        readCases(stmtSelCase, listCases);
       } finally {
         con.commit();
       }
@@ -383,8 +387,30 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     }
   }
 
+  protected boolean isParentalRelation(short code) {
+    return (code >= 187 && code <= 214) || (code >= 245 && code <= 254)
+        || (code >= 282 && code <= 294) || code == 272 || code == 273 || code == 5620
+        || code == 6360 || code == 6361;
+  }
+
+  protected void translateParentalRelationship(final EsCaseRelatedPerson ret, Short codeId) {
+    if (ret.getParentRelationship() != null && codeId != null
+        && isParentalRelation(codeId.shortValue())) {
+      final SystemCode systemCode = SystemCodeCache.global().getSystemCode(codeId.shortValue());
+      if (systemCode != null) {
+        ret.setParentRelationship(systemCode.getSystemId().intValue());
+      }
+    }
+  }
+
+  protected void translateParentRelationships(final EsCaseRelatedPerson ret, Short code1,
+      Short code2) {
+    translateParentalRelationship(ret, code1);
+    translateParentalRelationship(ret, code2);
+  }
+
   @Override
-  public EsPersonCase extract(final ResultSet rs) throws SQLException {
+  public EsCaseRelatedPerson extract(final ResultSet rs) throws SQLException {
     final String caseId = rs.getString("CASE_ID");
     String focusChildId = rs.getString("FOCUS_CHILD_ID");
 
@@ -393,7 +419,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
       return null;
     }
 
-    final EsChildPersonCase ret = new EsChildPersonCase();
+    final EsCaseRelatedPerson ret = new EsCaseRelatedPerson();
 
     //
     // Case:
@@ -405,14 +431,17 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     ret.setCounty(rs.getInt("COUNTY"));
     ret.setServiceComponent(rs.getInt("SERVICE_COMP"));
 
+    final Map<String, ReplicatedClient> mapClients = this.allocMapClients.get();
+
     //
     // Child (client):
     //
+    final ReplicatedClient focusChild = mapClients.get(focusChildId);
     ret.setFocusChildId(focusChildId);
-    // ret.setFocusChildFirstName(ifNull(rs.getString("FOCUS_CHLD_FIRST_NM")));
-    // ret.setFocusChildLastName(ifNull(rs.getString("FOCUS_CHLD_LAST_NM")));
-    // ret.setFocusChildLastUpdated(rs.getTimestamp("FOCUS_CHILD_LAST_UPDATED"));
-    // ret.setFocusChildSensitivityIndicator(rs.getString("FOCUS_CHILD_SENSITIVITY_IND"));
+    ret.setFocusChildFirstName(ifNull(focusChild.getFirstName()));
+    ret.setFocusChildLastName(ifNull(focusChild.getLastName()));
+    ret.setFocusChildLastUpdated(focusChild.getLastUpdatedTime());
+    ret.setFocusChildSensitivityIndicator(focusChild.getSensitivityIndicator());
 
     //
     // Relative (client):
@@ -420,8 +449,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     final String focusInd = rs.getString("FOCUS_IND");
 
     if (StringUtils.isBlank(focusInd) || !"Y".equalsIgnoreCase(focusInd)) {
-      final ReplicatedClient client =
-          this.allocMapClients.get().get(rs.getString("THIS_CLIENT_ID"));
+      final ReplicatedClient client = mapClients.get(rs.getString("THIS_CLIENT_ID"));
       ret.setParentId(client.getId());
       ret.setParentSourceTable("CLIENT");
       ret.setParentFirstName(client.getFirstName());
@@ -429,10 +457,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
       ret.setParentSensitivityIndicator(client.getSensitivityIndicator());
       ret.setParentLastUpdated(client.getLastUpdatedTime());
 
-      // 0 AS REL_FOCUS_TO_OTHER,
-      // 0 AS REL_OTHER_TO_FOCUS,
+      final Short relFocusToOther = rs.getShort("REL_FOCUS_TO_OTHER");
+      final Short relOtherToFocus = rs.getShort("REL_OTHER_TO_FOCUS");
 
-      // ret.setParentRelationship(rs.getInt("OTHER_RELATIONSHIP"));
+      translateParentRelationships(ret, relFocusToOther, relOtherToFocus);
     }
 
     //
@@ -470,9 +498,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
   protected void clearThreadContainers() {
     if (allocCases.get() == null) {
       this.allocCases.get().clear();
-      this.allocMapCases.get().clear();
+      this.allocMapCasesByClient.get().clear();
       this.allocMapClients.get().clear();
-      this.allocReadyToNorm.get().clear();
     }
   }
 
@@ -486,9 +513,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
   protected void allocateThreadMemory() {
     if (allocCases.get() == null) {
       allocCases.set(new ArrayList<>(150000));
-      allocReadyToNorm.set(new ArrayList<>(150000));
-      allocMapCases.set(new HashMap<>(99881)); // Prime
-      allocReadyToNorm.set(new ArrayList<>(150000));
+      allocMapCasesByClient.set(new HashMap<>(99881)); // Prime
       clearThreadContainers();
     }
   }
