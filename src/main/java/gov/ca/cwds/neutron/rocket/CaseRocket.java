@@ -175,8 +175,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
       buf.append(" WHERE CAS.LMT_ACSSCD = 'N' ");
     }
 
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
-    final String ret = buf.toString().replaceAll("\\s+", " ").trim();
+    final String ret = buf.toString().trim();
     LOGGER.info("CASE SQL: {}", ret);
     return ret;
   }
@@ -212,7 +211,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     return extract(rs);
   }
 
-  protected void readReferrals(final PreparedStatement stmtSelCase,
+  protected void readCases(final PreparedStatement stmtSelCase,
       final Map<String, EsPersonCase> mapReferrals) throws SQLException {
     stmtSelCase.setMaxRows(0);
     stmtSelCase.setQueryTimeout(0);
@@ -223,7 +222,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     LOGGER.info("pull cases");
     final ResultSet rs = stmtSelCase.executeQuery(); // NOSONAR
     while (!isFailed() && rs.next() && (m = mapRows(rs)) != null) {
-      JobLogs.logEvery(++cntr, "read", "bundle referral");
+      JobLogs.logEvery(++cntr, "read", "case bundle");
       JobLogs.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read", "cases");
       // if (m.getReferralClientReplicationOperation() != CmsReplicationOperation.D) {
       // mapReferrals.put(m.getReferralId(), m);
@@ -238,7 +237,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
 
   protected int normalizeClientReferrals(int cntr, MinClientReferral rc1, final String clientId,
       final Map<String, EsPersonCase> mapReferrals, final List<EsPersonCase> listReadyToNorm,
-      final Map<String, List<EsPersonCase>> mapAllegationByReferral) {
+      final Map<String, List<EsPersonCase>> mapCasesByClient) {
     int ret = cntr;
     // final String referralId = rc1.getReferralId();
     // final EsPersonCase denormReferral = mapReferrals.get(referralId);
@@ -249,8 +248,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     // // Sealed and sensitive may be excluded.
     // if (goodToGo) {
     // // Loop allegations for this referral:
-    // if (mapAllegationByReferral.containsKey(referralId)) {
-    // for (EsPersonCase alg : mapAllegationByReferral.get(referralId)) {
+    // if (mapCasesByClient.containsKey(referralId)) {
+    // for (EsPersonCase alg : mapCasesByClient.get(referralId)) {
     // // alg.mergeClientReferralInfo(clientId, denormReferral);
     // listReadyToNorm.add(alg);
     // }
@@ -269,28 +268,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     return ret;
   }
 
-  protected int normalizeQueryResults(final Map<String, EsPersonCase> mapRawCasesByClient,
-      final List<EsPersonCase> listReadyToNorm,
-      final Map<String, List<EsPersonCase>> mapCasesByClient) {
-    LOGGER.debug("Normalize all: START");
-    int countNormalized = 0;
-
-    // for (Map.Entry<String, List<MinClientReferral>> rc : mapCaseByClient.entrySet()) {
-    // final String clientId = rc.getKey();
-    // // Loop cases for this client only.
-    // if (StringUtils.isNotBlank(clientId)) {
-    // listReadyToNorm.clear(); // next client id
-    // for (MinClientReferral rc1 : rc.getValue()) {
-    // countNormalized = normalizeClientReferrals(countNormalized, rc1, clientId, mapReferrals,
-    // listReadyToNorm, mapAllegationByReferral);
-    // }
-    // }
-    // }
-
-    LOGGER.debug("Normalize all: END");
-    return countNormalized;
-  }
-
   /**
    * Justification: See method cleanUpMemory in rocket {@link ReferralHistoryIndexerJob}.
    * 
@@ -304,10 +281,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
   }
 
   /**
-   * Pour cases, and client/case keys into the caldron and brew into a cases array element per
+   * Pour cases, and client/case keys into the caldron and brew into a cases JSON array element per
    * client.
    * 
-   * @param listCases bundle allegations
+   * @param listCases cases bundle
    * @param mapCases k=referral id, v=EsPersonCase
    * @param listClientCaseKeys client/referral key pairs
    * @param listReadyToNorm denormalized records
@@ -317,13 +294,13 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
       final Map<String, EsPersonCase> mapCases, final List<EsPersonCase> listReadyToNorm) {
     int countNormalized = 0;
     try {
-      final Map<String, List<EsPersonCase>> mapAllegationByReferral =
+      final Map<String, List<EsPersonCase>> mapCasesByClient =
           listCases.stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
               .collect(Collectors.groupingBy(EsPersonCase::getCaseId));
-      listCases.clear(); // release objects for gc
+      listCases.clear(); // release objects for garbage collection
 
       // For each client group:
-      countNormalized = normalizeQueryResults(mapCases, listReadyToNorm, mapAllegationByReferral);
+      // countNormalized = normalizeQueryResults(mapCases, listReadyToNorm, mapCasesByClient);
     } finally {
       cleanUpMemory(mapCases, listReadyToNorm);
     }
@@ -331,8 +308,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
   }
 
   /**
-   * Read all records from a single partition (key range) in buckets. Then sort results and
-   * normalize.
+   * Read all records from a single partition (key range), sort results, and normalize.
    * 
    * <p>
    * Each call to this method should run in its own thread.
@@ -365,7 +341,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
       try (final PreparedStatement stmtInsClient = con.prepareStatement(getClientSeedQuery());
           final PreparedStatement stmtSelCase = con.prepareStatement(getInitialLoadQuery(schema))) {
         readClients(stmtInsClient, p);
-        readReferrals(stmtSelCase, mapReferrals);
+        readCases(stmtSelCase, mapReferrals);
         con.commit();
       }
     } catch (Exception e) {
