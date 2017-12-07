@@ -496,7 +496,7 @@ public class HyperCube extends NeutronGuiceModule {
     scheduler.setJobFactory(rocketFactory);
     ret.setScheduler(scheduler);
 
-    // Scheduler listeners.
+    // Quartz scheduler listeners.
     final ListenerManager mgr = ret.getScheduler().getListenerManager();
     mgr.addSchedulerListener(new NeutronSchedulerListener());
     mgr.addTriggerListener(new NeutronTriggerListener(ret));

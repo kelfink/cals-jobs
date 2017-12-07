@@ -418,26 +418,22 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     //
     // Relative (client):
     //
-
-    // FOCUS_IND,
-    // 0 AS REL_FOCUS_TO_OTHER,
-    // 0 AS REL_OTHER_TO_FOCUS,
-
     final String focusInd = rs.getString("FOCUS_IND");
 
     if (StringUtils.isBlank(focusInd) || !"Y".equalsIgnoreCase(focusInd)) {
-      ret.setParentId(ifNull(rs.getString("THIS_CLIENT_ID")));
+      final ReplicatedClient client =
+          this.allocMapClients.get().get(rs.getString("THIS_CLIENT_ID"));
+      ret.setParentId(client.getId());
+      ret.setParentSourceTable("CLIENT");
+      ret.setParentFirstName(client.getFirstName());
+      ret.setParentLastName(client.getLastName());
+      ret.setParentSensitivityIndicator(client.getSensitivityIndicator());
+      ret.setParentLastUpdated(client.getLastUpdatedTime());
 
-      // TODO: read from Client map.
+      // 0 AS REL_FOCUS_TO_OTHER,
+      // 0 AS REL_OTHER_TO_FOCUS,
 
-
-
-      // ret.setParentFirstName(ifNull(rs.getString("OTHER_FIRST_NM")));
-      // ret.setParentLastName(ifNull(rs.getString("OTHER_LAST_NM")));
       // ret.setParentRelationship(rs.getInt("OTHER_RELATIONSHIP"));
-      // ret.setParentLastUpdated(rs.getTimestamp("OTHER_LAST_UPDATED"));
-      // ret.setParentSourceTable(rs.getString("OTHER_SOURCE_TABLE"));
-      // ret.setParentSensitivityIndicator(rs.getString("OTHER_SENSITIVITY_IND"));
     }
 
     //
