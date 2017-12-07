@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
+import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
 import gov.ca.cwds.dao.cms.StaffPersonDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
@@ -35,6 +36,7 @@ import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.data.persistence.cms.StaffPerson;
 import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.ReferralHistoryIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
@@ -46,7 +48,6 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import gov.ca.cwds.neutron.rocket.referral.MinClientReferral;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
@@ -74,9 +75,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
 
   protected transient ThreadLocal<Map<String, EsPersonCase>> allocMapCases = new ThreadLocal<>();
 
-  protected transient ThreadLocal<List<MinClientReferral>> allocClientCaseKeys =
-      new ThreadLocal<>();
-
   protected transient ThreadLocal<List<EsPersonCase>> allocReadyToNorm = new ThreadLocal<>();
 
   protected final AtomicInteger rowsReadCases = new AtomicInteger(0);
@@ -85,6 +83,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
 
   private StaffPersonDao staffPersonDao;
 
+  private ReplicatedClientDao clientDao;
+
   private Map<String, StaffPerson> staffWorkers = new HashMap<>();
 
   /**
@@ -92,6 +92,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
    * 
    * @param dao DAO for {@link ReplicatedPersonCases}
    * @param esDao ElasticSearch DAO
+   * @param clientDao client DAO
    * @param staffPersonDao staff worker DAO
    * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
@@ -99,9 +100,11 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
    */
   @Inject
   public CaseRocket(ReplicatedPersonCasesDao dao, ElasticsearchDao esDao,
-      StaffPersonDao staffPersonDao, @LastRunFile String lastRunFile, ObjectMapper mapper,
-      FlightPlan flightPlan) {
+      ReplicatedClientDao clientDao, StaffPersonDao staffPersonDao, @LastRunFile String lastRunFile,
+      ObjectMapper mapper, FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
+
+    this.clientDao = clientDao;
     this.staffPersonDao = staffPersonDao;
   }
 
@@ -191,6 +194,15 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     return EsPersonCase.class;
   }
 
+  @Override
+  public List<ReplicatedPersonCases> normalize(List<EsPersonCase> recs) {
+    return EntityNormalizer.<ReplicatedPersonCases, EsPersonCase>normalizeList(recs);
+  }
+
+  // =====================
+  // JDBC:
+  // =====================
+
   protected void prepClientBundle(final PreparedStatement stmtInsClient,
       final Pair<String, String> p) throws SQLException {
     stmtInsClient.setMaxRows(0);
@@ -223,11 +235,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
       // mapReferrals.put(m.getReferralId(), m);
       // }
     }
-  }
-
-  @Override
-  public List<ReplicatedPersonCases> normalize(List<EsPersonCase> recs) {
-    return EntityNormalizer.<ReplicatedPersonCases, EsPersonCase>normalizeList(recs);
   }
 
   /**
@@ -305,14 +312,15 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
               con.prepareStatement(CaseSQLResource.INSERT_CLIENT_FULL);
           final PreparedStatement stmtSelCase = con.prepareStatement(getInitialLoadQuery(schema))) {
         prepClientBundle(stmtInsClient, p);
+        final Map<String, ReplicatedClient> mapClients = readClients();
         readCases(stmtSelCase, mapCases);
       } finally {
         con.commit();
       }
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(LOGGER, e, "ERROR HANDING RANGE {} - {}: {}", p.getLeft(), p.getRight(),
-          e.getMessage());
+      throw JobLogs.runtime(LOGGER, e, "ERROR HANDLING RANGE {} - {}: {}", p.getLeft(),
+          p.getRight(), e.getMessage());
     }
 
     int cntr = mapReduce(listCases, mapCases, listReadyToNorm);
@@ -369,10 +377,20 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
   protected Map<String, StaffPerson> readStaffWorkers() throws NeutronException {
     try {
       return staffPersonDao.findAll().stream()
-          .collect(Collectors.toMap(StaffPerson::getId, a -> a));
+          .collect(Collectors.toMap(StaffPerson::getId, w -> w));
     } catch (Exception e) {
       fail();
-      throw new NeutronException("ERROR READING CASE WORKERS", e);
+      throw new NeutronException("ERROR READING STAFF WORKERS", e);
+    }
+  }
+
+  protected Map<String, ReplicatedClient> readClients() throws NeutronException {
+    try {
+      return clientDao.findByTemp().stream()
+          .collect(Collectors.toMap(ReplicatedClient::getId, c -> c));
+    } catch (Exception e) {
+      fail();
+      throw new NeutronException("ERROR READING CLIENTS", e);
     }
   }
 
@@ -463,7 +481,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
       allocCases.set(new ArrayList<>(150000));
       allocReadyToNorm.set(new ArrayList<>(150000));
       allocMapCases.set(new HashMap<>(99881)); // Prime
-      allocClientCaseKeys.set(new ArrayList<>(12000));
     }
   }
 

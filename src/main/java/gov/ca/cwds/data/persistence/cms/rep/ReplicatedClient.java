@@ -81,6 +81,22 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         + "z.HISP_UD_CD, z.SOCPLC_CD, z.CL_INDX_NO, z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
         + "from {h-schema}CLIENT_T z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR",
     resultClass = ReplicatedClient.class)
+//@formatter:off
+@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient.findByTemp",
+    query = 
+        "\nSELECT \n"
+            + "    c.IDENTIFIER \n"
+            + "  , trim(c.COM_FST_NM) AS COM_FST_NM \n"
+            + "  , trim(c.COM_LST_NM) AS COM_LST_NM \n"
+            + "  , c.SENSTV_IND \n"
+            + "  , c.LST_UPD_TS \n"
+            + "  , c.IBMSNAP_LOGMARKER \n"
+            + "  , c.IBMSNAP_OPERATION \n"
+            + " FROM {h-schema}GT_ID GT \n"
+            + " JOIN {h-schema}CLIENT_T C ON C.IDENTIFIER = GT.IDENTIFIER \n"
+        + " FOR READ ONLY WITH UR ",
+    resultClass = ReplicatedClient.class)
+//@formatter:on
 @Entity
 @Table(name = "CLIENT_T")
 @JsonPropertyOrder(alphabetic = true)
