@@ -558,6 +558,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     if (allocCases.get() == null) {
       allocCases.set(new ArrayList<>(150000));
       allocMapCasesByClient.set(new HashMap<>(99881)); // Prime
+      allocMapClients.set(new HashMap<>(69029)); // Prime
       clearThreadContainers();
     }
   }
