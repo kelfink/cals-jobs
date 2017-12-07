@@ -15,6 +15,7 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.data.persistence.cms.StaffPerson;
+import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.ReferralHistoryIndexerJob;
 import gov.ca.cwds.jobs.config.FlightPlan;
@@ -59,8 +61,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CaseRocket.class);
-
-  private List<StaffPerson> caseWorkers = new ArrayList<>(88000);
 
   /**
    * Allocate memory once for each thread and reuse per key range.
@@ -165,7 +165,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
-    buf.append(CaseSQLResource.SELECT_CASE);
+    buf.append(CaseSQLResource.SELECT_CASES_FULL);
 
     if (!getFlightPlan().isLoadSealedAndSensitive()) {
       buf.append(" WHERE CAS.LMT_ACSSCD = 'N' ");
@@ -408,23 +408,28 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     ret.setFocusChildSensitivityIndicator(rs.getString("FOCUS_CHILD_SENSITIVITY_IND"));
 
     //
-    // Parent:
+    // Relative (client):
     //
-    ret.setParentId(ifNull(rs.getString("PARENT_ID")));
-    ret.setParentFirstName(ifNull(rs.getString("PARENT_FIRST_NM")));
-    ret.setParentLastName(ifNull(rs.getString("PARENT_LAST_NM")));
-    ret.setParentRelationship(rs.getInt("PARENT_RELATIONSHIP"));
-    ret.setParentLastUpdated(rs.getTimestamp("PARENT_LAST_UPDATED"));
-    ret.setParentSourceTable(rs.getString("PARENT_SOURCE_TABLE"));
-    ret.setParentSensitivityIndicator(rs.getString("PARENT_SENSITIVITY_IND"));
+    ret.setParentId(ifNull(rs.getString("OTHER_ID")));
+    ret.setParentFirstName(ifNull(rs.getString("OTHER_FIRST_NM")));
+    ret.setParentLastName(ifNull(rs.getString("OTHER_LAST_NM")));
+    ret.setParentRelationship(rs.getInt("OTHER_RELATIONSHIP"));
+    ret.setParentLastUpdated(rs.getTimestamp("OTHER_LAST_UPDATED"));
+    ret.setParentSourceTable(rs.getString("OTHER_SOURCE_TABLE"));
+    ret.setParentSensitivityIndicator(rs.getString("OTHER_SENSITIVITY_IND"));
 
     //
     // Worker (staff):
     //
-    ret.getWorker().setWorkerId(ifNull(rs.getString("WORKER_ID")));
-    ret.getWorker().setWorkerFirstName(ifNull(rs.getString("WORKER_FIRST_NM")));
-    ret.getWorker().setWorkerLastName(ifNull(rs.getString("WORKER_LAST_NM")));
-    ret.getWorker().setWorkerLastUpdated(rs.getTimestamp("WORKER_LAST_UPDATED"));
+    final String workerId = ifNull(rs.getString("WORKER_ID"));
+    if (StringUtils.isNotBlank(workerId) && staffWorkers.containsKey(workerId)) {
+      final StaffPerson staffPerson = staffWorkers.get(workerId);
+      final EmbeddableStaffWorker worker = ret.getWorker();
+      worker.setWorkerId(workerId);
+      worker.setWorkerFirstName(staffPerson.getFirstName());
+      worker.setWorkerLastName(staffPerson.getLastName());
+      worker.setWorkerLastUpdated(staffPerson.getLastUpdatedTime());
+    }
 
     //
     // Access Limitation:
@@ -440,6 +445,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
       final List<EsPersonCase> listReadyToNorm) {
     listReadyToNorm.clear();
     mapCases.clear();
+  }
+
+  public Map<String, StaffPerson> getStaffWorkers() {
+    return staffWorkers;
   }
 
   /**
@@ -458,10 +467,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
     }
   }
 
-  public List<StaffPerson> getCaseWorkers() {
-    return caseWorkers;
-  }
-
   /**
    * Rocket entry point.
    * 
@@ -470,10 +475,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
    */
   public static void main(String... args) throws Exception {
     LaunchCommand.launchOneWayTrip(CaseRocket.class, args);
-  }
-
-  public Map<String, StaffPerson> getStaffWorkers() {
-    return staffWorkers;
   }
 
 }
