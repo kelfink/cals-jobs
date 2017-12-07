@@ -677,7 +677,7 @@ public class ReferralHistoryIndexerJobTest
   public void getClientSeedQuery_Args__() throws Exception {
     final String actual = target.getClientSeedQuery();
     final String expected =
-        "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T\nWHERE rc.FKCLIENT_T > ? AND rc.FKCLIENT_T <= ?\nAND c.IBMSNAP_OPERATION IN ('I','U') ";
+        "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T\nWHERE rc.FKCLIENT_T BETWEEN ? AND ?\nAND c.IBMSNAP_OPERATION IN ('I','U') ";
     assertThat(actual, is(equalTo(expected)));
   }
 
