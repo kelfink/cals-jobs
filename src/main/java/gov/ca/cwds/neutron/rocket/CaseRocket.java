@@ -102,6 +102,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
       StaffPersonDao staffPersonDao, @LastRunFile String lastRunFile, ObjectMapper mapper,
       FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
+    this.staffPersonDao = staffPersonDao;
   }
 
   // =====================
@@ -527,11 +528,11 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsP
    * @throws Exception on launch error
    */
   public static void main(String... args) throws Exception {
-    try {
-      LaunchCommand.launchOneWayTrip(CaseRocket.class, args);
-    } catch (Throwable e) {
-      e.printStackTrace();
-    }
+    LaunchCommand.launchOneWayTrip(CaseRocket.class, args);
+  }
+
+  public Map<String, StaffPerson> getStaffWorkers() {
+    return staffWorkers;
   }
 
 }

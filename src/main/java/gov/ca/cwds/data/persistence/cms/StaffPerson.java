@@ -44,7 +44,7 @@ public class StaffPerson extends CmsPersistentObject
   private Date endDate;
 
   @Column(name = "FIRST_NM", length = 20, nullable = false)
-  @ColumnTransformer(read = ("trim(FIRST_NM)"))
+  @ColumnTransformer(read = "trim(FIRST_NM)")
   private String firstName;
 
   @Column(name = "JOB_TL_DSC")
