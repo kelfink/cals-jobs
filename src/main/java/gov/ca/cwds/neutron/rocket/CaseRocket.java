@@ -82,15 +82,15 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       new ThreadLocal<>();
 
   /**
-   * k=client id, v=case
+   * k=case id, v=case
    */
-  protected transient ThreadLocal<Map<String, EsCaseRelatedPerson>> allocMapCasesById =
+  protected transient ThreadLocal<Map<String, EsCaseRelatedPerson>> allocMapCases =
       new ThreadLocal<>();
 
   /**
-   * k=client id, v=case
+   * k=client id, v=cases
    */
-  protected transient ThreadLocal<Map<String, Set<String>>> allocMapCasesByClient =
+  protected transient ThreadLocal<Map<String, Set<String>>> allocMapClientCases =
       new ThreadLocal<>();
 
   /**
@@ -99,9 +99,9 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   protected transient ThreadLocal<Map<String, ReplicatedClient>> allocMapClients =
       new ThreadLocal<>();
 
-  protected final AtomicInteger rowsReadCases = new AtomicInteger(0);
+  private final AtomicInteger rowsReadCases = new AtomicInteger(0);
 
-  protected final AtomicInteger nextThreadNum = new AtomicInteger(0);
+  private final AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   private transient StaffPersonDao staffPersonDao;
 
@@ -219,6 +219,32 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   @Override
   public List<ReplicatedPersonCases> normalize(List<EsCaseRelatedPerson> recs) {
     return EntityNormalizer.<ReplicatedPersonCases, EsCaseRelatedPerson>normalizeList(recs);
+  }
+
+  // =====================
+  // TRANSLATE SYSCODES:
+  // =====================
+
+  protected void translateParentRelationships(final EsCaseRelatedPerson ret, Short code1,
+      Short code2) {
+    translateParentalRelationship(ret, code1);
+    translateParentalRelationship(ret, code2);
+  }
+
+  protected boolean isParentalRelation(short code) {
+    return (code >= 187 && code <= 214) || (code >= 245 && code <= 254)
+        || (code >= 282 && code <= 294) || code == 272 || code == 273 || code == 5620
+        || code == 6360 || code == 6361;
+  }
+
+  protected void translateParentalRelationship(final EsCaseRelatedPerson ret, Short codeId) {
+    if (ret.getParentRelationship() != null && codeId != null
+        && isParentalRelation(codeId.shortValue())) {
+      final SystemCode systemCode = SystemCodeCache.global().getSystemCode(codeId.shortValue());
+      if (systemCode != null) {
+        ret.setParentRelationship(systemCode.getSystemId().intValue());
+      }
+    }
   }
 
   // =====================
@@ -477,20 +503,15 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
           .sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
           .collect(Collectors.toList());
 
-      // final Map<String, List<CaseClientRelative>> ccrByOtherClient =
-      // ccrs.stream().filter(CaseClientRelative::hasRelation)
-      // .collect(Collectors.groupingBy(CaseClientRelative::getRelatedClientId));
-      //
-      // final Map<String, List<CaseClientRelative>> ccrCasesByFocusChild =
-      // ccrs.stream().filter(CaseClientRelative::hasNoRelation)
-      // .collect(Collectors.groupingBy(CaseClientRelative::getRelatedClientId));
-
       // MAPS:
       // cases => clients
       // client => cases
-      // client => relationships
+      // client => parents
+
+      // NEXT: case: focus child, parents.
 
       final Map<String, Set<String>> mapCaseClients = new HashMap<>(99881);
+      final Map<String, Set<String>> mapClientParents = new HashMap<>(99881);
 
       for (CaseClientRelative ccr : ccrs) {
         collectCaseClients(mapCaseClients, ccr);
@@ -505,13 +526,12 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
       final Set<String> amber = mapClientCases.get("TMZGOO205B");
       LOGGER.info("Amber: {}", amber);
+      amber.forEach(x -> LOGGER.info("x: {}", mapCases.get(x)));
 
       final Set<String> nina = mapClientCases.get("TBCF40g0D8");
       LOGGER.info("Nina: {}", nina);
 
-    } finally
-
-    {
+    } finally {
       clearThreadContainers();
     }
 
@@ -539,7 +559,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
     final List<CaseClientRelative> listCaseClientRelative = allocCaseClientRelative.get();
     final Map<String, ReplicatedClient> mapClients = allocMapClients.get();
-    final Map<String, EsCaseRelatedPerson> mapCasesById = allocMapCasesById.get();
+    final Map<String, EsCaseRelatedPerson> mapCasesById = allocMapCases.get();
 
     try (final Connection con = getConnection()) {
       final String schema = getDBSchemaName();
@@ -572,8 +592,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
           p.getRight(), e.getMessage());
     }
 
-    int cntr = assemblePieces(listCaseClientRelative, mapCasesById, mapClients,
-        allocMapCasesByClient.get());
+    int cntr =
+        assemblePieces(listCaseClientRelative, mapCasesById, mapClients, allocMapClientCases.get());
     getFlightLog().markRangeComplete(p);
     LOGGER.info("DONE");
     return cntr;
@@ -615,31 +635,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       throw JobLogs.runtime(LOGGER, e, "ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
+      deallocateThreadMemory();
     }
 
     LOGGER.info("DONE: read {} ES case rows", this.rowsReadCases.get());
-  }
-
-  protected boolean isParentalRelation(short code) {
-    return (code >= 187 && code <= 214) || (code >= 245 && code <= 254)
-        || (code >= 282 && code <= 294) || code == 272 || code == 273 || code == 5620
-        || code == 6360 || code == 6361;
-  }
-
-  protected void translateParentalRelationship(final EsCaseRelatedPerson ret, Short codeId) {
-    if (ret.getParentRelationship() != null && codeId != null
-        && isParentalRelation(codeId.shortValue())) {
-      final SystemCode systemCode = SystemCodeCache.global().getSystemCode(codeId.shortValue());
-      if (systemCode != null) {
-        ret.setParentRelationship(systemCode.getSystemId().intValue());
-      }
-    }
-  }
-
-  protected void translateParentRelationships(final EsCaseRelatedPerson ret, Short code1,
-      Short code2) {
-    translateParentalRelationship(ret, code1);
-    translateParentalRelationship(ret, code2);
   }
 
   // =====================
@@ -650,10 +649,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     final List<EsCaseRelatedPerson> cases = allocCases.get();
     if (cases != null) {
       cases.clear();
-      this.allocMapCasesByClient.get().clear();
-      this.allocMapClients.get().clear();
-      this.allocCases.get().clear();
       this.allocCaseClientRelative.get().clear();
+      this.allocMapClientCases.get().clear();
+      this.allocMapClients.get().clear();
+      this.allocMapCases.get().clear();
       System.gc(); // NOSONAR
     }
   }
@@ -669,8 +668,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     if (allocCases.get() == null) {
       allocCases.set(new ArrayList<>(205000));
       allocCaseClientRelative.set(new ArrayList<>(205000));
-      allocMapCasesByClient.set(new HashMap<>(99881)); // Prime
-      allocMapCasesById.set(new HashMap<>(69029)); // Prime
+      allocMapClientCases.set(new HashMap<>(99881)); // Prime
+      allocMapCases.set(new HashMap<>(69029)); // Prime
       allocMapClients.set(new HashMap<>(69029)); // Prime
       clearThreadContainers();
     }
@@ -679,8 +678,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   protected void deallocateThreadMemory() {
     if (allocCases.get() != null) {
       allocCases.set(null);
-      allocMapCasesByClient.set(null);
-      allocMapCasesById.set(null);
+      allocMapClientCases.set(null);
+      allocMapCases.set(null);
       allocMapClients.set(null);
       allocCaseClientRelative.set(null);
     }
