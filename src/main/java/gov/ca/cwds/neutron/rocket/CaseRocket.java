@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -88,7 +89,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   /**
    * k=client id, v=case
    */
-  protected transient ThreadLocal<Map<String, List<String>>> allocMapCasesByClient =
+  protected transient ThreadLocal<Map<String, Map<String, String>>> allocMapCasesByClient =
       new ThreadLocal<>();
 
   /**
@@ -422,12 +423,9 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     int countNormalized = 0;
 
     try {
-      // Merge pieces.
-      final Map<String, List<String>> mapCaseIdByClient = allocMapCasesByClient.get();
-
       // CCR = Case/Client/Relation
-      final List<CaseClientRelative> ccrOrderByCase = listCaseClientRelation
-          .stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
+      final List<CaseClientRelative> ccrOrderByCase = listCaseClientRelation.stream()
+          .sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
           .collect(Collectors.toList());
 
       final Map<String, List<CaseClientRelative>> ccrByOtherClient =
@@ -438,18 +436,21 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
           ccrOrderByCase.stream().filter(CaseClientRelative::hasNoRelation)
               .collect(Collectors.groupingBy(CaseClientRelative::getRelatedClientId));
 
-      // for() {
-      //
-      // }
+      // Merge pieces.
+      final Map<String, Map<String, String>> mapCaseIdsByClient = allocMapCasesByClient.get();
+
+      for (Entry<String, List<CaseClientRelative>> entry : ccrByOtherClient.entrySet()) {
+
+      }
 
       // mapCasesByClient.putAll(mapCasesByFocusChild);
       // mapCasesByClient.putAll(mapCasesByOtherClient);
 
-      final List<String> amber = mapCaseIdByClient.get("TMZGOO205B");
-      LOGGER.info("Amber: {}", amber);
-
-      final List<String> nina = mapCaseIdByClient.get("TBCF40g0D8");
-      LOGGER.info("nina: {}", nina);
+      // final List<String> amber = mapCaseIdsByClient.get("TMZGOO205B");
+      // LOGGER.info("Amber: {}", amber);
+      //
+      // final List<String> nina = mapCaseIdsByClient.get("TBCF40g0D8");
+      // LOGGER.info("nina: {}", nina);
 
     } finally {
       clearThreadContainers();
