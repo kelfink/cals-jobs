@@ -464,9 +464,9 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     }
   }
 
-  private void collectClientParents(final Map<String, Set<String>> mapFocusChildParents,
+  private void collectFocusChildParents(final Map<String, Set<String>> mapFocusChildParents,
       final CaseClientRelative ccr) {
-    // client => parents
+    // focus child => parents
     if (ccr.hasRelation() && ccr.isParentRelation()) {
       final String clientId = ccr.getFocusClientId();
       Set<String> clientParents = mapFocusChildParents.get(clientId);
@@ -474,15 +474,22 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
         clientParents = new HashSet<>();
         mapFocusChildParents.put(clientId, clientParents);
       }
-
       clientParents.add(clientId);
     }
   }
 
-  private void addCaseParents(final Map<String, Set<String>> mapCaseParents,
-      final CaseClientRelative ccr) {
+  private void collectCaseParents(final Map<String, Set<String>> mapCaseParents,
+      final Map<String, Set<String>> mapFocusChildParents, final CaseClientRelative ccr) {
     // case => parents
-    if (ccr.hasRelation() && ccr.isParentRelation()) {
+    final String caseId = ccr.getCaseId();
+    final Set<String> focusChildParents = mapFocusChildParents.get(caseId);
+    if (focusChildParents != null && !focusChildParents.isEmpty()) {
+      Set<String> caseParents = mapCaseParents.get(caseId);
+      if (caseParents == null) {
+        caseParents = new HashSet<>();
+        mapFocusChildParents.put(caseId, caseParents);
+      }
+      caseParents.addAll(focusChildParents);
     }
   }
 
@@ -510,8 +517,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       for (CaseClientRelative ccr : ccrs) {
         collectCaseClients(mapCaseClients, ccr);
         collectClientCases(mapClientCases, ccr);
-        collectClientParents(mapFocusChildParents, ccr);
-        // addCaseParents(mapCaseParents, ccr);
+        collectFocusChildParents(mapFocusChildParents, ccr);
+        collectCaseParents(mapCaseParents, mapFocusChildParents, ccr);
       }
 
       // Focus child:
@@ -523,7 +530,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
           theCase.setFocusChildSensitivityIndicator(focusChild.getSensitivityIndicator());
           theCase.setFocusChildLastUpdated(focusChild.getLastUpdatedTime());
         } else {
-          LOGGER.warn("FOCUS CHILD NOT FOUND!! client id: {}", theCase.getFocusChildId());
+          LOGGER.error("FOCUS CHILD NOT FOUND!! client id: {}", theCase.getFocusChildId());
         }
       }
 
