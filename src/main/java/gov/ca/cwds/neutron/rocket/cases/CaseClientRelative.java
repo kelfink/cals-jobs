@@ -10,6 +10,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.rest.api.domain.cms.SystemCode;
+import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
  * Convenient carrier bean for client/case/relative keys.
@@ -23,10 +25,10 @@ public class CaseClientRelative implements ApiMarker {
   private String focusClientId;
   private String relatedClientId;
   private String caseId;
-  private Short relationCode;
+  private short relationCode;
 
   public CaseClientRelative(String caseId, String focusClientId, String clientId,
-      Short relationCode) {
+      short relationCode) {
     this.relatedClientId = clientId;
     this.caseId = caseId;
     this.focusClientId = focusClientId;
@@ -71,12 +73,24 @@ public class CaseClientRelative implements ApiMarker {
     this.focusClientId = focusClientId;
   }
 
-  public Short getRelationCode() {
+  public short getRelationCode() {
     return relationCode;
   }
 
-  public void setRelationCode(Short relationCode) {
+  public void setRelationCode(short relationCode) {
     this.relationCode = relationCode;
+  }
+
+  public boolean isParentRelation() {
+    return (relationCode >= 187 && relationCode <= 214)
+        || (relationCode >= 245 && relationCode <= 254)
+        || (relationCode >= 282 && relationCode <= 294) || relationCode == 272
+        || relationCode == 273 || relationCode == 5620 || relationCode == 6360
+        || relationCode == 6361;
+  }
+
+  public SystemCode translateRelationship() {
+    return SystemCodeCache.global().getSystemCode(this.relationCode);
   }
 
   @Override

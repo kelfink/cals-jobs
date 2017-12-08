@@ -53,8 +53,6 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.cases.CaseClientRelative;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
-import gov.ca.cwds.rest.api.domain.cms.SystemCode;
-import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
  * Rocket to index person cases from CMS into ElasticSearch.
@@ -219,32 +217,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   @Override
   public List<ReplicatedPersonCases> normalize(List<EsCaseRelatedPerson> recs) {
     return EntityNormalizer.<ReplicatedPersonCases, EsCaseRelatedPerson>normalizeList(recs);
-  }
-
-  // =====================
-  // TRANSLATE SYSCODES:
-  // =====================
-
-  protected void translateParentRelationships(final EsCaseRelatedPerson ret, Short code1,
-      Short code2) {
-    translateParentalRelationship(ret, code1);
-    translateParentalRelationship(ret, code2);
-  }
-
-  protected boolean isParentalRelation(short code) {
-    return (code >= 187 && code <= 214) || (code >= 245 && code <= 254)
-        || (code >= 282 && code <= 294) || code == 272 || code == 273 || code == 5620
-        || code == 6360 || code == 6361;
-  }
-
-  protected void translateParentalRelationship(final EsCaseRelatedPerson ret, Short codeId) {
-    if (ret.getParentRelationship() != null && codeId != null
-        && isParentalRelation(codeId.shortValue())) {
-      final SystemCode systemCode = SystemCodeCache.global().getSystemCode(codeId.shortValue());
-      if (systemCode != null) {
-        ret.setParentRelationship(systemCode.getSystemId().intValue());
-      }
-    }
   }
 
   // =====================
@@ -491,6 +463,20 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     }
   }
 
+  private void addClientParents(final Map<String, Set<String>> mapClientParents,
+      final CaseClientRelative ccr) {
+    // client => parents
+    if (ccr.hasRelation() && ccr.isParentRelation()) {
+    }
+  }
+
+  private void addCaseParents(final Map<String, Set<String>> mapCaseParents,
+      final CaseClientRelative ccr) {
+    // case => parents
+    if (ccr.hasRelation() && ccr.isParentRelation()) {
+    }
+  }
+
   protected int assemblePieces(final List<CaseClientRelative> listCaseClientRelation,
       final Map<String, EsCaseRelatedPerson> mapCases,
       final Map<String, ReplicatedClient> mapClients,
@@ -505,14 +491,18 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
       final Map<String, Set<String>> mapCaseClients = new HashMap<>(99881);
       final Map<String, Set<String>> mapClientParents = new HashMap<>(99881);
+      final Map<String, Set<String>> mapCaseParents = new HashMap<>(99881);
 
       // MAPS:
-      // cases => clients
       // client => cases
       // client => parents
+      // case => clients
+      // case => parents
       for (CaseClientRelative ccr : ccrs) {
         collectCaseClients(mapCaseClients, ccr);
         collectClientCases(mapClientCases, ccr);
+        addClientParents(mapClientParents, ccr);
+        addCaseParents(mapCaseParents, ccr);
       }
 
       for (EsCaseRelatedPerson theCase : mapCases.values()) {
