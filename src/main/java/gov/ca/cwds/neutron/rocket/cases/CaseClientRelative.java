@@ -80,4 +80,12 @@ public class CaseClientRelative implements ApiMarker {
     this.caseSensitivity = caseSensitivity;
   }
 
+  public String getFocusClientId() {
+    return focusClientId;
+  }
+
+  public void setFocusClientId(String focusClientId) {
+    this.focusClientId = focusClientId;
+  }
+
 }

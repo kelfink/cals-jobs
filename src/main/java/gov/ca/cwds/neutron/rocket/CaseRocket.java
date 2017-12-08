@@ -237,12 +237,14 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     stmtSelClientCaseRelation.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
 
     int cntr = 0;
-    EsPersonCase m;
+    EsCaseRelatedPerson m;
     LOGGER.info("pull cases");
     final ResultSet rs = stmtSelClientCaseRelation.executeQuery(); // NOSONAR
     while (!isFailed() && rs.next() && (m = pullClientCaseRelationship(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "case bundle");
-      JobLogs.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read", "cases");
+      JobLogs.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read",
+          "case/client/rel");
+      cases.add(m);
     }
   }
 
@@ -308,7 +310,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     // Relative (client):
     //
     final String focusInd = rs.getString("FOCUS_IND");
-
     if (StringUtils.isBlank(focusInd) || !"Y".equalsIgnoreCase(focusInd)) {
       final ReplicatedClient client = mapClients.get(rs.getString("THIS_CLIENT_ID"));
       ret.setParentId(client.getId());
@@ -317,11 +318,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       ret.setParentLastName(client.getLastName());
       ret.setParentSensitivityIndicator(client.getSensitivityIndicator());
       ret.setParentLastUpdated(client.getLastUpdatedTime());
-
-      final Short relFocusToOther = rs.getShort("REL_FOCUS_TO_OTHER");
-      final Short relOtherToFocus = rs.getShort("REL_OTHER_TO_FOCUS");
-
-      translateParentRelationships(ret, relFocusToOther, relOtherToFocus);
+      translateParentRelationships(ret, rs.getShort("REL_FOCUS_TO_OTHER"),
+          rs.getShort("REL_OTHER_TO_FOCUS"));
     }
 
     //
@@ -417,12 +415,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    * 
    * @param listCases cases bundle
    * @param mapCases k=referral id, v=EsPersonCase
-   * @param listReadyToNorm denormalized records
    * @return normalized record count
    */
   protected int mapReduce(final List<EsCaseRelatedPerson> listCases,
-      final Map<String, EsCaseRelatedPerson> mapCases,
-      final List<EsCaseRelatedPerson> listReadyToNorm) {
+      final Map<String, EsCaseRelatedPerson> mapCases) {
     int countNormalized = 0;
 
     try {
@@ -455,6 +451,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     getFlightLog().markRangeStart(p);
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
+    final List<EsCaseRelatedPerson> listCases = allocCases.get();
     final Map<String, EsCaseRelatedPerson> mapCasesById = allocMapCasesById.get();
     final Map<String, List<EsCaseRelatedPerson>> mapCasesByClient = allocMapCasesByClient.get();
     final Map<String, ReplicatedClient> mapClients = allocMapClients.get();
@@ -478,6 +475,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
               con.prepareStatement(getInitialLoadQuery(schema))) {
         prepClientBundle(stmtInsClient, p);
         readClients(stmtSelClient, mapClients);
+        readClientCaseRelationship(stmtSelCaseClientRelationship, listCases);
         readCases(stmtSelCase, mapCasesById);
       } finally {
         con.commit();
@@ -581,12 +579,16 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    */
   protected void allocateThreadMemory() {
     if (allocCases.get() == null) {
-      allocCases.set(new ArrayList<>(150000));
+      allocCases.set(new ArrayList<>(205000));
       allocMapCasesByClient.set(new HashMap<>(99881)); // Prime
       allocMapCasesById.set(new HashMap<>(69029)); // Prime
       allocMapClients.set(new HashMap<>(69029)); // Prime
       clearThreadContainers();
     }
+  }
+
+  public ReplicatedClientDao getClientDao() {
+    return clientDao;
   }
 
   /**
@@ -597,10 +599,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    */
   public static void main(String... args) throws Exception {
     LaunchCommand.launchOneWayTrip(CaseRocket.class, args);
-  }
-
-  public ReplicatedClientDao getClientDao() {
-    return clientDao;
   }
 
 }
