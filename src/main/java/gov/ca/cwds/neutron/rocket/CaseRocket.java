@@ -8,9 +8,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -89,7 +90,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   /**
    * k=client id, v=case
    */
-  protected transient ThreadLocal<Map<String, Map<String, String>>> allocMapCasesByClient =
+  protected transient ThreadLocal<Map<String, Set<String>>> allocMapCasesByClient =
       new ThreadLocal<>();
 
   /**
@@ -419,36 +420,54 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
   protected int assemblePieces(final List<CaseClientRelative> listCaseClientRelation,
       final Map<String, EsCaseRelatedPerson> mapCases,
-      final Map<String, ReplicatedClient> mapClients) {
+      final Map<String, ReplicatedClient> mapClients,
+      final Map<String, Set<String>> mapCaseIdsByClient) {
     int countNormalized = 0;
 
     try {
       // CCR = Case/Client/Relation
-      final List<CaseClientRelative> ccrOrderByCase = listCaseClientRelation.stream()
+      final List<CaseClientRelative> ccrs = listCaseClientRelation.stream()
           .sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
           .collect(Collectors.toList());
 
-      final Map<String, List<CaseClientRelative>> ccrByOtherClient =
-          ccrOrderByCase.stream().filter(CaseClientRelative::hasRelation)
-              .collect(Collectors.groupingBy(CaseClientRelative::getRelatedClientId));
+      // final Map<String, List<CaseClientRelative>> ccrByOtherClient =
+      // ccrs.stream().filter(CaseClientRelative::hasRelation)
+      // .collect(Collectors.groupingBy(CaseClientRelative::getRelatedClientId));
+      //
+      // final Map<String, List<CaseClientRelative>> ccrCasesByFocusChild =
+      // ccrs.stream().filter(CaseClientRelative::hasNoRelation)
+      // .collect(Collectors.groupingBy(CaseClientRelative::getRelatedClientId));
 
-      final Map<String, List<CaseClientRelative>> ccrCasesByFocusChild =
-          ccrOrderByCase.stream().filter(CaseClientRelative::hasNoRelation)
-              .collect(Collectors.groupingBy(CaseClientRelative::getRelatedClientId));
+      // MAPS:
+      // cases => clients
+      // client => cases
+      // client => relationships
 
-      // Merge pieces.
-      final Map<String, Map<String, String>> mapCaseIdsByClient = allocMapCasesByClient.get();
+      final Map<String, Set<String>> mapCaseClients = new HashMap<>(99881);
 
-      for (Entry<String, List<CaseClientRelative>> entry : ccrByOtherClient.entrySet()) {
+      for (CaseClientRelative ccr : ccrs) {
+        final String key = ccr.getCaseId();
+        if (mapCaseClients.containsKey(key)) {
+          Set<String> clientCases = mapCaseClients.get(key);
+
+          if (clientCases == null) {
+            clientCases = new HashSet<>();
+            mapCaseClients.put(key, clientCases);
+          }
+
+          clientCases.add(ccr.getFocusClientId());
+          final String otherClient = ccr.getRelatedClientId();
+          if (StringUtils.isNotBlank(otherClient)) {
+            clientCases.add(otherClient);
+          }
+
+        }
 
       }
 
-      // mapCasesByClient.putAll(mapCasesByFocusChild);
-      // mapCasesByClient.putAll(mapCasesByOtherClient);
+      final Set<String> amber = mapCaseClients.get("TMZGOO205B");
+      LOGGER.info("Amber: {}", amber);
 
-      // final List<String> amber = mapCaseIdsByClient.get("TMZGOO205B");
-      // LOGGER.info("Amber: {}", amber);
-      //
       // final List<String> nina = mapCaseIdsByClient.get("TBCF40g0D8");
       // LOGGER.info("nina: {}", nina);
 
@@ -513,7 +532,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
           p.getRight(), e.getMessage());
     }
 
-    int cntr = assemblePieces(listCaseClientRelative, mapCasesById, mapClients);
+    int cntr = assemblePieces(listCaseClientRelative, mapCasesById, mapClients,
+        allocMapCasesByClient.get());
     getFlightLog().markRangeComplete(p);
     LOGGER.info("DONE");
     return cntr;
