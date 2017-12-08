@@ -667,9 +667,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       LOGGER.info("mapClients.size(): {}", mapClients.size());
       LOGGER.info("mapFocusChildParents.size(): {}", mapFocusChildParents.size());
 
-      final ReplicatedPersonCases amber = mapReadyClientCases.get("TMZGOO205B");
-      LOGGER.info("Amber: {}", amber);
-      // amber.forEach(x -> LOGGER.info("x: {}", mapCases.get(x)));
+      final Set<String> amber = mapClientCases.get("TBCF40g0D8");
+      final ReplicatedPersonCases amberJson = mapReadyClientCases.get("TMZGOO205B");
+      amber.forEach(x -> LOGGER.info("x: {}", mapCases.get(x)));
+      LOGGER.info("Amber: {}", amberJson);
 
       final Set<String> nina = mapClientCases.get("TBCF40g0D8");
       LOGGER.info("Nina: {}", nina);
