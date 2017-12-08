@@ -490,7 +490,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       final Map<String, Set<String>> mapFocusChildParents, final CaseClientRelative ccr) {
     // case => parents
     final String caseId = ccr.getCaseId();
-    final Set<String> focusChildParents = mapFocusChildParents.get(caseId);
+    final Set<String> focusChildParents = mapFocusChildParents.get(ccr.getFocusClientId());
     if (focusChildParents != null && !focusChildParents.isEmpty()) {
       Set<String> caseParents = mapCaseParents.get(caseId);
       if (caseParents == null) {
@@ -516,6 +516,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       }
     }
   }
+
+  // =====================
+  // REDUCE:
+  // =====================
 
   protected void reduceCase(final ReplicatedPersonCases cases, EsCaseRelatedPerson rawCase,
       final Map<String, Set<String>> mapCaseClients,
@@ -683,6 +687,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
     return countNormalized;
   }
+
+  // =====================
+  // THREADS:
+  // =====================
 
   /**
    * Read all records from a single partition (key range), sort results, and normalize.
