@@ -240,7 +240,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     EsCaseRelatedPerson m;
     LOGGER.info("pull cases");
     final ResultSet rs = stmtSelClientCaseRelation.executeQuery(); // NOSONAR
-    while (!isFailed() && rs.next() && (m = pullClientCaseRelationship(rs)) != null) {
+    while (!isFailed() && rs.next() && (m = extractClientCaseRelationship(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "case bundle");
       JobLogs.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read",
           "case/client/rel");
@@ -279,7 +279,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     }
   }
 
-  protected EsCaseRelatedPerson pullClientCaseRelationship(final ResultSet rs) throws SQLException {
+  protected EsCaseRelatedPerson extractClientCaseRelationship(final ResultSet rs) throws SQLException {
     final String caseId = rs.getString("CASE_ID");
     String focusChildId = rs.getString("FOCUS_CHILD_ID");
 
@@ -322,19 +322,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
           rs.getShort("REL_OTHER_TO_FOCUS"));
     }
 
-    //
-    // Worker (staff):
-    //
-    final String workerId = ifNull(rs.getString("WORKER_ID"));
-    if (StringUtils.isNotBlank(workerId) && staffWorkers.containsKey(workerId)) {
-      final StaffPerson staffPerson = staffWorkers.get(workerId);
-      final EmbeddableStaffWorker worker = ret.getWorker();
-      worker.setWorkerId(workerId);
-      worker.setWorkerFirstName(staffPerson.getFirstName());
-      worker.setWorkerLastName(staffPerson.getLastName());
-      worker.setWorkerLastUpdated(staffPerson.getLastUpdatedTime());
-    }
-
     return ret;
   }
 
@@ -343,7 +330,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    */
   @Override
   public EsCaseRelatedPerson extract(final ResultSet rs) throws SQLException {
-    return pullClientCaseRelationship(rs);
+    return extractClientCaseRelationship(rs);
   }
 
   protected ReplicatedClient extractClient(ResultSet rs) throws SQLException {
@@ -369,6 +356,19 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     ret.setCaseLastUpdated(rs.getTimestamp("CASE_LAST_UPDATED"));
     ret.setCounty(rs.getInt("COUNTY"));
     ret.setServiceComponent(rs.getInt("SERVICE_COMP"));
+
+    //
+    // Worker (staff):
+    //
+    final String workerId = ifNull(rs.getString("WORKER_ID"));
+    if (StringUtils.isNotBlank(workerId) && staffWorkers.containsKey(workerId)) {
+      final StaffPerson staffPerson = staffWorkers.get(workerId);
+      final EmbeddableStaffWorker worker = ret.getWorker();
+      worker.setWorkerId(workerId);
+      worker.setWorkerFirstName(staffPerson.getFirstName());
+      worker.setWorkerLastName(staffPerson.getLastName());
+      worker.setWorkerLastUpdated(staffPerson.getLastUpdatedTime());
+    }
 
     //
     // Access Limitation:
