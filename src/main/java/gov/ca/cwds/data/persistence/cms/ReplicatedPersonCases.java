@@ -2,12 +2,14 @@ package gov.ca.cwds.data.persistence.cms;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.google.common.collect.Lists;
 
@@ -30,13 +32,13 @@ public class ReplicatedPersonCases implements RetrovillePerson {
    * Key: Case ID <br>
    * Value: ElasticSearchPersonCase objects for the keyed case id.
    */
-  private Map<String, ElasticSearchPersonCase> personCases = new HashMap<>();
+  private Map<String, ElasticSearchPersonCase> personCases = new LinkedHashMap<>();
 
   /**
    * Key: Case ID <br>
    * Value: ElasticSearchPersonParent objects for the keyed case id.
    */
-  private Map<String, List<ElasticSearchPersonParent>> caseParents = new HashMap<>();
+  private Map<String, List<ElasticSearchPersonParent>> caseParents = new LinkedHashMap<>();
 
   /**
    * Construct the object
@@ -83,6 +85,11 @@ public class ReplicatedPersonCases implements RetrovillePerson {
   }
 
   @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE, true);
+  }
+
+  @Override
   public int hashCode() {
     return HashCodeBuilder.reflectionHashCode(this, false);
   }
@@ -90,6 +97,10 @@ public class ReplicatedPersonCases implements RetrovillePerson {
   @Override
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
+  public String getGroupId() {
+    return groupId;
   }
 
 }

@@ -501,74 +501,25 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     }
   }
 
-  protected int assemblePieces(final List<CaseClientRelative> listCaseClientRelation,
-      final Map<String, EsCaseRelatedPerson> mapCases,
-      final Map<String, ReplicatedClient> mapClients,
-      final Map<String, Set<String>> mapClientCases) {
-    int countNormalized = 0;
-
-    try {
-      // CCR = Case/Client/Relation
-      final List<CaseClientRelative> ccrs = listCaseClientRelation.stream()
-          .sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
-          .collect(Collectors.toList());
-
-      final Map<String, Set<String>> mapCaseClients = new HashMap<>(99881);
-      final Map<String, Set<String>> mapCaseParents = new HashMap<>(99881);
-      final Map<String, Set<String>> mapFocusChildParents = new HashMap<>(99881);
-
-      // MAPS:
-      // client => cases
-      // client => parents
-      // case => clients
-      // case => parents
-      for (CaseClientRelative ccr : ccrs) {
-        collectCaseClients(mapCaseClients, ccr);
-        collectClientCases(mapClientCases, ccr);
-        collectFocusChildParents(mapFocusChildParents, ccr);
-        collectCaseParents(mapCaseParents, mapFocusChildParents, ccr);
+  private void addFocusChildren(final Map<String, EsCaseRelatedPerson> mapCases,
+      final Map<String, ReplicatedClient> mapClients) {
+    // Focus child:
+    for (EsCaseRelatedPerson theCase : mapCases.values()) {
+      final ReplicatedClient focusChild = mapClients.get(theCase.getFocusChildId());
+      if (focusChild != null) {
+        theCase.setFocusChildFirstName(focusChild.getFirstName());
+        theCase.setFocusChildLastName(focusChild.getLastName());
+        theCase.setFocusChildSensitivityIndicator(focusChild.getSensitivityIndicator());
+        theCase.setFocusChildLastUpdated(focusChild.getLastUpdatedTime());
+      } else {
+        LOGGER.error("FOCUS CHILD NOT FOUND!! client id: {}", theCase.getFocusChildId());
       }
-
-      // Focus child:
-      for (EsCaseRelatedPerson theCase : mapCases.values()) {
-        final ReplicatedClient focusChild = mapClients.get(theCase.getFocusChildId());
-        if (focusChild != null) {
-          theCase.setFocusChildFirstName(focusChild.getFirstName());
-          theCase.setFocusChildLastName(focusChild.getLastName());
-          theCase.setFocusChildSensitivityIndicator(focusChild.getSensitivityIndicator());
-          theCase.setFocusChildLastUpdated(focusChild.getLastUpdatedTime());
-        } else {
-          LOGGER.error("FOCUS CHILD NOT FOUND!! client id: {}", theCase.getFocusChildId());
-        }
-      }
-
-      LOGGER.info("listCaseClientRelation.size(): {}", listCaseClientRelation.size());
-      LOGGER.info("mapCaseClients.size(): {}", mapCaseClients.size());
-      LOGGER.info("mapCaseParents.size(): {}", mapCaseParents.size());
-      LOGGER.info("mapCases.size(): {}", mapCases.size());
-      LOGGER.info("mapClientCases.size(): {}", mapClientCases.size());
-      LOGGER.info("mapClients.size(): {}", mapClients.size());
-      LOGGER.info("mapFocusChildParents.size(): {}", mapFocusChildParents.size());
-
-      final Set<String> amber = mapClientCases.get("TMZGOO205B");
-      LOGGER.info("Amber: {}", amber);
-      amber.forEach(x -> LOGGER.info("x: {}", mapCases.get(x)));
-
-      final Set<String> nina = mapClientCases.get("TBCF40g0D8");
-      LOGGER.info("Nina: {}", nina);
-      nina.forEach(x -> LOGGER.info("x: {}", mapCases.get(x)));
-
-    } finally {
-      clearThreadContainers();
     }
-
-    return countNormalized;
   }
 
-  public void reduceCase(final ReplicatedPersonCases cases, EsCaseRelatedPerson rawCase,
+  protected void reduceCase(final ReplicatedPersonCases cases, EsCaseRelatedPerson rawCase,
       final Map<String, Set<String>> mapCaseClients,
       final Map<String, Set<String>> mapCaseParents) {
-
     final ElasticSearchPersonCase esPersonCase = new ElasticSearchPersonCase();
 
     //
@@ -637,11 +588,22 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     esPersonCase.setAccessLimitation(accessLimit);
   }
 
-  public ReplicatedPersonCases reduceClient(final String clientId,
+  protected ReplicatedPersonCases reduceClientCases(final String clientId,
+      final Map<String, EsCaseRelatedPerson> mapCases,
+      final Map<String, Set<String>> mapClientCases, final Map<String, Set<String>> mapCaseClients,
+      final Map<String, Set<String>> mapCaseParents) {
+    final ReplicatedPersonCases ret = new ReplicatedPersonCases(clientId);
+
+    final Set<String> cases = mapClientCases.get(clientId);
+    cases.stream().forEach(k -> reduceCase(ret, mapCases.get(k), mapCaseClients, mapCaseParents));
+
+    return ret;
+  }
+
+  protected void reduceCaseParents(final ReplicatedPersonCases cases,
       final Map<String, EsCaseRelatedPerson> mapCases,
       final Map<String, Set<String>> mapCaseClients,
       final Map<String, Set<String>> mapCaseParents) {
-    final ReplicatedPersonCases cases = new ReplicatedPersonCases(clientId);
 
     // //
     // // A Case may have more than one parents:
@@ -660,7 +622,64 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     // parent.setSensitivityIndicator(this.parentSensitivityIndicator);
     // cases.addCase(esPersonCase, parent);
 
-    return cases;
+  }
+
+  protected int assemblePieces(final List<CaseClientRelative> listCaseClientRelation,
+      final Map<String, EsCaseRelatedPerson> mapCases,
+      final Map<String, ReplicatedClient> mapClients,
+      final Map<String, Set<String>> mapClientCases) {
+    int countNormalized = 0;
+
+    try {
+      // CCR = Case/Client/Relation
+      final List<CaseClientRelative> ccrs = listCaseClientRelation.stream()
+          .sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
+          .collect(Collectors.toList());
+
+      final Map<String, Set<String>> mapCaseClients = new HashMap<>(99881);
+      final Map<String, Set<String>> mapCaseParents = new HashMap<>(99881);
+      final Map<String, Set<String>> mapFocusChildParents = new HashMap<>(99881);
+
+      // MAPS:
+      // client => cases
+      // client => parents
+      // case => clients
+      // case => parents
+      for (CaseClientRelative ccr : ccrs) {
+        collectCaseClients(mapCaseClients, ccr);
+        collectClientCases(mapClientCases, ccr);
+        collectFocusChildParents(mapFocusChildParents, ccr);
+        collectCaseParents(mapCaseParents, mapFocusChildParents, ccr);
+      }
+
+      addFocusChildren(mapCases, mapClients);
+      final Map<String, ReplicatedPersonCases> mapReadyClientCases = mapClientCases
+          .entrySet().stream().map(x -> reduceClientCases(x.getKey(), mapCases, mapClientCases,
+              mapCaseClients, mapCaseParents))
+          .collect(Collectors.toMap(ReplicatedPersonCases::getGroupId, r -> r));
+
+      // Check results.
+      LOGGER.info("listCaseClientRelation.size(): {}", listCaseClientRelation.size());
+      LOGGER.info("mapCaseClients.size(): {}", mapCaseClients.size());
+      LOGGER.info("mapCaseParents.size(): {}", mapCaseParents.size());
+      LOGGER.info("mapCases.size(): {}", mapCases.size());
+      LOGGER.info("mapClientCases.size(): {}", mapClientCases.size());
+      LOGGER.info("mapClients.size(): {}", mapClients.size());
+      LOGGER.info("mapFocusChildParents.size(): {}", mapFocusChildParents.size());
+
+      final ReplicatedPersonCases amber = mapReadyClientCases.get("TMZGOO205B");
+      LOGGER.info("Amber: {}", amber);
+      // amber.forEach(x -> LOGGER.info("x: {}", mapCases.get(x)));
+
+      final Set<String> nina = mapClientCases.get("TBCF40g0D8");
+      LOGGER.info("Nina: {}", nina);
+      nina.forEach(x -> LOGGER.info("x: {}", mapCases.get(x)));
+
+    } finally {
+      clearThreadContainers();
+    }
+
+    return countNormalized;
   }
 
   /**
