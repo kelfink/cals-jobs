@@ -279,7 +279,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     }
   }
 
-  protected EsCaseRelatedPerson extractClientCaseRelationship(final ResultSet rs) throws SQLException {
+  protected EsCaseRelatedPerson extractClientCaseRelationship(final ResultSet rs)
+      throws SQLException {
     final String caseId = rs.getString("CASE_ID");
     String focusChildId = rs.getString("FOCUS_CHILD_ID");
 
@@ -327,6 +328,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
   /**
    * Pulls <strong>Client/Case/Relationship</strong>.
+   * 
+   * @param rs result set
    */
   @Override
   public EsCaseRelatedPerson extract(final ResultSet rs) throws SQLException {
@@ -409,23 +412,30 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     return mapClients;
   }
 
-  /**
-   * Pour cases, and client/case keys into the caldron and brew into a cases JSON array element per
-   * client.
-   * 
-   * @param listCases cases bundle
-   * @param mapCases k=referral id, v=EsPersonCase
-   * @return normalized record count
-   */
-  protected int mapReduce(final List<EsCaseRelatedPerson> listCases,
-      final Map<String, EsCaseRelatedPerson> mapCases) {
+  protected int assemblePieces(final List<EsCaseRelatedPerson> listCases,
+      final Map<String, EsCaseRelatedPerson> mapCases,
+      final Map<String, ReplicatedClient> mapClients) {
     int countNormalized = 0;
 
     try {
-      final Map<String, List<EsCaseRelatedPerson>> mapCasesById =
+      final Map<String, List<EsCaseRelatedPerson>> mapCasesByClient = allocMapCasesByClient.get();
+
+      final Map<String, List<EsCaseRelatedPerson>> mapCasesByFocusChild =
           listCases.stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
-              .collect(Collectors.groupingBy(EsCaseRelatedPerson::getCaseId));
-      listCases.clear(); // release objects for garbage collection
+              .collect(Collectors.groupingBy(EsCaseRelatedPerson::getFocusChildId));
+      mapCasesByClient.putAll(mapCasesByFocusChild);
+
+      final Map<String, List<EsCaseRelatedPerson>> mapCasesByOtherClient =
+          listCases.stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
+              .collect(Collectors.groupingBy(EsCaseRelatedPerson::getRelatedPersonId));
+      mapCasesByClient.putAll(mapCasesByOtherClient);
+
+      final List<EsCaseRelatedPerson> amber = mapCasesByClient.get("TMZGOO205B");
+      LOGGER.info("Amber: {}", amber);
+
+      final List<EsCaseRelatedPerson> nina = mapCasesByClient.get("TBCF40g0D8");
+      LOGGER.info("nina: {}", nina);
+
     } finally {
       clearThreadContainers();
     }
@@ -443,7 +453,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    * @param p partition (key) range to read
    * @return number of client documents affected
    */
-  protected int pullNextRange(final Pair<String, String> p) {
+  protected int pullNextRange(final Pair<String, String> p) throws NeutronException {
     final String threadName =
         "extract_" + nextThreadNum.incrementAndGet() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);
@@ -452,9 +462,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
     final List<EsCaseRelatedPerson> listCases = allocCases.get();
-    final Map<String, EsCaseRelatedPerson> mapCasesById = allocMapCasesById.get();
-    final Map<String, List<EsCaseRelatedPerson>> mapCasesByClient = allocMapCasesByClient.get();
     final Map<String, ReplicatedClient> mapClients = allocMapClients.get();
+    final Map<String, EsCaseRelatedPerson> mapCasesById = allocMapCasesById.get();
 
     try (final Connection con = getConnection()) {
       final String schema = getDBSchemaName();
@@ -475,19 +484,19 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
               con.prepareStatement(getInitialLoadQuery(schema))) {
         prepClientBundle(stmtInsClient, p);
         readClients(stmtSelClient, mapClients);
-        readClientCaseRelationship(stmtSelCaseClientRelationship, listCases);
         readCases(stmtSelCase, mapCasesById);
+        readClientCaseRelationship(stmtSelCaseClientRelationship, listCases);
       } finally {
         con.commit();
       }
+
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(LOGGER, e, "ERROR HANDLING RANGE {} - {}: {}", p.getLeft(),
+      throw JobLogs.checked(LOGGER, e, "ERROR HANDLING RANGE {} - {}: {}", p.getLeft(),
           p.getRight(), e.getMessage());
     }
 
-    int cntr = 0;
-    // int cntr = mapReduce(listCases, mapCases, listReadyToNorm);
+    int cntr = assemblePieces(listCases, mapCasesById, mapClients);
     getFlightLog().markRangeComplete(p);
     LOGGER.info("DONE");
     return cntr;
@@ -529,6 +538,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       throw JobLogs.runtime(LOGGER, e, "ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
+      deallocateThreadMemory();
     }
 
     LOGGER.info("DONE: read {} ES case rows", this.rowsReadCases.get());
@@ -583,6 +593,16 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       allocMapCasesByClient.set(new HashMap<>(99881)); // Prime
       allocMapCasesById.set(new HashMap<>(69029)); // Prime
       allocMapClients.set(new HashMap<>(69029)); // Prime
+      clearThreadContainers();
+    }
+  }
+
+  protected void deallocateThreadMemory() {
+    if (allocCases.get() == null) {
+      allocCases.set(null);
+      allocMapCasesByClient.set(null);
+      allocMapCasesById.set(null);
+      allocMapClients.set(null);
       clearThreadContainers();
     }
   }

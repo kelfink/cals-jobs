@@ -209,6 +209,9 @@ public class CaseSQLResource implements ApiMarker {
      + " FOR READ ONLY WITH UR ";
   //@formatter:on
 
+  /**
+   * Original, overkill approach. Brings back too much redundant data.
+   */
   //@formatter:off
   public static final String SELECT_CASES_FULL_EVERYTHING = 
       "\nWITH DRIVER AS (\n"
