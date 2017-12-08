@@ -427,6 +427,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
       final Map<String, List<EsCaseRelatedPerson>> mapCasesByOtherClient =
           listCases.stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
+              .filter(EsCaseRelatedPerson::hasRelatedPerson)
               .collect(Collectors.groupingBy(EsCaseRelatedPerson::getRelatedPersonId));
       mapCasesByClient.putAll(mapCasesByOtherClient);
 
@@ -538,7 +539,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       throw JobLogs.runtime(LOGGER, e, "ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
-      deallocateThreadMemory();
     }
 
     LOGGER.info("DONE: read {} ES case rows", this.rowsReadCases.get());
