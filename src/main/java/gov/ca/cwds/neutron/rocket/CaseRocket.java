@@ -571,7 +571,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   // =====================
 
   protected void clearThreadContainers() {
-    if (allocCases.get() == null) {
+    if (allocCases.get() != null) {
       this.allocCases.get().clear();
       this.allocMapCasesByClient.get().clear();
       this.allocMapClients.get().clear();
@@ -598,12 +598,11 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   }
 
   protected void deallocateThreadMemory() {
-    if (allocCases.get() == null) {
+    if (allocCases.get() != null) {
       allocCases.set(null);
       allocMapCasesByClient.set(null);
       allocMapCasesById.set(null);
       allocMapClients.set(null);
-      clearThreadContainers();
     }
   }
 
