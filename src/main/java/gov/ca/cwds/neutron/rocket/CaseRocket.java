@@ -418,10 +418,57 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     return mapClients;
   }
 
+  // =====================
+  // ASSEMBLY:
+  // =====================
+
+  private void collectCaseClients(final Map<String, Set<String>> mapCaseClients,
+      final CaseClientRelative ccr) {
+    // case => clients
+    final String caseId = ccr.getCaseId();
+    Set<String> clientCases = mapCaseClients.get(caseId);
+
+    if (clientCases == null) {
+      clientCases = new HashSet<>();
+      mapCaseClients.put(caseId, clientCases);
+    }
+
+    clientCases.add(ccr.getFocusClientId());
+    final String otherClient = ccr.getRelatedClientId();
+    if (StringUtils.isNotBlank(otherClient)) {
+      clientCases.add(otherClient);
+    }
+
+  }
+
+  private void collectThisClientCase(final Map<String, Set<String>> mapClientCases, String caseId,
+      String clientId) {
+    Set<String> clientCases = mapClientCases.get(clientId);
+    if (clientCases == null) {
+      clientCases = new HashSet<>();
+      mapClientCases.put(clientId, clientCases);
+    }
+
+    clientCases.add(caseId);
+  }
+
+  private void collectClientCases(final Map<String, Set<String>> mapClientCases,
+      final CaseClientRelative ccr) {
+    // client => cases
+    final String caseId = ccr.getCaseId();
+    String clientId = ccr.getFocusClientId();
+    collectThisClientCase(mapClientCases, caseId, clientId);
+
+    clientId = ccr.getRelatedClientId();
+    if (StringUtils.isNotBlank(clientId)) {
+      collectThisClientCase(mapClientCases, caseId, clientId);
+    }
+  }
+
   protected int assemblePieces(final List<CaseClientRelative> listCaseClientRelation,
       final Map<String, EsCaseRelatedPerson> mapCases,
       final Map<String, ReplicatedClient> mapClients,
-      final Map<String, Set<String>> mapCaseIdsByClient) {
+      final Map<String, Set<String>> mapClientCases) {
     int countNormalized = 0;
 
     try {
@@ -446,32 +493,25 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       final Map<String, Set<String>> mapCaseClients = new HashMap<>(99881);
 
       for (CaseClientRelative ccr : ccrs) {
-        final String key = ccr.getCaseId();
-        if (mapCaseClients.containsKey(key)) {
-          Set<String> clientCases = mapCaseClients.get(key);
-
-          if (clientCases == null) {
-            clientCases = new HashSet<>();
-            mapCaseClients.put(key, clientCases);
-          }
-
-          clientCases.add(ccr.getFocusClientId());
-          final String otherClient = ccr.getRelatedClientId();
-          if (StringUtils.isNotBlank(otherClient)) {
-            clientCases.add(otherClient);
-          }
-
-        }
-
+        collectCaseClients(mapCaseClients, ccr);
+        collectClientCases(mapClientCases, ccr);
       }
 
-      final Set<String> amber = mapCaseClients.get("TMZGOO205B");
+      LOGGER.info("listCaseClientRelation.size(): {}", listCaseClientRelation.size());
+      LOGGER.info("mapCases.size(): {}", mapCases.size());
+      LOGGER.info("mapClients.size(): {}", mapClients.size());
+      LOGGER.info("mapCaseClients.size(): {}", mapCaseClients.size());
+      LOGGER.info("mapClientCases.size(): {}", mapClientCases.size());
+
+      final Set<String> amber = mapClientCases.get("TMZGOO205B");
       LOGGER.info("Amber: {}", amber);
 
-      // final List<String> nina = mapCaseIdsByClient.get("TBCF40g0D8");
-      // LOGGER.info("nina: {}", nina);
+      final Set<String> nina = mapClientCases.get("TBCF40g0D8");
+      LOGGER.info("Nina: {}", nina);
 
-    } finally {
+    } finally
+
+    {
       clearThreadContainers();
     }
 
