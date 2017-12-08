@@ -84,7 +84,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   /**
    * k=client id, v=case
    */
-  protected transient ThreadLocal<Map<String, EsCaseRelatedPerson>> allocMapCasesByClient =
+  protected transient ThreadLocal<Map<String, List<EsCaseRelatedPerson>>> allocMapCasesByClient =
       new ThreadLocal<>();
 
   /**
@@ -337,13 +337,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       worker.setWorkerLastUpdated(staffPerson.getLastUpdatedTime());
     }
 
-    //
-    // Access Limitation:
-    //
-    ret.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
-    ret.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
-    ret.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
-    ret.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
     return ret;
   }
 
@@ -378,6 +371,14 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     ret.setCaseLastUpdated(rs.getTimestamp("CASE_LAST_UPDATED"));
     ret.setCounty(rs.getInt("COUNTY"));
     ret.setServiceComponent(rs.getInt("SERVICE_COMP"));
+
+    //
+    // Access Limitation:
+    //
+    ret.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
+    ret.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
+    ret.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
+    ret.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
 
     return ret;
   }
@@ -455,7 +456,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
     final Map<String, EsCaseRelatedPerson> mapCasesById = allocMapCasesById.get();
-    final Map<String, EsCaseRelatedPerson> mapCasesByClient = allocMapCasesByClient.get();
+    final Map<String, List<EsCaseRelatedPerson>> mapCasesByClient = allocMapCasesByClient.get();
     final Map<String, ReplicatedClient> mapClients = allocMapClients.get();
 
     try (final Connection con = getConnection()) {
@@ -477,7 +478,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
               con.prepareStatement(getInitialLoadQuery(schema))) {
         prepClientBundle(stmtInsClient, p);
         readClients(stmtSelClient, mapClients);
-        readCases(stmtSelAlles, mapCasesById);
+        readCases(stmtSelCase, mapCasesById);
       } finally {
         con.commit();
       }

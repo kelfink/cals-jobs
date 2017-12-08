@@ -15,6 +15,7 @@ public class CaseClientRelative implements ApiMarker {
 
   private static final long serialVersionUID = 1L;
 
+  private String focusClientId;
   private String clientId;
   private String caseId;
 
