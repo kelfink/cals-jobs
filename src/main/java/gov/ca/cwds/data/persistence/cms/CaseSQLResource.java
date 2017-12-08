@@ -35,7 +35,7 @@ public class CaseSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  protected static final String INSERT_CLIENT_CASE_FULL =
+  public static final String INSERT_CLIENT_CASE_FULL =
       "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)"
      + " SELECT \n"
           + " CAS1.IDENTIFIER      AS CASE_ID, \n"
@@ -77,13 +77,13 @@ public class CaseSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  protected static final String SELECT_CLIENT_CASE =
+  public static final String SELECT_CLIENT_CASE =
         "SELECT rc.FKCLIENT_T, rc.FKREFERL_T, rc.SENSTV_IND\n" 
       + "FROM GT_REFR_CLT RC \n";
   //@formatter:on
 
   //@formatter:off
-  protected static final String SELECT_CASE_DETAIL =
+  public static final String SELECT_CASE_DETAIL =
         "WITH driver AS ( \n"
           + " SELECT gt.IDENTIFIER AS THIS_CLIENT_ID \n"
           + " FROM GT_ID gt  \n"
@@ -105,11 +105,11 @@ public class CaseSQLResource implements ApiMarker {
           + " CAS1.GVR_ENTC      AS COUNTY,  \n"
           + " CAS1.APV_STC \n"
           + "FROM driver D1 \n"
-          + "JOIN CASE_T CAS1 ON CAS1.FKCHLD_CLT = d1.THIS_CLIENT_ID   -- this = focus child \n"
+          + "JOIN CASE_T CAS1 ON CAS1.FKCHLD_CLT = d1.THIS_CLIENT_ID \n"
           + "WHERE CAS1.IBMSNAP_OPERATION IN ('I','U') \n"
           + "UNION \n"
           + "SELECT DISTINCT \n"
-          + "    CAS2.IDENTIFIER    AS CASE_ID, \n"
+          + " CAS2.IDENTIFIER    AS CASE_ID, \n"
           + " CAS2.FKCHLD_CLT    AS FOCUS_CHILD_ID, \n"
           + " CAS2.CASE_NM       AS CASE_NAME, \n"
           + " CAS2.START_DT      AS START_DATE, \n"
@@ -125,13 +125,13 @@ public class CaseSQLResource implements ApiMarker {
           + " CAS2.GVR_ENTC      AS COUNTY,  \n"
           + " CAS2.APV_STC \n"
           + "FROM driver d2 \n"
-          + "JOIN CLN_RELT REL2 ON REL2.FKCLIENT_T = d2.THIS_CLIENT_ID  -- this = focus child \n"
+          + "JOIN CLN_RELT REL2 ON REL2.FKCLIENT_T = d2.THIS_CLIENT_ID \n"
           + "JOIN CASE_T   CAS2 ON CAS2.FKCHLD_CLT = REL2.FKCLIENT_0 \n"
           + "WHERE CAS2.IBMSNAP_OPERATION IN ('I','U') \n"
           + "  AND REL2.IBMSNAP_OPERATION IN ('I','U') \n"
           + "UNION \n"
           + "SELECT DISTINCT \n"
-          + "    CAS3.IDENTIFIER    AS CASE_ID, \n"
+          + " CAS3.IDENTIFIER    AS CASE_ID, \n"
           + " CAS3.FKCHLD_CLT    AS FOCUS_CHILD_ID, \n"
           + " CAS3.CASE_NM       AS CASE_NAME, \n"
           + " CAS3.START_DT      AS START_DATE, \n"
@@ -147,7 +147,7 @@ public class CaseSQLResource implements ApiMarker {
           + " CAS3.GVR_ENTC      AS COUNTY,  \n"
           + " CAS3.APV_STC \n"
           + "FROM driver d3, CLN_RELT REL3, CASE_T CAS3 \n"
-          + "WHERE CAS3.FKCHLD_CLT = REL3.FKCLIENT_T AND REL3.FKCLIENT_0 = d3.THIS_CLIENT_ID -- this = relative \n"
+          + "WHERE CAS3.FKCHLD_CLT = REL3.FKCLIENT_T AND REL3.FKCLIENT_0 = d3.THIS_CLIENT_ID \n"
           + "  AND CAS3.IBMSNAP_OPERATION IN ('I','U') \n"
           + "  AND REL3.IBMSNAP_OPERATION IN ('I','U') \n"
           + "WITH UR  \n";

@@ -48,7 +48,6 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import gov.ca.cwds.neutron.rocket.referral.MinClientReferral;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 import gov.ca.cwds.rest.api.domain.cms.SystemCode;
@@ -76,7 +75,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    */
   protected transient ThreadLocal<List<EsCaseRelatedPerson>> allocCases = new ThreadLocal<>();
 
-  protected transient ThreadLocal<List<MinClientReferral>> allocClientCaseKeys =
+  /**
+   * k=client id, v=case
+   */
+  protected transient ThreadLocal<Map<String, EsCaseRelatedPerson>> allocMapCasesById =
       new ThreadLocal<>();
 
   /**
@@ -228,23 +230,36 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     LOGGER.info("bundle client/cases: {}", countInsClientCases);
   }
 
-  protected EsPersonCase mapRows(ResultSet rs) throws SQLException {
-    return extract(rs);
+  protected void readClientCaseRelationship(final PreparedStatement stmtSelClientCaseRelation,
+      final List<EsCaseRelatedPerson> cases) throws SQLException {
+    stmtSelClientCaseRelation.setMaxRows(0);
+    stmtSelClientCaseRelation.setQueryTimeout(0);
+    stmtSelClientCaseRelation.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+
+    int cntr = 0;
+    EsPersonCase m;
+    LOGGER.info("pull cases");
+    final ResultSet rs = stmtSelClientCaseRelation.executeQuery(); // NOSONAR
+    while (!isFailed() && rs.next() && (m = pullClientCaseRelationship(rs)) != null) {
+      JobLogs.logEvery(++cntr, "read", "case bundle");
+      JobLogs.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read", "cases");
+    }
   }
 
   protected void readCases(final PreparedStatement stmtSelCase,
-      final List<EsCaseRelatedPerson> cases) throws SQLException {
+      final Map<String, EsCaseRelatedPerson> mapCases) throws SQLException {
     stmtSelCase.setMaxRows(0);
     stmtSelCase.setQueryTimeout(0);
     stmtSelCase.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
 
     int cntr = 0;
-    EsPersonCase m;
+    EsCaseRelatedPerson m;
     LOGGER.info("pull cases");
     final ResultSet rs = stmtSelCase.executeQuery(); // NOSONAR
-    while (!isFailed() && rs.next() && (m = mapRows(rs)) != null) {
+    while (!isFailed() && rs.next() && (m = extractCase(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "case bundle");
       JobLogs.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read", "cases");
+      mapCases.put(m.getCaseId(), m);
     }
   }
 
@@ -262,6 +277,84 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     }
   }
 
+  protected EsCaseRelatedPerson pullClientCaseRelationship(final ResultSet rs) throws SQLException {
+    final String caseId = rs.getString("CASE_ID");
+    String focusChildId = rs.getString("FOCUS_CHILD_ID");
+
+    if (focusChildId == null) {
+      LOGGER.warn("FOCUS_CHILD_ID is null for CASE_ID: {}", caseId); // NOSONAR
+      return null;
+    }
+
+    final EsCaseRelatedPerson ret = new EsCaseRelatedPerson();
+
+    //
+    // Case:
+    //
+    ret.setCaseId(caseId);
+    final Map<String, ReplicatedClient> mapClients = this.allocMapClients.get();
+
+    //
+    // Child (client):
+    //
+    final ReplicatedClient focusChild = mapClients.get(focusChildId);
+    ret.setFocusChildId(focusChildId);
+    ret.setFocusChildFirstName(ifNull(focusChild.getFirstName()));
+    ret.setFocusChildLastName(ifNull(focusChild.getLastName()));
+    ret.setFocusChildLastUpdated(focusChild.getLastUpdatedTime());
+    ret.setFocusChildSensitivityIndicator(focusChild.getSensitivityIndicator());
+
+    //
+    // Relative (client):
+    //
+    final String focusInd = rs.getString("FOCUS_IND");
+
+    if (StringUtils.isBlank(focusInd) || !"Y".equalsIgnoreCase(focusInd)) {
+      final ReplicatedClient client = mapClients.get(rs.getString("THIS_CLIENT_ID"));
+      ret.setParentId(client.getId());
+      ret.setParentSourceTable("CLIENT");
+      ret.setParentFirstName(client.getFirstName());
+      ret.setParentLastName(client.getLastName());
+      ret.setParentSensitivityIndicator(client.getSensitivityIndicator());
+      ret.setParentLastUpdated(client.getLastUpdatedTime());
+
+      final Short relFocusToOther = rs.getShort("REL_FOCUS_TO_OTHER");
+      final Short relOtherToFocus = rs.getShort("REL_OTHER_TO_FOCUS");
+
+      translateParentRelationships(ret, relFocusToOther, relOtherToFocus);
+    }
+
+    //
+    // Worker (staff):
+    //
+    final String workerId = ifNull(rs.getString("WORKER_ID"));
+    if (StringUtils.isNotBlank(workerId) && staffWorkers.containsKey(workerId)) {
+      final StaffPerson staffPerson = staffWorkers.get(workerId);
+      final EmbeddableStaffWorker worker = ret.getWorker();
+      worker.setWorkerId(workerId);
+      worker.setWorkerFirstName(staffPerson.getFirstName());
+      worker.setWorkerLastName(staffPerson.getLastName());
+      worker.setWorkerLastUpdated(staffPerson.getLastUpdatedTime());
+    }
+
+    //
+    // Access Limitation:
+    //
+    ret.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
+    ret.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
+    ret.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
+    ret.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
+    return ret;
+  }
+
+  /**
+   * Pulls <strong>Client/Case/Relationship</strong>.
+   */
+  @Override
+  public EsCaseRelatedPerson extract(final ResultSet rs) throws SQLException {
+    return pullClientCaseRelationship(rs);
+  }
+
   protected ReplicatedClient extractClient(ResultSet rs) throws SQLException {
     ReplicatedClient ret = new ReplicatedClient();
 
@@ -276,10 +369,23 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     return ret;
   }
 
+  protected EsCaseRelatedPerson extractCase(ResultSet rs) throws SQLException {
+    EsCaseRelatedPerson ret = new EsCaseRelatedPerson();
+
+    ret.setCaseId(rs.getString("CASE_ID"));
+    ret.setStartDate(rs.getDate("START_DATE"));
+    ret.setEndDate(rs.getDate("END_DATE"));
+    ret.setCaseLastUpdated(rs.getTimestamp("CASE_LAST_UPDATED"));
+    ret.setCounty(rs.getInt("COUNTY"));
+    ret.setServiceComponent(rs.getInt("SERVICE_COMP"));
+
+    return ret;
+  }
+
   protected Map<String, ReplicatedClient> readClients(final PreparedStatement stmtSelClient,
       final Map<String, ReplicatedClient> mapClients) throws NeutronException {
     try {
-      // Transaction begins after prior INSERT. :-(
+      // Hibernate starts a *new* transaction *after* INSERT into temp table. :-(
       // return clientDao.findByTemp().stream()
       // .collect(Collectors.toMap(ReplicatedClient::getId, c -> c));
 
@@ -348,14 +454,9 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     getFlightLog().markRangeStart(p);
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
-    final List<MinClientReferral> listClientCaseKeys = this.allocClientCaseKeys.get();
-    final List<EsCaseRelatedPerson> listCases = allocCases.get();
-    final Map<String, EsCaseRelatedPerson> mapCases = allocMapCasesByClient.get();
+    final Map<String, EsCaseRelatedPerson> mapCasesById = allocMapCasesById.get();
+    final Map<String, EsCaseRelatedPerson> mapCasesByClient = allocMapCasesByClient.get();
     final Map<String, ReplicatedClient> mapClients = allocMapClients.get();
-
-    listCases.clear();
-    mapCases.clear();
-    mapClients.clear();
 
     try (final Connection con = getConnection()) {
       final String schema = getDBSchemaName();
@@ -368,12 +469,15 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
               con.prepareStatement(CaseSQLResource.INSERT_CLIENT_FULL);
           final PreparedStatement stmtSelClient =
               con.prepareStatement(CaseSQLResource.SELECT_CLIENT_FULL);
-          final PreparedStatement stmtSelCase = con.prepareStatement(getInitialLoadQuery(schema))) {
+          final PreparedStatement stmtSelCase =
+              con.prepareStatement(CaseSQLResource.SELECT_CASE_DETAIL);
+          final PreparedStatement stmtSelCaseClientRelationship =
+              con.prepareStatement(CaseSQLResource.SELECT_CLIENT_CASE_RELATIONSHIP);
+          final PreparedStatement stmtSelAlles =
+              con.prepareStatement(getInitialLoadQuery(schema))) {
         prepClientBundle(stmtInsClient, p);
         readClients(stmtSelClient, mapClients);
-
-        // allocMapClients.set();
-        readCases(stmtSelCase, listCases);
+        readCases(stmtSelAlles, mapCasesById);
       } finally {
         con.commit();
       }
@@ -453,83 +557,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     translateParentalRelationship(ret, code2);
   }
 
-  @Override
-  public EsCaseRelatedPerson extract(final ResultSet rs) throws SQLException {
-    final String caseId = rs.getString("CASE_ID");
-    String focusChildId = rs.getString("FOCUS_CHILD_ID");
-
-    if (focusChildId == null) {
-      LOGGER.warn("FOCUS_CHILD_ID is null for CASE_ID: {}", caseId); // NOSONAR
-      return null;
-    }
-
-    final EsCaseRelatedPerson ret = new EsCaseRelatedPerson();
-
-    //
-    // Case:
-    //
-    ret.setCaseId(caseId);
-    ret.setStartDate(rs.getDate("START_DATE"));
-    ret.setEndDate(rs.getDate("END_DATE"));
-    ret.setCaseLastUpdated(rs.getTimestamp("CASE_LAST_UPDATED"));
-    ret.setCounty(rs.getInt("COUNTY"));
-    ret.setServiceComponent(rs.getInt("SERVICE_COMP"));
-
-    final Map<String, ReplicatedClient> mapClients = this.allocMapClients.get();
-
-    //
-    // Child (client):
-    //
-    final ReplicatedClient focusChild = mapClients.get(focusChildId);
-    ret.setFocusChildId(focusChildId);
-    ret.setFocusChildFirstName(ifNull(focusChild.getFirstName()));
-    ret.setFocusChildLastName(ifNull(focusChild.getLastName()));
-    ret.setFocusChildLastUpdated(focusChild.getLastUpdatedTime());
-    ret.setFocusChildSensitivityIndicator(focusChild.getSensitivityIndicator());
-
-    //
-    // Relative (client):
-    //
-    final String focusInd = rs.getString("FOCUS_IND");
-
-    if (StringUtils.isBlank(focusInd) || !"Y".equalsIgnoreCase(focusInd)) {
-      final ReplicatedClient client = mapClients.get(rs.getString("THIS_CLIENT_ID"));
-      ret.setParentId(client.getId());
-      ret.setParentSourceTable("CLIENT");
-      ret.setParentFirstName(client.getFirstName());
-      ret.setParentLastName(client.getLastName());
-      ret.setParentSensitivityIndicator(client.getSensitivityIndicator());
-      ret.setParentLastUpdated(client.getLastUpdatedTime());
-
-      final Short relFocusToOther = rs.getShort("REL_FOCUS_TO_OTHER");
-      final Short relOtherToFocus = rs.getShort("REL_OTHER_TO_FOCUS");
-
-      translateParentRelationships(ret, relFocusToOther, relOtherToFocus);
-    }
-
-    //
-    // Worker (staff):
-    //
-    final String workerId = ifNull(rs.getString("WORKER_ID"));
-    if (StringUtils.isNotBlank(workerId) && staffWorkers.containsKey(workerId)) {
-      final StaffPerson staffPerson = staffWorkers.get(workerId);
-      final EmbeddableStaffWorker worker = ret.getWorker();
-      worker.setWorkerId(workerId);
-      worker.setWorkerFirstName(staffPerson.getFirstName());
-      worker.setWorkerLastName(staffPerson.getLastName());
-      worker.setWorkerLastUpdated(staffPerson.getLastUpdatedTime());
-    }
-
-    //
-    // Access Limitation:
-    //
-    ret.setLimitedAccessCode(ifNull(rs.getString("LIMITED_ACCESS_CODE")));
-    ret.setLimitedAccessDate(rs.getDate("LIMITED_ACCESS_DATE"));
-    ret.setLimitedAccessDescription(ifNull(rs.getString("LIMITED_ACCESS_DESCRIPTION")));
-    ret.setLimitedAccessGovernmentEntityId(rs.getInt("LIMITED_ACCESS_GOVERNMENT_ENT"));
-    return ret;
-  }
-
   // =====================
   // THREAD MEMORY:
   // =====================
@@ -539,6 +566,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       this.allocCases.get().clear();
       this.allocMapCasesByClient.get().clear();
       this.allocMapClients.get().clear();
+      this.allocCases.get().clear();
       System.gc(); // NOSONAR
     }
   }
@@ -554,6 +582,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     if (allocCases.get() == null) {
       allocCases.set(new ArrayList<>(150000));
       allocMapCasesByClient.set(new HashMap<>(99881)); // Prime
+      allocMapCasesById.set(new HashMap<>(69029)); // Prime
       allocMapClients.set(new HashMap<>(69029)); // Prime
       clearThreadContainers();
     }
@@ -567,6 +596,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    */
   public static void main(String... args) throws Exception {
     LaunchCommand.launchOneWayTrip(CaseRocket.class, args);
+  }
+
+  public ReplicatedClientDao getClientDao() {
+    return clientDao;
   }
 
 }
