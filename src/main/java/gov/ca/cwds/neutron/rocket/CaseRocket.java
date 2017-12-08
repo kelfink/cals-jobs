@@ -487,7 +487,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       Set<String> caseParents = mapCaseParents.get(caseId);
       if (caseParents == null) {
         caseParents = new HashSet<>();
-        mapFocusChildParents.put(caseId, caseParents);
+        mapCaseParents.put(caseId, caseParents);
       }
       caseParents.addAll(focusChildParents);
     }
@@ -548,6 +548,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
       final Set<String> nina = mapClientCases.get("TBCF40g0D8");
       LOGGER.info("Nina: {}", nina);
+      nina.forEach(x -> LOGGER.info("x: {}", mapCases.get(x)));
 
     } finally {
       clearThreadContainers();
