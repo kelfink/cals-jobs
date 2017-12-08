@@ -521,6 +521,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       final Map<String, Set<String>> mapCaseClients,
       final Map<String, Set<String>> mapCaseParents) {
     final ElasticSearchPersonCase esPersonCase = new ElasticSearchPersonCase();
+    cases.addCase(esPersonCase, null);
 
     //
     // Case:
