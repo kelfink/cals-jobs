@@ -468,6 +468,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    * 
    * @param p partition (key) range to read
    * @return number of client documents affected
+   * @throws NeutronException on general error
    */
   protected int pullNextRange(final Pair<String, String> p) throws NeutronException {
     final String threadName =
