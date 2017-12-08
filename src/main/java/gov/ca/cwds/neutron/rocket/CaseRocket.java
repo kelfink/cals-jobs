@@ -503,20 +503,27 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
           .sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
           .collect(Collectors.toList());
 
+      final Map<String, Set<String>> mapCaseClients = new HashMap<>(99881);
+      final Map<String, Set<String>> mapClientParents = new HashMap<>(99881);
+
       // MAPS:
       // cases => clients
       // client => cases
       // client => parents
-
-      // NEXT: case: focus child, parents.
-
-      final Map<String, Set<String>> mapCaseClients = new HashMap<>(99881);
-      final Map<String, Set<String>> mapClientParents = new HashMap<>(99881);
-
       for (CaseClientRelative ccr : ccrs) {
         collectCaseClients(mapCaseClients, ccr);
         collectClientCases(mapClientCases, ccr);
       }
+
+      for (EsCaseRelatedPerson theCase : mapCases.values()) {
+        final ReplicatedClient focusChild = mapClients.get(theCase.getFocusChildId());
+        theCase.setFocusChildFirstName(focusChild.getFirstName());
+        theCase.setFocusChildLastName(focusChild.getFirstName());
+        theCase.setFocusChildSensitivityIndicator(focusChild.getSensitivityIndicator());
+        theCase.setFocusChildLastUpdated(focusChild.getLastUpdatedTime());
+      }
+
+      // NEXT: case: focus child, parents.
 
       LOGGER.info("listCaseClientRelation.size(): {}", listCaseClientRelation.size());
       LOGGER.info("mapCases.size(): {}", mapCases.size());
