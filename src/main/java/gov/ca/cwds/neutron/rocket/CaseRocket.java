@@ -34,6 +34,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
 import gov.ca.cwds.data.es.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPersonChild;
+import gov.ca.cwds.data.es.ElasticSearchPersonParent;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CaseSQLResource;
@@ -522,10 +523,9 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   // =====================
 
   protected void reduceCase(final ReplicatedPersonCases cases, EsCaseRelatedPerson rawCase,
-      final Map<String, Set<String>> mapCaseClients,
+      final Map<String, ReplicatedClient> mapClients, final Map<String, Set<String>> mapCaseClients,
       final Map<String, Set<String>> mapCaseParents) {
     final ElasticSearchPersonCase esPersonCase = new ElasticSearchPersonCase();
-    cases.addCase(esPersonCase, null);
 
     //
     // Case:
@@ -591,42 +591,44 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
         SystemCodeCache.global().getSystemCodeShortDescription(
             rawCase.getAccessLimitation().getLimitedAccessGovernmentEntityId()));
     esPersonCase.setAccessLimitation(accessLimit);
+
+    //
+    // A Case may have more than one parents:
+    //
+    final Set<String> parents = mapCaseParents.get(rawCase.getCaseId());
+    if (parents != null && !parents.isEmpty()) {
+      parents.stream().forEach(p -> {
+        final ElasticSearchPersonParent parent = new ElasticSearchPersonParent();
+        final ReplicatedClient parentClient = mapClients.get(p);
+
+        parent.setId(parentClient.getId());
+        parent.setLegacyClientId(parentClient.getId());
+        parent.setLegacyLastUpdated(
+            DomainChef.cookStrictTimestamp(parentClient.getLastUpdatedTime()));
+        parent.setLegacySourceTable(LegacyTable.CLIENT.getName());
+        parent.setFirstName(parentClient.getFirstName());
+        parent.setLastName(parentClient.getLastName());
+        parent.setRelationship(parent.getRelationship());
+        parent.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(parentClient.getId(),
+            parentClient.getLastUpdatedTime(), LegacyTable.CLIENT));
+        parent.setSensitivityIndicator(parentClient.getSensitivityIndicator());
+        cases.addCase(esPersonCase, parent);
+      });
+
+    } else {
+      cases.addCase(esPersonCase, null);
+    }
   }
 
   protected ReplicatedPersonCases reduceClientCases(final String clientId,
+      final Map<String, ReplicatedClient> mapClients,
       final Map<String, EsCaseRelatedPerson> mapCases,
       final Map<String, Set<String>> mapClientCases, final Map<String, Set<String>> mapCaseClients,
       final Map<String, Set<String>> mapCaseParents) {
     final ReplicatedPersonCases ret = new ReplicatedPersonCases(clientId);
-
-    final Set<String> cases = mapClientCases.get(clientId);
-    cases.stream().forEach(k -> reduceCase(ret, mapCases.get(k), mapCaseClients, mapCaseParents));
-
+    mapClientCases.get(clientId).stream()
+        .forEach(k -> reduceCase(ret, mapCases.get(k), mapClients, mapCaseClients, mapCaseParents));
     return ret;
-  }
-
-  protected void reduceCaseParents(final ReplicatedPersonCases cases,
-      final Map<String, EsCaseRelatedPerson> mapCases,
-      final Map<String, Set<String>> mapCaseClients,
-      final Map<String, Set<String>> mapCaseParents) {
-
-    // //
-    // // A Case may have more than one parents:
-    // //
-    // final ElasticSearchPersonParent parent = new ElasticSearchPersonParent();
-    // parent.setId(this.parentId);
-    // parent.setLegacyClientId(getParentId());
-    // parent.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.parentLastUpdated));
-    // parent.setLegacySourceTable(this.parentSourceTable);
-    // parent.setFirstName(this.parentFirstName);
-    // parent.setLastName(this.parentLastName);
-    // parent.setRelationship(
-    // SystemCodeCache.global().getSystemCodeShortDescription(this.parentRelationship));
-    // parent.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.parentId,
-    // this.parentLastUpdated, LegacyTable.CLIENT));
-    // parent.setSensitivityIndicator(this.parentSensitivityIndicator);
-    // cases.addCase(esPersonCase, parent);
-
   }
 
   protected int assemblePieces(final List<CaseClientRelative> listCaseClientRelation,
@@ -658,10 +660,11 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       }
 
       addFocusChildren(mapCases, mapClients);
-      final Map<String, ReplicatedPersonCases> mapReadyClientCases = mapClientCases
-          .entrySet().stream().map(x -> reduceClientCases(x.getKey(), mapCases, mapClientCases,
-              mapCaseClients, mapCaseParents))
-          .collect(Collectors.toMap(ReplicatedPersonCases::getGroupId, r -> r));
+      final Map<String, ReplicatedPersonCases> mapReadyClientCases =
+          mapClientCases.entrySet().stream()
+              .map(x -> reduceClientCases(x.getKey(), mapClients, mapCases, mapClientCases,
+                  mapCaseClients, mapCaseParents))
+              .collect(Collectors.toMap(ReplicatedPersonCases::getGroupId, r -> r));
 
       // Check results.
       LOGGER.info("listCaseClientRelation.size(): {}", listCaseClientRelation.size());
