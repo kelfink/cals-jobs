@@ -477,7 +477,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     getFlightLog().markRangeStart(p);
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
-    final List<EsCaseRelatedPerson> listCases = allocCases.get();
     final List<CaseClientRelative> listCaseClientRelative = allocCaseClientRelative.get();
     final Map<String, ReplicatedClient> mapClients = allocMapClients.get();
     final Map<String, EsCaseRelatedPerson> mapCasesById = allocMapCasesById.get();
@@ -587,11 +586,13 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   // =====================
 
   protected void clearThreadContainers() {
-    if (allocCases.get() != null) {
-      this.allocCases.get().clear();
+    final List<EsCaseRelatedPerson> cases = allocCases.get();
+    if (cases != null) {
+      cases.clear();
       this.allocMapCasesByClient.get().clear();
       this.allocMapClients.get().clear();
       this.allocCases.get().clear();
+      this.allocCaseClientRelative.get().clear();
       System.gc(); // NOSONAR
     }
   }
@@ -606,6 +607,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   protected void allocateThreadMemory() {
     if (allocCases.get() == null) {
       allocCases.set(new ArrayList<>(205000));
+      allocCaseClientRelative.set(new ArrayList<>(205000));
       allocMapCasesByClient.set(new HashMap<>(99881)); // Prime
       allocMapCasesById.set(new HashMap<>(69029)); // Prime
       allocMapClients.set(new HashMap<>(69029)); // Prime
@@ -619,6 +621,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       allocMapCasesByClient.set(null);
       allocMapCasesById.set(null);
       allocMapClients.set(null);
+      allocCaseClientRelative.set(null);
     }
   }
 
