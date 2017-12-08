@@ -3,7 +3,8 @@ package gov.ca.cwds.neutron.rocket.cases;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
+import org.apache.commons.lang3.StringUtils;
+
 import gov.ca.cwds.data.std.ApiMarker;
 
 /**
@@ -16,36 +17,38 @@ public class CaseClientRelative implements ApiMarker {
   private static final long serialVersionUID = 1L;
 
   private String focusClientId;
-  private String clientId;
+  private String relatedClientId;
   private String caseId;
+  private Short relationCode;
 
-  private String clientSensitivity;
-  private String caseSensitivity;
-
-  private CmsReplicationOperation clientReplicationOperation = CmsReplicationOperation.U;
-
-  public CaseClientRelative(String clientId, String caseId, String clientSensitivity,
-      String caseSensitivity, String clientReplOp) {
-    this.clientId = clientId;
+  public CaseClientRelative(String caseId, String focusClientId, String clientId,
+      Short relationCode) {
+    this.relatedClientId = clientId;
     this.caseId = caseId;
-    this.clientSensitivity = clientSensitivity;
-    this.caseSensitivity = caseSensitivity;
-    this.clientReplicationOperation = CmsReplicationOperation.strToRepOp(clientReplOp);
+    this.focusClientId = focusClientId;
+    this.relationCode = relationCode;
   }
 
   public static CaseClientRelative extract(final ResultSet rs) throws SQLException {
-    final CaseClientRelative ret = new CaseClientRelative(rs.getString("FKCLIENT_T"),
-        rs.getString("FK_T"), rs.getString("SENSTV_IND"), rs.getString("SENSTV_IND"),
-        rs.getString("CLT_IBMSNAP_OPERATION"));
+    final CaseClientRelative ret = new CaseClientRelative(rs.getString("CASE_ID"),
+        rs.getString("FOCUS_CHILD_ID"), rs.getString("THIS_CLIENT_ID"), rs.getShort("RELATION"));
     return ret;
   }
 
-  public String getClientId() {
-    return clientId;
+  public boolean hasRelation() {
+    return StringUtils.isNotBlank(relatedClientId);
   }
 
-  public void setClientId(String clientId) {
-    this.clientId = clientId;
+  public boolean hasNoRelation() {
+    return !hasRelation();
+  }
+
+  public String getRelatedClientId() {
+    return relatedClientId;
+  }
+
+  public void setRelatedClientId(String clientId) {
+    this.relatedClientId = clientId;
   }
 
   public String getCaseId() {
@@ -56,36 +59,20 @@ public class CaseClientRelative implements ApiMarker {
     this.caseId = referralId;
   }
 
-  public String getClientSensitivity() {
-    return clientSensitivity;
-  }
-
-  public void setClientSensitivity(String sensitivity) {
-    this.clientSensitivity = sensitivity;
-  }
-
-  public CmsReplicationOperation getClientReplicationOperation() {
-    return clientReplicationOperation;
-  }
-
-  public void setClientReplicationOperation(CmsReplicationOperation clientReplicationOperation) {
-    this.clientReplicationOperation = clientReplicationOperation;
-  }
-
-  public String getCaseSensitivity() {
-    return caseSensitivity;
-  }
-
-  public void setCaseSensitivity(String caseSensitivity) {
-    this.caseSensitivity = caseSensitivity;
-  }
-
   public String getFocusClientId() {
     return focusClientId;
   }
 
   public void setFocusClientId(String focusClientId) {
     this.focusClientId = focusClientId;
+  }
+
+  public Short getRelationCode() {
+    return relationCode;
+  }
+
+  public void setRelationCode(Short relationCode) {
+    this.relationCode = relationCode;
   }
 
 }

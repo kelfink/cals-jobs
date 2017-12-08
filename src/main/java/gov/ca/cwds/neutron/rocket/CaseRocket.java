@@ -48,6 +48,7 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.rocket.cases.CaseClientRelative;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 import gov.ca.cwds.rest.api.domain.cms.SystemCode;
@@ -75,6 +76,9 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    */
   protected transient ThreadLocal<List<EsCaseRelatedPerson>> allocCases = new ThreadLocal<>();
 
+  protected transient ThreadLocal<List<CaseClientRelative>> allocCaseClientRelative =
+      new ThreadLocal<>();
+
   /**
    * k=client id, v=case
    */
@@ -84,7 +88,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   /**
    * k=client id, v=case
    */
-  protected transient ThreadLocal<Map<String, List<EsCaseRelatedPerson>>> allocMapCasesByClient =
+  protected transient ThreadLocal<Map<String, List<String>>> allocMapCasesByClient =
       new ThreadLocal<>();
 
   /**
@@ -231,20 +235,20 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   }
 
   protected void readClientCaseRelationship(final PreparedStatement stmtSelClientCaseRelation,
-      final List<EsCaseRelatedPerson> cases) throws SQLException {
+      final List<CaseClientRelative> listCaseClientRelation) throws SQLException {
     stmtSelClientCaseRelation.setMaxRows(0);
     stmtSelClientCaseRelation.setQueryTimeout(0);
     stmtSelClientCaseRelation.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
 
     int cntr = 0;
-    EsCaseRelatedPerson m;
+    CaseClientRelative m;
     LOGGER.info("pull cases");
     final ResultSet rs = stmtSelClientCaseRelation.executeQuery(); // NOSONAR
-    while (!isFailed() && rs.next() && (m = extractClientCaseRelationship(rs)) != null) {
+    while (!isFailed() && rs.next() && (m = CaseClientRelative.extract(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "case bundle");
       JobLogs.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read",
           "case/client/rel");
-      cases.add(m);
+      listCaseClientRelation.add(m);
     }
   }
 
@@ -279,52 +283,52 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     }
   }
 
-  protected EsCaseRelatedPerson extractClientCaseRelationship(final ResultSet rs)
-      throws SQLException {
-    final String caseId = rs.getString("CASE_ID");
-    String focusChildId = rs.getString("FOCUS_CHILD_ID");
-
-    if (focusChildId == null) {
-      LOGGER.warn("FOCUS_CHILD_ID is null for CASE_ID: {}", caseId); // NOSONAR
-      return null;
-    }
-
-    final EsCaseRelatedPerson ret = new EsCaseRelatedPerson();
-
-    //
-    // Case:
-    //
-    ret.setCaseId(caseId);
-    final Map<String, ReplicatedClient> mapClients = this.allocMapClients.get();
-
-    //
-    // Child (client):
-    //
-    final ReplicatedClient focusChild = mapClients.get(focusChildId);
-    ret.setFocusChildId(focusChildId);
-    ret.setFocusChildFirstName(ifNull(focusChild.getFirstName()));
-    ret.setFocusChildLastName(ifNull(focusChild.getLastName()));
-    ret.setFocusChildLastUpdated(focusChild.getLastUpdatedTime());
-    ret.setFocusChildSensitivityIndicator(focusChild.getSensitivityIndicator());
-
-    //
-    // Relative (client):
-    //
-    final String focusInd = rs.getString("FOCUS_IND");
-    if (StringUtils.isBlank(focusInd) || !"Y".equalsIgnoreCase(focusInd)) {
-      final ReplicatedClient client = mapClients.get(rs.getString("THIS_CLIENT_ID"));
-      ret.setParentId(client.getId());
-      ret.setParentSourceTable("CLIENT");
-      ret.setParentFirstName(client.getFirstName());
-      ret.setParentLastName(client.getLastName());
-      ret.setParentSensitivityIndicator(client.getSensitivityIndicator());
-      ret.setParentLastUpdated(client.getLastUpdatedTime());
-      translateParentRelationships(ret, rs.getShort("REL_FOCUS_TO_OTHER"),
-          rs.getShort("REL_OTHER_TO_FOCUS"));
-    }
-
-    return ret;
-  }
+  // protected CaseClientRelative extractClientCaseRelationship(final ResultSet rs)
+  // throws SQLException {
+  // final String caseId = rs.getString("CASE_ID");
+  // String focusChildId = rs.getString("FOCUS_CHILD_ID");
+  //
+  // if (focusChildId == null) {
+  // LOGGER.warn("FOCUS_CHILD_ID is null for CASE_ID: {}", caseId); // NOSONAR
+  // return null;
+  // }
+  //
+  // final EsCaseRelatedPerson ret = new EsCaseRelatedPerson();
+  //
+  // //
+  // // Case:
+  // //
+  // ret.setCaseId(caseId);
+  // final Map<String, ReplicatedClient> mapClients = this.allocMapClients.get();
+  //
+  // //
+  // // Child (client):
+  // //
+  // final ReplicatedClient focusChild = mapClients.get(focusChildId);
+  // ret.setFocusChildId(focusChildId);
+  // ret.setFocusChildFirstName(ifNull(focusChild.getFirstName()));
+  // ret.setFocusChildLastName(ifNull(focusChild.getLastName()));
+  // ret.setFocusChildLastUpdated(focusChild.getLastUpdatedTime());
+  // ret.setFocusChildSensitivityIndicator(focusChild.getSensitivityIndicator());
+  //
+  // //
+  // // Relative (client):
+  // //
+  // final String focusInd = rs.getString("STANZA");
+  // if (StringUtils.isBlank(focusInd) || !"1".equalsIgnoreCase(focusInd)) {
+  // final ReplicatedClient client = mapClients.get(rs.getString("THIS_CLIENT_ID"));
+  // ret.setParentId(client.getId());
+  // ret.setParentSourceTable("CLIENT");
+  // ret.setParentFirstName(client.getFirstName());
+  // ret.setParentLastName(client.getLastName());
+  // ret.setParentSensitivityIndicator(client.getSensitivityIndicator());
+  // ret.setParentLastUpdated(client.getLastUpdatedTime());
+  // translateParentRelationships(ret, rs.getShort("REL_FOCUS_TO_OTHER"),
+  // rs.getShort("REL_OTHER_TO_FOCUS"));
+  // }
+  //
+  // return ret;
+  // }
 
   /**
    * Pulls <strong>Client/Case/Relationship</strong>.
@@ -333,7 +337,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    */
   @Override
   public EsCaseRelatedPerson extract(final ResultSet rs) throws SQLException {
-    return extractClientCaseRelationship(rs);
+    return null;
   }
 
   protected ReplicatedClient extractClient(ResultSet rs) throws SQLException {
@@ -412,29 +416,39 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     return mapClients;
   }
 
-  protected int assemblePieces(final List<EsCaseRelatedPerson> listCases,
+  protected int assemblePieces(final List<CaseClientRelative> listCaseClientRelation,
       final Map<String, EsCaseRelatedPerson> mapCases,
       final Map<String, ReplicatedClient> mapClients) {
     int countNormalized = 0;
 
     try {
-      final Map<String, List<EsCaseRelatedPerson>> mapCasesByClient = allocMapCasesByClient.get();
+      // Merge pieces.
+      final Map<String, List<String>> mapCaseIdByClient = allocMapCasesByClient.get();
 
-      final Map<String, List<EsCaseRelatedPerson>> mapCasesByFocusChild =
-          listCases.stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
-              .collect(Collectors.groupingBy(EsCaseRelatedPerson::getFocusChildId));
-      mapCasesByClient.putAll(mapCasesByFocusChild);
+      // CCR = Case/Client/Relation
+      final List<CaseClientRelative> ccrOrderByCase = listCaseClientRelation
+          .stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
+          .collect(Collectors.toList());
 
-      final Map<String, List<EsCaseRelatedPerson>> mapCasesByOtherClient =
-          listCases.stream().sorted((e1, e2) -> e1.getCaseId().compareTo(e2.getCaseId()))
-              .filter(EsCaseRelatedPerson::hasRelatedPerson)
-              .collect(Collectors.groupingBy(EsCaseRelatedPerson::getRelatedPersonId));
-      mapCasesByClient.putAll(mapCasesByOtherClient);
+      final Map<String, List<CaseClientRelative>> ccrByOtherClient =
+          ccrOrderByCase.stream().filter(CaseClientRelative::hasRelation)
+              .collect(Collectors.groupingBy(CaseClientRelative::getRelatedClientId));
 
-      final List<EsCaseRelatedPerson> amber = mapCasesByClient.get("TMZGOO205B");
+      final Map<String, List<CaseClientRelative>> ccrCasesByFocusChild =
+          ccrOrderByCase.stream().filter(CaseClientRelative::hasNoRelation)
+              .collect(Collectors.groupingBy(CaseClientRelative::getRelatedClientId));
+
+      // for() {
+      //
+      // }
+
+      // mapCasesByClient.putAll(mapCasesByFocusChild);
+      // mapCasesByClient.putAll(mapCasesByOtherClient);
+
+      final List<String> amber = mapCaseIdByClient.get("TMZGOO205B");
       LOGGER.info("Amber: {}", amber);
 
-      final List<EsCaseRelatedPerson> nina = mapCasesByClient.get("TBCF40g0D8");
+      final List<String> nina = mapCaseIdByClient.get("TBCF40g0D8");
       LOGGER.info("nina: {}", nina);
 
     } finally {
@@ -463,6 +477,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
     final List<EsCaseRelatedPerson> listCases = allocCases.get();
+    final List<CaseClientRelative> listCaseClientRelative = allocCaseClientRelative.get();
     final Map<String, ReplicatedClient> mapClients = allocMapClients.get();
     final Map<String, EsCaseRelatedPerson> mapCasesById = allocMapCasesById.get();
 
@@ -486,7 +501,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
         prepClientBundle(stmtInsClient, p);
         readClients(stmtSelClient, mapClients);
         readCases(stmtSelCase, mapCasesById);
-        readClientCaseRelationship(stmtSelCaseClientRelationship, listCases);
+        readClientCaseRelationship(stmtSelCaseClientRelationship, listCaseClientRelative);
       } finally {
         con.commit();
       }
@@ -497,7 +512,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
           p.getRight(), e.getMessage());
     }
 
-    int cntr = assemblePieces(listCases, mapCasesById, mapClients);
+    int cntr = assemblePieces(listCaseClientRelative, mapCasesById, mapClients);
     getFlightLog().markRangeComplete(p);
     LOGGER.info("DONE");
     return cntr;
