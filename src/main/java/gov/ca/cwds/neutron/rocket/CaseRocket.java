@@ -519,7 +519,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
         final ReplicatedClient focusChild = mapClients.get(theCase.getFocusChildId());
         if (focusChild != null) {
           theCase.setFocusChildFirstName(focusChild.getFirstName());
-          theCase.setFocusChildLastName(focusChild.getFirstName());
+          theCase.setFocusChildLastName(focusChild.getLastName());
           theCase.setFocusChildSensitivityIndicator(focusChild.getSensitivityIndicator());
           theCase.setFocusChildLastUpdated(focusChild.getLastUpdatedTime());
         } else {
