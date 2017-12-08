@@ -29,7 +29,11 @@ import com.google.inject.Inject;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
 import gov.ca.cwds.dao.cms.StaffPersonDao;
+import gov.ca.cwds.data.es.ElasticSearchAccessLimitation;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
+import gov.ca.cwds.data.es.ElasticSearchPersonCase;
+import gov.ca.cwds.data.es.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CaseSQLResource;
@@ -52,7 +56,11 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.cases.CaseClientRelative;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
+import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
+import gov.ca.cwds.rest.api.domain.DomainChef;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
+import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
  * Rocket to index person cases from CMS into ElasticSearch.
@@ -555,6 +563,104 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     }
 
     return countNormalized;
+  }
+
+  public void reduceCase(final ReplicatedPersonCases cases, EsCaseRelatedPerson rawCase,
+      final Map<String, Set<String>> mapCaseClients,
+      final Map<String, Set<String>> mapCaseParents) {
+
+    final ElasticSearchPersonCase esPersonCase = new ElasticSearchPersonCase();
+
+    //
+    // Case:
+    //
+    esPersonCase.setId(rawCase.getCaseId());
+    esPersonCase.setLegacyId(rawCase.getCaseId());
+    esPersonCase.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(rawCase.getCaseLastUpdated()));
+    esPersonCase.setStartDate(DomainChef.cookDate(rawCase.getStartDate()));
+    esPersonCase.setEndDate(DomainChef.cookDate(rawCase.getEndDate()));
+
+    final Integer county = rawCase.getCounty();
+    esPersonCase.setCountyId(county == null ? null : county.toString());
+    esPersonCase.setCountyName(SystemCodeCache.global().getSystemCodeShortDescription(county));
+    esPersonCase.setServiceComponentId(
+        rawCase.getServiceComponent() == null ? null : rawCase.getServiceComponent().toString());
+    esPersonCase.setServiceComponent(
+        SystemCodeCache.global().getSystemCodeShortDescription(rawCase.getServiceComponent()));
+    esPersonCase.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(rawCase.getCaseId(),
+        rawCase.getCaseLastUpdated(), LegacyTable.CASE));
+
+    //
+    // Child:
+    //
+    final ElasticSearchPersonChild child = new ElasticSearchPersonChild();
+    child.setId(rawCase.getFocusChildId());
+    child.setLegacyClientId(rawCase.getFocusChildId());
+    child.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(rawCase.getFocusChildLastUpdated()));
+    child.setFirstName(rawCase.getFocusChildFirstName());
+    child.setLastName(rawCase.getFocusChildLastName());
+    child.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(rawCase.getFocusChildId(),
+        rawCase.getFocusChildLastUpdated(), LegacyTable.CLIENT));
+    child.setSensitivityIndicator(rawCase.getFocusChildSensitivityIndicator());
+    esPersonCase.setFocusChild(child);
+
+    //
+    // Assigned Worker:
+    //
+    final ElasticSearchPersonSocialWorker assignedWorker = new ElasticSearchPersonSocialWorker();
+    assignedWorker.setId(rawCase.getWorker().getWorkerId());
+    assignedWorker.setLegacyClientId(rawCase.getWorker().getWorkerId());
+    assignedWorker.setLegacyLastUpdated(
+        DomainChef.cookStrictTimestamp(rawCase.getWorker().getWorkerLastUpdated()));
+    assignedWorker.setFirstName(rawCase.getWorker().getWorkerFirstName());
+    assignedWorker.setLastName(rawCase.getWorker().getWorkerLastName());
+    assignedWorker.setLegacyDescriptor(
+        ElasticTransformer.createLegacyDescriptor(rawCase.getWorker().getWorkerId(),
+            rawCase.getWorker().getWorkerLastUpdated(), LegacyTable.STAFF_PERSON));
+    esPersonCase.setAssignedSocialWorker(assignedWorker);
+
+    //
+    // Access Limitation:
+    //
+    final ElasticSearchAccessLimitation accessLimit = new ElasticSearchAccessLimitation();
+    accessLimit.setLimitedAccessCode(rawCase.getAccessLimitation().getLimitedAccessCode());
+    accessLimit.setLimitedAccessDate(
+        DomainChef.cookDate(rawCase.getAccessLimitation().getLimitedAccessDate()));
+    accessLimit
+        .setLimitedAccessDescription(rawCase.getAccessLimitation().getLimitedAccessDescription());
+    accessLimit.setLimitedAccessGovernmentEntityId(
+        rawCase.getAccessLimitation().getLimitedAccessGovernmentEntityId() == null ? null
+            : rawCase.getAccessLimitation().getLimitedAccessGovernmentEntityId().toString());
+    accessLimit.setLimitedAccessGovernmentEntityName(
+        SystemCodeCache.global().getSystemCodeShortDescription(
+            rawCase.getAccessLimitation().getLimitedAccessGovernmentEntityId()));
+    esPersonCase.setAccessLimitation(accessLimit);
+  }
+
+  public ReplicatedPersonCases reduceClient(final String clientId,
+      final Map<String, EsCaseRelatedPerson> mapCases,
+      final Map<String, Set<String>> mapCaseClients,
+      final Map<String, Set<String>> mapCaseParents) {
+    final ReplicatedPersonCases cases = new ReplicatedPersonCases(clientId);
+
+    // //
+    // // A Case may have more than one parents:
+    // //
+    // final ElasticSearchPersonParent parent = new ElasticSearchPersonParent();
+    // parent.setId(this.parentId);
+    // parent.setLegacyClientId(getParentId());
+    // parent.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(this.parentLastUpdated));
+    // parent.setLegacySourceTable(this.parentSourceTable);
+    // parent.setFirstName(this.parentFirstName);
+    // parent.setLastName(this.parentLastName);
+    // parent.setRelationship(
+    // SystemCodeCache.global().getSystemCodeShortDescription(this.parentRelationship));
+    // parent.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.parentId,
+    // this.parentLastUpdated, LegacyTable.CLIENT));
+    // parent.setSensitivityIndicator(this.parentSensitivityIndicator);
+    // cases.addCase(esPersonCase, parent);
+
+    return cases;
   }
 
   /**
