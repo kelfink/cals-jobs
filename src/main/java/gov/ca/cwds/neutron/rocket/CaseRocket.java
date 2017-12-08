@@ -182,7 +182,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
-    buf.append(CaseSQLResource.SELECT_CASES_FULL);
+    buf.append(CaseSQLResource.SELECT_CASES_FULL_EVERYTHING);
 
     if (!getFlightPlan().isLoadSealedAndSensitive()) {
       buf.append(" WHERE CAS.LMT_ACSSCD = 'N' ");
@@ -324,7 +324,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
               .collect(Collectors.groupingBy(EsCaseRelatedPerson::getCaseId));
       listCases.clear(); // release objects for garbage collection
     } finally {
-      releaseThreadMemory();
+      clearThreadContainers();
     }
 
     return countNormalized;
@@ -534,16 +534,12 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   // THREAD MEMORY:
   // =====================
 
-  protected void releaseThreadMemory() {
-    clearThreadContainers();
-    System.gc(); // NOSONAR
-  }
-
   protected void clearThreadContainers() {
     if (allocCases.get() == null) {
       this.allocCases.get().clear();
       this.allocMapCasesByClient.get().clear();
       this.allocMapClients.get().clear();
+      System.gc(); // NOSONAR
     }
   }
 
