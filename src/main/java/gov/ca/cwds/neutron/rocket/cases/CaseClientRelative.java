@@ -42,7 +42,8 @@ public class CaseClientRelative implements ApiMarker {
   }
 
   public boolean hasRelation() {
-    return StringUtils.isNotBlank(relatedClientId) && !relatedClientId.equals(focusClientId);
+    return StringUtils.isNotBlank(relatedClientId) && !"0".equals(relatedClientId)
+        && !relatedClientId.equals(focusClientId);
   }
 
   public boolean hasNoRelation() {
