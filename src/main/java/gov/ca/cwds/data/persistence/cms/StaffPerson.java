@@ -53,6 +53,7 @@ public class StaffPerson extends CmsPersistentObject
   private String firstName;
 
   @Column(name = "JOB_TL_DSC")
+  @ColumnTransformer(read = "trim(JOB_TL_DSC)")
   private String jobTitle;
 
   @Column(name = "LAST_NM", length = 25, nullable = false)
@@ -89,6 +90,7 @@ public class StaffPerson extends CmsPersistentObject
   private String cwsOffice;
 
   @Column(name = "AVLOC_DSC")
+  @ColumnTransformer(read = "trim(AVLOC_DSC)")
   private String availabilityAndLocationDescription;
 
   @Column(name = "SSRS_WKRID")
@@ -104,9 +106,10 @@ public class StaffPerson extends CmsPersistentObject
   private String cwsOfficeAddress;
 
   @Column(name = "EMAIL_ADDR")
+  @ColumnTransformer(read = "trim(EMAIL_ADDR)")
   private String emailAddress;
 
-  private EmbeddableCmsReplicatedEntity embeddableCmsReplicatedEntity;;
+  private EmbeddableCmsReplicatedEntity embeddableCmsReplicatedEntity;
 
   /**
    * Default constructor

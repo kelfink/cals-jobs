@@ -258,7 +258,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     while (!isFailed() && rs.next() && (m = CaseClientRelative.extract(rs)) != null) {
       JobLogs.logEvery(++cntr, "read", "case bundle");
       JobLogs.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read",
-          "case/client/rel");
+          "case/client/relation");
       listCaseClientRelation.add(m);
     }
   }
@@ -694,8 +694,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
     } catch (Exception e) {
       fail();
-      throw JobLogs.checked(LOGGER, e, "ERROR HANDLING RANGE {} - {}: {}", p.getLeft(),
-          p.getRight(), e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "ERROR PULLING RANGE {} - {}: {}", p.getLeft(), p.getRight(),
+          e.getMessage());
     }
 
     // Process records.
@@ -705,7 +705,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
           allocMapClientCases.get());
     } catch (IOException e) {
       fail();
-      throw JobLogs.checked(LOGGER, e, "ERROR HANDLING RANGE {} - {}: {}", p.getLeft(),
+      throw JobLogs.checked(LOGGER, e, "ERROR ASSEMBLING RANGE {} - {}: {}", p.getLeft(),
           p.getRight(), e.getMessage());
     } finally {
       getFlightLog().markRangeComplete(p);
@@ -805,6 +805,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     }
   }
 
+  @SuppressWarnings("javadoc")
   public ReplicatedClientDao getClientDao() {
     return clientDao;
   }

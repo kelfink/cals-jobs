@@ -42,7 +42,7 @@ public class CaseClientRelative implements ApiMarker {
   }
 
   public boolean hasRelation() {
-    return StringUtils.isNotBlank(relatedClientId);
+    return StringUtils.isNotBlank(relatedClientId) && !relatedClientId.equals(focusClientId);
   }
 
   public boolean hasNoRelation() {
@@ -82,11 +82,11 @@ public class CaseClientRelative implements ApiMarker {
   }
 
   public boolean isParentRelation() {
-    return (relationCode >= 187 && relationCode <= 214)
+    return hasRelation() && ((relationCode >= 187 && relationCode <= 214)
         || (relationCode >= 245 && relationCode <= 254)
         || (relationCode >= 282 && relationCode <= 294) || relationCode == 272
         || relationCode == 273 || relationCode == 5620 || relationCode == 6360
-        || relationCode == 6361;
+        || relationCode == 6361);
   }
 
   public SystemCode translateRelationship() {
