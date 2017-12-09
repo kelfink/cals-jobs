@@ -32,9 +32,33 @@ import gov.ca.cwds.data.persistence.cms.rep.EmbeddableCmsReplicatedEntityAware;
  */
 @Entity
 @Table(name = "STFPERST")
+//@formatter:off
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.StaffPerson.findAll",
-    query = "SELECT s.* FROM {h-schema}STFPERST s FOR READ ONLY WITH UR ",
+    query = "SELECT "
+          + "s.IDENTIFIER, \n"
+          + "s.END_DT, \n"
+          + "trim(s.FIRST_NM)   AS FIRST_NM, \n"
+          + "trim(s.JOB_TL_DSC) AS JOB_TL_DSC, \n"
+          + "trim(s.LAST_NM)    AS LAST_NM, \n"
+          + "trim(s.MID_INI_NM) AS MID_INI_NM, \n"
+          + "trim(s.NMPRFX_DSC) AS NMPRFX_DSC, \n"
+          + "s.PHONE_NO, \n"
+          + "s.TEL_EXT_NO, \n"
+          + "s.START_DT, \n"
+          + "trim(s.SUFX_TLDSC) AS SUFX_TLDSC, \n"
+          + "s.TLCMTR_IND, \n"
+          + "s.LST_UPD_ID, \n"
+          + "s.LST_UPD_TS, \n"
+          + "s.FKCWS_OFFT, \n"
+          + "trim(s.AVLOC_DSC)  AS AVLOC_DSC, \n"
+          + "s.SSRS_WKRID, \n"
+          + "s.CNTY_SPFCD, \n"
+          + "s.DTYWKR_IND, \n"
+          + "s.FKCWSADDRT, \n"
+          + "trim(s.EMAIL_ADDR \n"
+        + "FROM {h-schema}STFPERST s FOR READ ONLY WITH UR ",
     resultClass = StaffPerson.class, readOnly = true)
+//@formatter:on
 public class StaffPerson extends CmsPersistentObject
     implements CmsReplicatedEntity, EmbeddableCmsReplicatedEntityAware {
 
