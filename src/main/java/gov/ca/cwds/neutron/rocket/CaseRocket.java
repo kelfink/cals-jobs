@@ -428,13 +428,13 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       final CaseClientRelative ccr) {
     // focus child => parents
     if (ccr.hasRelation() && ccr.isParentRelation()) {
-      final String clientId = ccr.getFocusClientId();
-      Set<String> clientParents = mapFocusChildParents.get(clientId);
+      final String focusChildId = ccr.getFocusClientId();
+      Set<String> clientParents = mapFocusChildParents.get(focusChildId);
       if (clientParents == null) {
         clientParents = new HashSet<>();
-        mapFocusChildParents.put(clientId, clientParents);
+        mapFocusChildParents.put(focusChildId, clientParents);
       }
-      clientParents.add(clientId);
+      clientParents.add(ccr.getRelatedClientId());
     }
   }
 
