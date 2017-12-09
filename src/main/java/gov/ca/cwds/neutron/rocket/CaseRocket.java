@@ -627,6 +627,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       LOGGER.info("mapClients.size(): {}", mapClients.size());
       LOGGER.info("mapFocusChildParents.size(): {}", mapFocusChildParents.size());
 
+      // Index!
+      mapReadyClientCases.values().stream().forEach(this::addToIndexQueue);
+
+      // Debug:
       String json =
           ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get("TMZGOO205B"));
       LOGGER.info("Amber: {}", json);

@@ -122,6 +122,7 @@ public abstract class CaseHistoryIndexerJob
     return recs;
   }
 
+  @SuppressWarnings("javadoc")
   protected List<EsPersonCase> fetchLastRunCaseResults(final Session session,
       final Date lastRunTime) {
     final List<EsPersonCase> ret = new ArrayList<>();

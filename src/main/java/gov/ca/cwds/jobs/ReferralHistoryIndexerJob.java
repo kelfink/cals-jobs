@@ -319,6 +319,7 @@ public class ReferralHistoryIndexerJob
     }
   }
 
+  @SuppressWarnings("javadoc")
   protected void readAllegations(final PreparedStatement stmtSelAllegation,
       final List<EsPersonReferral> listAllegations) throws SQLException {
     stmtSelAllegation.setMaxRows(0);
@@ -342,6 +343,7 @@ public class ReferralHistoryIndexerJob
     return EntityNormalizer.<ReplicatedPersonReferrals, EsPersonReferral>normalizeList(recs);
   }
 
+  @SuppressWarnings("javadoc")
   protected int normalizeClientReferrals(int cntr, MinClientReferral rc1, final String clientId,
       final Map<String, EsPersonReferral> mapReferrals,
       final List<EsPersonReferral> listReadyToNorm,
@@ -375,6 +377,7 @@ public class ReferralHistoryIndexerJob
     return ret;
   }
 
+  @SuppressWarnings("javadoc")
   protected int normalizeQueryResults(final Map<String, EsPersonReferral> mapReferrals,
       final List<EsPersonReferral> listReadyToNorm,
       final Map<String, List<MinClientReferral>> mapReferralByClient,
@@ -398,6 +401,7 @@ public class ReferralHistoryIndexerJob
     return countNormalized;
   }
 
+  @SuppressWarnings("javadoc")
   protected DB2SystemMonitor buildMonitor(final Connection con) {
     DB2SystemMonitor ret = null;
     if (monitorDb2) {
@@ -406,6 +410,7 @@ public class ReferralHistoryIndexerJob
     return ret;
   }
 
+  @SuppressWarnings("javadoc")
   protected void monitorStopAndReport(DB2SystemMonitor monitor) throws SQLException {
     if (monitor != null) {
       NeutronDB2Util.monitorStopAndReport(monitor);
@@ -469,6 +474,7 @@ public class ReferralHistoryIndexerJob
     return countNormalized;
   }
 
+  @SuppressWarnings("javadoc")
   protected String getClientSeedQuery() {
     return INSERT_CLIENT_FULL;
   }
@@ -629,6 +635,7 @@ public class ReferralHistoryIndexerJob
     return new EsPersonReferral(rs);
   }
 
+  @SuppressWarnings("javadoc")
   protected void releaseLocalMemory(final List<EsPersonReferral> listAllegations,
       final Map<String, EsPersonReferral> mapReferrals,
       final List<MinClientReferral> listClientReferralKeys,
@@ -639,10 +646,12 @@ public class ReferralHistoryIndexerJob
     mapReferrals.clear();
   }
 
+  @SuppressWarnings("javadoc")
   public boolean isMonitorDb2() {
     return monitorDb2;
   }
 
+  @SuppressWarnings("javadoc")
   public void setMonitorDb2(boolean monitorDb2) {
     this.monitorDb2 = monitorDb2;
   }

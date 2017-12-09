@@ -252,7 +252,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     DocWriteRequest<?> ret;
     try {
       if (isDelete(t)) {
-        ret = bulkDelete((String) t.getPrimaryKey()); // NOTE: cannot assume String PK.
+        ret = bulkDelete((String) t.getPrimaryKey()); // WARNING: cannot assume String PK.
         getFlightLog().incrementBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);

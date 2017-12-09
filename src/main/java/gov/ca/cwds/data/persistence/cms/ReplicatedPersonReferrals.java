@@ -63,6 +63,7 @@ public class ReplicatedPersonReferrals implements RetrovillePerson {
     return referrals.containsKey(referralId);
   }
 
+  @SuppressWarnings("javadoc")
   public ElasticSearchPersonReferral getReferral(String referralId) {
     return referrals.get(referralId);
   }
@@ -104,10 +105,12 @@ public class ReplicatedPersonReferrals implements RetrovillePerson {
     return this.clientId;
   }
 
+  @SuppressWarnings("javadoc")
   public String getClientId() {
     return clientId;
   }
 
+  @SuppressWarnings("javadoc")
   public void setClientId(String clientId) {
     this.clientId = clientId;
   }
