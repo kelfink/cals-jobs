@@ -55,7 +55,7 @@ import gov.ca.cwds.data.persistence.cms.rep.EmbeddableCmsReplicatedEntityAware;
           + "s.CNTY_SPFCD, \n"
           + "s.DTYWKR_IND, \n"
           + "s.FKCWSADDRT, \n"
-          + "trim(s.EMAIL_ADDR \n"
+          + "trim(s.EMAIL_ADDR) AS EMAIL_ADDR\n"
         + "FROM {h-schema}STFPERST s FOR READ ONLY WITH UR ",
     resultClass = StaffPerson.class, readOnly = true)
 //@formatter:on
