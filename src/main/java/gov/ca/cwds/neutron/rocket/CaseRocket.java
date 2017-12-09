@@ -475,9 +475,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
   private void reduceCase(final ReplicatedPersonCases cases, EsCaseRelatedPerson rawCase,
       final Map<String, ReplicatedClient> mapClients,
-      final Map<String, Set<String>> mapCaseParents) {
+      final Map<String, Set<String>> mapFocusChildParents) {
     final ElasticSearchPersonCase esPersonCase = new ElasticSearchPersonCase();
     final String caseId = rawCase.getCaseId();
+    final String focusChildId = rawCase.getFocusChildId();
 
     //
     // Case:
@@ -502,12 +503,12 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     // Child:
     //
     final ElasticSearchPersonChild child = new ElasticSearchPersonChild();
-    child.setId(rawCase.getFocusChildId());
-    child.setLegacyClientId(rawCase.getFocusChildId());
+    child.setId(focusChildId);
+    child.setLegacyClientId(focusChildId);
     child.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(rawCase.getFocusChildLastUpdated()));
     child.setFirstName(rawCase.getFocusChildFirstName());
     child.setLastName(rawCase.getFocusChildLastName());
-    child.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(rawCase.getFocusChildId(),
+    child.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(focusChildId,
         rawCase.getFocusChildLastUpdated(), LegacyTable.CLIENT));
     child.setSensitivityIndicator(rawCase.getFocusChildSensitivityIndicator());
     esPersonCase.setFocusChild(child);
@@ -547,7 +548,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     //
     // A Case may have more than one parents:
     //
-    final Set<String> parents = mapCaseParents.get(caseId);
+    final Set<String> parents = mapFocusChildParents.get(focusChildId);
     if (parents != null && !parents.isEmpty()) {
       parents.stream().forEach(p -> {
         final ElasticSearchPersonParent parent = new ElasticSearchPersonParent();
@@ -575,10 +576,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       final Map<String, ReplicatedClient> mapClients,
       final Map<String, EsCaseRelatedPerson> mapCases,
       final Map<String, Set<String>> mapClientCases,
-      final Map<String, Set<String>> mapCaseParents) {
+      final Map<String, Set<String>> mapFocusChildParents) {
     final ReplicatedPersonCases ret = new ReplicatedPersonCases(clientId);
     mapClientCases.get(clientId).stream()
-        .forEach(k -> reduceCase(ret, mapCases.get(k), mapClients, mapCaseParents));
+        .forEach(k -> reduceCase(ret, mapCases.get(k), mapClients, mapFocusChildParents));
     return ret;
   }
 
@@ -611,10 +612,11 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       }
 
       addFocusChildren(mapCases, mapClients);
-      final Map<String, ReplicatedPersonCases> mapReadyClientCases = mapClientCases
-          .entrySet().stream().map(x -> reduceClientCases(x.getKey(), mapClients, mapCases,
-              mapClientCases, mapCaseParents))
-          .collect(Collectors.toMap(ReplicatedPersonCases::getGroupId, r -> r));
+      final Map<String, ReplicatedPersonCases> mapReadyClientCases =
+          mapClientCases.entrySet().stream()
+              .map(x -> reduceClientCases(x.getKey(), mapClients, mapCases, mapClientCases,
+                  mapFocusChildParents))
+              .collect(Collectors.toMap(ReplicatedPersonCases::getGroupId, r -> r));
 
       // Check results.
       LOGGER.info("listCaseClientRelation.size(): {}", listCaseClientRelation.size());
