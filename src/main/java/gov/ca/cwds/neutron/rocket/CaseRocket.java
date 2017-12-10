@@ -629,20 +629,29 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
       // Index!
       mapReadyClientCases.values().stream().forEach(this::addToIndexQueue);
-
-      // Debug:
-      String json =
-          ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get("TMZGOO205B"));
-      LOGGER.info("Amber: {}", json);
-
-      json = ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get("TBCF40g0D8"));
-      LOGGER.info("Nina: {}", json);
+      verify(mapReadyClientCases);
 
     } finally {
       clearThreadContainers();
     }
 
     return countNormalized;
+  }
+
+  private boolean verify(final Map<String, ReplicatedPersonCases> mapReadyClientCases)
+      throws IOException {
+    // Validate:
+    String json =
+        ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get("TMZGOO205B"));
+    LOGGER.info("Amber: {}", json);
+
+    json = ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get("TBCF40g0D8"));
+    LOGGER.info("Nina: {}", json);
+
+    json = ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get("ASUREPK0Bu"));
+    LOGGER.info("Lucy: {}", json);
+
+    return true;
   }
 
   // =====================
