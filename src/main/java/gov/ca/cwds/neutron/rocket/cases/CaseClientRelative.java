@@ -27,9 +27,9 @@ public class CaseClientRelative implements ApiMarker {
   private String caseId;
   private short relationCode;
 
-  public CaseClientRelative(String caseId, String focusClientId, String clientId,
+  public CaseClientRelative(String caseId, String focusClientId, String thisClientId,
       short relationCode) {
-    this.relatedClientId = clientId;
+    this.relatedClientId = thisClientId;
     this.caseId = caseId;
     this.focusClientId = focusClientId;
     this.relationCode = relationCode;
