@@ -586,7 +586,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   private int assemblePieces(final List<CaseClientRelative> listCaseClientRelation,
       final Map<String, EsCaseRelatedPerson> mapCases,
       final Map<String, ReplicatedClient> mapClients, final Map<String, Set<String>> mapClientCases)
-      throws IOException {
+      throws NeutronException {
     int countNormalized = 0;
 
     try {
@@ -599,11 +599,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       final Map<String, Set<String>> mapCaseParents = new HashMap<>(99881);
       final Map<String, Set<String>> mapFocusChildParents = new HashMap<>(99881);
 
-      // MAPS:
-      // client => cases
-      // client => parents
-      // case => clients
-      // case => parents
+      // Collect maps:
       for (CaseClientRelative ccr : ccrs) {
         collectCaseClients(mapCaseClients, ccr);
         collectClientCases(mapClientCases, ccr);
@@ -611,14 +607,17 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
         collectCaseParents(mapCaseParents, mapFocusChildParents, ccr);
       }
 
+      // Add focus child details to cases:
       addFocusChildren(mapCases, mapClients);
+
+      // Boil down to JSON objects ready for Elasticsearch.
       final Map<String, ReplicatedPersonCases> mapReadyClientCases =
           mapClientCases.entrySet().stream()
               .map(x -> reduceClientCases(x.getKey(), mapClients, mapCases, mapClientCases,
                   mapFocusChildParents))
               .collect(Collectors.toMap(ReplicatedPersonCases::getGroupId, r -> r));
 
-      // Check results.
+      // Sanity check: show map sizes.
       LOGGER.info("listCaseClientRelation.size(): {}", listCaseClientRelation.size());
       LOGGER.info("mapCaseClients.size(): {}", mapCaseClients.size());
       LOGGER.info("mapCaseParents.size(): {}", mapCaseParents.size());
@@ -627,8 +626,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       LOGGER.info("mapClients.size(): {}", mapClients.size());
       LOGGER.info("mapFocusChildParents.size(): {}", mapFocusChildParents.size());
 
-      // Index!
+      // Index into Elasticsearch!
       mapReadyClientCases.values().stream().forEach(this::addToIndexQueue);
+
+      // TEST DATA ONLY!
       verify(mapReadyClientCases);
 
     } finally {
@@ -639,17 +640,25 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   }
 
   private boolean verify(final Map<String, ReplicatedPersonCases> mapReadyClientCases)
-      throws IOException {
-    // Validate:
-    String json =
-        ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get("TMZGOO205B"));
-    LOGGER.info("Amber: {}", json);
+      throws NeutronException {
+    if (!isLargeDataSet()) {
+      final List<Pair<String, String>> tests = new ArrayList<>();
+      tests.add(Pair.of("Amber", "TMZGOO205B"));
+      tests.add(Pair.of("Nina", "TBCF40g0D8"));
+      tests.add(Pair.of("Lucy", "ASUREPK0Bu"));
 
-    json = ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get("TBCF40g0D8"));
-    LOGGER.info("Nina: {}", json);
-
-    json = ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get("ASUREPK0Bu"));
-    LOGGER.info("Lucy: {}", json);
+      try {
+        catchYourBreath(); // Let bulk processor finish
+        for (Pair<String, String> p : tests) {
+          String json =
+              ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get(p.getRight()));
+          LOGGER.info("TEST: name: {}\n{}", p.getLeft(), json);
+        }
+      } catch (IOException e) {
+        fail();
+        throw JobLogs.checked(LOGGER, e, "VALIDATION ERROR! {}", e.getMessage());
+      }
+    }
 
     return true;
   }
@@ -718,11 +727,12 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     try {
       cntr = assemblePieces(listCaseClientRelative, mapCasesById, mapClients,
           allocMapClientCases.get());
-    } catch (IOException e) {
+    } catch (NeutronException e) {
       fail();
       throw JobLogs.checked(LOGGER, e, "ERROR ASSEMBLING RANGE {} - {}: {}", p.getLeft(),
           p.getRight(), e.getMessage());
     } finally {
+      clearThreadContainers();
       getFlightLog().markRangeComplete(p);
     }
 
