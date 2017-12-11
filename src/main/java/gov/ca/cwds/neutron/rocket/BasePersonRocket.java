@@ -132,7 +132,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
   protected FlightLog flightLog = new FlightLog();
 
   /**
-   * Queue of raw, de-normalized records waiting to be normalized.
+   * Queue of raw, denormalized records waiting to be normalized.
    * <p>
    * <strong>NOTE</strong>: some rockets normalize on their own, since the normalize/transform step
    * is inexpensive.
