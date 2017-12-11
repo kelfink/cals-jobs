@@ -106,6 +106,11 @@ public class CaseClientRelative implements ApiMarker {
     return SystemCodeCache.global().getSystemCode(this.relationCode);
   }
 
+  public String translateRelationshipToString() {
+    final SystemCode sc = SystemCodeCache.global().getSystemCode(this.relationCode);
+    return sc != null ? sc.getShortDescription() : null;
+  }
+
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE, true);

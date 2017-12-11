@@ -76,12 +76,6 @@ public class CaseSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  public static final String SELECT_CLIENT_CASE =
-        "SELECT rc.FKCLIENT_T, rc.FKREFERL_T, rc.SENSTV_IND\n" 
-      + "FROM GT_REFR_CLT RC \n";
-  //@formatter:on
-
-  //@formatter:off
   public static final String SELECT_CASE_DETAIL =
         "WITH driver AS ( \n"
           + " SELECT gt.IDENTIFIER AS THIS_CLIENT_ID \n"
@@ -110,7 +104,7 @@ public class CaseSQLResource implements ApiMarker {
           + "SELECT DISTINCT     \n"
           + " CAS2.IDENTIFIER    AS CASE_ID, \n"
           + " CAS2.FKCHLD_CLT    AS FOCUS_CHILD_ID, \n"
-          + " CAS2.CASE_NM       AS CASE_NAME, \n"
+          + " trim(CAS2.CASE_NM)       AS CASE_NAME, \n"
           + " CAS2.START_DT      AS START_DATE, \n"
           + " CAS2.END_DT        AS END_DATE, \n"
           + " CAS2.SRV_CMPC      AS SERVICE_COMP, \n"
@@ -118,7 +112,7 @@ public class CaseSQLResource implements ApiMarker {
           + " CAS2.FKSTFPERST    AS WORKER_ID, \n"
           + " CAS2.LMT_ACSSCD    AS LIMITED_ACCESS_CODE, \n"
           + " CAS2.LMT_ACS_DT    AS LIMITED_ACCESS_DATE, \n"
-          + " CAS2.LMT_ACSDSC    AS LIMITED_ACCESS_DESCRIPTION, \n"
+          + " trim(CAS2.LMT_ACSDSC)    AS LIMITED_ACCESS_DESCRIPTION, \n"
           + " CAS2.L_GVR_ENTC    AS LIMITED_ACCESS_GOVERNMENT_ENT, \n"
           + " CAS2.LST_UPD_TS    AS CASE_LAST_UPDATED, \n"
           + " CAS2.GVR_ENTC      AS COUNTY,  \n"
@@ -132,7 +126,7 @@ public class CaseSQLResource implements ApiMarker {
           + "SELECT DISTINCT \n"
           + " CAS3.IDENTIFIER    AS CASE_ID, \n"
           + " CAS3.FKCHLD_CLT    AS FOCUS_CHILD_ID, \n"
-          + " CAS3.CASE_NM       AS CASE_NAME, \n"
+          + " trim(CAS3.CASE_NM)       AS CASE_NAME, \n"
           + " CAS3.START_DT      AS START_DATE, \n"
           + " CAS3.END_DT        AS END_DATE, \n"
           + " CAS3.SRV_CMPC      AS SERVICE_COMP, \n"
@@ -140,7 +134,7 @@ public class CaseSQLResource implements ApiMarker {
           + " CAS3.FKSTFPERST    AS WORKER_ID, \n"
           + " CAS3.LMT_ACSSCD    AS LIMITED_ACCESS_CODE, \n"
           + " CAS3.LMT_ACS_DT    AS LIMITED_ACCESS_DATE, \n"
-          + " CAS3.LMT_ACSDSC    AS LIMITED_ACCESS_DESCRIPTION, \n"
+          + " trim(CAS3.LMT_ACSDSC)    AS LIMITED_ACCESS_DESCRIPTION, \n"
           + " CAS3.L_GVR_ENTC    AS LIMITED_ACCESS_GOVERNMENT_ENT, \n"
           + " CAS3.LST_UPD_TS    AS CASE_LAST_UPDATED, \n"
           + " CAS3.GVR_ENTC      AS COUNTY,  \n"
