@@ -7,7 +7,7 @@ public class CaseSQLResource implements ApiMarker {
   private static final long serialVersionUID = 1L;
 
   //@formatter:off
-  public static final String INSERT_CLIENT_FULL =
+  public static final String PREP_AFFECTED_CLIENTS_FULL =
       "\nINSERT INTO GT_ID (IDENTIFIER) \n"
           +" SELECT c.IDENTIFIER \n"
           +" FROM CLIENT_T C \n"

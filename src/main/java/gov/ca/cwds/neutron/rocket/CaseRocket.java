@@ -703,7 +703,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
       try (
           final PreparedStatement stmtInsClient =
-              con.prepareStatement(CaseSQLResource.INSERT_CLIENT_FULL);
+              con.prepareStatement(CaseSQLResource.PREP_AFFECTED_CLIENTS_FULL);
           final PreparedStatement stmtSelClient =
               con.prepareStatement(CaseSQLResource.SELECT_CLIENT_FULL);
           final PreparedStatement stmtSelCase =
