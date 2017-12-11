@@ -30,13 +30,17 @@ public class CaseClientRelative implements ApiMarker {
   private String caseId;
   private short relationCode;
 
-  private static final Set<Integer> setParentCodes = ConcurrentHashMap.newKeySet();
+  private static final Set<Short> setParentCodes = ConcurrentHashMap.newKeySet();
 
+  /**
+   * SonarQube complains about code ranges in conditional checks, so we stuff all the parent code
+   * into a set.
+   */
   static {
-    addCodes(setParentCodes, 187, 214);
-    addCodes(setParentCodes, 245, 254);
-    addCodes(setParentCodes, 282, 294);
-    IntStream.of(272, 273, 5620, 6360, 6361).boxed().forEach(setParentCodes::add);
+    addCodes(187, 214);
+    addCodes(245, 254);
+    addCodes(282, 294);
+    addCodes(272, 273, 5620, 6360, 6361);
   }
 
   public CaseClientRelative(String caseId, String focusClientId, String thisClientId,
@@ -53,17 +57,22 @@ public class CaseClientRelative implements ApiMarker {
     return ret;
   }
 
-  private static void addCodes(final Set<Integer> setParentCodes, int begin, int end) {
-    IntStream.rangeClosed(begin, end).boxed().forEach(setParentCodes::add);
+  private static void addCodes(int begin, int end) {
+    IntStream.rangeClosed(begin, end).boxed().map(i -> (short) i.intValue())
+        .forEach(setParentCodes::add);
+  }
+
+  private static void addCodes(int... x) {
+    IntStream.of(x).boxed().map(i -> (short) i.intValue()).forEach(setParentCodes::add);
   }
 
   public boolean isParentRelation() {
-    return hasRelation() && setParentCodes.contains((int) this.relationCode);
+    return hasRelation() && setParentCodes.contains(this.relationCode);
   }
 
   public boolean hasRelation() {
     return StringUtils.isNotBlank(relatedClientId) && !"0".equals(relatedClientId)
-        && !relatedClientId.equals(focusClientId);
+        && !relatedClientId.equals(focusClientId) && this.relationCode != (short) 0;
   }
 
   public boolean hasNoRelation() {
