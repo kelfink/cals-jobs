@@ -152,7 +152,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
   @Override
   public String getPrepLastChangeSQL() {
-    return CaseSQLResource.INSERT_CLIENT_LAST_CHG;
+    return CaseSQLResource.PREP_AFFECTED_CLIENTS_LAST_CHG;
   }
 
   @Override
