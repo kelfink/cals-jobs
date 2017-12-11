@@ -58,7 +58,7 @@ public class CaseClientRelative implements ApiMarker {
   }
 
   public boolean isParentRelation() {
-    return hasRelation() && setParentCodes.contains(this.relationCode);
+    return hasRelation() && setParentCodes.contains((int) this.relationCode);
   }
 
   public boolean hasRelation() {
