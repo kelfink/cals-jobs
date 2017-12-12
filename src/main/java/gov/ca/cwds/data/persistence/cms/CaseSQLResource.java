@@ -169,47 +169,6 @@ public class CaseSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  public static final String INSERT_CLIENT_CASE_FULL =
-      "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)"
-     + " SELECT \n"
-          + " CAS1.IDENTIFIER      AS CASE_ID,  \n"
-          + " CAS1.FKCHLD_CLT      AS FOCUS_CHILD_ID,  \n"
-          + " DRV1.THIS_CLIENT_ID  AS THIS_CLIENT_ID, \n"
-          + " SUBSTR ('F', 1, 1)   AS FOCUS_IND, \n"
-          + " 0                    AS REL_FOCUS_TO_OTHER,  \n"
-          + " 0                    AS REL_OTHER_TO_FOCUS  \n"
-          + "FROM GT_ID DRV1 \n"
-          + "JOIN CASE_T CAS1 ON CAS1.FKCHLD_CLT = DRV1.IDENTIFIER \n"
-          + "WHERE CAS1.IBMSNAP_OPERATION IN ('I','U')  \n"
-     + "UNION ALL  \n"
-          + "SELECT   \n"
-          + " CAS2.IDENTIFIER      AS CASE_ID,  \n"
-          + " CAS2.FKCHLD_CLT      AS FOCUS_CHILD_ID,  \n"
-          + " DRV2.THIS_CLIENT_ID  AS THIS_CLIENT_ID, \n"
-          + " SUBSTR (' ', 1, 1)   AS FOCUS_IND,  \n"
-          + " REL2.CLNTRELC        AS REL_FOCUS_TO_OTHER, \n"
-          + " 0                    AS REL_OTHER_TO_FOCUS \n"
-          + "FROM GT_ID DRV2 \n"
-          + "JOIN CLN_RELT REL2 ON REL2.FKCLIENT_T = DRV2.IDENTIFIER \n"
-          + "JOIN CASE_T   CAS2 ON CAS2.FKCHLD_CLT = REL2.FKCLIENT_0  \n"
-          + "WHERE CAS2.IBMSNAP_OPERATION IN ('I','U')   \n"
-          + "  AND REL2.IBMSNAP_OPERATION IN ('I','U')   \n"
-    + "UNION ALL   \n"
-          + "SELECT    \n"
-          + " CAS3.IDENTIFIER      AS CASE_ID,  \n"
-          + " CAS3.FKCHLD_CLT      AS FOCUS_CHILD_ID,  \n"
-          + " DRV3.THIS_CLIENT_ID  AS THIS_CLIENT_ID, \n"
-          + " SUBSTR (' ', 1, 1)   AS FOCUS_IND, \n"
-          + " 0                    AS REL_FOCUS_TO_OTHER,  \n"
-          + " REL3.CLNTRELC        AS REL_OTHER_TO_FOCUS \n"
-          + "FROM GT_ID DRV3, CLN_RELT REL3, CASE_T CAS3 \n"
-          + "WHERE CAS3.FKCHLD_CLT = REL3.FKCLIENT_T \n"
-          + "AND REL3.FKCLIENT_0 = DRV3.IDENTIFIER \n"
-          + "  AND CAS3.IBMSNAP_OPERATION IN ('I','U')  \n"
-          + "  AND REL3.IBMSNAP_OPERATION IN ('I','U')  \n";
-  //@formatter:on
-
-  //@formatter:off
   public static final String SELECT_CASE_DETAIL =
         "WITH driver AS ( \n"
           + " SELECT gt.IDENTIFIER AS THIS_CLIENT_ID \n"
