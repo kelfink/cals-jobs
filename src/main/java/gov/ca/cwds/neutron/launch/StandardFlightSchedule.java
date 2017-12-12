@@ -38,37 +38,36 @@ public enum StandardFlightSchedule {
   RESET_INDEX(IndexResetRocket.class, // klazz
       "reset_index", // rocketName
       1, // initialLoadOrder
-      1, // startDelaySeconds
-      200000000, // periodSeconds
-      10000, // lastRunPriority
-      null, // nestedElement
-      false, // runLastChange
+      200000000, // startDelaySeconds
+      10000, // periodSeconds
+      null, // lastRunPriority
+      false, // nestedElement
       true // runInitialLoad
   ),
 
   /**
    * Client. Essential document root.
    */
-  CLIENT(ClientIndexerJob.class, "client", 5, 5, 20, 1000, null, true, true),
+  CLIENT(ClientIndexerJob.class, "client", 5, 20, 1000, null, true, true),
 
-  REPORTER(ReporterIndexerJob.class, "reporter", 10, 10, 30, 950, null, true, true),
+  REPORTER(ReporterIndexerJob.class, "reporter", 10, 30, 950, null, true, true),
 
-  COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, "collateral_individual", 15, 20, 30,
-      90, null, true, true),
+  COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, "collateral_individual", 20, 30, 90,
+      null, true, true),
 
-  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, "service_provider", 20, 25, 120, 85, null, true,
+  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, "service_provider", 25, 120, 85, null, true,
       true),
 
-  SUBSTITUTE_CARE_PROVIDER(SubstituteCareProviderIndexJob.class, "substitute_care_provider", 5, 30,
-      25, 80, null, true, true),
+  SUBSTITUTE_CARE_PROVIDER(SubstituteCareProviderIndexJob.class, "substitute_care_provider", 30, 25,
+      80, null, true, true),
 
-  EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, "education_provider", 30, 42, 120,
-      75, null, true, true),
+  EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, "education_provider", 42, 120, 75,
+      null, true, true),
 
-  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, "other_adult", 35, 50, 120, 70, null,
+  OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, "other_adult", 50, 120, 70, null,
       true, true),
 
-  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, "other_child", 40, 55, 120, 65, null,
+  OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, "other_child", 55, 120, 65, null,
       true, true),
 
   //
@@ -78,12 +77,12 @@ public enum StandardFlightSchedule {
   /**
    * Client name aliases.
    */
-  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, "other_client_name", 45, 90, 45, 300, "akas", true, true),
+  OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, "other_client_name", 90, 45, 300, "akas", true, true),
 
   /**
    * Combines child and parent case.
    */
-  CASES(ChildCaseHistoryIndexerJob.class, "case", 50, 70, 30, 550, "cases", true, true),
+  CASES(ChildCaseHistoryIndexerJob.class, "cases", 70, 30, 550, "cases", true, true),
 
   /**
    * Child cases.
@@ -100,22 +99,22 @@ public enum StandardFlightSchedule {
   /**
    * Relationships.
    */
-  RELATIONSHIP(RelationshipIndexerJob.class, "relationship", 60, 90, 30, 600, "relationships", true, true),
+  RELATIONSHIP(RelationshipIndexerJob.class, "relationship", 90, 30, 600, "relationships", true, true),
 
   /**
    * Referrals.
    */
-  REFERRAL(ReferralHistoryIndexerJob.class, "referral", 65, 45, 30, 700, "referrals", true, true),
+  REFERRAL(ReferralHistoryIndexerJob.class, "referral", 45, 30, 700, "referrals", true, true),
 
   /**
    * Safety alerts.
    */
-  SAFETY_ALERT(SafetyAlertIndexerJob.class, "safety_alert", 70, 90, 45, 800, "safety_alerts", true, true),
+  SAFETY_ALERT(SafetyAlertIndexerJob.class, "safety_alert", 90, 45, 800, "safety_alerts", true, true),
 
   /**
    * Screenings.
    */
-  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 75, 90, 20, 900, "screenings", true, true),
+  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 90, 20, 900, "screenings", true, true),
 
   // /**
   // * Validation.
@@ -125,7 +124,7 @@ public enum StandardFlightSchedule {
   /**
    * Exit the initial load process.
    */
-  EXIT_INITIAL_LOAD(ExitInitialLoadRocket.class, "exit_initial_load", 66666, 140, 2000000, 10000, null, false, true);
+  EXIT_INITIAL_LOAD(ExitInitialLoadRocket.class, "exit_initial_load", 140, 2000000, 10000, null, false, true);
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(StandardFlightSchedule.class);
 
@@ -137,7 +136,7 @@ public enum StandardFlightSchedule {
 
   private final String rocketName;
 
-  private final int initialLoadOrder;
+  private final int initialLoadOrder = ordinal();
 
   private final int startDelaySeconds;
 
@@ -158,12 +157,11 @@ public enum StandardFlightSchedule {
     }
   }
 
-  private StandardFlightSchedule(Class<?> klazz, String rocketName, int initialLoadOrder,
-      int startDelaySeconds, int periodSeconds, int lastRunPriority, String nestedElement,
-      boolean runLastChange, boolean runInitialLoad) {
+  private StandardFlightSchedule(Class<?> klazz, String rocketName, int startDelaySeconds,
+      int periodSeconds, int lastRunPriority, String nestedElement, boolean runLastChange,
+      boolean runInitialLoad) {
     this.klazz = klazz;
     this.rocketName = rocketName;
-    this.initialLoadOrder = initialLoadOrder;
     this.startDelaySeconds = startDelaySeconds;
     this.waitPeriodSeconds = periodSeconds;
     this.lastRunPriority = lastRunPriority;
