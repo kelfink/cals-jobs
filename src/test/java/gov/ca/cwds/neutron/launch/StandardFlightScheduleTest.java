@@ -152,7 +152,7 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void getInitialLoadOrder_Args__() throws Exception {
     int actual = target.getInitialLoadOrder();
-    int expected = 5;
+    int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 
