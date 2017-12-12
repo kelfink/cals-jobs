@@ -50,6 +50,9 @@ public enum StandardFlightSchedule {
    */
   CLIENT(ClientIndexerJob.class, "client", 5, 20, 1000, null, true, true),
 
+  /**
+   * Document root. Reporter
+   */
   REPORTER(ReporterIndexerJob.class, "reporter", 10, 30, 950, null, true, true),
 
   COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, "collateral_individual", 20, 30, 90,

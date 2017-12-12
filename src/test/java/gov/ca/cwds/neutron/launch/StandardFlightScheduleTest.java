@@ -14,6 +14,7 @@ import org.quartz.listeners.JobChainingJobListener;
 import gov.ca.cwds.jobs.Goddard;
 
 public class StandardFlightScheduleTest extends Goddard {
+
   StandardFlightSchedule target;
 
   @Override

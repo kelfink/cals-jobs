@@ -244,7 +244,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     stmtInsClient.setMaxRows(0);
     stmtInsClient.setQueryTimeout(0);
 
-    if (getFlightLog().isInitialLoad()) {
+    if (!getFlightPlan().isLastRunMode()) {
       stmtInsClient.setString(1, p.getLeft());
       stmtInsClient.setString(2, p.getRight());
     } else {
