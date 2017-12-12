@@ -48,8 +48,7 @@ public class StandardFlightScheduleTest extends Goddard {
     expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME);
     expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME);
     expected.add(StandardFlightSchedule.OTHER_CLIENT_NAME);
-    expected.add(StandardFlightSchedule.CHILD_CASE);
-    expected.add(StandardFlightSchedule.PARENT_CASE);
+    expected.add(StandardFlightSchedule.CASES);
     expected.add(StandardFlightSchedule.RELATIONSHIP);
     expected.add(StandardFlightSchedule.REFERRAL);
     expected.add(StandardFlightSchedule.SAFETY_ALERT);
@@ -73,8 +72,7 @@ public class StandardFlightScheduleTest extends Goddard {
     expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME);
     expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME);
     expected.add(StandardFlightSchedule.OTHER_CLIENT_NAME);
-    expected.add(StandardFlightSchedule.CHILD_CASE);
-    expected.add(StandardFlightSchedule.PARENT_CASE);
+    expected.add(StandardFlightSchedule.CASES);
     expected.add(StandardFlightSchedule.RELATIONSHIP);
     expected.add(StandardFlightSchedule.REFERRAL);
     expected.add(StandardFlightSchedule.SAFETY_ALERT);
@@ -136,9 +134,9 @@ public class StandardFlightScheduleTest extends Goddard {
 
   @Test
   public void lookupByJobName_Args__String() throws Exception {
-    String key = StandardFlightSchedule.CHILD_CASE.getRocketName();
+    String key = StandardFlightSchedule.CASES.getRocketName();
     StandardFlightSchedule actual = StandardFlightSchedule.lookupByRocketName(key);
-    StandardFlightSchedule expected = StandardFlightSchedule.CHILD_CASE;
+    StandardFlightSchedule expected = StandardFlightSchedule.CASES;
     assertThat(actual, is(equalTo(expected)));
   }
 

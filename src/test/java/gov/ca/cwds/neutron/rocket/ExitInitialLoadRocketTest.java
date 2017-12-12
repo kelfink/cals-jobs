@@ -50,7 +50,7 @@ public class ExitInitialLoadRocketTest extends Goddard {
 
   @Test
   public void logError_Args__StandardFlightSchedule__FlightSummary() throws Exception {
-    StandardFlightSchedule sched = StandardFlightSchedule.CHILD_CASE;
+    StandardFlightSchedule sched = StandardFlightSchedule.CASES;
     FlightSummary summary = mock(FlightSummary.class);
     target.logError(sched, summary);
   }

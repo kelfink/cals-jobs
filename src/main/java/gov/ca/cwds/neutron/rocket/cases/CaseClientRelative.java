@@ -52,9 +52,8 @@ public class CaseClientRelative implements ApiMarker {
   }
 
   public static CaseClientRelative extract(final ResultSet rs) throws SQLException {
-    final CaseClientRelative ret = new CaseClientRelative(rs.getString("CASE_ID"),
-        rs.getString("FOCUS_CHILD_ID"), rs.getString("THIS_CLIENT_ID"), rs.getShort("RELATION"));
-    return ret;
+    return new CaseClientRelative(rs.getString("CASE_ID"), rs.getString("FOCUS_CHILD_ID"),
+        rs.getString("THIS_CLIENT_ID"), rs.getShort("RELATION"));
   }
 
   private static void addCodes(int begin, int end) {

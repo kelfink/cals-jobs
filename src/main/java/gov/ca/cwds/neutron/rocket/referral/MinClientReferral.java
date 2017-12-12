@@ -29,10 +29,8 @@ public class MinClientReferral implements ApiMarker {
   }
 
   public static MinClientReferral extract(final ResultSet rs) throws SQLException {
-    final MinClientReferral ret =
-        new MinClientReferral(rs.getString("FKCLIENT_T"), rs.getString("FKREFERL_T"),
-            rs.getString("SENSTV_IND"), rs.getString("CLT_IBMSNAP_OPERATION"));
-    return ret;
+    return new MinClientReferral(rs.getString("FKCLIENT_T"), rs.getString("FKREFERL_T"),
+        rs.getString("SENSTV_IND"), rs.getString("CLT_IBMSNAP_OPERATION"));
   }
 
   public String getClientId() {
