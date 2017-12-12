@@ -803,7 +803,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       doneRetrieve();
       deallocateThreadMemory();
     }
-    return super.fetchLastRunResults(lastRunDate, deletionResults);
+    return new ArrayList<>(); // Work already done
   }
 
   /**
