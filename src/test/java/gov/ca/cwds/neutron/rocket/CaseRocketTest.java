@@ -5,7 +5,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -84,7 +86,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
   public void getPartitionRanges_Args__() throws Exception {
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     final List<Pair<String, String>> expected = new ArrayList<>();
-    expected.add(Pair.of("aaaaaaaaaa", "9999999999"));
+    expected.add(pair);
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -154,7 +156,14 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
   @Test
   public void pullNextRange_Args__Pair() throws Exception {
-    final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
+    final PreparedStatement stmtInsClient = mock(PreparedStatement.class);
+    final PreparedStatement stmtSelClient = mock(PreparedStatement.class);
+    when(stmtSelClient.executeQuery()).thenReturn(rs);
+
+    when(rs.getString("FKCLIENT_T")).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString("SENSTV_IND")).thenReturn("N");
+    final Pair<String, String> p = pair;
+
     int actual = target.pullNextRange(p);
     int expected = 0;
     assertThat(actual, is(equalTo(expected)));
@@ -162,7 +171,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
   @Test(expected = NeutronException.class)
   public void pullNextRange_Args__Pair_T__NeutronException() throws Exception {
-    final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
+    final Pair<String, String> p = pair;
     target.pullNextRange(p);
   }
 
