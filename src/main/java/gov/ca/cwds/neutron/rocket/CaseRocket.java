@@ -792,7 +792,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     doneTransform(); // normalize in place **WITHOUT** the transform thread
     try {
       staffWorkers = readStaffWorkers();
-      pullBucketRange("a", "b");
+      pullNextRange(Pair.of("a", "b"));
     } catch (Exception e) {
       fail();
       throw JobLogs.runtime(LOGGER, e, "ERROR! {}", e.getMessage());
