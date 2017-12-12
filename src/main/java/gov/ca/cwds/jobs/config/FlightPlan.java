@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.commons.cli.CommandLine;
@@ -120,7 +121,7 @@ public class FlightPlan implements ApiMarker {
    * Default constructor.
    */
   public FlightPlan() {
-    // Default contructor
+    // Default constructor
   }
 
   /**
@@ -181,6 +182,21 @@ public class FlightPlan implements ApiMarker {
     this.refreshMqt = flightPlan.refreshMqt;
     this.dropIndex = flightPlan.dropIndex;
     this.simulateLaunch = flightPlan.simulateLaunch;
+  }
+
+  /**
+   * Smart/auto mode. If last run date is older than 25 years, assume initial load. Written when
+   * DevOps started using Rundeck and was unable to pass parameters to jobs.
+   * 
+   * @param lastRun last successful run date
+   * @return true if running initial load
+   */
+  public boolean isInitialLoad(final Date lastRun) {
+    LOGGER.debug("Last successsful run time: {}", lastRun); // NOSONAR
+
+    final Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.YEAR, -25);
+    return !isLastRunMode() || lastRun.before(cal.getTime());
   }
 
   /**

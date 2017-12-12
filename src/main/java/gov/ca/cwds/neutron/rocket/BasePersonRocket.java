@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -583,26 +582,19 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     }
   }
 
-  private boolean determineFlightMode(final Date lastRun) {
-    LOGGER.debug("Last successsful run time: {}", lastRun); // NOSONAR
-
-    // Smart/auto mode. If last run date is older than 25 years, assume initial load.
-    // Written when DevOps started using Rundeck and was unable to pass parameters to jobs.
-    final Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.YEAR, -25);
-    final boolean autoInitialLoad =
-        this.getFlightLog().isInitialLoad() || lastRun.before(cal.getTime());
-
+  protected void sizeQueues(final Date lastRun) {
     // Configure queue sizes for last run or initial load.
-    if (autoInitialLoad) {
+    if (determineFlightMode(lastRun)) {
       queueNormalize = new LinkedBlockingDeque<>(2000);
       queueIndex = new LinkedBlockingDeque<>(5000);
     } else {
       queueNormalize = new LinkedBlockingDeque<>(50000);
       queueIndex = new LinkedBlockingDeque<>(125000);
     }
+  }
 
-    return autoInitialLoad;
+  protected boolean determineFlightMode(final Date lastRun) {
+    return this.getFlightPlan().isInitialLoad(lastRun);
   }
 
   /**
@@ -632,6 +624,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       getFlightPlan().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
 
+      sizeQueues(lastRun);
       if (determineFlightMode(lastRun)) {
         flightLog.setInitialLoad(true);
         refreshMQT();

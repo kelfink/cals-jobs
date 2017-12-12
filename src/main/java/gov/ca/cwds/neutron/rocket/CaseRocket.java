@@ -745,7 +745,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     return cntr;
   }
 
-  private void runInitialLoad() {
+  private void runIndexing() {
     nameThread("case_main");
     LOGGER.info("BEGIN: main read thread");
     doneTransform(); // normalize in place **WITHOUT** the transform thread
@@ -788,7 +788,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    */
   @Override
   protected void threadRetrieveByJdbc() {
-    runInitialLoad();
+    runIndexing();
   }
 
   // =====================
