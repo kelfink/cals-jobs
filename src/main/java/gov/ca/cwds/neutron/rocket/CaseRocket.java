@@ -661,6 +661,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   private boolean verify(final Map<String, ReplicatedPersonCases> mapReadyClientCases)
       throws NeutronException {
     if (!isLargeDataSet()) {
+      LOGGER.info("Validate test data ...");
       final List<Pair<String, String>> tests = new ArrayList<>();
       tests.add(Pair.of("Amber", "TMZGOO205B"));
       tests.add(Pair.of("Nina", "TBCF40g0D8"));
