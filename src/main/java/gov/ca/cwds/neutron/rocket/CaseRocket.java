@@ -239,8 +239,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   // JDBC:
   // =====================
 
-  private void prepClientBundle(final PreparedStatement stmtInsClient, final Pair<String, String> p)
-      throws SQLException {
+  private void prepAffectedClients(final PreparedStatement stmtInsClient,
+      final Pair<String, String> p) throws SQLException {
     stmtInsClient.setMaxRows(0);
     stmtInsClient.setQueryTimeout(0);
 
@@ -248,12 +248,15 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       stmtInsClient.setString(1, p.getLeft());
       stmtInsClient.setString(2, p.getRight());
     } else {
-      stmtInsClient.setString(1,
-          NeutronJdbcUtils.makeSimpleTimestampString(getFlightLog().getLastChangeSince()));
+      final String strTimestamp =
+          NeutronJdbcUtils.makeSimpleTimestampString(getFlightLog().getLastChangeSince());
+      for (int i = 1; i <= 5; i++) {
+        stmtInsClient.setString(i, strTimestamp);
+      }
     }
 
     final int countInsClientCases = stmtInsClient.executeUpdate();
-    LOGGER.info("bundle client/cases: {}", countInsClientCases);
+    LOGGER.info("affected client/cases: {}", countInsClientCases);
   }
 
   private void readClientCaseRelationship(final PreparedStatement stmtSelClientCaseRelation,
@@ -719,7 +722,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
           final PreparedStatement stmtSelCase = con.prepareStatement(CaseSQLResource.SELECT_CASE);
           final PreparedStatement stmtSelCaseClientRelationship =
               con.prepareStatement(CaseSQLResource.SELECT_CLIENT_CASE_RELATIONSHIP)) {
-        prepClientBundle(stmtInsClient, keyRange);
+        prepAffectedClients(stmtInsClient, keyRange);
         readClients(stmtSelClient, mapClients);
         readCases(stmtSelCase, mapCasesById);
         readClientCaseRelationship(stmtSelCaseClientRelationship, listCaseClientRelative);

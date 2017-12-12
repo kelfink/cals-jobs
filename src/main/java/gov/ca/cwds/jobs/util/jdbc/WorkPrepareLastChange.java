@@ -14,7 +14,7 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
- * Execute SQL prior to retrieving records, typically for last change runs.
+ * Execute DML prior to retrieving records, typically for last change runs.
  * 
  * <p>
  * Examples include populating a global temporary table prior to reading from a view.
