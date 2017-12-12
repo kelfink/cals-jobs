@@ -29,7 +29,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
  * Populates the Client County table via stored procedure.
@@ -122,7 +122,7 @@ public class ClientCountyRocket extends ClientIndexerJob
     nameThread(threadName);
     getLogger().info("BEGIN: extract thread {}", threadName);
 
-    try (Connection con = NeutronJdbcUtil.prepConnection(getJobDao().getSessionFactory())) {
+    try (Connection con = NeutronJdbcUtils.prepConnection(getJobDao().getSessionFactory())) {
       processStatement(p, con);
     } catch (Exception e) {
       fail();

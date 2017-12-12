@@ -63,7 +63,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
-import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 
 /**
@@ -682,7 +682,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     try {
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-          NeutronJdbcUtil.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
+          NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<T> recs = q.list();
@@ -710,7 +710,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
         entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
     final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
     q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-        NeutronJdbcUtil.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
+        NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
     final List<M> deletionRecs = q.list();
     if (deletionRecs != null && !deletionRecs.isEmpty()) {
@@ -754,7 +754,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       prepHibernateLastChange(session, lastRunTime);
       final NativeQuery<M> q = session.getNamedNativeQuery(namedQueryName);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-          NeutronJdbcUtil.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
+          NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime), StringType.INSTANCE);
 
       final ImmutableList.Builder<T> results = new ImmutableList.Builder<>();
       final List<M> recs = q.list();

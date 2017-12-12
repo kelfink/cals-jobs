@@ -15,7 +15,7 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
-import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
  * Rocket to load Other Child In Placement Home from CMS into ElasticSearch.
@@ -45,7 +45,7 @@ public class OtherChildInPlacemtHomeIndexerJob
 
   @Override
   public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
-    return NeutronJdbcUtil.getCommonPartitionRanges4(this);
+    return NeutronJdbcUtils.getCommonPartitionRanges4(this);
   }
 
   /**

@@ -33,7 +33,7 @@ import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 
-public class NeutronJdbcUtilTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
+public class NeutronJdbcUtilsTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
   private static final class TestAtomHibernate extends TestIndexerJob
       implements AtomHibernate<TestNormalizedEntity, TestDenormalizedEntity> {
@@ -65,13 +65,13 @@ public class NeutronJdbcUtilTest extends Goddard<TestNormalizedEntity, TestDenor
 
   @Test
   public void type() throws Exception {
-    assertThat(NeutronJdbcUtil.class, notNullValue());
+    assertThat(NeutronJdbcUtils.class, notNullValue());
   }
 
   @Test
   public void makeTimestampString_Args__Date() throws Exception {
     Date date = mock(Date.class);
-    String actual = NeutronJdbcUtil.makeTimestampString(date);
+    String actual = NeutronJdbcUtils.makeTimestampString(date);
     String expected = "TIMESTAMP('1969-12-31 16:00:00.000')";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -79,14 +79,14 @@ public class NeutronJdbcUtilTest extends Goddard<TestNormalizedEntity, TestDenor
   @Test
   public void makeSimpleTimestampString_Args__Date() throws Exception {
     Date date = new Date(1508521402357L);
-    String actual = NeutronJdbcUtil.makeSimpleTimestampString(date);
+    String actual = NeutronJdbcUtils.makeSimpleTimestampString(date);
     String expected = "2017-10-20 10:43:22.357";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getDBSchemaName_Args__() throws Exception {
-    String actual = NeutronJdbcUtil.getDBSchemaName();
+    String actual = NeutronJdbcUtils.getDBSchemaName();
     String expected = "CWSRS1";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -99,7 +99,7 @@ public class NeutronJdbcUtilTest extends Goddard<TestNormalizedEntity, TestDenor
     Date lastRunTime = mock(Date.class);
     String sqlInsertLastChange = null;
     Function<Connection, PreparedStatement> func = mock(Function.class);
-    NeutronJdbcUtil.prepHibernateLastChange(session, lastRunTime, sqlInsertLastChange, func);
+    NeutronJdbcUtils.prepHibernateLastChange(session, lastRunTime, sqlInsertLastChange, func);
   }
 
   @Test
@@ -114,37 +114,37 @@ public class NeutronJdbcUtilTest extends Goddard<TestNormalizedEntity, TestDenor
 
   @Test
   public void getPartitionRanges64_Args__() throws Exception {
-    List actual = NeutronJdbcUtil.getPartitionRanges64();
+    List actual = NeutronJdbcUtils.getPartitionRanges64();
     assertThat(actual.size(), is(equalTo(64)));
   }
 
   @Test
   public void getPartitionRanges16_Args__() throws Exception {
-    List actual = NeutronJdbcUtil.getPartitionRanges16();
+    List actual = NeutronJdbcUtils.getPartitionRanges16();
     assertThat(actual.size(), is(equalTo(16)));
   }
 
   @Test
   public void getPartitionRanges4_Args__() throws Exception {
-    List actual = NeutronJdbcUtil.getPartitionRanges4();
+    List actual = NeutronJdbcUtils.getPartitionRanges4();
     assertThat(actual.size(), is(equalTo(4)));
   }
 
   @Test
   public void getCommonPartitionRanges4_Args__AtomHibernate() throws Exception {
-    List actual = NeutronJdbcUtil.getCommonPartitionRanges4(initialLoad);
+    List actual = NeutronJdbcUtils.getCommonPartitionRanges4(initialLoad);
     assertThat(actual.size(), is(equalTo(4)));
   }
 
   @Test
   public void getCommonPartitionRanges16_Args__AtomHibernate() throws Exception {
-    final List actual = NeutronJdbcUtil.getCommonPartitionRanges16(initialLoad);
+    final List actual = NeutronJdbcUtils.getCommonPartitionRanges16(initialLoad);
     assertThat(actual.size(), is(equalTo(16)));
   }
 
   @Test
   public void getCommonPartitionRanges64_Args__AtomHibernate() throws Exception {
-    final List actual = NeutronJdbcUtil.getCommonPartitionRanges64(initialLoad);
+    final List actual = NeutronJdbcUtils.getCommonPartitionRanges64(initialLoad);
     assertThat(actual.size(), is(equalTo(64)));
   }
 

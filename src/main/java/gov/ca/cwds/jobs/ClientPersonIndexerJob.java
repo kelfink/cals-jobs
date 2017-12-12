@@ -33,7 +33,7 @@ import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
-import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
@@ -227,7 +227,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
-    return NeutronJdbcUtil.getCommonPartitionRanges64(this);
+    return NeutronJdbcUtils.getCommonPartitionRanges64(this);
   }
 
   /**

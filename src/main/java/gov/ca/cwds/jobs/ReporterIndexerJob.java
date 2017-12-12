@@ -15,7 +15,7 @@ import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
-import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
  * Rocket to load reporters from CMS into ElasticSearch.
@@ -49,7 +49,7 @@ public class ReporterIndexerJob extends BasePersonRocket<ReplicatedReporter, Rep
 
   @Override
   public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
-    return NeutronJdbcUtil.getCommonPartitionRanges64(this);
+    return NeutronJdbcUtils.getCommonPartitionRanges64(this);
   }
 
   /**

@@ -58,7 +58,7 @@ import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.cases.CaseClientRelative;
-import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
@@ -168,7 +168,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
   @Override
   public List<Pair<String, String>> getPartitionRanges() throws NeutronException {
-    return NeutronJdbcUtil.getCommonPartitionRanges64(this);
+    return NeutronJdbcUtils.getCommonPartitionRanges64(this);
   }
 
   @Override
@@ -710,9 +710,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
           final PreparedStatement stmtSelCase =
               con.prepareStatement(CaseSQLResource.SELECT_CASE_DETAIL);
           final PreparedStatement stmtSelCaseClientRelationship =
-              con.prepareStatement(CaseSQLResource.SELECT_CLIENT_CASE_RELATIONSHIP);
-          final PreparedStatement stmtSelAlles =
-              con.prepareStatement(getInitialLoadQuery(schema))) {
+              con.prepareStatement(CaseSQLResource.SELECT_CLIENT_CASE_RELATIONSHIP)) {
         prepClientBundle(stmtInsClient, p);
         readClients(stmtSelClient, mapClients);
         readCases(stmtSelCase, mapCasesById);
@@ -791,6 +789,13 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     runIndexing();
   }
 
+  @Override
+  protected List<ReplicatedPersonCases> fetchLastRunResults(Date lastRunDt,
+      Set<String> deletionResults) {
+    // TODO: HERE!
+    return super.fetchLastRunResults(lastRunDt, deletionResults);
+  }
+
   // =====================
   // THREAD MEMORY:
   // =====================
@@ -838,13 +843,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   @SuppressWarnings("javadoc")
   public ReplicatedClientDao getClientDao() {
     return clientDao;
-  }
-
-  @Override
-  protected List<ReplicatedPersonCases> fetchLastRunResults(Date lastRunDt,
-      Set<String> deletionResults) {
-    // TODO: HERE!
-    return super.fetchLastRunResults(lastRunDt, deletionResults);
   }
 
   /**

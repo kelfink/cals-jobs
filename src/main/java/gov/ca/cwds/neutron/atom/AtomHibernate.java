@@ -20,7 +20,7 @@ import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
-import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
  * Common functions and features for Hibernate calls.
@@ -172,7 +172,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   default void prepHibernateLastChange(final Session session, final Date lastRunTime) {
     final String sql = getPrepLastChangeSQL();
     if (StringUtils.isNotBlank(sql)) {
-      NeutronJdbcUtil.prepHibernateLastChange(session, lastRunTime, sql,
+      NeutronJdbcUtils.prepHibernateLastChange(session, lastRunTime, sql,
           getPreparedStatementMaker());
     }
   }

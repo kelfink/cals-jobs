@@ -11,7 +11,7 @@ import org.hibernate.jdbc.Work;
 
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtil;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
  * Execute SQL prior to retrieving records, typically for last change runs.
@@ -64,11 +64,11 @@ public class WorkPrepareLastChange implements Work {
    */
   @Override
   public void execute(Connection con) throws SQLException {
-    con.setSchema(NeutronJdbcUtil.getDBSchemaName());
+    con.setSchema(NeutronJdbcUtils.getDBSchemaName());
     con.setAutoCommit(false);
     NeutronDB2Util.enableParallelism(con);
 
-    final String strLastRunTime = NeutronJdbcUtil.makeSimpleTimestampString(lastRunTime);
+    final String strLastRunTime = NeutronJdbcUtils.makeSimpleTimestampString(lastRunTime);
     try (final PreparedStatement stmt = createPreparedStatement(con)) {
       for (int i = 1; i <= StringUtils.countMatches(sql, "?"); i++) {
         stmt.setString(i, strLastRunTime); // String or Timestamp, that is the question.
