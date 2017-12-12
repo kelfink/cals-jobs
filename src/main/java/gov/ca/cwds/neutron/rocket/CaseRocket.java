@@ -412,7 +412,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     if (StringUtils.isNotBlank(otherClient)) {
       clientCases.add(otherClient);
     }
-
   }
 
   private void collectThisClientCase(final Map<String, Set<String>> mapClientCases, String caseId,
@@ -467,7 +466,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
         caseParents = new HashMap<>();
         mapCaseParents.put(caseId, caseParents);
       }
-      // caseParents.put(caseId, caseParents);
+      // caseParents.put(caseId, focusChildParents.);
     }
   }
 

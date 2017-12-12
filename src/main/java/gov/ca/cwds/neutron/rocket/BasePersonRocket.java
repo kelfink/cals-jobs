@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
+import javax.persistence.FlushModeType;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.DocWriteRequest;
@@ -21,7 +23,6 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.CacheMode;
-import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -855,10 +856,14 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     final Transaction txn = getOrCreateTransaction();
 
     try {
+      session.clear();
+      session.setCacheMode(CacheMode.IGNORE);
+      session.setDefaultReadOnly(true);
+      session.setFlushMode(FlushModeType.COMMIT);
+
       final NativeQuery<T> q = session.getNamedNativeQuery(namedQueryName);
       q.setParameter("min_id", minId, StringType.INSTANCE)
-          .setParameter("max_id", maxId, StringType.INSTANCE).setCacheable(false)
-          .setFlushMode(FlushMode.MANUAL).setCacheMode(CacheMode.IGNORE)
+          .setParameter("max_id", maxId, StringType.INSTANCE)
           .setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
 
       // No reduction/normalization. Iterate, process, flush.

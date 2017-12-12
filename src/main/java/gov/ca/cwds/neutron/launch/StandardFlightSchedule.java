@@ -18,7 +18,6 @@ import gov.ca.cwds.jobs.IntakeScreeningJob;
 import gov.ca.cwds.jobs.OtherAdultInPlacemtHomeIndexerJob;
 import gov.ca.cwds.jobs.OtherChildInPlacemtHomeIndexerJob;
 import gov.ca.cwds.jobs.OtherClientNameIndexerJob;
-import gov.ca.cwds.jobs.ParentCaseHistoryIndexerJob;
 import gov.ca.cwds.jobs.ReferralHistoryIndexerJob;
 import gov.ca.cwds.jobs.RelationshipIndexerJob;
 import gov.ca.cwds.jobs.ReporterIndexerJob;
@@ -82,14 +81,21 @@ public enum StandardFlightSchedule {
   OTHER_CLIENT_NAME(OtherClientNameIndexerJob.class, "other_client_name", 45, 90, 45, 300, "akas", true, true),
 
   /**
+   * Combines child and parent case.
+   */
+  CASES(ChildCaseHistoryIndexerJob.class, "case", 50, 70, 30, 550, "cases", true, true),
+
+  /**
    * Child cases.
    */
-  CHILD_CASE(ChildCaseHistoryIndexerJob.class, "child_case", 50, 70, 30, 550, "cases", true, true),
+  // CHILD_CASE(ChildCaseHistoryIndexerJob.class, "child_case", 50, 70, 30, 550, "cases", true,
+  // true),
 
   /**
    * Parent cases.
    */
-  PARENT_CASE(ParentCaseHistoryIndexerJob.class, "parent_case", 55, 80, 30, 575, "cases", true, true),
+  // PARENT_CASE(ParentCaseHistoryIndexerJob.class, "parent_case", 55, 80, 30, 575, "cases", true,
+  // true),
 
   /**
    * Relationships.
