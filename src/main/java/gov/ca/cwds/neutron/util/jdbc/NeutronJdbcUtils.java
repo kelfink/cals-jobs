@@ -20,8 +20,8 @@ import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.jdbc.Work;
 
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
-import gov.ca.cwds.jobs.util.jdbc.NeutronStreamUtil;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronStreamUtils;
 import gov.ca.cwds.jobs.util.jdbc.WorkPrepareLastChange;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
@@ -82,7 +82,7 @@ public final class NeutronJdbcUtils {
         .getService(ConnectionProvider.class).getConnection();
     con.setSchema(getDBSchemaName());
     con.setAutoCommit(false);
-    NeutronDB2Util.enableParallelism(con);
+    NeutronDB2Utils.enableParallelism(con);
     return con;
   }
 
@@ -100,7 +100,7 @@ public final class NeutronJdbcUtils {
     LOGGER.info("len: {}, skip: {}", len, skip);
 
     final Integer[] positions =
-        IntStream.rangeClosed(0, len - 1).boxed().flatMap(NeutronStreamUtil.everyNth(skip)).sorted()
+        IntStream.rangeClosed(0, len - 1).boxed().flatMap(NeutronStreamUtils.everyNth(skip)).sorted()
             .sequential().collect(Collectors.toList()).toArray(new Integer[0]);
 
     if (LOGGER.isInfoEnabled()) {

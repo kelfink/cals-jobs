@@ -38,8 +38,8 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.config.FlightPlanTest;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
-import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.neutron.rocket.referral.MinClientReferral;
 
 public class ReferralHistoryIndexerJobTest
@@ -293,12 +293,12 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void testMonitorStopAndReport() throws Exception {
-    NeutronDB2Util.monitorStopAndReport(new TestDB2SystemMonitor());
+    NeutronDB2Utils.monitorStopAndReport(new TestDB2SystemMonitor());
   }
 
   @Test
   public void testCalcThreads() throws Exception {
-    NeutronThreadUtil.calcReaderThreads(target.getFlightPlan());
+    NeutronThreadUtils.calcReaderThreads(target.getFlightPlan());
   }
 
   @Test

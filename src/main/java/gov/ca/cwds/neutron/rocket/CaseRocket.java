@@ -51,9 +51,9 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
-import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
+import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -238,8 +238,14 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       throws SQLException {
     stmtInsClient.setMaxRows(0);
     stmtInsClient.setQueryTimeout(0);
-    stmtInsClient.setString(1, p.getLeft());
-    stmtInsClient.setString(2, p.getRight());
+
+    if (getFlightLog().isInitialLoad()) {
+      stmtInsClient.setString(1, p.getLeft());
+      stmtInsClient.setString(2, p.getRight());
+    } else {
+      stmtInsClient.setString(1,
+          NeutronJdbcUtils.makeSimpleTimestampString(getFlightLog().getLastChangeSince()));
+    }
 
     final int countInsClientCases = stmtInsClient.executeUpdate();
     LOGGER.info("bundle client/cases: {}", countInsClientCases);
@@ -679,16 +685,16 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    * Each call to this method should run in its own thread.
    * </p>
    * 
-   * @param p partition (key) range to read
+   * @param keyRange partition (key) range to read
    * @return number of client documents affected
    * @throws NeutronException on general error
    */
-  protected int pullNextRange(final Pair<String, String> p) throws NeutronException {
-    final String threadName =
-        "extract_" + nextThreadNum.incrementAndGet() + "_" + p.getLeft() + "_" + p.getRight();
+  protected int pullNextRange(final Pair<String, String> keyRange) throws NeutronException {
+    final String threadName = "extract_" + nextThreadNum.incrementAndGet() + "_"
+        + keyRange.getLeft() + "_" + keyRange.getRight();
     nameThread(threadName);
     LOGGER.info("BEGIN");
-    getFlightLog().markRangeStart(p);
+    getFlightLog().markRangeStart(keyRange);
 
     allocateThreadMemory();
     final List<CaseClientRelative> listCaseClientRelative = allocCaseClientRelative.get();
@@ -700,18 +706,18 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       final String schema = getDBSchemaName();
       con.setSchema(schema);
       con.setAutoCommit(false);
-      NeutronDB2Util.enableParallelism(con);
+      NeutronDB2Utils.enableParallelism(con);
 
       try (
-          final PreparedStatement stmtInsClient =
-              con.prepareStatement(CaseSQLResource.PREP_AFFECTED_CLIENTS_FULL);
+          final PreparedStatement stmtInsClient = con.prepareStatement(
+              getFlightLog().isInitialLoad() ? CaseSQLResource.PREP_AFFECTED_CLIENTS_FULL
+                  : CaseSQLResource.PREP_AFFECTED_CLIENTS_LAST_CHG);
           final PreparedStatement stmtSelClient =
-              con.prepareStatement(CaseSQLResource.SELECT_CLIENT_FULL);
-          final PreparedStatement stmtSelCase =
-              con.prepareStatement(CaseSQLResource.SELECT_CASE_DETAIL);
+              con.prepareStatement(CaseSQLResource.SELECT_CLIENT);
+          final PreparedStatement stmtSelCase = con.prepareStatement(CaseSQLResource.SELECT_CASE);
           final PreparedStatement stmtSelCaseClientRelationship =
               con.prepareStatement(CaseSQLResource.SELECT_CLIENT_CASE_RELATIONSHIP)) {
-        prepClientBundle(stmtInsClient, p);
+        prepClientBundle(stmtInsClient, keyRange);
         readClients(stmtSelClient, mapClients);
         readCases(stmtSelCase, mapCasesById);
         readClientCaseRelationship(stmtSelCaseClientRelationship, listCaseClientRelative);
@@ -721,29 +727,30 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
     } catch (Exception e) {
       fail();
-      throw JobLogs.checked(LOGGER, e, "ERROR PULLING RANGE {} - {}: {}", p.getLeft(), p.getRight(),
-          e.getMessage());
+      clearThreadContainers();
+      throw JobLogs.checked(LOGGER, e, "ERROR PULLING RANGE {} - {}: {}", keyRange.getLeft(),
+          keyRange.getRight(), e.getMessage());
     }
 
     // Process records.
-    int cntr = 0;
+    int recordsProcessed = 0;
     try {
-      cntr = assemblePieces(listCaseClientRelative, mapCasesById, mapClients,
+      recordsProcessed = assemblePieces(listCaseClientRelative, mapCasesById, mapClients,
           allocMapClientCases.get());
     } catch (NeutronException e) {
       fail();
-      throw JobLogs.checked(LOGGER, e, "ERROR ASSEMBLING RANGE {} - {}: {}", p.getLeft(),
-          p.getRight(), e.getMessage());
+      throw JobLogs.checked(LOGGER, e, "ERROR ASSEMBLING RANGE {} - {}: {}", keyRange.getLeft(),
+          keyRange.getRight(), e.getMessage());
     } finally {
       clearThreadContainers();
-      getFlightLog().markRangeComplete(p);
+      getFlightLog().markRangeComplete(keyRange);
     }
 
     LOGGER.info("DONE");
-    return cntr;
+    return recordsProcessed;
   }
 
-  private void runIndexing() {
+  private void runMultiThreadIndexing() {
     nameThread("case_main");
     LOGGER.info("BEGIN: main read thread");
     doneTransform(); // normalize in place **WITHOUT** the transform thread
@@ -754,7 +761,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
       final ForkJoinPool threadPool =
-          new ForkJoinPool(NeutronThreadUtil.calcReaderThreads(getFlightPlan()));
+          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
@@ -777,6 +784,23 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     LOGGER.info("DONE: read {} ES case rows", this.rowsReadCases.get());
   }
 
+  @Override
+  protected List<ReplicatedPersonCases> fetchLastRunResults(Date lastRunDate,
+      Set<String> deletionResults) {
+    doneTransform(); // normalize in place **WITHOUT** the transform thread
+    try {
+      staffWorkers = readStaffWorkers();
+
+    } catch (Exception e) {
+      fail();
+      throw JobLogs.runtime(LOGGER, e, "ERROR! {}", e.getMessage());
+    } finally {
+      doneRetrieve();
+      deallocateThreadMemory();
+    }
+    return super.fetchLastRunResults(lastRunDate, deletionResults);
+  }
+
   /**
    * Initial load only. The "extract" part of ETL. Processes key ranges in separate threads.
    * 
@@ -786,14 +810,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    */
   @Override
   protected void threadRetrieveByJdbc() {
-    runIndexing();
-  }
-
-  @Override
-  protected List<ReplicatedPersonCases> fetchLastRunResults(Date lastRunDt,
-      Set<String> deletionResults) {
-    // TODO: HERE!
-    return super.fetchLastRunResults(lastRunDt, deletionResults);
+    runMultiThreadIndexing();
   }
 
   // =====================

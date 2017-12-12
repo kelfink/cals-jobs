@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
+import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.launch.RocketSpecification;
 
@@ -59,7 +59,7 @@ public interface AtomShared extends ApiMarker {
    * @param title title of thread
    */
   default void nameThread(final String title) {
-    NeutronThreadUtil.nameThread(title, this);
+    NeutronThreadUtils.nameThread(title, this);
   }
 
   default RocketSpecification rocketSpecs() {
@@ -67,7 +67,7 @@ public interface AtomShared extends ApiMarker {
   }
 
   default void catchYourBreath() {
-    NeutronThreadUtil.catchYourBreath();
+    NeutronThreadUtils.catchYourBreath();
   }
 
 }

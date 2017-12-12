@@ -27,7 +27,7 @@ import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
-import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
+import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.neutron.atom.AtomHibernate;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
@@ -107,7 +107,7 @@ public class NeutronJdbcUtilsTest extends Goddard<TestNormalizedEntity, TestDeno
     FlightPlan opts = mock(FlightPlan.class);
     when(opts.getThreadCount()).thenReturn(4L);
 
-    int actual = NeutronThreadUtil.calcReaderThreads(opts);
+    int actual = NeutronThreadUtils.calcReaderThreads(opts);
     int expected = 4;
     assertThat(actual, is(equalTo(expected)));
   }

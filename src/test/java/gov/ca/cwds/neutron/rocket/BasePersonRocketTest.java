@@ -51,7 +51,7 @@ import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
@@ -728,7 +728,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void enableParallelism_Args__Connection() throws Exception {
-    NeutronDB2Util.enableParallelism(con);
+    NeutronDB2Utils.enableParallelism(con);
   }
 
   @Test

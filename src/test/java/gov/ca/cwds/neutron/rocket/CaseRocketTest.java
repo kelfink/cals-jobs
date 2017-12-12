@@ -4,12 +4,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
@@ -211,14 +208,14 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void fetchLastRunResults_Args__Date__Set() throws Exception {
-    Date lastRunDt = mock(Date.class);
-    Set<String> deletionResults = mock(Set.class);
-    List<ReplicatedPersonCases> actual = target.fetchLastRunResults(lastRunDt, deletionResults);
-    List<ReplicatedPersonCases> expected = new ArrayList<>();
-    assertThat(actual, is(equalTo(expected)));
-  }
+  // @Test
+  // public void fetchLastRunResults_Args__Date__Set() throws Exception {
+  // Date lastRunDt = mock(Date.class);
+  // Set<String> deletionResults = mock(Set.class);
+  // List<ReplicatedPersonCases> actual = target.fetchLastRunResults(lastRunDt, deletionResults);
+  // List<ReplicatedPersonCases> expected = new ArrayList<>();
+  // assertThat(actual, is(equalTo(expected)));
+  // }
 
   // @Test
   // public void main_Args__StringArray() throws Exception {

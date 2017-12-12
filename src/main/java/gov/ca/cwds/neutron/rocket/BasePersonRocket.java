@@ -49,7 +49,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.atom.AtomDocumentSecurity;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.atom.AtomPersonDocPrep;
@@ -357,7 +357,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       LOGGER.info("query: {}", query);
 
       // Enable parallelism for underlying database.
-      NeutronDB2Util.enableParallelism(con);
+      NeutronDB2Utils.enableParallelism(con);
 
       M m;
       try (final Statement stmt = con.createStatement()) {
@@ -534,9 +534,9 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     }
   }
 
-  protected List<T> fetchLastRunResults(final Date lastRunDt, final Set<String> deletionResults) {
-    return this.isViewNormalizer() ? extractLastRunRecsFromView(lastRunDt, deletionResults)
-        : extractLastRunRecsFromTable(lastRunDt);
+  protected List<T> fetchLastRunResults(final Date lastRunDate, final Set<String> deletionResults) {
+    return this.isViewNormalizer() ? extractLastRunRecsFromView(lastRunDate, deletionResults)
+        : extractLastRunRecsFromTable(lastRunDate);
   }
 
   /**

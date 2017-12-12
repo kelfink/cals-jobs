@@ -16,7 +16,7 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.exception.NeutronException;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
@@ -110,12 +110,12 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   }
 
   /**
-   * @see NeutronDB2Util#isDB2OnZOS(BaseDaoImpl)
+   * @see NeutronDB2Utils#isDB2OnZOS(BaseDaoImpl)
    * @return true if DB2 on mainframe
    * @throws NeutronException on error
    */
   default boolean isDB2OnZOS() throws NeutronException {
-    return NeutronDB2Util.isDB2OnZOS(getJobDao());
+    return NeutronDB2Utils.isDB2OnZOS(getJobDao());
   }
 
   /**

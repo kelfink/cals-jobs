@@ -29,7 +29,7 @@ import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
-import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
+import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
@@ -191,7 +191,7 @@ public class RelationshipIndexerJob
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
       final ForkJoinPool threadPool =
-          new ForkJoinPool(NeutronThreadUtil.calcReaderThreads(getFlightPlan()));
+          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {

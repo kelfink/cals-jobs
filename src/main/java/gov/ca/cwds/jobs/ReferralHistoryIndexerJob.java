@@ -35,9 +35,9 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Util;
+import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
-import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtil;
+import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
@@ -74,7 +74,8 @@ public class ReferralHistoryIndexerJob
    * Filter <strong>deleted</strong> Client, Referral, Referral/Client, Allegation.
    */
 //@formatter:off
-  protected static final String INSERT_CLIENT_LAST_CHG = "INSERT INTO GT_ID (IDENTIFIER)\n"
+  protected static final String INSERT_CLIENT_LAST_CHG = 
+      "INSERT INTO GT_ID (IDENTIFIER)\n"
       + " WITH step1 AS (\n"
       + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID\n"
       + "     FROM ALLGTN_T ALG \n"
@@ -405,7 +406,7 @@ public class ReferralHistoryIndexerJob
   protected DB2SystemMonitor buildMonitor(final Connection con) {
     DB2SystemMonitor ret = null;
     if (monitorDb2) {
-      ret = NeutronDB2Util.monitorStart(con);
+      ret = NeutronDB2Utils.monitorStart(con);
     }
     return ret;
   }
@@ -413,7 +414,7 @@ public class ReferralHistoryIndexerJob
   @SuppressWarnings("javadoc")
   protected void monitorStopAndReport(DB2SystemMonitor monitor) throws SQLException {
     if (monitor != null) {
-      NeutronDB2Util.monitorStopAndReport(monitor);
+      NeutronDB2Utils.monitorStopAndReport(monitor);
     }
   }
 
@@ -509,9 +510,9 @@ public class ReferralHistoryIndexerJob
     try (final Connection con = getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
-      NeutronDB2Util.enableParallelism(con);
+      NeutronDB2Utils.enableParallelism(con);
 
-      final DB2SystemMonitor monitor = NeutronDB2Util.monitorStart(con);
+      final DB2SystemMonitor monitor = NeutronDB2Utils.monitorStart(con);
       final String schema = getDBSchemaName();
 
       try (final PreparedStatement stmtInsClient = con.prepareStatement(getClientSeedQuery());
@@ -523,7 +524,7 @@ public class ReferralHistoryIndexerJob
         readReferrals(stmtSelReferral, mapReferrals);
         readAllegations(stmtSelAllegation, listAllegations);
 
-        NeutronDB2Util.monitorStopAndReport(monitor);
+        NeutronDB2Utils.monitorStopAndReport(monitor);
         con.commit();
       }
     } catch (Exception e) {
@@ -559,7 +560,7 @@ public class ReferralHistoryIndexerJob
       LOGGER.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
       final ForkJoinPool threadPool =
-          new ForkJoinPool(NeutronThreadUtil.calcReaderThreads(getFlightPlan()));
+          new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
