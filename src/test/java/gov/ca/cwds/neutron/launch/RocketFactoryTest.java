@@ -20,8 +20,8 @@ import org.quartz.spi.TriggerFiredBundle;
 import com.google.inject.Injector;
 
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 public class RocketFactoryTest extends Goddard {

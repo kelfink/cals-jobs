@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiObjectIdentity;
-import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 public class JobTask<N extends PersistentObject, D extends ApiGroupNormalizer<?>>

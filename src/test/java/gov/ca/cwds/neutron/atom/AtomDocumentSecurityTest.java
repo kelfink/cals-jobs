@@ -8,8 +8,8 @@ import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.neutron.atom.AtomDocumentSecurity;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 
 public class AtomDocumentSecurityTest {
 

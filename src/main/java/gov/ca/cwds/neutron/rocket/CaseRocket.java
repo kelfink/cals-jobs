@@ -48,13 +48,13 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.jobs.util.jdbc.NeutronRowMapper;
 import gov.ca.cwds.jobs.util.jdbc.NeutronThreadUtils;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.cases.CaseClientRelative;
@@ -210,6 +210,11 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     return ret;
   }
 
+  private String buildAffectedClientsSQL() {
+    return getFlightPlan().isLastRunMode() ? CaseSQLResource.PREP_AFFECTED_CLIENTS_LAST_CHG
+        : CaseSQLResource.PREP_AFFECTED_CLIENTS_FULL;
+  }
+
   // =====================
   // NORMALIZATION:
   // =====================
@@ -312,7 +317,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   }
 
   private ReplicatedClient extractClient(ResultSet rs) throws SQLException {
-    ReplicatedClient ret = new ReplicatedClient();
+    final ReplicatedClient ret = new ReplicatedClient();
 
     ret.setId(rs.getString("CLIENT_ID"));
     ret.setCommonFirstName(rs.getString("CLIENT_FIRST_NM"));
@@ -326,7 +331,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   }
 
   private EsCaseRelatedPerson extractCase(ResultSet rs) throws SQLException {
-    EsCaseRelatedPerson ret = new EsCaseRelatedPerson();
+    final EsCaseRelatedPerson ret = new EsCaseRelatedPerson();
 
     ret.setCaseId(rs.getString("CASE_ID"));
     ret.setFocusChildId(rs.getString("FOCUS_CHILD_ID"));
@@ -708,10 +713,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       con.setAutoCommit(false);
       NeutronDB2Utils.enableParallelism(con);
 
-      try (
-          final PreparedStatement stmtInsClient = con.prepareStatement(
-              getFlightLog().isInitialLoad() ? CaseSQLResource.PREP_AFFECTED_CLIENTS_FULL
-                  : CaseSQLResource.PREP_AFFECTED_CLIENTS_LAST_CHG);
+      try (final PreparedStatement stmtInsClient = con.prepareStatement(buildAffectedClientsSQL());
           final PreparedStatement stmtSelClient =
               con.prepareStatement(CaseSQLResource.SELECT_CLIENT);
           final PreparedStatement stmtSelCase = con.prepareStatement(CaseSQLResource.SELECT_CASE);
@@ -790,7 +792,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     doneTransform(); // normalize in place **WITHOUT** the transform thread
     try {
       staffWorkers = readStaffWorkers();
-
+      pullBucketRange("a", "b");
     } catch (Exception e) {
       fail();
       throw JobLogs.runtime(LOGGER, e, "ERROR! {}", e.getMessage());

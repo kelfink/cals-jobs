@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual;
-import gov.ca.cwds.jobs.config.FlightPlanTest;
+import gov.ca.cwds.neutron.flight.FlightPlanTest;
 
 /**
  * @author CWDS API Team

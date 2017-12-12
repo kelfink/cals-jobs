@@ -2,6 +2,8 @@ package gov.ca.cwds.jobs.config;
 
 import org.apache.commons.cli.Option;
 
+import gov.ca.cwds.neutron.flight.FlightPlan;
+
 /**
  * Neutron command line options.
  * 

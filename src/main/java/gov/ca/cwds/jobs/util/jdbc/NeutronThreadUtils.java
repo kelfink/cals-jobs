@@ -3,8 +3,8 @@ package gov.ca.cwds.jobs.util.jdbc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 
 public final class NeutronThreadUtils {
 

@@ -6,8 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 
 @Singleton
 public class FlightPlanRegistry implements AtomFlightPlanManager {

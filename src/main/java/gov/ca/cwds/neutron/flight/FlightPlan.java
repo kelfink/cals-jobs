@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.config;
+package gov.ca.cwds.neutron.flight;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.jobs.config.CmdLineOption;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.util.NeutronDateUtils;
@@ -191,7 +192,7 @@ public class FlightPlan implements ApiMarker {
    * @param lastRun last successful run date
    * @return true if running initial load
    */
-  public boolean isInitialLoad(final Date lastRun) {
+  public boolean determineInitialLoad(final Date lastRun) {
     LOGGER.debug("Last successsful run time: {}", lastRun); // NOSONAR
 
     final Calendar cal = Calendar.getInstance();
@@ -298,7 +299,7 @@ public class FlightPlan implements ApiMarker {
    * @param sep argument separator
    * @return command line option
    */
-  protected static Option makeOpt(String shortOpt, String longOpt, String description,
+  public static Option makeOpt(String shortOpt, String longOpt, String description,
       boolean required, int argc, Class<?> type, char sep) {
     return Option.builder(shortOpt).argName(longOpt).required(required).longOpt(longOpt)
         .desc(description).numberOfArgs(argc).type(type).valueSeparator(sep).build();

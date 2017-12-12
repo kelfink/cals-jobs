@@ -45,7 +45,6 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.component.BulkProcessorBuilder;
-import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.JobsException;
 import gov.ca.cwds.jobs.exception.NeutronException;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -59,6 +58,7 @@ import gov.ca.cwds.neutron.enums.NeutronColumn;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
@@ -594,7 +594,7 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
   }
 
   protected boolean determineFlightMode(final Date lastRun) {
-    return this.getFlightPlan().isInitialLoad(lastRun);
+    return this.getFlightPlan().determineInitialLoad(lastRun);
   }
 
   /**

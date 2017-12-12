@@ -8,8 +8,8 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 
-import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
 
 public class FlightPlanRegistryTest {

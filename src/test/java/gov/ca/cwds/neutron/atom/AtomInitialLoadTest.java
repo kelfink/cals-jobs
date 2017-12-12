@@ -16,10 +16,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.jobs.Goddard;
-import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 
 public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDenormalizedEntity> {
 

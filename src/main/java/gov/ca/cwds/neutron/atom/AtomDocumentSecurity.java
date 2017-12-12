@@ -1,7 +1,7 @@
 package gov.ca.cwds.neutron.atom;
 
 import gov.ca.cwds.data.std.ApiMarker;
-import gov.ca.cwds.jobs.config.FlightPlan;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 
 /**
  * Common security features for Elasticsearch indexing jobs, especially legacy CMS.

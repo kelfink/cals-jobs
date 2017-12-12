@@ -16,8 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.jobs.config.FlightPlan;
-import gov.ca.cwds.jobs.config.FlightPlanTest;
+import gov.ca.cwds.neutron.flight.FlightPlanTest;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 
 /**
@@ -44,8 +44,7 @@ public class ServiceProviderIndexerJobTest extends Goddard {
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedServiceProviderDao(sessionFactory);
-    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER,
-        flightPlan);
+    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan);
     target.setFlightPlan(FlightPlanTest.makeGeneric());
   }
 
@@ -61,8 +60,7 @@ public class ServiceProviderIndexerJobTest extends Goddard {
 
   @Test
   public void testInstantiation() throws Exception {
-    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER,
-        flightPlan);
+    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan);
     assertThat(target, notNullValue());
   }
 
@@ -85,8 +83,7 @@ public class ServiceProviderIndexerJobTest extends Goddard {
 
   @Test
   public void getPartitionRanges_Args__() throws Exception {
-    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER,
-        flightPlan);
+    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }
@@ -94,8 +91,7 @@ public class ServiceProviderIndexerJobTest extends Goddard {
   @Test
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
-    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER,
-        flightPlan);
+    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }

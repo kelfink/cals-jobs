@@ -2,8 +2,8 @@ package gov.ca.cwds.neutron.atom;
 
 import org.quartz.spi.JobFactory;
 
-import gov.ca.cwds.jobs.config.FlightPlan;
 import gov.ca.cwds.jobs.exception.NeutronException;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 public interface AtomRocketFactory extends JobFactory {
