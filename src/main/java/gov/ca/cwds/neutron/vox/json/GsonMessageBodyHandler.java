@@ -12,7 +12,6 @@ import java.nio.charset.Charset;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
@@ -48,15 +47,9 @@ public class GsonMessageBodyHandler
   @Override
   public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
-      throws IOException, WebApplicationException {
+      throws IOException {
     try (InputStreamReader reader = new InputStreamReader(entityStream, Charset.defaultCharset())) {
-      Type jsonType;
-      if (type.equals(genericType)) {
-        jsonType = type;
-      } else {
-        jsonType = genericType;
-      }
-      return getGson().fromJson(reader, jsonType);
+      return getGson().fromJson(reader, type.equals(genericType) ? type : genericType);
     }
   }
 
@@ -75,11 +68,10 @@ public class GsonMessageBodyHandler
   @Override
   public void writeTo(Object object, Class<?> type, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
-      throws IOException, WebApplicationException {
+      throws IOException {
     try (OutputStreamWriter writer =
         new OutputStreamWriter(entityStream, Charset.defaultCharset())) {
-      Type jsonType = type.equals(genericType) ? type : genericType;
-      getGson().toJson(object, jsonType, writer);
+      getGson().toJson(object, type.equals(genericType) ? type : genericType, writer);
     }
   }
 
