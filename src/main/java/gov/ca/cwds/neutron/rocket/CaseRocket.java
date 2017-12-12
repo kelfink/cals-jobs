@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -837,6 +838,13 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   @SuppressWarnings("javadoc")
   public ReplicatedClientDao getClientDao() {
     return clientDao;
+  }
+
+  @Override
+  protected List<ReplicatedPersonCases> fetchLastRunResults(Date lastRunDt,
+      Set<String> deletionResults) {
+    // TODO: HERE!
+    return super.fetchLastRunResults(lastRunDt, deletionResults);
   }
 
   /**

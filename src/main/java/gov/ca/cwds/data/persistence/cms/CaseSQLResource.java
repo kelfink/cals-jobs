@@ -44,7 +44,7 @@ public class CaseSQLResource implements ApiMarker {
           + "\nSELECT CAS1.FKCHLD_CLT"
            + "\n FROM CASE_T CAS1 "
            + "\nWHERE CAS1.IBMSNAP_LOGMARKER > ? "
-       + "\nUNION\n"
+       + "\nUNION"
            + "SELECT CAS2.FKCHLD_CLT "
            + "\nFROM CASE_T CAS2"
            + "\nLEFT JOIN CHLD_CLT CCL1 ON CCL1.FKCLIENT_T = CAS2.FKCHLD_CLT  "
