@@ -249,60 +249,65 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     List<ElasticSearchPersonAddress> esClientAddresses = new ArrayList<>();
 
     for (ReplicatedClientAddress repClientAddress : this.clientAddresses) {
-      String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
       String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());
       String addressActive = StringUtils.isBlank(effectiveEndDate) ? "true" : "false";
-      ElasticSearchSystemCode addressType = new ElasticSearchSystemCode();
 
-      SystemCode addressTypeSystemCode =
-          SystemCodeCache.global().getSystemCode(repClientAddress.getAddressType());
-      if (addressTypeSystemCode != null) {
-        addressType.setDescription(addressTypeSystemCode.getShortDescription());
-        addressType.setId(addressTypeSystemCode.getSystemId().toString());
-      }
-
-      for (ReplicatedAddress repAddress : repClientAddress.getAddresses()) {
-        ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress();
-        esClientAddresses.add(esAddress);
-
-        esAddress.setLegacyDescriptor(repAddress.getLegacyDescriptor());
-        esAddress.setId(repAddress.getAddressId());
-        esAddress.setCity(repAddress.getCity());
-        esAddress.setCounty(repAddress.getCounty());
-        esAddress.setState(repAddress.getState());
-        esAddress.setZip(repAddress.getZip());
-        esAddress.setZip4(repAddress.getApiAdrZip4());
-        esAddress.setStreetName(repAddress.getStreetName());
-        esAddress.setStreetNumber(repAddress.getStreetNumber());
-        esAddress.setUnitNumber(repAddress.getApiAdrUnitNumber());
-        esAddress.setEffectiveStartDate(effectiveStartDate);
-        esAddress.setEffectiveEndDate(effectiveEndDate);
-        esAddress.setType(addressType);
-        esAddress.setActive(addressActive);
-
-        ElasticSearchSystemCode stateCode = new ElasticSearchSystemCode();
-        esAddress.setStateSystemCode(stateCode);
-        SystemCode stateSysCode = SystemCodeCache.global().getSystemCode(repAddress.getStateCd());
-        if (stateSysCode != null) {
-          stateCode.setDescription(stateSysCode.getShortDescription());
-          stateCode.setId(stateSysCode.getSystemId().toString());
-          esAddress.setStateName(stateSysCode.getShortDescription());
-          esAddress.setStateCode(stateSysCode.getLogicalId());
+      /*
+       * We index only active addresses
+       */
+      if (Boolean.valueOf(addressActive)) {
+        String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
+        ElasticSearchSystemCode addressType = new ElasticSearchSystemCode();
+        SystemCode addressTypeSystemCode =
+            SystemCodeCache.global().getSystemCode(repClientAddress.getAddressType());
+        if (addressTypeSystemCode != null) {
+          addressType.setDescription(addressTypeSystemCode.getShortDescription());
+          addressType.setId(addressTypeSystemCode.getSystemId().toString());
         }
 
-        ElasticSearchSystemCode countyCode = new ElasticSearchSystemCode();
-        esAddress.setCountySystemCode(countyCode);
-        SystemCode countySysCode =
-            SystemCodeCache.global().getSystemCode(repAddress.getGovernmentEntityCd());
-        if (countySysCode != null) {
-          countyCode.setDescription(countySysCode.getShortDescription());
-          countyCode.setId(countySysCode.getSystemId().toString());
-        }
+        for (ReplicatedAddress repAddress : repClientAddress.getAddresses()) {
+          ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress();
+          esClientAddresses.add(esAddress);
 
-        if (repAddress.getApiAdrUnitType() != null
-            && repAddress.getApiAdrUnitType().intValue() != 0) {
-          esAddress.setUnitType(SystemCodeCache.global()
-              .getSystemCodeShortDescription(repAddress.getApiAdrUnitType()));
+          esAddress.setLegacyDescriptor(repAddress.getLegacyDescriptor());
+          esAddress.setId(repAddress.getAddressId());
+          esAddress.setCity(repAddress.getCity());
+          esAddress.setCounty(repAddress.getCounty());
+          esAddress.setState(repAddress.getState());
+          esAddress.setZip(repAddress.getZip());
+          esAddress.setZip4(repAddress.getApiAdrZip4());
+          esAddress.setStreetName(repAddress.getStreetName());
+          esAddress.setStreetNumber(repAddress.getStreetNumber());
+          esAddress.setUnitNumber(repAddress.getApiAdrUnitNumber());
+          esAddress.setEffectiveStartDate(effectiveStartDate);
+          esAddress.setEffectiveEndDate(effectiveEndDate);
+          esAddress.setType(addressType);
+          esAddress.setActive(addressActive);
+
+          ElasticSearchSystemCode stateCode = new ElasticSearchSystemCode();
+          esAddress.setStateSystemCode(stateCode);
+          SystemCode stateSysCode = SystemCodeCache.global().getSystemCode(repAddress.getStateCd());
+          if (stateSysCode != null) {
+            stateCode.setDescription(stateSysCode.getShortDescription());
+            stateCode.setId(stateSysCode.getSystemId().toString());
+            esAddress.setStateName(stateSysCode.getShortDescription());
+            esAddress.setStateCode(stateSysCode.getLogicalId());
+          }
+
+          ElasticSearchSystemCode countyCode = new ElasticSearchSystemCode();
+          esAddress.setCountySystemCode(countyCode);
+          SystemCode countySysCode =
+              SystemCodeCache.global().getSystemCode(repAddress.getGovernmentEntityCd());
+          if (countySysCode != null) {
+            countyCode.setDescription(countySysCode.getShortDescription());
+            countyCode.setId(countySysCode.getSystemId().toString());
+          }
+
+          if (repAddress.getApiAdrUnitType() != null
+              && repAddress.getApiAdrUnitType().intValue() != 0) {
+            esAddress.setUnitType(SystemCodeCache.global()
+                .getSystemCodeShortDescription(repAddress.getApiAdrUnitType()));
+          }
         }
       }
     }
