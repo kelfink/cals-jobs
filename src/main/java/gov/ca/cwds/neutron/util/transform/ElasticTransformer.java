@@ -26,6 +26,7 @@ import gov.ca.cwds.dao.ApiClientCountyAware;
 import gov.ca.cwds.dao.ApiClientRaceAndEthnicityAware;
 import gov.ca.cwds.dao.ApiClientSafetyAlertsAware;
 import gov.ca.cwds.dao.ApiLegacyAware;
+import gov.ca.cwds.dao.ApiMultipleClientAddressAware;
 import gov.ca.cwds.dao.ApiMultiplePersonAware;
 import gov.ca.cwds.dao.ApiOtherClientNamesAware;
 import gov.ca.cwds.dao.ApiScreeningAware;
@@ -46,7 +47,6 @@ import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiLanguageAware;
-import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
 import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
@@ -356,16 +356,8 @@ public final class ElasticTransformer {
   protected static List<ElasticSearchPersonAddress> buildAddress(ApiPersonAware p) {
     List<ElasticSearchPersonAddress> ret = null;
 
-    if (p instanceof ApiMultipleAddressesAware) {
-      ret = new ArrayList<>();
-      ApiMultipleAddressesAware madrx = (ApiMultipleAddressesAware) p;
-      for (ApiAddressAware adrx : madrx.getAddresses()) {
-        ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress(adrx);
-        if (adrx instanceof ApiLegacyAware) {
-          esAddress.setLegacyDescriptor(((ApiLegacyAware) adrx).getLegacyDescriptor());
-        }
-        ret.add(esAddress);
-      }
+    if (p instanceof ApiMultipleClientAddressAware) {
+      ret = ((ApiMultipleClientAddressAware) p).getElasticSearchPersonAddresses();
     } else if (p instanceof ApiAddressAware) {
       ret = new ArrayList<>();
       ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress((ApiAddressAware) p);

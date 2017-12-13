@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
@@ -27,8 +28,10 @@ import gov.ca.cwds.dao.ApiClientCaseAware;
 import gov.ca.cwds.dao.ApiClientCountyAware;
 import gov.ca.cwds.dao.ApiClientRaceAndEthnicityAware;
 import gov.ca.cwds.dao.ApiClientSafetyAlertsAware;
+import gov.ca.cwds.dao.ApiMultipleClientAddressAware;
 import gov.ca.cwds.dao.ApiOtherClientNamesAware;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
@@ -36,13 +39,12 @@ import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseClient;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
-import gov.ca.cwds.data.std.ApiAddressAware;
-import gov.ca.cwds.data.std.ApiMultipleAddressesAware;
 import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
+import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCode;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -81,28 +83,22 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         + "z.HISP_UD_CD, z.SOCPLC_CD, z.CL_INDX_NO, z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
         + "from {h-schema}CLIENT_T z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR",
     resultClass = ReplicatedClient.class)
-//@formatter:off
+// @formatter:off
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient.findByTemp",
-    query = 
-        "\nSELECT \n"
-            + "    c.IDENTIFIER \n"
-            + "  , trim(c.COM_FST_NM) AS COM_FST_NM \n"
-            + "  , trim(c.COM_LST_NM) AS COM_LST_NM \n"
-            + "  , c.SENSTV_IND \n"
-            + "  , c.LST_UPD_TS \n"
-            + "  , c.IBMSNAP_LOGMARKER \n"
-            + "  , c.IBMSNAP_OPERATION \n"
-            + " FROM {h-schema}GT_ID GT \n"
-            + " JOIN {h-schema}CLIENT_T C ON C.IDENTIFIER = GT.IDENTIFIER \n"
+    query = "\nSELECT \n" + "    c.IDENTIFIER \n" + "  , trim(c.COM_FST_NM) AS COM_FST_NM \n"
+        + "  , trim(c.COM_LST_NM) AS COM_LST_NM \n" + "  , c.SENSTV_IND \n" + "  , c.LST_UPD_TS \n"
+        + "  , c.IBMSNAP_LOGMARKER \n" + "  , c.IBMSNAP_OPERATION \n"
+        + " FROM {h-schema}GT_ID GT \n"
+        + " JOIN {h-schema}CLIENT_T C ON C.IDENTIFIER = GT.IDENTIFIER \n"
         + " FOR READ ONLY WITH UR ",
     resultClass = ReplicatedClient.class)
-//@formatter:on
+// @formatter:on
 @Entity
 @Table(name = "CLIENT_T")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReplicatedClient extends BaseClient implements ApiPersonAware,
-    ApiMultipleLanguagesAware, ApiMultipleAddressesAware, ApiMultiplePhonesAware,
+    ApiMultipleLanguagesAware, ApiMultipleClientAddressAware, ApiMultiplePhonesAware,
     CmsReplicatedEntity, ApiClientCountyAware, ApiClientRaceAndEthnicityAware,
     ApiClientSafetyAlertsAware, ApiOtherClientNamesAware, ApiClientCaseAware {
 
@@ -244,15 +240,82 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   }
 
   // ============================
-  // ApiMultipleAddressesAware:
+  // ApiMultipleClientAddressAware:
   // ============================
 
   @JsonIgnore
   @Override
-  public ApiAddressAware[] getAddresses() {
-    return clientAddresses.stream().flatMap(ca -> ca.getAddresses().stream())
-        .collect(Collectors.toList()).toArray(new ApiAddressAware[0]);
+  public List<ElasticSearchPersonAddress> getElasticSearchPersonAddresses() {
+    List<ElasticSearchPersonAddress> esClientAddresses = new ArrayList<>();
+
+    for (ReplicatedClientAddress repClientAddress : this.clientAddresses) {
+      String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
+      String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());
+      String addressActive = StringUtils.isBlank(effectiveEndDate) ? "true" : "false";
+      ElasticSearchSystemCode addressType = new ElasticSearchSystemCode();
+
+      SystemCode addressTypeSystemCode =
+          SystemCodeCache.global().getSystemCode(repClientAddress.getAddressType());
+      if (addressTypeSystemCode != null) {
+        addressType.setDescription(addressTypeSystemCode.getShortDescription());
+        addressType.setId(addressTypeSystemCode.getSystemId().toString());
+      }
+
+      for (ReplicatedAddress repAddress : repClientAddress.getAddresses()) {
+        ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress();
+        esClientAddresses.add(esAddress);
+
+        esAddress.setLegacyDescriptor(repAddress.getLegacyDescriptor());
+        esAddress.setId(repAddress.getAddressId());
+        esAddress.setCity(repAddress.getCity());
+        esAddress.setCounty(repAddress.getCounty());
+        esAddress.setState(repAddress.getState());
+        esAddress.setZip(repAddress.getZip());
+        esAddress.setZip4(repAddress.getApiAdrZip4());
+        esAddress.setStreetName(repAddress.getStreetName());
+        esAddress.setStreetNumber(repAddress.getStreetNumber());
+        esAddress.setUnitNumber(repAddress.getApiAdrUnitNumber());
+        esAddress.setEffectiveStartDate(effectiveStartDate);
+        esAddress.setEffectiveEndDate(effectiveEndDate);
+        esAddress.setType(addressType);
+        esAddress.setActive(addressActive);
+
+        ElasticSearchSystemCode stateCode = new ElasticSearchSystemCode();
+        esAddress.setStateSystemCode(stateCode);
+        SystemCode stateSysCode = SystemCodeCache.global().getSystemCode(repAddress.getStateCd());
+        if (stateSysCode != null) {
+          stateCode.setDescription(stateSysCode.getShortDescription());
+          stateCode.setId(stateSysCode.getSystemId().toString());
+          esAddress.setStateName(stateSysCode.getShortDescription());
+          esAddress.setStateCode(stateSysCode.getLogicalId());
+        }
+
+        ElasticSearchSystemCode countyCode = new ElasticSearchSystemCode();
+        esAddress.setCountySystemCode(countyCode);
+        SystemCode countySysCode =
+            SystemCodeCache.global().getSystemCode(repAddress.getGovernmentEntityCd());
+        if (countySysCode != null) {
+          countyCode.setDescription(countySysCode.getShortDescription());
+          countyCode.setId(countySysCode.getSystemId().toString());
+        }
+
+        if (repAddress.getApiAdrUnitType() != null
+            && repAddress.getApiAdrUnitType().intValue() != 0) {
+          esAddress.setUnitType(SystemCodeCache.global()
+              .getSystemCodeShortDescription(repAddress.getApiAdrUnitType()));
+        }
+      }
+    }
+
+    return esClientAddresses;
   }
+
+  // @JsonIgnore
+  // @Override
+  // public ApiAddressAware[] getAddresses() {
+  // return clientAddresses.stream().flatMap(ca -> ca.getAddresses().stream())
+  // .collect(Collectors.toList()).toArray(new ApiAddressAware[0]);
+  // }
 
   // ============================
   // ApiMultiplePhonesAware:

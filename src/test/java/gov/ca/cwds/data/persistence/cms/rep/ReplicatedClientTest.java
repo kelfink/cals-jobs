@@ -21,11 +21,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
+import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
-import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.jobs.Goddard;
 
@@ -89,8 +89,8 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void getAddresses_Args__() throws Exception {
-    ApiAddressAware[] actual = target.getAddresses();
-    ApiAddressAware[] expected = new ApiAddressAware[0];
+    List<ElasticSearchPersonAddress> actual = target.getElasticSearchPersonAddresses();
+    List<ElasticSearchPersonAddress> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -161,7 +161,7 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void setClientRaces_Args__List() throws Exception {
-    List<Short> clientRaces = new ArrayList<Short>();
+    List<Short> clientRaces = new ArrayList<>();
     target.setClientRaces(clientRaces);
   }
 
@@ -197,7 +197,7 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void setAkas_Args__Map() throws Exception {
-    Map<String, ElasticSearchPersonAka> akas = new HashMap<String, ElasticSearchPersonAka>();
+    Map<String, ElasticSearchPersonAka> akas = new HashMap<>();
     target.setAkas(akas);
   }
 
@@ -216,8 +216,7 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void setSafetyAlerts_Args__Map() throws Exception {
-    Map<String, ElasticSearchSafetyAlert> safetyAlerts =
-        new HashMap<String, ElasticSearchSafetyAlert>();
+    Map<String, ElasticSearchSafetyAlert> safetyAlerts = new HashMap<>();
     target.setSafetyAlerts(safetyAlerts);
   }
 
