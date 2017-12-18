@@ -1,6 +1,10 @@
 buildscript {
     repositories {
-         jcenter()
+        maven {
+            url "http://sonar.dev.cwds.io:8081/artifactory/repo"
+        }
+        jcenter()
+    }
     }
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
