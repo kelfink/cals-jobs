@@ -220,7 +220,7 @@ task testEsDockerCreateImage(type: Exec, dependsOn: [checkDockerService, testEsD
     doFirst {
         commandLine 'docker', 'build', '-t', testEsDockerImageName,
                 '-f', "$rootProject.projectDir/cals/src/test/resources/es/Dockerfile",
-                '--build-arg', "ELASTICSEARCH_VERSION=$project.elasticsearchVersion",
+                '--build-arg',
                 "$rootProject.projectDir/cals/src/test/resources/es/"
     }
 }
@@ -229,7 +229,7 @@ task testEsDockerStartContainer(type: Exec, dependsOn: [checkDockerService, test
     testEsDockerCreateImage.mustRunAfter(checkDockerService)
     environment << dockerEnvVars
     doFirst {
-        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "$project.elasticPort:9200", '-p', '9300:9300', '-e', "http.host=0.0.0.0", '-e', "transport.host=127.0.0.1", testEsDockerImageName
+        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "$project.elasticPort:1500", '-p', '9300:9300', '-e', "http.host=0.0.0.0", '-e', "transport.host=127.0.0.1", testEsDockerImageName
     }
     doLast {
         waitForPortToOpen(project.elasticHost, project.elasticPort, 1000, 60)
