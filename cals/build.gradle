@@ -220,7 +220,7 @@ task testEsDockerCreateImage(type: Exec, dependsOn: [checkDockerService, testEsD
     doFirst {
         commandLine 'docker', 'build', '-t', testEsDockerImageName,
                 '-f', "$rootProject.projectDir/cals/src/test/resources/es/Dockerfile",
-                '--build-arg',
+                '--build-arg', "ELASTICSEARCH_VERSION=$project.elasticsearchVersion",
                 "$rootProject.projectDir/cals/src/test/resources/es/"
     }
 }
