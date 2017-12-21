@@ -229,7 +229,7 @@ task testEsDockerStartContainer(type: Exec, dependsOn: [checkDockerService, test
     testEsDockerCreateImage.mustRunAfter(checkDockerService)
     environment << dockerEnvVars
     doFirst {
-        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "$project.elasticPort:1500", '-p', '9300:9300', '-e', "http.host=0.0.0.0", '-e', "transport.host=127.0.0.1", testEsDockerImageName
+        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "1500:$project.elasticPort", '-p', '9300:9300', '-e', "http.host=0.0.0.0", '-e', "transport.host=127.0.0.1", testEsDockerImageName
     }
     doLast {
         waitForPortToOpen(project.elasticHost, project.elasticPort, 1000, 60)
