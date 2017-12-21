@@ -6,10 +6,10 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import gov.ca.cwds.generic.jobs.config.JobOptions;
 import gov.ca.cwds.jobs.cals.facility.FacilityIncrementalLoadDateStrategy;
 import gov.ca.cwds.jobs.cals.facility.LISFacilityIncrementalLoadDateStrategy;
 import gov.ca.cwds.jobs.cals.rfa.RFA1aFormIncrementalLoadDateStrategy;
-import gov.ca.cwds.jobs.config.JobOptions;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

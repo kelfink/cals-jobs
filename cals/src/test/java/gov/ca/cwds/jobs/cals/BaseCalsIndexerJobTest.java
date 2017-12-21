@@ -31,7 +31,7 @@ public abstract class BaseCalsIndexerJobTest {
   protected static final String CALSNS_PASSWORD = "";
   protected static final String TIME_FILES_DIR = System.getProperty("user.dir");
 
-  private static final String ES_HOSTNAME = "127.0.0.1";
+  private static final String ES_HOSTNAME = "localhost";
   private static final int ES_PORT = 9200;
 
   protected static RestClient anonymousRestClient;
