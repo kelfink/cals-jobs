@@ -1,0 +1,11 @@
+elasticsearch.host: localhost
+elasticsearch.port: 9300
+elasticsearch.cluster: elasticsearch
+elasticsearch.alias: rfa1aforms
+elasticsearch.doctype: rfa1aform
+#
+elasticsearch.index.settings: config/cals/rfa/rfa.settings.json
+elasticsearch.document.mapping: config/cals/rfa/rfa.mapping.json
+#
+elasticsearch.xpack.user: elastic
+elasticsearch.xpack.password: changeme

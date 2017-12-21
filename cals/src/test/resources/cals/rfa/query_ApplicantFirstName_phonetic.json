@@ -1,0 +1,12 @@
+{
+  "query": {
+    "nested" : {
+      "path" : "applicants",
+      "query": {
+        "match" : {
+          "applicants.last_name.phonetic" : "smeet"
+        }
+      }
+    }
+  }
+}

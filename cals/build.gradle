@@ -1,0 +1,239 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+    }
+}
+
+version = parent.version
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'jacoco'
+
+project.ext {
+    calsApiVersion =  '0.4.4-SNAPSHOT'
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://maven2.cwds.tabordasolutions.net"
+    }
+    maven { url "http://sonar.dev.cwds.io:8081/artifactory/repo" }
+    maven {
+        url "https://artifacts.elastic.co/maven"
+    }
+}
+
+
+dependencies {
+//    compile project(project.parent.path)
+
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+    testCompile group: 'com.h2database', name: 'h2', version: '1.4.195'
+    testCompile 'org.mockito:mockito-core:2.0.54-beta'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
+    testCompile('org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:2.23.2') {
+        exclude group: 'javax.servlet', module: 'javax.servlet-api'
+        exclude group: 'junit', module: 'junit'
+    }
+
+    // CALS API for CALS Jobs
+    compile (group: 'gov.ca.cwds.cals', name: 'cals-api', version: calsApiVersion) {
+        exclude group: 'org.bouncycastle'
+        exclude group: 'gov.ca.cwds.api', module: 'api-core'
+        exclude group: 'org.liquibase', module: 'liquibase-core'
+    }
+
+    // https://mvnrepository.com/artifact/nl.jqno.equalsverifier/equalsverifier
+    testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
+    testCompile 'org.ow2.asm:asm-all:5.1'
+    testCompile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
+
+
+    //from main gradle file
+
+    // ES 5.x:
+    compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
+    compile group: 'org.elasticsearch.client', name: 'transport', version: elasticsearchVersion
+    compile ("org.elasticsearch.client:x-pack-transport:" + elasticsearchVersion)
+
+    compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
+
+    compile group: 'javax.validation', name: 'validation-api', version: '1.1.0.Final'
+
+    // LOGGING:
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
+    compile group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4jVersion
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.1'
+    compile group: 'org.slf4j', name: 'slf4j-ext', version: '1.7.25'
+
+    compile group: 'com.google.inject', name: 'guice', version: '4.1.0'
+    compile 'com.google.inject.extensions:guice-jmx:4.1.0'
+
+    compile group: "org.postgresql", name: "postgresql", version: "9.4.1212"
+    compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.1.0"
+    compile 'org.hibernate:hibernate-c3p0:5.2.10.Final'
+
+    // Exclude transitive dependencies.
+    compile ('gov.ca.cwds.api:api-core:3.6.458') {
+        exclude group: 'org.glassfish.jersey.core'
+        exclude group: 'ch.qos.logback'
+        exclude group: 'org.slf4j'
+    }
+
+    compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
+    compile group: "javax.el", name: "javax.el-api", version: "2.2.4"
+    compile group: "org.glassfish.web", name: "javax.el", version: "2.2.4"
+    compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.8.3'
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+
+    compile 'com.fasterxml.jackson.module:jackson-module-guice:2.8.2'
+    compile group: 'org.json', name: 'json', version: '20090211'
+    compile 'io.reactivex.rxjava2:rxjavafx:2.2.0'
+
+    compile fileTree(dir: 'lib', include: ['*.jar'])
+
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+    testCompile group: 'com.h2database', name: 'h2', version: '1.4.195'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.10.0'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
+    testCompile('org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:2.23.2') {
+        exclude group: 'javax.servlet', module: 'javax.servlet-api'
+        exclude group: 'junit', module: 'junit'
+    }
+
+    // https://mvnrepository.com/artifact/nl.jqno.equalsverifier/equalsverifier
+    testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
+    testCompile 'org.ow2.asm:asm-all:5.2'
+    // testCompile 'org.jacoco:jacoco:0.7.9'
+}
+
+import org.apache.tools.ant.taskdefs.condition.Os
+
+project.ext {
+    // assume that Windows users use the Docker Toolbox
+    buildEnv = System.env.BUILD_ENV ?: (Os.isFamily(Os.FAMILY_WINDOWS) ? 'WIN_DEV' : 'JENKINS')
+    devDockerHost = System.env.DEV_DOCKER_HOST ?: 'localhost'
+    devDockerPort = 2376
+    elasticHost = 'localhost'
+    elasticPort = 9200
+    log4jVersion = "2.8"
+    elasticsearchVersion = "5.6.0"
+    calsApiVersion =  '3.6-SNAPSHOT'
+}
+
+
+project.ext.dockerEnvVars = project.buildEnv != 'WIN_DEV' ? [:] : [
+        DOCKER_CERT_PATH: System.getProperty("user.home") + '/.docker/machine/machines/default',
+        DOCKER_HOST: "tcp://$project.devDockerHost:$project.devDockerPort",
+        DOCKER_MACHINE_NAME: 'default',
+        DOCKER_TLS_VERIFY: '1',
+        COMPOSE_CONVERT_WINDOWS_PATHS: 'true'
+]
+
+def testEsDockerImageName = 'cwds/jobs-test-elasticsearch'
+def testEsContainerName = 'jobs-test-elasticsearch'
+
+shadowJar {
+    zip64 true
+    classifier = ''
+    baseName = (System.properties.getProperty('baseName') != null) ? System.properties.getProperty('baseName') : 'cals-jobs'
+    mergeServiceFiles()
+    /*manifest {
+        Attributes 'Main-Class': (System.properties.getProperty('mainClass') != null) ? System.properties.getProperty('mainClass') : 'gov.ca.cwds.jobs.cals.facility.FacilityIndexerJob'
+    }*/
+    version version + ((System.properties.getProperty('build') != null ) ? '.' + System.properties.getProperty('build') : '')
+}
+
+
+static def isPortOpen(host, port) {
+    try {
+        Socket socket = new Socket(host, port)
+        socket.close()
+        return true
+    } catch (IOException e) {
+        return false
+    }
+}
+
+void waitForPortToOpen(host, port, millis, maxAttempts) {
+    boolean isOpen = false
+    int attempts = 0
+    while (!isOpen) {
+        if (++attempts > maxAttempts) throw new GradleException("Failed to wait for $host:$port to open")
+        isOpen = isPortOpen(host, port)
+        if (isOpen) {
+            println "\n$host:$port is open"
+        } else {
+            println "\nWaiting ${millis}ms for $host:$port to open ($attempts/$maxAttempts)..."
+            sleep(millis)
+        }
+    }
+}
+
+task checkDockerService(type: Exec) {
+    enabled = project.buildEnv == 'WIN_DEV'
+    doFirst {
+        if (!isPortOpen(project.devDockerHost, project.devDockerPort)) {
+            throw new GradleException('Docker service is not available. Windows users should start Docker Quickstart Terminal of Docker Toolbox')
+        }
+        // update system limits on the docker host machine, so the elasticsearch service can start in a container
+        commandLine 'docker-machine', 'ssh', 'default', 'sudo', 'sysctl', '-w', 'vm.max_map_count=262144'
+    }
+}
+
+task testEsDockerCleanUpBeforeTest(type: Exec, dependsOn: checkDockerService) {
+    ignoreExitValue true
+    environment << dockerEnvVars
+    doFirst {
+        commandLine 'docker', 'rm', '-v', '--force', testEsContainerName
+    }
+    doLast {
+        commandLine 'docker', 'rmi', '-v', '--force', testEsDockerImageName
+    }
+}
+// have to duplicate the clean up actions to avoid circular dependencies, to be optimized
+task testEsDockerCleanUpAfterTest(type: Exec, dependsOn: checkDockerService) {
+    ignoreExitValue true
+    environment << dockerEnvVars
+    doFirst {
+        commandLine 'docker', 'rm', '-v', '--force', testEsContainerName
+    }
+    doLast {
+        commandLine 'docker', 'rmi', '-v', '--force', testEsDockerImageName
+    }
+}
+
+task testEsDockerCreateImage(type: Exec, dependsOn: [checkDockerService, testEsDockerCleanUpBeforeTest]) {
+    testEsDockerCleanUpBeforeTest.mustRunAfter(checkDockerService)
+    environment << dockerEnvVars
+    doFirst {
+        commandLine 'docker', 'build', '-t', testEsDockerImageName,
+                '-f', "$rootProject.projectDir/cals/src/test/resources/es/Dockerfile",
+                '--build-arg', "ELASTICSEARCH_VERSION=$project.elasticsearchVersion",
+                "$rootProject.projectDir/cals/src/test/resources/es/"
+    }
+}
+
+task testEsDockerStartContainer(type: Exec, dependsOn: [checkDockerService, testEsDockerCreateImage]) {
+    testEsDockerCreateImage.mustRunAfter(checkDockerService)
+    environment << dockerEnvVars
+    doFirst {
+        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "$project.elasticPort:9200", '-p', '9300:9300', '-e', "http.host=0.0.0.0", '-e', "transport.host=127.0.0.1", testEsDockerImageName
+    }
+    doLast {
+        waitForPortToOpen(project.elasticHost, project.elasticPort, 1000, 60)
+    }
+}
+
+test.dependsOn testEsDockerStartContainer
+test.finalizedBy testEsDockerCleanUpAfterTest
