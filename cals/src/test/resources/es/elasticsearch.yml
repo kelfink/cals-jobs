@@ -90,6 +90,7 @@ transport.profiles.default.bind_host: 0.0.0.0
 action.auto_create_index: .security,.monitoring*,.watches,.triggered_watches,.watcher-history*
 cluster.name: elasticsearch
 xpack.security.enabled: false
-transport.host: 127.0.0.1
+transport.host: 0.0.0.0
+#transport.host: 127.0.0.1
 http.host: 0.0.0.0
 network.host: 0.0.0.0
