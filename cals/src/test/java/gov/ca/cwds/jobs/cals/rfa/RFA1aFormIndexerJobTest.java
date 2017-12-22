@@ -12,13 +12,12 @@ import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * @author CWDS TPT-2
  */
-@Ignore
+//@Ignore
 public class RFA1aFormIndexerJobTest extends BaseCalsIndexerJobTest {
 
   private static final String TEST_CONFIG = "src/test/resources/config/cals/rfa/CALS_RFA1aForm.yaml";

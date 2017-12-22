@@ -183,7 +183,7 @@ void waitForPortToOpen(host, port, millis, maxAttempts) {
 }
 
 task checkDockerService(type: Exec) {
-    enabled = project.buildEnv == 'WIN_DEV'
+//    enabled = project.buildEnv == 'WIN_DEV'
     doFirst {
         if (!isPortOpen(project.devDockerHost, project.devDockerPort)) {
             throw new GradleException('Docker service is not available. Windows users should start Docker Quickstart Terminal of Docker Toolbox')
@@ -231,7 +231,7 @@ task testEsDockerStartContainer(type: Exec, dependsOn: [checkDockerService, test
     testEsDockerCreateImage.mustRunAfter(checkDockerService)
     environment << dockerEnvVars
     doFirst {
-        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "9216:$project.elasticPort", '-p', '9316:9300', '-e', "http.host=0.0.0.0", '-e', "transport.host=127.0.0.1", '-e', "cluster.name=elasticsearch", testEsDockerImageName
+        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "9216:$project.elasticPort", '-p', '9316:9300', '-e', "http.host=0.0.0.0", '-e', "transport.host=127.0.0.1", testEsDockerImageName
 //        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "9216:$project.elasticPort", '-p', '9316:9300', testEsDockerImageName
     }
     doLast {
