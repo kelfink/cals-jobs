@@ -16,7 +16,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
 
 project.ext {
-    calsApiVersion =  '0.4.4-SNAPSHOT'
+    calsApiVersion = '0.4.4-SNAPSHOT'
 //    calsApiVersion =  '3.6-SNAPSHOT'
 }
 
@@ -47,7 +47,7 @@ dependencies {
     }
 
     // CALS API for CALS Jobs
-    compile (group: 'gov.ca.cwds.cals', name: 'cals-api', version: calsApiVersion) {
+    compile(group: 'gov.ca.cwds.cals', name: 'cals-api', version: calsApiVersion) {
         exclude group: 'org.bouncycastle'
         exclude group: 'gov.ca.cwds.api', module: 'api-core'
         exclude group: 'org.liquibase', module: 'liquibase-core'
@@ -58,13 +58,12 @@ dependencies {
     testCompile 'org.ow2.asm:asm-all:5.1'
     testCompile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
 
-
     //from main gradle file
 
     // ES 5.x:
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
     compile group: 'org.elasticsearch.client', name: 'transport', version: elasticsearchVersion
-    compile ("org.elasticsearch.client:x-pack-transport:" + elasticsearchVersion)
+    compile("org.elasticsearch.client:x-pack-transport:" + elasticsearchVersion)
 
     compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
 
@@ -85,7 +84,7 @@ dependencies {
     compile 'org.hibernate:hibernate-c3p0:5.2.10.Final'
 
     // Exclude transitive dependencies.
-    compile ('gov.ca.cwds.api:api-core:3.6.458') {
+    compile('gov.ca.cwds.api:api-core:3.6.458') {
         exclude group: 'org.glassfish.jersey.core'
         exclude group: 'ch.qos.logback'
         exclude group: 'org.slf4j'
@@ -115,7 +114,6 @@ dependencies {
     // https://mvnrepository.com/artifact/nl.jqno.equalsverifier/equalsverifier
     testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
     testCompile 'org.ow2.asm:asm-all:5.2'
-    // testCompile 'org.jacoco:jacoco:0.7.9'
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -128,17 +126,16 @@ project.ext {
     elasticHost = 'localhost'
     elasticPort = 9200
     log4jVersion = "2.8"
-//    elasticsearchVersion = "5.6.0"
     elasticsearchVersion = "5.5.2"
 //    calsApiVersion =  '3.6-SNAPSHOT'
 }
 
 
 project.ext.dockerEnvVars = project.buildEnv != 'WIN_DEV' ? [:] : [
-        DOCKER_CERT_PATH: System.getProperty("user.home") + '/.docker/machine/machines/default',
-        DOCKER_HOST: "tcp://$project.devDockerHost:$project.devDockerPort",
-        DOCKER_MACHINE_NAME: 'default',
-        DOCKER_TLS_VERIFY: '1',
+        DOCKER_CERT_PATH             : System.getProperty("user.home") + '/.docker/machine/machines/default',
+        DOCKER_HOST                  : "tcp://$project.devDockerHost:$project.devDockerPort",
+        DOCKER_MACHINE_NAME          : 'default',
+        DOCKER_TLS_VERIFY            : '1',
         COMPOSE_CONVERT_WINDOWS_PATHS: 'true'
 ]
 
@@ -153,7 +150,7 @@ shadowJar {
     /*manifest {
         Attributes 'Main-Class': (System.properties.getProperty('mainClass') != null) ? System.properties.getProperty('mainClass') : 'gov.ca.cwds.jobs.cals.facility.FacilityIndexerJob'
     }*/
-    version version + ((System.properties.getProperty('build') != null ) ? '.' + System.properties.getProperty('build') : '')
+    version version + ((System.properties.getProperty('build') != null) ? '.' + System.properties.getProperty('build') : '')
 }
 
 
@@ -183,11 +180,11 @@ void waitForPortToOpen(host, port, millis, maxAttempts) {
 }
 
 task checkDockerService(type: Exec) {
-//    enabled = project.buildEnv == 'WIN_DEV'
+    enabled = project.buildEnv == 'WIN_DEV'
     doFirst {
-//        if (!isPortOpen(project.devDockerHost, project.devDockerPort)) {
-//            throw new GradleException('Docker service is not available. Windows users should start Docker Quickstart Terminal of Docker Toolbox')
-//        }
+        if (!isPortOpen(project.devDockerHost, project.devDockerPort)) {
+            throw new GradleException('Docker service is not available. Windows users should start Docker Quickstart Terminal of Docker Toolbox')
+        }
         // update system limits on the docker host machine, so the elasticsearch service can start in a container
         commandLine 'docker-machine', 'ssh', 'default', 'sudo', 'sysctl', '-w', 'vm.max_map_count=262144'
     }
@@ -205,7 +202,6 @@ task testEsDockerCleanUpBeforeTest(type: Exec, dependsOn: checkDockerService) {
 }
 // have to duplicate the clean up actions to avoid circular dependencies, to be optimized
 task testEsDockerCleanUpAfterTest(type: Exec, dependsOn: checkDockerService) {
-//    enabled = false
     ignoreExitValue true
     environment << dockerEnvVars
     doFirst {
@@ -232,10 +228,8 @@ task testEsDockerStartContainer(type: Exec, dependsOn: [checkDockerService, test
     environment << dockerEnvVars
     doFirst {
         commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "9216:$project.elasticPort", '-p', '9316:9300', '-e', "http.host=0.0.0.0", '-e', "transport.host=127.0.0.1", testEsDockerImageName
-//        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "9216:$project.elasticPort", '-p', '9316:9300', testEsDockerImageName
     }
     doLast {
-//        waitForPortToOpen(project.elasticHost, project.elasticPort, 1000, 60)
         waitForPortToOpen(project.elasticHost, 9216, 1000, 60)
     }
 }
