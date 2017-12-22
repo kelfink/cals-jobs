@@ -32,9 +32,10 @@ public abstract class BaseCalsIndexerJobTest {
   protected static final String TIME_FILES_DIR = System.getProperty("user.dir");
 
   private static final String ES_HOSTNAME = "localhost";
-  private static final int ES_PORT = 1500;
+  private static final int ES_PORT = 9200;
+//  private static final int ES_PORT = 1500;
 
-  protected static RestClient anonymousRestClient;
+  //  protected static RestClient anonymousRestClient;
   protected static RestClient restClient;
 
   protected static String createTestDbFile(String schema) throws Exception {
@@ -45,9 +46,8 @@ public abstract class BaseCalsIndexerJobTest {
 
   @BeforeClass
   public static void initClients() {
-    anonymousRestClient = RestClient.builder(
-        new HttpHost(ES_HOSTNAME, ES_PORT, "http")).build();
-
+//    anonymousRestClient = RestClient.builder(
+//        new HttpHost(ES_HOSTNAME, ES_PORT, "http")).build();
     // create authorized REST client
     final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
     credentialsProvider.setCredentials(AuthScope.ANY,
@@ -62,7 +62,7 @@ public abstract class BaseCalsIndexerJobTest {
   @AfterClass
   public static void closeClients() throws IOException {
     try {
-      anonymousRestClient.close();
+//      anonymousRestClient.close();
     } finally {
       restClient.close();
     }

@@ -17,6 +17,7 @@ apply plugin: 'jacoco'
 
 project.ext {
     calsApiVersion =  '0.4.4-SNAPSHOT'
+//    calsApiVersion =  '3.6-SNAPSHOT'
 }
 
 sourceCompatibility = 1.8
@@ -128,7 +129,7 @@ project.ext {
     elasticPort = 9200
     log4jVersion = "2.8"
 //    elasticsearchVersion = "5.6.0"
-    elasticsearchVersion = "5.5.1"
+    elasticsearchVersion = "5.5.2"
 //    calsApiVersion =  '3.6-SNAPSHOT'
 }
 
@@ -204,6 +205,7 @@ task testEsDockerCleanUpBeforeTest(type: Exec, dependsOn: checkDockerService) {
 }
 // have to duplicate the clean up actions to avoid circular dependencies, to be optimized
 task testEsDockerCleanUpAfterTest(type: Exec, dependsOn: checkDockerService) {
+//    enabled = false
     ignoreExitValue true
     environment << dockerEnvVars
     doFirst {
@@ -229,7 +231,8 @@ task testEsDockerStartContainer(type: Exec, dependsOn: [checkDockerService, test
     testEsDockerCreateImage.mustRunAfter(checkDockerService)
     environment << dockerEnvVars
     doFirst {
-        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "1500:$project.elasticPort", '-p', '1600:9300', '-e', "http.host=0.0.0.0", '-e', "transport.host=127.0.0.1", testEsDockerImageName
+//        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "1500:$project.elasticPort", '-p', '1600:9300', '-e', "http.host=0.0.0.0", '-e', "transport.host=127.0.0.1", testEsDockerImageName
+        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "9200:$project.elasticPort", '-p', '9300:9300', '-e', "http.host=0.0.0.0", '-e', "transport.host=127.0.0.1", testEsDockerImageName
     }
     doLast {
         waitForPortToOpen(project.elasticHost, project.elasticPort, 1000, 60)
