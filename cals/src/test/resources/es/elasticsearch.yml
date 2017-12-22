@@ -88,8 +88,6 @@ transport.profiles.default.bind_host: 0.0.0.0
 #
 #action.destructive_requires_name: true
 action.auto_create_index: .security,.monitoring*,.watches,.triggered_watches,.watcher-history*
-cluster.name: elasticsearch
-network.host: 0.0.0.0
-http.host: 0.0.0.0
-transport.host: 127.0.0.1
-xpack.security.enabled: false
+#cluster.name: elasticsearch
+#transport.host: 127.0.0.1
+#http.host: 0.0.0.0
