@@ -62,7 +62,7 @@ public class RFA1aFormIndexerJobTest extends BaseCalsIndexerJobTest {
   @Ignore
   @Test(expected = ResponseException.class)
   public void testUnauthorized() throws Exception {
-    anonymousRestClient.performRequest("GET", "/");
+//    anonymousRestClient.performRequest("GET", "/");
   }
 
   @Test

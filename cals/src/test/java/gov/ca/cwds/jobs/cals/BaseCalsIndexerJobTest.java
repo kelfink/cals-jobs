@@ -32,8 +32,8 @@ public abstract class BaseCalsIndexerJobTest {
   protected static final String TIME_FILES_DIR = System.getProperty("user.dir");
 
   private static final String ES_HOSTNAME = "localhost";
-  private static final int ES_PORT = 9200;
-//  private static final int ES_PORT = 1500;
+//  private static final int ES_PORT = 9200;
+  private static final int ES_PORT = 9216;
 
   //  protected static RestClient anonymousRestClient;
   protected static RestClient restClient;
