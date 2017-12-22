@@ -30,7 +30,8 @@ node ('dora-slave'){
     stage ('Push to artifactory'){
         rtGradle.deployer repo:'libs-snapshot', server: serverArti
         rtGradle.deployer.deployArtifacts = true
-        buildInfo = rtGradle.run buildFile: 'build.gradle', switches: "--info", tasks: 'artifactoryPublish'
+        //buildInfo = rtGradle.run buildFile: 'build.gradle', switches: "--info", tasks: 'artifactoryPublish'
+        buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish'
         rtGradle.deployer.deployArtifacts = false
 	}
 	stage('Clean WorkSpace') {

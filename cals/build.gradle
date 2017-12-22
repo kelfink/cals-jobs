@@ -236,3 +236,19 @@ task testEsDockerStartContainer(type: Exec, dependsOn: [checkDockerService, test
 
 test.dependsOn testEsDockerStartContainer
 test.finalizedBy testEsDockerCleanUpAfterTest
+
+publishing {
+    publications {
+        shadow(MavenPublication) {
+            from components.shadow
+            groupId 'gov.ca.cwds.jobs'
+            artifactId 'cals-jobs-shadow'
+            version version + ((System.properties.getProperty('build') != null) ? '.' + System.properties.getProperty('build') : '')
+        }
+    }
+    repositories {
+        maven {
+            url "http://sonar.dev.cwds.io:8081/artifactory/repo"
+        }
+    }
+}
