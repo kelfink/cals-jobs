@@ -23,7 +23,8 @@ apply plugin: 'jacoco'
 
 project.ext {
     log4jVersion = "2.8"
-    elasticsearchVersion = "5.5.2"
+//    elasticsearchVersion = "5.5.2"
+    elasticsearchVersion = "5.6.0"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
     dropwizardVersion = "1.1.0"
 }
