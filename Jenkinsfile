@@ -2,7 +2,13 @@ node ('dora-slave'){
    def artifactVersion="3.3-SNAPSHOT"
    def serverArti = Artifactory.server 'CWDS_DEV'
    def rtGradle = Artifactory.newGradleBuild()
-   properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false], parameters([string(defaultValue: 'latest', description: '', name: 'APP_VERSION'), string(defaultValue: 'development', description: '', name: 'branch'), string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')]), pipelineTriggers([pollSCM('H/5 * * * *')])])
+   properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
+   disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+   parameters([
+        booleanParam(defaultValue: true, description: '', name: 'USE_NEWRELIC'),
+        string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
+        string(defaultValue: 'development', description: '', name: 'branch'),
+        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')]), pipelineTriggers([pollSCM('H/5 * * * *')])])
   try {
    stage('Preparation') {
           cleanWs()
@@ -39,7 +45,14 @@ node ('dora-slave'){
 		sh ('docker-compose down -v')
 		publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests/test', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
 
-	}cd
+	}
+	stage('Deploy Application'){
+	   checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/facility-jobs']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/de-ansible.git']]]
+	   sh 'ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e Job_StartScript=sealed -e JobLastRun_time=yes -e CALS_VERSION_NUMBER=$APP_VERSION -i $inventory deploy-jobs-to-rundeck.yml --vault-password-file ~/.ssh/vault.txt -vv'
+	   cleanWs()
+	   sleep (20)
+  }
+
  } catch (e)   {
        emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
        subject: "Jobs failed with ${e.message}", to: "Leonid.Marushevskiy@osi.ca.gov, Alex.Kuznetsov@osi.ca.gov"
@@ -47,5 +60,7 @@ node ('dora-slave'){
 	   sh ('docker-compose down -v')
 	   publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests/test', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
 
-	}
+	}finally {
+        cleanWs()
+    }
 }
