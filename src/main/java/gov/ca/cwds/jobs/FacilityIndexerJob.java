@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -193,7 +194,8 @@ public class FacilityIndexerJob extends AbstractModule {
           " path/to/config/file.yaml");
     }
     try {
-      final File configFile = new ApiFileAssistant().validateFileLocation(args[0]);
+      String configFilePath = Paths.get(args[0]).normalize().toAbsolutePath().toString();
+      File configFile = new File(configFilePath);
       Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile)); // NOSONAR
       Rocket job = injector.getInstance(Key.get(Rocket.class, Names.named("facility-job")));
       job.run();
