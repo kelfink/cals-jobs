@@ -2,6 +2,7 @@ package gov.ca.cwds.neutron.inject;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.function.Function;
 
@@ -181,8 +182,9 @@ public class HyperCube extends NeutronGuiceModule {
     if (instance != null) {
       ret = instance;
     } else {
-      ret = new HyperCube(opts, new ApiFileAssistant().validateFileLocation(opts.getEsConfigLoc()),
-          opts.getLastRunLoc());
+      String esConfigLocPath = Paths.get(opts.getEsConfigLoc()).normalize().toAbsolutePath().toString();
+      File esConfigLocFile = new File(esConfigLocPath);
+      ret = new HyperCube(opts, esConfigLocFile, opts.getLastRunLoc());
     }
 
     return ret;

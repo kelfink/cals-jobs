@@ -2,6 +2,8 @@ package gov.ca.cwds.jobs.schedule;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -155,18 +157,15 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   protected void handleSchedulerModeTimeFile(final FlightPlan flightPlan, final DateFormat fmt,
       final Date now, final StandardFlightSchedule sched) throws IOException {
-    final StringBuilder buf = new StringBuilder();
+    String baseDirectory = flightPlan.getBaseDirectory();
+    Path lastRunLocPath = Paths.get(baseDirectory, sched.getRocketName() + ".time").normalize();
 
-    buf.append(flightPlan.getBaseDirectory()).append(File.separatorChar)
-        .append(sched.getRocketName()).append(".time");
-    final String timeFileLoc =
-        buf.toString().replaceAll(File.separator + File.separator, File.separator);
-    flightPlan.setLastRunLoc(timeFileLoc);
+    flightPlan.setLastRunLoc(lastRunLocPath.toAbsolutePath().toString());
     LOGGER.debug("base directory: {}, job name: {}, last run loc: {}",
         flightPlan.getBaseDirectory(), sched.getRocketName(), flightPlan.getLastRunLoc());
 
     // If timestamp file doesn't exist, create it.
-    final File f = new File(timeFileLoc); // NOSONAR
+    final File f = new File(lastRunLocPath.toAbsolutePath().toString()); // NOSONAR
     final boolean fileExists = f.exists();
     final boolean overrideLastRunTime = flightPlan.getOverrideLastRunTime() != null;
 

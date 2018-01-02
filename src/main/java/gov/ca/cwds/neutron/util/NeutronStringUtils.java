@@ -1,6 +1,6 @@
 package gov.ca.cwds.neutron.util;
 
-import java.io.File;
+import java.nio.file.Paths;
 
 public final class NeutronStringUtils {
 
@@ -9,7 +9,7 @@ public final class NeutronStringUtils {
   }
 
   public static String filePath(String path) {
-    return path.substring(0, path.lastIndexOf(File.separatorChar));
+    return Paths.get(path).normalize().getParent().toAbsolutePath().toString();
   }
 
 }
