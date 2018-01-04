@@ -3,10 +3,6 @@ package gov.ca.cwds.jobs.cals.facility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
-import gov.ca.cwds.cals.inject.CalsnsDataAccessModule;
-import gov.ca.cwds.cals.inject.CwsCmsDataAccessModule;
-import gov.ca.cwds.cals.inject.FasDataAccessModule;
-import gov.ca.cwds.cals.inject.LisDataAccessModule;
 import gov.ca.cwds.cals.service.ChangedFacilityService;
 import gov.ca.cwds.cals.service.dto.changed.ChangedFacilityDTO;
 import gov.ca.cwds.generic.jobs.Job;
@@ -14,6 +10,10 @@ import gov.ca.cwds.generic.jobs.util.AsyncReadWriteJob;
 import gov.ca.cwds.jobs.cals.BaseCalsIndexerJob;
 import gov.ca.cwds.jobs.cals.CalsElasticJobWriter;
 import gov.ca.cwds.jobs.cals.CalsElasticsearchIndexerDao;
+import gov.ca.cwds.jobs.cals.inject.CalsnsDataAccessModule;
+import gov.ca.cwds.jobs.cals.inject.CwsCmsDataAccessModule;
+import gov.ca.cwds.jobs.cals.inject.FasDataAccessModule;
+import gov.ca.cwds.jobs.cals.inject.LisDataAccessModule;
 
 /**
  * <p> Command line arguments: </p>
