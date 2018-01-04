@@ -27,9 +27,24 @@ project.ext {
 //    elasticsearchVersion = "5.6.0"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
     dropwizardVersion = "1.1.0"
+
+    projectMajorVersion = "0.5.4"
+
+    isRelease = System.getProperty("Release") == "true"
+    buildNumber = System.getProperty('BuildNumber')
+    customVersion = System.getProperty('CustomVersion')
+
+    projectSnapshotVersion = projectMajorVersion + "-SNAPSHOT"
+    projectReleaseVersion = (customVersion == null || customVersion == "" || customVersion.startsWith('$') ? projectMajorVersion + '_' + buildNumber + '-RC' : customVersion )
+    projectVersion = (isRelease ? projectReleaseVersion : projectSnapshotVersion )
+
+    // Publishing configuration
+    snapshotMavenRepo = "http://sonar.dev.cwds.io:8081/artifactory/repo"
+    releaseMavenRepo = "http://sonar.dev.cwds.io:8081/artifactory/libs-release"
+    artifactoryRepo = (isRelease ? releaseMavenRepo : snapshotMavenRepo)
 }
 
-version = "0.5.4-SNAPSHOT"
+version = projectVersion
 
 repositories {
     mavenCentral()
@@ -127,13 +142,11 @@ publishing {
       from components.shadow
       groupId 'gov.ca.cwds.jobs'
       artifactId 'jobs'
-        version version + ((System.properties.getProperty('build') != null ) ? '.' + System.properties.getProperty('build') : '')
     }
   }
   repositories {
     maven {
-      // OPTION: set to http url.
-        url "http://sonar.dev.cwds.io:8081/artifactory/repo"
+        url artifactoryRepo
     }
   }
 }
