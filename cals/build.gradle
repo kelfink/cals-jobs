@@ -235,12 +235,11 @@ publishing {
             from components.shadow
             groupId 'gov.ca.cwds.jobs'
             artifactId 'cals-jobs-shadow'
-            version version + ((System.properties.getProperty('build') != null) ? '.' + System.properties.getProperty('build') : '')
         }
     }
     repositories {
         maven {
-            url "http://sonar.dev.cwds.io:8081/artifactory/repo"
+            url artifactoryRepo
         }
     }
 }
