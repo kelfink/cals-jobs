@@ -36,11 +36,7 @@ import gov.ca.cwds.data.legacy.cms.entity.StaffPerson;
 import gov.ca.cwds.data.legacy.cms.entity.SubCareProviderPhoneticName;
 import gov.ca.cwds.data.legacy.cms.entity.SubstituteCareProvider;
 import gov.ca.cwds.data.legacy.cms.entity.SubstituteCareProviderUc;
-import gov.ca.cwds.data.legacy.cms.entity.syscodes.County;
-import gov.ca.cwds.data.legacy.cms.entity.syscodes.FacilityType;
-import gov.ca.cwds.data.legacy.cms.entity.syscodes.LicenseStatus;
-import gov.ca.cwds.data.legacy.cms.entity.syscodes.State;
-import gov.ca.cwds.data.legacy.cms.entity.syscodes.VisitType;
+import gov.ca.cwds.data.legacy.cms.entity.syscodes.*;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.CwsRsSessionFactory;
 import org.hibernate.SessionFactory;
@@ -91,7 +87,7 @@ public class CwsCmsDataAccessModule extends AbstractModule {
         .addAnnotatedClass(SubstituteCareProvider.class)
         .addAnnotatedClass(SubstituteCareProviderUc.class)
         .addAnnotatedClass(SubCareProviderPhoneticName.class)
-
+        .addAnnotatedClass(NameType.class)
         .buildSessionFactory();
   }
 

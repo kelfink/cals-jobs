@@ -2,11 +2,15 @@ package gov.ca.cwds.jobs.cals.facility;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Provides;
+import gov.ca.cwds.cals.inject.DataAccessServicesModule;
 import gov.ca.cwds.cals.service.ChangedFacilityService;
 import gov.ca.cwds.cals.service.dto.changed.ChangedFacilityDTO;
 import gov.ca.cwds.generic.jobs.Job;
 import gov.ca.cwds.generic.jobs.util.AsyncReadWriteJob;
+import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.BaseCalsIndexerJob;
 import gov.ca.cwds.jobs.cals.CalsElasticJobWriter;
 import gov.ca.cwds.jobs.cals.CalsElasticsearchIndexerDao;
@@ -14,6 +18,7 @@ import gov.ca.cwds.jobs.cals.inject.CalsnsDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.CwsCmsDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.FasDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.LisDataAccessModule;
+import org.hibernate.SessionFactory;
 
 /**
  * <p> Command line arguments: </p>
@@ -46,6 +51,17 @@ public final class FacilityIndexerJob extends BaseCalsIndexerJob {
     install(new LisDataAccessModule("cals-jobs-lis-hibernate.cfg.xml"));
     install(new FasDataAccessModule("cals-jobs-fas-hibernate.cfg.xml"));
     install(new CalsnsDataAccessModule("cals-jobs-calsns-hibernate.cfg.xml"));
+    install(new DataAccessServicesModule() {
+      private SessionFactory getXaCmsSessionFactory(Injector injector) {
+        return injector.getInstance(Key.get(SessionFactory.class, CmsSessionFactory.class));
+      }
+
+      @Override
+      protected SessionFactory getDataAccessSercvicesSessionFactory(Injector injector) {
+        return getXaCmsSessionFactory(injector);
+      }
+
+    });
     bind(FacilityReader.class);
     bind(FacilityElasticJobWriter.class);
     bind(ChangedFacilityService.class);
