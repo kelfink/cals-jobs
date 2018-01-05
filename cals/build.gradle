@@ -15,10 +15,6 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
 
-project.ext {
-    calsApiVersion = '0.5.4_798-RC'
-}
-
 sourceCompatibility = 1.8
 
 repositories {
@@ -33,89 +29,6 @@ repositories {
     }
 }
 
-
-dependencies {
-//    compile project(project.parent.path)
-    compile group: "org.postgresql", name: "postgresql", version: "9.4.1212"
-    compile group: 'com.connx.jdbc', name: 'connxjdbc', version: '12.4'
-    compile group: 'com.ibm', name: 'db2jcc4', version: '4.21.29'
-    compile group: 'com.ibm', name: 'db2jcc_license_cisuz', version: '4.0.0'
-
-    // CALS API for CALS Jobs
-    compile(group: 'gov.ca.cwds.cals', name: 'cals-api', version: calsApiVersion) {
-        exclude group: 'org.bouncycastle'
-        exclude group: 'org.liquibase', module: 'liquibase-core'
-    }
-
-    //from main gradle file
-
-    // ES 5.x:
-    compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
-    compile group: 'org.elasticsearch.client', name: 'transport', version: elasticsearchVersion
-    compile("org.elasticsearch.client:x-pack-transport:" + elasticsearchVersion)
-
-    compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
-
-    compile group: 'javax.validation', name: 'validation-api', version: '1.1.0.Final'
-
-    // LOGGING:
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
-    compile group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4jVersion
-    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.1'
-    compile group: 'org.slf4j', name: 'slf4j-ext', version: '1.7.25'
-
-    compile group: 'com.google.inject', name: 'guice', version: '4.1.0'
-    compile 'com.google.inject.extensions:guice-jmx:4.1.0'
-
-    compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.1.0"
-    compile 'org.hibernate:hibernate-c3p0:5.2.10.Final'
-
-    compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
-    compile group: "javax.el", name: "javax.el-api", version: "2.2.4"
-    compile group: "org.glassfish.web", name: "javax.el", version: "2.2.4"
-    compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.8.3'
-    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
-
-    compile 'com.fasterxml.jackson.module:jackson-module-guice:2.8.2'
-    compile group: 'org.json', name: 'json', version: '20090211'
-    compile 'io.reactivex.rxjava2:rxjavafx:2.2.0'
-
-    compile fileTree(dir: 'lib', include: ['*.jar'])
-
-    testCompile group: 'junit', name: 'junit', version: '4.+'
-    testCompile group: 'com.h2database', name: 'h2', version: '1.4.195'
-    testCompile 'org.mockito:mockito-core:2.0.54-beta'
-    testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
-    testCompile('org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:2.23.2') {
-        exclude group: 'javax.servlet', module: 'javax.servlet-api'
-        exclude group: 'junit', module: 'junit'
-    }
-
-    // https://mvnrepository.com/artifact/nl.jqno.equalsverifier/equalsverifier
-    testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
-    testCompile 'org.ow2.asm:asm-all:5.2'
-
-    testCompile group: 'junit', name: 'junit', version: '4.+'
-    testCompile group: 'com.h2database', name: 'h2', version: '1.4.195'
-    testCompile 'org.mockito:mockito-core:2.0.54-beta'
-    testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
-    testCompile('org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:2.23.2') {
-        exclude group: 'javax.servlet', module: 'javax.servlet-api'
-        exclude group: 'junit', module: 'junit'
-    }
-
-    // https://mvnrepository.com/artifact/nl.jqno.equalsverifier/equalsverifier
-    testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
-    testCompile 'org.ow2.asm:asm-all:5.1'
-    testCompile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
-
-
-
-}
-
-import org.apache.tools.ant.taskdefs.condition.Os
-
 project.ext {
     // assume that Windows users use the Docker Toolbox
     buildEnv = System.env.BUILD_ENV ?: (Os.isFamily(Os.FAMILY_WINDOWS) ? 'WIN_DEV' : 'JENKINS')
@@ -125,9 +38,27 @@ project.ext {
     elasticPort = 9200
     log4jVersion = "2.8"
     elasticsearchVersion = "5.5.2"
-//    calsApiVersion =  '3.6-SNAPSHOT'
+    calsApiVersion = '0.5.4_798-RC'
 }
 
+dependencies {
+
+    // CALS API for CALS Jobs
+    compile(group: 'gov.ca.cwds.cals', name: 'cals-api', version: calsApiVersion) {
+        exclude group: 'org.bouncycastle'
+        exclude group: 'org.liquibase', module: 'liquibase-core'
+    }
+
+    // ES 5.x:
+    compile("org.elasticsearch.client:x-pack-transport:" + elasticsearchVersion)
+
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+
+    testCompile 'org.mockito:mockito-core:2.0.54-beta'
+    testCompile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
+}
+
+import org.apache.tools.ant.taskdefs.condition.Os
 
 project.ext.dockerEnvVars = project.buildEnv != 'WIN_DEV' ? [:] : [
         DOCKER_CERT_PATH             : System.getProperty("user.home") + '/.docker/machine/machines/default',
