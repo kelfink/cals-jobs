@@ -16,7 +16,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
 
 project.ext {
-    calsApiVersion = '0.5.4_794-RC'
+    calsApiVersion = '0.5.4_798-RC'
 }
 
 sourceCompatibility = 1.8
@@ -36,26 +36,16 @@ repositories {
 
 dependencies {
 //    compile project(project.parent.path)
-
-    testCompile group: 'junit', name: 'junit', version: '4.+'
-    testCompile group: 'com.h2database', name: 'h2', version: '1.4.195'
-    testCompile 'org.mockito:mockito-core:2.0.54-beta'
-    testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
-    testCompile('org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:2.23.2') {
-        exclude group: 'javax.servlet', module: 'javax.servlet-api'
-        exclude group: 'junit', module: 'junit'
-    }
+    compile group: "org.postgresql", name: "postgresql", version: "9.4.1212"
+    compile group: 'com.connx.jdbc', name: 'connxjdbc', version: '12.4'
+    compile group: 'com.ibm', name: 'db2jcc4', version: '4.21.29'
+    compile group: 'com.ibm', name: 'db2jcc_license_cisuz', version: '4.0.0'
 
     // CALS API for CALS Jobs
     compile(group: 'gov.ca.cwds.cals', name: 'cals-api', version: calsApiVersion) {
         exclude group: 'org.bouncycastle'
         exclude group: 'org.liquibase', module: 'liquibase-core'
     }
-
-    // https://mvnrepository.com/artifact/nl.jqno.equalsverifier/equalsverifier
-    testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
-    testCompile 'org.ow2.asm:asm-all:5.1'
-    testCompile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
 
     //from main gradle file
 
@@ -78,7 +68,6 @@ dependencies {
     compile group: 'com.google.inject', name: 'guice', version: '4.1.0'
     compile 'com.google.inject.extensions:guice-jmx:4.1.0'
 
-    compile group: "org.postgresql", name: "postgresql", version: "9.4.1212"
     compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.1.0"
     compile 'org.hibernate:hibernate-c3p0:5.2.10.Final'
 
@@ -106,6 +95,23 @@ dependencies {
     // https://mvnrepository.com/artifact/nl.jqno.equalsverifier/equalsverifier
     testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
     testCompile 'org.ow2.asm:asm-all:5.2'
+
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+    testCompile group: 'com.h2database', name: 'h2', version: '1.4.195'
+    testCompile 'org.mockito:mockito-core:2.0.54-beta'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
+    testCompile('org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:2.23.2') {
+        exclude group: 'javax.servlet', module: 'javax.servlet-api'
+        exclude group: 'junit', module: 'junit'
+    }
+
+    // https://mvnrepository.com/artifact/nl.jqno.equalsverifier/equalsverifier
+    testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
+    testCompile 'org.ow2.asm:asm-all:5.1'
+    testCompile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
+
+
+
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
