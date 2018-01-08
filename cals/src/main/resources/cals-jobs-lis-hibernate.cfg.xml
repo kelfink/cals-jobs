@@ -4,9 +4,9 @@
 <hibernate-configuration>
     <session-factory>
         <property name="hibernate.current_session_context_class">thread</property>
-        <property name="hibernate.dialect">gov.ca.cwds.cals.persistence.hibernate.dialect.CONNXDialect</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQL82Dialect</property>
         <property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
-        <property name="hibernate.connection.driver_class">com.Connx.jdbc.TCJdbc.TCJdbcDriver</property>
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
         <property name="hibernate.connection.username">${DB_LIS_USER}</property>
         <property name="hibernate.connection.password">${DB_LIS_PASSWORD}</property>
         <property name="hibernate.connection.url">${DB_LIS_JDBC_URL}</property>
