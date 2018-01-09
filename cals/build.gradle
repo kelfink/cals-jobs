@@ -38,7 +38,7 @@ project.ext {
     elasticPort = 9200
     log4jVersion = "2.8"
     elasticsearchVersion = "5.5.2"
-    calsApiVersion = '0.5.4_798-RC'
+    calsApiVersion = '0.5.4_803-RC'
 }
 
 dependencies {
