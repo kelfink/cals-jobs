@@ -11,17 +11,6 @@ elasticsearch.xpack.user: ${ELASTIC_SEARCH_XPACK_USER:-elastic}
 elasticsearch.xpack.password: ${ELASTIC_SEARCH_XPACK_PASSWORD:-changeme}
 
 lisDataSourceFactory:
-  autoCommitByDefault: false
-  driverClass: com.Connx.jdbc.TCJdbc.TCJdbcDriver
-  user: ${DB_LIS_USER:-CWDS_Admin}
-  password: ${DB_LIS_PASSWORD:-x}
-  url: ${DB_LIS_JDBC_URL:-jdbc:connx:DD=CX_All;Gateway=10.211.5.29;port=7502}
-  validationQuery: "select count(*) from ${DB_LIS_SCHEMA:-dbo}.lis_fac_file"
-  logValidationErrors: true
-  initialSize: 0
-  minSize: 0
-  maxSize: ${DB_LIS_CP_MAX_SIZE:-8}
-  minIdleTime: 1 minute
   properties:
       hibernate.dialect: gov.ca.cwds.cals.persistence.hibernate.dialect.CONNXDialect
       hibernate.show_sql: true
