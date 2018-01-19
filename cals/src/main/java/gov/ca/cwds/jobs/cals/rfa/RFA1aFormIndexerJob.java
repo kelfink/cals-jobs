@@ -3,6 +3,8 @@ package gov.ca.cwds.jobs.cals.rfa;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import gov.ca.cwds.cals.Constants;
 import gov.ca.cwds.cals.service.dto.changed.ChangedRFA1aFormDTO;
 import gov.ca.cwds.cals.service.rfa.RFA1aFormsCollectionService;
 import gov.ca.cwds.generic.jobs.Job;
@@ -10,7 +12,10 @@ import gov.ca.cwds.generic.jobs.util.AsyncReadWriteJob;
 import gov.ca.cwds.jobs.cals.BaseCalsIndexerJob;
 import gov.ca.cwds.jobs.cals.CalsElasticJobWriter;
 import gov.ca.cwds.jobs.cals.CalsElasticsearchIndexerDao;
+import gov.ca.cwds.jobs.cals.CalsJobConfiguration;
 import gov.ca.cwds.jobs.cals.inject.CalsnsDataAccessModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p> Command line arguments: </p>
@@ -26,6 +31,8 @@ import gov.ca.cwds.jobs.cals.inject.CalsnsDataAccessModule;
  */
 public final class RFA1aFormIndexerJob extends BaseCalsIndexerJob {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(RFA1aFormIndexerJob.class);
+
   public static void main(String[] args) {
     runJob(RFA1aFormIndexerJob.class, args);
   }
@@ -33,10 +40,15 @@ public final class RFA1aFormIndexerJob extends BaseCalsIndexerJob {
   @Override
   protected void configure() {
     super.configure();
-    install(new CalsnsDataAccessModule("cals-jobs-calsns-hibernate.cfg.xml"));
+    install(new CalsnsDataAccessModule(getCalsJobsConfiguration().getCalsnsDataSourceFactory(), Constants.UnitOfWork.CALSNS));
     bind(RFA1aFormReader.class);
     bind(RFA1aFormElasticJobWriter.class);
     bind(RFA1aFormsCollectionService.class);
+  }
+
+  @Override
+  public CalsJobConfiguration getCalsJobsConfiguration() {
+    return CalsJobConfiguration.getCalsJobsConfiguration(CalsJobConfiguration.class, getJobOptions().getEsConfigLoc());
   }
 
   @Provides

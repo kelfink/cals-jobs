@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs.cals;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.*;
 import gov.ca.cwds.cals.inject.MappingModule;
 import gov.ca.cwds.generic.jobs.Job;
@@ -28,9 +26,11 @@ public abstract class BaseCalsIndexerJob extends AbstractModule {
 
   private JobOptions jobOptions;
 
+  protected abstract CalsJobConfiguration getCalsJobsConfiguration();
+
   @Override
-  protected void configure() {
-    install(new MappingModule());
+  protected void configure() {install(new MappingModule());
+    bind(CalsJobConfiguration.class).toInstance(getCalsJobsConfiguration());
     bind(JobOptions.class).toInstance(jobOptions);
   }
 
@@ -107,11 +107,15 @@ public abstract class BaseCalsIndexerJob extends AbstractModule {
     this.jobOptions = jobOptions;
   }
 
+  public JobOptions getJobOptions() {
+    return jobOptions;
+  }
+
   @Provides
   @Inject
   // the client should not be closed here, it is closed when job is done
   @SuppressWarnings("squid:S2095")
-  public Client elasticsearchClient(CalsElasticsearchConfiguration config) {
+  public Client elasticsearchClient(CalsJobConfiguration config) {
     TransportClient client = null;
     LOGGER.warn("Create NEW ES client");
     try {
@@ -135,7 +139,7 @@ public abstract class BaseCalsIndexerJob extends AbstractModule {
   @Singleton
   @Inject
   public CalsElasticsearchIndexerDao elasticsearchDao(Client client,
-      CalsElasticsearchConfiguration configuration) {
+      CalsJobConfiguration configuration) {
 
     CalsElasticsearchIndexerDao esIndexerDao = new CalsElasticsearchIndexerDao(client,
         configuration);
@@ -144,15 +148,4 @@ public abstract class BaseCalsIndexerJob extends AbstractModule {
     return esIndexerDao;
   }
 
-  @Provides
-  public CalsElasticsearchConfiguration config() {
-    try {
-      File jobConfigFile = new File(jobOptions.getEsConfigLoc());
-      return new ObjectMapper(new YAMLFactory())
-          .readValue(jobConfigFile, CalsElasticsearchConfiguration.class);
-    } catch (Exception e) {
-      LOGGER.error("Error reading job configuration: {}", e.getMessage(), e);
-      throw new JobsException("Error reading job configuration: " + e.getMessage(), e);
-    }
-  }
 }

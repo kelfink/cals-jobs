@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provides;
+import gov.ca.cwds.cals.Constants;
 import gov.ca.cwds.cals.inject.DataAccessServicesModule;
 import gov.ca.cwds.cals.service.ChangedFacilityService;
 import gov.ca.cwds.cals.service.dto.changed.ChangedFacilityDTO;
@@ -14,31 +15,21 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.BaseCalsIndexerJob;
 import gov.ca.cwds.jobs.cals.CalsElasticJobWriter;
 import gov.ca.cwds.jobs.cals.CalsElasticsearchIndexerDao;
+import gov.ca.cwds.jobs.cals.CalsJobConfiguration;
 import gov.ca.cwds.jobs.cals.inject.CalsnsDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.CwsCmsDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.FasDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.LisDataAccessModule;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * <p> Command line arguments: </p>
- *
- * <pre>
- * {@code run script: $ java -DDB_FAS_JDBC_URL="jdbc:postgresql://192.168.99.100:5432/?currentSchema=fas" \
--DDB_FAS_USER="postgres_data" -DDB_FAS_PASSWORD="CHANGEME" \
--DDB_LIS_JDBC_URL="jdbc:postgresql://192.168.99.100:5432/?currentSchema=lis" \
--DDB_LIS_USER="postgres_data" -DDB_LIS_PASSWORD="CHANGEME" \
--DDB_CMS_JDBC_URL="jdbc:db2://192.168.99.100:50000/DB0TDEV" -DDB_CMS_SCHEMA="CWSCMSRS" \
--DDB_CMS_USER="db2inst1" -DDB_CMS_PASSWORD="CHANGEME" \
--DDB_CALSNS_JDBC_URL="jdbc:postgresql://192.168.99.100:5432/?currentSchema=calsns" \
--DDB_CALSNS_USER="postgres_data" -DDB_CALSNS_PASSWORD="CHANGEME" \
--cp cals/build/libs/cals-jobs-<version>.jar gov.ca.cwds.jobs.cals.facility.FacilityIndexerJob \
--c cals/config/cals/facility/facility.yaml -l ./}
- * </pre>
- *
  * @author CWDS TPT-2
  */
 public final class FacilityIndexerJob extends BaseCalsIndexerJob {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(FacilityIndexerJob.class);
 
   public static void main(String[] args) {
     runJob(FacilityIndexerJob.class, args);
@@ -47,10 +38,11 @@ public final class FacilityIndexerJob extends BaseCalsIndexerJob {
   @Override
   protected void configure() {
     super.configure();
-    install(new CwsCmsDataAccessModule("cals-jobs-cms-hibernate.cfg.xml"));
-    install(new LisDataAccessModule("cals-jobs-lis-hibernate.cfg.xml"));
-    install(new FasDataAccessModule("cals-jobs-fas-hibernate.cfg.xml"));
-    install(new CalsnsDataAccessModule("cals-jobs-calsns-hibernate.cfg.xml"));
+    final FacilityJobConfiguration facilityJobsConfiguration = getCalsJobsConfiguration();
+    install(new CwsCmsDataAccessModule(facilityJobsConfiguration.getCmsDataSourceFactory(), Constants.UnitOfWork.CMSRS));
+    install(new LisDataAccessModule(facilityJobsConfiguration.getLisDataSourceFactory(), Constants.UnitOfWork.LIS));
+    install(new FasDataAccessModule(facilityJobsConfiguration.getFasDataSourceFactory(), Constants.UnitOfWork.FAS));
+    install(new CalsnsDataAccessModule(facilityJobsConfiguration.getCalsnsDataSourceFactory(), Constants.UnitOfWork.CALSNS));
     install(new DataAccessServicesModule() {
       private SessionFactory getXaCmsSessionFactory(Injector injector) {
         return injector.getInstance(Key.get(SessionFactory.class, CmsSessionFactory.class));
@@ -65,6 +57,11 @@ public final class FacilityIndexerJob extends BaseCalsIndexerJob {
     bind(FacilityReader.class);
     bind(FacilityElasticJobWriter.class);
     bind(ChangedFacilityService.class);
+  }
+
+  public FacilityJobConfiguration getCalsJobsConfiguration() {
+    return CalsJobConfiguration.getCalsJobsConfiguration(FacilityJobConfiguration.class,
+            getJobOptions().getEsConfigLoc());
   }
 
   @Provides
