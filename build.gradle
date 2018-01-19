@@ -28,7 +28,7 @@ project.ext {
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
     dropwizardVersion = "1.1.0"
 
-    projectMajorVersion = "0.5.4"
+    projectMajorVersion = "0.5.5"
 
     isRelease = System.getProperty("Release") == "true"
     buildNumber = System.getProperty('BuildNumber')

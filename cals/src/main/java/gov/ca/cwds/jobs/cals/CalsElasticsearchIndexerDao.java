@@ -37,7 +37,7 @@ public class CalsElasticsearchIndexerDao implements Closeable {
   /**
    * Elasticsearch configuration
    */
-  private CalsElasticsearchConfiguration config;
+  private CalsJobConfiguration config;
 
   /**
    * Constructor.
@@ -46,7 +46,7 @@ public class CalsElasticsearchIndexerDao implements Closeable {
    * @param config The ElasticSearch configuration which is read from .yaml file
    */
   @Inject
-  public CalsElasticsearchIndexerDao(Client client, CalsElasticsearchConfiguration config) {
+  public CalsElasticsearchIndexerDao(Client client, CalsJobConfiguration config) {
     this.client = client;
     this.config = config;
   }
