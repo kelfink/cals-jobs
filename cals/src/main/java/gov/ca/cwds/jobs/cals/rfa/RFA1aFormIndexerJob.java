@@ -46,8 +46,7 @@ public final class RFA1aFormIndexerJob extends BaseCalsIndexerJob {
     bind(RFA1aFormsCollectionService.class);
   }
 
-  @Singleton
-  @Provides
+  @Override
   public CalsJobConfiguration getCalsJobsConfiguration() {
     return CalsJobConfiguration.getCalsJobsConfiguration(CalsJobConfiguration.class, getJobOptions().getEsConfigLoc());
   }
