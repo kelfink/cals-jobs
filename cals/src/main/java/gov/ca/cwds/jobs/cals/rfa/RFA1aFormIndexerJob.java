@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.cals.rfa;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import gov.ca.cwds.cals.Constants;
 import gov.ca.cwds.cals.service.dto.changed.ChangedRFA1aFormDTO;
 import gov.ca.cwds.cals.service.rfa.RFA1aFormsCollectionService;

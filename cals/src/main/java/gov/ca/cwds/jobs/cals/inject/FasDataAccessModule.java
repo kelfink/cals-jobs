@@ -1,9 +1,17 @@
 package gov.ca.cwds.jobs.cals.inject;
 
 import gov.ca.cwds.cals.inject.FasSessionFactory;
-import gov.ca.cwds.cals.persistence.dao.fas.*;
+import gov.ca.cwds.cals.persistence.dao.fas.ComplaintReportLic802Dao;
+import gov.ca.cwds.cals.persistence.dao.fas.FacilityInformationDao;
+import gov.ca.cwds.cals.persistence.dao.fas.InspectionDao;
+import gov.ca.cwds.cals.persistence.dao.fas.LpaInformationDao;
+import gov.ca.cwds.cals.persistence.dao.fas.RecordChangeFasDao;
 import gov.ca.cwds.cals.persistence.model.RecordChange;
-import gov.ca.cwds.cals.persistence.model.fas.*;
+import gov.ca.cwds.cals.persistence.model.fas.ComplaintReportLic802;
+import gov.ca.cwds.cals.persistence.model.fas.FacilityInformation;
+import gov.ca.cwds.cals.persistence.model.fas.LpaInformation;
+import gov.ca.cwds.cals.persistence.model.fas.Rr809Dn;
+import gov.ca.cwds.cals.persistence.model.fas.Rrcpoc;
 import gov.ca.cwds.generic.jobs.inject.JobsDataAccessModule;
 import io.dropwizard.db.DataSourceFactory;
 import org.hibernate.SessionFactory;
