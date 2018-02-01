@@ -72,8 +72,8 @@ public class ChangedFacilityService extends FacilityService {
   }
 
   @UnitOfWork(CMS)
-  protected FacilityDTO findExpandedById(String id) {
-    return findByParameterObject(facilityParameterObjectBuilder.createExpandedFacilityParameterObject(id));
+  protected FacilityDTO findCWSFacilityById(String id) {
+    return findByParameterObject(facilityParameterObjectBuilder.createFacilityParameterObject(id));
   }
 
   public Stream<ChangedFacilityDTO> changedFacilitiesStream(Date after, Date lisAfter) {
@@ -86,7 +86,7 @@ public class ChangedFacilityService extends FacilityService {
     return Stream.concat(stream, lisRecordChanges.newStream())
         .map(recordChange -> {
           LOG.info("Getting facility by ID: {}", recordChange.getId());
-          FacilityDTO facilityDTO = findExpandedById(recordChange.getId());
+          FacilityDTO facilityDTO = findCWSFacilityById(recordChange.getId());
           if (facilityDTO == null) {
             return null;
           }

@@ -6,19 +6,7 @@
     "addresses": {
       "type": "nested"
     },
-    "children": {
-      "type": "nested"
-    },
-    "complaints": {
-      "type": "nested"
-    },
-    "inspections": {
-      "type": "nested"
-    },
     "phones": {
-      "type": "nested"
-    },
-    "visits": {
       "type": "nested"
     }
   }
