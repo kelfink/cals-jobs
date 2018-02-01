@@ -11,16 +11,16 @@ node ('dora-slave'){
         booleanParam(defaultValue: false, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
         string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
         string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')]),
-        pipelineTriggers([[$class: 'GitHubBranchTrigger',
-            events: [<objectoftypecom.github.kostyasha.github.integration.branch.events.impl.GitHubBranchRestrictionFilter>],
+        pipelineTriggers([[$class: 'GitHubPRTrigger',
+            branchRestriction: [targetBranch: 'development'],
+            events: [[$class: 'GitHubPRCommitEvent']],
             preStatus: true,
             repoProviders: [[$class: 'GitHubPluginRepoProvider',
             repoPermission: 'PULL']],
             skipFirstRun: true,
-            spec: 'H/15****',
-            triggerMode: 'HEAVY_HOOKS']
-        ])
-     ])
+            spec: 'H/15 * * * * ',
+            triggerMode: 'HEAVY_HOOKS']])])
+
   try {
    stage('Preparation') {
           cleanWs()
