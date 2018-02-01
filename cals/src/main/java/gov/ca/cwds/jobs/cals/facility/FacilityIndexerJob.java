@@ -8,8 +8,7 @@ import com.google.inject.Provides;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.cals.Constants;
 import gov.ca.cwds.cals.inject.DataAccessServicesModule;
-import gov.ca.cwds.cals.inject.FacilityParameterObjectBuilderProvider;
-import gov.ca.cwds.cals.service.builder.FacilityParameterObjectCMSAwareBuilder;
+import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.generic.jobs.Job;
 import gov.ca.cwds.generic.jobs.util.AsyncReadWriteJob;
 import gov.ca.cwds.inject.CmsSessionFactory;
@@ -17,10 +16,10 @@ import gov.ca.cwds.jobs.cals.BaseCalsIndexerJob;
 import gov.ca.cwds.jobs.cals.CalsElasticJobWriter;
 import gov.ca.cwds.jobs.cals.CalsElasticsearchIndexerDao;
 import gov.ca.cwds.jobs.cals.CalsJobConfiguration;
-import gov.ca.cwds.jobs.cals.inject.NsDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.CwsCmsRsDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.FasDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.LisDataAccessModule;
+import gov.ca.cwds.jobs.cals.inject.NsDataAccessModule;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +57,7 @@ public final class FacilityIndexerJob extends BaseCalsIndexerJob {
     bind(FacilityReader.class);
     bind(FacilityElasticJobWriter.class);
     bind(ChangedFacilityService.class);
-    bind(FacilityParameterObjectCMSAwareBuilder.class).toProvider(FacilityParameterObjectBuilderProvider.class);
+    bind(FacilityParameterObjectBuilder.class);
   }
 
   public FacilityJobConfiguration getCalsJobsConfiguration() {

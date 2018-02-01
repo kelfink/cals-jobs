@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.cals.facility;
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.CompositeIterator;
 import gov.ca.cwds.cals.service.FacilityService;
-import gov.ca.cwds.cals.service.builder.FacilityParameterObjectCMSAwareBuilder;
+import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
 import gov.ca.cwds.cals.util.DateTimeUtils;
 import gov.ca.cwds.jobs.cals.RecordChangeOperation;
@@ -39,7 +39,7 @@ public class ChangedFacilityService extends FacilityService {
   private RecordChangeFasDao recordChangeFasDao;
 
   @Inject
-  private FacilityParameterObjectCMSAwareBuilder facilityParameterObjectBuilder;
+  private FacilityParameterObjectBuilder facilityParameterObjectBuilder;
 
   public ChangedFacilityService() {
     // default constructor
@@ -71,6 +71,7 @@ public class ChangedFacilityService extends FacilityService {
     return recordChanges;
   }
 
+  @UnitOfWork(CMS)
   protected FacilityDTO findExpandedById(String id) {
     return findByParameterObject(facilityParameterObjectBuilder.createExpandedFacilityParameterObject(id));
   }
