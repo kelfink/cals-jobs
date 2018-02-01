@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import gov.ca.cwds.cals.Constants;
-import gov.ca.cwds.cals.service.dto.changed.ChangedRFA1aFormDTO;
 import gov.ca.cwds.cals.service.rfa.RFA1aFormsCollectionService;
 import gov.ca.cwds.generic.jobs.Job;
 import gov.ca.cwds.generic.jobs.util.AsyncReadWriteJob;
@@ -12,7 +11,7 @@ import gov.ca.cwds.jobs.cals.BaseCalsIndexerJob;
 import gov.ca.cwds.jobs.cals.CalsElasticJobWriter;
 import gov.ca.cwds.jobs.cals.CalsElasticsearchIndexerDao;
 import gov.ca.cwds.jobs.cals.CalsJobConfiguration;
-import gov.ca.cwds.jobs.cals.inject.CalsnsDataAccessModule;
+import gov.ca.cwds.jobs.cals.inject.NsDataAccessModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ public final class RFA1aFormIndexerJob extends BaseCalsIndexerJob {
   @Override
   protected void configure() {
     super.configure();
-    install(new CalsnsDataAccessModule(getCalsJobsConfiguration().getCalsnsDataSourceFactory(), Constants.UnitOfWork.CALSNS));
+    install(new NsDataAccessModule(getCalsJobsConfiguration().getCalsnsDataSourceFactory(), Constants.UnitOfWork.CALSNS));
     bind(RFA1aFormReader.class);
     bind(RFA1aFormElasticJobWriter.class);
     bind(RFA1aFormsCollectionService.class);

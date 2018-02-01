@@ -1,34 +1,38 @@
 package gov.ca.cwds.jobs.cals.inject;
 
+import com.google.common.collect.ImmutableList;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
 import gov.ca.cwds.cals.persistence.dao.lis.LisFacFileLisDao;
 import gov.ca.cwds.cals.persistence.dao.lis.LisTableFileDao;
-import gov.ca.cwds.cals.persistence.dao.lis.RecordChangeLisDao;
-import gov.ca.cwds.cals.persistence.model.RecordChange;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisDoFile;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisFacFile;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisTableFile;
 import gov.ca.cwds.generic.jobs.inject.JobsDataAccessModule;
+import gov.ca.cwds.jobs.cals.facility.RecordChange;
+import gov.ca.cwds.jobs.cals.facility.RecordChangeLisDao;
 import io.dropwizard.db.DataSourceFactory;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 
 /**
  * @author CWDS TPT-2
  */
 public class LisDataAccessModule extends JobsDataAccessModule {
 
+  public static final ImmutableList<Class<?>> lisEntityClasses =
+          ImmutableList.<Class<?>>builder().add(
+                  RecordChange.class,
+                  LisFacFile.class,
+                  LisTableFile.class,
+                  LisDoFile.class
+          ).build();
+
   public LisDataAccessModule(DataSourceFactory dataSourceFactory, String dataSourceName) {
     super(dataSourceFactory, dataSourceName);
   }
 
   @Override
-  protected void addEntityClasses(Configuration configuration) {
-    configuration
-            .addAnnotatedClass(RecordChange.class)
-            .addAnnotatedClass(LisFacFile.class)
-            .addAnnotatedClass(LisTableFile.class)
-            .addAnnotatedClass(LisDoFile.class);
+  protected ImmutableList<Class<?>> getEntityClasses() {
+    return lisEntityClasses;
   }
 
   @Override

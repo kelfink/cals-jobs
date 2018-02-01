@@ -1,0 +1,90 @@
+applicationName: CWDS CALS API
+version: ${APP_VERSION:-local}
+
+server:
+  applicationConnectors:
+  - type: http
+    port: 8090
+
+shiro:
+ iniConfigs: ["classpath:api-core-test-support-shiro.ini"]
+
+swagger:
+  templateName: swagger.mustache
+  assetsPath: /static
+  resourcePackage: gov.ca.cwds.cals.web.rest
+  title: CWDS CALC API
+  description: RESTful API definitions for the CWS New System.
+  logo: images/CWDS-API-Logo-Horizontal.png
+  loginUrl: ${LOGIN_URL:-http://localhost:8090/authn/login}
+  showSwagger: ${SHOW_SWAGGER:-true}
+
+fasDataSourceFactory:
+  driverClass: org.h2.Driver
+  user: sa
+  password:
+  url: jdbc:h2:mem:fas;INIT=create schema if not exists fas\;set schema fas
+  validationQuery: "/* MyService Health Check */ SELECT 1"
+  logValidationErrors: true
+  initialSize: ${DB_NS_CP_INITIAL_SIZE:-2}
+  minSize: ${DB_NS_CP_MIN_SIZE:-2}
+  maxSize: ${DB_NS_CP_MAX_SIZE:-8}
+  minIdleTime: 1 minute
+  properties:
+      hibernate.dialect: org.hibernate.dialect.H2Dialect
+      hibernate.id.new_generator_mappings: false
+      hibernate.show_sql: false
+
+cmsrsDataSourceFactory:
+  driverClass: org.h2.Driver
+  user: sa
+  password:
+  url: jdbc:h2:mem:cwscmsrs;INIT=create schema if not exists cwscmsrs\;set schema cwscmsrs
+  validationQuery: "/* MyService Health Check */ SELECT 1"
+  logValidationErrors: true
+  initialSize: ${DB_CMS_CP_INITIAL_SIZE:-2}
+  minSize: ${DB_CMS_CP_MIN_SIZE:-2}
+  maxSize: ${DB_CMS_CP_MAX_SIZE:-8}
+  minIdleTime: 1 minute
+  properties:
+      hibernate.dialect: org.hibernate.dialect.H2Dialect
+      hibernate.default_schema: cwscmsrs
+      hibernate.id.new_generator_mappings: false
+      hibernate.show_sql: false
+
+lisDataSourceFactory:
+  driverClass: org.h2.Driver
+  user: sa
+  password:
+  url: jdbc:h2:mem:lis;INIT=create schema if not exists lis\;set schema lis
+  validationQuery: "/* MyService Health Check */ SELECT 1"
+  logValidationErrors: true
+  initialSize: ${DB_LIS_CP_INITIAL_SIZE:-2}
+  minSize: ${DB_LIS_CP_MIN_SIZE:-2}
+  maxSize: ${DB_LIS_CP_MAX_SIZE:-8}
+  minIdleTime: 1 minute
+  properties:
+      hibernate.dialect: org.hibernate.dialect.H2Dialect
+      hibernate.default_schema: lis
+      hibernate.id.new_generator_mappings: false
+      hibernate.show_sql: false
+
+nsDataSourceFactory:
+  driverClass: org.h2.Driver
+  user: sa
+  password:
+  url: jdbc:h2:mem:calsns;INIT=create schema if not exists calsns\;set schema calsns
+  validationQuery: "/* MyService Health Check */ SELECT 1"
+  logValidationErrors: true
+  initialSize: ${DB_NS_CP_INITIAL_SIZE:-2}
+  minSize: ${DB_NS_CP_MIN_SIZE:-2}
+  maxSize: ${DB_NS_CP_MAX_SIZE:-8}
+  minIdleTime: 1 minute
+  properties:
+      hibernate.dialect: org.hibernate.dialect.H2Dialect
+      #hibernate.default_schema: CALSNS
+      hibernate.id.new_generator_mappings: false
+      hibernate.show_sql: false
+      hibernate.cache.use_second_level_cache: true
+      hibernate.cache.region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
+      hibernate.cache.use_query_cache: true
