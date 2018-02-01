@@ -10,7 +10,7 @@ node ('dora-slave'){
         string(defaultValue: 'development', description: '', name: 'branch'),
         booleanParam(defaultValue: false, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
         string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
-        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')]), pipelineTriggers([pollSCM('H/5 * * * *')])])
+        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')])])
   try {
    stage('Preparation') {
           cleanWs()
