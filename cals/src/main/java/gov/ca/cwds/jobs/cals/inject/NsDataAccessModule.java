@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.cals.inject;
 
+import com.google.common.collect.ImmutableList;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.persistence.dao.calsns.RFA1aFormsDao;
 import gov.ca.cwds.cals.persistence.model.calsns.dictionaries.AddressType;
@@ -27,7 +28,13 @@ import gov.ca.cwds.cals.persistence.model.calsns.rfa.RFA1aMinorChild;
 import gov.ca.cwds.cals.persistence.model.calsns.rfa.RFA1aOtherAdult;
 import gov.ca.cwds.cals.persistence.model.calsns.rfa.RFA1bForm;
 import gov.ca.cwds.cals.persistence.model.calsns.rfa.RFA1cForm;
+import gov.ca.cwds.cals.persistence.model.fas.ComplaintReportLic802;
+import gov.ca.cwds.cals.persistence.model.fas.FacilityInformation;
+import gov.ca.cwds.cals.persistence.model.fas.LpaInformation;
+import gov.ca.cwds.cals.persistence.model.fas.Rr809Dn;
+import gov.ca.cwds.cals.persistence.model.fas.Rrcpoc;
 import gov.ca.cwds.generic.jobs.inject.JobsDataAccessModule;
+import gov.ca.cwds.jobs.cals.facility.RecordChange;
 import io.dropwizard.db.DataSourceFactory;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -35,43 +42,48 @@ import org.hibernate.cfg.Configuration;
 /**
  * @author CWDS TPT-2
  */
-public class CalsnsDataAccessModule extends JobsDataAccessModule {
+public class NsDataAccessModule extends JobsDataAccessModule {
 
-  public CalsnsDataAccessModule(DataSourceFactory dataSourceFactory, String dataSourceName) {
+  public static final ImmutableList<Class<?>> nsEntityClasses = ImmutableList.<Class<?>>builder().add(
+          AgeGroupType.class,
+          LanguageType.class,
+          GenderType.class,
+          NameType.class,
+          EducationLevelType.class,
+          EthnicityType.class,
+          RaceType.class,
+          RelationshipToApplicantType.class,
+          IncomeType.class,
+          PhoneNumberType.class,
+          AddressType.class,
+          SiblingGroupType.class,
+          StateType.class,
+          ResidenceOwnershipType.class,
+          ApplicantRelationshipType.class,
+          LicenseType.class,
+          MarriageTerminationReasonType.class,
+          SchoolGradeType.class,
+          RFA1aForm.class,
+          RFA1aApplicant.class,
+          RFA1aMinorChild.class,
+          RFA1aOtherAdult.class,
+          RFA1bForm.class,
+          RFA1cForm.class,
+          LIC198bForm.class).build();
+
+  public NsDataAccessModule(DataSourceFactory dataSourceFactory, String dataSourceName) {
     super(dataSourceFactory, dataSourceName);
   }
 
   @Override
-  protected void addEntityClasses(Configuration configuration) {
-    configuration
-            .addAnnotatedClass(AgeGroupType.class)
-            .addAnnotatedClass(LanguageType.class)
-            .addAnnotatedClass(GenderType.class)
-            .addAnnotatedClass(NameType.class)
-            .addAnnotatedClass(EducationLevelType.class)
-            .addAnnotatedClass(EthnicityType.class)
-            .addAnnotatedClass(RaceType.class)
-            .addAnnotatedClass(RelationshipToApplicantType.class)
-            .addAnnotatedClass(IncomeType.class)
-            .addAnnotatedClass(PhoneNumberType.class)
-            .addAnnotatedClass(AddressType.class)
-            .addAnnotatedClass(SiblingGroupType.class)
-            .addAnnotatedClass(StateType.class)
-            .addAnnotatedClass(ResidenceOwnershipType.class)
-            .addAnnotatedClass(ApplicantRelationshipType.class)
-            .addAnnotatedClass(LicenseType.class)
-            .addAnnotatedClass(MarriageTerminationReasonType.class)
-            .addAnnotatedClass(SchoolGradeType.class)
-            // for JsonType
-            .addPackage("gov.ca.cwds.cals.persistence.model.calsns.rfa")
-            //RFA
-            .addAnnotatedClass(RFA1aForm.class)
-            .addAnnotatedClass(RFA1aApplicant.class)
-            .addAnnotatedClass(RFA1aMinorChild.class)
-            .addAnnotatedClass(RFA1aOtherAdult.class)
-            .addAnnotatedClass(RFA1bForm.class)
-            .addAnnotatedClass(RFA1cForm.class)
-            .addAnnotatedClass(LIC198bForm.class);
+  protected ImmutableList<Class<?>> getEntityClasses() {
+    return nsEntityClasses;
+  }
+
+  @Override
+  protected void configure(Configuration configuration) {
+    super.configure(configuration);
+    configuration.addPackage("gov.ca.cwds.cals.persistence.model.calsns.rfa");
   }
 
   @Override

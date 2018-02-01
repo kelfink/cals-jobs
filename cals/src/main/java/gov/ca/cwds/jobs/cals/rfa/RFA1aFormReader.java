@@ -2,8 +2,6 @@ package gov.ca.cwds.jobs.cals.rfa;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
-import gov.ca.cwds.cals.service.dto.changed.ChangedRFA1aFormDTO;
-import gov.ca.cwds.cals.service.rfa.RFA1aFormsCollectionService;
 import gov.ca.cwds.generic.jobs.util.JobReader;
 import org.hibernate.SessionFactory;
 
@@ -25,13 +23,13 @@ public class RFA1aFormReader implements JobReader<ChangedRFA1aFormDTO> {
   private SessionFactory calsnsSessionFactory;
 
   @Inject
-  private RFA1aFormsCollectionService rfa1aFormsCollectionService;
+  private ChangedRFAFormsService rfaFormsService;
 
   @Override
   public void init() {
     LocalDateTime dateAfter = incrementalLoadDateStrategy.calculateLocalDateTime();
     calsnsSessionFactory.getCurrentSession().beginTransaction();
-    changedRFA1aFormDTOIterator = rfa1aFormsCollectionService.streamChangedRFA1aForms(dateAfter)
+    changedRFA1aFormDTOIterator = rfaFormsService.streamChangedRFA1aForms(dateAfter)
         .iterator();
   }
 

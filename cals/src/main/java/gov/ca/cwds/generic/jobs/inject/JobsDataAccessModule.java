@@ -1,5 +1,6 @@
 package gov.ca.cwds.generic.jobs.inject;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import io.dropwizard.db.DataSourceFactory;
 import org.apache.commons.lang3.Validate;
@@ -22,6 +23,12 @@ public abstract class JobsDataAccessModule extends AbstractModule {
     this.dataSourceName = dataSourceName;
   }
 
+  protected abstract ImmutableList<Class<?>> getEntityClasses();
+
+  protected void configure(Configuration configuration) {
+    //empty by default
+  }
+
   @Override
   protected void configure() {
     Validate.notNull(dataSourceFactory, String.format("%s data source configuration is empty", dataSourceName));
@@ -29,11 +36,10 @@ public abstract class JobsDataAccessModule extends AbstractModule {
     for (Map.Entry<String, String> property : dataSourceFactory.getProperties().entrySet()) {
       configuration.setProperty(property.getKey(), property.getValue());
     }
-    addEntityClasses(configuration);
+    getEntityClasses().forEach(configuration::addAnnotatedClass);
+    configure(configuration);
     sessionFactory = configuration.buildSessionFactory();
   }
-
-  protected abstract void addEntityClasses(Configuration configuration);
 
   public SessionFactory getSessionFactory() {
     return sessionFactory;

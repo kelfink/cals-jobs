@@ -4,8 +4,6 @@ import com.google.inject.Inject;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
-import gov.ca.cwds.cals.service.ChangedFacilityService;
-import gov.ca.cwds.cals.service.dto.changed.ChangedFacilityDTO;
 import gov.ca.cwds.generic.jobs.util.JobReader;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import org.hibernate.SessionFactory;

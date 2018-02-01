@@ -35,7 +35,9 @@ project.ext {
     elasticPort = 9200
     log4jVersion = "2.8"
     elasticsearchVersion = "5.5.2"
-    calsApiVersion = '0.5.5_825-RC'
+    cwdsModelVersion = '0.5.6_426-RC'
+    calsApiVersion = '0.5.6_875-RC'
+    testSupportVersion = '0.5.6_272-RC'
 }
 
 dependencies {
@@ -53,6 +55,13 @@ dependencies {
 
     testCompile 'org.mockito:mockito-core:2.0.54-beta'
     testCompile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
+    testCompile group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion
+
+    testCompile (group: 'gov.ca.cwds.cals', name: 'lis-data-model', version: cwdsModelVersion, changing: true)
+    testCompile (group: 'gov.ca.cwds.cals', name: 'cals-ns-data-model', version: cwdsModelVersion, changing: true)
+    testCompile (group: 'gov.ca.cwds.cals', name: 'fas-data-model', version: cwdsModelVersion, changing: true)
+    testCompile (group: 'gov.ca.cwds.cals', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true)
+
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -80,6 +89,7 @@ shadowJar {
 }
 
 
+/*
 static def isPortOpen(host, port) {
     try {
         Socket socket = new Socket(host, port)
@@ -162,6 +172,7 @@ task testEsDockerStartContainer(type: Exec, dependsOn: [checkDockerService, test
 
 test.dependsOn testEsDockerStartContainer
 test.finalizedBy testEsDockerCleanUpAfterTest
+*/
 
 publishing {
     publications {
