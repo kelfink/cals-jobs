@@ -10,7 +10,17 @@ node ('dora-slave'){
         string(defaultValue: 'development', description: '', name: 'branch'),
         booleanParam(defaultValue: false, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
         string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
-        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')])])
+        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')]),
+        pipelineTriggers([[$class: 'GitHubBranchTrigger',
+            events: [<objectoftypecom.github.kostyasha.github.integration.branch.events.impl.GitHubBranchRestrictionFilter>],
+            preStatus: true,
+            repoProviders: [[$class: 'GitHubPluginRepoProvider',
+            repoPermission: 'PULL']],
+            skipFirstRun: true,
+            spec: 'H/15****',
+            triggerMode: 'HEAVY_HOOKS']
+        ])
+     ])
   try {
    stage('Preparation') {
           cleanWs()
@@ -43,7 +53,7 @@ node ('dora-slave'){
 	stage('Clean WorkSpace') {
 		archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
 		sh ('docker-compose down -v')
-		publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests/test', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
+ 	    publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
 
 	}
 // stage('Deploy Application'){
