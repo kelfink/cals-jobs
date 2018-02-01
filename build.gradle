@@ -44,6 +44,7 @@ project.ext {
     artifactoryRepo = (isRelease ? releaseMavenRepo : snapshotMavenRepo)
 }
 
+
 version = projectVersion
 
 repositories {
@@ -155,6 +156,15 @@ task printProps << {
     println System.properties['DB_CMS_JDBC_URL']
 }
 
+task savePropertyFile (){
+    Properties props = new Properties()
+    File propsFile = new File('jenkins_build.properties')
+    props.setProperty('elasticsearchVersion', elasticsearchVersion)
+    props.setProperty('projectVersion',projectVersion)
+    props.setProperty('artifactoryRepo',artifactoryRepo )
+    props.store(propsFile.newWriter(), null)
+}
+
 tasks.withType(Test) {
     enableAssertions = true
     systemProperties project.properties.subMap(["DB_CMS_JDBC_URL", "DB_CMS_PASSWORD", "DB_CMS_SCHEMA", "DB_CMS_REP_SCHEMA", "DB_CMS_USER", "DB_NS_JDBC_URL", "DB_NS_PASSWORD", "DB_NS_SCHEMA", "DB_NS_USER"])
@@ -175,7 +185,7 @@ task libLicenseReportFiles(type: Copy){
 }
 
 task libLicenseReport(dependsOn:[generateLicenseReport, libLicenceFolders,
-                                 libLicenseReportFiles ] ){
+                                 libLicenseReportFiles,savePropertyFile ] ){
 }
 
 jacocoTestReport {
