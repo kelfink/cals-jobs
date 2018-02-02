@@ -1,13 +1,13 @@
 package gov.ca.cwds.jobs.cals.facility;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gov.ca.cwds.jobs.cals.CalsJobConfiguration;
+import gov.ca.cwds.jobs.cals.BaseJobConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 
 /**
  * Created by Alexander Serbin on 1/18/2018.
  */
-public class FacilityJobConfiguration extends CalsJobConfiguration {
+public class FacilityJobConfiguration extends BaseJobConfiguration {
 
     private DataSourceFactory fasDataSourceFactory;
 

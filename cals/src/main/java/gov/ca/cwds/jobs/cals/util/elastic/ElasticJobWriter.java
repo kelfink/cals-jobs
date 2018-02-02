@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.cals.util.elastic;
 import gov.ca.cwds.cals.Identifiable;
 import gov.ca.cwds.generic.jobs.exception.JobsException;
 import gov.ca.cwds.generic.jobs.util.JobWriter;
-import gov.ca.cwds.jobs.cals.CalsElasticsearchIndexerDao;
+import gov.ca.cwds.jobs.cals.ElasticsearchIndexerDao;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ElasticJobWriter<T extends Identifiable<String>> implements JobWriter<T> {
 
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ElasticJobWriter.class);
-  protected CalsElasticsearchIndexerDao elasticsearchDao;
+  protected ElasticsearchIndexerDao elasticsearchDao;
   protected BulkProcessor bulkProcessor;
   protected ObjectMapper objectMapper;
 
@@ -35,7 +35,7 @@ public class ElasticJobWriter<T extends Identifiable<String>> implements JobWrit
    * @param elasticsearchDao ES DAO
    * @param objectMapper Jackson object mapper
    */
-  public ElasticJobWriter(CalsElasticsearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
+  public ElasticJobWriter(ElasticsearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
     this.elasticsearchDao = elasticsearchDao;
     this.objectMapper = objectMapper;
     bulkProcessor =

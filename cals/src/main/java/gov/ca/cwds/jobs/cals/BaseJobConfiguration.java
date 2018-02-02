@@ -19,10 +19,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-public class CalsJobConfiguration extends ElasticsearchConfiguration {
+public class BaseJobConfiguration extends ElasticsearchConfiguration {
 
   private static final org.slf4j.Logger LOGGER = LoggerFactory
-      .getLogger(CalsJobConfiguration.class);
+      .getLogger(BaseJobConfiguration.class);
 
   private String elasticsearchIndexSettings;
 
@@ -72,7 +72,7 @@ public class CalsJobConfiguration extends ElasticsearchConfiguration {
     }
   }
 
-  public static <T extends CalsJobConfiguration> T getCalsJobsConfiguration(Class<T> clazz, String path) {
+  public static <T extends BaseJobConfiguration> T getCalsJobsConfiguration(Class<T> clazz, String path) {
     final String pathToConfiguration = Paths.get(path).toAbsolutePath().toString();
     EnvironmentVariableSubstitutor environmentVariableSubstitutor = new EnvironmentVariableSubstitutor(false);
     ConfigurationSourceProvider configurationSourceProvider =

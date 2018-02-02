@@ -1,7 +1,6 @@
 package gov.ca.cwds.jobs.cals;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -12,50 +11,37 @@ import gov.ca.cwds.generic.jobs.Job;
 import gov.ca.cwds.generic.jobs.config.JobOptions;
 import gov.ca.cwds.generic.jobs.exception.JobsException;
 import gov.ca.cwds.generic.jobs.util.elastic.XPackUtils;
+import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Paths;
 
 /**
  * @author CWDS TPT-2
  */
-public abstract class BaseCalsIndexerJob extends AbstractModule {
+public abstract class BaseIndexerJob<T extends ElasticsearchConfiguration> extends AbstractModule {
 
-  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(BaseCalsIndexerJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(BaseIndexerJob.class);
 
   private JobOptions jobOptions;
 
-  protected abstract CalsJobConfiguration getCalsJobsConfiguration();
+  protected abstract T getJobsConfiguration();
 
   @Override
   protected void configure() {install(new MappingModule());
-    bind(CalsJobConfiguration.class).toInstance(getCalsJobsConfiguration());
     bind(JobOptions.class).toInstance(jobOptions);
   }
 
-  static <T extends BaseCalsIndexerJob> JobOptions buildJobOptions(Class<T> jobRunnerClass,
-      String[] args) {
-    try {
-      if (args.length < 4) {
-        throw new JobsException("not enough command line arguments");
-      }
-      return validateJobOptions(JobOptions.parseCommandLine(args));
-    } catch (JobsException e) {
-      LOGGER.error(
-          "usage: java -D... -cp cals-jobs.jar {} -c path/to/config/file.yaml -l dir/for/time/files/",
-          jobRunnerClass.getName());
-      throw e;
-    }
-  }
-
-  private static JobOptions validateJobOptions(JobOptions jobOptions) {
+  private JobOptions validateJobOptions(JobOptions jobOptions) {
     // check option: -c
     File configFile = new File(jobOptions.getEsConfigLoc());
     if (!configFile.exists()) {
@@ -63,45 +49,30 @@ public abstract class BaseCalsIndexerJob extends AbstractModule {
           "job arguments error: specified config file " + configFile.getPath() + " not found");
     }
 
-    if (!configFile.isFile()) {
-      throw new JobsException("job arguments error: specified config file " + configFile.getPath()
-          + " is not really a file");
-    }
-
     // check option: -l
     File timeFilesDir = new File(jobOptions.getLastRunLoc());
     if (!timeFilesDir.exists()) {
-      throw new JobsException(
-          "job arguments error: specified time files directory " + timeFilesDir.getPath()
-              + " not found");
+      if (timeFilesDir.mkdir() && (LOGGER.isInfoEnabled())) {
+        LOGGER.info(getPathToOutputDirectory() + " was created in file system");
+      }
     }
 
-    if (!timeFilesDir.isDirectory()) {
-      throw new JobsException(
-          "job arguments error: specified time files directory " + timeFilesDir.getPath()
-              + " is not really a directory");
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Using " + getPathToOutputDirectory() + " as output folder");
     }
-
     return jobOptions;
   }
 
-  private static <T extends BaseCalsIndexerJob> T newJobRunner(Class<T> jobRunnerClass,
-      String[] args) {
-    try {
-      JobOptions jobOptions = buildJobOptions(jobRunnerClass, args);
-      T jobRunner = jobRunnerClass.newInstance();
-      jobRunner.setJobOptions(jobOptions);
-      return jobRunner;
-    } catch (CreationException | InstantiationException | IllegalAccessException e) {
-      throw new JobsException(e);
-    }
+  private String getPathToOutputDirectory() {
+    return Paths.get(jobOptions.getLastRunLoc()).normalize().toAbsolutePath().toString();
   }
 
-  protected static <T extends BaseCalsIndexerJob> void runJob(Class<T> jobRunnerClass,
-      String[] args) {
+  protected void run(String[] args) {
     try {
-      final T jobRunner = newJobRunner(jobRunnerClass, args);
-      final Injector injector = Guice.createInjector(jobRunner);
+      final JobOptions jobOptions = JobOptions.parseCommandLine(args);
+      setJobOptions(jobOptions);
+      validateJobOptions(jobOptions);
+      final Injector injector = Guice.createInjector(this);
       injector.getInstance(Job.class).run();
     } catch (RuntimeException e) {
       LOGGER.error("ERROR: ", e.getMessage(), e);
@@ -121,7 +92,7 @@ public abstract class BaseCalsIndexerJob extends AbstractModule {
   @Inject
   // the client should not be closed here, it is closed when job is done
   @SuppressWarnings("squid:S2095")
-  public Client elasticsearchClient(CalsJobConfiguration config) {
+  public Client elasticsearchClient(BaseJobConfiguration config) {
     TransportClient client = null;
     LOGGER.warn("Create NEW ES client");
     try {
@@ -144,10 +115,10 @@ public abstract class BaseCalsIndexerJob extends AbstractModule {
   @Provides
   @Singleton
   @Inject
-  public CalsElasticsearchIndexerDao elasticsearchDao(Client client,
-      CalsJobConfiguration configuration) {
+  public ElasticsearchIndexerDao elasticsearchDao(Client client,
+                                                  BaseJobConfiguration configuration) {
 
-    CalsElasticsearchIndexerDao esIndexerDao = new CalsElasticsearchIndexerDao(client,
+    ElasticsearchIndexerDao esIndexerDao = new ElasticsearchIndexerDao(client,
         configuration);
     esIndexerDao.createIndexIfMissing();
 
