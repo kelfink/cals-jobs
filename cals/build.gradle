@@ -39,7 +39,7 @@ project.ext {
 
 dependencies {
 
-    compile project(':jobs-common')
+    //compile project(':jobs-common')
 
     // CALS API for CALS Jobs
     compile(group: 'gov.ca.cwds.cals', name: 'cals-api', version: calsApiVersion) {
