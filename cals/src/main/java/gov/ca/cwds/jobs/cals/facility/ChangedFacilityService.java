@@ -6,6 +6,7 @@ import gov.ca.cwds.cals.service.FacilityService;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
 import gov.ca.cwds.cals.util.DateTimeUtils;
+import gov.ca.cwds.cals.web.rest.parameter.FacilityParameterObject;
 import gov.ca.cwds.jobs.cals.RecordChangeOperation;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.slf4j.Logger;
@@ -72,8 +73,20 @@ public class ChangedFacilityService extends FacilityService {
   }
 
   @UnitOfWork(CMS)
-  protected FacilityDTO findCWSFacilityById(String id) {
-    return findByParameterObject(facilityParameterObjectBuilder.createFacilityParameterObject(id));
+  protected FacilityParameterObject createFacilityParameterObject(String id) {
+    return facilityParameterObjectBuilder.createFacilityParameterObject(id);
+  }
+
+
+  protected FacilityDTO findFacilityById(String id) {
+    //TODO this is temporary solution to unblock creating index and to address CALS-5551
+    //TODO we'll be handlin poisonous messages in a different way soon
+    try {
+      return findByParameterObject(createFacilityParameterObject(id));
+    } catch (Exception e) {
+      LOG.error("Can't get Facility by id", e);
+      return null;
+    }
   }
 
   public Stream<ChangedFacilityDTO> changedFacilitiesStream(Date after, Date lisAfter) {
@@ -86,7 +99,7 @@ public class ChangedFacilityService extends FacilityService {
     return Stream.concat(stream, lisRecordChanges.newStream())
         .map(recordChange -> {
           LOG.info("Getting facility by ID: {}", recordChange.getId());
-          FacilityDTO facilityDTO = findCWSFacilityById(recordChange.getId());
+          FacilityDTO facilityDTO = findFacilityById(recordChange.getId());
           if (facilityDTO == null) {
             return null;
           }

@@ -12,10 +12,10 @@ import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.generic.jobs.Job;
 import gov.ca.cwds.generic.jobs.util.AsyncReadWriteJob;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.cals.BaseCalsIndexerJob;
+import gov.ca.cwds.jobs.cals.BaseIndexerJob;
 import gov.ca.cwds.jobs.cals.CalsElasticJobWriter;
-import gov.ca.cwds.jobs.cals.CalsElasticsearchIndexerDao;
-import gov.ca.cwds.jobs.cals.CalsJobConfiguration;
+import gov.ca.cwds.jobs.cals.ElasticsearchIndexerDao;
+import gov.ca.cwds.jobs.cals.BaseJobConfiguration;
 import gov.ca.cwds.jobs.cals.inject.CwsCmsRsDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.FasDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.LisDataAccessModule;
@@ -27,18 +27,20 @@ import org.slf4j.LoggerFactory;
 /**
  * @author CWDS TPT-2
  */
-public final class FacilityIndexerJob extends BaseCalsIndexerJob {
+public final class FacilityIndexerJob extends BaseIndexerJob {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FacilityIndexerJob.class);
 
   public static void main(String[] args) {
-    runJob(FacilityIndexerJob.class, args);
+    FacilityIndexerJob  facilityIndexerJob = new FacilityIndexerJob();
+    facilityIndexerJob.run(args);
   }
 
   @Override
   protected void configure() {
     super.configure();
-    final FacilityJobConfiguration facilityJobsConfiguration = getCalsJobsConfiguration();
+    final FacilityJobConfiguration facilityJobsConfiguration = getJobsConfiguration();
+    bind(FacilityJobConfiguration.class).toInstance(facilityJobsConfiguration);
     install(new CwsCmsRsDataAccessModule(facilityJobsConfiguration.getCmsDataSourceFactory(), DataSourceName.CWSRS.name()));
     install(new LisDataAccessModule(facilityJobsConfiguration.getLisDataSourceFactory(), Constants.UnitOfWork.LIS));
     install(new FasDataAccessModule(facilityJobsConfiguration.getFasDataSourceFactory(), Constants.UnitOfWork.FAS));
@@ -58,10 +60,12 @@ public final class FacilityIndexerJob extends BaseCalsIndexerJob {
     bind(FacilityElasticJobWriter.class);
     bind(ChangedFacilityService.class);
     bind(FacilityParameterObjectBuilder.class);
+    bind(BaseJobConfiguration.class).toInstance(facilityJobsConfiguration);
+    bind(FacilityJobConfiguration.class).toInstance(facilityJobsConfiguration);
   }
 
-  public FacilityJobConfiguration getCalsJobsConfiguration() {
-    return CalsJobConfiguration.getCalsJobsConfiguration(FacilityJobConfiguration.class,
+  public FacilityJobConfiguration getJobsConfiguration() {
+    return BaseJobConfiguration.getCalsJobsConfiguration(FacilityJobConfiguration.class,
             getJobOptions().getEsConfigLoc());
   }
 
@@ -80,7 +84,7 @@ public final class FacilityIndexerJob extends BaseCalsIndexerJob {
      * @param objectMapper Jackson object mapper
      */
     @Inject
-    FacilityElasticJobWriter(CalsElasticsearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
+    FacilityElasticJobWriter(ElasticsearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
       super(elasticsearchDao, objectMapper);
     }
   }

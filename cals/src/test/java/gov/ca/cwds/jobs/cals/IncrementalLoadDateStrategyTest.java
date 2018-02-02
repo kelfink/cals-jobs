@@ -41,8 +41,8 @@ public class IncrementalLoadDateStrategyTest {
 
   @BeforeClass
   public static void beforeClass() throws IOException {
-    JobOptions jobOptions = BaseCalsIndexerJob
-        .buildJobOptions(BaseCalsIndexerJob.class, new String[]{
+    JobOptions jobOptions = BaseIndexerJob
+        .buildJobOptions(BaseIndexerJob.class, new String[]{
             "-c", "config/config.yaml", "-l", TIME_FILES_DIR
         });
     Whitebox.setInternalState(RFA1A_FORM_LOAD_DATE_STRATEGY, "jobOptions", jobOptions);

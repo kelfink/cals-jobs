@@ -20,10 +20,7 @@ sourceCompatibility = 1.8
 repositories {
     mavenCentral()
     mavenLocal()
-    maven { url "http://sonar.dev.cwds.io:8081/artifactory/repo" }
-    maven {
-        url "https://artifacts.elastic.co/maven"
-    }
+    maven { url artifactoryRepo }
 }
 
 project.ext {
@@ -41,6 +38,8 @@ project.ext {
 }
 
 dependencies {
+
+    compile project(':jobs-common')
 
     // CALS API for CALS Jobs
     compile(group: 'gov.ca.cwds.cals', name: 'cals-api', version: calsApiVersion) {
@@ -82,97 +81,8 @@ shadowJar {
     classifier = ''
     baseName = (System.properties.getProperty('baseName') != null) ? System.properties.getProperty('baseName') : 'cals-jobs'
     mergeServiceFiles()
-    /*manifest {
-        Attributes 'Main-Class': (System.properties.getProperty('mainClass') != null) ? System.properties.getProperty('mainClass') : 'gov.ca.cwds.jobs.cals.facility.FacilityIndexerJob'
-    }*/
     version version + ((System.properties.getProperty('build') != null) ? '.' + System.properties.getProperty('build') : '')
 }
-
-
-/*
-static def isPortOpen(host, port) {
-    try {
-        Socket socket = new Socket(host, port)
-        socket.close()
-        return true
-    } catch (IOException e) {
-        return false
-    }
-}
-
-void waitForPortToOpen(host, port, millis, maxAttempts) {
-    boolean isOpen = false
-    int attempts = 0
-    while (!isOpen) {
-        if (++attempts > maxAttempts) throw new GradleException("Failed to wait for $host:$port to open")
-        isOpen = isPortOpen(host, port)
-        if (isOpen) {
-            println "\n$host:$port is open"
-        } else {
-            println "\nWaiting ${millis}ms for $host:$port to open ($attempts/$maxAttempts)..."
-            sleep(millis)
-        }
-    }
-}
-
-task checkDockerService(type: Exec) {
-    enabled = project.buildEnv == 'WIN_DEV'
-    doFirst {
-        if (!isPortOpen(project.devDockerHost, project.devDockerPort)) {
-            throw new GradleException('Docker service is not available. Windows users should start Docker Quickstart Terminal of Docker Toolbox')
-        }
-        // update system limits on the docker host machine, so the elasticsearch service can start in a container
-        commandLine 'docker-machine', 'ssh', 'default', 'sudo', 'sysctl', '-w', 'vm.max_map_count=262144'
-    }
-}
-
-task testEsDockerCleanUpBeforeTest(type: Exec, dependsOn: checkDockerService) {
-    ignoreExitValue true
-    environment << dockerEnvVars
-    doFirst {
-        commandLine 'docker', 'rm', '-v', '--force', testEsContainerName
-    }
-    doLast {
-        commandLine 'docker', 'rmi', '-v', '--force', testEsDockerImageName
-    }
-}
-// have to duplicate the clean up actions to avoid circular dependencies, to be optimized
-task testEsDockerCleanUpAfterTest(type: Exec, dependsOn: checkDockerService) {
-    ignoreExitValue true
-    environment << dockerEnvVars
-    doFirst {
-        commandLine 'docker', 'rm', '-v', '--force', testEsContainerName
-    }
-    doLast {
-        commandLine 'docker', 'rmi', '-v', '--force', testEsDockerImageName
-    }
-}
-
-task testEsDockerCreateImage(type: Exec, dependsOn: [checkDockerService, testEsDockerCleanUpBeforeTest]) {
-    testEsDockerCleanUpBeforeTest.mustRunAfter(checkDockerService)
-    environment << dockerEnvVars
-    doFirst {
-        commandLine 'docker', 'build', '-t', testEsDockerImageName,
-                '-f', "$rootProject.projectDir/cals/src/test/resources/es/Dockerfile",
-                '--build-arg', "ELASTICSEARCH_VERSION=$project.elasticsearchVersion",
-                "$rootProject.projectDir/cals/src/test/resources/es/"
-    }
-}
-
-task testEsDockerStartContainer(type: Exec, dependsOn: [checkDockerService, testEsDockerCreateImage]) {
-    testEsDockerCreateImage.mustRunAfter(checkDockerService)
-    environment << dockerEnvVars
-    doFirst {
-        commandLine 'docker', 'run', '-d', "--name=$testEsContainerName", '-p', "9216:$project.elasticPort", '-p', '9316:9300', '-e', "http.host=0.0.0.0", '-e', "transport.host=127.0.0.1", testEsDockerImageName
-    }
-    doLast {
-        waitForPortToOpen(project.elasticHost, 9216, 1000, 60)
-    }
-}
-
-test.dependsOn testEsDockerStartContainer
-test.finalizedBy testEsDockerCleanUpAfterTest
-*/
 
 publishing {
     publications {

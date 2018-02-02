@@ -24,10 +24,10 @@ import java.io.IOException;
  *
  * @author CWDS TPT-2
  */
-public class CalsElasticsearchIndexerDao implements Closeable {
+public class ElasticsearchIndexerDao implements Closeable {
 
   private static final org.slf4j.Logger LOGGER = LoggerFactory
-      .getLogger(CalsElasticsearchIndexerDao.class);
+      .getLogger(ElasticsearchIndexerDao.class);
 
   /**
    * Client is thread safe.
@@ -37,7 +37,7 @@ public class CalsElasticsearchIndexerDao implements Closeable {
   /**
    * Elasticsearch configuration
    */
-  private CalsJobConfiguration config;
+  private BaseJobConfiguration config;
 
   /**
    * Constructor.
@@ -46,7 +46,7 @@ public class CalsElasticsearchIndexerDao implements Closeable {
    * @param config The ElasticSearch configuration which is read from .yaml file
    */
   @Inject
-  public CalsElasticsearchIndexerDao(Client client, CalsJobConfiguration config) {
+  public ElasticsearchIndexerDao(Client client, BaseJobConfiguration config) {
     this.client = client;
     this.config = config;
   }

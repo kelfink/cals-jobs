@@ -21,7 +21,7 @@ public class CalsElasticJobWriter<T extends ChangedDTO<?>> extends ElasticJobWri
    * @param elasticsearchDao ES DAO
    * @param objectMapper Jackson object mapper
    */
-  public CalsElasticJobWriter(CalsElasticsearchIndexerDao elasticsearchDao,
+  public CalsElasticJobWriter(ElasticsearchIndexerDao elasticsearchDao,
       ObjectMapper objectMapper) {
     super(elasticsearchDao, objectMapper);
   }
