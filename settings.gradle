@@ -1,2 +1,4 @@
 rootProject.name = 'jobs'
 include 'cals'
+include 'jobs-common'
+
