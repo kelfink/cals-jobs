@@ -44,10 +44,7 @@ public class ChangedFacilityResourceTest extends BaseApiTest<TestCalsJobsConfigu
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    DatabaseHelper.setUpDatabase(application.getConfiguration().getFasDataSourceFactory(), DataSourceName.FAS);
-    //DatabaseHelper.setUpDatabase(application.getConfiguration().getCmsDataSourceFactory(), DataSourceName.CWS);
     DatabaseHelper.setUpDatabase(application.getConfiguration().getLisDataSourceFactory(), DataSourceName.LIS);
-    DatabaseHelper.setUpDatabase(application.getConfiguration().getNsDataSourceFactory(), DataSourceName.NS);
     DatabaseHelper.setUpDatabase(application.getConfiguration().getCmsrsDataSourceFactory(), DataSourceName.CWSRS);
   }
 
@@ -60,7 +57,7 @@ public class ChangedFacilityResourceTest extends BaseApiTest<TestCalsJobsConfigu
                 invocation.get(String.class), new TypeReference<CollectionDTO<TestChangedFacilityDTO>>() {
                 });
         assertEquals(79, facilities.getCollection().size());
-        //assertResponse(facilities);
+        assertResponse(facilities);
     }
 
   @Test
@@ -70,12 +67,12 @@ public class ChangedFacilityResourceTest extends BaseApiTest<TestCalsJobsConfigu
     CollectionDTO<TestChangedFacilityDTO> facilities = Jackson.newObjectMapper().readValue(
               invocation.get(String.class), new TypeReference<CollectionDTO<TestChangedFacilityDTO>>() { });
     assertEquals(79, facilities.getCollection().size());
-    //assertResponse(facilities);
+    assertResponse(facilities);
   }
 
     private void assertResponse(CollectionDTO<TestChangedFacilityDTO> changedFacilities) throws Exception {
         String fixture = fixture("fixtures/changed-facility-service.json");
-        assertEqualsResponse(fixture, transformDTOtoJSON(changedFacilities));
+        //assertEqualsResponse(fixture, transformDTOtoJSON(changedFacilities));
     }
 
 }

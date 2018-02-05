@@ -2,8 +2,11 @@ package gov.ca.cwds.jobs.cals;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.ca.cwds.generic.jobs.exception.JobsException;
-import gov.ca.cwds.jobs.cals.util.elastic.ElasticJobWriter;
+import gov.ca.cwds.jobs.common.ChangedDTO;
+import gov.ca.cwds.jobs.common.ElasticsearchIndexerDao;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
+import gov.ca.cwds.jobs.common.elastic.ElasticJobWriter;
+import gov.ca.cwds.jobs.common.exception.JobsException;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;

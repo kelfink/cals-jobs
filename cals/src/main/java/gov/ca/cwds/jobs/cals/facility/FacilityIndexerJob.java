@@ -8,18 +8,19 @@ import com.google.inject.Provides;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.cals.Constants;
 import gov.ca.cwds.cals.inject.DataAccessServicesModule;
+import gov.ca.cwds.cals.inject.MappingModule;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
-import gov.ca.cwds.generic.jobs.Job;
-import gov.ca.cwds.generic.jobs.util.AsyncReadWriteJob;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.cals.BaseIndexerJob;
 import gov.ca.cwds.jobs.cals.CalsElasticJobWriter;
-import gov.ca.cwds.jobs.cals.ElasticsearchIndexerDao;
-import gov.ca.cwds.jobs.cals.BaseJobConfiguration;
 import gov.ca.cwds.jobs.cals.inject.CwsCmsRsDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.FasDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.LisDataAccessModule;
 import gov.ca.cwds.jobs.cals.inject.NsDataAccessModule;
+import gov.ca.cwds.jobs.common.BaseIndexerJob;
+import gov.ca.cwds.jobs.common.BaseJobConfiguration;
+import gov.ca.cwds.jobs.common.ElasticsearchIndexerDao;
+import gov.ca.cwds.jobs.common.job.AsyncReadWriteJob;
+import gov.ca.cwds.jobs.common.job.Job;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,7 @@ public final class FacilityIndexerJob extends BaseIndexerJob {
   @Override
   protected void configure() {
     super.configure();
+    install(new MappingModule());
     final FacilityJobConfiguration facilityJobsConfiguration = getJobsConfiguration();
     bind(FacilityJobConfiguration.class).toInstance(facilityJobsConfiguration);
     install(new CwsCmsRsDataAccessModule(facilityJobsConfiguration.getCmsDataSourceFactory(), DataSourceName.CWSRS.name()));
@@ -65,8 +67,11 @@ public final class FacilityIndexerJob extends BaseIndexerJob {
   }
 
   public FacilityJobConfiguration getJobsConfiguration() {
-    return BaseJobConfiguration.getCalsJobsConfiguration(FacilityJobConfiguration.class,
+    FacilityJobConfiguration facilityJobConfiguration = BaseJobConfiguration.getJobsConfiguration(FacilityJobConfiguration.class,
             getJobOptions().getEsConfigLoc());
+    facilityJobConfiguration.setDocumentMapping("facility.mapping.json");
+    facilityJobConfiguration.setIndexSettings("facility.settings.json");
+    return facilityJobConfiguration;
   }
 
   @Provides

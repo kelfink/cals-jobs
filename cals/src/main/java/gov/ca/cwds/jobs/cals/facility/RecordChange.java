@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.cals.facility;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.jobs.cals.RecordChangeOperation;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import org.hibernate.annotations.NamedNativeQuery;
 
 import javax.persistence.Column;

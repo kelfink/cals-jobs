@@ -7,7 +7,7 @@ import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
 import gov.ca.cwds.cals.util.DateTimeUtils;
 import gov.ca.cwds.cals.web.rest.parameter.FacilityParameterObject;
-import gov.ca.cwds.jobs.cals.RecordChangeOperation;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
-import static gov.ca.cwds.cals.Constants.UnitOfWork.FAS;
 import static gov.ca.cwds.cals.Constants.UnitOfWork.LIS;
 
 /**
@@ -35,9 +34,6 @@ public class ChangedFacilityService extends FacilityService {
 
   @Inject
   private RecordChangeLisDao recordChangeLisDao;
-
-  @Inject
-  private RecordChangeFasDao recordChangeFasDao;
 
   @Inject
   private FacilityParameterObjectBuilder facilityParameterObjectBuilder;
@@ -64,14 +60,6 @@ public class ChangedFacilityService extends FacilityService {
     return recordChanges;
   }
 
-  @UnitOfWork(FAS)
-  protected RecordChanges handleFasFacilityIds(Date after) {
-    RecordChanges recordChanges = new RecordChanges();
-    recordChangeFasDao.streamChangedFacilityRecords(after == null, evalDateAfter(after))
-        .forEach(recordChanges::add);
-    return recordChanges;
-  }
-
   @UnitOfWork(CMS)
   protected FacilityParameterObject createFacilityParameterObject(String id) {
     return facilityParameterObjectBuilder.createFacilityParameterObject(id);
@@ -79,22 +67,13 @@ public class ChangedFacilityService extends FacilityService {
 
 
   protected FacilityDTO findFacilityById(String id) {
-    //TODO this is temporary solution to unblock creating index and to address CALS-5551
-    //TODO we'll be handlin poisonous messages in a different way soon
-    try {
       return findByParameterObject(createFacilityParameterObject(id));
-    } catch (Exception e) {
-      LOG.error("Can't get Facility by id", e);
-      return null;
-    }
   }
 
   public Stream<ChangedFacilityDTO> changedFacilitiesStream(Date after, Date lisAfter) {
     RecordChanges cwsCmsRecordChanges = handleCwsCmsFacilityIds(after);
-    RecordChanges fasRecordChanges = handleFasFacilityIds(after);
     RecordChanges lisRecordChanges = handleLisFacilityIds(lisAfter);
-    Stream<RecordChange> stream =
-        Stream.concat(cwsCmsRecordChanges.newStream(), fasRecordChanges.newStream());
+    Stream<RecordChange> stream = cwsCmsRecordChanges.newStream();
 
     return Stream.concat(stream, lisRecordChanges.newStream())
         .map(recordChange -> {

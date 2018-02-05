@@ -40,7 +40,7 @@ import gov.ca.cwds.data.legacy.cms.entity.syscodes.LicenseStatus;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.NameType;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.State;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.VisitType;
-import gov.ca.cwds.generic.jobs.inject.JobsDataAccessModule;
+import gov.ca.cwds.jobs.common.inject.JobsDataAccessModule;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.RecordChange;
 import gov.ca.cwds.jobs.cals.facility.RecordChangeCwsCmsDao;

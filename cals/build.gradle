@@ -9,7 +9,6 @@ buildscript {
 
 version = parent.version
 
-apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.johnrengelman.shadow'
@@ -17,44 +16,30 @@ apply plugin: 'jacoco'
 
 sourceCompatibility = 1.8
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-    maven { url artifactoryRepo }
-}
-
-project.ext {
-    // assume that Windows users use the Docker Toolbox
-    buildEnv = System.env.BUILD_ENV ?: (Os.isFamily(Os.FAMILY_WINDOWS) ? 'WIN_DEV' : 'JENKINS')
-    devDockerHost = System.env.DEV_DOCKER_HOST ?: 'localhost'
-    devDockerPort = 2376
-    elasticHost = 'localhost'
-    elasticPort = 9200
-    log4jVersion = "2.8"
-    elasticsearchVersion = "5.5.2"
-    cwdsModelVersion = '0.5.6_426-RC'
-    calsApiVersion = '0.5.6_875-RC'
-    testSupportVersion = '0.5.6_272-RC'
-}
-
 dependencies {
 
-    //compile project(':jobs-common')
+    compile project(':jobs-common')
 
     // CALS API for CALS Jobs
     compile(group: 'gov.ca.cwds.cals', name: 'cals-api', version: calsApiVersion) {
         exclude group: 'org.bouncycastle'
         exclude group: 'org.liquibase', module: 'liquibase-core'
+        exclude group: 'gov.ca.cwds.api'
     }
 
+    compile group: 'gov.ca.cwds.api', name: 'legacy-data-access-services', version: coreApiVersion
+
     // ES 5.x:
-    compile("org.elasticsearch.client:x-pack-transport:" + elasticsearchVersion)
 
-    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
-
+//    compile("org.elasticsearch.client:x-pack-transport:" + elasticsearchVersion)
+//
+//    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+//
     testCompile 'org.mockito:mockito-core:2.0.54-beta'
-    testCompile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
-    testCompile group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion
+//    testCompile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
+    testCompile (group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion) {
+        exclude group: 'gov.ca.cwds.api'
+    }
 
     testCompile (group: 'gov.ca.cwds.cals', name: 'lis-data-model', version: cwdsModelVersion, changing: true)
     testCompile (group: 'gov.ca.cwds.cals', name: 'cals-ns-data-model', version: cwdsModelVersion, changing: true)
@@ -62,19 +47,6 @@ dependencies {
     testCompile (group: 'gov.ca.cwds.cals', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true)
 
 }
-
-import org.apache.tools.ant.taskdefs.condition.Os
-
-project.ext.dockerEnvVars = project.buildEnv != 'WIN_DEV' ? [:] : [
-        DOCKER_CERT_PATH             : System.getProperty("user.home") + '/.docker/machine/machines/default',
-        DOCKER_HOST                  : "tcp://$project.devDockerHost:$project.devDockerPort",
-        DOCKER_MACHINE_NAME          : 'default',
-        DOCKER_TLS_VERIFY            : '1',
-        COMPOSE_CONVERT_WINDOWS_PATHS: 'true'
-]
-
-def testEsDockerImageName = 'cwds/jobs-test-elasticsearch'
-def testEsContainerName = 'jobs-test-elasticsearch'
 
 shadowJar {
     zip64 true
