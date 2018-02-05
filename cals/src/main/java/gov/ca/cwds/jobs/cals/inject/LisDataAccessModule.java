@@ -7,7 +7,7 @@ import gov.ca.cwds.cals.persistence.dao.lis.LisTableFileDao;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisDoFile;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisFacFile;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisTableFile;
-import gov.ca.cwds.generic.jobs.inject.JobsDataAccessModule;
+import gov.ca.cwds.jobs.common.inject.JobsDataAccessModule;
 import gov.ca.cwds.jobs.cals.facility.RecordChange;
 import gov.ca.cwds.jobs.cals.facility.RecordChangeLisDao;
 import io.dropwizard.db.DataSourceFactory;

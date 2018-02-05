@@ -7,7 +7,7 @@ import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
 import gov.ca.cwds.cals.util.DateTimeUtils;
 import gov.ca.cwds.cals.web.rest.parameter.FacilityParameterObject;
-import gov.ca.cwds.jobs.cals.RecordChangeOperation;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

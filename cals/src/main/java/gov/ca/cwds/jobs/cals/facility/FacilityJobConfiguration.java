@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.cals.facility;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gov.ca.cwds.jobs.cals.BaseJobConfiguration;
+import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 
 /**

@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.cals.rfa;
 
-import gov.ca.cwds.jobs.cals.BaseIncrementalLoadDateStrategy;
+import gov.ca.cwds.jobs.common.BaseIncrementalLoadDateStrategy;
 
 /**
  * @author CWDS TPT-2

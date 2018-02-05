@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.cals.facility;
 
 import gov.ca.cwds.cals.service.dto.ExpandedFacilityDTO;
 import gov.ca.cwds.dto.BaseDTO;
-import gov.ca.cwds.jobs.cals.RecordChangeOperation;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 
 import java.io.Serializable;
 

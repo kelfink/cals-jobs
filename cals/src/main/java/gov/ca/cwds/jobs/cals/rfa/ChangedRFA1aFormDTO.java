@@ -3,8 +3,8 @@ package gov.ca.cwds.jobs.cals.rfa;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import gov.ca.cwds.cals.service.dto.rfa.RFA1aFormDTO;
 import gov.ca.cwds.dto.BaseDTO;
-import gov.ca.cwds.jobs.cals.ChangedDTO;
-import gov.ca.cwds.jobs.cals.RecordChangeOperation;
+import gov.ca.cwds.jobs.common.ChangedDTO;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;

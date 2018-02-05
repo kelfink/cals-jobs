@@ -11,7 +11,7 @@ import gov.ca.cwds.cals.persistence.model.fas.FacilityInformation;
 import gov.ca.cwds.cals.persistence.model.fas.LpaInformation;
 import gov.ca.cwds.cals.persistence.model.fas.Rr809Dn;
 import gov.ca.cwds.cals.persistence.model.fas.Rrcpoc;
-import gov.ca.cwds.generic.jobs.inject.JobsDataAccessModule;
+import gov.ca.cwds.jobs.common.inject.JobsDataAccessModule;
 import gov.ca.cwds.jobs.cals.facility.RecordChange;
 import gov.ca.cwds.jobs.cals.facility.RecordChangeFasDao;
 import io.dropwizard.db.DataSourceFactory;

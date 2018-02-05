@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.cals.rfa;
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.persistence.dao.calsns.RFA1aFormsDao;
 import gov.ca.cwds.cals.service.mapper.RFA1aFormMapper;
-import gov.ca.cwds.jobs.cals.RecordChangeOperation;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 
 import java.time.LocalDateTime;
 import java.util.stream.Stream;

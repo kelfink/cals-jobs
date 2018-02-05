@@ -1,5 +1,37 @@
-apply plugin: 'java'
-
 dependencies {
 
+    compile group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: commonsLangVersion
+
+    compile group: 'com.google.inject', name: 'guice', version: guiceVersion
+    compile group: 'org.hibernate', name: 'hibernate-core', version: hibernateVersion
+    compile group: 'io.dropwizard', name: 'dropwizard-db', version: dropwizardVersion
+    compile group: 'org.elasticsearch.client', name:'x-pack-transport', version: elasticsearchVersion
+
+    compile group: 'gov.ca.cwds.api', name: 'api-core-cms', version: coreApiVersion
+    compile group: 'gov.ca.cwds.api', name: 'api-core-common', version: coreApiVersion
+    compile (group: 'gov.ca.cwds.api', name: 'api-core', version: coreApiVersion) {
+        exclude group: 'org.glassfish.jersey.core'
+    }
+
 }
+
+/*
+publishing {
+    publications {
+        library(MavenPublication) {
+            from components.java
+            groupId commonGroupId
+            artifactId 'jobs-common'
+        }
+    }
+    repositories {
+        mavenLocal()
+        maven {
+            url artifactoryRepo
+        }
+    }
+}
+*/
+
+

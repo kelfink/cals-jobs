@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.cals;
 
-import gov.ca.cwds.generic.jobs.config.JobOptions;
+import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.cals.facility.FacilityIncrementalLoadDateStrategy;
 import gov.ca.cwds.jobs.cals.facility.LISFacilityIncrementalLoadDateStrategy;
 import gov.ca.cwds.jobs.cals.rfa.RFA1aFormIncrementalLoadDateStrategy;

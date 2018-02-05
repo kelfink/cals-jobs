@@ -45,7 +45,6 @@ public class ChangedFacilityResourceTest extends BaseApiTest<TestCalsJobsConfigu
   @BeforeClass
   public static void beforeClass() throws Exception {
     DatabaseHelper.setUpDatabase(application.getConfiguration().getFasDataSourceFactory(), DataSourceName.FAS);
-    //DatabaseHelper.setUpDatabase(application.getConfiguration().getCmsDataSourceFactory(), DataSourceName.CWS);
     DatabaseHelper.setUpDatabase(application.getConfiguration().getLisDataSourceFactory(), DataSourceName.LIS);
     DatabaseHelper.setUpDatabase(application.getConfiguration().getNsDataSourceFactory(), DataSourceName.NS);
     DatabaseHelper.setUpDatabase(application.getConfiguration().getCmsrsDataSourceFactory(), DataSourceName.CWSRS);
