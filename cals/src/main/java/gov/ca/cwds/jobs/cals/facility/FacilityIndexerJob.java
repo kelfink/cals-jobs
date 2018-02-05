@@ -67,8 +67,11 @@ public final class FacilityIndexerJob extends BaseIndexerJob {
   }
 
   public FacilityJobConfiguration getJobsConfiguration() {
-    return BaseJobConfiguration.getCalsJobsConfiguration(FacilityJobConfiguration.class,
+    FacilityJobConfiguration facilityJobConfiguration = BaseJobConfiguration.getJobsConfiguration(FacilityJobConfiguration.class,
             getJobOptions().getEsConfigLoc());
+    facilityJobConfiguration.setDocumentMapping("facility.mapping.json");
+    facilityJobConfiguration.setIndexSettings("facility.settings.json");
+    return facilityJobConfiguration;
   }
 
   @Provides

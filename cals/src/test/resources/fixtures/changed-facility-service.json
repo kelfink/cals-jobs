@@ -24,43 +24,7 @@
           "zip_code" : "95834"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "ACUKzHJ0Ki",
-        "person" : {
-          "gender" : "F",
-          "age" : 26,
-          "first_name" : "Stacey",
-          "last_name" : "Stone",
-          "date_of_birth" : "1992-01-01"
-        },
-        "date_of_placement" : "2001-07-23",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "AV75hif0Ki",
-        "person" : {
-          "gender" : "M",
-          "age" : 21,
-          "first_name" : "Eldon",
-          "last_name" : "Albertson",
-          "date_of_birth" : "1996-03-09"
-        },
-        "date_of_placement" : "2001-03-09",
-        "county_of_origin" : "Napa"
-      }, {
-        "id" : "Blg1KRJ0Ki",
-        "person" : {
-          "gender" : "F",
-          "age" : 22,
-          "first_name" : "Margie",
-          "last_name" : "Rencher",
-          "date_of_birth" : "1995-12-05"
-        },
-        "date_of_placement" : "2001-02-02",
-        "county_of_origin" : "Napa"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -87,21 +51,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AJpMiKy04Y",
-        "person" : {
-          "gender" : "F",
-          "age" : 24,
-          "first_name" : "Jane",
-          "last_name" : "Doe",
-          "date_of_birth" : "1993-03-02"
-        },
-        "date_of_placement" : "2000-03-03",
-        "county_of_origin" : "San Francisco"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -129,62 +79,7 @@
           "zip_code" : "91111"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AKYoK6K0QJ",
-        "person" : {
-          "gender" : "M",
-          "age" : 18,
-          "first_name" : "Test",
-          "last_name" : "Child05102",
-          "date_of_birth" : "1999-05-10"
-        },
-        "date_of_placement" : "2004-05-03",
-        "assigned_worker" : {
-          "first_name" : "FST",
-          "last_name" : "User"
-        }
-      }, {
-        "id" : "AKYoK6K0QJ",
-        "person" : {
-          "gender" : "M",
-          "age" : 18,
-          "first_name" : "Test",
-          "last_name" : "Child05102",
-          "date_of_birth" : "1999-05-10"
-        },
-        "date_of_placement" : "2004-05-03",
-        "assigned_worker" : {
-          "first_name" : "FST",
-          "last_name" : "User"
-        }
-      }, {
-        "id" : "AbC3bgW0QJ",
-        "person" : {
-          "gender" : "M",
-          "age" : 18,
-          "first_name" : "Test",
-          "last_name" : "Child021204",
-          "date_of_birth" : "1999-02-12"
-        },
-        "date_of_placement" : "2004-01-01"
-      }, {
-        "id" : "Ak4j27L0QJ",
-        "person" : {
-          "gender" : "M",
-          "age" : 19,
-          "first_name" : "Test",
-          "last_name" : "Child112103",
-          "date_of_birth" : "1998-11-21"
-        },
-        "date_of_placement" : "2003-11-01",
-        "assigned_worker" : {
-          "first_name" : "FST",
-          "last_name" : "User"
-        }
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -212,25 +107,7 @@
           "zip_code" : "95834"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "APe85yg0Ki",
-        "person" : {
-          "gender" : "F",
-          "age" : 22,
-          "first_name" : "Stacy",
-          "last_name" : "Paul",
-          "date_of_birth" : "1995-08-20"
-        },
-        "date_of_placement" : "2004-10-28",
-        "assigned_worker" : {
-          "first_name" : "H",
-          "last_name" : "RAMES"
-        },
-        "county_of_origin" : "State of California"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -261,32 +138,7 @@
           "zip_code" : "92089"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A9GI1Mx0AB",
-        "person" : {
-          "gender" : "F",
-          "age" : 30,
-          "first_name" : "Annette",
-          "last_name" : "Turner",
-          "date_of_birth" : "1987-05-12"
-        },
-        "date_of_placement" : "1999-01-14",
-        "county_of_origin" : "San Diego"
-      }, {
-        "id" : "ABkN0PD0AB",
-        "person" : {
-          "gender" : "F",
-          "age" : 26,
-          "first_name" : "Betsey",
-          "last_name" : "Lowe",
-          "date_of_birth" : "1991-11-19"
-        },
-        "date_of_placement" : "1999-11-19",
-        "county_of_origin" : "San Diego"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -320,20 +172,7 @@
           "zip_code" : "95356"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "BvfKH6T0MM",
-        "person" : {
-          "gender" : "M",
-          "age" : 23,
-          "first_name" : "Jonny",
-          "last_name" : "Begood",
-          "date_of_birth" : "1994-02-01"
-        },
-        "date_of_placement" : "2001-07-05"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -364,30 +203,7 @@
           "zip_code" : "98888"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "Ad5MsgU0Cv",
-        "person" : {
-          "gender" : "M",
-          "age" : 23,
-          "first_name" : "boy c",
-          "last_name" : "county158",
-          "date_of_birth" : "1994-04-04"
-        },
-        "date_of_placement" : "1998-08-12"
-      }, {
-        "id" : "BkscjlS03k",
-        "person" : {
-          "gender" : "M",
-          "age" : 31,
-          "first_name" : "boy 42",
-          "last_name" : "countyshelter",
-          "date_of_birth" : "1986-06-06"
-        },
-        "date_of_placement" : "1998-08-08"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -421,70 +237,7 @@
           "zip_code" : "32132"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A7H4Z1A00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9484049",
-          "last_name" : "A4840499",
-          "date_of_birth" : "1995-01-20"
-        },
-        "date_of_placement" : "1999-12-05"
-      }, {
-        "id" : "AEgd5PQ00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9481431",
-          "last_name" : "A4814311",
-          "date_of_birth" : "1995-01-17"
-        },
-        "date_of_placement" : "1999-11-15"
-      }, {
-        "id" : "AOvrHe800F",
-        "person" : {
-          "gender" : "F",
-          "age" : 22,
-          "first_name" : "A9514117",
-          "last_name" : "A5141172",
-          "date_of_birth" : "1995-02-24"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "AVDZWpn00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9386155",
-          "last_name" : "A3861557",
-          "date_of_birth" : "1994-09-29"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "BH8OoLc00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9483913",
-          "last_name" : "A4839136",
-          "date_of_birth" : "1995-01-20"
-        },
-        "date_of_placement" : "1999-12-05"
-      }, {
-        "id" : "BhZMhO800F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9483921",
-          "last_name" : "A4839217",
-          "date_of_birth" : "1995-01-20"
-        },
-        "date_of_placement" : "1999-12-05"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -523,21 +276,7 @@
           "zip_code" : "95971"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "BvsjTt800E",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "State ID",
-          "last_name" : "State ID",
-          "date_of_birth" : "2001-01-01"
-        },
-        "date_of_placement" : "2002-10-17",
-        "county_of_origin" : "State of California"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -569,32 +308,7 @@
           "zip_code" : "98658"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AeF72jz0ET",
-        "person" : {
-          "gender" : "M",
-          "age" : 35,
-          "first_name" : "Don",
-          "last_name" : "Pearl",
-          "date_of_birth" : "1982-06-16"
-        },
-        "date_of_placement" : "1999-04-22",
-        "county_of_origin" : "Alpine"
-      }, {
-        "id" : "AeF72jz0ET",
-        "person" : {
-          "gender" : "M",
-          "age" : 35,
-          "first_name" : "Don",
-          "last_name" : "Pearl",
-          "date_of_birth" : "1982-06-16"
-        },
-        "date_of_placement" : "1999-04-22",
-        "county_of_origin" : "Alpine"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -622,70 +336,7 @@
           "zip_code" : "92225"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AIDmszr00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9392513",
-          "last_name" : "A3925139",
-          "date_of_birth" : "1994-10-06"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "AcB3fpD00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9447670",
-          "last_name" : "A4476700",
-          "date_of_birth" : "1994-12-09"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "AnKXcsV00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9447744",
-          "last_name" : "A4477441",
-          "date_of_birth" : "1994-12-09"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "BGwDeS300F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9427874",
-          "last_name" : "A4278744",
-          "date_of_birth" : "1994-11-16"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "BiiboJg00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 22,
-          "first_name" : "A9500334",
-          "last_name" : "A5003342",
-          "date_of_birth" : "1995-02-08"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "BoP83ts00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9478641",
-          "last_name" : "A4786413",
-          "date_of_birth" : "1995-01-14"
-        },
-        "date_of_placement" : "1999-09-01"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -713,21 +364,7 @@
           "zip_code" : "95814"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AcZ9uSP0WJ",
-        "person" : {
-          "gender" : "F",
-          "age" : 22,
-          "first_name" : "Xiaohong",
-          "last_name" : "Lin",
-          "date_of_birth" : "1995-11-08"
-        },
-        "date_of_placement" : "2005-11-08",
-        "county_of_origin" : "Sacramento"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -754,21 +391,7 @@
           "state" : "NC"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AooW8n300b",
-        "person" : {
-          "gender" : "F",
-          "age" : 28,
-          "first_name" : "Bunny",
-          "last_name" : "Bounce",
-          "date_of_birth" : "1990-01-01"
-        },
-        "date_of_placement" : "1998-02-06",
-        "county_of_origin" : "Santa Clara"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -800,21 +423,7 @@
           "zip_code" : "95628"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "ASUiAyp0G7",
-        "person" : {
-          "gender" : "M",
-          "age" : 24,
-          "first_name" : "Josh",
-          "last_name" : "Harris",
-          "date_of_birth" : "1993-09-16"
-        },
-        "date_of_placement" : "1999-09-24",
-        "county_of_origin" : "Monterey"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -848,21 +457,7 @@
           "zip_code" : "88888"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "BcDY0J803k",
-        "person" : {
-          "gender" : "M",
-          "age" : 31,
-          "first_name" : "boy F",
-          "last_name" : "lotsanames",
-          "date_of_birth" : "1986-02-05"
-        },
-        "date_of_placement" : "1998-07-30",
-        "county_of_origin" : "Modoc"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -897,70 +492,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A0JrvUs0MY",
-        "person" : {
-          "gender" : "F",
-          "age" : 19,
-          "first_name" : "Jen",
-          "last_name" : "Davis",
-          "date_of_birth" : "1998-09-02"
-        },
-        "date_of_placement" : "2002-08-21",
-        "assigned_worker" : {
-          "first_name" : "Frank",
-          "last_name" : "Rigano"
-        },
-        "county_of_origin" : "Kern"
-      }, {
-        "id" : "AGJxH1C0MY",
-        "person" : {
-          "gender" : "M",
-          "age" : 19,
-          "first_name" : "John",
-          "last_name" : "Bush",
-          "date_of_birth" : "1998-09-13"
-        },
-        "date_of_placement" : "2003-08-04",
-        "assigned_worker" : {
-          "first_name" : "Frank",
-          "last_name" : "Rigano"
-        },
-        "county_of_origin" : "Kern"
-      }, {
-        "id" : "AGJxH1C0MY",
-        "person" : {
-          "gender" : "M",
-          "age" : 19,
-          "first_name" : "John",
-          "last_name" : "Bush",
-          "date_of_birth" : "1998-09-13"
-        },
-        "date_of_placement" : "2003-08-04",
-        "assigned_worker" : {
-          "first_name" : "Frank",
-          "last_name" : "Rigano"
-        },
-        "county_of_origin" : "Kern"
-      }, {
-        "id" : "BwgdK900MY",
-        "person" : {
-          "gender" : "F",
-          "age" : 20,
-          "first_name" : "Jina",
-          "last_name" : "Davis",
-          "date_of_birth" : "1997-09-02"
-        },
-        "date_of_placement" : "2002-08-15",
-        "assigned_worker" : {
-          "first_name" : "Frank",
-          "last_name" : "Rigano"
-        },
-        "county_of_origin" : "Kern"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -988,21 +520,7 @@
           "zip_code" : "94444"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AvqWDR50Gs",
-        "person" : {
-          "gender" : "M",
-          "age" : 21,
-          "first_name" : "alpha",
-          "last_name" : "fc1582-b",
-          "date_of_birth" : "1996-06-06"
-        },
-        "date_of_placement" : "1998-07-01",
-        "county_of_origin" : "Tehama"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1038,21 +556,7 @@
           "zip_suffix_code" : "1243"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A920ePs0FV",
-        "person" : {
-          "gender" : "M",
-          "age" : 27,
-          "first_name" : "William",
-          "last_name" : "Little",
-          "date_of_birth" : "1990-04-22"
-        },
-        "date_of_placement" : "1999-04-19",
-        "county_of_origin" : "Imperial"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1084,20 +588,7 @@
           "zip_suffix_code" : "1254"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "BcWHTUr0Kh",
-        "person" : {
-          "gender" : "M",
-          "age" : 28,
-          "first_name" : "Manuel",
-          "last_name" : "Martinez",
-          "date_of_birth" : "1989-02-15"
-        },
-        "date_of_placement" : "2001-06-04"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1136,21 +627,7 @@
           "zip_code" : "95485"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "Almqb7V0Ki",
-        "person" : {
-          "gender" : "F",
-          "age" : 30,
-          "first_name" : "Teresa",
-          "last_name" : "Wright",
-          "date_of_birth" : "1987-10-01"
-        },
-        "date_of_placement" : "2001-04-09",
-        "county_of_origin" : "Sacramento"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1178,21 +655,7 @@
           "zip_code" : "95834"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "BotqWu60MQ",
-        "person" : {
-          "gender" : "M",
-          "age" : 30,
-          "first_name" : "SCR5808",
-          "last_name" : "cl1",
-          "date_of_birth" : "1987-09-10"
-        },
-        "date_of_placement" : "2002-09-16",
-        "county_of_origin" : "State of California"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1221,21 +684,7 @@
           "zip_suffix_code" : "1111"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AOb9wf409t",
-        "person" : {
-          "gender" : "M",
-          "age" : 27,
-          "first_name" : "Bryan",
-          "last_name" : "Stephens",
-          "date_of_birth" : "1990-06-08"
-        },
-        "date_of_placement" : "1998-06-14",
-        "county_of_origin" : "Imperial"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1263,43 +712,7 @@
           "zip_code" : "95128"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "ABKHzIx0HS",
-        "person" : {
-          "gender" : "M",
-          "age" : 33,
-          "first_name" : "Russell",
-          "last_name" : "Welby",
-          "date_of_birth" : "1984-10-01"
-        },
-        "date_of_placement" : "1999-12-06",
-        "county_of_origin" : "Santa Clara"
-      }, {
-        "id" : "Afs8WxO0Bi",
-        "person" : {
-          "gender" : "M",
-          "age" : 23,
-          "first_name" : "Carl",
-          "last_name" : "Apple",
-          "date_of_birth" : "1994-12-05"
-        },
-        "date_of_placement" : "1998-12-23",
-        "county_of_origin" : "Imperial"
-      }, {
-        "id" : "BEj4RHf0HS",
-        "person" : {
-          "gender" : "M",
-          "age" : 26,
-          "first_name" : "Wendall",
-          "last_name" : "Welby",
-          "date_of_birth" : "1991-03-07"
-        },
-        "date_of_placement" : "1999-10-04",
-        "county_of_origin" : "Santa Clara"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1328,21 +741,7 @@
           "zip_suffix_code" : "2258"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AOb9wf409t",
-        "person" : {
-          "gender" : "M",
-          "age" : 27,
-          "first_name" : "Bryan",
-          "last_name" : "Stephens",
-          "date_of_birth" : "1990-06-08"
-        },
-        "date_of_placement" : "1998-06-14",
-        "county_of_origin" : "Imperial"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1369,20 +768,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "BgiqiGu0Rt",
-        "person" : {
-          "gender" : "M",
-          "age" : 14,
-          "first_name" : "Today",
-          "last_name" : "Test",
-          "date_of_birth" : "2003-12-08"
-        },
-        "date_of_placement" : "2004-12-07"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1417,25 +803,7 @@
           "zip_code" : "92115"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "ASBfiop0ND",
-        "person" : {
-          "gender" : "M",
-          "age" : 26,
-          "first_name" : "zippy",
-          "last_name" : "word",
-          "date_of_birth" : "1991-03-03"
-        },
-        "date_of_placement" : "2003-04-18",
-        "assigned_worker" : {
-          "first_name" : "Christa",
-          "last_name" : "Silas - Durio"
-        },
-        "county_of_origin" : "San Diego"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1463,21 +831,7 @@
           "zip_code" : "22222"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "Bg3PrJC03k",
-        "person" : {
-          "gender" : "F",
-          "age" : 29,
-          "first_name" : "girl C",
-          "last_name" : "lotsanames",
-          "date_of_birth" : "1988-08-08"
-        },
-        "date_of_placement" : "1998-08-04",
-        "county_of_origin" : "Modoc"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1511,21 +865,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AOb9wf409t",
-        "person" : {
-          "gender" : "M",
-          "age" : 27,
-          "first_name" : "Bryan",
-          "last_name" : "Stephens",
-          "date_of_birth" : "1990-06-08"
-        },
-        "date_of_placement" : "1998-06-14",
-        "county_of_origin" : "Imperial"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1556,20 +896,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A4BUH9m09T",
-        "person" : {
-          "gender" : "F",
-          "age" : 26,
-          "first_name" : "bongo",
-          "last_name" : "joy",
-          "date_of_birth" : "1991-04-01"
-        },
-        "date_of_placement" : "1998-05-25"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1596,32 +923,7 @@
           "state" : "NC"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A0JsDD800b",
-        "person" : {
-          "gender" : "M",
-          "age" : 21,
-          "first_name" : "Green",
-          "last_name" : "Apple",
-          "date_of_birth" : "1996-03-04"
-        },
-        "date_of_placement" : "1998-02-02",
-        "county_of_origin" : "Santa Clara"
-      }, {
-        "id" : "BHSsOgb00b",
-        "person" : {
-          "gender" : "F",
-          "age" : 35,
-          "first_name" : "Jamie",
-          "last_name" : "Jacobs",
-          "date_of_birth" : "1982-02-02"
-        },
-        "date_of_placement" : "1998-02-02",
-        "county_of_origin" : "Santa Clara"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1667,21 +969,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "BqVmS9K0Bv",
-        "person" : {
-          "gender" : "F",
-          "age" : 29,
-          "first_name" : "Connie",
-          "last_name" : "Xparte",
-          "date_of_birth" : "1988-03-21"
-        },
-        "date_of_placement" : "1999-03-02",
-        "county_of_origin" : "State of California"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1709,24 +997,7 @@
           "zip_code" : "11111"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A3x0dGT0Pl",
-        "person" : {
-          "gender" : "M",
-          "age" : 16,
-          "first_name" : "a",
-          "last_name" : "a",
-          "date_of_birth" : "2001-08-05"
-        },
-        "date_of_placement" : "2002-08-22",
-        "assigned_worker" : {
-          "first_name" : "Richard",
-          "last_name" : "Chu"
-        }
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1757,21 +1028,7 @@
           "zip_code" : "92225"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AV75hif0Ki",
-        "person" : {
-          "gender" : "M",
-          "age" : 21,
-          "first_name" : "Eldon",
-          "last_name" : "Albertson",
-          "date_of_birth" : "1996-03-09"
-        },
-        "date_of_placement" : "2001-03-09",
-        "county_of_origin" : "Napa"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1810,21 +1067,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "ACmqdE20Dw",
-        "person" : {
-          "gender" : "F",
-          "age" : 31,
-          "first_name" : "Child",
-          "last_name" : "Victimzz",
-          "date_of_birth" : "1986-12-15"
-        },
-        "date_of_placement" : "1999-01-07",
-        "county_of_origin" : "Contra Costa"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1865,21 +1108,7 @@
           "zip_suffix_code" : "4849"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A920ePs0FV",
-        "person" : {
-          "gender" : "M",
-          "age" : 27,
-          "first_name" : "William",
-          "last_name" : "Little",
-          "date_of_birth" : "1990-04-22"
-        },
-        "date_of_placement" : "1999-04-19",
-        "county_of_origin" : "Imperial"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1907,20 +1136,7 @@
           "zip_code" : "95249"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AIrV4JX0Cv",
-        "person" : {
-          "gender" : "M",
-          "age" : 33,
-          "first_name" : "Client A",
-          "last_name" : "FC1514-SOC158",
-          "date_of_birth" : "1984-04-04"
-        },
-        "date_of_placement" : "1998-12-04"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -1954,373 +1170,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A1CLwjY0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A122",
-          "last_name" : "A122",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "AEYcuBk0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A97",
-          "last_name" : "A97",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "AKpIA2a0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A391",
-          "last_name" : "A391",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "ANlXAa00V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A14",
-          "last_name" : "A14",
-          "date_of_birth" : "2000-08-09"
-        },
-        "date_of_placement" : "2004-08-09",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "AOMyaWO0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A329",
-          "last_name" : "A329",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "APq4Ayu0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A213",
-          "last_name" : "A213",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "AULwfEW0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A238",
-          "last_name" : "A238",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "AXDfCx60V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A345",
-          "last_name" : "A345",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "AcY25xw0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A174",
-          "last_name" : "A174",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "AeSjivI0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A392",
-          "last_name" : "A392",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "Ak7YpUu0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A347",
-          "last_name" : "A347",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "Aku42Lg0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A142",
-          "last_name" : "A142",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "Al4sRaK0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A301",
-          "last_name" : "A301",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "An2wVc80V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A346",
-          "last_name" : "A346",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "Ao5bCaO0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A65",
-          "last_name" : "A65",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "Apytw5Y0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A354",
-          "last_name" : "A354",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "AqWhHhI0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A27",
-          "last_name" : "A27",
-          "date_of_birth" : "2000-08-09"
-        },
-        "date_of_placement" : "2004-08-09",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "AqxwF9U0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A419",
-          "last_name" : "A419",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "Ar6kMHY0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A442",
-          "last_name" : "A442",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "AwH8XFo0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A111",
-          "last_name" : "A111",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "AwRidwm0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A454",
-          "last_name" : "A454",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "BCPVLLc0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A6",
-          "last_name" : "A6",
-          "date_of_birth" : "2000-08-09"
-        },
-        "date_of_placement" : "2004-08-09",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "BDSER6O0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A45",
-          "last_name" : "A45",
-          "date_of_birth" : "2000-08-09"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "BDo2Gb20V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A247",
-          "last_name" : "A247",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "BEe13n60V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A364",
-          "last_name" : "A364",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "BG37AEa0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A159",
-          "last_name" : "A159",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "BahY1hQ0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A57",
-          "last_name" : "A57",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "BhraA6y0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A445",
-          "last_name" : "A445",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "BhwbzZY0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A88",
-          "last_name" : "A88",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "BkJibjU0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A412",
-          "last_name" : "A412",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "Bq2TLdg0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A129",
-          "last_name" : "A129",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "BvbiWgi0V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A490",
-          "last_name" : "A490",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      }, {
-        "id" : "BwjkUw40V4",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "A120",
-          "last_name" : "A120",
-          "date_of_birth" : "2000-08-10"
-        },
-        "date_of_placement" : "2004-08-10",
-        "county_of_origin" : "Sacramento"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2347,38 +1197,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AeKWcfS05I",
-        "person" : {
-          "gender" : "M",
-          "age" : 21,
-          "first_name" : "uu",
-          "last_name" : "uu",
-          "date_of_birth" : "1996-03-27"
-        },
-        "date_of_placement" : "1998-03-16",
-        "assigned_worker" : {
-          "first_name" : "Yolo",
-          "last_name" : "Worker"
-        }
-      }, {
-        "id" : "AeKWcfS05I",
-        "person" : {
-          "gender" : "M",
-          "age" : 21,
-          "first_name" : "uu",
-          "last_name" : "uu",
-          "date_of_birth" : "1996-03-27"
-        },
-        "date_of_placement" : "1998-03-16",
-        "assigned_worker" : {
-          "first_name" : "Yolo",
-          "last_name" : "Worker"
-        }
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2405,24 +1224,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "BsDKCfQ0SR",
-        "person" : {
-          "gender" : "F",
-          "age" : 18,
-          "first_name" : "Viola",
-          "last_name" : "Fuss",
-          "date_of_birth" : "1999-07-27"
-        },
-        "date_of_placement" : "2004-07-27",
-        "assigned_worker" : {
-          "first_name" : "Ben",
-          "last_name" : "Slab"
-        }
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2457,45 +1259,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AIC66IY0MY",
-        "person" : {
-          "gender" : "M",
-          "age" : 16,
-          "first_name" : "James",
-          "last_name" : "Carter",
-          "date_of_birth" : "2001-10-01"
-        },
-        "date_of_placement" : "2002-10-08"
-      }, {
-        "id" : "AedX5E60MY",
-        "person" : {
-          "gender" : "M",
-          "age" : 19,
-          "first_name" : "John",
-          "last_name" : "Lopez",
-          "date_of_birth" : "1998-09-13"
-        },
-        "date_of_placement" : "2002-09-01",
-        "assigned_worker" : {
-          "first_name" : "Frank",
-          "last_name" : "Rigano"
-        },
-        "county_of_origin" : "Kern"
-      }, {
-        "id" : "AqPYDmI0MY",
-        "person" : {
-          "gender" : "M",
-          "age" : 18,
-          "first_name" : "Dick",
-          "last_name" : "Morris",
-          "date_of_birth" : "1999-10-05"
-        },
-        "date_of_placement" : "2002-10-14"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2535,21 +1299,7 @@
           "zip_code" : "95453"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A21VTRG0Mu",
-        "person" : {
-          "gender" : "F",
-          "age" : 20,
-          "first_name" : "Gabby",
-          "last_name" : "Williams",
-          "date_of_birth" : "1997-09-03"
-        },
-        "date_of_placement" : "2002-09-03",
-        "county_of_origin" : "Lake"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2576,40 +1326,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AAWHOx60Ki",
-        "person" : {
-          "gender" : "F",
-          "age" : 19,
-          "first_name" : "Rocy",
-          "last_name" : "Willman",
-          "date_of_birth" : "1998-05-19"
-        },
-        "date_of_placement" : "2004-05-19",
-        "assigned_worker" : {
-          "first_name" : "H",
-          "last_name" : "RAMES"
-        },
-        "county_of_origin" : "Napa"
-      }, {
-        "id" : "AAWHOx60Ki",
-        "person" : {
-          "gender" : "F",
-          "age" : 19,
-          "first_name" : "Rocy",
-          "last_name" : "Willman",
-          "date_of_birth" : "1998-05-19"
-        },
-        "date_of_placement" : "2004-05-19",
-        "assigned_worker" : {
-          "first_name" : "H",
-          "last_name" : "RAMES"
-        },
-        "county_of_origin" : "Napa"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2648,21 +1365,7 @@
           "zip_code" : "95223"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AQzvsgN0AB",
-        "person" : {
-          "gender" : "M",
-          "age" : 26,
-          "first_name" : "Brother1",
-          "last_name" : "Splitt",
-          "date_of_birth" : "1991-05-05"
-        },
-        "date_of_placement" : "1999-02-05",
-        "county_of_origin" : "San Diego"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2691,31 +1394,7 @@
           "zip_suffix_code" : "2984"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AUjG8Tk0FT",
-        "person" : {
-          "gender" : "M",
-          "age" : 22,
-          "first_name" : "stfh3547",
-          "last_name" : "sfg5365",
-          "date_of_birth" : "1996-01-20"
-        },
-        "date_of_placement" : "2000-01-05"
-      }, {
-        "id" : "Ad9Fgnc0FT",
-        "person" : {
-          "gender" : "F",
-          "age" : 20,
-          "first_name" : "urday",
-          "last_name" : "sat",
-          "date_of_birth" : "1998-01-01"
-        },
-        "date_of_placement" : "2000-02-07",
-        "county_of_origin" : "Imperial"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2744,21 +1423,7 @@
           "zip_suffix_code" : "6666"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AOb9wf409t",
-        "person" : {
-          "gender" : "M",
-          "age" : 27,
-          "first_name" : "Bryan",
-          "last_name" : "Stephens",
-          "date_of_birth" : "1990-06-08"
-        },
-        "date_of_placement" : "1998-06-14",
-        "county_of_origin" : "Imperial"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2778,20 +1443,7 @@
       },
       "phones" : [ ],
       "addresses" : [ ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AqDfR1p01w",
-        "person" : {
-          "gender" : "F",
-          "age" : 17,
-          "first_name" : "Kim",
-          "last_name" : "Roberts",
-          "date_of_birth" : "2000-09-29"
-        },
-        "date_of_placement" : "2001-05-31"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2818,25 +1470,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AlQkCE40Py",
-        "person" : {
-          "gender" : "F",
-          "age" : 15,
-          "first_name" : "Cindy",
-          "last_name" : "Strafford",
-          "date_of_birth" : "2002-11-15"
-        },
-        "date_of_placement" : "2004-11-02",
-        "assigned_worker" : {
-          "first_name" : "James",
-          "last_name" : "Brown"
-        },
-        "county_of_origin" : "Monterey"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2872,36 +1506,7 @@
           "zip_code" : "91111"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A8ZRBYc0MY",
-        "person" : {
-          "gender" : "M",
-          "age" : 20,
-          "first_name" : "Test",
-          "last_name" : "Child17",
-          "date_of_birth" : "1997-10-16"
-        },
-        "date_of_placement" : "2002-10-10",
-        "assigned_worker" : {
-          "first_name" : "Frank",
-          "last_name" : "Rigano"
-        },
-        "county_of_origin" : "Kern"
-      }, {
-        "id" : "Ayfu0u60MY",
-        "person" : {
-          "gender" : "M",
-          "age" : 20,
-          "first_name" : "Test",
-          "last_name" : "Child11",
-          "date_of_birth" : "1997-10-11"
-        },
-        "date_of_placement" : "2002-10-01",
-        "county_of_origin" : "Kern"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2928,20 +1533,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AeKm34a00E",
-        "person" : {
-          "gender" : "F",
-          "age" : 19,
-          "first_name" : "Roberta",
-          "last_name" : "Santos",
-          "date_of_birth" : "1998-12-12"
-        },
-        "date_of_placement" : "2004-12-21"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -2969,21 +1561,7 @@
           "zip_code" : "68678"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "ACvfGiq0I3",
-        "person" : {
-          "gender" : "M",
-          "age" : 23,
-          "first_name" : "Five",
-          "last_name" : "Valentine",
-          "date_of_birth" : "1994-09-08"
-        },
-        "date_of_placement" : "2002-04-16",
-        "county_of_origin" : "Santa Cruz"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -3010,25 +1588,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "BwDOmH00Ki",
-        "person" : {
-          "gender" : "M",
-          "age" : 18,
-          "first_name" : "ZBug",
-          "last_name" : "Nash",
-          "date_of_birth" : "1999-09-10"
-        },
-        "date_of_placement" : "2010-09-10",
-        "assigned_worker" : {
-          "first_name" : "H",
-          "last_name" : "RAMES"
-        },
-        "county_of_origin" : "Napa"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -3057,21 +1617,7 @@
           "zip_suffix_code" : "7777"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AOb9wf409t",
-        "person" : {
-          "gender" : "M",
-          "age" : 27,
-          "first_name" : "Bryan",
-          "last_name" : "Stephens",
-          "date_of_birth" : "1990-06-08"
-        },
-        "date_of_placement" : "1998-06-14",
-        "county_of_origin" : "Imperial"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -3098,25 +1644,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "Az8YThqCON",
-        "person" : {
-          "gender" : "F",
-          "age" : 24,
-          "first_name" : "v",
-          "last_name" : "0316a",
-          "date_of_birth" : "1993-03-16"
-        },
-        "date_of_placement" : "1998-05-15",
-        "assigned_worker" : {
-          "first_name" : "y",
-          "last_name" : "pakcs"
-        },
-        "county_of_origin" : "Kern"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -3148,21 +1676,7 @@
           "zip_suffix_code" : "0071"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "Bv4DSpX0Bv",
-        "person" : {
-          "gender" : "F",
-          "age" : 20,
-          "first_name" : "Merry",
-          "last_name" : "Melody",
-          "date_of_birth" : "1998-01-01"
-        },
-        "date_of_placement" : "1999-08-03",
-        "county_of_origin" : "State of California"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -3190,25 +1704,7 @@
           "zip_code" : "95133"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "ATeE6p70SR",
-        "person" : {
-          "gender" : "M",
-          "age" : 20,
-          "first_name" : "E96E932-1",
-          "last_name" : "FST",
-          "date_of_birth" : "1997-06-23"
-        },
-        "date_of_placement" : "2005-06-23",
-        "assigned_worker" : {
-          "first_name" : "Ben",
-          "last_name" : "Slab"
-        },
-        "county_of_origin" : "Santa Clara"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -3235,109 +1731,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AJO7twO0Ql",
-        "person" : {
-          "gender" : "M",
-          "age" : 20,
-          "first_name" : "Test",
-          "last_name" : "Child",
-          "date_of_birth" : "1997-11-02"
-        },
-        "date_of_placement" : "2004-05-25",
-        "assigned_worker" : {
-          "first_name" : "User",
-          "last_name" : "FST"
-        }
-      }, {
-        "id" : "AJO7twO0Ql",
-        "person" : {
-          "gender" : "M",
-          "age" : 20,
-          "first_name" : "Test",
-          "last_name" : "Child",
-          "date_of_birth" : "1997-11-02"
-        },
-        "date_of_placement" : "2004-05-25",
-        "assigned_worker" : {
-          "first_name" : "User",
-          "last_name" : "FST"
-        }
-      }, {
-        "id" : "AJO7twO0Ql",
-        "person" : {
-          "gender" : "M",
-          "age" : 20,
-          "first_name" : "Test",
-          "last_name" : "Child",
-          "date_of_birth" : "1997-11-02"
-        },
-        "date_of_placement" : "2004-05-25",
-        "assigned_worker" : {
-          "first_name" : "User",
-          "last_name" : "FST"
-        }
-      }, {
-        "id" : "AJO7twO0Ql",
-        "person" : {
-          "gender" : "M",
-          "age" : 20,
-          "first_name" : "Test",
-          "last_name" : "Child",
-          "date_of_birth" : "1997-11-02"
-        },
-        "date_of_placement" : "2004-05-25",
-        "assigned_worker" : {
-          "first_name" : "User",
-          "last_name" : "FST"
-        }
-      }, {
-        "id" : "APiAAYq0Ql",
-        "person" : {
-          "gender" : "M",
-          "age" : 18,
-          "first_name" : "Test",
-          "last_name" : "Child031104",
-          "date_of_birth" : "1999-03-11"
-        },
-        "date_of_placement" : "2004-03-01",
-        "assigned_worker" : {
-          "first_name" : "User",
-          "last_name" : "FST"
-        }
-      }, {
-        "id" : "BEp3ECm0Ql",
-        "person" : {
-          "gender" : "M",
-          "age" : 18,
-          "first_name" : "Test",
-          "last_name" : "Child031104",
-          "date_of_birth" : "1999-03-11"
-        },
-        "date_of_placement" : "2004-03-01",
-        "assigned_worker" : {
-          "first_name" : "User",
-          "last_name" : "FST"
-        }
-      }, {
-        "id" : "BoI77zU0Ql",
-        "person" : {
-          "gender" : "M",
-          "age" : 18,
-          "first_name" : "Test",
-          "last_name" : "Child",
-          "date_of_birth" : "1999-03-19"
-        },
-        "date_of_placement" : "2004-05-01",
-        "assigned_worker" : {
-          "first_name" : "User",
-          "last_name" : "FST"
-        },
-        "county_of_origin" : "Sacramento"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -3375,31 +1769,7 @@
           "zip_code" : "95971"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "Bs36qN10Cv",
-        "person" : {
-          "gender" : "M",
-          "age" : 33,
-          "first_name" : "FFACH D",
-          "last_name" : "FC1414-SOC158",
-          "date_of_birth" : "1984-04-04"
-        },
-        "date_of_placement" : "1998-12-01"
-      }, {
-        "id" : "BtIJjHf00X",
-        "person" : {
-          "gender" : "M",
-          "age" : 36,
-          "first_name" : "yankee",
-          "last_name" : "fc1520-c",
-          "date_of_birth" : "1981-09-30"
-        },
-        "date_of_placement" : "1999-06-30",
-        "county_of_origin" : "Tehama"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -3431,21 +1801,7 @@
           "zip_suffix_code" : "0074"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AdOY6Ts0Bv",
-        "person" : {
-          "gender" : "M",
-          "age" : 33,
-          "first_name" : "Alex",
-          "last_name" : "Reese",
-          "date_of_birth" : "1984-12-03"
-        },
-        "date_of_placement" : "1999-06-03",
-        "county_of_origin" : "Plumas"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "I"
   }, {
@@ -3481,25 +1837,7 @@
           "zip_code" : "95674"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "ASUREPK0Bu",
-        "person" : {
-          "gender" : "F",
-          "age" : 21,
-          "first_name" : "Lucy",
-          "last_name" : "Lego",
-          "date_of_birth" : "1996-10-22"
-        },
-        "date_of_placement" : "1998-12-01",
-        "assigned_worker" : {
-          "first_name" : "Merrie",
-          "last_name" : "Poppins"
-        },
-        "county_of_origin" : "Plumas"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -3540,31 +1878,7 @@
           "zip_code" : "95453"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A3JsHlS057",
-        "person" : {
-          "gender" : "M",
-          "age" : 29,
-          "first_name" : "Tom",
-          "last_name" : "Tester",
-          "date_of_birth" : "1988-11-26"
-        },
-        "date_of_placement" : "1998-03-04"
-      }, {
-        "id" : "Bzioo1C057",
-        "person" : {
-          "gender" : "M",
-          "age" : 27,
-          "first_name" : "Howard",
-          "last_name" : "Bill",
-          "date_of_birth" : "1990-12-12"
-        },
-        "date_of_placement" : "1998-06-02",
-        "county_of_origin" : "Lake"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -3595,21 +1909,7 @@
           "zip_code" : "22222"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "BraRWYU0EE",
-        "person" : {
-          "gender" : "F",
-          "age" : 32,
-          "first_name" : "Jan",
-          "last_name" : "Brady",
-          "date_of_birth" : "1985-12-16"
-        },
-        "date_of_placement" : "1998-12-22",
-        "county_of_origin" : "Sutter"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -3636,21 +1936,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "ASUiAyp0G7",
-        "person" : {
-          "gender" : "M",
-          "age" : 24,
-          "first_name" : "Josh",
-          "last_name" : "Harris",
-          "date_of_birth" : "1993-09-16"
-        },
-        "date_of_placement" : "1999-09-24",
-        "county_of_origin" : "Monterey"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -3677,25 +1963,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AQieKgi0Um",
-        "person" : {
-          "gender" : "M",
-          "age" : 22,
-          "first_name" : "Johnny",
-          "last_name" : "Jinn",
-          "date_of_birth" : "1995-09-09"
-        },
-        "date_of_placement" : "2004-08-23",
-        "assigned_worker" : {
-          "first_name" : "Gene",
-          "last_name" : "Timmerman"
-        },
-        "county_of_origin" : "Mendocino"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -3725,21 +1993,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "ApppJ9n005",
-        "person" : {
-          "gender" : "F",
-          "age" : 27,
-          "first_name" : "bravo",
-          "last_name" : "non-cwd",
-          "date_of_birth" : "1990-02-02"
-        },
-        "date_of_placement" : "1998-01-01",
-        "county_of_origin" : "Los Angeles"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -3795,21 +2049,7 @@
           "zip_suffix_code" : "1234"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "Ar6kQoF0AB",
-        "person" : {
-          "gender" : "M",
-          "age" : 29,
-          "first_name" : "Teddy",
-          "last_name" : "Wendt",
-          "date_of_birth" : "1988-09-11"
-        },
-        "date_of_placement" : "1996-12-14",
-        "county_of_origin" : "San Diego"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -3837,21 +2077,7 @@
           "zip_code" : "99995"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "BEhgVQx0Ha",
-        "person" : {
-          "gender" : "M",
-          "age" : 28,
-          "first_name" : "Eddie",
-          "last_name" : "Munster",
-          "date_of_birth" : "1989-08-05"
-        },
-        "date_of_placement" : "1999-09-29",
-        "county_of_origin" : "San Mateo"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -3882,21 +2108,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AbQYKuK0JG",
-        "person" : {
-          "gender" : "M",
-          "age" : 22,
-          "first_name" : "child5",
-          "last_name" : "WEP II",
-          "date_of_birth" : "1995-03-17"
-        },
-        "date_of_placement" : "1998-12-11",
-        "county_of_origin" : "Colusa"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -3935,24 +2147,7 @@
           "zip_code" : "94508"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AcqEeTo0Ql",
-        "person" : {
-          "gender" : "M",
-          "age" : 18,
-          "first_name" : "Test",
-          "last_name" : "Child031204",
-          "date_of_birth" : "1999-03-12"
-        },
-        "date_of_placement" : "2004-03-01",
-        "assigned_worker" : {
-          "first_name" : "User",
-          "last_name" : "FST"
-        }
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -3980,21 +2175,7 @@
           "zip_code" : "95994"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "Afp03uu0Ht",
-        "person" : {
-          "gender" : "F",
-          "age" : 29,
-          "first_name" : "Snow",
-          "last_name" : "White",
-          "date_of_birth" : "1988-04-21"
-        },
-        "date_of_placement" : "2003-05-08",
-        "county_of_origin" : "Santa Cruz"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -4022,24 +2203,7 @@
           "zip_code" : "91111"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A3x0dGT0Pl",
-        "person" : {
-          "gender" : "M",
-          "age" : 16,
-          "first_name" : "a",
-          "last_name" : "a",
-          "date_of_birth" : "2001-08-05"
-        },
-        "date_of_placement" : "2002-08-22",
-        "assigned_worker" : {
-          "first_name" : "Richard",
-          "last_name" : "Chu"
-        }
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -4068,21 +2232,7 @@
           "zip_suffix_code" : "8888"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AdT8QJn0ES",
-        "person" : {
-          "gender" : "F",
-          "age" : 24,
-          "first_name" : "SCI",
-          "last_name" : "TEST",
-          "date_of_birth" : "1994-01-01"
-        },
-        "date_of_placement" : "1998-01-01",
-        "county_of_origin" : "Los Angeles"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -4109,25 +2259,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AbtnmWU0Mq",
-        "person" : {
-          "gender" : "M",
-          "age" : 17,
-          "first_name" : "Billy",
-          "last_name" : "Placement",
-          "date_of_birth" : "2000-08-22"
-        },
-        "date_of_placement" : "2002-09-26",
-        "assigned_worker" : {
-          "first_name" : "Benjamin",
-          "last_name" : "Caso"
-        },
-        "county_of_origin" : "Ventura"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -4155,21 +2287,7 @@
           "zip_code" : "93405"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "AeDddFG06b",
-        "person" : {
-          "gender" : "M",
-          "age" : 19,
-          "first_name" : "Just",
-          "last_name" : "Tyme",
-          "date_of_birth" : "1998-08-07"
-        },
-        "date_of_placement" : "2002-08-29",
-        "county_of_origin" : "San Luis Obispo"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -4200,32 +2318,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "ASDQKfa0CR",
-        "person" : {
-          "gender" : "M",
-          "age" : 28,
-          "first_name" : "Child",
-          "last_name" : "RTS5027",
-          "date_of_birth" : "1990-01-01"
-        },
-        "date_of_placement" : "1998-12-23",
-        "county_of_origin" : "Sutter"
-      }, {
-        "id" : "ASDQKfa0CR",
-        "person" : {
-          "gender" : "M",
-          "age" : 28,
-          "first_name" : "Child",
-          "last_name" : "RTS5027",
-          "date_of_birth" : "1990-01-01"
-        },
-        "date_of_placement" : "1998-12-23",
-        "county_of_origin" : "Sutter"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -4263,21 +2356,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "ACmqdE20Dw",
-        "person" : {
-          "gender" : "F",
-          "age" : 31,
-          "first_name" : "Child",
-          "last_name" : "Victimzz",
-          "date_of_birth" : "1986-12-15"
-        },
-        "date_of_placement" : "1999-01-07",
-        "county_of_origin" : "Contra Costa"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -4311,20 +2390,7 @@
           "zip_code" : "95222"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "Afp02uw0Cv",
-        "person" : {
-          "gender" : "F",
-          "age" : 33,
-          "first_name" : "court",
-          "last_name" : "soc158",
-          "date_of_birth" : "1984-04-04"
-        },
-        "date_of_placement" : "1998-08-08"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -4351,20 +2417,7 @@
           "state" : "CA"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "Bl9bt9H00I",
-        "person" : {
-          "gender" : "F",
-          "age" : 22,
-          "first_name" : "12099 Cl 2",
-          "last_name" : "SOC158",
-          "date_of_birth" : "1995-06-18"
-        },
-        "date_of_placement" : "1995-12-05"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -4392,190 +2445,7 @@
           "zip_code" : "90210"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "A7H4Z1A00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9484049",
-          "last_name" : "A4840499",
-          "date_of_birth" : "1995-01-20"
-        },
-        "date_of_placement" : "1999-12-05"
-      }, {
-        "id" : "AEgd5PQ00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9481431",
-          "last_name" : "A4814311",
-          "date_of_birth" : "1995-01-17"
-        },
-        "date_of_placement" : "1999-11-15"
-      }, {
-        "id" : "AIDmszr00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9392513",
-          "last_name" : "A3925139",
-          "date_of_birth" : "1994-10-06"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "AOvrHe800F",
-        "person" : {
-          "gender" : "F",
-          "age" : 22,
-          "first_name" : "A9514117",
-          "last_name" : "A5141172",
-          "date_of_birth" : "1995-02-24"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "AVDZWpn00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9386155",
-          "last_name" : "A3861557",
-          "date_of_birth" : "1994-09-29"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "AcB3fpD00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9447670",
-          "last_name" : "A4476700",
-          "date_of_birth" : "1994-12-09"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "AcB3fpD00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9447670",
-          "last_name" : "A4476700",
-          "date_of_birth" : "1994-12-09"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "AnKXcsV00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9447744",
-          "last_name" : "A4477441",
-          "date_of_birth" : "1994-12-09"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "AnKXcsV00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9447744",
-          "last_name" : "A4477441",
-          "date_of_birth" : "1994-12-09"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "BCDEi4R00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9393093",
-          "last_name" : "A3930931",
-          "date_of_birth" : "1994-10-07"
-        },
-        "date_of_placement" : "1999-07-01"
-      }, {
-        "id" : "BGwDeS300F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9427874",
-          "last_name" : "A4278744",
-          "date_of_birth" : "1994-11-16"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "BGwDeS300F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9427874",
-          "last_name" : "A4278744",
-          "date_of_birth" : "1994-11-16"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "BH8OoLc00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9483913",
-          "last_name" : "A4839136",
-          "date_of_birth" : "1995-01-20"
-        },
-        "date_of_placement" : "1999-12-05"
-      }, {
-        "id" : "BhZMhO800F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9483921",
-          "last_name" : "A4839217",
-          "date_of_birth" : "1995-01-20"
-        },
-        "date_of_placement" : "1999-12-05"
-      }, {
-        "id" : "BiiboJg00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 22,
-          "first_name" : "A9500334",
-          "last_name" : "A5003342",
-          "date_of_birth" : "1995-02-08"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "BiiboJg00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 22,
-          "first_name" : "A9500334",
-          "last_name" : "A5003342",
-          "date_of_birth" : "1995-02-08"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "BoP83ts00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9478641",
-          "last_name" : "A4786413",
-          "date_of_birth" : "1995-01-14"
-        },
-        "date_of_placement" : "1999-09-01"
-      }, {
-        "id" : "BoP83ts00F",
-        "person" : {
-          "gender" : "F",
-          "age" : 23,
-          "first_name" : "A9478641",
-          "last_name" : "A4786413",
-          "date_of_birth" : "1995-01-14"
-        },
-        "date_of_placement" : "1999-09-01"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   }, {
@@ -4607,21 +2477,7 @@
           "zip_code" : "95223"
         }
       } ],
-      "facility_source" : "CWS/CMS",
-      "children" : [ {
-        "id" : "APxR78V0AB",
-        "person" : {
-          "gender" : "F",
-          "age" : 25,
-          "first_name" : "CariFC3",
-          "last_name" : "Benton",
-          "date_of_birth" : "1992-02-05"
-        },
-        "date_of_placement" : "1998-02-17",
-        "county_of_origin" : "San Diego"
-      } ],
-      "inspections" : [ ],
-      "complaints" : [ ]
+      "facility_source" : "CWS/CMS"
     },
     "recordChangeOperation" : "U"
   } ]

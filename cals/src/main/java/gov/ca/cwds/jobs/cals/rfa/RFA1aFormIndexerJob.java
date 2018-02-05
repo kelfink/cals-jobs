@@ -40,8 +40,12 @@ public final class RFA1aFormIndexerJob extends BaseIndexerJob {
   }
 
   @Override
-  public BaseJobConfiguration getJobsConfiguration() {
-    return BaseJobConfiguration.getCalsJobsConfiguration(BaseJobConfiguration.class, getJobOptions().getEsConfigLoc());
+  public RFA1aJobConfiguration getJobsConfiguration() {
+    RFA1aJobConfiguration jobConfiguration = BaseJobConfiguration.getJobsConfiguration(RFA1aJobConfiguration.class,
+            getJobOptions().getEsConfigLoc());
+    jobConfiguration.setDocumentMapping("rfa.mapping.json");
+    jobConfiguration.setIndexSettings("rfa.settings.json");
+    return jobConfiguration;
   }
 
   @Provides
