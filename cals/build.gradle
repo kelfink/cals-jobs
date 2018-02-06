@@ -54,6 +54,15 @@ dependencies {
     testCompile (group: 'gov.ca.cwds.cals', name: 'fas-data-model', version: cwdsModelVersion, changing: true)
     testCompile (group: 'gov.ca.cwds.cals', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true)
 
+//    test {
+//        configurations {
+//            exclude module: 'log4j-over-slf4j'
+//        }
+//    }
+}
+
+configurations {
+    all*.exclude module: 'log4j-over-slf4j'
 }
 
 shadowJar {
