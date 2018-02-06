@@ -5,7 +5,9 @@ dependencies {
 
     compile group: 'com.google.inject', name: 'guice', version: guiceVersion
     compile group: 'org.hibernate', name: 'hibernate-core', version: hibernateVersion
-    compile group: 'io.dropwizard', name: 'dropwizard-db', version: dropwizardVersion
+    compile (group: 'io.dropwizard', name: 'dropwizard-db', version: dropwizardVersion){
+        exclude group: 'org.slf4j'
+    }
     compile group: 'org.elasticsearch.client', name:'x-pack-transport', version: elasticsearchVersion
 
     compile group: 'gov.ca.cwds.api', name: 'api-core-cms', version: coreApiVersion
