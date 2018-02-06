@@ -77,7 +77,6 @@ public class ChangedFacilityService extends FacilityService {
 
     return Stream.concat(stream, lisRecordChanges.newStream())
         .map(recordChange -> {
-          LOG.info("Getting facility by ID: {}", recordChange.getId());
           FacilityDTO facilityDTO = findFacilityById(recordChange.getId());
           if (facilityDTO == null) {
             return null;
@@ -88,14 +87,14 @@ public class ChangedFacilityService extends FacilityService {
         })
         .filter(facilityDTO -> {
           if (facilityDTO == null) {
-            LOG.error("Finding facility by ID did not return FacilityDTO. Skipped.");
+            LOG.warn("Finding facility by ID did not return FacilityDTO. Skipped.");
             return false;
           }
           return true;
         })
         .filter(facilityDTO -> {
           if (facilityDTO.getId() == null) {
-            LOG.error(
+            LOG.warn(
                 "Finding facility by ID returned incorrect FacilityDTO with NULL id. Skipped.");
             return false;
           } else {
