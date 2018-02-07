@@ -13,6 +13,6 @@ public interface Job extends ApiMarker {
   /**
    * Run the job.
    */
-  public void run();
+  void run();
 
 }

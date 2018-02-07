@@ -17,23 +17,3 @@ dependencies {
     }
 
 }
-
-/*
-publishing {
-    publications {
-        library(MavenPublication) {
-            from components.java
-            groupId commonGroupId
-            artifactId 'jobs-common'
-        }
-    }
-    repositories {
-        mavenLocal()
-        maven {
-            url artifactoryRepo
-        }
-    }
-}
-*/
-
-

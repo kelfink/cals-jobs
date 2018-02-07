@@ -19,21 +19,19 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
 import static gov.ca.cwds.cals.Constants.API.FACILITIES;
-import static gov.ca.cwds.test.utils.AssertResponseHelper.assertEqualsResponse;
 import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author CWDS TPT-2
  */
-@Ignore
+@Ignore  //Eugene Please unignore back
 public class ChangedFacilityResourceTest extends BaseApiTest<TestCalsJobsConfiguration> {
 
   static final String PATH_CHANGED_FACILITY = "changed-" + FACILITIES;
   static final String PATH_INITIAL = "initial";
   static final String PATH_INITIAL_FACILITY_LOAD = PATH_CHANGED_FACILITY + "/" + PATH_INITIAL;
   static final String DATE_AFTER = "dateAfter";
-  static final String LIS_DATE_AFTER = "lisDateAfter";
 
   @ClassRule
   public static final BaseDropwizardApplication<TestCalsJobsConfiguration> application
@@ -47,33 +45,33 @@ public class ChangedFacilityResourceTest extends BaseApiTest<TestCalsJobsConfigu
   @BeforeClass
   public static void beforeClass() throws Exception {
     DatabaseHelper.setUpDatabase(application.getConfiguration().getLisDataSourceFactory(), DataSourceName.LIS);
+    DatabaseHelper.setUpDatabase(application.getConfiguration().getFasDataSourceFactory(), DataSourceName.FAS);
     DatabaseHelper.setUpDatabase(application.getConfiguration().getCmsrsDataSourceFactory(), DataSourceName.CWSRS);
   }
 
     @Test
     public void getChangedFacilitiesTest() throws Exception {
-        WebTarget target = clientTestRule.target(PATH_CHANGED_FACILITY + "/?" + DATE_AFTER + "=2017-12-19&"
-                + LIS_DATE_AFTER + "=2017-12-19");
+        WebTarget target = clientTestRule.target(PATH_CHANGED_FACILITY + "/?" + DATE_AFTER + "=2017-12-19-00.00.00.000");
         Invocation.Builder invocation = target.request(MediaType.APPLICATION_JSON);
         CollectionDTO<TestChangedFacilityDTO> facilities = Jackson.newObjectMapper().readValue(
                 invocation.get(String.class), new TypeReference<CollectionDTO<TestChangedFacilityDTO>>() {
                 });
         assertEquals(79, facilities.getCollection().size());
-        assertResponse(facilities);
+        assertResponse(facilities, "fixtures/changed-facility-service-incremental.json");
     }
 
   @Test
   public void initialLoadTest() throws Exception {
-    WebTarget target = clientTestRule.target(PATH_INITIAL_FACILITY_LOAD + "/?" + LIS_DATE_AFTER + "=2017-12-19");
+    WebTarget target = clientTestRule.target(PATH_INITIAL_FACILITY_LOAD);
     Invocation.Builder invocation = target.request(MediaType.APPLICATION_JSON);
     CollectionDTO<TestChangedFacilityDTO> facilities = Jackson.newObjectMapper().readValue(
               invocation.get(String.class), new TypeReference<CollectionDTO<TestChangedFacilityDTO>>() { });
-    assertEquals(79, facilities.getCollection().size());
-    assertResponse(facilities);
+    assertEquals(309, facilities.getCollection().size());
+    assertResponse(facilities, "fixtures/changed-facility-service-initial.json");
   }
 
-    private void assertResponse(CollectionDTO<TestChangedFacilityDTO> changedFacilities) throws Exception {
-        String fixture = fixture("fixtures/changed-facility-service.json");
+    private void assertResponse(CollectionDTO<TestChangedFacilityDTO> changedFacilities, String fixturePath) throws Exception {
+        String fixture = fixture(fixturePath);
         //assertEqualsResponse(fixture, transformDTOtoJSON(changedFacilities));
     }
 

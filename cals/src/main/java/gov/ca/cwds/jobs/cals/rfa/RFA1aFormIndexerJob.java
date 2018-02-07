@@ -7,12 +7,12 @@ import gov.ca.cwds.cals.Constants;
 import gov.ca.cwds.cals.inject.MappingModule;
 import gov.ca.cwds.cals.service.rfa.RFA1aFormsCollectionService;
 import gov.ca.cwds.jobs.cals.CalsElasticJobWriter;
-import gov.ca.cwds.jobs.common.job.Job;
-import gov.ca.cwds.jobs.common.job.AsyncReadWriteJob;
-import gov.ca.cwds.jobs.common.BaseIndexerJob;
-import gov.ca.cwds.jobs.common.ElasticsearchIndexerDao;
-import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.cals.inject.NsDataAccessModule;
+import gov.ca.cwds.jobs.common.BaseIndexerJob;
+import gov.ca.cwds.jobs.common.BaseJobConfiguration;
+import gov.ca.cwds.jobs.common.ElasticsearchIndexerDao;
+import gov.ca.cwds.jobs.common.job.Job;
+import gov.ca.cwds.jobs.common.job.impl.AsyncReadWriteJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +37,7 @@ public final class RFA1aFormIndexerJob extends BaseIndexerJob {
     bind(RFA1aFormReader.class);
     bind(RFA1aFormElasticJobWriter.class);
     bind(RFA1aFormsCollectionService.class);
+    bind(ChangedRFAFormsService.class);
   }
 
   @Override

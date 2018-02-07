@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs.cals.facility;
 
-import gov.ca.cwds.cals.Identifiable;
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
 import gov.ca.cwds.dto.BaseDTO;
 import gov.ca.cwds.jobs.common.ChangedDTO;

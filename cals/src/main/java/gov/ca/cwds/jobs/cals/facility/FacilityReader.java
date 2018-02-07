@@ -4,28 +4,21 @@ import com.google.inject.Inject;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
-import gov.ca.cwds.jobs.common.job.JobReader;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.common.job.impl.AbstractJobReader;
+import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
 import org.hibernate.SessionFactory;
-
-import java.util.Date;
-import java.util.Iterator;
 
 /**
  * @author CWDS TPT-2
  */
-public class FacilityReader implements JobReader<ChangedFacilityDTO> {
-
-  private Iterator<ChangedFacilityDTO> facilityDTOIterator;
+public class FacilityReader extends AbstractJobReader<ChangedFacilityDTO> {
 
   @Inject
-  private FacilityIncrementalLoadDateStrategy incrementalLoadDateStrategy;
-
-  @Inject
-  private LISFacilityIncrementalLoadDateStrategy lisIncrementalLoadDateStrategy;
-
-  @Inject
-  private ChangedFacilityService changedFacilityService;
+  public FacilityReader(ChangedFacilityService changedEntitiesService,
+                        TimestampOperator timestampOperator) {
+    super(changedEntitiesService, timestampOperator);
+  }
 
   @Inject
   @FasSessionFactory
@@ -45,18 +38,10 @@ public class FacilityReader implements JobReader<ChangedFacilityDTO> {
 
   @Override
   public void init() {
-    Date dateAfter = incrementalLoadDateStrategy.calculateDate();
-    Date lisDateAfter = lisIncrementalLoadDateStrategy.calculateDate();
     fasSessionFactory.getCurrentSession().beginTransaction();
     lisSessionFactory.getCurrentSession().beginTransaction();
     cwsCmcSessionFactory.getCurrentSession().beginTransaction();
-    facilityDTOIterator = changedFacilityService.changedFacilitiesStream(dateAfter, lisDateAfter)
-        .iterator();
-  }
-
-  @Override
-  public ChangedFacilityDTO read() {
-    return facilityDTOIterator.hasNext() ? facilityDTOIterator.next() : null;
+    super.init();
   }
 
   @Override
@@ -83,4 +68,5 @@ public class FacilityReader implements JobReader<ChangedFacilityDTO> {
       sessionFactory.close();
     }
   }
+
 }

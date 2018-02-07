@@ -19,9 +19,9 @@ import gov.ca.cwds.jobs.cals.inject.NsDataAccessModule;
 import gov.ca.cwds.jobs.common.BaseIndexerJob;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.ElasticsearchIndexerDao;
-import gov.ca.cwds.jobs.common.job.AsyncReadWriteJob;
 import gov.ca.cwds.jobs.common.job.Job;
 import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
+import gov.ca.cwds.jobs.common.job.impl.AsyncReadWriteJob;
 import org.hibernate.SessionFactory;
 
 /**
@@ -56,9 +56,9 @@ public final class FacilityIndexerJob extends BaseIndexerJob {
       }
 
     });
-    bind(FacilityReader.class);
     bind(FacilityElasticJobWriter.class);
     bind(ChangedFacilityService.class);
+    bind(FacilityReader.class);
     bind(FacilityParameterObjectBuilder.class);
     bind(BaseJobConfiguration.class).toInstance(facilityJobsConfiguration);
     bind(FacilityJobConfiguration.class).toInstance(facilityJobsConfiguration);

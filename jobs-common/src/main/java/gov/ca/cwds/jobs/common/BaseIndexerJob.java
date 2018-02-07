@@ -9,7 +9,10 @@ import com.google.inject.Singleton;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.elastic.XPackUtils;
 import gov.ca.cwds.jobs.common.exception.JobsException;
+import gov.ca.cwds.jobs.common.inject.LastRunDir;
 import gov.ca.cwds.jobs.common.job.Job;
+import gov.ca.cwds.jobs.common.job.timestamp.FilesystemTimestampOperator;
+import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 import org.elasticsearch.client.Client;
@@ -23,6 +26,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 
 /**
  * @author CWDS TPT-2
@@ -38,6 +42,8 @@ public abstract class BaseIndexerJob<T extends ElasticsearchConfiguration> exten
   @Override
   protected void configure() {
     bind(JobOptions.class).toInstance(jobOptions);
+    bindConstant().annotatedWith(LastRunDir.class).to(jobOptions.getLastRunLoc());
+    bind(TimestampOperator.class).to(FilesystemTimestampOperator.class);
   }
 
   private JobOptions validateJobOptions(JobOptions jobOptions) {
@@ -73,6 +79,7 @@ public abstract class BaseIndexerJob<T extends ElasticsearchConfiguration> exten
       validateJobOptions(jobOptions);
       final Injector injector = Guice.createInjector(this);
       injector.getInstance(Job.class).run();
+      injector.getInstance(TimestampOperator.class).writeTimestamp(LocalDateTime.now());
     } catch (RuntimeException e) {
       LOGGER.error("ERROR: ", e.getMessage(), e);
       System.exit(1);
