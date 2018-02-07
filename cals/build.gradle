@@ -16,6 +16,13 @@ apply plugin: 'jacoco'
 
 sourceCompatibility = 1.8
 
+configurations {
+    externalLibs {
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    }
+    testCompile.extendsFrom(externalLibs)
+}
+
 dependencies {
 
     compile project(':jobs-common')
@@ -55,16 +62,13 @@ dependencies {
     testCompile(group: 'gov.ca.cwds.cals', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true)
 }
 
-configurations {
-    all*.exclude module: 'log4j-over-slf4j'
-}
-
 shadowJar {
     zip64 true
     classifier = ''
     baseName = (System.properties.getProperty('baseName') != null) ? System.properties.getProperty('baseName') : 'cals-jobs'
     mergeServiceFiles()
     version version + ((System.properties.getProperty('build') != null) ? '.' + System.properties.getProperty('build') : '')
+    dependencies { exclude(dependency('org.slf4j:log4j-over-slf4j:1.7.24')) }
 }
 
 publishing {

@@ -31,7 +31,6 @@ import static org.junit.Assert.assertTrue;
  * @author CWDS TPT-2
  */
 
-@Ignore //Eugene Please unignore back
 public class ChangedRFA1aFormsResourceTest extends BaseApiTest<TestCalsJobsConfiguration> {
 
   static final String PATH_CHANGED_RFA_1A_FORMS = "changed-" + RFA_1A_FORMS;
