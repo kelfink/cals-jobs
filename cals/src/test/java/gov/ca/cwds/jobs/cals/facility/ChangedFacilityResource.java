@@ -10,14 +10,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static gov.ca.cwds.cals.util.DateTimeUtils.toDate;
 import static gov.ca.cwds.jobs.cals.facility.ChangedFacilityResourceTest.DATE_AFTER;
-import static gov.ca.cwds.jobs.cals.facility.ChangedFacilityResourceTest.LIS_DATE_AFTER;
 import static gov.ca.cwds.jobs.cals.facility.ChangedFacilityResourceTest.PATH_CHANGED_FACILITY;
 import static gov.ca.cwds.jobs.cals.facility.ChangedFacilityResourceTest.PATH_INITIAL;
+import static gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator.DATE_TIME_FORMATTER;
 
 /**
  * @author CWDS TPT-2
@@ -33,25 +33,18 @@ public class ChangedFacilityResource {
   @GET
   public CollectionDTO<ChangedFacilityDTO> getChangedFacilities(
       @QueryParam(DATE_AFTER)
-          String stringDateAfter,
-      @QueryParam(LIS_DATE_AFTER)
-          String stringLisDateAfter
-  ) throws ParseException {
-    List<ChangedFacilityDTO> changedFacilityDTOList = changedFacilityService
-            .changedFacilitiesStream(
-                    toDate(stringDateAfter), toDate(stringLisDateAfter)).collect(Collectors.toList());
+          String stringDateAfter) throws ParseException {
+    LocalDateTime dateAfter = LocalDateTime.parse(stringDateAfter, DATE_TIME_FORMATTER);
+    List<ChangedFacilityDTO> changedFacilityDTOList =
+            changedFacilityService.doIncrementalLoad(dateAfter).collect(Collectors.toList());
     return new CollectionDTO<>(changedFacilityDTOList);
   }
 
   @GET
   @Path("/" + PATH_INITIAL)
-  public CollectionDTO<ChangedFacilityDTO> initialLLoadedFacilities(
-          @QueryParam(LIS_DATE_AFTER)
-                  String stringLisDateAfter
-  ) throws ParseException {
+  public CollectionDTO<ChangedFacilityDTO> initialLLoadedFacilities() throws ParseException {
     List<ChangedFacilityDTO> changedFacilityDTOList = changedFacilityService
-            .changedFacilitiesStream(
-                    null, toDate(stringLisDateAfter)).collect(Collectors.toList());
+            .doInitialLoad().collect(Collectors.toList());
     return new CollectionDTO<>(changedFacilityDTOList);
   }
 

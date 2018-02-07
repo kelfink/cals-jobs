@@ -12,6 +12,7 @@ import gov.ca.cwds.inject.AuditingModule;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityService;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityServiceProvider;
+import gov.ca.cwds.jobs.common.inject.LastRunDir;
 import gov.ca.cwds.rest.BaseApiApplication;
 import io.dropwizard.setup.Bootstrap;
 import org.hibernate.SessionFactory;
@@ -46,6 +47,7 @@ public class TestCalsJobsApplication extends BaseApiApplication<TestCalsJobsConf
                 });
                 bind(ChangedFacilityService.class).toProvider(ChangedFacilityServiceProvider.class);
                 bind(FacilityParameterObjectCMSAwareBuilder.class).toProvider(FacilityParameterObjectBuilderProvider.class);
+                bindConstant().annotatedWith(LastRunDir.class).to("out");
             }
         };
     }

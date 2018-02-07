@@ -1,5 +1,0 @@
-elasticsearch.host: es.dev.cwds.tabordasolutions.net
-elasticsearch.port: 9300
-elasticsearch.cluster: taborda-dev-es
-elasticsearch.alias: people
-elasticsearch.doctype: person

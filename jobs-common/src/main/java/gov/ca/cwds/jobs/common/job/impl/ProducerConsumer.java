@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.common.job;
+package gov.ca.cwds.jobs.common.job.impl;
 
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import java.util.concurrent.BlockingQueue;

@@ -20,7 +20,7 @@ import org.junit.Test;
  */
 @Ignore
 public class RFA1aFormIndexerJobTest extends BaseCalsIndexerJobTest {
-
+/*
   private static final String TEST_CONFIG = "src/test/resources/config/cals/rfa/CALS_RFA1aForm.yaml";
 
   private static final String CALSNS_SCHEMA = "calsns";
@@ -102,4 +102,5 @@ public class RFA1aFormIndexerJobTest extends BaseCalsIndexerJobTest {
     new DatabaseHelper(getCalsnsJdbcUrl(), CALSNS_USER, CALSNS_PASSWORD)
         .runScript(CALSNS_TEST_DATA_SCRIPT, CALSNS_SCHEMA);
   }
+  */
 }

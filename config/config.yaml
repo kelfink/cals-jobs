@@ -1,5 +1,0 @@
-elasticsearch.host: 10.10.15.61
-elasticsearch.port: 9300
-elasticsearch.cluster: elasticsearch
-elasticsearch.alias: people
-elasticsearch.doctype: person

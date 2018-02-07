@@ -60,8 +60,7 @@ public class ChangedRFA1aFormsResource {
           String dateAfter
   ) {
     List<ChangedRFA1aFormDTO> changedRFA1aFormDTOList = changedRFAFormsService
-            .streamChangedRFA1aForms(DateTimeUtils.toLocalDateTime(dateAfter))
-        .collect(Collectors.toList());
+            .doIncrementalLoad(DateTimeUtils.toLocalDateTime(dateAfter)).collect(Collectors.toList());
     return new CollectionDTO<>(changedRFA1aFormDTOList);
   }
 }

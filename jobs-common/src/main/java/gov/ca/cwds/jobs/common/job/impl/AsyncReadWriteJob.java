@@ -1,6 +1,12 @@
-package gov.ca.cwds.jobs.common.job;
+package gov.ca.cwds.jobs.common.job.impl;
 
 import gov.ca.cwds.jobs.common.exception.JobsException;
+import gov.ca.cwds.jobs.common.job.Job;
+import gov.ca.cwds.jobs.common.job.JobComponent;
+import gov.ca.cwds.jobs.common.job.JobProcessor;
+import gov.ca.cwds.jobs.common.job.JobReader;
+import gov.ca.cwds.jobs.common.job.JobWriter;
+
 import java.util.LinkedList;
 import java.util.List;
 
