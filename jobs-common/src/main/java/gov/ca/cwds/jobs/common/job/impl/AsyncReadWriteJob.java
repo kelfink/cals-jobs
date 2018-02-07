@@ -1,12 +1,7 @@
 package gov.ca.cwds.jobs.common.job.impl;
 
 import gov.ca.cwds.jobs.common.exception.JobsException;
-import gov.ca.cwds.jobs.common.job.Job;
-import gov.ca.cwds.jobs.common.job.JobComponent;
-import gov.ca.cwds.jobs.common.job.JobProcessor;
-import gov.ca.cwds.jobs.common.job.JobReader;
-import gov.ca.cwds.jobs.common.job.JobWriter;
-
+import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -81,6 +76,7 @@ public class AsyncReadWriteJob extends ProducerConsumer implements Job, JobCompo
     try {
       Object out = processor.process(o);
       chunk.add(out);
+      ConsumerCounter.incrementCounter();
       if (chunk.size() == chunkSize) {
         flush();
       }

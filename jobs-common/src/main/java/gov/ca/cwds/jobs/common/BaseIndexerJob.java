@@ -100,7 +100,7 @@ public abstract class BaseIndexerJob<T extends ElasticsearchConfiguration> exten
   @SuppressWarnings("squid:S2095")
   public Client elasticsearchClient(BaseJobConfiguration config) {
     TransportClient client = null;
-    LOGGER.warn("Create NEW ES client");
+    LOGGER.info("Create NEW ES client");
     try {
       Settings.Builder settings =
           Settings.builder().put("cluster.name", config.getElasticsearchCluster());

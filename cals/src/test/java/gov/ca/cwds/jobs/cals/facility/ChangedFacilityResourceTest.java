@@ -11,6 +11,7 @@ import gov.ca.cwds.test.support.DatabaseHelper;
 import io.dropwizard.jackson.Jackson;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.client.Invocation;
@@ -25,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author CWDS TPT-2
  */
+@Ignore
 public class ChangedFacilityResourceTest extends BaseApiTest<TestCalsJobsConfiguration> {
 
   static final String PATH_CHANGED_FACILITY = "changed-" + FACILITIES;
