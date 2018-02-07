@@ -25,7 +25,6 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author CWDS TPT-2
  */
-@Ignore  //Eugene Please unignore back
 public class ChangedFacilityResourceTest extends BaseApiTest<TestCalsJobsConfiguration> {
 
   static final String PATH_CHANGED_FACILITY = "changed-" + FACILITIES;
