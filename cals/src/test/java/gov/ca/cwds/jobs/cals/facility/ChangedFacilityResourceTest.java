@@ -19,14 +19,13 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
 import static gov.ca.cwds.cals.Constants.API.FACILITIES;
-import static gov.ca.cwds.test.utils.AssertResponseHelper.assertEqualsResponse;
 import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author CWDS TPT-2
  */
-@Ignore
+@Ignore  //Eugene Please unignore back
 public class ChangedFacilityResourceTest extends BaseApiTest<TestCalsJobsConfiguration> {
 
   static final String PATH_CHANGED_FACILITY = "changed-" + FACILITIES;
