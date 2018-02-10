@@ -23,7 +23,7 @@ apply plugin: 'jacoco'
 
 project.ext {
     cwdsModelVersion = '0.5.6_426-RC'
-    calsApiVersion = '0.5.6_882-RC'
+    calsApiVersion = '0.5.7_888-RC'
     coreApiVersion = '0.5.6_283-RC'
     testSupportVersion = '0.5.6_272-RC'
     commonsCliVersion = '1.4'
