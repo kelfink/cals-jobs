@@ -106,13 +106,13 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
         throw new IllegalStateException("FacilityDTO must not be null!!!");
       } else {
         if (LOG.isInfoEnabled()) {
-          LOG.info("Find facility by ID {} returned FacilityDTO", facilityDTO.getId());
+          LOG.info("Found facility by ID {}", facilityDTO.getId());
         }
       }
       return facilityDTO;
     } catch (Exception e) {
       LOG.error("Can't get facility by id " + id, e);
-      throw new IllegalStateException("FacilityDTO must not be null!!!");
+      throw new IllegalStateException("Can't get facility by id ", e);
     }
   }
 
@@ -138,10 +138,10 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
 
 
   private void printRecordsCount(RecordChanges recordChanges, DataSourceName dataSourceName) {
-    String messageFormatString = "Found {} facilities from {} {} into elastic search facility index";
-    LOG.info(messageFormatString, recordChanges.toBeInserted.size(), dataSourceName.name(), "to be inserted");
-    LOG.info(messageFormatString, recordChanges.toBeUpdated.size(), dataSourceName.name(), "to be updated");
-    LOG.info(messageFormatString, recordChanges.toBeDeleted.size(), dataSourceName.name(), "to be deleted");
+    String messageFormatString = "Found {} facilities from {} {} elastic search facility index";
+    LOG.info(messageFormatString, recordChanges.toBeInserted.size(), dataSourceName.name(), "to be inserted to");
+    LOG.info(messageFormatString, recordChanges.toBeUpdated.size(), dataSourceName.name(), "to be updated in");
+    LOG.info(messageFormatString, recordChanges.toBeDeleted.size(), dataSourceName.name(), "to be deleted from");
   }
 
   private static class RecordChanges {
