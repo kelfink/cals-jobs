@@ -100,7 +100,6 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
 
 
   protected FacilityDTO findFacilityById(String id) {
-    //TODO remove catching exceptions when no errors in INT
     try {
       FacilityDTO facilityDTO = findByParameterObject(createFacilityParameterObject(id));
       if (facilityDTO == null) {
@@ -137,10 +136,12 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
             .filter(Objects::nonNull);
   }
 
+
   private void printRecordsCount(RecordChanges recordChanges, DataSourceName dataSourceName) {
-    LOG.info(dataSourceName.name() + " to be inserted " +  recordChanges.toBeInserted.size());
-    LOG.info(dataSourceName.name() + " to be updated " +  recordChanges.toBeUpdated.size());
-    LOG.info(dataSourceName.name() + " to be deleted " +  recordChanges.toBeDeleted.size());
+    String messageFormatString = "Found {} facilities from {} {} into elastic search facility index";
+    LOG.info(messageFormatString, recordChanges.toBeInserted.size(), dataSourceName.name(), "to be inserted");
+    LOG.info(messageFormatString, recordChanges.toBeUpdated.size(), dataSourceName.name(), "to be updated");
+    LOG.info(messageFormatString, recordChanges.toBeDeleted.size(), dataSourceName.name(), "to be deleted");
   }
 
   private static class RecordChanges {
