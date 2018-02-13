@@ -103,6 +103,7 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
     try {
       FacilityDTO facilityDTO = findByParameterObject(createFacilityParameterObject(id));
       if (facilityDTO == null) {
+        LOG.error("Can't get facility by id " + id);
         throw new IllegalStateException("FacilityDTO must not be null!!!");
       } else {
         if (LOG.isInfoEnabled()) {
@@ -112,7 +113,7 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
       return facilityDTO;
     } catch (Exception e) {
       LOG.error("Can't get facility by id " + id, e);
-      throw new IllegalStateException("Can't get facility by id ", e);
+      throw new IllegalStateException(String.format("Can't get facility by id %s", id), e);
     }
   }
 
