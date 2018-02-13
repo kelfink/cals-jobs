@@ -55,7 +55,7 @@ public class ChangedFacilityResourceTest extends BaseApiTest<TestCalsJobsConfigu
         CollectionDTO<TestChangedFacilityDTO> facilities = Jackson.newObjectMapper().readValue(
                 invocation.get(String.class), new TypeReference<CollectionDTO<TestChangedFacilityDTO>>() {
                 });
-        assertEquals(79, facilities.getCollection().size());
+        assertEquals(309, facilities.getCollection().size());
         assertResponse(facilities, "fixtures/changed-facility-service-incremental.json");
     }
 
