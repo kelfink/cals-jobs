@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.cals.facility;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.cals.CompositeIterator;
 import gov.ca.cwds.cals.service.FacilityService;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
@@ -19,6 +20,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -98,40 +100,48 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
 
 
   protected FacilityDTO findFacilityById(String id) {
-      return findByParameterObject(createFacilityParameterObject(id));
+    try {
+      FacilityDTO facilityDTO = findByParameterObject(createFacilityParameterObject(id));
+      if (facilityDTO == null) {
+        throw new IllegalStateException("FacilityDTO must not be null!!!");
+      } else {
+        if (LOG.isInfoEnabled()) {
+          LOG.info("Find facility by ID {} returned FacilityDTO", facilityDTO.getId());
+        }
+      }
+      return facilityDTO;
+    } catch (Exception e) {
+      LOG.error("Can't get facility by id " + id, e);
+      throw new IllegalStateException("FacilityDTO must not be null!!!");
+    }
   }
 
   private Stream<ChangedFacilityDTO> changedFacilitiesStream(Date after, Date lisAfter) {
+    if (LOG.isInfoEnabled()) {
+      LOG.info("LIS date after is " + lisAfter);
+      LOG.info("CWS/CMS date after is " + after);
+    }
     RecordChanges cwsCmsRecordChanges = handleCwsCmsFacilityIds(after);
     RecordChanges lisRecordChanges = handleLisFacilityIds(lisAfter);
+    if (LOG.isInfoEnabled()) {
+      printRecordsCount(cwsCmsRecordChanges, DataSourceName.CWS);
+      printRecordsCount(lisRecordChanges, DataSourceName.LIS);
+    }
+
     Stream<RecordChange> stream = cwsCmsRecordChanges.newStream();
 
     return Stream.concat(stream, lisRecordChanges.newStream())
-        .map(recordChange -> {
-          FacilityDTO facilityDTO = findFacilityById(recordChange.getId());
-          if (facilityDTO == null) {
-            return null;
-          }
-          LOG.info("Find facility by ID {} returned FacilityDTO with ID {}", recordChange.getId(),
-              facilityDTO.getId());
-          return new ChangedFacilityDTO(facilityDTO, recordChange.getRecordChangeOperation());
-        })
-        .filter(facilityDTO -> {
-          if (facilityDTO == null) {
-            LOG.warn("Finding facility by ID did not return FacilityDTO. Skipped.");
-            return false;
-          }
-          return true;
-        })
-        .filter(facilityDTO -> {
-          if (facilityDTO.getId() == null) {
-            LOG.warn(
-                "Finding facility by ID returned incorrect FacilityDTO with NULL id. Skipped.");
-            return false;
-          } else {
-            return true;
-          }
-        });
+            .map(recordChange -> new ChangedFacilityDTO(findFacilityById(recordChange.getId()),
+                    recordChange.getRecordChangeOperation()))
+            .filter(Objects::nonNull);
+  }
+
+
+  private void printRecordsCount(RecordChanges recordChanges, DataSourceName dataSourceName) {
+    String messageFormatString = "Found {} facilities from {} {} into elastic search facility index";
+    LOG.info(messageFormatString, recordChanges.toBeInserted.size(), dataSourceName.name(), "to be inserted");
+    LOG.info(messageFormatString, recordChanges.toBeUpdated.size(), dataSourceName.name(), "to be updated");
+    LOG.info(messageFormatString, recordChanges.toBeDeleted.size(), dataSourceName.name(), "to be deleted");
   }
 
   private static class RecordChanges {

@@ -36,7 +36,8 @@ import java.io.Serializable;
 @NamedNativeQuery(
     name = "RecordChange.findChangedFacilityRecordsInLIS",
     query = "SELECT f.fac_nbr as ID, 'U' AS CHANGE_OPERATION"
-        + " FROM {h-schema}lis_fac_file f WHERE f.fac_last_upd_date > :dateAfter",
+        + " FROM {h-schema}lis_fac_file f "
+        ,//TODO uncomment when LDU is ready + "WHERE f.fac_last_upd_date > :dateAfter",   TEMPORARY COMMENTED OUT UNTIL LDU PROVIDES SOME DATES FOR THAT FIELD
     resultClass = RecordChange.class,
     readOnly = true
 )

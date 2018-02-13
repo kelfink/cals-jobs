@@ -27,12 +27,14 @@ public abstract class AbstractJobReader<T> implements JobReader<T> {
     }
 
     public void initEntitiesIterator() {
-        if (!timestampOperator.timeStampExists()) {
+      //TODO !!! uncomment incremental load when CALS JOBS became stable
+      //TODO Please do not remove code lines below that are commented out
+//        if (!timestampOperator.timeStampExists()) {
             entitiesIterator = changedEntitiesService.doInitialLoad().iterator();
-        } else {
-            entitiesIterator = changedEntitiesService.doIncrementalLoad(
-                    timestampOperator.readTimestamp()).iterator();
-        }
+//        } else {
+//            entitiesIterator = changedEntitiesService.doIncrementalLoad(
+//                    timestampOperator.readTimestamp()).iterator();
+//        }
     }
 
     @Override
