@@ -21,7 +21,8 @@ public class RecordChangeLisDao extends BaseDaoImpl<RecordChange> {
   public Stream<RecordChange> streamChangedFacilityRecords(final Date after) {
     QueryCreator<RecordChange> queryCreator = (session, entityClass) -> session
         .getNamedNativeQuery(entityClass.getSimpleName() + ".findChangedFacilityRecordsInLIS")
-        .setParameter("dateAfter", after).setReadOnly(true);
+// //TODO uncomment when LDU is ready     .setParameter("dateAfter", after) TEMPORARY COMMENTED OUT UNTIL LDU PROVIDES SOME DATES FOR THAT FIELD
+        .setReadOnly(true);
     return new RecordChangesStreamer(this, queryCreator).createStream();
   }
 }
