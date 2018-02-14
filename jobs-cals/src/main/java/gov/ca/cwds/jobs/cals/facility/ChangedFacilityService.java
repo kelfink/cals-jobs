@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.cals.facility;
 
 import com.google.inject.Inject;
+import com.jcabi.aspects.Loggable;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.cals.CompositeIterator;
 import gov.ca.cwds.cals.service.FacilityService;
@@ -75,6 +76,7 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
     return Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
   }
 
+  @Loggable
   @UnitOfWork(CMS)
   protected RecordChanges handleCwsCmsFacilityIds(Date dateAfter) {
     RecordChanges recordChanges = new RecordChanges();
@@ -86,6 +88,7 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
     return date == null ? DateTimeUtils.toDate(LocalDateTime.now().minusYears(100)) : date;
   }
 
+  @Loggable
   @UnitOfWork(LIS)
   protected RecordChanges handleLisFacilityIds(Date lisAfter) {
     RecordChanges recordChanges = new RecordChanges();
@@ -93,12 +96,13 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
     return recordChanges;
   }
 
+  @Loggable
   @UnitOfWork(CMS)
   protected FacilityParameterObject createFacilityParameterObject(String id) {
     return facilityParameterObjectBuilder.createFacilityParameterObject(id);
   }
 
-
+  @Loggable
   protected FacilityDTO findFacilityById(String id) {
     try {
       FacilityDTO facilityDTO = findByParameterObject(createFacilityParameterObject(id));
@@ -117,6 +121,7 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
     }
   }
 
+  @Loggable
   private Stream<ChangedFacilityDTO> changedFacilitiesStream(Date after, Date lisAfter) {
     if (LOG.isInfoEnabled()) {
       LOG.info("LIS date after is " + lisAfter);
