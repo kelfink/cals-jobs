@@ -20,8 +20,8 @@ import gov.ca.cwds.jobs.common.BaseIndexerJob;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.ElasticsearchIndexerDao;
 import gov.ca.cwds.jobs.common.job.Job;
-import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import gov.ca.cwds.jobs.common.job.impl.AsyncReadWriteJob;
+import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import org.hibernate.SessionFactory;
 
 /**
