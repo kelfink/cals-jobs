@@ -19,8 +19,7 @@ public class JobExceptionHandler {
     }
 
     public static synchronized void handleException(Exception e) {
-        String message = "Exception occured ";
-        handleException(message, e);
+        handleException("Exception occured ", e);
     }
 
     public static boolean isExceptionHappened() {
