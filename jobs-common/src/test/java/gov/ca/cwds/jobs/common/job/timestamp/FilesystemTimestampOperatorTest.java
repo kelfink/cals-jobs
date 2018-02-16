@@ -1,13 +1,10 @@
 package gov.ca.cwds.jobs.common.job.timestamp;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 import static org.junit.Assert.assertEquals;
@@ -22,7 +19,7 @@ public class FilesystemTimestampOperatorTest {
     @Test
     public void readWriteTimestampTest() throws Exception {
         LocalDateTime timestamp = LocalDateTime.of(2018, 2, 6, 4, 14, 20);
-        FilesystemTimestampOperator timestampOperator = new FilesystemTimestampOperator(getLastRunDir().toString());
+        FilesystemTimestampOperator timestampOperator = new FilesystemTimestampOperator(LastRunDirHelper.getLastRunDir().toString());
         assertFalse(timestampOperator.timeStampExists());
         timestampOperator.writeTimestamp(timestamp);
         assertEquals(timestamp, timestampOperator.readTimestamp());
@@ -31,20 +28,12 @@ public class FilesystemTimestampOperatorTest {
 
     @Before
     public void beforeMethod() throws IOException {
-        FileUtils.forceMkdir(getLastRunDir().toFile());
+        LastRunDirHelper.createTimestampDirectory();
     }
 
     @After
     public void afterMethod() throws IOException {
-        FileUtils.deleteDirectory(getLastRunDir().toFile());
+        LastRunDirHelper.deleteTimestampDirectory();
     }
-
-    private Path getLastRunDir() {
-        return Paths.get("temp").normalize().toAbsolutePath();
-    }
-
-
-
-
 
 }

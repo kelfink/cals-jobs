@@ -8,11 +8,13 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.elastic.XPackUtils;
+import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
 import gov.ca.cwds.jobs.common.job.Job;
 import gov.ca.cwds.jobs.common.job.timestamp.FilesystemTimestampOperator;
 import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
+import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 import org.elasticsearch.client.Client;
@@ -43,7 +45,7 @@ public abstract class BaseIndexerJob<T extends ElasticsearchConfiguration> exten
   protected void configure() {
     bind(JobOptions.class).toInstance(jobOptions);
     bindConstant().annotatedWith(LastRunDir.class).to(jobOptions.getLastRunLoc());
-    bind(TimestampOperator.class).to(FilesystemTimestampOperator.class);
+    bind(TimestampOperator.class).to(FilesystemTimestampOperator.class).asEagerSingleton();
   }
 
   private JobOptions validateJobOptions(JobOptions jobOptions) {
@@ -79,10 +81,15 @@ public abstract class BaseIndexerJob<T extends ElasticsearchConfiguration> exten
       validateJobOptions(jobOptions);
       final Injector injector = Guice.createInjector(this);
       injector.getInstance(Job.class).run();
-      injector.getInstance(TimestampOperator.class).writeTimestamp(LocalDateTime.now());
+      if (!JobExceptionHandler.isExceptionHappened()) {
+        injector.getInstance(TimestampOperator.class).writeTimestamp(LocalDateTime.now());
+      }
+      System.out.println(String.format("Added %s entities to ES bulk uploader", ConsumerCounter.getCounter()));
     } catch (RuntimeException e) {
       LOGGER.error("ERROR: ", e.getMessage(), e);
       System.exit(1);
+    } finally {
+      JobExceptionHandler.reset();
     }
   }
 
