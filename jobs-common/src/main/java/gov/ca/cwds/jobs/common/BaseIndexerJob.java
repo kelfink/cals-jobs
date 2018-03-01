@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs.common;
 
+import static gov.ca.cwds.jobs.common.elastic.ElasticUtils.createAndConfigureESClient;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -7,7 +9,6 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import gov.ca.cwds.jobs.common.config.JobOptions;
-import gov.ca.cwds.jobs.common.elastic.XPackUtils;
 import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
@@ -16,19 +17,12 @@ import gov.ca.cwds.jobs.common.job.timestamp.FilesystemTimestampOperator;
 import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
 import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
-import gov.ca.cwds.rest.api.ApiException;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import org.elasticsearch.client.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author CWDS TPT-2
@@ -84,7 +78,8 @@ public abstract class BaseIndexerJob<T extends ElasticsearchConfiguration> exten
       if (!JobExceptionHandler.isExceptionHappened()) {
         injector.getInstance(TimestampOperator.class).writeTimestamp(LocalDateTime.now());
       }
-      System.out.println(String.format("Added %s entities to ES bulk uploader", ConsumerCounter.getCounter()));
+      System.out.println(
+          String.format("Added %s entities to ES bulk uploader", ConsumerCounter.getCounter()));
     } catch (RuntimeException e) {
       LOGGER.error("ERROR: ", e.getMessage(), e);
       System.exit(1);
@@ -106,30 +101,14 @@ public abstract class BaseIndexerJob<T extends ElasticsearchConfiguration> exten
   // the client should not be closed here, it is closed when job is done
   @SuppressWarnings("squid:S2095")
   public Client elasticsearchClient(BaseJobConfiguration config) {
-    TransportClient client = null;
-    LOGGER.info("Create NEW ES client");
-    try {
-      Settings.Builder settings =
-          Settings.builder().put("cluster.name", config.getElasticsearchCluster());
-      client = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
-      client.addTransportAddress(
-          new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
-              Integer.parseInt(config.getElasticsearchPort())));
-    } catch (RuntimeException | UnknownHostException e) {
-      LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
-      if (client != null) {
-        client.close();
-      }
-      throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
-    }
-    return client;
+    return createAndConfigureESClient(config);
   }
 
   @Provides
   @Singleton
   @Inject
   public ElasticsearchIndexerDao elasticsearchDao(Client client,
-                                                  BaseJobConfiguration configuration) {
+      BaseJobConfiguration configuration) {
 
     ElasticsearchIndexerDao esIndexerDao = new ElasticsearchIndexerDao(client,
         configuration);
@@ -137,5 +116,4 @@ public abstract class BaseIndexerJob<T extends ElasticsearchConfiguration> exten
 
     return esIndexerDao;
   }
-
 }
