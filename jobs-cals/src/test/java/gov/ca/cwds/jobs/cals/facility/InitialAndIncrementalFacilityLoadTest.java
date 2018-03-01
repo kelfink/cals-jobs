@@ -136,10 +136,10 @@ public class InitialAndIncrementalFacilityLoadTest extends BaseApiTest<TestCalsJ
         Optional<TestChangedFacilityDTO> lisFacility =
                 filteredList.stream().filter((o) -> LIS_INITIAL_LOAD_FACILITY_ID.equals(o.getId())).findAny();
         JSONAssert.assertEquals(
-                fixture("fixtures/facilities-initial-load-CWSCMS.json"),
+                fixture("fixtures/facilities-initial-load-cwscms.json"),
                 clientTestRule.getMapper().writeValueAsString(cwsCmsFacility), JSONCompareMode.STRICT);
         JSONAssert.assertEquals(
-                fixture("fixtures/facilities-initial-load-LIS.json"),
+                fixture("fixtures/facilities-initial-load-lis.json"),
                 clientTestRule.getMapper().writeValueAsString(lisFacility), JSONCompareMode.STRICT);
     }
 
