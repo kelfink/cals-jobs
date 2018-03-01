@@ -6,7 +6,7 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.stream.QueryCreator;
 import org.hibernate.SessionFactory;
 
-import java.util.Date;
+import java.math.BigInteger;
 import java.util.stream.Stream;
 
 /** @author CWDS CALS API Team */
@@ -17,12 +17,22 @@ public class RecordChangeLisDao extends BaseDaoImpl<RecordChange> {
     super(sessionFactory);
   }
 
-  @SuppressWarnings("unchecked") // because of getNamedNativeQuery
-  public Stream<RecordChange> streamChangedFacilityRecords(final Date after) {
+  @SuppressWarnings("unchecked")
+  public Stream<RecordChange> getInitialLoadStream() {
     QueryCreator<RecordChange> queryCreator = (session, entityClass) -> session
-        .getNamedNativeQuery(entityClass.getSimpleName() + ".findChangedFacilityRecordsInLIS")
-// //TODO uncomment when LDU is ready     .setParameter("dateAfter", after) TEMPORARY COMMENTED OUT UNTIL LDU PROVIDES SOME DATES FOR THAT FIELD
-        .setReadOnly(true);
+            .getNamedNativeQuery(RecordChange.LIS_INITIAL_LOAD_QUERY_NAME)
+            .setReadOnly(true);
     return new RecordChangesStreamer(this, queryCreator).createStream();
   }
+
+  @SuppressWarnings("unchecked")
+  public Stream<RecordChange> getIncrementalLoadStream(final BigInteger dateAfter) {
+    QueryCreator<RecordChange> queryCreator = (session, entityClass) -> session
+            .getNamedNativeQuery(RecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME)
+            .setParameter("dateAfter", dateAfter)
+            .setReadOnly(true);
+    return new RecordChangesStreamer(this, queryCreator).createStream();
+  }
+
+
 }

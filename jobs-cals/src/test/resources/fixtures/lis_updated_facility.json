@@ -1,0 +1,55 @@
+{
+  "id" : "193600001",
+  "dto" : {
+    "id" : "193600001",
+    "capacity_last_changed" : "2006-10-13",
+    "type" : {
+      "id" : "810",
+      "value" : "FAMILY DAY CARE"
+    },
+    "name" : "BACKYARDIGAN FOSTER FAMILY HOME",
+    "licensee_name" : "PROMESA BEHAVIORAL HEALTH",
+    "license_type" : "A",
+    "assigned_worker" : { },
+    "district_office" : {
+      "number" : "2",
+      "name" : "BAY AREA-CC OAKLAND"
+    },
+    "license_number" : "193600001",
+    "status" : {
+      "id" : "15",
+      "value" : "CLOSED, CHG LOCATION"
+    },
+    "capacity" : 14,
+    "license_effective_date" : "2004-05-10",
+    "original_application_recieved_date" : "2004-01-28",
+    "county" : {
+      "id" : "7",
+      "value" : "CONTRA COSTA"
+    },
+    "phones" : [ {
+      "relation" : "primary",
+      "type" : "Cell",
+      "number" : "9255220001"
+    } ],
+    "addresses" : [ {
+      "type" : "Residential",
+      "address" : {
+        "street_address" : "485 PILGRIM AVE.",
+        "city" : "MODESTO",
+        "state" : "CA",
+        "zip_code" : "95650"
+      }
+    }, {
+      "type" : "Mailing",
+      "address" : {
+        "street_address" : "485 PILGRIM AVE.",
+        "city" : "MODESTO",
+        "state" : "CA",
+        "zip_code" : "95650"
+      }
+    } ],
+    "facility_source" : "LIS"
+  },
+  "recordChangeOperation" : "U"
+}

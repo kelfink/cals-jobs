@@ -1,0 +1,29 @@
+{
+  "id" : "3w6sOO50Ki",
+  "dto" : {
+    "id" : "3w6sOO50Ki",
+    "type" : {
+      "id" : "790",
+      "value" : "County Shelter/Recving Home(Non EA/AFDC)"
+    },
+    "name" : "Guadalupe Group Home",
+    "licensee_name" : "",
+    "capacity" : 20,
+    "county" : {
+      "id" : "28",
+      "value" : "Napa"
+    },
+    "phones" : [ ],
+    "addresses" : [ {
+      "type" : "Residential",
+      "address" : {
+        "street_address" : "3775 North Market",
+        "city" : "Sacramento",
+        "state" : "CA",
+        "zip_code" : "95834"
+      }
+    } ],
+    "facility_source" : "CWS/CMS"
+  },
+  "recordChangeOperation" : "I"
+}
