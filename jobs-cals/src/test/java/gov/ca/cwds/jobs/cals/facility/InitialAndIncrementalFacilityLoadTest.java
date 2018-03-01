@@ -14,6 +14,7 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.jackson.Jackson;
 import liquibase.exception.LiquibaseException;
 import org.json.JSONException;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
