@@ -1,0 +1,47 @@
+{
+  "id" : "AP9Ewb409u",
+  "dto" : {
+    "id" : "AP9Ewb409u",
+    "type" : {
+      "id" : "711",
+      "value" : "Foster Family Home"
+    },
+    "name" : "Sally Smith Foster Home",
+    "licensee_name" : "",
+    "assigned_worker" : {
+      "value" : "North License Worker LICEN"
+    },
+    "district_office" : {
+      "number" : "13",
+      "name" : "Imperial"
+    },
+    "status" : {
+      "id" : "0002",
+      "value" : "Pending"
+    },
+    "capacity" : 3,
+    "original_application_recieved_date" : "1998-12-29",
+    "county" : {
+      "id" : "13",
+      "value" : "Imperial"
+    },
+    "phones" : [ ],
+    "addresses" : [ {
+      "type" : "Residential",
+      "address" : {
+        "street_address" : "543 Mulberry Street",
+        "city" : "Brawley",
+        "state" : "CA"
+      }
+    }, {
+      "type" : "Mailing",
+      "address" : {
+        "street_address" : "3243 fdsfdsfdsfdsfd",
+        "city" : "Brawley",
+        "state" : "CA"
+      }
+    } ],
+    "facility_source" : "CWS/CMS"
+  },
+  "recordChangeOperation" : "U"
+}

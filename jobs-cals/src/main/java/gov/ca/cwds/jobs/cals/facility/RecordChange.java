@@ -14,50 +14,49 @@ import java.io.Serializable;
 /**
  * @author CWDS TPT-2
  */
+
 @NamedNativeQuery(
-    name = "RecordChange.findChangedFacilityRecordsInCWSCMS",
-    query =
-        "SELECT PlacementHome.IDENTIFIER AS ID, PlacementHome.IBMSNAP_OPERATION AS CHANGE_OPERATION"
-            + " FROM {h-schema}PLC_HM_T PlacementHome"
-            + " WHERE PlacementHome.LICENSE_NO IS NULL AND PlacementHome.IBMSNAP_LOGMARKER > :dateAfter"
-            + " UNION"
-            + " SELECT DISTINCT PlacementHome.IDENTIFIER AS ID, 'U' AS CHANGE_OPERATION"
-            + " FROM {h-schema}CLIENT_T Client"
-            + " INNER JOIN {h-schema}PLC_EPST PlacementEpisode ON Client.IDENTIFIER=PlacementEpisode.FKCLIENT_T"
-            + " INNER JOIN {h-schema}O_HM_PLT OutOfHomePlacement ON PlacementEpisode.THIRD_ID=OutOfHomePlacement.FKPLC_EPS0"
-            + " INNER JOIN {h-schema}PLC_HM_T PlacementHome ON OutOfHomePlacement.FKPLC_HM_T=PlacementHome.IDENTIFIER"
-            + " WHERE PlacementHome.LICENSE_NO IS NULL AND ("
-            + " Client.IBMSNAP_LOGMARKER > :dateAfter OR"
-            + " PlacementEpisode.IBMSNAP_LOGMARKER > :dateAfter OR"
-            + " OutOfHomePlacement.IBMSNAP_LOGMARKER > :dateAfter)",
+        name = RecordChange.CWSCMS_INITIAL_LOAD_QUERY_NAME,
+        query = RecordChange.CWS_CMS_BASE_QUERY,
+        resultClass = RecordChange.class,
+        readOnly = true
+)
+
+@NamedNativeQuery(
+    name = RecordChange.CWSCMS_INCREMENTAL_LOAD_QUERY_NAME,
+    query = RecordChange.CWS_CMS_BASE_QUERY +
+            " AND PlacementHome.IBMSNAP_LOGMARKER >= :dateAfter",
+    resultClass = RecordChange.class,
+    readOnly = true
+)
+
+@NamedNativeQuery(
+    name = RecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
+    query = RecordChange.LIS_BASE_QUERY,
     resultClass = RecordChange.class,
     readOnly = true
 )
 @NamedNativeQuery(
-    name = "RecordChange.findChangedFacilityRecordsInLIS",
-    query = "SELECT f.fac_nbr as ID, 'U' AS CHANGE_OPERATION"
-        + " FROM {h-schema}lis_fac_file f "
-        ,//TODO uncomment when LDU is ready + "WHERE f.fac_last_upd_date > :dateAfter",   TEMPORARY COMMENTED OUT UNTIL LDU PROVIDES SOME DATES FOR THAT FIELD
-    resultClass = RecordChange.class,
-    readOnly = true
-)
-@NamedNativeQuery(
-    name = "RecordChange.findChangedFacilityRecordsInFAS",
-    query = "SELECT DISTINCT f.facility_number_text AS ID, 'U' AS CHANGE_OPERATION"
-        + " FROM {h-schema}facility_information f"
-        + " LEFT JOIN Rr809Dn rr809dn ON TRIM(rr809dn.facility_number_text) = TRIM(CAST (f.facility_number_text AS VARCHAR(254)))"
-        + " LEFT JOIN Rrcpoc rrcpoc ON TRIM(rrcpoc.facility_number_text) = TRIM(CAST (f.facility_number_text AS VARCHAR(254)))"
-        + " LEFT JOIN complaint_report_lic802 compl ON TRIM(compl.facility_number_text) = TRIM(CAST (f.facility_number_text AS VARCHAR(254)))"
-        + " WHERE"
-        + " (:initialLoad = 1 AND f.dt_modified IS NULL) OR f.dt_modified > :dateAfter"
-        + " OR rr809dn.dt_created > :dateAfter OR rr809dn.dt_modified > :dateAfter"
-        + " OR rrcpoc.dt_created > :dateAfter OR rrcpoc.dt_modified > :dateAfter"
-        + " OR compl.dt_created > :dateAfter OR compl.dt_modified > :dateAfter",
-    resultClass = RecordChange.class,
-    readOnly = true
+        name = RecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
+        query = RecordChange.LIS_BASE_QUERY +
+                " WHERE f.system_datetime_1 >= :dateAfter ",
+        resultClass = RecordChange.class,
+        readOnly = true
 )
 @Entity
 public class RecordChange implements PersistentObject {
+
+  public final static String CWSCMS_INITIAL_LOAD_QUERY_NAME = "RecordChange.cwscmsInitialLoadQuery";
+  public final static String CWSCMS_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.cwscmsIncrementalLoadQuery";
+  public final static String LIS_INITIAL_LOAD_QUERY_NAME = "RecordChange.lisInitialLoadQuery";
+  public final static String LIS_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.lisIncrementalLoadQuery";
+
+  final static String CWS_CMS_BASE_QUERY = "SELECT PlacementHome.IDENTIFIER AS ID, PlacementHome.IBMSNAP_OPERATION AS CHANGE_OPERATION"
+          + " FROM {h-schema}PLC_HM_T PlacementHome"
+          + " WHERE PlacementHome.LICENSE_NO IS NULL";
+
+  final static String LIS_BASE_QUERY = "SELECT fac_nbr as ID, 'U' AS CHANGE_OPERATION"
+          + " FROM {h-schema}lis_fac_file f";
 
   @Id
   @Column(name = "ID")

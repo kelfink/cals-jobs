@@ -14,9 +14,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static gov.ca.cwds.jobs.cals.facility.ChangedFacilityResourceTest.DATE_AFTER;
-import static gov.ca.cwds.jobs.cals.facility.ChangedFacilityResourceTest.PATH_CHANGED_FACILITY;
-import static gov.ca.cwds.jobs.cals.facility.ChangedFacilityResourceTest.PATH_INITIAL;
+import static gov.ca.cwds.cals.Constants.API.FACILITIES;
+import static gov.ca.cwds.jobs.cals.facility.ChangedFacilityResource.PATH_CHANGED_FACILITY;
 import static gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator.DATE_TIME_FORMATTER;
 
 /**
@@ -27,11 +26,15 @@ import static gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator.DATE_TIME_
 @Consumes(MediaType.APPLICATION_JSON)
 public class ChangedFacilityResource {
 
+  static final String PATH_CHANGED_FACILITY = "changed-" + FACILITIES;
+  static final String PATH_INITIAL = "initial";
+  static final String DATE_AFTER = "dateAfter";
+
   @Inject
   private ChangedFacilityService changedFacilityService;
 
   @GET
-  public CollectionDTO<ChangedFacilityDTO> getChangedFacilities(
+  public CollectionDTO<ChangedFacilityDTO> incrementalLoad(
       @QueryParam(DATE_AFTER)
           String stringDateAfter) throws ParseException {
     LocalDateTime dateAfter = LocalDateTime.parse(stringDateAfter, DATE_TIME_FORMATTER);

@@ -6,7 +6,7 @@ import gov.ca.cwds.data.stream.QueryCreator;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import org.hibernate.SessionFactory;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 /**
@@ -19,11 +19,21 @@ public class RecordChangeCwsCmsDao extends BaseDaoImpl<RecordChange> {
     super(sessionFactory);
   }
 
-  @SuppressWarnings("unchecked") // because of getNamedNativeQuery
-  public Stream<RecordChange> streamChangedFacilityRecords(final Date after) {
+  @SuppressWarnings("unchecked")
+  public Stream<RecordChange> getInitialLoadStream() {
     QueryCreator<RecordChange> queryCreator = (session, entityClass) -> session
-        .getNamedNativeQuery(entityClass.getSimpleName() + ".findChangedFacilityRecordsInCWSCMS")
-        .setParameter("dateAfter", after).setReadOnly(true);
+        .getNamedNativeQuery("RecordChange.cwscmsInitialLoadQuery")
+        .setReadOnly(true);
     return new RecordChangesStreamer(this, queryCreator).createStream();
   }
+
+  @SuppressWarnings("unchecked")
+  public Stream<RecordChange> getIncrementalLoadStream(final LocalDateTime dateAfter) {
+    QueryCreator<RecordChange> queryCreator = (session, entityClass) -> session
+            .getNamedNativeQuery("RecordChange.cwscmsIncrementalLoadQuery")
+            .setParameter("dateAfter", dateAfter)
+            .setReadOnly(true);
+    return new RecordChangesStreamer(this, queryCreator).createStream();
+  }
+
 }

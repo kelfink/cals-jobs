@@ -1,0 +1,40 @@
+{
+  "id" : "AyT7r860AB",
+  "dto" : {
+    "id" : "AyT7r860AB",
+    "type" : {
+      "id" : "711",
+      "value" : "Foster Family Home"
+    },
+    "name" : "San Diego Placement Home 3",
+    "licensee_name" : "",
+    "assigned_worker" : {
+      "value" : "Kay Riley"
+    },
+    "district_office" : {
+      "number" : "37",
+      "name" : "San Diego"
+    },
+    "status" : {
+      "id" : "0002",
+      "value" : "Pending"
+    },
+    "capacity" : 0,
+    "county" : {
+      "id" : "05",
+      "value" : "Calaveras"
+    },
+    "phones" : [ ],
+    "addresses" : [ {
+      "type" : "Residential",
+      "address" : {
+        "street_address" : "3300 Beach St",
+        "city" : "San Diego",
+        "state" : "CA",
+        "zip_code" : "95223"
+      }
+    } ],
+    "facility_source" : "CWS/CMS"
+  },
+  "recordChangeOperation" : "D"
+}

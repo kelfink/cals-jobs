@@ -17,8 +17,8 @@ apply plugin: 'eclipse'
 apply plugin: 'jacoco'
 
 project.ext {
-    cwdsModelVersion = '0.5.6_426-RC'
-    calsApiVersion = '0.5.7_890-RC'
+    cwdsModelVersion = '0.5.8_473-RC'
+    calsApiVersion = '0.5.8_948-RC.jar'
     coreApiVersion = '0.5.7_316-RC'
     testSupportVersion = '0.5.6_272-RC'
     commonsCliVersion = '1.4'
@@ -29,12 +29,13 @@ project.ext {
     hibernateVersion = '5.2.8.Final'
     dropwizardVersion = '1.1.0'
     jUnitVersion = '4.12'
+    jsonAssertVersion = '1.5.0'
 
     elasticsearchVersion = "5.5.2"
 //    elasticsearchVersion = "5.6.0"
     dropwizardVersion = "1.1.0"
 
-    projectMajorVersion = "0.5.7"
+    projectMajorVersion = "0.5.8"
 
     isRelease = System.getProperty("Release") == "true"
     buildNumber = System.getProperty('BuildNumber')

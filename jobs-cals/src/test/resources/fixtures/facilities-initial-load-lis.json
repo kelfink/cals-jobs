@@ -1,0 +1,54 @@
+{
+  "id" : "9069",
+  "dto" : {
+    "id" : "9069",
+    "capacity_last_changed" : "2006-10-13",
+    "type" : {
+      "id" : "433",
+      "value" : "FFA CERTIFIED HOME"
+    },
+    "name" : "Cervantes, Joyce & Ronald CFH",
+    "licensee_name" : "Seneca Family Services Inc.",
+    "license_type" : "A",
+    "assigned_worker" : { },
+    "district_office" : {
+      "number" : "26",
+      "name" : "CENTRAL COAST CR/RES"
+    },
+    "license_number" : "9069",
+    "status" : {
+      "id" : "12",
+      "value" : "CERTIFIED/APPROVED"
+    },
+    "capacity" : 10,
+    "license_effective_date" : "2015-04-13",
+    "county" : {
+      "id" : "44",
+      "value" : "SANTA CRUZ"
+    },
+    "phones" : [ {
+      "relation" : "primary",
+      "type" : "Cell",
+      "number" : "8313368354"
+    } ],
+    "addresses" : [ {
+      "type" : "Residential",
+      "address" : {
+        "street_address" : "130 Alameda Ave",
+        "city" : "Brookdale",
+        "state" : "CA",
+        "zip_code" : "95007"
+      }
+    }, {
+      "type" : "Mailing",
+      "address" : {
+        "street_address" : "130 Alameda Ave",
+        "city" : "Brookdale",
+        "state" : "CA",
+        "zip_code" : "95007"
+      }
+    } ],
+    "facility_source" : "LIS"
+  },
+  "recordChangeOperation" : "U"
+}

@@ -7,19 +7,17 @@ import gov.ca.cwds.cals.CompositeIterator;
 import gov.ca.cwds.cals.service.FacilityService;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
-import gov.ca.cwds.cals.util.DateTimeUtils;
 import gov.ca.cwds.cals.web.rest.parameter.FacilityParameterObject;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.job.ChangedEntitiesService;
+import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDate;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -34,6 +32,8 @@ import static gov.ca.cwds.cals.Constants.UnitOfWork.LIS;
 public class ChangedFacilityService extends FacilityService implements ChangedEntitiesService<ChangedFacilityDTO> {
 
   private static final Logger LOG = LoggerFactory.getLogger(ChangedFacilityService.class);
+
+  static final DateTimeFormatter lisTimestampFormatter = DateTimeFormatter.ofPattern("YYYYMMddHHmmss");
 
   @Inject
   private RecordChangeCwsCmsDao recordChangeCwsCmsDao;
@@ -50,59 +50,61 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
 
   @Override
   public Stream<ChangedFacilityDTO> doInitialLoad() {
-    Date lisAfter = Date.from(LocalDate.now().minusYears(100).atStartOfDay(ZoneId.systemDefault()).toInstant());
-    return changedFacilitiesStream(null, lisAfter);
+    if (LOG.isInfoEnabled()) {
+      LOG.info("Processing initial load");
+    }
+    return handleFacilitiesIdentifiersStream(getCwsCmsInitialLoadIdentifiers(), getLisInitialLoadIdentifiers());
   }
 
   @Override
   public Stream<ChangedFacilityDTO> doIncrementalLoad(LocalDateTime dateAfter) {
-    Date cwsDateAfter = Date.from(dateAfter.atZone(ZoneId.systemDefault()).toInstant());
-    Date lisDateAfter = calculateLisDateAfter(dateAfter);
-    return changedFacilitiesStream(cwsDateAfter, lisDateAfter);
-  }
-
-  private Date calculateLisDateAfter(LocalDateTime dateAfter) {
-    final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    LocalDate date = LocalDate.now();
-    String currentDate = date.format(dateFormatter);
-    String lastRunDate = dateAfter.format(dateFormatter);
-    if (!currentDate.equals(lastRunDate)) {
-      // first time for this day
-      date = date.minusDays(2);
-    } else {
-      // not first time for this day
-      date = date.minusDays(1);
+    if (LOG.isInfoEnabled()) {
+      LOG.info("Processing incremental load after timestamp " + TimestampOperator.DATE_TIME_FORMATTER.format(dateAfter));
     }
-    return Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    return handleFacilitiesIdentifiersStream(getCwsCmsIncrementalLoadIdentifiers(dateAfter),
+            getLisIncrementalLoadIdentifiers(dateAfter));
   }
 
-  @Loggable
+  @Loggable(Loggable.DEBUG)
   @UnitOfWork(CMS)
-  protected RecordChanges handleCwsCmsFacilityIds(Date dateAfter) {
+  protected RecordChanges getCwsCmsInitialLoadIdentifiers() {
     RecordChanges recordChanges = new RecordChanges();
-    recordChangeCwsCmsDao.streamChangedFacilityRecords(buildDateForCwsCms(dateAfter)).forEach(recordChanges::add);
+    recordChangeCwsCmsDao.getInitialLoadStream().forEach(recordChanges::add);
     return recordChanges;
   }
 
-  private Date buildDateForCwsCms(Date date) {
-    return date == null ? DateTimeUtils.toDate(LocalDateTime.now().minusYears(100)) : date;
+  @Loggable(Loggable.DEBUG)
+  @UnitOfWork(CMS)
+  protected RecordChanges getCwsCmsIncrementalLoadIdentifiers(LocalDateTime dateAfter) {
+    RecordChanges recordChanges = new RecordChanges();
+    recordChangeCwsCmsDao.getIncrementalLoadStream(dateAfter).forEach(recordChanges::add);
+    return recordChanges;
   }
 
-  @Loggable
+  @Loggable(Loggable.DEBUG)
   @UnitOfWork(LIS)
-  protected RecordChanges handleLisFacilityIds(Date lisAfter) {
+  protected RecordChanges getLisInitialLoadIdentifiers() {
     RecordChanges recordChanges = new RecordChanges();
-    recordChangeLisDao.streamChangedFacilityRecords(lisAfter).forEach(recordChanges::add);
+    recordChangeLisDao.getInitialLoadStream().forEach(recordChanges::add);
     return recordChanges;
   }
 
-  @Loggable
+  @Loggable(Loggable.DEBUG)
+  @UnitOfWork(LIS)
+  protected RecordChanges getLisIncrementalLoadIdentifiers(LocalDateTime timestampAfter) {
+    RecordChanges recordChanges = new RecordChanges();
+    BigInteger dateAfter = new BigInteger(lisTimestampFormatter.format(timestampAfter));
+    recordChangeLisDao.getIncrementalLoadStream(dateAfter).forEach(recordChanges::add);
+    return recordChanges;
+  }
+
+  @Loggable(Loggable.DEBUG)
   @UnitOfWork(CMS)
   protected FacilityParameterObject createFacilityParameterObject(String id) {
     return facilityParameterObjectBuilder.createFacilityParameterObject(id);
   }
 
-  @Loggable
+  @Loggable(Loggable.DEBUG)
   protected FacilityDTO findFacilityById(String id) {
     try {
       FacilityDTO facilityDTO = findByParameterObject(createFacilityParameterObject(id));
@@ -121,22 +123,16 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
     }
   }
 
-  @Loggable
-  private Stream<ChangedFacilityDTO> changedFacilitiesStream(Date after, Date lisAfter) {
+  @Loggable(Loggable.DEBUG)
+  private Stream<ChangedFacilityDTO> handleFacilitiesIdentifiersStream(RecordChanges cwscmsIdentifiers, RecordChanges lisIdentifiers) {
     if (LOG.isInfoEnabled()) {
-      LOG.info("LIS date after is " + lisAfter);
-      LOG.info("CWS/CMS date after is " + after);
-    }
-    RecordChanges cwsCmsRecordChanges = handleCwsCmsFacilityIds(after);
-    RecordChanges lisRecordChanges = handleLisFacilityIds(lisAfter);
-    if (LOG.isInfoEnabled()) {
-      printRecordsCount(cwsCmsRecordChanges, DataSourceName.CWS);
-      printRecordsCount(lisRecordChanges, DataSourceName.LIS);
+      printRecordsCount(cwscmsIdentifiers, DataSourceName.CWS);
+      printRecordsCount(lisIdentifiers, DataSourceName.LIS);
     }
 
-    Stream<RecordChange> stream = cwsCmsRecordChanges.newStream();
+    Stream<RecordChange> stream = cwscmsIdentifiers.newStream();
 
-    return Stream.concat(stream, lisRecordChanges.newStream())
+    return Stream.concat(stream, lisIdentifiers.newStream())
             .map(recordChange -> new ChangedFacilityDTO(findFacilityById(recordChange.getId()),
                     recordChange.getRecordChangeOperation()))
             .filter(Objects::nonNull);

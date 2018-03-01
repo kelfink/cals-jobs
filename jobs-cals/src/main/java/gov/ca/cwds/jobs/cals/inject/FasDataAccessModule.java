@@ -11,9 +11,8 @@ import gov.ca.cwds.cals.persistence.model.fas.FacilityInformation;
 import gov.ca.cwds.cals.persistence.model.fas.LpaInformation;
 import gov.ca.cwds.cals.persistence.model.fas.Rr809Dn;
 import gov.ca.cwds.cals.persistence.model.fas.Rrcpoc;
-import gov.ca.cwds.jobs.common.inject.JobsDataAccessModule;
 import gov.ca.cwds.jobs.cals.facility.RecordChange;
-import gov.ca.cwds.jobs.cals.facility.RecordChangeFasDao;
+import gov.ca.cwds.jobs.common.inject.JobsDataAccessModule;
 import io.dropwizard.db.DataSourceFactory;
 import org.hibernate.SessionFactory;
 
@@ -46,7 +45,6 @@ public class FasDataAccessModule extends JobsDataAccessModule {
     bind(SessionFactory.class).annotatedWith(FasSessionFactory.class).toInstance(getSessionFactory());
 
     // schema: fas
-    bind(RecordChangeFasDao.class);
     bind(FacilityInformationDao.class);
     bind(ComplaintReportLic802Dao.class);
     bind(LpaInformationDao.class);
