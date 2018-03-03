@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs.common;
 
-import static gov.ca.cwds.jobs.common.elastic.ElasticUtils.createAndConfigureESClient;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -17,12 +15,15 @@ import gov.ca.cwds.jobs.common.job.timestamp.FilesystemTimestampOperator;
 import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
 import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
-import java.io.File;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import org.elasticsearch.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+
+import static gov.ca.cwds.jobs.common.elastic.ElasticUtils.createAndConfigureESClient;
 
 /**
  * @author CWDS TPT-2
@@ -69,11 +70,12 @@ public abstract class BaseIndexerJob<T extends ElasticsearchConfiguration> exten
   }
 
   protected void run(String[] args) {
+    Injector injector = null;
     try {
       final JobOptions jobOptions = JobOptions.parseCommandLine(args);
       setJobOptions(jobOptions);
       validateJobOptions(jobOptions);
-      final Injector injector = Guice.createInjector(this);
+      injector = Guice.createInjector(this);
       injector.getInstance(Job.class).run();
       if (!JobExceptionHandler.isExceptionHappened()) {
         injector.getInstance(TimestampOperator.class).writeTimestamp(LocalDateTime.now());
@@ -85,6 +87,7 @@ public abstract class BaseIndexerJob<T extends ElasticsearchConfiguration> exten
       System.exit(1);
     } finally {
       JobExceptionHandler.reset();
+      close(injector);
     }
   }
 
@@ -116,4 +119,9 @@ public abstract class BaseIndexerJob<T extends ElasticsearchConfiguration> exten
 
     return esIndexerDao;
   }
+
+  protected void close(Injector inject) {
+    //empty by default
+  }
+
 }

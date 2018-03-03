@@ -1,6 +1,11 @@
 package gov.ca.cwds.jobs.cals.inject;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.persistence.dao.calsns.RFA1aFormsDao;
 import gov.ca.cwds.cals.persistence.model.calsns.dictionaries.AddressType;
@@ -28,15 +33,15 @@ import gov.ca.cwds.cals.persistence.model.calsns.rfa.RFA1aMinorChild;
 import gov.ca.cwds.cals.persistence.model.calsns.rfa.RFA1aOtherAdult;
 import gov.ca.cwds.cals.persistence.model.calsns.rfa.RFA1bForm;
 import gov.ca.cwds.cals.persistence.model.calsns.rfa.RFA1cForm;
-import gov.ca.cwds.jobs.common.inject.JobsDataAccessModule;
-import io.dropwizard.db.DataSourceFactory;
+import gov.ca.cwds.jobs.cals.facility.FacilityJobConfiguration;
+import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 /**
  * @author CWDS TPT-2
  */
-public class NsDataAccessModule extends JobsDataAccessModule {
+public class NsDataAccessModule extends AbstractModule {
 
   public static final ImmutableList<Class<?>> nsEntityClasses = ImmutableList.<Class<?>>builder().add(
           AgeGroupType.class,
@@ -65,28 +70,28 @@ public class NsDataAccessModule extends JobsDataAccessModule {
           RFA1cForm.class,
           LIC198bForm.class).build();
 
-  public NsDataAccessModule(DataSourceFactory dataSourceFactory, String dataSourceName) {
-    super(dataSourceFactory, dataSourceName);
-  }
-
-  @Override
-  protected ImmutableList<Class<?>> getEntityClasses() {
-    return nsEntityClasses;
-  }
-
-  @Override
-  protected void configure(Configuration configuration) {
-    super.configure(configuration);
-    configuration.addPackage("gov.ca.cwds.cals.persistence.model.calsns.rfa");
-  }
-
   @Override
   protected void configure() {
-    super.configure();
     bind(SessionFactory.class).annotatedWith(CalsnsSessionFactory.class)
-        .toInstance(getSessionFactory());
-
-    // schema: calsns
+        .toProvider(NsSessionFactoryProvider.class).in(Singleton.class);
     bind(RFA1aFormsDao.class);
   }
+
+  private static class NsSessionFactoryProvider implements Provider<SessionFactory> {
+
+    @Inject
+    private FacilityJobConfiguration facilityJobConfiguration;
+
+    @Override
+    public SessionFactory get() {
+      return SessionFactoryUtil.buildSessionFactory(facilityJobConfiguration.getCalsnsDataSourceFactory(),
+              DataSourceName.NS.name(), nsEntityClasses,
+              (configuration) -> {
+                return configuration.addPackage("gov.ca.cwds.cals.persistence.model.calsns.rfa");
+              }
+      );
+    }
+
+  }
+
 }

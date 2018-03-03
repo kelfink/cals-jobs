@@ -16,13 +16,13 @@ elasticsearch.xpack.password: ${ELASTIC_SEARCH_XPACK_PASSWORD:-changeme}
 
 lisDataSourceFactory:
   properties:
-      hibernate.current_session_context_class: thread
+      hibernate.current_session_context_class: managed
       hibernate.dialect: org.hibernate.dialect.PostgreSQL82Dialect
       hibernate.temp.use_jdbc_metadata_defaults: false
       hibernate.connection.driver_class: org.postgresql.Driver
       hibernate.connection.username: ${DB_LIS_USER:-postgres_data}
       hibernate.connection.password: ${DB_LIS_PASSWORD:-postgres_data}
-      hibernate.connection.url: ${DB_LIS_JDBC_URL:-jdbc:postgresql://192.168.99.100:32772/?currentSchema=lis}
+      hibernate.connection.url: ${DB_LIS_JDBC_URL:-jdbc:postgresql://192.168.99.100:32768/?currentSchema=lis}
       hibernate.connection.pool_size: ${DB_LIS_CP_MAX_SIZE:-8}
       hibernate.show_sql: false
       hibernate.format_sql: true
@@ -31,19 +31,19 @@ lisDataSourceFactory:
 fasDataSourceFactory:
   properties:
       hibernate.default_schema: ${DB_FAS_DEFAULT_SCHEMA:-fas}
-      hibernate.current_session_context_class: thread
+      hibernate.current_session_context_class: managed
       hibernate.dialect: org.hibernate.dialect.PostgreSQL82Dialect
       hibernate.temp.use_jdbc_metadata_defaults: false
       hibernate.connection.driver_class: org.postgresql.Driver
       hibernate.connection.username: ${DB_FAS_USER:-postgres_data}
       hibernate.connection.password: ${DB_FAS_PASSWORD:-postgres_data}
-      hibernate.connection.url: ${DB_FAS_JDBC_URL:-jdbc:postgresql://192.168.99.100:32772/?currentSchema=fas}
+      hibernate.connection.url: ${DB_FAS_JDBC_URL:-jdbc:postgresql://192.168.99.100:32768/?currentSchema=fas}
       hibernate.connection.pool_size: ${DB_FAS_CP_MAX_SIZE:-8}
       hibernate.show_sql: false
 
 cmsDataSourceFactory:
   properties:
-      hibernate.current_session_context_class: thread
+      hibernate.current_session_context_class: managed
       hibernate.dialect: org.hibernate.dialect.DB2Dialect
       hibernate.temp.use_jdbc_metadata_defaults: false
       hibernate.connection.driver_class: com.ibm.db2.jcc.DB2Driver
@@ -53,7 +53,7 @@ cmsDataSourceFactory:
       hibernate.use_sql_comments: false
       hibernate.connection.username: ${DB_CMS_USER:-db2inst1}
       hibernate.connection.password: ${DB_CMS_PASSWORD:-db2inst1-pwd}
-      hibernate.connection.url: ${DB_CMS_JDBC_URL:-jdbc:db2://192.168.99.100:32773/DB0TDEV}
+      hibernate.connection.url: ${DB_CMS_JDBC_URL:-jdbc:db2://192.168.99.100:32771/DB0TDEV}
       hibernate.default_schema: ${DB_CMS_SCHEMA:-CWSCMSRS}
       hibernate.connection.connectionTimeout: 1000000
       hibernate.connection.loginTimeout: 1000000
@@ -63,13 +63,13 @@ cmsDataSourceFactory:
 
 calsnsDataSourceFactory:
   properties:
-      hibernate.current_session_context_class: thread
+      hibernate.current_session_context_class: managed
       hibernate.dialect: org.hibernate.dialect.PostgreSQL82Dialect
       hibernate.temp.use_jdbc_metadata_defaults: false
       hibernate.connection.driver_class: org.postgresql.Driver
       hibernate.connection.username: ${DB_NS_USER:-postgres_data}
       hibernate.connection.password: ${DB_NS_PASSWORD:-postgres_data}
-      hibernate.connection.url: ${DB_NS_JDBC_URL:-jdbc:postgresql://192.168.99.100:32772/?currentSchema=calsns}
+      hibernate.connection.url: ${DB_NS_JDBC_URL:-jdbc:postgresql://192.168.99.100:32768/?currentSchema=calsns}
       hibernate.connection.pool_size: ${DB_NS_CP_MAX_SIZE:-8}
       hibernate.show_sql: false
 

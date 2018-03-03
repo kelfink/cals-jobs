@@ -1,6 +1,11 @@
 package gov.ca.cwds.jobs.cals.inject;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.data.legacy.cms.dao.ClientDao;
 import gov.ca.cwds.data.legacy.cms.dao.CountiesDao;
 import gov.ca.cwds.data.legacy.cms.dao.PlacementHomeDao;
@@ -40,17 +45,17 @@ import gov.ca.cwds.data.legacy.cms.entity.syscodes.LicenseStatus;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.NameType;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.State;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.VisitType;
-import gov.ca.cwds.jobs.common.inject.JobsDataAccessModule;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.cals.facility.FacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.RecordChange;
 import gov.ca.cwds.jobs.cals.facility.RecordChangeCwsCmsDao;
-import io.dropwizard.db.DataSourceFactory;
+import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import org.hibernate.SessionFactory;
 
 /**
  * @author CWDS TPT-2
  */
-public class CwsCmsRsDataAccessModule extends JobsDataAccessModule {
+public class CwsCmsRsDataAccessModule extends AbstractModule {
 
   public static final ImmutableList<Class<?>> cwsrsEntityClasses = ImmutableList.<Class<?>>builder().add(
           RecordChange.class,
@@ -93,24 +98,25 @@ public class CwsCmsRsDataAccessModule extends JobsDataAccessModule {
           NameType.class
   ).build();
 
-  public CwsCmsRsDataAccessModule(DataSourceFactory dataSourceFactory, String dataSourceName) {
-    super(dataSourceFactory, dataSourceName);
-  }
-
-  @Override
-  protected ImmutableList<Class<?>> getEntityClasses() {
-    return cwsrsEntityClasses;
-  }
-
   @Override
   protected void configure() {
-    super.configure();
-    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class).toInstance(getSessionFactory());
-
-    // schema: cwscms
+    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
+            .toProvider(CwsSessionFactoryProvider.class).in(Singleton.class);
     bind(RecordChangeCwsCmsDao.class);
     bind(CountiesDao.class);
     bind(ClientDao.class);
     bind(PlacementHomeDao.class);
+  }
+
+  private static class CwsSessionFactoryProvider implements Provider<SessionFactory> {
+
+    @Inject
+    private FacilityJobConfiguration facilityJobConfiguration;
+
+    @Override
+    public SessionFactory get() {
+      return SessionFactoryUtil.buildSessionFactory(facilityJobConfiguration.getCmsDataSourceFactory(),
+              DataSourceName.CWSRS.name(), cwsrsEntityClasses);
+    }
   }
 }
