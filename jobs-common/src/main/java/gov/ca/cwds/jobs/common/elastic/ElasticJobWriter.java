@@ -1,20 +1,19 @@
 package gov.ca.cwds.jobs.common.elastic;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.Identifiable;
+import gov.ca.cwds.jobs.common.ElasticSearchIndexerDao;
 import gov.ca.cwds.jobs.common.exception.JobsException;
-import gov.ca.cwds.jobs.common.ElasticsearchIndexerDao;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import gov.ca.cwds.jobs.common.job.JobWriter;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -25,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ElasticJobWriter<T extends Identifiable<String>> implements JobWriter<T> {
 
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ElasticJobWriter.class);
-  protected ElasticsearchIndexerDao elasticsearchDao;
+  protected ElasticSearchIndexerDao elasticsearchDao;
   protected BulkProcessor bulkProcessor;
   protected ObjectMapper objectMapper;
 
@@ -35,7 +34,7 @@ public class ElasticJobWriter<T extends Identifiable<String>> implements JobWrit
    * @param elasticsearchDao ES DAO
    * @param objectMapper Jackson object mapper
    */
-  public ElasticJobWriter(ElasticsearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
+  public ElasticJobWriter(ElasticSearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
     this.elasticsearchDao = elasticsearchDao;
     this.objectMapper = objectMapper;
     bulkProcessor =

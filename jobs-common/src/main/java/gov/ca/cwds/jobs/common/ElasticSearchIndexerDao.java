@@ -24,10 +24,10 @@ import java.io.IOException;
  *
  * @author CWDS TPT-2
  */
-public class ElasticsearchIndexerDao implements Closeable {
+public class ElasticSearchIndexerDao implements Closeable {
 
   private static final org.slf4j.Logger LOGGER = LoggerFactory
-      .getLogger(ElasticsearchIndexerDao.class);
+      .getLogger(ElasticSearchIndexerDao.class);
 
   /**
    * Client is thread safe.
@@ -46,7 +46,7 @@ public class ElasticsearchIndexerDao implements Closeable {
    * @param config The ElasticSearch configuration which is read from .yaml file
    */
   @Inject
-  public ElasticsearchIndexerDao(Client client, BaseJobConfiguration config) {
+  public ElasticSearchIndexerDao(Client client, BaseJobConfiguration config) {
     this.client = client;
     this.config = config;
   }
@@ -89,7 +89,7 @@ public class ElasticsearchIndexerDao implements Closeable {
    * <p> Method is intentionally synchronized to prevent race conditions and multiple attempts to
    * create the same index. </p>
    */
-  synchronized void createIndexIfMissing() {
+  public synchronized void createIndexIfMissing() {
     final String index = config.getElasticsearchAlias();
     if (!doesIndexExist(index)) {
       LOGGER.warn("ES INDEX {} DOES NOT EXIST!!", index);

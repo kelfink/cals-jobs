@@ -1,35 +1,38 @@
 package gov.ca.cwds.jobs.common.job;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import gov.ca.cwds.jobs.common.BaseIndexerJob;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
-import gov.ca.cwds.rest.ElasticsearchConfiguration;
-import io.dropwizard.db.DataSourceFactory;
+import gov.ca.cwds.jobs.common.config.JobOptions;
+import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
 
 /**
- * Created by Alexander Serbin on 2/14/2018.
+ * Created by Alexander Serbin on 3/4/2018.
  */
 public class TestIndexerJob extends BaseIndexerJob {
 
-    @Override
-    protected ElasticsearchConfiguration getJobsConfiguration() {
-        return new ElasticsearchConfiguration();
+    private Job job;
+
+    public TestIndexerJob(Job job) {
+        this.job = job;
     }
 
     @Override
-    public void run(String[] args) {
-        super.run(args);
-    }
+    protected AbstractModule getJobModule(JobOptions jobOptions) {
+        return new AbstractBaseJobModule(jobOptions) {
 
-    @Override
-    protected void configure() {
-        super.configure();
-        bind(BaseJobConfiguration.class).toInstance(new BaseJobConfiguration() {
             @Override
-            public DataSourceFactory getCalsnsDataSourceFactory() {
-                return new DataSourceFactory();
+            protected BaseJobConfiguration getJobsConfiguration(JobOptions jobsOptions) {
+                return new TestJobConfiguration();
             }
-        });
 
+            @Provides
+            public Job provideJob() {
+                return job;
+            }
+
+        };
     }
 
 }

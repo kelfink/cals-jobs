@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.cals;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.jobs.common.ChangedDTO;
-import gov.ca.cwds.jobs.common.ElasticsearchIndexerDao;
+import gov.ca.cwds.jobs.common.ElasticSearchIndexerDao;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.elastic.ElasticJobWriter;
 import gov.ca.cwds.jobs.common.exception.JobsException;
@@ -24,7 +24,7 @@ public class CalsElasticJobWriter<T extends ChangedDTO<?>> extends ElasticJobWri
    * @param elasticsearchDao ES DAO
    * @param objectMapper Jackson object mapper
    */
-  public CalsElasticJobWriter(ElasticsearchIndexerDao elasticsearchDao,
+  public CalsElasticJobWriter(ElasticSearchIndexerDao elasticsearchDao,
       ObjectMapper objectMapper) {
     super(elasticsearchDao, objectMapper);
   }
