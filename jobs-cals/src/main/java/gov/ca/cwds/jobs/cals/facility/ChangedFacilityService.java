@@ -65,7 +65,7 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
             getLisIncrementalLoadIdentifiers(dateAfter));
   }
 
-  @Loggable(Loggable.WARN)
+  @Loggable(Loggable.DEBUG)
   @UnitOfWork(CMS)
   protected RecordChanges getCwsCmsInitialLoadIdentifiers() {
     RecordChanges recordChanges = new RecordChanges();
@@ -73,7 +73,7 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
     return recordChanges;
   }
 
-  @Loggable(Loggable.WARN)
+  @Loggable(Loggable.DEBUG)
   @UnitOfWork(CMS)
   protected RecordChanges getCwsCmsIncrementalLoadIdentifiers(LocalDateTime dateAfter) {
     RecordChanges recordChanges = new RecordChanges();
@@ -81,7 +81,7 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
     return recordChanges;
   }
 
-  @Loggable(Loggable.WARN)
+  @Loggable(Loggable.DEBUG)
   @UnitOfWork(LIS)
   protected RecordChanges getLisInitialLoadIdentifiers() {
     RecordChanges recordChanges = new RecordChanges();
@@ -89,7 +89,7 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
     return recordChanges;
   }
 
-  @Loggable(Loggable.WARN)
+  @Loggable(Loggable.DEBUG)
   @UnitOfWork(LIS)
   protected RecordChanges getLisIncrementalLoadIdentifiers(LocalDateTime timestampAfter) {
     RecordChanges recordChanges = new RecordChanges();
@@ -98,13 +98,13 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
     return recordChanges;
   }
 
-  @Loggable(Loggable.WARN)
+  @Loggable(Loggable.DEBUG)
   @UnitOfWork(CMS)
   protected FacilityParameterObject createFacilityParameterObject(String id) {
     return facilityParameterObjectBuilder.createFacilityParameterObject(id);
   }
 
-  @Loggable(Loggable.WARN)
+  @Loggable(Loggable.DEBUG)
   protected FacilityDTO findFacilityById(String id) {
     try {
       FacilityDTO facilityDTO = findByParameterObject(createFacilityParameterObject(id));
@@ -123,7 +123,7 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
     }
   }
 
-  @Loggable(Loggable.WARN)
+  @Loggable(Loggable.DEBUG)
   private Stream<ChangedFacilityDTO> handleFacilitiesIdentifiersStream(RecordChanges cwscmsIdentifiers, RecordChanges lisIdentifiers) {
     if (LOG.isInfoEnabled()) {
       printRecordsCount(cwscmsIdentifiers, DataSourceName.CWS);
