@@ -24,7 +24,7 @@ public final class SessionFactoryUtil {
                                                      ImmutableList<Class<?>> entityClasses,
                                                      Function<Configuration, Configuration> function) {
         Validate.notNull(dataSourceFactory, String.format("%s data source configuration is empty", dataSourceName));
-        Configuration configuration = new Configuration();//.configure();
+        Configuration configuration = new Configuration();
         for (Map.Entry<String, String> property : dataSourceFactory.getProperties().entrySet()) {
             configuration.setProperty(property.getKey(), property.getValue());
         }
