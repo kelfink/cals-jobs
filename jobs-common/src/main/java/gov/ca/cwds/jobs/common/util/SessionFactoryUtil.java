@@ -34,6 +34,7 @@ public final class SessionFactoryUtil {
 
         entityClasses.forEach(configuration::addAnnotatedClass);
         function.apply(configuration);
+        configuration.configure();
         return configuration.buildSessionFactory(serviceRegistry);
     }
 

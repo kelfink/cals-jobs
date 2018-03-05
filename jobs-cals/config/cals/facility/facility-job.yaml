@@ -23,10 +23,10 @@ lisDataSourceFactory:
       hibernate.connection.username: ${DB_LIS_USER:-postgres_data}
       hibernate.connection.password: ${DB_LIS_PASSWORD:-postgres_data}
       hibernate.connection.url: ${DB_LIS_JDBC_URL:-jdbc:postgresql://192.168.99.100:32768/?currentSchema=lis}
-      hibernate.connection.pool_size: ${DB_LIS_CP_MAX_SIZE:-8}
       hibernate.show_sql: false
       hibernate.format_sql: true
       hibernate.use_sql_comments: false
+      hibernate.c3p0.min_size: 1
 
 fasDataSourceFactory:
   properties:
@@ -38,8 +38,8 @@ fasDataSourceFactory:
       hibernate.connection.username: ${DB_FAS_USER:-postgres_data}
       hibernate.connection.password: ${DB_FAS_PASSWORD:-postgres_data}
       hibernate.connection.url: ${DB_FAS_JDBC_URL:-jdbc:postgresql://192.168.99.100:32768/?currentSchema=fas}
-      hibernate.connection.pool_size: ${DB_FAS_CP_MAX_SIZE:-8}
       hibernate.show_sql: false
+      hibernate.c3p0.min_size: 1
 
 cmsDataSourceFactory:
   properties:
@@ -47,7 +47,6 @@ cmsDataSourceFactory:
       hibernate.dialect: org.hibernate.dialect.DB2Dialect
       hibernate.temp.use_jdbc_metadata_defaults: false
       hibernate.connection.driver_class: com.ibm.db2.jcc.DB2Driver
-      hibernate.connection.pool_size: 20
       hibernate.show_sql: false
       hibernate.format_sql: true
       hibernate.use_sql_comments: false
@@ -60,6 +59,7 @@ cmsDataSourceFactory:
       hibernate.connection.keepAliveTimeOut: 8
       hibernate.jdbc.time_zone: America/Los_Angeles
       hibernate.jdbc.use_scrollable_resultset: true
+      hibernate.c3p0.min_size: 1
 
 calsnsDataSourceFactory:
   properties:
@@ -70,8 +70,8 @@ calsnsDataSourceFactory:
       hibernate.connection.username: ${DB_NS_USER:-postgres_data}
       hibernate.connection.password: ${DB_NS_PASSWORD:-postgres_data}
       hibernate.connection.url: ${DB_NS_JDBC_URL:-jdbc:postgresql://192.168.99.100:32768/?currentSchema=calsns}
-      hibernate.connection.pool_size: ${DB_NS_CP_MAX_SIZE:-8}
       hibernate.show_sql: false
+      hibernate.c3p0.min_size: 1
 
 
 
