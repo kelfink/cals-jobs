@@ -46,17 +46,10 @@ public class ElasticUtils {
 
   private static List<InetSocketTransportAddress> getValidatedESNodes(BaseJobConfiguration config) {
     List<InetSocketTransportAddress> nodesList = new LinkedList<>();
-
     String[] params;
-
     Map<String, String> hostPortMap = new HashMap<>();
+
     hostPortMap.put(config.getElasticsearchHost(), config.getElasticsearchPort());
-
-//    for (int i = 1; i <= config.getAdditionalHosts().size(); i++) {
-//      hostPortMap.put(config.getAdditionalHosts().get("host" + i),
-//          config.getAdditionalPorts().get("port" + i));
-//    }
-
     for (String node : config.getNodes()) {
       params = node.split(":");
       hostPortMap.put(params[0], params[1]);
@@ -78,5 +71,3 @@ public class ElasticUtils {
     return nodesList;
   }
 }
-
-
