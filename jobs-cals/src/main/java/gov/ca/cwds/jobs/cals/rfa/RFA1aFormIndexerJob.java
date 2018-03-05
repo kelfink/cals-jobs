@@ -33,7 +33,7 @@ public final class RFA1aFormIndexerJob extends BaseIndexerJob {
     super.configure();
     install(new MappingModule());
     bind(BaseJobConfiguration.class).toInstance(getJobsConfiguration());
-    install(new NsDataAccessModule(getJobsConfiguration().getCalsnsDataSourceFactory(), Constants.UnitOfWork.CALSNS));
+    install(new NsDataAccessModule());
     bind(RFA1aFormReader.class);
     bind(RFA1aFormElasticJobWriter.class);
     bind(RFA1aFormsCollectionService.class);
