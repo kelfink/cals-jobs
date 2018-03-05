@@ -24,17 +24,18 @@ public final class SessionFactoryUtil {
                                                      ImmutableList<Class<?>> entityClasses,
                                                      Function<Configuration, Configuration> function) {
         Validate.notNull(dataSourceFactory, String.format("%s data source configuration is empty", dataSourceName));
-        Configuration configuration = new Configuration();//.configure();
+        Configuration configuration = new Configuration();
         for (Map.Entry<String, String> property : dataSourceFactory.getProperties().entrySet()) {
             configuration.setProperty(property.getKey(), property.getValue());
         }
+        configuration.setProperty("hibernate.current_session_context_class", "managed");
+        configuration.setProperty("hibernate.c3p0.min_size", "1");
         ServiceRegistry serviceRegistry
                 = new StandardServiceRegistryBuilder()
                 .applySettings(configuration.getProperties()).build();
 
         entityClasses.forEach(configuration::addAnnotatedClass);
         function.apply(configuration);
-        configuration.configure();
         return configuration.buildSessionFactory(serviceRegistry);
     }
 
