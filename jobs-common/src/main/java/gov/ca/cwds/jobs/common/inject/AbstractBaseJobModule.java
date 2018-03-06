@@ -19,8 +19,8 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
 
     private JobOptions jobOptions;
 
-    public AbstractBaseJobModule(JobOptions jobOptions) {
-        this.jobOptions = jobOptions;
+    public AbstractBaseJobModule(String[] args) {
+        this.jobOptions = JobOptions.parseCommandLine(args);
     }
 
     @Override

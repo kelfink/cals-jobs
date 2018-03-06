@@ -1,8 +1,9 @@
 package gov.ca.cwds.jobs.common.job.timestamp;
 
-import gov.ca.cwds.jobs.common.BaseIndexerJob;
-import gov.ca.cwds.jobs.common.job.TestIndexerJob;
-import gov.ca.cwds.jobs.common.job.impl.AsyncReadWriteJob;
+import gov.ca.cwds.jobs.common.job.JobReader;
+import gov.ca.cwds.jobs.common.job.JobWriter;
+import gov.ca.cwds.jobs.common.job.TestModule;
+import gov.ca.cwds.jobs.common.job.impl.JobRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,9 +37,11 @@ public class TimestampAfterCrashTest {
     @Test
     public void test_timestamp_is_created_if_job_successful() throws IOException {
         assertFalse(timestampOperator.timeStampExists());
-        BaseIndexerJob job = new TestIndexerJob(new AsyncReadWriteJob(() -> null, items -> {}));
         String configFilePath = Paths.get("src","test", "resources", "config.yaml").normalize().toAbsolutePath().toString();
-        job.run(new String[] {"-c", configFilePath, "-l", getLastRunDir().toString()});
+        String[] args = new String[] {"-c", configFilePath, "-l", getLastRunDir().toString()};
+        JobReader jobReader = () -> null;
+        JobWriter jobWriter = items -> {};
+        JobRunner.run(new TestModule(args, jobReader, jobWriter));
         assertTrue(timestampOperator.timeStampExists());
         LocalDateTime timestamp = timestampOperator.readTimestamp();
         assertTrue(timestamp.isBefore(LocalDateTime.now()));
@@ -62,15 +65,16 @@ public class TimestampAfterCrashTest {
     }
 
     private void runCrashingJob() {
-        TestIndexerJob job = new TestIndexerJob(new AsyncReadWriteJob(() -> {
+        String configFilePath = Paths.get("src", "test", "resources", "config.yaml").normalize().toAbsolutePath().toString();
+        String[] args = new String[]{"-c", configFilePath, "-l", getLastRunDir().toString()};
+        JobReader jobReader = () -> {
             if (1 == 1) {
                 throw new IllegalStateException();
             }
             return null;
-        }, items -> {
-        }));
-        String configFilePath = Paths.get("src", "test", "resources", "config.yaml").normalize().toAbsolutePath().toString();
-        job.run(new String[]{"-c", configFilePath, "-l", getLastRunDir().toString()});
+        };
+        JobWriter jobWriter = items -> {};
+        JobRunner.run(new TestModule(args, jobReader, jobWriter));
     }
 
 }
