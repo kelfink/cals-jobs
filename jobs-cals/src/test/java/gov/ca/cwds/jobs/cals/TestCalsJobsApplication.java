@@ -12,6 +12,8 @@ import gov.ca.cwds.inject.AuditingModule;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityService;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityServiceProvider;
+import gov.ca.cwds.jobs.cals.facility.inject.ChangedFacilityIdentifiersProvider;
+import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
 import gov.ca.cwds.rest.BaseApiApplication;
 import io.dropwizard.setup.Bootstrap;
@@ -45,6 +47,7 @@ public class TestCalsJobsApplication extends BaseApiApplication<TestCalsJobsConf
                     }
 
                 });
+                bind(ChangedIdentifiersService.class).toProvider(ChangedFacilityIdentifiersProvider.class);
                 bind(ChangedFacilityService.class).toProvider(ChangedFacilityServiceProvider.class);
                 bind(FacilityParameterObjectCMSAwareBuilder.class).toProvider(FacilityParameterObjectBuilderProvider.class);
                 bindConstant().annotatedWith(LastRunDir.class).to("out");

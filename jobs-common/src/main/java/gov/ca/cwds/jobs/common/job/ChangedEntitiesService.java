@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.common.job;
 
-import java.time.LocalDateTime;
+import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+
 import java.util.stream.Stream;
 
 /**
@@ -8,8 +9,6 @@ import java.util.stream.Stream;
  */
 public interface ChangedEntitiesService<T> {
 
-    Stream<T> doInitialLoad();
-
-    Stream<T> doIncrementalLoad(LocalDateTime dateAfter);
+    Stream<T> loadEntities(Stream<ChangedEntityIdentifier> identifiers);
 
 }

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.cals.inject;
+package gov.ca.cwds.jobs.cals.facility.inject;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;

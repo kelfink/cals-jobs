@@ -1,11 +1,19 @@
-package gov.ca.cwds.jobs.common;
+package gov.ca.cwds.jobs.common.identifier;
+
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 
 import java.time.LocalDateTime;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
-public class ChangedEntityInformation {
+public class ChangedEntityIdentifier {
+
+    public ChangedEntityIdentifier(String id, RecordChangeOperation recordChangeOperation, LocalDateTime timestamp) {
+        this.id = id;
+        this.recordChangeOperation = recordChangeOperation;
+        this.timestamp = timestamp;
+    }
 
     private String id;
 

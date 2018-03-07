@@ -14,7 +14,6 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.jackson.Jackson;
 import liquibase.exception.LiquibaseException;
 import org.json.JSONException;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -36,6 +35,7 @@ import java.util.stream.Collectors;
 import static gov.ca.cwds.jobs.cals.facility.ChangedFacilityResource.DATE_AFTER;
 import static gov.ca.cwds.jobs.cals.facility.ChangedFacilityResource.PATH_CHANGED_FACILITY;
 import static gov.ca.cwds.jobs.cals.facility.ChangedFacilityResource.PATH_INITIAL;
+import static gov.ca.cwds.jobs.cals.facility.recordchange.LisRecordChange.lisTimestampFormatter;
 import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.junit.Assert.assertEquals;
 
@@ -119,7 +119,7 @@ public class InitialAndIncrementalFacilityLoadTest extends BaseApiTest<TestCalsJ
         DatabaseHelper lisDatabaseHelper = new DatabaseHelper(lisDataSourceFactory.getUrl(),
                 lisDataSourceFactory.getUser(), lisDataSourceFactory.getPassword());
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("now", ChangedFacilityService.lisTimestampFormatter.format(LocalDateTime.now()));
+        parameters.put("now", lisTimestampFormatter.format(LocalDateTime.now()));
         lisDatabaseHelper.runScript("liquibase/lis_facility_incremental_load.xml", parameters, "lis");
     }
 

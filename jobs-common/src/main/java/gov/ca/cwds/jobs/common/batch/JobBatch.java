@@ -1,24 +1,29 @@
 package gov.ca.cwds.jobs.common.batch;
 
-import gov.ca.cwds.jobs.common.ChangedEntityInformation;
+import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
 public class JobBatch {
 
-    private List<ChangedEntityInformation> changedEntities;
+    private Stream<ChangedEntityIdentifier> identifiers;
     private LocalDateTime timestamp;
 
-    public List<ChangedEntityInformation> getChangedEntities() {
-        return changedEntities;
+    public JobBatch(Stream<ChangedEntityIdentifier> identifiers, LocalDateTime timestamp) {
+        this.identifiers = identifiers;
+        this.timestamp = timestamp;
     }
 
-    public void setChangedEntities(List<ChangedEntityInformation> changedEntities) {
-        this.changedEntities = changedEntities;
+    public Stream<ChangedEntityIdentifier> getChangedEntityIdentifiers() {
+        return identifiers;
+    }
+
+    public void setChangedEntityIdentifiers(Stream<ChangedEntityIdentifier> changedEntities) {
+        this.identifiers = changedEntities;
     }
 
     public LocalDateTime getTimestamp() {

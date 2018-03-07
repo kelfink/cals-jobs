@@ -1,7 +1,12 @@
 package gov.ca.cwds.jobs.common.job.impl;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.jobs.common.batch.JobBatch;
+import gov.ca.cwds.jobs.common.batch.JobBatchPreProcessor;
 import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;
+import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.identifier.impl.ChangedIdentifiersProvider;
+import gov.ca.cwds.jobs.common.job.ChangedEntitiesService;
 import gov.ca.cwds.jobs.common.job.Job;
 import gov.ca.cwds.jobs.common.job.JobReader;
 import gov.ca.cwds.jobs.common.job.JobWriter;
@@ -11,11 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
-public class JobImpl implements Job {
+public class JobImpl<T> implements Job {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobImpl.class);
 
@@ -23,32 +31,53 @@ public class JobImpl implements Job {
     private TimestampOperator timestampOperator;
 
     @Inject
-    private JobReader jobReader;
+    private JobWriter jobWriter;
 
     @Inject
-    private JobWriter jobWriter;
+    private ChangedEntitiesService changedEntitiesService;
+
+    @Inject
+    private ChangedIdentifiersProvider changedIdentifiersProvider;
+
+    @Inject
+    private JobBatchPreProcessor jobBatchPreProcessor;
 
     @Override
     public void run() {
         try {
-            //Stream<ChangedEntitiesInformation> changedEntities = changedEntitiesProvider.findChangedentities
-            //List<JobBatch> jobPreProcessor.buildJobBatches();
-            //for (batch: batches) {
-            //   run job(batch)
-            //   set batch timestamp
-            //}
-            new AsyncReadWriteJob(jobReader, jobWriter).run();
-            if (!JobExceptionHandler.isExceptionHappened()) {
-                timestampOperator.writeTimestamp(LocalDateTime.now());
+            Stream<ChangedEntityIdentifier> identifiers = changedIdentifiersProvider.get();
+            List<JobBatch> jobBatches = jobBatchPreProcessor.buildJobBatches(identifiers);
+            for (JobBatch batch : jobBatches) {
+                new AsyncReadWriteJob(createJobReader(batch.getChangedEntityIdentifiers()), jobWriter).run();
+                if (!JobExceptionHandler.isExceptionHappened()) {
+                   timestampOperator.writeTimestamp(batch.getTimestamp());
+                   LOGGER.info("Save point has been reached. Batch timestamp is " + batch.getTimestamp());
+                } else {
+                   LOGGER.error("Exception occured during batch processing. Job has been terminated." +
+                           " Batch timestamp " + batch.getTimestamp() + "has not been recorded");
+                   return;
+                }
             }
+            if (noTimestampsFound(jobBatches)) {
+                LOGGER.info("No timestamp found for any batch. Current timestamp has been recorded");
+                timestampOperator.writeTimestamp(LocalDateTime.now());
+            };
             LOGGER.info(String.format("Added %s entities to ES bulk uploader", ConsumerCounter.getCounter()));
         } catch (RuntimeException e) {
             LOGGER.error("ERROR: ", e.getMessage(), e);
-            System.exit(1);
         } finally {
             JobExceptionHandler.reset();
             close();
         }
+    }
+
+    private boolean noTimestampsFound(List<JobBatch> jobBatches) {
+        return jobBatches.stream().filter(batch -> batch.getTimestamp() != null).count() == 0;
+    }
+
+    private JobReader<T> createJobReader(Stream<ChangedEntityIdentifier> identifiers) {
+        Iterator<T> entitiesIterator = changedEntitiesService.loadEntities(identifiers).iterator();
+        return () -> entitiesIterator.hasNext() ? entitiesIterator.next() : null;
     }
 
 }

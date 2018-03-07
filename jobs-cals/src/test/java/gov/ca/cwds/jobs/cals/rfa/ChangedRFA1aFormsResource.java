@@ -2,9 +2,7 @@ package gov.ca.cwds.jobs.cals.rfa;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
-import gov.ca.cwds.cals.service.dto.rfa.collection.CollectionDTO;
 import gov.ca.cwds.cals.service.dto.rfa.collection.RFA1aFormCollectionDTO;
-import gov.ca.cwds.cals.util.DateTimeUtils;
 import gov.ca.cwds.rest.api.Response;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.Api;
@@ -19,8 +17,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static gov.ca.cwds.cals.Constants.RFA;
 import static gov.ca.cwds.cals.Constants.UnitOfWork.CALSNS;
@@ -37,7 +33,7 @@ import static gov.ca.cwds.jobs.cals.rfa.ChangedRFA1aFormsResourceTest.PATH_PARAM
 public class ChangedRFA1aFormsResource {
 
   @Inject
-  private ChangedRFAFormsService changedRFAFormsService;
+  private ChangedRFA1aFormsService changedRFAFormsService;
 
   @UnitOfWork(CALSNS)
   @GET
@@ -59,8 +55,12 @@ public class ChangedRFA1aFormsResource {
       @ApiParam(required = true, name = PATH_PARAM_DATE_AFTER, value = "date/time")
           String dateAfter
   ) {
+    // TODO uncomment when RFA 1a job is ready
+/*
     List<ChangedRFA1aFormDTO> changedRFA1aFormDTOList = changedRFAFormsService
             .doIncrementalLoad(DateTimeUtils.toLocalDateTime(dateAfter)).collect(Collectors.toList());
     return new CollectionDTO<>(changedRFA1aFormDTOList);
+*/
+   return null;
   }
 }

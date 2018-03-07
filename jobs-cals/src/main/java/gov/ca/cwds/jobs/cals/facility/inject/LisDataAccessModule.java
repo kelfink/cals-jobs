@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.cals.inject;
+package gov.ca.cwds.jobs.cals.facility.inject;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
@@ -13,8 +13,8 @@ import gov.ca.cwds.cals.persistence.model.lisfas.LisDoFile;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisFacFile;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisTableFile;
 import gov.ca.cwds.jobs.cals.facility.FacilityJobConfiguration;
-import gov.ca.cwds.jobs.cals.facility.RecordChange;
-import gov.ca.cwds.jobs.cals.facility.RecordChangeLisDao;
+import gov.ca.cwds.jobs.cals.facility.recordchange.RecordChangeLisDao;
+import gov.ca.cwds.jobs.cals.facility.recordchange.LisRecordChange;
 import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import org.hibernate.SessionFactory;
 
@@ -25,7 +25,7 @@ public class LisDataAccessModule extends AbstractModule {
 
   public static final ImmutableList<Class<?>> lisEntityClasses =
           ImmutableList.<Class<?>>builder().add(
-                  RecordChange.class,
+                  LisRecordChange.class,
                   LisFacFile.class,
                   LisTableFile.class,
                   LisDoFile.class

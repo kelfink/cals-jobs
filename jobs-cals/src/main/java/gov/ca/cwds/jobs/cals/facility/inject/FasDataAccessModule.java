@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.cals.inject;
+package gov.ca.cwds.jobs.cals.facility.inject;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
@@ -17,7 +17,7 @@ import gov.ca.cwds.cals.persistence.model.fas.LpaInformation;
 import gov.ca.cwds.cals.persistence.model.fas.Rr809Dn;
 import gov.ca.cwds.cals.persistence.model.fas.Rrcpoc;
 import gov.ca.cwds.jobs.cals.facility.FacilityJobConfiguration;
-import gov.ca.cwds.jobs.cals.facility.RecordChange;
+import gov.ca.cwds.jobs.cals.facility.recordchange.RecordChange;
 import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import org.hibernate.SessionFactory;
 

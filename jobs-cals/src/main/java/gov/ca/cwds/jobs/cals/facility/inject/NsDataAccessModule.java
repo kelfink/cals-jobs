@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.cals.inject;
+package gov.ca.cwds.jobs.cals.facility.inject;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;

@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.cals.inject;
+package gov.ca.cwds.jobs.cals.facility.inject;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
@@ -47,8 +47,8 @@ import gov.ca.cwds.data.legacy.cms.entity.syscodes.State;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.VisitType;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.FacilityJobConfiguration;
-import gov.ca.cwds.jobs.cals.facility.RecordChange;
-import gov.ca.cwds.jobs.cals.facility.RecordChangeCwsCmsDao;
+import gov.ca.cwds.jobs.cals.facility.recordchange.RecordChangeCwsCmsDao;
+import gov.ca.cwds.jobs.cals.facility.recordchange.CwsRecordChange;
 import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import org.hibernate.SessionFactory;
 
@@ -58,7 +58,7 @@ import org.hibernate.SessionFactory;
 public class CwsCmsRsDataAccessModule extends AbstractModule {
 
   public static final ImmutableList<Class<?>> cwsrsEntityClasses = ImmutableList.<Class<?>>builder().add(
-          RecordChange.class,
+          CwsRecordChange.class,
           Client.class,
           OutOfHomePlacement.class,
           PlacementEpisode.class,

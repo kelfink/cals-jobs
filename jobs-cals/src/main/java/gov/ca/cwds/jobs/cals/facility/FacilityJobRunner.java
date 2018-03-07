@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.cals.facility;
 
-import gov.ca.cwds.jobs.cals.inject.FacilityJobModule;
+import gov.ca.cwds.jobs.cals.facility.inject.FacilityJobModule;
 import gov.ca.cwds.jobs.common.job.impl.JobRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

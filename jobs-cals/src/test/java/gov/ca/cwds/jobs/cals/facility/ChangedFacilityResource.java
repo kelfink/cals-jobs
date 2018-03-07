@@ -2,6 +2,8 @@ package gov.ca.cwds.jobs.cals.facility;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.service.dto.rfa.collection.CollectionDTO;
+import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -13,6 +15,7 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static gov.ca.cwds.cals.Constants.API.FACILITIES;
 import static gov.ca.cwds.jobs.cals.facility.ChangedFacilityResource.PATH_CHANGED_FACILITY;
@@ -33,21 +36,25 @@ public class ChangedFacilityResource {
   @Inject
   private ChangedFacilityService changedFacilityService;
 
+  @Inject
+  private ChangedIdentifiersService changedFacilityIdentifiersService;
+
   @GET
   public CollectionDTO<ChangedFacilityDTO> incrementalLoad(
-      @QueryParam(DATE_AFTER)
-          String stringDateAfter) throws ParseException {
+          @QueryParam(DATE_AFTER)
+                  String stringDateAfter) throws ParseException {
     LocalDateTime dateAfter = LocalDateTime.parse(stringDateAfter, DATE_TIME_FORMATTER);
+    Stream<ChangedEntityIdentifier> identifiers = changedFacilityIdentifiersService.getIdentifiersForIncrementalLoad(dateAfter);
     List<ChangedFacilityDTO> changedFacilityDTOList =
-            changedFacilityService.doIncrementalLoad(dateAfter).collect(Collectors.toList());
+            changedFacilityService.loadEntities(identifiers).collect(Collectors.toList());
     return new CollectionDTO<>(changedFacilityDTOList);
   }
 
   @GET
   @Path("/" + PATH_INITIAL)
   public CollectionDTO<ChangedFacilityDTO> initialLLoadedFacilities() throws ParseException {
-    List<ChangedFacilityDTO> changedFacilityDTOList = changedFacilityService
-            .doInitialLoad().collect(Collectors.toList());
+    Stream<ChangedEntityIdentifier> identifiers = changedFacilityIdentifiersService.getIdentifiersForInitialLoad();
+    List<ChangedFacilityDTO> changedFacilityDTOList = changedFacilityService.loadEntities(identifiers).collect(Collectors.toList());
     return new CollectionDTO<>(changedFacilityDTOList);
   }
 

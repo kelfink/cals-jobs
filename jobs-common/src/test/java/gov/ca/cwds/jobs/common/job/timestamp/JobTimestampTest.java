@@ -1,7 +1,8 @@
 package gov.ca.cwds.jobs.common.job.timestamp;
 
-import gov.ca.cwds.jobs.common.job.JobReader;
-import gov.ca.cwds.jobs.common.job.JobWriter;
+import gov.ca.cwds.jobs.common.batch.JobBatch;
+import gov.ca.cwds.jobs.common.batch.JobBatchPreProcessor;
+import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.job.TestModule;
 import gov.ca.cwds.jobs.common.job.impl.JobRunner;
 import org.junit.After;
@@ -11,6 +12,10 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static gov.ca.cwds.jobs.common.job.timestamp.LastRunDirHelper.getLastRunDir;
 import static org.junit.Assert.assertFalse;
@@ -19,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by Alexander Serbin on 2/14/2018.
  */
-public class TimestampAfterCrashTest {
+public class JobTimestampTest {
 
     private FilesystemTimestampOperator timestampOperator;
 
@@ -37,14 +42,10 @@ public class TimestampAfterCrashTest {
     @Test
     public void test_timestamp_is_created_if_job_successful() throws IOException {
         assertFalse(timestampOperator.timeStampExists());
-        String configFilePath = Paths.get("src","test", "resources", "config.yaml").normalize().toAbsolutePath().toString();
-        String[] args = new String[] {"-c", configFilePath, "-l", getLastRunDir().toString()};
-        JobReader jobReader = () -> null;
-        JobWriter jobWriter = items -> {};
-        JobRunner.run(new TestModule(args, jobReader, jobWriter));
+        JobRunner.run(new TestModule(getModuleArgs()));
         assertTrue(timestampOperator.timeStampExists());
         LocalDateTime timestamp = timestampOperator.readTimestamp();
-        assertTrue(timestamp.isBefore(LocalDateTime.now()));
+        assertTrue(timestamp.until(LocalDateTime.now(), ChronoUnit.SECONDS) < 1);
     }
 
     @Test
@@ -64,17 +65,40 @@ public class TimestampAfterCrashTest {
         assertTrue(timestamp.equals(timestampOperator.readTimestamp()));
     }
 
+    @Test
+    public void test_all_timestamps_null() {
+        assertFalse(timestampOperator.timeStampExists());
+        TestModule testModule = new TestModule(getModuleArgs());
+        testModule.setJobBatchPreProcessorClass(EmptyTimestampTestPreProcessor.class);
+        JobRunner.run(testModule);
+        assertTrue(timestampOperator.timeStampExists());
+        LocalDateTime timestamp = timestampOperator.readTimestamp();
+        assertTrue(timestamp.until(LocalDateTime.now(), ChronoUnit.SECONDS) < 1);
+    }
+
     private void runCrashingJob() {
-        String configFilePath = Paths.get("src", "test", "resources", "config.yaml").normalize().toAbsolutePath().toString();
-        String[] args = new String[]{"-c", configFilePath, "-l", getLastRunDir().toString()};
-        JobReader jobReader = () -> {
+        TestModule testModule = new TestModule(getModuleArgs());
+        testModule.setJobWriter(items -> {
             if (1 == 1) {
                 throw new IllegalStateException();
             }
-            return null;
-        };
-        JobWriter jobWriter = items -> {};
-        JobRunner.run(new TestModule(args, jobReader, jobWriter));
+        });
+        JobRunner.run(testModule);
     }
+
+    private String[] getModuleArgs() {
+        String configFilePath = Paths.get("src", "test", "resources", "config.yaml").normalize().toAbsolutePath().toString();
+        return new String[]{"-c", configFilePath, "-l", getLastRunDir().toString()};
+    }
+
+    private static class EmptyTimestampTestPreProcessor implements JobBatchPreProcessor {
+
+        @Override
+        public List<JobBatch> buildJobBatches(Stream<ChangedEntityIdentifier> identifiers) {
+            return Collections.singletonList(new JobBatch(identifiers, null));
+        }
+    }
+
+
 
 }

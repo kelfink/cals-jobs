@@ -4,6 +4,8 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
 import gov.ca.cwds.rest.api.ApiException;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,6 +19,8 @@ import java.util.stream.Stream;
  * Created by Alexander Serbin on 2/5/2018.
  */
 public class FilesystemTimestampOperator implements TimestampOperator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(FilesystemTimestampOperator.class);
 
     private static final String TIMESTAMP_FILENAME = "LastJobRun.time";
     private String outputDir;
@@ -56,6 +60,10 @@ public class FilesystemTimestampOperator implements TimestampOperator {
 
     @Override
     public void writeTimestamp(LocalDateTime timestamp) {
+        if (timestamp == null) {
+            LOG.info("Timestamp is empty for the batch and will not be recorded");
+            return;
+        }
         String stringTimestamp = timestamp.format(DATE_TIME_FORMATTER);
         try {
             if (timeStampExists()) {
