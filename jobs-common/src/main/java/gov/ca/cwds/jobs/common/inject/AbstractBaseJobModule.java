@@ -57,7 +57,6 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
     }
 
     @Provides
-    @Singleton
     @Inject
     public ElasticSearchIndexerDao provideElasticSearchDao(Client client,
                                                     BaseJobConfiguration configuration) {

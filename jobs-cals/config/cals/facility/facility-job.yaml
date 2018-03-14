@@ -1,4 +1,4 @@
-batchSize: 1000
+batchSize: 100
 
 elasticsearch.host: ${ELASTIC_SEARCH_HOST:-localhost}
 elasticsearch.port: ${ELASTIC_SEARCH_PORT:-9300}

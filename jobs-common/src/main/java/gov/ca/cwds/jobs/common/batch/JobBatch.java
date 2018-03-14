@@ -49,4 +49,9 @@ public class JobBatch {
     public int getSize() {
         return identifiers.size();
     }
+
+    @Override
+    public String toString() {
+        return "batch size = " + identifiers.size() + ", timestamp is " + timestamp;
+    }
 }

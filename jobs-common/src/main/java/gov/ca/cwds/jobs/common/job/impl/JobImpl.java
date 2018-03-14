@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.common.job.impl;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
 import gov.ca.cwds.jobs.common.batch.JobBatchPreProcessor;
 import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;
@@ -31,9 +32,6 @@ public class JobImpl<T> implements Job {
     private TimestampOperator timestampOperator;
 
     @Inject
-    private JobWriter jobWriter;
-
-    @Inject
     private ChangedEntitiesService changedEntitiesService;
 
     @Inject
@@ -42,19 +40,24 @@ public class JobImpl<T> implements Job {
     @Inject
     private JobBatchPreProcessor jobBatchPreProcessor;
 
+    @Inject
+    private Injector injector;
+
     @Override
     public void run() {
         try {
             Stream<ChangedEntityIdentifier> identifiers = changedIdentifiersProvider.get();
             List<JobBatch> jobBatches = jobBatchPreProcessor.buildJobBatches(identifiers);
-            for (JobBatch batch : jobBatches) {
-                new AsyncReadWriteJob(createJobReader(batch.getChangedEntityIdentifiers()), jobWriter).run();
+            printJobBatchesInformation(jobBatches);
+            for (int batchNumber = 0; batchNumber < jobBatches.size(); batchNumber ++) {
+                createBatchJob(jobBatches.get(batchNumber)).run();
                 if (!JobExceptionHandler.isExceptionHappened()) {
-                   timestampOperator.writeTimestamp(batch.getTimestamp());
-                   LOGGER.info("Save point has been reached. Save point batch timestamp is " + batch.getTimestamp());
+                   timestampOperator.writeTimestamp(jobBatches.get(batchNumber).getTimestamp());
+                   LOGGER.info(((float)batchNumber + 1)/jobBatches.size() * 100 + "% complete");
+                   LOGGER.info("Save point has been reached. Save point batch timestamp is " + jobBatches.get(batchNumber).getTimestamp());
                 } else {
                    LOGGER.error("Exception occured during batch processing. Job has been terminated." +
-                           " Batch timestamp " + batch.getTimestamp() + "has not been recorded");
+                           " Batch timestamp " + jobBatches.get(batchNumber).getTimestamp() + "has not been recorded");
                    return;
                 }
             }
@@ -69,6 +72,19 @@ public class JobImpl<T> implements Job {
             JobExceptionHandler.reset();
             close();
         }
+    }
+
+    private void printJobBatchesInformation(List<JobBatch> jobBatches) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("*** Batches ***");
+            jobBatches.forEach(batch->LOGGER.info(batch.toString()));
+            LOGGER.info("*** End of Batches");
+        }
+    }
+
+    private AsyncReadWriteJob createBatchJob(JobBatch batch) {
+        return new AsyncReadWriteJob(createJobReader(batch.getChangedEntityIdentifiers()),
+                injector.getInstance(JobWriter.class));
     }
 
     private boolean noTimestampsFound(List<JobBatch> jobBatches) {
