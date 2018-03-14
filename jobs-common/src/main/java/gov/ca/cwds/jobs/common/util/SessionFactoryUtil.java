@@ -28,8 +28,10 @@ public final class SessionFactoryUtil {
         for (Map.Entry<String, String> property : dataSourceFactory.getProperties().entrySet()) {
             configuration.setProperty(property.getKey(), property.getValue());
         }
+
         configuration.setProperty("hibernate.current_session_context_class", "managed");
         configuration.setProperty("hibernate.c3p0.min_size", "1");
+
         ServiceRegistry serviceRegistry
                 = new StandardServiceRegistryBuilder()
                 .applySettings(configuration.getProperties()).build();

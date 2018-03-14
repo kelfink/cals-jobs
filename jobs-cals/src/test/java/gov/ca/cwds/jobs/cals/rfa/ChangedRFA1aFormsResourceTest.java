@@ -31,6 +31,8 @@ import static org.junit.Assert.assertTrue;
  * @author CWDS TPT-2
  */
 
+//TODO unignore once RFA1a job is ready
+@Ignore
 public class ChangedRFA1aFormsResourceTest extends BaseApiTest<TestCalsJobsConfiguration> {
 
   static final String PATH_CHANGED_RFA_1A_FORMS = "changed-" + RFA_1A_FORMS;

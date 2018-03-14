@@ -6,6 +6,8 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.ElasticSearchIndexerDao;
+import gov.ca.cwds.jobs.common.batch.JobBatchPreProcessor;
+import gov.ca.cwds.jobs.common.batch.JobBatchPreProcessorImpl;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.elastic.ElasticUtils;
 import gov.ca.cwds.jobs.common.job.timestamp.FilesystemTimestampOperator;
@@ -19,8 +21,14 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
 
     private JobOptions jobOptions;
 
-    public AbstractBaseJobModule(JobOptions jobOptions) {
-        this.jobOptions = jobOptions;
+    private Class<? extends JobBatchPreProcessor> jobBatchPreProcessorClass = JobBatchPreProcessorImpl.class;
+
+    public AbstractBaseJobModule(String[] args) {
+        this.jobOptions = JobOptions.parseCommandLine(args);
+    }
+
+    public void setJobBatchPreProcessorClass(Class<? extends JobBatchPreProcessor> jobBatchPreProcessorClass) {
+        this.jobBatchPreProcessorClass = jobBatchPreProcessorClass;
     }
 
     @Override
@@ -28,6 +36,8 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
         bind(JobOptions.class).toInstance(jobOptions);
         bindConstant().annotatedWith(LastRunDir.class).to(jobOptions.getLastRunLoc());
         bind(TimestampOperator.class).to(FilesystemTimestampOperator.class).asEagerSingleton();
+        bind(JobBatchPreProcessor.class).to(jobBatchPreProcessorClass);
+        bindConstant().annotatedWith(JobBatchSize.class).to(getJobsConfiguration(jobOptions).getBatchSize());
     }
 
     protected abstract BaseJobConfiguration getJobsConfiguration(JobOptions jobsOptions);
@@ -47,7 +57,6 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
     }
 
     @Provides
-    @Singleton
     @Inject
     public ElasticSearchIndexerDao provideElasticSearchDao(Client client,
                                                     BaseJobConfiguration configuration) {
@@ -58,5 +67,7 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
 
         return esIndexerDao;
     }
+
+
 
 }

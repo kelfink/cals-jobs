@@ -9,13 +9,11 @@ elasticsearch.xpack.password: ${ELASTIC_SEARCH_XPACK_PASSWORD:-changeme}
 
 calsnsDataSourceFactory:
   properties:
-      hibernate.current_session_context_class: thread
       hibernate.dialect: org.hibernate.dialect.PostgreSQL82Dialect
       hibernate.temp.use_jdbc_metadata_defaults: false
       hibernate.connection.driver_class: org.postgresql.Driver
       hibernate.connection.username: ${DB_NS_USER:-postgres_data}
       hibernate.connection.password: ${DB_NS_PASSWORD:-postgres_data}
-      hibernate.connection.url: ${DB_NS_JDBC_URL:-jdbc:postgresql://192.168.99.100:32770/?currentSchema=calsns}
-      hibernate.connection.pool_size: ${DB_NS_CP_MAX_SIZE:-8}
+      hibernate.connection.url: ${DB_NS_JDBC_URL:-jdbc:postgresql://192.168.99.100:32768/?currentSchema=calsns}
       hibernate.show_sql: false
 

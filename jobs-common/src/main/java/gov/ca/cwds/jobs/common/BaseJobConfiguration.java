@@ -24,6 +24,8 @@ public abstract class BaseJobConfiguration extends ElasticsearchConfiguration {
   private String documentMapping;
   private String indexSettings;
 
+  private int batchSize;
+
   private DataSourceFactory calsnsDataSourceFactory;
 
   public DataSourceFactory getCalsnsDataSourceFactory() {
@@ -48,6 +50,14 @@ public abstract class BaseJobConfiguration extends ElasticsearchConfiguration {
 
   public void setIndexSettings(String indexSettingsFilename) {
     this.indexSettings = getElasticSearchIndexSettings(indexSettingsFilename);
+  }
+
+  public int getBatchSize() {
+    return batchSize;
+  }
+
+  public void setBatchSize(int batchSize) {
+    this.batchSize = batchSize;
   }
 
   public static <T extends BaseJobConfiguration> T getJobsConfiguration(Class<T> clazz, String path) {
