@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.common;
 
+import gov.ca.cwds.jobs.common.elastic.ElasticsearchConfiguration;
 import gov.ca.cwds.jobs.common.exception.JobsException;
-import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 import io.dropwizard.configuration.ConfigurationSourceProvider;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
