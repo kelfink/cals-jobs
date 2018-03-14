@@ -45,7 +45,7 @@ public class JobBatchPreProcessorImpl implements JobBatchPreProcessor {
 
     private List<JobBatch> handleNotEmptyIdentifiers(List<ChangedEntityIdentifier> identifiers) {
         List<JobBatch> jobBatches = new ArrayList<>(identifiers.size() / batchSize);
-        TreeMap<ChronoLocalDateTime<?>, List<ChangedEntityIdentifier>> identifiersMap = identifiers.parallelStream().//).
+        TreeMap<ChronoLocalDateTime<?>, List<ChangedEntityIdentifier>> identifiersMap = identifiers.stream().//).
                 collect(sortedGroupingBy(ChangedEntityIdentifier::getTimestamp));
         OpenedJobBatchHolder openedJobBatchHolder = new OpenedJobBatchHolder(jobBatches);
         for (ChronoLocalDateTime timestamp: identifiersMap.keySet()) {
@@ -87,7 +87,7 @@ public class JobBatchPreProcessorImpl implements JobBatchPreProcessor {
     }
 
     private List<JobBatch> handleManyJobBatchesCase(LocalDateTime timestamp, List<List<ChangedEntityIdentifier>> partisionedIdentifiers) {
-        List<JobBatch> timeStampBatch = partisionedIdentifiers.parallelStream().
+        List<JobBatch> timeStampBatch = partisionedIdentifiers.stream().
                 map(list -> new JobBatch(list, null)).collect(Collectors.toList());
         if (timeStampBatch.size() > 1) {
             timeStampBatch.get(timeStampBatch.size() - 1).setTimestamp(timestamp);
@@ -99,7 +99,7 @@ public class JobBatchPreProcessorImpl implements JobBatchPreProcessor {
     }
 
     private List<JobBatch> handleEmptyIdentifiers(List<ChangedEntityIdentifier> changedEntityIdentifiers) {
-        return Lists.partition(changedEntityIdentifiers, batchSize).parallelStream().map(
+        return Lists.partition(changedEntityIdentifiers, batchSize).stream().map(
                 list -> new JobBatch(list, null)).collect(Collectors.toList());
     }
 

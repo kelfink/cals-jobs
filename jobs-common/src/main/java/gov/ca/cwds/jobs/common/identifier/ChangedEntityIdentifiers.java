@@ -40,7 +40,7 @@ public class ChangedEntityIdentifiers {
     }
 
     public Stream<ChangedEntityIdentifier> newStream() {
-        return StreamSupport.stream(this.newIterable().spliterator(), true);
+        return StreamSupport.stream(this.newIterable().spliterator(), false);
     }
 
     private void compact() {

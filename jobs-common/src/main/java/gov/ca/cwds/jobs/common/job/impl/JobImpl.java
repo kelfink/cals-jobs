@@ -45,7 +45,7 @@ public class JobImpl<T> implements Job {
     @Override
     public void run() {
         try {
-            Stream<ChangedEntityIdentifier> identifiers = changedIdentifiersProvider.get().parallel();
+            Stream<ChangedEntityIdentifier> identifiers = changedIdentifiersProvider.get();
             List<JobBatch> jobBatches = jobBatchPreProcessor.buildJobBatches(identifiers);
             for (JobBatch batch : jobBatches) {
                 new AsyncReadWriteJob(createJobReader(batch.getChangedEntityIdentifiers()), jobWriter).run();

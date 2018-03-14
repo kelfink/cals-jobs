@@ -16,8 +16,7 @@ public abstract class JobRunner {
 
   public static void run(AbstractBaseJobModule mainModule) {
     LOGGER.info("Job has been started");
-    Injector injector = Guice.createInjector(mainModule);
-    injector.getInstance(Job.class).run();
+    Guice.createInjector(mainModule).getInstance(Job.class).run();
     LOGGER.info("Job has been finished");
   }
 
