@@ -46,7 +46,7 @@ public class ChangedFacilityResource {
     LocalDateTime dateAfter = LocalDateTime.parse(stringDateAfter, DATE_TIME_FORMATTER);
     Stream<ChangedEntityIdentifier> identifiers = changedFacilityIdentifiersService.getIdentifiersForIncrementalLoad(dateAfter);
     List<ChangedFacilityDTO> changedFacilityDTOList =
-            changedFacilityService.loadEntities(identifiers).collect(Collectors.toList());
+            changedFacilityService.loadEntities(identifiers.collect(Collectors.toList())).collect(Collectors.toList());
     return new CollectionDTO<>(changedFacilityDTOList);
   }
 
@@ -54,7 +54,8 @@ public class ChangedFacilityResource {
   @Path("/" + PATH_INITIAL)
   public CollectionDTO<ChangedFacilityDTO> initialLLoadedFacilities() throws ParseException {
     Stream<ChangedEntityIdentifier> identifiers = changedFacilityIdentifiersService.getIdentifiersForInitialLoad();
-    List<ChangedFacilityDTO> changedFacilityDTOList = changedFacilityService.loadEntities(identifiers).collect(Collectors.toList());
+    List<ChangedFacilityDTO> changedFacilityDTOList =
+            changedFacilityService.loadEntities(identifiers.collect(Collectors.toList())).collect(Collectors.toList());
     return new CollectionDTO<>(changedFacilityDTOList);
   }
 

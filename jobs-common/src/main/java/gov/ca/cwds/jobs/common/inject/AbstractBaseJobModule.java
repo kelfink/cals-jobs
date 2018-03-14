@@ -37,6 +37,7 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
         bindConstant().annotatedWith(LastRunDir.class).to(jobOptions.getLastRunLoc());
         bind(TimestampOperator.class).to(FilesystemTimestampOperator.class).asEagerSingleton();
         bind(JobBatchPreProcessor.class).to(jobBatchPreProcessorClass);
+        bindConstant().annotatedWith(JobBatchSize.class).to(getJobsConfiguration(jobOptions).getBatchSize());
     }
 
     protected abstract BaseJobConfiguration getJobsConfiguration(JobOptions jobsOptions);

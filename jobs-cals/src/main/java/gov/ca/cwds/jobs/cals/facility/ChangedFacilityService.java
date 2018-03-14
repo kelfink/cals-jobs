@@ -12,6 +12,7 @@ import io.dropwizard.hibernate.UnitOfWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
@@ -27,8 +28,8 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
   private FacilityParameterObjectBuilder facilityParameterObjectBuilder;
 
   @Override
-  public Stream<ChangedFacilityDTO> loadEntities(Stream<ChangedEntityIdentifier> identifiers) {
-    return identifiers.map(this::findFacilityById);
+  public Stream<ChangedFacilityDTO> loadEntities(List<ChangedEntityIdentifier> identifiers) {
+    return identifiers.stream().map(this::findFacilityById);
   }
 
 

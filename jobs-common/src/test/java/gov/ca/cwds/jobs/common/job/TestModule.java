@@ -34,7 +34,9 @@ public class TestModule extends AbstractBaseJobModule {
 
     @Override
     protected BaseJobConfiguration getJobsConfiguration(JobOptions jobsOptions) {
-        return new TestJobConfiguration();
+        TestJobConfiguration testJobConfiguration = new TestJobConfiguration();
+        testJobConfiguration.setBatchSize(1);
+        return testJobConfiguration;
     }
 
     @Override

@@ -45,13 +45,13 @@ public class JobImpl<T> implements Job {
     @Override
     public void run() {
         try {
-            Stream<ChangedEntityIdentifier> identifiers = changedIdentifiersProvider.get();
+            Stream<ChangedEntityIdentifier> identifiers = changedIdentifiersProvider.get().parallel();
             List<JobBatch> jobBatches = jobBatchPreProcessor.buildJobBatches(identifiers);
             for (JobBatch batch : jobBatches) {
                 new AsyncReadWriteJob(createJobReader(batch.getChangedEntityIdentifiers()), jobWriter).run();
                 if (!JobExceptionHandler.isExceptionHappened()) {
                    timestampOperator.writeTimestamp(batch.getTimestamp());
-                   LOGGER.info("Save point has been reached. Batch timestamp is " + batch.getTimestamp());
+                   LOGGER.info("Save point has been reached. Save point batch timestamp is " + batch.getTimestamp());
                 } else {
                    LOGGER.error("Exception occured during batch processing. Job has been terminated." +
                            " Batch timestamp " + batch.getTimestamp() + "has not been recorded");
@@ -75,7 +75,7 @@ public class JobImpl<T> implements Job {
         return jobBatches.stream().filter(batch -> batch.getTimestamp() != null).count() == 0;
     }
 
-    private JobReader<T> createJobReader(Stream<ChangedEntityIdentifier> identifiers) {
+    private JobReader<T> createJobReader(List<ChangedEntityIdentifier> identifiers) {
         Iterator<T> entitiesIterator = changedEntitiesService.loadEntities(identifiers).iterator();
         return () -> entitiesIterator.hasNext() ? entitiesIterator.next() : null;
     }

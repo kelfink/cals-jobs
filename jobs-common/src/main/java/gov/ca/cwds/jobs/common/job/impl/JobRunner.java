@@ -15,8 +15,10 @@ public abstract class JobRunner {
   private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
 
   public static void run(AbstractBaseJobModule mainModule) {
+    LOGGER.info("Job has been started");
     Injector injector = Guice.createInjector(mainModule);
     injector.getInstance(Job.class).run();
+    LOGGER.info("Job has been finished");
   }
 
 }

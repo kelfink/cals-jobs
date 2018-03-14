@@ -1,10 +1,11 @@
 package gov.ca.cwds.jobs.common.job.timestamp;
 
-import gov.ca.cwds.jobs.common.batch.JobBatch;
-import gov.ca.cwds.jobs.common.batch.JobBatchPreProcessor;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.job.TestModule;
 import gov.ca.cwds.jobs.common.job.impl.JobRunner;
+import gov.ca.cwds.jobs.common.job.preprocessor.BatchSavePointTestPreprocessor;
+import gov.ca.cwds.jobs.common.job.preprocessor.EmptyTimestampTestPreProcessor;
+import gov.ca.cwds.jobs.common.job.preprocessor.SingleBatchPreprocessor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,11 +14,13 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static gov.ca.cwds.jobs.common.job.preprocessor.BatchSavePointTestPreprocessor.BROKEN_ENTITY;
+import static gov.ca.cwds.jobs.common.job.preprocessor.BatchSavePointTestPreprocessor.SECOND_TIMESTAMP;
 import static gov.ca.cwds.jobs.common.job.timestamp.LastRunDirHelper.getLastRunDir;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -66,6 +69,26 @@ public class JobTimestampTest {
     }
 
     @Test
+    public void last_successfull_batch_save_point_test() {
+        assertFalse(timestampOperator.timeStampExists());
+        TestModule testModule = new TestModule(getModuleArgs());
+        testModule.setJobBatchPreProcessorClass(BatchSavePointTestPreprocessor.class);
+        testModule.setChangedEntitiesService(identifiers -> {
+            Optional<ChangedEntityIdentifier> brokenEntityIdentifier =
+                    identifiers.stream().filter(o -> o == BROKEN_ENTITY).findFirst();
+            return brokenEntityIdentifier.isPresent() ? Stream.of(new Object()): Stream.empty();
+        });
+        testModule.setJobWriter(items -> {
+            if (items.size() > 0) {
+                throw new IllegalStateException("Broken batch");
+            }
+        });
+        JobRunner.run(testModule);
+        assertTrue(timestampOperator.timeStampExists());
+        assertEquals(SECOND_TIMESTAMP, timestampOperator.readTimestamp());
+    }
+
+    @Test
     public void test_all_timestamps_null() {
         assertFalse(timestampOperator.timeStampExists());
         TestModule testModule = new TestModule(getModuleArgs());
@@ -78,6 +101,7 @@ public class JobTimestampTest {
 
     private void runCrashingJob() {
         TestModule testModule = new TestModule(getModuleArgs());
+        testModule.setJobBatchPreProcessorClass(SingleBatchPreprocessor.class);
         testModule.setJobWriter(items -> {
             if (1 == 1) {
                 throw new IllegalStateException();
@@ -90,15 +114,5 @@ public class JobTimestampTest {
         String configFilePath = Paths.get("src", "test", "resources", "config.yaml").normalize().toAbsolutePath().toString();
         return new String[]{"-c", configFilePath, "-l", getLastRunDir().toString()};
     }
-
-    private static class EmptyTimestampTestPreProcessor implements JobBatchPreProcessor {
-
-        @Override
-        public List<JobBatch> buildJobBatches(Stream<ChangedEntityIdentifier> identifiers) {
-            return Collections.singletonList(new JobBatch(identifiers, null));
-        }
-    }
-
-
 
 }
