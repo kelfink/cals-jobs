@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -47,26 +48,11 @@ public class JobImpl<T> implements Job {
     @Override
     public void run() {
         try {
-            Stream<ChangedEntityIdentifier> identifiers = changedIdentifiersProvider.get();
-            List<JobBatch> jobBatches = jobBatchPreProcessor.buildJobBatches(identifiers);
-            printJobBatchesInformation(jobBatches);
-            for (int batchNumber = 0; batchNumber < jobBatches.size(); batchNumber ++) {
-                createBatchJob(jobBatches.get(batchNumber)).run();
-                if (!JobExceptionHandler.isExceptionHappened()) {
-                   timestampOperator.writeTimestamp(jobBatches.get(batchNumber).getTimestamp());
-                   LOGGER.info(getCompletionPercent(jobBatches, batchNumber) + "% complete");
-                   LOGGER.info("Save point has been reached. Save point batch timestamp is " + jobBatches.get(batchNumber).getTimestamp());
-                } else {
-                   LOGGER.error("Exception occured during batch processing. Job has been terminated." +
-                           " Batch timestamp " + jobBatches.get(batchNumber).getTimestamp() + "has not been recorded");
-                   return;
-                }
-            }
-            if (noTimestampsFound(jobBatches)) {
-                LOGGER.info("No timestamp found for any batch. Current timestamp has been recorded");
-                timestampOperator.writeTimestamp(LocalDateTime.now());
-            };
-            LOGGER.info(String.format("Added %s entities to ES bulk uploader", ConsumerCounter.getCounter()));
+            processBatches(splitEntitiesByBatches());
+            LocalDateTime now = LocalDateTime.now();
+            timestampOperator.writeTimestamp(now);
+            LOGGER.info("Updating job timestamp to the current moment {}", now);
+            LOGGER.info(String.format("Added %s entities to the Elastic Search index", ConsumerCounter.getCounter()));
         } catch (RuntimeException e) {
             LOGGER.error("ERROR: ", e.getMessage(), e);
         } finally {
@@ -75,25 +61,61 @@ public class JobImpl<T> implements Job {
         }
     }
 
+    private void processBatches(List<JobBatch> jobBatches) {
+        for (int batchNumber = 0; batchNumber < jobBatches.size(); batchNumber ++) {
+            createBatchJob(jobBatches.get(batchNumber)).run();
+            if (!JobExceptionHandler.isExceptionHappened()) {
+               timestampOperator.writeTimestamp(jobBatches.get(batchNumber).getTimestamp());
+               LOGGER.info(getCompletionPercent(jobBatches, batchNumber) + "% complete");
+               LOGGER.info("Save point has been reached. Save point batch timestamp is " + jobBatches.get(batchNumber).getTimestamp());
+            } else {
+               LOGGER.error("Exception occured during batch processing. Job has been terminated." +
+                       " Batch timestamp " + jobBatches.get(batchNumber).getTimestamp() + "has not been recorded");
+               throw new RuntimeException("Exception occured during batch processing");
+            }
+        }
+    }
+
+    private List<JobBatch> splitEntitiesByBatches() {
+        LocalDateTime startTime = LocalDateTime.now();
+        Stream<ChangedEntityIdentifier> identifiers = changedIdentifiersProvider.get();
+        List<JobBatch> jobBatches = jobBatchPreProcessor.buildJobBatches(identifiers);
+        printJobBatchesInformation(jobBatches, startTime);
+        return jobBatches;
+    }
+
     private String getCompletionPercent(List<JobBatch> jobBatches, float batchNumber) {
         return new DecimalFormat("#0.00").format((batchNumber + 1)/jobBatches.size() * 100);
     }
 
-    private void printJobBatchesInformation(List<JobBatch> jobBatches) {
-        if (LOGGER.isInfoEnabled()) {
+    private void printJobBatchesInformation(List<JobBatch> jobBatches, LocalDateTime startTime) {
+        if (LOGGER.isInfoEnabled() && !jobBatches.isEmpty()) {
             LOGGER.info("*** Batches ***");
             jobBatches.forEach(batch->LOGGER.info(batch.toString()));
             LOGGER.info("*** End of Batches");
+            printTimeSpent("batches distribution", startTime);
+        }
+    }
+
+    private void printTimeSpent(String workDescription, LocalDateTime startTime) {
+        long hours = startTime.until(LocalDateTime.now(), ChronoUnit.HOURS);
+        long minutes = startTime.until(LocalDateTime.now(), ChronoUnit.MINUTES);
+        long seconds = startTime.until(LocalDateTime.now(), ChronoUnit.SECONDS);
+        long milliseconds = startTime.until(LocalDateTime.now(), ChronoUnit.MILLIS);
+        if (hours > 0) {
+            LOGGER.info(workDescription + " {} hr", hours);
+        } else if (minutes > 0) {
+            LOGGER.info(workDescription + " {} min", minutes);
+        } else if (seconds > 0) {
+            LOGGER.info(workDescription + " {} sec", seconds);
+        } else {
+            LOGGER.info(workDescription + " {} ms", milliseconds);
         }
     }
 
     private AsyncReadWriteJob createBatchJob(JobBatch batch) {
         return new AsyncReadWriteJob(createJobReader(batch.getChangedEntityIdentifiers()),
                 injector.getInstance(JobWriter.class));
-    }
-
-    private boolean noTimestampsFound(List<JobBatch> jobBatches) {
-        return jobBatches.stream().filter(batch -> batch.getTimestamp() != null).count() == 0;
     }
 
     private JobReader<T> createJobReader(List<ChangedEntityIdentifier> identifiers) {

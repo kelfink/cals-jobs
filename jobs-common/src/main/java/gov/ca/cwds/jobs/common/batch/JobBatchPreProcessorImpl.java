@@ -45,7 +45,7 @@ public class JobBatchPreProcessorImpl implements JobBatchPreProcessor {
 
     private List<JobBatch> handleNotEmptyIdentifiers(List<ChangedEntityIdentifier> identifiers) {
         List<JobBatch> jobBatches = new ArrayList<>(identifiers.size() / batchSize);
-        TreeMap<ChronoLocalDateTime<?>, List<ChangedEntityIdentifier>> identifiersMap = identifiers.stream().//).
+        TreeMap<ChronoLocalDateTime<?>, List<ChangedEntityIdentifier>> identifiersMap = identifiers.stream().
                 collect(sortedGroupingBy(ChangedEntityIdentifier::getTimestamp));
         OpenedJobBatchHolder openedJobBatchHolder = new OpenedJobBatchHolder(jobBatches);
         for (ChronoLocalDateTime timestamp: identifiersMap.keySet()) {
