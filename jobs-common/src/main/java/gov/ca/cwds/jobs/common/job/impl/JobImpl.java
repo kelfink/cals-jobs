@@ -16,6 +16,7 @@ import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +54,7 @@ public class JobImpl<T> implements Job {
                 createBatchJob(jobBatches.get(batchNumber)).run();
                 if (!JobExceptionHandler.isExceptionHappened()) {
                    timestampOperator.writeTimestamp(jobBatches.get(batchNumber).getTimestamp());
-                   LOGGER.info(((float)batchNumber + 1)/jobBatches.size() * 100 + "% complete");
+                   LOGGER.info(getCompletionPercent(jobBatches, batchNumber) + "% complete");
                    LOGGER.info("Save point has been reached. Save point batch timestamp is " + jobBatches.get(batchNumber).getTimestamp());
                 } else {
                    LOGGER.error("Exception occured during batch processing. Job has been terminated." +
@@ -72,6 +73,10 @@ public class JobImpl<T> implements Job {
             JobExceptionHandler.reset();
             close();
         }
+    }
+
+    private String getCompletionPercent(List<JobBatch> jobBatches, float batchNumber) {
+        return new DecimalFormat("#0.00").format((batchNumber + 1)/jobBatches.size() * 100);
     }
 
     private void printJobBatchesInformation(List<JobBatch> jobBatches) {
