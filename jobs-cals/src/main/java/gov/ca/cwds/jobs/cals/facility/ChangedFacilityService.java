@@ -44,15 +44,8 @@ public class ChangedFacilityService extends FacilityService implements
   @Loggable(Loggable.DEBUG)
   protected ChangedFacilityDTO findFacilityById(ChangedEntityIdentifier identifier) {
     try {
-    //
       FacilityDTO facilityDTO = findByParameterObject(
           createFacilityParameterObject(identifier.getId()));
-      List<FacilityChildDTO> childrenList = findFacilityChildredByFacilityId(identifier.getId());
-     if (LOG.isInfoEnabled() && !childrenList.isEmpty()) {
-       LOG.info("Found {} children for facility with ID: {}", childrenList.size(), facilityDTO.getId());
-       LOG.info(Arrays.toString(childrenList.toArray()));
-     }
-     //
       if (facilityDTO == null) {
         LOG.error("Can't get facility by id " + identifier.getId());
         throw new IllegalStateException("FacilityDTO must not be null!!!");
