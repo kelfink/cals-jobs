@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.common.job;
 
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
-import gov.ca.cwds.jobs.common.batch.JobBatchPreProcessorImpl;
+import gov.ca.cwds.jobs.common.batch.BatchPreProcessorImpl;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import org.junit.Test;
 
@@ -21,7 +21,7 @@ public class BatchPreprocessorTest {
 
     @Test
     public void test_batch_size_1 () {
-        JobBatchPreProcessorImpl jobBatchPreProcessor = new JobBatchPreProcessorImpl();
+        BatchPreProcessorImpl jobBatchPreProcessor = new BatchPreProcessorImpl();
         int batchSize = 1;
         jobBatchPreProcessor.setBatchSize(batchSize);
         ChangedEntityIdentifier changedEntityIdentifier = new ChangedEntityIdentifier("testId", RecordChangeOperation.I,
@@ -35,7 +35,7 @@ public class BatchPreprocessorTest {
 
     @Test
     public void test_empty_dates_and_less_items_then_batch_number () {
-        JobBatchPreProcessorImpl jobBatchPreProcessor = new JobBatchPreProcessorImpl();
+        BatchPreProcessorImpl jobBatchPreProcessor = new BatchPreProcessorImpl();
         int batchSize = 5;
         jobBatchPreProcessor.setBatchSize(batchSize);
         Stream<ChangedEntityIdentifier> identifiers = Stream.of(
@@ -50,7 +50,7 @@ public class BatchPreprocessorTest {
 
     @Test
     public void test_empty_dates_and_exact_count_as_then_batch_number() {
-        JobBatchPreProcessorImpl jobBatchPreProcessor = new JobBatchPreProcessorImpl();
+        BatchPreProcessorImpl jobBatchPreProcessor = new BatchPreProcessorImpl();
         final int batchSize = 2;
         jobBatchPreProcessor.setBatchSize(batchSize);
         Stream<ChangedEntityIdentifier> identifiers = Stream.of(
@@ -65,7 +65,7 @@ public class BatchPreprocessorTest {
 
     @Test
     public void test_empty_dates_and_items_count_more_then_batch_number() {
-        JobBatchPreProcessorImpl jobBatchPreProcessor = new JobBatchPreProcessorImpl();
+        BatchPreProcessorImpl jobBatchPreProcessor = new BatchPreProcessorImpl();
         int batchSize = 2;
         jobBatchPreProcessor.setBatchSize(batchSize);
         Stream<ChangedEntityIdentifier> identifiers = Stream.of(
@@ -83,7 +83,7 @@ public class BatchPreprocessorTest {
 
     @Test
     public void test_empty_dates_less_then_batch_number_and_some_not_empty_dates_more_then_batch_number() {
-        JobBatchPreProcessorImpl jobBatchPreProcessor = new JobBatchPreProcessorImpl();
+        BatchPreProcessorImpl jobBatchPreProcessor = new BatchPreProcessorImpl();
         int batchSize = 3;
         jobBatchPreProcessor.setBatchSize(batchSize);
         ChangedEntityIdentifier changedEntityIdentifier1 = new ChangedEntityIdentifier("testId1", RecordChangeOperation.I,
@@ -124,7 +124,7 @@ public class BatchPreprocessorTest {
 
     @Test
     public void test_not_empty_dates_less_then_batch_number() {
-        JobBatchPreProcessorImpl jobBatchPreProcessor = new JobBatchPreProcessorImpl();
+        BatchPreProcessorImpl jobBatchPreProcessor = new BatchPreProcessorImpl();
         int batchSize = 3;
         jobBatchPreProcessor.setBatchSize(batchSize);
         ChangedEntityIdentifier changedEntityIdentifier1 = new ChangedEntityIdentifier("testId1", RecordChangeOperation.I,
@@ -142,7 +142,7 @@ public class BatchPreprocessorTest {
 
     @Test
     public void complexBatchPrepossessingTest() {
-        JobBatchPreProcessorImpl jobBatchPreProcessor = new JobBatchPreProcessorImpl();
+        BatchPreProcessorImpl jobBatchPreProcessor = new BatchPreProcessorImpl();
         int batchSize = 2;
 
         jobBatchPreProcessor.setBatchSize(batchSize);

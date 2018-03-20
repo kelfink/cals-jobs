@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
 import gov.ca.cwds.cals.Constants;
 import gov.ca.cwds.cals.inject.DataAccessServicesModule;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
@@ -13,19 +14,21 @@ import gov.ca.cwds.cals.inject.LisSessionFactory;
 import gov.ca.cwds.cals.inject.MappingModule;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.cals.CalsElasticJobWriter;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
+import gov.ca.cwds.jobs.cals.facility.FacilityBatchProcessor;
 import gov.ca.cwds.jobs.cals.facility.FacilityJob;
 import gov.ca.cwds.jobs.cals.facility.FacilityJobConfiguration;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.ElasticSearchIndexerDao;
 import gov.ca.cwds.jobs.common.config.JobOptions;
+import gov.ca.cwds.jobs.common.elastic.ElasticWriter;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
-import gov.ca.cwds.jobs.common.job.ChangedEntitiesService;
+import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 import gov.ca.cwds.jobs.common.job.Job;
-import gov.ca.cwds.jobs.common.job.JobWriter;
+import gov.ca.cwds.jobs.common.job.BulkWriter;
+import gov.ca.cwds.jobs.common.job.impl.BatchProcessor;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.hibernate.SessionFactory;
@@ -38,17 +41,24 @@ import org.slf4j.LoggerFactory;
 public class FacilityJobModule extends AbstractBaseJobModule {
 
     private static final Logger LOG = LoggerFactory.getLogger(FacilityJobModule.class);
+    private Class<? extends BulkWriter<ChangedFacilityDTO>> facilityElasticWriterClass;
 
     public FacilityJobModule(String[] args) {
         super(args);
+        this.facilityElasticWriterClass = FacilityElasticWriter.class;
+    }
+
+    public void setFacilityElasticWriterClass(Class<? extends BulkWriter<ChangedFacilityDTO>> facilityElasticWriterClass) {
+        this.facilityElasticWriterClass = facilityElasticWriterClass;
     }
 
     @Override
     protected void configure() {
         super.configure();
-        bind(JobWriter.class).to(FacilityElasticJobWriter.class);
+        bind(new TypeLiteral<BulkWriter<ChangedFacilityDTO>>() {}).to(facilityElasticWriterClass);
+        bind(new TypeLiteral<BatchProcessor<ChangedFacilityDTO>>() {}).to(FacilityBatchProcessor.class);
         bind(ChangedIdentifiersService.class).toProvider(ChangedFacilityIdentifiersProvider.class);
-        bind(ChangedEntitiesService.class).toProvider(ChangedFacilityServiceProvider.class);
+        bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {}).toProvider(ChangedFacilityServiceProvider.class);
         bind(FacilityParameterObjectBuilder.class);
         bind(Job.class).to(FacilityJob.class);
         install(new MappingModule());
@@ -80,16 +90,10 @@ public class FacilityJobModule extends AbstractBaseJobModule {
         return facilityJobConfiguration;
     }
 
-    static class FacilityElasticJobWriter extends CalsElasticJobWriter<ChangedFacilityDTO> {
+    static class FacilityElasticWriter extends ElasticWriter<ChangedFacilityDTO> {
 
-        /**
-         * Constructor.
-         *
-         * @param elasticsearchDao ES DAO
-         * @param objectMapper Jackson object mapper
-         */
         @Inject
-        FacilityElasticJobWriter(ElasticSearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
+        FacilityElasticWriter(ElasticSearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
             super(elasticsearchDao, objectMapper);
         }
     }

@@ -9,7 +9,7 @@ import java.util.stream.Stream;
  * Created by Alexander Serbin on 3/7/2018.
  */
 @FunctionalInterface
-public interface JobBatchPreProcessor {
+public interface BatchPreProcessor {
 
     List<JobBatch> buildJobBatches(Stream<ChangedEntityIdentifier> identifiers);
 

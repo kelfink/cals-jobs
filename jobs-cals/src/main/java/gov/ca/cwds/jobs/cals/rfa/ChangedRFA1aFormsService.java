@@ -4,15 +4,12 @@ import com.google.inject.Inject;
 import gov.ca.cwds.cals.persistence.dao.calsns.RFA1aFormsDao;
 import gov.ca.cwds.cals.service.mapper.RFA1aFormMapper;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.job.ChangedEntitiesService;
-
-import java.util.List;
-import java.util.stream.Stream;
+import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 
 /**
  * Created by Alexander Serbin on 1/30/2018.
  */
-public class ChangedRFA1aFormsService implements ChangedEntitiesService<ChangedRFA1aFormDTO> {
+public class ChangedRFA1aFormsService implements ChangedEntityService<ChangedRFA1aFormDTO> {
 
     @Inject
     private RFA1aFormsDao dao;
@@ -21,7 +18,7 @@ public class ChangedRFA1aFormsService implements ChangedEntitiesService<ChangedR
     private RFA1aFormMapper rfa1aFormMapper;
 
     @Override
-    public Stream<ChangedRFA1aFormDTO> loadEntities(List<ChangedEntityIdentifier> identifiers) {
+    public ChangedRFA1aFormDTO loadEntity(ChangedEntityIdentifier identifier) {
         return null;
     }
 

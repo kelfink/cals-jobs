@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
-public class JobBatchPreProcessorImpl implements JobBatchPreProcessor {
+public class BatchPreProcessorImpl implements BatchPreProcessor {
 
     @Inject
     @JobBatchSize
@@ -78,17 +78,17 @@ public class JobBatchPreProcessorImpl implements JobBatchPreProcessor {
                    openedJobBatchHolder.encloseJobBatch();
                 } else {
                     openedJobBatchHolder.encloseJobBatch();
-                    openedJobBatchHolder.push(new JobBatch(identifiers, null));
+                    openedJobBatchHolder.push(new JobBatch(identifiers));
                 }
             } else {
-                openedJobBatchHolder.push(new JobBatch(identifiers, null));
+                openedJobBatchHolder.push(new JobBatch(identifiers));
             }
         }
     }
 
     private List<JobBatch> handleManyJobBatchesCase(LocalDateTime timestamp, List<List<ChangedEntityIdentifier>> partisionedIdentifiers) {
         List<JobBatch> timeStampBatch = partisionedIdentifiers.stream().
-                map(list -> new JobBatch(list, null)).collect(Collectors.toList());
+                map(list -> new JobBatch(list)).collect(Collectors.toList());
         if (timeStampBatch.size() > 1) {
             timeStampBatch.get(timeStampBatch.size() - 1).setTimestamp(timestamp);
         } else {
@@ -100,7 +100,7 @@ public class JobBatchPreProcessorImpl implements JobBatchPreProcessor {
 
     private List<JobBatch> handleEmptyIdentifiers(List<ChangedEntityIdentifier> changedEntityIdentifiers) {
         return Lists.partition(changedEntityIdentifiers, batchSize).stream().map(
-                list -> new JobBatch(list, null)).collect(Collectors.toList());
+                list -> new JobBatch(list)).collect(Collectors.toList());
     }
 
     private Stream<ChangedEntityIdentifier> getSortedStream(Stream<ChangedEntityIdentifier> identifiers) {

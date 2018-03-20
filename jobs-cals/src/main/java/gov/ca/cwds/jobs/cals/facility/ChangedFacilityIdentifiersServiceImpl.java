@@ -1,7 +1,6 @@
 package gov.ca.cwds.jobs.cals.facility;
 
 import com.google.inject.Inject;
-import com.jcabi.aspects.Loggable;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.recordchange.CwsRecordChange;
 import gov.ca.cwds.jobs.cals.facility.recordchange.LisRecordChange;
@@ -46,7 +45,6 @@ public class ChangedFacilityIdentifiersServiceImpl implements ChangedIdentifiers
                 getLisIncrementalLoadIdentifiers(timestamp));
     }
 
-    @Loggable(Loggable.DEBUG)
     @UnitOfWork(CMS)
     protected ChangedFacilitiesIdentifiers getCwsCmsInitialLoadIdentifiers() {
         ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(DataSourceName.CWS);
@@ -55,7 +53,6 @@ public class ChangedFacilityIdentifiersServiceImpl implements ChangedIdentifiers
         return changedEntityIdentifiers;
     }
 
-    @Loggable(Loggable.DEBUG)
     @UnitOfWork(CMS)
     protected ChangedFacilitiesIdentifiers getCwsCmsIncrementalLoadIdentifiers(LocalDateTime dateAfter) {
         ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(DataSourceName.CWS);
@@ -64,7 +61,6 @@ public class ChangedFacilityIdentifiersServiceImpl implements ChangedIdentifiers
         return changedEntityIdentifiers;
     }
 
-    @Loggable(Loggable.DEBUG)
     @UnitOfWork(LIS)
     protected ChangedFacilitiesIdentifiers getLisInitialLoadIdentifiers() {
         ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(DataSourceName.LIS);
@@ -73,7 +69,6 @@ public class ChangedFacilityIdentifiersServiceImpl implements ChangedIdentifiers
         return changedEntityIdentifiers;
     }
 
-    @Loggable(Loggable.DEBUG)
     @UnitOfWork(LIS)
     protected ChangedFacilitiesIdentifiers getLisIncrementalLoadIdentifiers(LocalDateTime timestampAfter) {
         ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(DataSourceName.LIS);

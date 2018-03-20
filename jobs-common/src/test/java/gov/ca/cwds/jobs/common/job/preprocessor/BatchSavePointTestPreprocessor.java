@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.common.job.preprocessor;
 
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
-import gov.ca.cwds.jobs.common.batch.JobBatchPreProcessor;
+import gov.ca.cwds.jobs.common.batch.BatchPreProcessor;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 
 import java.time.LocalDateTime;
@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 /**
  * Created by Alexander Serbin on 3/7/2018.
  */
-public class BatchSavePointTestPreprocessor implements JobBatchPreProcessor {
+public class BatchSavePointTestPreprocessor implements BatchPreProcessor {
 
     private static LocalDateTime FIRST_TIMESTAMP = null;
     public static LocalDateTime SECOND_TIMESTAMP = LocalDateTime.of(2013, 1, 1, 1, 1, 1);
