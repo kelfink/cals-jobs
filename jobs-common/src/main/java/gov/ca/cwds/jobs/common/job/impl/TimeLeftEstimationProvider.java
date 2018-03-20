@@ -35,7 +35,8 @@ public class TimeLeftEstimationProvider {
 
     private long getEstimatedTimePerItem() {
         long totalAlreadySpent = jobStartTime.until(LocalDateTime.now(), ChronoUnit.MILLIS);
-        return totalAlreadySpent / (calculateTotalItemsProcessed());
+        int totalItemsProcessed = calculateTotalItemsProcessed();
+        return totalItemsProcessed != 0 ? totalAlreadySpent / totalItemsProcessed: 0;
     }
 
     private int calculateTotalItemsProcessed() {
