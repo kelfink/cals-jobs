@@ -13,7 +13,7 @@ import gov.ca.cwds.data.legacy.cms.entity.AddressPhoneticName;
 import gov.ca.cwds.data.legacy.cms.entity.AddressPhoneticNamePK;
 import gov.ca.cwds.data.legacy.cms.entity.BackgroundCheck;
 import gov.ca.cwds.data.legacy.cms.entity.Client;
-import gov.ca.cwds.data.legacy.cms.entity.ClientScpEthnicity;
+import gov.ca.cwds.data.legacy.cms.entity.ClientOtherEthnicity;
 import gov.ca.cwds.data.legacy.cms.entity.CountyLicenseCase;
 import gov.ca.cwds.data.legacy.cms.entity.CountyOwnership;
 import gov.ca.cwds.data.legacy.cms.entity.CountyOwnershipPK;
@@ -23,11 +23,13 @@ import gov.ca.cwds.data.legacy.cms.entity.ExternalInterfacePK;
 import gov.ca.cwds.data.legacy.cms.entity.LicensingVisit;
 import gov.ca.cwds.data.legacy.cms.entity.OtherAdultsInPlacementHome;
 import gov.ca.cwds.data.legacy.cms.entity.OtherChildrenInPlacementHome;
+import gov.ca.cwds.data.legacy.cms.entity.OtherEthnicity;
 import gov.ca.cwds.data.legacy.cms.entity.OtherPeopleScpRelationship;
 import gov.ca.cwds.data.legacy.cms.entity.OutOfHomePlacement;
 import gov.ca.cwds.data.legacy.cms.entity.OutOfStateCheck;
 import gov.ca.cwds.data.legacy.cms.entity.PhoneContactDetail;
 import gov.ca.cwds.data.legacy.cms.entity.PlacementEpisode;
+import gov.ca.cwds.data.legacy.cms.entity.PlacementFacilityTypeHistory;
 import gov.ca.cwds.data.legacy.cms.entity.PlacementHome;
 import gov.ca.cwds.data.legacy.cms.entity.PlacementHomeInformation;
 import gov.ca.cwds.data.legacy.cms.entity.PlacementHomeInformationPK;
@@ -71,11 +73,12 @@ public class CwsCmsRsDataAccessModule extends AbstractModule {
           VisitType.class,
           State.class,
           LicenseStatus.class,
-
+          PlacementFacilityTypeHistory.class,
           AddressPhoneticName.class,
           AddressPhoneticNamePK.class,
           BackgroundCheck.class,
-          ClientScpEthnicity.class,
+          OtherEthnicity.class,
+          ClientOtherEthnicity.class,
           CountyOwnership.class,
           CountyOwnershipPK.class,
           EmergencyContactDetail.class,
