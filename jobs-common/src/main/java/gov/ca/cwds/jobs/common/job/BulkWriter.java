@@ -7,7 +7,9 @@ import java.util.List;
  * @param <T> type to write
  */
 @FunctionalInterface
-public interface JobWriter<T> extends JobComponent {
+public interface BulkWriter<T> {
 
   void write(List<T> items);
+
+  default void destroy() {};
 }

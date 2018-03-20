@@ -1,14 +1,15 @@
 package gov.ca.cwds.jobs.common.job;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
-import gov.ca.cwds.jobs.common.batch.JobBatchPreProcessor;
-import gov.ca.cwds.jobs.common.batch.JobBatchPreProcessorImpl;
+import gov.ca.cwds.jobs.common.batch.BatchPreProcessor;
+import gov.ca.cwds.jobs.common.batch.BatchPreProcessorImpl;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
+import gov.ca.cwds.jobs.common.job.impl.BatchProcessor;
 import gov.ca.cwds.jobs.common.job.impl.JobImpl;
-
-import java.util.stream.Stream;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
@@ -16,9 +17,9 @@ import java.util.stream.Stream;
 public class TestModule extends AbstractBaseJobModule {
 
     private ChangedIdentifiersService changedIdentifiersService;
-    private ChangedEntitiesService changedEntitiesService;
-    private Class<? extends JobBatchPreProcessor> jobBatchPreProcessorClass;
-    private JobWriter jobWriter;
+    private ChangedEntityService changedEntityService;
+    private Class<? extends BatchPreProcessor> jobBatchPreProcessorClass;
+    private BulkWriter bulkWriter;
 
     public TestModule(String[] args) {
         super(args);
@@ -27,9 +28,13 @@ public class TestModule extends AbstractBaseJobModule {
 
     private void initDefaults() {
         changedIdentifiersService = new TestChangeIdentifiersService();
-        changedEntitiesService = identifiers -> Stream.of(new Object());
-        jobBatchPreProcessorClass = JobBatchPreProcessorImpl.class;
-        jobWriter = items -> {};
+        changedEntityService = identifier -> new Object();
+        jobBatchPreProcessorClass = BatchPreProcessorImpl.class;
+        setElasticSearchModule(new AbstractModule() {
+            @Override
+            protected void configure() {}
+        });
+        bulkWriter = items -> {};
     }
 
     @Override
@@ -44,24 +49,32 @@ public class TestModule extends AbstractBaseJobModule {
         super.setJobBatchPreProcessorClass(jobBatchPreProcessorClass);
         super.configure();
         bind(ChangedIdentifiersService.class).toInstance(changedIdentifiersService);
-        bind(ChangedEntitiesService.class).toInstance(changedEntitiesService);
-        bind(Job.class).to(JobImpl.class);
-        bind(JobWriter.class).toInstance(jobWriter);
+        bind(Job.class).to(TestJobImpl.class);
+        bind(new TypeLiteral<BatchProcessor<Object>>() {}).to(TestBatchProcessor.class);
+        bind(new TypeLiteral<ChangedEntityService<Object>>() {}).toInstance(changedEntityService);
+        bind(new TypeLiteral<BulkWriter<Object>>() {}).toInstance(bulkWriter);
+    }
+
+    private static class TestJobImpl extends JobImpl<Object> {
+
+    }
+
+    private static class TestBatchProcessor extends BatchProcessor<Object> {
     }
 
     public void setChangedIdentifiersService(ChangedIdentifiersService changedIdentifiersService) {
         this.changedIdentifiersService = changedIdentifiersService;
     }
 
-    public void setChangedEntitiesService(ChangedEntitiesService changedEntitiesService) {
-        this.changedEntitiesService = changedEntitiesService;
+    public void setChangedEntityService(ChangedEntityService changedEntityService) {
+        this.changedEntityService = changedEntityService;
     }
 
-    public void setJobWriter(JobWriter jobWriter) {
-        this.jobWriter = jobWriter;
+    public void setBulkWriter(BulkWriter bulkWriter) {
+        this.bulkWriter = bulkWriter;
     }
 
-    public void setJobBatchPreProcessorClass(Class<? extends JobBatchPreProcessor> jobBatchPreProcessorClass) {
+    public void setJobBatchPreProcessorClass(Class<? extends BatchPreProcessor> jobBatchPreProcessorClass) {
         this.jobBatchPreProcessorClass = jobBatchPreProcessorClass;
     }
 }

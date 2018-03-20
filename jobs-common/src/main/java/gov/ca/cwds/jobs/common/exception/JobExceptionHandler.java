@@ -1,6 +1,9 @@
 package gov.ca.cwds.jobs.common.exception;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by Alexander Serbin on 2/15/2018.
@@ -8,25 +11,24 @@ import org.slf4j.LoggerFactory;
 
 public class JobExceptionHandler {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(JobExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JobExceptionHandler.class);
 
-    private static volatile boolean exceptionHappened;
+    private static AtomicBoolean exceptionHappened = new AtomicBoolean(false) ;
 
-    public static synchronized void handleException(String message, Exception e) {
+    public static void handleException(String message, Throwable e) {
        LOGGER.error(message, e);
-       exceptionHappened = true;
-       throw new JobsException(message, e);
+       exceptionHappened.set(true);
     }
 
-    public static synchronized void handleException(Exception e) {
+    public static void handleException(Throwable e) {
         handleException("Exception occured ", e);
     }
 
     public static boolean isExceptionHappened() {
-        return exceptionHappened;
+        return exceptionHappened.get();
     }
 
-    public static synchronized void reset() {
-        exceptionHappened = false;
+    public static void reset() {
+        exceptionHappened.set(false);
     }
 }

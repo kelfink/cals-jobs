@@ -16,10 +16,12 @@ import static org.junit.Assert.assertTrue;
  */
 public class FilesystemTimestampOperatorTest {
 
+    private LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("temp");
+
     @Test
     public void readWriteTimestampTest() throws Exception {
         LocalDateTime timestamp = LocalDateTime.of(2018, 2, 6, 4, 14, 20);
-        FilesystemTimestampOperator timestampOperator = new FilesystemTimestampOperator(LastRunDirHelper.getLastRunDir().toString());
+        FilesystemTimestampOperator timestampOperator = new FilesystemTimestampOperator(lastRunDirHelper.getLastRunDir().toString());
         assertFalse(timestampOperator.timeStampExists());
         timestampOperator.writeTimestamp(timestamp);
         assertEquals(timestamp, timestampOperator.readTimestamp());
@@ -28,12 +30,12 @@ public class FilesystemTimestampOperatorTest {
 
     @Before
     public void beforeMethod() throws IOException {
-        LastRunDirHelper.createTimestampDirectory();
+        lastRunDirHelper.createTimestampDirectory();
     }
 
     @After
     public void afterMethod() throws IOException {
-        LastRunDirHelper.deleteTimestampDirectory();
+        lastRunDirHelper.deleteTimestampDirectory();
     }
 
 }

@@ -10,7 +10,7 @@ import org.hibernate.SessionFactory;
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
-public class FacilityJob extends JobImpl {
+public class FacilityJob extends JobImpl<ChangedFacilityDTO> {
 
     @Inject
     @FasSessionFactory
@@ -26,6 +26,7 @@ public class FacilityJob extends JobImpl {
 
     @Override
     public void close() {
+        super.close();
         fasSessionFactory.close();
         lisSessionFactory.close();
         cmsSessionFactory.close();

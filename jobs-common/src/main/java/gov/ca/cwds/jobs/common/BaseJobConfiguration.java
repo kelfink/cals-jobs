@@ -8,7 +8,6 @@ import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.FileConfigurationSourceProvider;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.configuration.YamlConfigurationFactory;
-import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.jackson.Jackson;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.LoggerFactory;
@@ -25,16 +24,8 @@ public abstract class BaseJobConfiguration extends ElasticsearchConfiguration {
   private String indexSettings;
 
   private int batchSize;
-
-  private DataSourceFactory calsnsDataSourceFactory;
-
-  public DataSourceFactory getCalsnsDataSourceFactory() {
-    return calsnsDataSourceFactory;
-  }
-
-  public void setCalsnsDataSourceFactory(DataSourceFactory calsnsDataSourceFactory) {
-    this.calsnsDataSourceFactory = calsnsDataSourceFactory;
-  }
+  private int elasticSearchBulkSize;
+  private int readerThreadsCount;
 
   public String getDocumentMapping() {
     return documentMapping;
@@ -95,4 +86,19 @@ public abstract class BaseJobConfiguration extends ElasticsearchConfiguration {
       }
   }
 
+  public int getElasticSearchBulkSize() {
+    return elasticSearchBulkSize;
+  }
+
+  public void setElasticSearchBulkSize(int elasticSearchBulkSize) {
+    this.elasticSearchBulkSize = elasticSearchBulkSize;
+  }
+
+  public int getReaderThreadsCount() {
+    return readerThreadsCount;
+  }
+
+  public void setReaderThreadsCount(int readerThreadsCount) {
+    this.readerThreadsCount = readerThreadsCount;
+  }
 }

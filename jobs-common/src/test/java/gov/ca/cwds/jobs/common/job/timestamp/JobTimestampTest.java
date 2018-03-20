@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs.common.job.timestamp;
 
-import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.job.TestModule;
 import gov.ca.cwds.jobs.common.job.impl.JobRunner;
 import gov.ca.cwds.jobs.common.job.preprocessor.BatchSavePointTestPreprocessor;
@@ -14,12 +13,9 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import static gov.ca.cwds.jobs.common.job.preprocessor.BatchSavePointTestPreprocessor.BROKEN_ENTITY;
 import static gov.ca.cwds.jobs.common.job.preprocessor.BatchSavePointTestPreprocessor.SECOND_TIMESTAMP;
-import static gov.ca.cwds.jobs.common.job.timestamp.LastRunDirHelper.getLastRunDir;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -30,16 +26,17 @@ import static org.junit.Assert.assertTrue;
 public class JobTimestampTest {
 
     private FilesystemTimestampOperator timestampOperator;
+    private LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("temp");
 
     @Before
     public void beforeMethod() throws IOException {
-        timestampOperator = new FilesystemTimestampOperator(getLastRunDir().toString());
-        LastRunDirHelper.createTimestampDirectory();
+        timestampOperator = new FilesystemTimestampOperator(lastRunDirHelper.getLastRunDir().toString());
+        lastRunDirHelper.createTimestampDirectory();
     }
 
     @After
     public void afterMethod() throws IOException {
-        LastRunDirHelper.deleteTimestampDirectory();
+        lastRunDirHelper.deleteTimestampDirectory();
     }
 
     @Test
@@ -73,15 +70,17 @@ public class JobTimestampTest {
         assertFalse(timestampOperator.timeStampExists());
         TestModule testModule = new TestModule(getModuleArgs());
         testModule.setJobBatchPreProcessorClass(BatchSavePointTestPreprocessor.class);
-        testModule.setChangedEntitiesService(identifiers -> {
-            Optional<ChangedEntityIdentifier> brokenEntityIdentifier =
-                    identifiers.stream().filter(o -> o == BROKEN_ENTITY).findFirst();
-            return brokenEntityIdentifier.isPresent() ? Stream.of(new Object()): Stream.empty();
-        });
-        testModule.setJobWriter(items -> {
-            if (items.size() > 0) {
-                throw new IllegalStateException("Broken batch");
+        testModule.setChangedEntityService(identifier -> {
+            if (identifier == BROKEN_ENTITY) {
+                return BROKEN_ENTITY;
+            } else {
+                return new Object();
             }
+        });
+        testModule.setBulkWriter(items -> {
+            if (!items.isEmpty() && items.get(0) == BROKEN_ENTITY) {
+                throw new IllegalStateException("Broken batch");
+            };
         });
         JobRunner.run(testModule);
         assertTrue(timestampOperator.timeStampExists());
@@ -102,7 +101,7 @@ public class JobTimestampTest {
     private void runCrashingJob() {
         TestModule testModule = new TestModule(getModuleArgs());
         testModule.setJobBatchPreProcessorClass(SingleBatchPreprocessor.class);
-        testModule.setJobWriter(items -> {
+        testModule.setBulkWriter(items -> {
             if (1 == 1) {
                 throw new IllegalStateException();
             }
@@ -112,7 +111,7 @@ public class JobTimestampTest {
 
     private String[] getModuleArgs() {
         String configFilePath = Paths.get("src", "test", "resources", "config.yaml").normalize().toAbsolutePath().toString();
-        return new String[]{"-c", configFilePath, "-l", getLastRunDir().toString()};
+        return new String[]{"-c", configFilePath, "-l", lastRunDirHelper.getLastRunDir().toString()};
     }
 
 }

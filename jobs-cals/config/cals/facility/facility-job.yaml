@@ -1,4 +1,6 @@
 batchSize: 100
+elasticSearchBulkSize: 100
+readerThreadsCount: 2
 
 elasticsearch.host: ${ELASTIC_SEARCH_HOST:-localhost}
 elasticsearch.port: ${ELASTIC_SEARCH_PORT:-9300}

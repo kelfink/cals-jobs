@@ -1,25 +1,20 @@
 package gov.ca.cwds.jobs.common.job.impl;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import gov.ca.cwds.jobs.common.batch.BatchPreProcessor;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
-import gov.ca.cwds.jobs.common.batch.JobBatchPreProcessor;
 import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.identifier.impl.ChangedIdentifiersProvider;
-import gov.ca.cwds.jobs.common.job.ChangedEntitiesService;
+import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 import gov.ca.cwds.jobs.common.job.Job;
-import gov.ca.cwds.jobs.common.job.JobReader;
-import gov.ca.cwds.jobs.common.job.JobWriter;
 import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
 import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
+import gov.ca.cwds.jobs.common.job.utils.TimeSpentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -34,16 +29,16 @@ public class JobImpl<T> implements Job {
     private TimestampOperator timestampOperator;
 
     @Inject
-    private ChangedEntitiesService changedEntitiesService;
+    private ChangedEntityService<T> changedEntitiesService;
 
     @Inject
     private ChangedIdentifiersProvider changedIdentifiersProvider;
 
     @Inject
-    private JobBatchPreProcessor jobBatchPreProcessor;
+    private BatchPreProcessor jobBatchPreProcessor;
 
     @Inject
-    private Injector injector;
+    private BatchProcessor<T> batchProcessor;
 
     @Override
     public void run() {
@@ -62,11 +57,15 @@ public class JobImpl<T> implements Job {
     }
 
     private void processBatches(List<JobBatch> jobBatches) {
+        JobTimeReport jobTimeReport = new JobTimeReport(jobBatches);
+        batchProcessor.init();
         for (int batchNumber = 0; batchNumber < jobBatches.size(); batchNumber ++) {
-            createBatchJob(jobBatches.get(batchNumber)).run();
+            batchProcessor.process(jobBatches.get(batchNumber));
             if (!JobExceptionHandler.isExceptionHappened()) {
                timestampOperator.writeTimestamp(jobBatches.get(batchNumber).getTimestamp());
-               LOGGER.info(getCompletionPercent(jobBatches, batchNumber) + "% complete");
+               if (LOGGER.isInfoEnabled()) {
+                   jobTimeReport.printTimeReport(batchNumber);
+               }
                LOGGER.info("Save point has been reached. Save point batch timestamp is " + jobBatches.get(batchNumber).getTimestamp());
             } else {
                LOGGER.error("Exception occured during batch processing. Job has been terminated." +
@@ -74,6 +73,7 @@ public class JobImpl<T> implements Job {
                throw new RuntimeException("Exception occured during batch processing");
             }
         }
+        jobTimeReport.printTimeSpent();
     }
 
     private List<JobBatch> splitEntitiesByBatches() {
@@ -84,43 +84,17 @@ public class JobImpl<T> implements Job {
         return jobBatches;
     }
 
-    private String getCompletionPercent(List<JobBatch> jobBatches, float batchNumber) {
-        return new DecimalFormat("#0.00").format((batchNumber + 1)/jobBatches.size() * 100);
-    }
-
     private void printJobBatchesInformation(List<JobBatch> jobBatches, LocalDateTime startTime) {
         if (LOGGER.isInfoEnabled() && !jobBatches.isEmpty()) {
             LOGGER.info("*** Batches ***");
             jobBatches.forEach(batch->LOGGER.info(batch.toString()));
             LOGGER.info("*** End of Batches");
-            printTimeSpent("batches distribution", startTime);
+            TimeSpentUtil.printTimeSpent("Batches distribution", startTime);
         }
     }
 
-    private void printTimeSpent(String workDescription, LocalDateTime startTime) {
-        long hours = startTime.until(LocalDateTime.now(), ChronoUnit.HOURS);
-        long minutes = startTime.until(LocalDateTime.now(), ChronoUnit.MINUTES);
-        long seconds = startTime.until(LocalDateTime.now(), ChronoUnit.SECONDS);
-        long milliseconds = startTime.until(LocalDateTime.now(), ChronoUnit.MILLIS);
-        if (hours > 0) {
-            LOGGER.info(workDescription + " {} hr", hours);
-        } else if (minutes > 0) {
-            LOGGER.info(workDescription + " {} min", minutes);
-        } else if (seconds > 0) {
-            LOGGER.info(workDescription + " {} sec", seconds);
-        } else {
-            LOGGER.info(workDescription + " {} ms", milliseconds);
-        }
+    @Override
+    public void close() {
+       batchProcessor.destroy();
     }
-
-    private AsyncReadWriteJob createBatchJob(JobBatch batch) {
-        return new AsyncReadWriteJob(createJobReader(batch.getChangedEntityIdentifiers()),
-                injector.getInstance(JobWriter.class));
-    }
-
-    private JobReader<T> createJobReader(List<ChangedEntityIdentifier> identifiers) {
-        Iterator<T> entitiesIterator = changedEntitiesService.loadEntities(identifiers).iterator();
-        return () -> entitiesIterator.hasNext() ? entitiesIterator.next() : null;
-    }
-
 }

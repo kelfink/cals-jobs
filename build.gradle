@@ -73,7 +73,6 @@ subprojects {
         compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
         //slf4j-log4j12-1.6.1.jar
         //log4j-1.2.16.jar
-        compile group: "com.jcabi", name: "jcabi-aspects", version: "0.22.6"
         testCompile group: 'junit', name: 'junit', version: jUnitVersion
     }
 }

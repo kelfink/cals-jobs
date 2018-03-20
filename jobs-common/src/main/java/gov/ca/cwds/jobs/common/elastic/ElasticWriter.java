@@ -2,10 +2,12 @@ package gov.ca.cwds.jobs.common.elastic;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.ca.cwds.Identifiable;
+import gov.ca.cwds.jobs.common.ChangedDTO;
 import gov.ca.cwds.jobs.common.ElasticSearchIndexerDao;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.exception.JobsException;
-import gov.ca.cwds.jobs.common.job.JobWriter;
+import gov.ca.cwds.jobs.common.job.BulkWriter;
+import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -21,9 +23,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <T> persistence class type
  */
-public class ElasticJobWriter<T extends Identifiable<String>> implements JobWriter<T> {
+public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
 
-  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ElasticJobWriter.class);
+  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ElasticWriter.class);
   protected ElasticSearchIndexerDao elasticsearchDao;
   protected BulkProcessor bulkProcessor;
   protected ObjectMapper objectMapper;
@@ -34,7 +36,7 @@ public class ElasticJobWriter<T extends Identifiable<String>> implements JobWrit
    * @param elasticsearchDao ES DAO
    * @param objectMapper Jackson object mapper
    */
-  public ElasticJobWriter(ElasticSearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
+  public ElasticWriter(ElasticSearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
     this.elasticsearchDao = elasticsearchDao;
     this.objectMapper = objectMapper;
     bulkProcessor =
@@ -56,17 +58,27 @@ public class ElasticJobWriter<T extends Identifiable<String>> implements JobWrit
         }).build();
   }
 
-  @Override
-  public void write(List<T> items) {
-    items.stream().map(item -> {
-      try {
-        return elasticsearchDao.bulkAdd(objectMapper, item.getId(), item);
-      } catch (JsonProcessingException e) {
-        throw new JobsException(e);
-      }
-    }).forEach(bulkProcessor::add);
-    bulkProcessor.flush();
-  }
+    @Override
+    public void write(List<T> items) {
+        items.stream().forEach(item -> {
+            try {
+                RecordChangeOperation recordChangeOperation = item.getRecordChangeOperation();
+
+                LOGGER.info("Preparing to delete item: ID {}", item.getId());
+                bulkProcessor.add(elasticsearchDao.bulkDelete(item.getId()));
+
+                if (RecordChangeOperation.I == recordChangeOperation
+                        || RecordChangeOperation.U == recordChangeOperation) {
+                    LOGGER.info("Preparing to insert item: ID {}", item.getId());
+                    bulkProcessor.add(elasticsearchDao.bulkAdd(objectMapper, item.getId(), item.getDTO()));
+                }
+            } catch (JsonProcessingException e) {
+                throw new JobsException(e);
+            }
+        });
+        bulkProcessor.flush();
+        ConsumerCounter.addToCounter(items.size());
+    }
 
   @Override
   public void destroy() {

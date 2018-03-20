@@ -16,6 +16,7 @@ public class RFA1aJob extends JobImpl {
 
     @Override
     public void close() {
+        super.close();
         calsnsSessionFactory.close();
     }
 

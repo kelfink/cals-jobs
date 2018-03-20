@@ -13,6 +13,11 @@ public class JobBatch {
     private List<ChangedEntityIdentifier> identifiers;
     private LocalDateTime timestamp;
 
+    public JobBatch(List<ChangedEntityIdentifier> identifiers) {
+        this.identifiers = identifiers;
+        this.timestamp = null;
+    }
+
     public JobBatch(List<ChangedEntityIdentifier> identifiers, LocalDateTime timestamp) {
         this.identifiers = identifiers;
         this.timestamp = timestamp;

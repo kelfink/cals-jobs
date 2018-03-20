@@ -4,7 +4,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
-        classpath 'com.github.sedovalx.gradle:gradle-aspectj-binary:1.0.24'
     }
 }
 
@@ -14,10 +13,6 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
-apply plugin: 'com.github.sedovalx.gradle-aspectj-binary'
-
-weaveClasses.dependsOn compileJava
-classes.dependsOn weaveClasses
 
 sourceCompatibility = 1.8
 

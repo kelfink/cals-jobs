@@ -1,26 +1,22 @@
 package gov.ca.cwds.jobs.cals.facility;
 
 import com.google.inject.Inject;
-import com.jcabi.aspects.Loggable;
 import gov.ca.cwds.cals.service.FacilityService;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
 import gov.ca.cwds.cals.web.rest.parameter.FacilityParameterObject;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.job.ChangedEntitiesService;
+import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.stream.Stream;
 
 import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
 
 /**
  * @author CWDS TPT-2
  */
-public class ChangedFacilityService extends FacilityService implements ChangedEntitiesService<ChangedFacilityDTO> {
+public class ChangedFacilityService extends FacilityService implements ChangedEntityService<ChangedFacilityDTO> {
 
   private static final Logger LOG = LoggerFactory.getLogger(ChangedFacilityService.class);
 
@@ -28,19 +24,7 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
   private FacilityParameterObjectBuilder facilityParameterObjectBuilder;
 
   @Override
-  public Stream<ChangedFacilityDTO> loadEntities(List<ChangedEntityIdentifier> identifiers) {
-    return identifiers.stream().map(this::findFacilityById);
-  }
-
-
-  @Loggable(Loggable.DEBUG)
-  @UnitOfWork(CMS)
-  protected FacilityParameterObject createFacilityParameterObject(String id) {
-    return facilityParameterObjectBuilder.createFacilityParameterObject(id);
-  }
-
-  @Loggable(Loggable.DEBUG)
-  protected ChangedFacilityDTO findFacilityById(ChangedEntityIdentifier identifier) {
+  public ChangedFacilityDTO loadEntity(ChangedEntityIdentifier identifier) {
     try {
       FacilityDTO facilityDTO = findByParameterObject(createFacilityParameterObject(identifier.getId()));
       if (facilityDTO == null) {
@@ -56,6 +40,11 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
       LOG.error("Can't get facility by id " + identifier.getId(), e);
       throw new IllegalStateException(String.format("Can't get facility by id %s", identifier.getId()), e);
     }
+  }
+
+  @UnitOfWork(CMS)
+  protected FacilityParameterObject createFacilityParameterObject(String id) {
+    return facilityParameterObjectBuilder.createFacilityParameterObject(id);
   }
 
 }
