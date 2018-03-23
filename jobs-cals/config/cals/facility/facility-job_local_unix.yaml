@@ -56,6 +56,8 @@ cmsDataSourceFactory:
       hibernate.connection.keepAliveTimeOut: 8
       hibernate.jdbc.time_zone: America/Los_Angeles
       hibernate.jdbc.use_scrollable_resultset: true
+      hibernate.c3p0.min_size: 5
+      hibernate.c3p0.max_size: 5
 
 calsnsDataSourceFactory:
   properties:
