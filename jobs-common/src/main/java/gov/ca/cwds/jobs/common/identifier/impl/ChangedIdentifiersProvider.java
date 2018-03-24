@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.stream.Stream;
 
 /**
@@ -27,12 +28,19 @@ public class ChangedIdentifiersProvider {
         if (!timestampOperator.timeStampExists()) {
             LOGGER.info("Processing initial load");
             return changedIdentifiersService.getIdentifiersForInitialLoad();
+        } else if (isTimestampMoreThanOneMonthOld()) {
+            LOGGER.info("Processing initial load - resuming after save point " + timestampOperator.readTimestamp());
+            return changedIdentifiersService.getIdentifiersForResumingInitialLoad(timestampOperator.readTimestamp());
         } else {
             LocalDateTime timestamp = timestampOperator.readTimestamp();
             LOGGER.info("Processing incremental load after timestamp " +
                     TimestampOperator.DATE_TIME_FORMATTER.format(timestamp));
             return changedIdentifiersService.getIdentifiersForIncrementalLoad(timestamp);
         }
+    }
+
+    private boolean isTimestampMoreThanOneMonthOld() {
+        return timestampOperator.readTimestamp().until(LocalDateTime.now(), ChronoUnit.MONTHS) > 1;
     }
 
 }

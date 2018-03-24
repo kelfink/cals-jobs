@@ -15,8 +15,7 @@ import org.hibernate.service.ServiceRegistry;
  */
 public final class SessionFactoryUtil {
 
-    private SessionFactoryUtil() {
-    }
+    private SessionFactoryUtil() {}
 
     public static SessionFactory buildSessionFactory(DataSourceFactory dataSourceFactory,
                                                      String dataSourceName,

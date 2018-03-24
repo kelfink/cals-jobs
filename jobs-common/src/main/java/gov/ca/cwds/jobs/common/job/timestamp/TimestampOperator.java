@@ -8,7 +8,9 @@ import java.time.format.DateTimeFormatter;
  */
 public interface TimestampOperator {
 
-    DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSS");
+    String DATE_TIME_FORMAT = "yyyy-MM-dd-HH:mm:ss.SSSSSSSSS";
+
+    DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
     boolean timeStampExists();
 

@@ -10,6 +10,8 @@ public interface ChangedIdentifiersService {
 
     Stream<ChangedEntityIdentifier> getIdentifiersForInitialLoad();
 
+    Stream<ChangedEntityIdentifier> getIdentifiersForResumingInitialLoad(LocalDateTime localDateTime);
+
     Stream<ChangedEntityIdentifier> getIdentifiersForIncrementalLoad(LocalDateTime localDateTime);
 
 }

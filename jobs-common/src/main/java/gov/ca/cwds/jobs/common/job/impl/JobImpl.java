@@ -66,7 +66,9 @@ public class JobImpl<T> implements Job {
                if (LOGGER.isInfoEnabled()) {
                    jobTimeReport.printTimeReport(batchNumber);
                }
-               LOGGER.info("Save point has been reached. Save point batch timestamp is " + jobBatches.get(batchNumber).getTimestamp());
+               if (!jobBatches.get(batchNumber).isEmptyTimestamp()) {
+                   LOGGER.info("Save point has been reached. Save point batch timestamp is " + jobBatches.get(batchNumber).getTimestamp());
+               }
             } else {
                LOGGER.error("Exception occured during batch processing. Job has been terminated." +
                        " Batch timestamp " + jobBatches.get(batchNumber).getTimestamp() + "has not been recorded");

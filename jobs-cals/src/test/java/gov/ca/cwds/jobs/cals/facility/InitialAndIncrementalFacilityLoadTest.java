@@ -79,11 +79,12 @@ public class InitialAndIncrementalFacilityLoadTest extends BaseApiTest<TestCalsJ
         incrementalLoadTest();
     }
 
-    private void incrementalLoadTest() throws IOException, LiquibaseException, JSONException {
+    private void incrementalLoadTest() throws IOException, LiquibaseException, JSONException, InterruptedException {
         WebTarget target = clientTestRule.target(PATH_CHANGED_FACILITY + "/?" + DATE_AFTER + "="
                 + LocalDateTime.now().format(TimestampOperator.DATE_TIME_FORMATTER));
         assertEquals(0, getFacilities(target).getCollection().size());
         LocalDateTime dateAfter = LocalDateTime.now();
+        Thread.sleep(1000);
         addCwsDataForIncrementalLoad();
         addLisDataForIncrementalLoad();
         target = clientTestRule.target(PATH_CHANGED_FACILITY + "/?" + DATE_AFTER + "=" + dateAfter.format(TimestampOperator.DATE_TIME_FORMATTER));

@@ -17,6 +17,11 @@ public class TestChangeIdentifiersService implements ChangedIdentifiersService {
     }
 
     @Override
+    public Stream<ChangedEntityIdentifier> getIdentifiersForResumingInitialLoad(LocalDateTime localDateTime) {
+        return Stream.empty();
+    }
+
+    @Override
     public Stream<ChangedEntityIdentifier> getIdentifiersForIncrementalLoad(LocalDateTime localDateTime) {
         return Stream.empty();
     }
