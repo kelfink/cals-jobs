@@ -2,14 +2,13 @@ package gov.ca.cwds.jobs.common.util;
 
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.db.DataSourceFactory;
+import java.util.Map;
+import java.util.function.Function;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
-
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * Created by Alexander Serbin on 3/2/2018.
@@ -28,10 +27,10 @@ public final class SessionFactoryUtil {
             configuration.setProperty(property.getKey(), property.getValue());
         }
 
-        configuration.setProperty("hibernate.current_session_context_class", "managed");
-        if (dataSourceFactory.getProperties().get("hibernate.c3p0.min_size") == null) {
-          configuration.setProperty("hibernate.c3p0.min_size", "1");
-        }
+      if (!dataSourceFactory.getProperties().containsKey("hibernate.c3p0.min_size")) {
+        configuration.setProperty("hibernate.c3p0.min_size", "1");
+      }
+      configuration.setProperty("hibernate.current_session_context_class", "managed");
 
         ServiceRegistry serviceRegistry
                 = new StandardServiceRegistryBuilder()
