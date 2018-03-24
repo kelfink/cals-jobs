@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter;
 @NamedNativeQuery(
         name = LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
         query = LisRecordChange.LIS_BASE_QUERY +
-                " WHERE system_datetime_1 >= :dateAfter ",
+                " WHERE system_datetime_1 > :dateAfter ",
         resultClass = LisRecordChange.class,
         readOnly = true
 )

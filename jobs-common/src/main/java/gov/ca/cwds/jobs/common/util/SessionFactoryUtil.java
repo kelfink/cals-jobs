@@ -16,8 +16,7 @@ import java.util.function.Function;
  */
 public final class SessionFactoryUtil {
 
-    private SessionFactoryUtil() {
-    }
+    private SessionFactoryUtil() {}
 
     public static SessionFactory buildSessionFactory(DataSourceFactory dataSourceFactory,
                                                      String dataSourceName,
@@ -30,7 +29,9 @@ public final class SessionFactoryUtil {
         }
 
         configuration.setProperty("hibernate.current_session_context_class", "managed");
-        configuration.setProperty("hibernate.c3p0.min_size", "1");
+        if (dataSourceFactory.getProperties().get("hibernate.c3p0.min_size") == null) {
+          configuration.setProperty("hibernate.c3p0.min_size", "1");
+        }
 
         ServiceRegistry serviceRegistry
                 = new StandardServiceRegistryBuilder()

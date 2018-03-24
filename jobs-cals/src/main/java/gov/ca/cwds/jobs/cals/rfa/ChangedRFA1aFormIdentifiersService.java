@@ -17,6 +17,11 @@ public class ChangedRFA1aFormIdentifiersService implements ChangedIdentifiersSer
     }
 
     @Override
+    public Stream<ChangedEntityIdentifier> getIdentifiersForResumingInitialLoad(LocalDateTime localDateTime) {
+        return null;
+    }
+
+    @Override
     public Stream<ChangedEntityIdentifier> getIdentifiersForIncrementalLoad(LocalDateTime localDateTime) {
         return null;
     }

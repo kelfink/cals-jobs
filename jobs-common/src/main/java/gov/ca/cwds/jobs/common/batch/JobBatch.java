@@ -55,6 +55,10 @@ public class JobBatch {
         return identifiers.size();
     }
 
+    public boolean isEmptyTimestamp() {
+        return timestamp == null;
+    }
+
     @Override
     public String toString() {
         return "batch size = " + identifiers.size() + ", timestamp is " + timestamp;

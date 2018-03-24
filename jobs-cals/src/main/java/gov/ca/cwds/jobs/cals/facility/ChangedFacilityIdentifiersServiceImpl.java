@@ -40,6 +40,20 @@ public class ChangedFacilityIdentifiersServiceImpl implements ChangedIdentifiers
     }
 
     @Override
+    public Stream<ChangedEntityIdentifier> getIdentifiersForResumingInitialLoad(LocalDateTime timeStampAfter) {
+        return concat(getCwsCmsResumingInitialLoadIdentifiers(timeStampAfter),
+                getLisIncrementalLoadIdentifiers(timeStampAfter));
+    }
+
+    @UnitOfWork(CMS)
+    protected ChangedFacilitiesIdentifiers getCwsCmsResumingInitialLoadIdentifiers(LocalDateTime timeStampAfter) {
+        ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(DataSourceName.CWS);
+        recordChangeCwsCmsDao.getResumeInitialLoadStream(timeStampAfter).
+                map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
+        return changedEntityIdentifiers;
+    }
+
+    @Override
     public Stream<ChangedEntityIdentifier> getIdentifiersForIncrementalLoad(LocalDateTime timestamp) {
         return concat(getCwsCmsIncrementalLoadIdentifiers(timestamp),
                 getLisIncrementalLoadIdentifiers(timestamp));
