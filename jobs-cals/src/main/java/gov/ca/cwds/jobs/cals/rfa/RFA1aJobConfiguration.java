@@ -8,14 +8,14 @@ import io.dropwizard.db.DataSourceFactory;
  */
 public class RFA1aJobConfiguration extends BaseJobConfiguration {
 
-    private DataSourceFactory calsnsDataSourceFactory;
+  private DataSourceFactory calsnsDataSourceFactory;
 
-    public DataSourceFactory getCalsnsDataSourceFactory() {
-        return calsnsDataSourceFactory;
-    }
+  public DataSourceFactory getCalsnsDataSourceFactory() {
+    return calsnsDataSourceFactory;
+  }
 
-    public void setCalsnsDataSourceFactory(DataSourceFactory calsnsDataSourceFactory) {
-        this.calsnsDataSourceFactory = calsnsDataSourceFactory;
-    }
+  public void setCalsnsDataSourceFactory(DataSourceFactory calsnsDataSourceFactory) {
+    this.calsnsDataSourceFactory = calsnsDataSourceFactory;
+  }
 
 }

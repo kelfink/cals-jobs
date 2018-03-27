@@ -13,7 +13,7 @@ public class ChangedFacilityServiceProvider extends AbstractInjectProvider<Chang
 
   @Inject
   public ChangedFacilityServiceProvider(Injector injector,
-                                        UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory) {
+      UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory) {
     super(injector, unitOfWorkAwareProxyFactory);
   }
 

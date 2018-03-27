@@ -4,43 +4,44 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
 import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
 public class ChangedIdentifiersProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChangedIdentifiersProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ChangedIdentifiersProvider.class);
 
-    @Inject
-    private TimestampOperator timestampOperator;
+  @Inject
+  private TimestampOperator timestampOperator;
 
-    @Inject
-    private ChangedIdentifiersService changedIdentifiersService;
+  @Inject
+  private ChangedIdentifiersService changedIdentifiersService;
 
-    public Stream<ChangedEntityIdentifier> get() {
-        if (!timestampOperator.timeStampExists()) {
-            LOGGER.info("Processing initial load");
-            return changedIdentifiersService.getIdentifiersForInitialLoad();
-        } else if (isTimestampMoreThanOneMonthOld()) {
-            LOGGER.info("Processing initial load - resuming after save point " + timestampOperator.readTimestamp());
-            return changedIdentifiersService.getIdentifiersForResumingInitialLoad(timestampOperator.readTimestamp());
-        } else {
-            LocalDateTime timestamp = timestampOperator.readTimestamp();
-            LOGGER.info("Processing incremental load after timestamp " +
-                    TimestampOperator.DATE_TIME_FORMATTER.format(timestamp));
-            return changedIdentifiersService.getIdentifiersForIncrementalLoad(timestamp);
-        }
+  public Stream<ChangedEntityIdentifier> get() {
+    if (!timestampOperator.timeStampExists()) {
+      LOGGER.info("Processing initial load");
+      return changedIdentifiersService.getIdentifiersForInitialLoad();
+    } else if (isTimestampMoreThanOneMonthOld()) {
+      LOGGER.info("Processing initial load - resuming after save point " + timestampOperator
+          .readTimestamp());
+      return changedIdentifiersService
+          .getIdentifiersForResumingInitialLoad(timestampOperator.readTimestamp());
+    } else {
+      LocalDateTime timestamp = timestampOperator.readTimestamp();
+      LOGGER.info("Processing incremental load after timestamp " +
+          TimestampOperator.DATE_TIME_FORMATTER.format(timestamp));
+      return changedIdentifiersService.getIdentifiersForIncrementalLoad(timestamp);
     }
+  }
 
-    private boolean isTimestampMoreThanOneMonthOld() {
-        return timestampOperator.readTimestamp().until(LocalDateTime.now(), ChronoUnit.MONTHS) > 1;
-    }
+  private boolean isTimestampMoreThanOneMonthOld() {
+    return timestampOperator.readTimestamp().until(LocalDateTime.now(), ChronoUnit.MONTHS) > 1;
+  }
 
 }

@@ -10,14 +10,14 @@ import org.hibernate.SessionFactory;
  */
 public class RFA1aJob extends JobImpl {
 
-    @Inject
-    @CalsnsSessionFactory
-    private SessionFactory calsnsSessionFactory;
+  @Inject
+  @CalsnsSessionFactory
+  private SessionFactory calsnsSessionFactory;
 
-    @Override
-    public void close() {
-        super.close();
-        calsnsSessionFactory.close();
-    }
+  @Override
+  public void close() {
+    super.close();
+    calsnsSessionFactory.close();
+  }
 
 }

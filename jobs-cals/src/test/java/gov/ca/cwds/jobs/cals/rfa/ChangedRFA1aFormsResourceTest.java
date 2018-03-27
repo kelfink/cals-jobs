@@ -1,31 +1,30 @@
 package gov.ca.cwds.jobs.cals.rfa;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import gov.ca.cwds.DataSourceName;
-import gov.ca.cwds.cals.service.dto.rfa.RFA1aFormDTO;
-import gov.ca.cwds.cals.service.dto.rfa.collection.CollectionDTO;
-import gov.ca.cwds.jobs.common.RecordChangeOperation;
-import gov.ca.cwds.jobs.cals.TestCalsJobsApplication;
-import gov.ca.cwds.jobs.cals.TestCalsJobsConfiguration;
-import gov.ca.cwds.test.support.BaseApiTest;
-import gov.ca.cwds.test.support.BaseDropwizardApplication;
-import gov.ca.cwds.test.support.DatabaseHelper;
-import io.dropwizard.jackson.Jackson;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.util.Optional;
-
 import static gov.ca.cwds.cals.Constants.API.RFA_1A_FORMS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import gov.ca.cwds.DataSourceName;
+import gov.ca.cwds.cals.service.dto.rfa.RFA1aFormDTO;
+import gov.ca.cwds.cals.service.dto.rfa.collection.CollectionDTO;
+import gov.ca.cwds.jobs.cals.TestCalsJobsApplication;
+import gov.ca.cwds.jobs.cals.TestCalsJobsConfiguration;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
+import gov.ca.cwds.test.support.BaseApiTest;
+import gov.ca.cwds.test.support.BaseDropwizardApplication;
+import gov.ca.cwds.test.support.DatabaseHelper;
+import io.dropwizard.jackson.Jackson;
+import java.io.IOException;
+import java.util.Optional;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * @author CWDS TPT-2
@@ -40,7 +39,8 @@ public class ChangedRFA1aFormsResourceTest extends BaseApiTest<TestCalsJobsConfi
 
   @ClassRule
   public static final BaseDropwizardApplication<TestCalsJobsConfiguration> application
-          = new BaseDropwizardApplication<>(TestCalsJobsApplication.class, "config/test-application.yml");
+      = new BaseDropwizardApplication<>(TestCalsJobsApplication.class,
+      "config/test-application.yml");
 
   @Override
   protected BaseDropwizardApplication<TestCalsJobsConfiguration> getApplication() {
@@ -49,7 +49,8 @@ public class ChangedRFA1aFormsResourceTest extends BaseApiTest<TestCalsJobsConfi
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    DatabaseHelper.setUpDatabase(application.getConfiguration().getNsDataSourceFactory(), DataSourceName.NS);
+    DatabaseHelper
+        .setUpDatabase(application.getConfiguration().getNsDataSourceFactory(), DataSourceName.NS);
   }
 
   @Test
@@ -69,7 +70,8 @@ public class ChangedRFA1aFormsResourceTest extends BaseApiTest<TestCalsJobsConfi
     assertEquals(numberOfChangedAfter20170718, numberOfChangedAfter19700101 - 1);
     // the form that was created or modified before 2017-07-18 10:01:00 has id = 1,
     // so it should not be found in the collection:
-    Optional<RFA1aFormDTO> optional = rfaForms.getCollection().stream().map(ChangedRFA1aFormDTO::getDTO)
+    Optional<RFA1aFormDTO> optional = rfaForms.getCollection().stream()
+        .map(ChangedRFA1aFormDTO::getDTO)
         .filter(rfa1aForm -> rfa1aForm.getId() == 1).findFirst();
     assertFalse(optional.isPresent());
 
@@ -77,9 +79,12 @@ public class ChangedRFA1aFormsResourceTest extends BaseApiTest<TestCalsJobsConfi
     assertTrue(rfaForms.getCollection().size() == 0);
   }
 
-  private CollectionDTO<ChangedRFA1aFormDTO> getChangedRFA1aFormsAfter(String dateTime) throws IOException {
+  private CollectionDTO<ChangedRFA1aFormDTO> getChangedRFA1aFormsAfter(String dateTime)
+      throws IOException {
     WebTarget target = clientTestRule.target(PATH_CHANGED_RFA_1A_FORMS + "/" + dateTime);
     Invocation.Builder invocation = target.request(MediaType.APPLICATION_JSON);
-    return Jackson.newObjectMapper().readValue(invocation.get(String.class), new TypeReference<CollectionDTO<ChangedRFA1aFormDTO>>() { });
+    return Jackson.newObjectMapper().readValue(invocation.get(String.class),
+        new TypeReference<CollectionDTO<ChangedRFA1aFormDTO>>() {
+        });
   }
 }

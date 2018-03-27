@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs.cals.facility;
 
+import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
+
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.service.FacilityService;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
@@ -11,12 +13,11 @@ import io.dropwizard.hibernate.UnitOfWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
-
 /**
  * @author CWDS TPT-2
  */
-public class ChangedFacilityService extends FacilityService implements ChangedEntityService<ChangedFacilityDTO> {
+public class ChangedFacilityService extends FacilityService implements
+    ChangedEntityService<ChangedFacilityDTO> {
 
   private static final Logger LOG = LoggerFactory.getLogger(ChangedFacilityService.class);
 
@@ -26,7 +27,8 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
   @Override
   public ChangedFacilityDTO loadEntity(ChangedEntityIdentifier identifier) {
     try {
-      FacilityDTO facilityDTO = findByParameterObject(createFacilityParameterObject(identifier.getId()));
+      FacilityDTO facilityDTO = findByParameterObject(
+          createFacilityParameterObject(identifier.getId()));
       if (facilityDTO == null) {
         LOG.error("Can't get facility by id " + identifier.getId());
         throw new IllegalStateException("FacilityDTO must not be null!!!");
@@ -38,7 +40,8 @@ public class ChangedFacilityService extends FacilityService implements ChangedEn
       return new ChangedFacilityDTO(facilityDTO, identifier.getRecordChangeOperation());
     } catch (Exception e) {
       LOG.error("Can't get facility by id " + identifier.getId(), e);
-      throw new IllegalStateException(String.format("Can't get facility by id %s", identifier.getId()), e);
+      throw new IllegalStateException(
+          String.format("Can't get facility by id %s", identifier.getId()), e);
     }
   }
 

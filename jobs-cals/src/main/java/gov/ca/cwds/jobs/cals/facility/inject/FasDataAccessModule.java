@@ -26,19 +26,20 @@ import org.hibernate.SessionFactory;
  */
 public class FasDataAccessModule extends AbstractModule {
 
-  public static final ImmutableList<Class<?>> fasEntityClasses = ImmutableList.<Class<?>>builder().add(
+  public static final ImmutableList<Class<?>> fasEntityClasses = ImmutableList.<Class<?>>builder()
+      .add(
           RecordChange.class,
           FacilityInformation.class,
           ComplaintReportLic802.class,
           LpaInformation.class,
           Rrcpoc.class,
           Rr809Dn.class
-  ).build();
+      ).build();
 
   @Override
   protected void configure() {
     bind(SessionFactory.class).annotatedWith(FasSessionFactory.class)
-            .toProvider(FasSessionFactoryProvider.class).in(Singleton.class);
+        .toProvider(FasSessionFactoryProvider.class).in(Singleton.class);
     bind(FacilityInformationDao.class);
     bind(ComplaintReportLic802Dao.class);
     bind(LpaInformationDao.class);
@@ -52,7 +53,8 @@ public class FasDataAccessModule extends AbstractModule {
 
     @Override
     public SessionFactory get() {
-      return SessionFactoryUtil.buildSessionFactory(facilityJobConfiguration.getFasDataSourceFactory(),
+      return SessionFactoryUtil
+          .buildSessionFactory(facilityJobConfiguration.getFasDataSourceFactory(),
               DataSourceName.FAS.name(), fasEntityClasses);
     }
 

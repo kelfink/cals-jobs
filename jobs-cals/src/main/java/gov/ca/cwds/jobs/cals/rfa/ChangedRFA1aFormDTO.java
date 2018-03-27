@@ -5,8 +5,6 @@ import gov.ca.cwds.cals.service.dto.rfa.RFA1aFormDTO;
 import gov.ca.cwds.dto.BaseDTO;
 import gov.ca.cwds.jobs.common.ChangedDTO;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
-
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -17,10 +15,8 @@ public class ChangedRFA1aFormDTO extends BaseDTO implements ChangedDTO<RFA1aForm
 
   private static final long serialVersionUID = 2L;
 
-  @NotNull
   private RFA1aFormDTO rfa1aFormDTO;
 
-  @NotNull
   private RecordChangeOperation recordChangeOperation;
 
   public ChangedRFA1aFormDTO() {
@@ -28,7 +24,7 @@ public class ChangedRFA1aFormDTO extends BaseDTO implements ChangedDTO<RFA1aForm
   }
 
   public ChangedRFA1aFormDTO(RFA1aFormDTO rfa1aFormDTO,
-                             RecordChangeOperation recordChangeOperation) {
+      RecordChangeOperation recordChangeOperation) {
     this.rfa1aFormDTO = rfa1aFormDTO;
     this.recordChangeOperation = recordChangeOperation;
   }

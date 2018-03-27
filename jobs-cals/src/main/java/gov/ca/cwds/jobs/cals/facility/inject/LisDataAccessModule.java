@@ -13,8 +13,8 @@ import gov.ca.cwds.cals.persistence.model.lisfas.LisDoFile;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisFacFile;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisTableFile;
 import gov.ca.cwds.jobs.cals.facility.FacilityJobConfiguration;
-import gov.ca.cwds.jobs.cals.facility.recordchange.RecordChangeLisDao;
 import gov.ca.cwds.jobs.cals.facility.recordchange.LisRecordChange;
+import gov.ca.cwds.jobs.cals.facility.recordchange.RecordChangeLisDao;
 import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import org.hibernate.SessionFactory;
 
@@ -24,17 +24,17 @@ import org.hibernate.SessionFactory;
 public class LisDataAccessModule extends AbstractModule {
 
   public static final ImmutableList<Class<?>> lisEntityClasses =
-          ImmutableList.<Class<?>>builder().add(
-                  LisRecordChange.class,
-                  LisFacFile.class,
-                  LisTableFile.class,
-                  LisDoFile.class
-          ).build();
+      ImmutableList.<Class<?>>builder().add(
+          LisRecordChange.class,
+          LisFacFile.class,
+          LisTableFile.class,
+          LisDoFile.class
+      ).build();
 
   @Override
   protected void configure() {
     bind(SessionFactory.class).annotatedWith(LisSessionFactory.class)
-            .toProvider(LisSessionFactoryProvider.class).in(Singleton.class);
+        .toProvider(LisSessionFactoryProvider.class).in(Singleton.class);
     bind(RecordChangeLisDao.class);
     bind(LisFacFileLisDao.class);
     bind(LisTableFileDao.class);
@@ -47,7 +47,8 @@ public class LisDataAccessModule extends AbstractModule {
 
     @Override
     public SessionFactory get() {
-      return SessionFactoryUtil.buildSessionFactory(facilityJobConfiguration.getLisDataSourceFactory(),
+      return SessionFactoryUtil
+          .buildSessionFactory(facilityJobConfiguration.getLisDataSourceFactory(),
               DataSourceName.LIS.name(), lisEntityClasses);
     }
 

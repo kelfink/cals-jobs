@@ -7,6 +7,6 @@ import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
  */
 public interface ChangedEntityService<T> {
 
-    T loadEntity(ChangedEntityIdentifier identifier);
+  T loadEntity(ChangedEntityIdentifier identifier);
 
 }

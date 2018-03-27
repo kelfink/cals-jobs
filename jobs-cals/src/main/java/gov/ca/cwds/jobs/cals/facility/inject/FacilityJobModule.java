@@ -8,10 +8,16 @@ import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.cals.Constants;
+import gov.ca.cwds.cals.inject.CwsFacilityServiceProvider;
 import gov.ca.cwds.cals.inject.DataAccessServicesModule;
+import gov.ca.cwds.cals.inject.FasFacilityServiceProvider;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
+import gov.ca.cwds.cals.inject.LisFacilityServiceProvider;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
 import gov.ca.cwds.cals.inject.MappingModule;
+import gov.ca.cwds.cals.service.CwsFacilityService;
+import gov.ca.cwds.cals.service.FasFacilityService;
+import gov.ca.cwds.cals.service.LisFacilityService;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
@@ -25,9 +31,9 @@ import gov.ca.cwds.jobs.common.elastic.ElasticWriter;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
+import gov.ca.cwds.jobs.common.job.BulkWriter;
 import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 import gov.ca.cwds.jobs.common.job.Job;
-import gov.ca.cwds.jobs.common.job.BulkWriter;
 import gov.ca.cwds.jobs.common.job.impl.BatchProcessor;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -40,82 +46,91 @@ import org.slf4j.LoggerFactory;
  */
 public class FacilityJobModule extends AbstractBaseJobModule {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FacilityJobModule.class);
-    private Class<? extends BulkWriter<ChangedFacilityDTO>> facilityElasticWriterClass;
+  private static final Logger LOG = LoggerFactory.getLogger(FacilityJobModule.class);
+  private Class<? extends BulkWriter<ChangedFacilityDTO>> facilityElasticWriterClass;
 
-    public FacilityJobModule(String[] args) {
-        super(args);
-        this.facilityElasticWriterClass = FacilityElasticWriter.class;
-    }
+  public FacilityJobModule(String[] args) {
+    super(args);
+    this.facilityElasticWriterClass = FacilityElasticWriter.class;
+  }
 
-    public void setFacilityElasticWriterClass(Class<? extends BulkWriter<ChangedFacilityDTO>> facilityElasticWriterClass) {
-        this.facilityElasticWriterClass = facilityElasticWriterClass;
-    }
+  public void setFacilityElasticWriterClass(
+      Class<? extends BulkWriter<ChangedFacilityDTO>> facilityElasticWriterClass) {
+    this.facilityElasticWriterClass = facilityElasticWriterClass;
+  }
 
-    @Override
-    protected void configure() {
-        super.configure();
-        bind(new TypeLiteral<BulkWriter<ChangedFacilityDTO>>() {}).to(facilityElasticWriterClass);
-        bind(new TypeLiteral<BatchProcessor<ChangedFacilityDTO>>() {}).to(FacilityBatchProcessor.class);
-        bind(ChangedIdentifiersService.class).toProvider(ChangedFacilityIdentifiersProvider.class);
-        bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {}).toProvider(ChangedFacilityServiceProvider.class);
-        bind(FacilityParameterObjectBuilder.class);
-        bind(Job.class).to(FacilityJob.class);
-        install(new MappingModule());
-        install(new CwsCmsRsDataAccessModule());
-        install(new LisDataAccessModule());
-        install(new FasDataAccessModule());
-        install(new NsDataAccessModule());
-        install(new DataAccessServicesModule() {
-            private SessionFactory getXaCmsSessionFactory(Injector injector) {
-                return injector.getInstance(Key.get(SessionFactory.class, CmsSessionFactory.class));
-            }
+  @Override
+  protected void configure() {
+    super.configure();
+    bind(new TypeLiteral<BulkWriter<ChangedFacilityDTO>>() {
+    }).to(facilityElasticWriterClass);
+    bind(new TypeLiteral<BatchProcessor<ChangedFacilityDTO>>() {
+    }).to(FacilityBatchProcessor.class);
+    bind(ChangedIdentifiersService.class).toProvider(ChangedFacilityIdentifiersProvider.class);
+    bind(LisFacilityService.class).toProvider(LisFacilityServiceProvider.class);
+    bind(FasFacilityService.class).toProvider(FasFacilityServiceProvider.class);
+    bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
+    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {
+    }).toProvider(ChangedFacilityServiceProvider.class);
+    bind(FacilityParameterObjectBuilder.class);
+    bind(Job.class).to(FacilityJob.class);
+    install(new MappingModule());
+    install(new CwsCmsRsDataAccessModule());
+    install(new LisDataAccessModule());
+    install(new FasDataAccessModule());
+    install(new NsDataAccessModule());
+    install(new DataAccessServicesModule() {
+      private SessionFactory getCmsSessionFactory(Injector injector) {
+        return injector.getInstance(Key.get(SessionFactory.class, CmsSessionFactory.class));
+      }
 
-            @Override
-            protected SessionFactory getDataAccessSercvicesSessionFactory(Injector injector) {
-                return getXaCmsSessionFactory(injector);
-            }
-        });
-    }
+      @Override
+      protected SessionFactory getDataAccessSercvicesSessionFactory(Injector injector) {
+        return getCmsSessionFactory(injector);
+      }
+    });
+  }
 
-    @Provides
-    @Override
+  @Provides
+  @Override
+  @Inject
+  public FacilityJobConfiguration getJobsConfiguration(JobOptions jobOptions) {
+    FacilityJobConfiguration facilityJobConfiguration =
+        BaseJobConfiguration.getJobsConfiguration(FacilityJobConfiguration.class,
+            jobOptions.getEsConfigLoc());
+    facilityJobConfiguration.setDocumentMapping("facility.mapping.json");
+    facilityJobConfiguration.setIndexSettings("facility.settings.json");
+    return facilityJobConfiguration;
+  }
+
+  static class FacilityElasticWriter extends ElasticWriter<ChangedFacilityDTO> {
+
     @Inject
-    public FacilityJobConfiguration getJobsConfiguration(JobOptions jobOptions) {
-        FacilityJobConfiguration facilityJobConfiguration =
-                BaseJobConfiguration.getJobsConfiguration(FacilityJobConfiguration.class,
-                jobOptions.getEsConfigLoc());
-        facilityJobConfiguration.setDocumentMapping("facility.mapping.json");
-        facilityJobConfiguration.setIndexSettings("facility.settings.json");
-        return facilityJobConfiguration;
+    FacilityElasticWriter(ElasticSearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
+      super(elasticsearchDao, objectMapper);
     }
+  }
 
-    static class FacilityElasticWriter extends ElasticWriter<ChangedFacilityDTO> {
-
-        @Inject
-        FacilityElasticWriter(ElasticSearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
-            super(elasticsearchDao, objectMapper);
-        }
+  @Provides
+  @Inject
+  UnitOfWorkAwareProxyFactory provideUnitOfWorkAwareProxyFactory(
+      @FasSessionFactory SessionFactory fasSessionFactory,
+      @LisSessionFactory SessionFactory lisSessionFactory,
+      @CmsSessionFactory SessionFactory cwsSessionFactory) {
+    try {
+      ImmutableMap<String, SessionFactory> sessionFactories = ImmutableMap.<String, SessionFactory>builder()
+          .put(Constants.UnitOfWork.CMS, cwsSessionFactory)
+          .put(Constants.UnitOfWork.FAS, fasSessionFactory)
+          .put(Constants.UnitOfWork.LIS, lisSessionFactory)
+          .build();
+      UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory = new UnitOfWorkAwareProxyFactory();
+      FieldUtils
+          .writeField(unitOfWorkAwareProxyFactory, "sessionFactories", sessionFactories, true);
+      return unitOfWorkAwareProxyFactory;
+    } catch (IllegalAccessException e) {
+      LOG.error("Can't build UnitOfWorkAwareProxyFactory", e);
+      throw new JobsException(e);
     }
-
-    @Provides
-    @Inject
-    UnitOfWorkAwareProxyFactory provideUnitOfWorkAwareProxyFactory(@FasSessionFactory SessionFactory fasSessionFactory,
-                                                                   @LisSessionFactory SessionFactory lisSessionFactory,
-                                                                   @CmsSessionFactory SessionFactory cwsSessionFactory) {
-        try {
-            ImmutableMap<String, SessionFactory> sessionFactories = ImmutableMap.<String, SessionFactory>builder()
-                    .put(Constants.UnitOfWork.CMS, cwsSessionFactory)
-                    .put(Constants.UnitOfWork.FAS, fasSessionFactory)
-                    .put(Constants.UnitOfWork.LIS, lisSessionFactory)
-                    .build();
-            UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory = new UnitOfWorkAwareProxyFactory();
-            FieldUtils.writeField(unitOfWorkAwareProxyFactory, "sessionFactories", sessionFactories, true);
-            return unitOfWorkAwareProxyFactory;
-        } catch (IllegalAccessException e) {
-            LOG.error("Can't build UnitOfWorkAwareProxyFactory", e);
-            throw new JobsException(e);
-        }
-    }
+  }
 
 }

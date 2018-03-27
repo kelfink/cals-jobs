@@ -8,14 +8,14 @@ import java.time.format.DateTimeFormatter;
  */
 public interface TimestampOperator {
 
-    String DATE_TIME_FORMAT = "yyyy-MM-dd-HH:mm:ss.SSSSSSSSS";
+  String DATE_TIME_FORMAT = "yyyy-MM-dd-HH:mm:ss.SSSSSSSSS";
 
-    DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+  DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
-    boolean timeStampExists();
+  boolean timeStampExists();
 
-    LocalDateTime readTimestamp();
+  LocalDateTime readTimestamp();
 
-    void writeTimestamp(LocalDateTime timestamp);
+  void writeTimestamp(LocalDateTime timestamp);
 
 }

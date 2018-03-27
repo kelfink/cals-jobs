@@ -15,37 +15,39 @@ import org.hibernate.service.ServiceRegistry;
  */
 public final class SessionFactoryUtil {
 
-    private SessionFactoryUtil() {}
+  private SessionFactoryUtil() {
+  }
 
-    public static SessionFactory buildSessionFactory(DataSourceFactory dataSourceFactory,
-                                                     String dataSourceName,
-                                                     ImmutableList<Class<?>> entityClasses,
-                                                     Function<Configuration, Configuration> function) {
-        Validate.notNull(dataSourceFactory, String.format("%s data source configuration is empty", dataSourceName));
-        Configuration configuration = new Configuration();
-        for (Map.Entry<String, String> property : dataSourceFactory.getProperties().entrySet()) {
-            configuration.setProperty(property.getKey(), property.getValue());
-        }
-
-      if (!dataSourceFactory.getProperties().containsKey("hibernate.c3p0.min_size")) {
-        configuration.setProperty("hibernate.c3p0.min_size", "1");
-      }
-      configuration.setProperty("hibernate.current_session_context_class", "managed");
-
-        ServiceRegistry serviceRegistry
-                = new StandardServiceRegistryBuilder()
-                .applySettings(configuration.getProperties()).build();
-
-        entityClasses.forEach(configuration::addAnnotatedClass);
-        function.apply(configuration);
-        return configuration.buildSessionFactory(serviceRegistry);
+  public static SessionFactory buildSessionFactory(DataSourceFactory dataSourceFactory,
+      String dataSourceName,
+      ImmutableList<Class<?>> entityClasses,
+      Function<Configuration, Configuration> function) {
+    Validate.notNull(dataSourceFactory,
+        String.format("%s data source configuration is empty", dataSourceName));
+    Configuration configuration = new Configuration();
+    for (Map.Entry<String, String> property : dataSourceFactory.getProperties().entrySet()) {
+      configuration.setProperty(property.getKey(), property.getValue());
     }
 
-    public static SessionFactory buildSessionFactory(DataSourceFactory dataSourceFactory,
-                                                     String dataSourceName,
-                                                     ImmutableList<Class<?>> entityClasses) {
-        Function<Configuration, Configuration> emptyFunction = configuration -> configuration;
-        return buildSessionFactory(dataSourceFactory, dataSourceName, entityClasses, emptyFunction);
+    if (!dataSourceFactory.getProperties().containsKey("hibernate.c3p0.min_size")) {
+      configuration.setProperty("hibernate.c3p0.min_size", "1");
     }
+    configuration.setProperty("hibernate.current_session_context_class", "managed");
+
+    ServiceRegistry serviceRegistry
+        = new StandardServiceRegistryBuilder()
+        .applySettings(configuration.getProperties()).build();
+
+    entityClasses.forEach(configuration::addAnnotatedClass);
+    function.apply(configuration);
+    return configuration.buildSessionFactory(serviceRegistry);
+  }
+
+  public static SessionFactory buildSessionFactory(DataSourceFactory dataSourceFactory,
+      String dataSourceName,
+      ImmutableList<Class<?>> entityClasses) {
+    Function<Configuration, Configuration> emptyFunction = configuration -> configuration;
+    return buildSessionFactory(dataSourceFactory, dataSourceName, entityClasses, emptyFunction);
+  }
 
 }
