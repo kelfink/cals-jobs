@@ -20,9 +20,9 @@ import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.elastic.ElasticWriter;
 import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
+import gov.ca.cwds.jobs.common.job.BulkWriter;
 import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 import gov.ca.cwds.jobs.common.job.Job;
-import gov.ca.cwds.jobs.common.job.BulkWriter;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -33,56 +33,58 @@ import org.slf4j.LoggerFactory;
  */
 public class RFA1aJobModule extends AbstractBaseJobModule {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RFA1aJobModule.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RFA1aJobModule.class);
 
-    public RFA1aJobModule(String[] args) {
-        super(args);
-    }
+  public RFA1aJobModule(String[] args) {
+    super(args);
+  }
 
-    @Override
-    protected void configure() {
-        super.configure();
-        install(new MappingModule());
-        install(new NsDataAccessModule());
-        bind(Job.class).to(FacilityJob.class);
-        bind(BulkWriter.class).to(RFA1aFormElasticWriter.class);
-        bind(ChangedIdentifiersService.class).toProvider(ChangedRFAIdentifiersProvider.class);
-        bind(ChangedEntityService.class).toProvider(ChangedRFAServiceProvider.class);
-        bind(RFA1aFormsCollectionService.class);
-        bind(ChangedRFA1aFormsService.class);
-        bind(Job.class).to(RFA1aJob.class).in(Singleton.class);
-    }
+  @Override
+  protected void configure() {
+    super.configure();
+    install(new MappingModule());
+    install(new NsDataAccessModule());
+    bind(Job.class).to(FacilityJob.class);
+    bind(BulkWriter.class).to(RFA1aFormElasticWriter.class);
+    bind(ChangedIdentifiersService.class).toProvider(ChangedRFAIdentifiersProvider.class);
+    bind(ChangedEntityService.class).toProvider(ChangedRFAServiceProvider.class);
+    bind(RFA1aFormsCollectionService.class);
+    bind(ChangedRFA1aFormsService.class);
+    bind(Job.class).to(RFA1aJob.class).in(Singleton.class);
+  }
 
-    @Provides
-    @Override
+  @Provides
+  @Override
+  @Inject
+  public RFA1aJobConfiguration getJobsConfiguration(JobOptions jobOptions) {
+    RFA1aJobConfiguration jobConfiguration = BaseJobConfiguration
+        .getJobsConfiguration(RFA1aJobConfiguration.class,
+            jobOptions.getEsConfigLoc());
+    jobConfiguration.setDocumentMapping("rfa.mapping.json");
+    jobConfiguration.setIndexSettings("rfa.settings.json");
+    return jobConfiguration;
+  }
+
+  @Provides
+  @Inject
+  UnitOfWorkAwareProxyFactory provideUnitOfWorkAwareProxyFactory(
+      @NsSessionFactory SessionFactory nsSessionFactory) {
+    return new UnitOfWorkAwareProxyFactory(Constants.UnitOfWork.CALSNS, nsSessionFactory);
+  }
+
+  static class RFA1aFormElasticWriter extends ElasticWriter<ChangedRFA1aFormDTO> {
+
+    /**
+     * Constructor.
+     *
+     * @param elasticsearchDao ES DAO
+     * @param objectMapper Jackson object mapper
+     */
     @Inject
-    public RFA1aJobConfiguration getJobsConfiguration(JobOptions jobOptions) {
-        RFA1aJobConfiguration jobConfiguration = BaseJobConfiguration.getJobsConfiguration(RFA1aJobConfiguration.class,
-                jobOptions.getEsConfigLoc());
-        jobConfiguration.setDocumentMapping("rfa.mapping.json");
-        jobConfiguration.setIndexSettings("rfa.settings.json");
-        return jobConfiguration;
+    public RFA1aFormElasticWriter(ElasticSearchIndexerDao elasticsearchDao,
+        ObjectMapper objectMapper) {
+      super(elasticsearchDao, objectMapper);
     }
-
-    @Provides
-    @Inject
-    UnitOfWorkAwareProxyFactory provideUnitOfWorkAwareProxyFactory(@NsSessionFactory SessionFactory nsSessionFactory) {
-       return new UnitOfWorkAwareProxyFactory(Constants.UnitOfWork.CALSNS, nsSessionFactory);
-    }
-
-    static class RFA1aFormElasticWriter extends ElasticWriter<ChangedRFA1aFormDTO> {
-
-        /**
-         * Constructor.
-         *
-         * @param elasticsearchDao ES DAO
-         * @param objectMapper Jackson object mapper
-         */
-        @Inject
-        public RFA1aFormElasticWriter(ElasticSearchIndexerDao elasticsearchDao,
-                                      ObjectMapper objectMapper) {
-            super(elasticsearchDao, objectMapper);
-        }
-    }
+  }
 
 }

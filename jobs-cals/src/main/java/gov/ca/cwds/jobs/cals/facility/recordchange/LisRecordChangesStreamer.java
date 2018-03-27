@@ -8,7 +8,9 @@ import gov.ca.cwds.data.stream.ScalarResultsStreamer;
  * @author CWDS TPT-2
  */
 public final class LisRecordChangesStreamer extends ScalarResultsStreamer<LisRecordChange> {
-  public LisRecordChangesStreamer(BaseDaoImpl<LisRecordChange> dao, QueryCreator<LisRecordChange> queryCreator) {
+
+  public LisRecordChangesStreamer(BaseDaoImpl<LisRecordChange> dao,
+      QueryCreator<LisRecordChange> queryCreator) {
     super(dao, queryCreator);
   }
 }

@@ -11,26 +11,27 @@ import org.elasticsearch.client.Client;
  */
 public class ElasticSearchModule extends AbstractModule {
 
-    private BaseJobConfiguration configuration;
+  private BaseJobConfiguration configuration;
 
-    ElasticSearchModule(BaseJobConfiguration configuration) {
-        this.configuration = configuration;
-    }
+  ElasticSearchModule(BaseJobConfiguration configuration) {
+    this.configuration = configuration;
+  }
 
-    @Override
-    protected void configure() {
-      Client client = ElasticUtils.createAndConfigureESClient(configuration); //must be closed when the job done
-      bind(Client.class).toInstance(client);
-      bind(ElasticSearchIndexerDao.class).toInstance(createElasticSearchDao(client, configuration));
-    }
+  @Override
+  protected void configure() {
+    Client client = ElasticUtils
+        .createAndConfigureESClient(configuration); //must be closed when the job done
+    bind(Client.class).toInstance(client);
+    bind(ElasticSearchIndexerDao.class).toInstance(createElasticSearchDao(client, configuration));
+  }
 
-    private ElasticSearchIndexerDao createElasticSearchDao(Client client,
-                                                           BaseJobConfiguration configuration) {
-        ElasticSearchIndexerDao esIndexerDao = new ElasticSearchIndexerDao(client,
-                configuration);
-        esIndexerDao.createIndexIfMissing();
+  private ElasticSearchIndexerDao createElasticSearchDao(Client client,
+      BaseJobConfiguration configuration) {
+    ElasticSearchIndexerDao esIndexerDao = new ElasticSearchIndexerDao(client,
+        configuration);
+    esIndexerDao.createIndexIfMissing();
 
-        return esIndexerDao;
-    }
+    return esIndexerDao;
+  }
 
 }

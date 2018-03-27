@@ -24,35 +24,36 @@ import org.hibernate.SessionFactory;
  */
 public class TestCalsJobsApplication extends BaseApiApplication<TestCalsJobsConfiguration> {
 
-    @Override
-    public Module applicationModule(Bootstrap<TestCalsJobsConfiguration> bootstrap) {
+  @Override
+  public Module applicationModule(Bootstrap<TestCalsJobsConfiguration> bootstrap) {
 
-        return new AbstractModule() {
+    return new AbstractModule() {
 
-            @Override
-            protected void configure() {
-                install(new AuditingModule());
-                install(new TestDataAccessModule(bootstrap));
+      @Override
+      protected void configure() {
+        install(new AuditingModule());
+        install(new TestDataAccessModule(bootstrap));
 
-                install(new MappingModule());
+        install(new MappingModule());
 
-                install(new DataAccessServicesModule() {
-                    private SessionFactory getXaCmsSessionFactory(Injector injector) {
-                        return injector.getInstance(Key.get(SessionFactory.class, CmsSessionFactory.class));
-                    }
+        install(new DataAccessServicesModule() {
+          private SessionFactory getXaCmsSessionFactory(Injector injector) {
+            return injector.getInstance(Key.get(SessionFactory.class, CmsSessionFactory.class));
+          }
 
-                    @Override
-                    protected SessionFactory getDataAccessSercvicesSessionFactory(Injector injector) {
-                        return getXaCmsSessionFactory(injector);
-                    }
+          @Override
+          protected SessionFactory getDataAccessSercvicesSessionFactory(Injector injector) {
+            return getXaCmsSessionFactory(injector);
+          }
 
-                });
-                bind(ChangedIdentifiersService.class).toProvider(ChangedFacilityIdentifiersProvider.class);
-                bind(ChangedFacilityService.class).toProvider(ChangedFacilityServiceProvider.class);
-                bind(FacilityParameterObjectCMSAwareBuilder.class).toProvider(FacilityParameterObjectBuilderProvider.class);
-                bindConstant().annotatedWith(LastRunDir.class).to("out");
-            }
-        };
-    }
+        });
+        bind(ChangedIdentifiersService.class).toProvider(ChangedFacilityIdentifiersProvider.class);
+        bind(ChangedFacilityService.class).toProvider(ChangedFacilityServiceProvider.class);
+        bind(FacilityParameterObjectCMSAwareBuilder.class)
+            .toProvider(FacilityParameterObjectBuilderProvider.class);
+        bindConstant().annotatedWith(LastRunDir.class).to("out");
+      }
+    };
+  }
 
 }

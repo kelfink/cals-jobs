@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.common.elastic;
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.inject.ElasticSearchBulkSize;
 import gov.ca.cwds.jobs.common.job.BulkWriter;
-
 import java.util.ArrayList;
 import java.util.List;
 

@@ -12,24 +12,24 @@ import org.hibernate.SessionFactory;
  */
 public class FacilityJob extends JobImpl<ChangedFacilityDTO> {
 
-    @Inject
-    @FasSessionFactory
-    private SessionFactory fasSessionFactory;
+  @Inject
+  @FasSessionFactory
+  private SessionFactory fasSessionFactory;
 
-    @Inject
-    @CmsSessionFactory
-    private SessionFactory cmsSessionFactory;
+  @Inject
+  @CmsSessionFactory
+  private SessionFactory cmsSessionFactory;
 
-    @Inject
-    @LisSessionFactory
-    private SessionFactory lisSessionFactory;
+  @Inject
+  @LisSessionFactory
+  private SessionFactory lisSessionFactory;
 
-    @Override
-    public void close() {
-        super.close();
-        fasSessionFactory.close();
-        lisSessionFactory.close();
-        cmsSessionFactory.close();
-    }
+  @Override
+  public void close() {
+    super.close();
+    fasSessionFactory.close();
+    lisSessionFactory.close();
+    cmsSessionFactory.close();
+  }
 
 }

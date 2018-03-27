@@ -9,16 +9,17 @@ import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 /**
  * Created by Alexander Serbin on 3/6/2018.
  */
-public class ChangedFacilityIdentifiersProvider extends AbstractInjectProvider<ChangedFacilityIdentifiersServiceImpl> {
+public class ChangedFacilityIdentifiersProvider extends
+    AbstractInjectProvider<ChangedFacilityIdentifiersServiceImpl> {
 
-    @Inject
-    public ChangedFacilityIdentifiersProvider(Injector injector,
-                                              UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory) {
-        super(injector, unitOfWorkAwareProxyFactory);
-    }
+  @Inject
+  public ChangedFacilityIdentifiersProvider(Injector injector,
+      UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory) {
+    super(injector, unitOfWorkAwareProxyFactory);
+  }
 
-    @Override
-    public Class<ChangedFacilityIdentifiersServiceImpl> getServiceClass() {
-        return ChangedFacilityIdentifiersServiceImpl.class;
-    }
+  @Override
+  public Class<ChangedFacilityIdentifiersServiceImpl> getServiceClass() {
+    return ChangedFacilityIdentifiersServiceImpl.class;
+  }
 }

@@ -10,15 +10,15 @@ import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
  */
 public class ChangedFacilityServiceProvider extends AbstractInjectProvider<ChangedFacilityService> {
 
-    @Inject
-    public ChangedFacilityServiceProvider(Injector injector,
-                                   UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory) {
-        super(injector, unitOfWorkAwareProxyFactory);
-    }
+  @Inject
+  public ChangedFacilityServiceProvider(Injector injector,
+      UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory) {
+    super(injector, unitOfWorkAwareProxyFactory);
+  }
 
-    @Override
-    public Class<ChangedFacilityService> getServiceClass() {
-        return ChangedFacilityService.class;
-    }
+  @Override
+  public Class<ChangedFacilityService> getServiceClass() {
+    return ChangedFacilityService.class;
+  }
 }
 

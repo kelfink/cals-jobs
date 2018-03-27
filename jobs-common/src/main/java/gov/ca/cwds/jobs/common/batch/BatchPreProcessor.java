@@ -1,7 +1,6 @@
 package gov.ca.cwds.jobs.common.batch;
 
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -11,6 +10,6 @@ import java.util.stream.Stream;
 @FunctionalInterface
 public interface BatchPreProcessor {
 
-    List<JobBatch> buildJobBatches(Stream<ChangedEntityIdentifier> identifiers);
+  List<JobBatch> buildJobBatches(Stream<ChangedEntityIdentifier> identifiers);
 
 }

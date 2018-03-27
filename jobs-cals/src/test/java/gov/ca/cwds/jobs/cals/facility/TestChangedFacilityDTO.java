@@ -3,13 +3,13 @@ package gov.ca.cwds.jobs.cals.facility;
 import gov.ca.cwds.cals.service.dto.ExpandedFacilityDTO;
 import gov.ca.cwds.dto.BaseDTO;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
-
 import java.io.Serializable;
 
 /**
  * Created by TPT2 on 12/12/2017.
  */
 public class TestChangedFacilityDTO extends BaseDTO implements Serializable {
+
   private String id;
 
   private ExpandedFacilityDTO dto;

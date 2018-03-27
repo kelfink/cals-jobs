@@ -4,10 +4,9 @@ import gov.ca.cwds.cals.service.dto.FacilityDTO;
 import gov.ca.cwds.dto.BaseDTO;
 import gov.ca.cwds.jobs.common.ChangedDTO;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
-
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Objects;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author CWDS TPT-2

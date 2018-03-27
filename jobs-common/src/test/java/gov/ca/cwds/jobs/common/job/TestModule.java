@@ -16,65 +16,72 @@ import gov.ca.cwds.jobs.common.job.impl.JobImpl;
  */
 public class TestModule extends AbstractBaseJobModule {
 
-    private ChangedIdentifiersService changedIdentifiersService;
-    private ChangedEntityService changedEntityService;
-    private Class<? extends BatchPreProcessor> jobBatchPreProcessorClass;
-    private BulkWriter bulkWriter;
+  private ChangedIdentifiersService changedIdentifiersService;
+  private ChangedEntityService changedEntityService;
+  private Class<? extends BatchPreProcessor> jobBatchPreProcessorClass;
+  private BulkWriter bulkWriter;
 
-    public TestModule(String[] args) {
-        super(args);
-        initDefaults();
-    }
+  public TestModule(String[] args) {
+    super(args);
+    initDefaults();
+  }
 
-    private void initDefaults() {
-        changedIdentifiersService = new TestChangeIdentifiersService();
-        changedEntityService = identifier -> new Object();
-        jobBatchPreProcessorClass = BatchPreProcessorImpl.class;
-        setElasticSearchModule(new AbstractModule() {
-            @Override
-            protected void configure() {}
-        });
-        bulkWriter = items -> {};
-    }
+  private void initDefaults() {
+    changedIdentifiersService = new TestChangeIdentifiersService();
+    changedEntityService = identifier -> new Object();
+    jobBatchPreProcessorClass = BatchPreProcessorImpl.class;
+    setElasticSearchModule(new AbstractModule() {
+      @Override
+      protected void configure() {
+      }
+    });
+    bulkWriter = items -> {
+    };
+  }
 
-    @Override
-    protected BaseJobConfiguration getJobsConfiguration(JobOptions jobsOptions) {
-        TestJobConfiguration testJobConfiguration = new TestJobConfiguration();
-        testJobConfiguration.setBatchSize(1);
-        return testJobConfiguration;
-    }
+  @Override
+  protected BaseJobConfiguration getJobsConfiguration(JobOptions jobsOptions) {
+    TestJobConfiguration testJobConfiguration = new TestJobConfiguration();
+    testJobConfiguration.setBatchSize(1);
+    return testJobConfiguration;
+  }
 
-    @Override
-    protected void configure() {
-        super.setJobBatchPreProcessorClass(jobBatchPreProcessorClass);
-        super.configure();
-        bind(ChangedIdentifiersService.class).toInstance(changedIdentifiersService);
-        bind(Job.class).to(TestJobImpl.class);
-        bind(new TypeLiteral<BatchProcessor<Object>>() {}).to(TestBatchProcessor.class);
-        bind(new TypeLiteral<ChangedEntityService<Object>>() {}).toInstance(changedEntityService);
-        bind(new TypeLiteral<BulkWriter<Object>>() {}).toInstance(bulkWriter);
-    }
+  @Override
+  protected void configure() {
+    super.setJobBatchPreProcessorClass(jobBatchPreProcessorClass);
+    super.configure();
+    bind(ChangedIdentifiersService.class).toInstance(changedIdentifiersService);
+    bind(Job.class).to(TestJobImpl.class);
+    bind(new TypeLiteral<BatchProcessor<Object>>() {
+    }).to(TestBatchProcessor.class);
+    bind(new TypeLiteral<ChangedEntityService<Object>>() {
+    }).toInstance(changedEntityService);
+    bind(new TypeLiteral<BulkWriter<Object>>() {
+    }).toInstance(bulkWriter);
+  }
 
-    private static class TestJobImpl extends JobImpl<Object> {
+  private static class TestJobImpl extends JobImpl<Object> {
 
-    }
+  }
 
-    private static class TestBatchProcessor extends BatchProcessor<Object> {
-    }
+  private static class TestBatchProcessor extends BatchProcessor<Object> {
 
-    public void setChangedIdentifiersService(ChangedIdentifiersService changedIdentifiersService) {
-        this.changedIdentifiersService = changedIdentifiersService;
-    }
+  }
 
-    public void setChangedEntityService(ChangedEntityService changedEntityService) {
-        this.changedEntityService = changedEntityService;
-    }
+  public void setChangedIdentifiersService(ChangedIdentifiersService changedIdentifiersService) {
+    this.changedIdentifiersService = changedIdentifiersService;
+  }
 
-    public void setBulkWriter(BulkWriter bulkWriter) {
-        this.bulkWriter = bulkWriter;
-    }
+  public void setChangedEntityService(ChangedEntityService changedEntityService) {
+    this.changedEntityService = changedEntityService;
+  }
 
-    public void setJobBatchPreProcessorClass(Class<? extends BatchPreProcessor> jobBatchPreProcessorClass) {
-        this.jobBatchPreProcessorClass = jobBatchPreProcessorClass;
-    }
+  public void setBulkWriter(BulkWriter bulkWriter) {
+    this.bulkWriter = bulkWriter;
+  }
+
+  public void setJobBatchPreProcessorClass(
+      Class<? extends BatchPreProcessor> jobBatchPreProcessorClass) {
+    this.jobBatchPreProcessorClass = jobBatchPreProcessorClass;
+  }
 }

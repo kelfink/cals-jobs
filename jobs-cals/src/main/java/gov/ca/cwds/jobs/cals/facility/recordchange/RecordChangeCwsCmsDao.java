@@ -1,17 +1,16 @@
 package gov.ca.cwds.jobs.cals.facility.recordchange;
 
+import static gov.ca.cwds.jobs.cals.facility.recordchange.CwsRecordChange.CWSCMS_INCREMENTAL_LOAD_QUERY_NAME;
+import static gov.ca.cwds.jobs.cals.facility.recordchange.CwsRecordChange.CWSCMS_INITIAL_LOAD_QUERY_NAME;
+import static gov.ca.cwds.jobs.cals.facility.recordchange.CwsRecordChange.CWSCMS_RESUME_INCREMENTAL_LOAD_QUERY_NAME;
+
 import com.google.inject.Inject;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.stream.QueryCreator;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import org.hibernate.SessionFactory;
-
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
-
-import static gov.ca.cwds.jobs.cals.facility.recordchange.CwsRecordChange.CWSCMS_INCREMENTAL_LOAD_QUERY_NAME;
-import static gov.ca.cwds.jobs.cals.facility.recordchange.CwsRecordChange.CWSCMS_INITIAL_LOAD_QUERY_NAME;
-import static gov.ca.cwds.jobs.cals.facility.recordchange.CwsRecordChange.CWSCMS_RESUME_INCREMENTAL_LOAD_QUERY_NAME;
+import org.hibernate.SessionFactory;
 
 /**
  * @author CWDS TPT-2
@@ -40,11 +39,12 @@ public class RecordChangeCwsCmsDao extends BaseDaoImpl<CwsRecordChange> {
     return getIncrementalLoadStream(timeStampAfter, CWSCMS_RESUME_INCREMENTAL_LOAD_QUERY_NAME);
   }
 
-  private Stream<CwsRecordChange> getIncrementalLoadStream(LocalDateTime timeStampAfter, String queryName) {
+  private Stream<CwsRecordChange> getIncrementalLoadStream(LocalDateTime timeStampAfter,
+      String queryName) {
     QueryCreator<CwsRecordChange> queryCreator = (session, entityClass) -> session
-            .getNamedNativeQuery(queryName)
-            .setParameter("dateAfter", timeStampAfter)
-            .setReadOnly(true);
+        .getNamedNativeQuery(queryName)
+        .setParameter("dateAfter", timeStampAfter)
+        .setReadOnly(true);
     return new CwsRecordChangesStreamer(this, queryCreator).createStream();
   }
 

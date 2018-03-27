@@ -2,13 +2,12 @@ package gov.ca.cwds.jobs.cals.facility.recordchange;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
-
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import java.io.Serializable;
 
 /**
  * @author CWDS TPT-2

@@ -1,6 +1,11 @@
 package gov.ca.cwds.jobs.common.config;
 
 import gov.ca.cwds.jobs.common.exception.JobsException;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.file.Paths;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -13,15 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.nio.file.Paths;
-
 /**
  * Represents batch job options from the command line.
- * 
+ *
  * @author CWDS API Team
  */
 public class JobOptions {
@@ -50,7 +49,7 @@ public class JobOptions {
 
   /**
    * Getter for location of Elasticsearch configuration file.
-   * 
+   *
    * @return location of Elasticsearch configuration file
    */
   public String getEsConfigLoc() {
@@ -59,7 +58,7 @@ public class JobOptions {
 
   /**
    * Getter for location of last run date/time file.
-   * 
+   *
    * @return location of last run file
    */
   public String getLastRunLoc() {
@@ -69,7 +68,7 @@ public class JobOptions {
 
   /**
    * Define a command line option.
-   * 
+   *
    * @param shortOpt single letter option name
    * @param longOpt long option name
    * @param description option description
@@ -87,7 +86,7 @@ public class JobOptions {
 
   /**
    * Define command line options.
-   * 
+   *
    * @return command line option definitions
    */
   protected static Options buildCmdLineOptions() {
@@ -123,7 +122,7 @@ public class JobOptions {
 
   /**
    * Parse the command line return the job settings.
-   * 
+   *
    * @param args command line to parse
    * @return JobOptions defining this job
    * @throws JobsException if unable to parse command line
@@ -172,7 +171,7 @@ public class JobOptions {
     File configFile = new File(jobOptions.getEsConfigLoc());
     if (!configFile.exists()) {
       throw new JobsException(
-              "job arguments error: specified config file " + configFile.getPath() + " not found");
+          "job arguments error: specified config file " + configFile.getPath() + " not found");
     }
 
     // check option: -l

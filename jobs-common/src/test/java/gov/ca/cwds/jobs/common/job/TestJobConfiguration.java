@@ -7,9 +7,9 @@ import gov.ca.cwds.jobs.common.BaseJobConfiguration;
  */
 class TestJobConfiguration extends BaseJobConfiguration {
 
-    public TestJobConfiguration() {
-        setBatchSize(1);
-        setReaderThreadsCount(1);
-        setElasticSearchBulkSize(1);
-    }
+  public TestJobConfiguration() {
+    setBatchSize(1);
+    setReaderThreadsCount(1);
+    setElasticSearchBulkSize(1);
+  }
 }

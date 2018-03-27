@@ -8,20 +8,18 @@ import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.job.BulkWriter;
 import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 
 /**
- * @author CWDS TPT-2
- *
  * @param <T> persistence class type
+ * @author CWDS TPT-2
  */
 public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
 
@@ -32,7 +30,7 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
 
   /**
    * Constructor.
-   * 
+   *
    * @param elasticsearchDao ES DAO
    * @param objectMapper Jackson object mapper
    */
@@ -58,27 +56,27 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
         }).build();
   }
 
-    @Override
-    public void write(List<T> items) {
-        items.stream().forEach(item -> {
-            try {
-                RecordChangeOperation recordChangeOperation = item.getRecordChangeOperation();
+  @Override
+  public void write(List<T> items) {
+    items.stream().forEach(item -> {
+      try {
+        RecordChangeOperation recordChangeOperation = item.getRecordChangeOperation();
 
-                LOGGER.info("Preparing to delete item: ID {}", item.getId());
-                bulkProcessor.add(elasticsearchDao.bulkDelete(item.getId()));
+        LOGGER.info("Preparing to delete item: ID {}", item.getId());
+        bulkProcessor.add(elasticsearchDao.bulkDelete(item.getId()));
 
-                if (RecordChangeOperation.I == recordChangeOperation
-                        || RecordChangeOperation.U == recordChangeOperation) {
-                    LOGGER.info("Preparing to insert item: ID {}", item.getId());
-                    bulkProcessor.add(elasticsearchDao.bulkAdd(objectMapper, item.getId(), item.getDTO()));
-                }
-            } catch (JsonProcessingException e) {
-                throw new JobsException(e);
-            }
-        });
-        bulkProcessor.flush();
-        ConsumerCounter.addToCounter(items.size());
-    }
+        if (RecordChangeOperation.I == recordChangeOperation
+            || RecordChangeOperation.U == recordChangeOperation) {
+          LOGGER.info("Preparing to insert item: ID {}", item.getId());
+          bulkProcessor.add(elasticsearchDao.bulkAdd(objectMapper, item.getId(), item.getDTO()));
+        }
+      } catch (JsonProcessingException e) {
+        throw new JobsException(e);
+      }
+    });
+    bulkProcessor.flush();
+    ConsumerCounter.addToCounter(items.size());
+  }
 
   @Override
   public void destroy() {
@@ -88,7 +86,7 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
       } finally {
         elasticsearchDao.close();
       }
-    } catch (IOException |InterruptedException e) {
+    } catch (IOException | InterruptedException e) {
       throw new JobsException(e);
     }
   }

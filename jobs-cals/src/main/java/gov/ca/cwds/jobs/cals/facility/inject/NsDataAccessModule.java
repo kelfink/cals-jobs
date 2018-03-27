@@ -36,14 +36,14 @@ import gov.ca.cwds.cals.persistence.model.calsns.rfa.RFA1cForm;
 import gov.ca.cwds.jobs.cals.facility.FacilityJobConfiguration;
 import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 
 /**
  * @author CWDS TPT-2
  */
 public class NsDataAccessModule extends AbstractModule {
 
-  public static final ImmutableList<Class<?>> nsEntityClasses = ImmutableList.<Class<?>>builder().add(
+  public static final ImmutableList<Class<?>> nsEntityClasses = ImmutableList.<Class<?>>builder()
+      .add(
           AgeGroupType.class,
           LanguageType.class,
           GenderType.class,
@@ -84,10 +84,12 @@ public class NsDataAccessModule extends AbstractModule {
 
     @Override
     public SessionFactory get() {
-      return SessionFactoryUtil.buildSessionFactory(facilityJobConfiguration.getCalsnsDataSourceFactory(),
+      return SessionFactoryUtil
+          .buildSessionFactory(facilityJobConfiguration.getCalsnsDataSourceFactory(),
               DataSourceName.NS.name(), nsEntityClasses,
-              (configuration) -> configuration.addPackage("gov.ca.cwds.cals.persistence.model.calsns.rfa")
-      );
+              (configuration) -> configuration
+                  .addPackage("gov.ca.cwds.cals.persistence.model.calsns.rfa")
+          );
     }
 
   }
