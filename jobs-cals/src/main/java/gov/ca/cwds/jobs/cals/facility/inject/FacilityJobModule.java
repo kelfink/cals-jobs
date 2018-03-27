@@ -8,10 +8,16 @@ import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.cals.Constants;
+import gov.ca.cwds.cals.inject.CwsFacilityServiceProvider;
 import gov.ca.cwds.cals.inject.DataAccessServicesModule;
+import gov.ca.cwds.cals.inject.FasFacilityServiceProvider;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
+import gov.ca.cwds.cals.inject.LisFacilityServiceProvider;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
 import gov.ca.cwds.cals.inject.MappingModule;
+import gov.ca.cwds.cals.service.CwsFacilityService;
+import gov.ca.cwds.cals.service.FasFacilityService;
+import gov.ca.cwds.cals.service.LisFacilityService;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
@@ -61,6 +67,9 @@ public class FacilityJobModule extends AbstractBaseJobModule {
     bind(new TypeLiteral<BatchProcessor<ChangedFacilityDTO>>() {
     }).to(FacilityBatchProcessor.class);
     bind(ChangedIdentifiersService.class).toProvider(ChangedFacilityIdentifiersProvider.class);
+    bind(LisFacilityService.class).toProvider(LisFacilityServiceProvider.class);
+    bind(FasFacilityService.class).toProvider(FasFacilityServiceProvider.class);
+    bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {
     }).toProvider(ChangedFacilityServiceProvider.class);
     bind(FacilityParameterObjectBuilder.class);
@@ -71,13 +80,13 @@ public class FacilityJobModule extends AbstractBaseJobModule {
     install(new FasDataAccessModule());
     install(new NsDataAccessModule());
     install(new DataAccessServicesModule() {
-      private SessionFactory getXaCmsSessionFactory(Injector injector) {
+      private SessionFactory getCmsSessionFactory(Injector injector) {
         return injector.getInstance(Key.get(SessionFactory.class, CmsSessionFactory.class));
       }
 
       @Override
       protected SessionFactory getDataAccessSercvicesSessionFactory(Injector injector) {
-        return getXaCmsSessionFactory(injector);
+        return getCmsSessionFactory(injector);
       }
     });
   }
