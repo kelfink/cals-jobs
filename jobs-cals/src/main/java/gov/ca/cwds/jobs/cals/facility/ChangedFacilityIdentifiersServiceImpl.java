@@ -16,16 +16,11 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 3/6/2018.
  */
 public class ChangedFacilityIdentifiersServiceImpl implements ChangedIdentifiersService {
-
-  private static final Logger LOG = LoggerFactory
-      .getLogger(ChangedFacilityIdentifiersServiceImpl.class);
 
   @Inject
   private RecordChangeCwsCmsDao recordChangeCwsCmsDao;

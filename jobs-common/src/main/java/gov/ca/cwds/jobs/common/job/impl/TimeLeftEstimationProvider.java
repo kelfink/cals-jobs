@@ -1,18 +1,14 @@
 package gov.ca.cwds.jobs.common.job.impl;
 
 import gov.ca.cwds.jobs.common.batch.JobBatch;
-import gov.ca.cwds.jobs.common.job.utils.TimeSpentUtil;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 3/19/2018.
  */
 public class TimeLeftEstimationProvider {
-
-  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(TimeSpentUtil.class);
 
   private final List<JobBatch> jobBatches;
   private LocalDateTime jobStartTime;

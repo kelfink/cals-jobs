@@ -9,9 +9,11 @@ import org.slf4j.LoggerFactory;
 /**
  * @author CWDS TPT-2
  */
-public abstract class JobRunner {
+public final class JobRunner {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
+
+  private JobRunner() {}
 
   public static void run(AbstractBaseJobModule mainModule) {
     Job job = null;

@@ -25,15 +25,11 @@ import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 import gov.ca.cwds.jobs.common.job.Job;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 3/4/2018.
  */
 public class RFA1aJobModule extends AbstractBaseJobModule {
-
-  private static final Logger LOG = LoggerFactory.getLogger(RFA1aJobModule.class);
 
   public RFA1aJobModule(String[] args) {
     super(args);

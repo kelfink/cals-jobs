@@ -96,37 +96,20 @@ public class BatchPreProcessorImpl implements BatchPreProcessor {
   private List<JobBatch> handleManyJobBatchesCase(LocalDateTime timestamp,
       List<List<ChangedEntityIdentifier>> partisionedIdentifiers) {
     List<JobBatch> timeStampBatch = partisionedIdentifiers.stream().
-        map(list -> new JobBatch(list)).collect(Collectors.toList());
+        map(JobBatch::new).collect(Collectors.toList());
     if (timeStampBatch.size() > 1) {
       timeStampBatch.get(timeStampBatch.size() - 1).setTimestamp(timestamp);
     } else {
       timeStampBatch.get(0).setTimestamp(timestamp);
     }
-    ;
+
     return timeStampBatch;
   }
 
   private List<JobBatch> handleEmptyIdentifiers(
       List<ChangedEntityIdentifier> changedEntityIdentifiers) {
     return Lists.partition(changedEntityIdentifiers, batchSize).stream().map(
-        list -> new JobBatch(list)).collect(Collectors.toList());
-  }
-
-  private Stream<ChangedEntityIdentifier> getSortedStream(
-      Stream<ChangedEntityIdentifier> identifiers) {
-    return identifiers.sorted((id1, id2) -> {
-      if (id1.getTimestamp() == null || id2.getTimestamp() == null) {
-        if (id1.getTimestamp() == null && id2.getTimestamp() == null) {
-          return 0;
-        } else if (id1.getTimestamp() == null && id2.getTimestamp() != null) {
-          return -1;
-        } else {
-          return 1;
-        }
-      } else {
-        return id1.getTimestamp().compareTo(id2.getTimestamp());
-      }
-    });
+        JobBatch::new).collect(Collectors.toList());
   }
 
   public void setBatchSize(int batchSize) {
@@ -136,7 +119,7 @@ public class BatchPreProcessorImpl implements BatchPreProcessor {
   private static class OpenedJobBatchHolder {
 
     private Queue<JobBatch> stack = new LinkedList<>();
-    ;
+
     private List<JobBatch> jobBatches;
 
     public OpenedJobBatchHolder(List<JobBatch> jobBatches) {

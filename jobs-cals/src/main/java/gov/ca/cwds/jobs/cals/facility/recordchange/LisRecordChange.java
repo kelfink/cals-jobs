@@ -29,8 +29,8 @@ import org.hibernate.annotations.NamedNativeQuery;
 @Entity
 public class LisRecordChange extends RecordChange {
 
-  public final static String LIS_INITIAL_LOAD_QUERY_NAME = "RecordChange.lisInitialLoadQuery";
-  public final static String LIS_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.lisIncrementalLoadQuery";
+  public static final String LIS_INITIAL_LOAD_QUERY_NAME = "RecordChange.lisInitialLoadQuery";
+  public static final String LIS_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.lisIncrementalLoadQuery";
 
   public static final DateTimeFormatter lisTimestampFormatter = DateTimeFormatter
       .ofPattern("yyyyMMddHHmmss");

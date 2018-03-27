@@ -7,7 +7,6 @@ import gov.ca.cwds.jobs.common.ChangedDTO;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import java.io.Serializable;
 import java.util.Objects;
-import javax.validation.constraints.NotNull;
 
 /**
  * @author CWDS TPT-2
@@ -16,10 +15,8 @@ public class ChangedRFA1aFormDTO extends BaseDTO implements ChangedDTO<RFA1aForm
 
   private static final long serialVersionUID = 2L;
 
-  @NotNull
   private RFA1aFormDTO rfa1aFormDTO;
 
-  @NotNull
   private RecordChangeOperation recordChangeOperation;
 
   public ChangedRFA1aFormDTO() {

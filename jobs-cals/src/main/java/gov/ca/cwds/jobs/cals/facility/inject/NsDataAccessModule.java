@@ -87,7 +87,7 @@ public class NsDataAccessModule extends AbstractModule {
       return SessionFactoryUtil
           .buildSessionFactory(facilityJobConfiguration.getCalsnsDataSourceFactory(),
               DataSourceName.NS.name(), nsEntityClasses,
-              (configuration) -> configuration
+              configuration -> configuration
                   .addPackage("gov.ca.cwds.cals.persistence.model.calsns.rfa")
           );
     }

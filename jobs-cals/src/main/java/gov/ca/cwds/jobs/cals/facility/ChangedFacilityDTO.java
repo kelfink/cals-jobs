@@ -6,7 +6,6 @@ import gov.ca.cwds.jobs.common.ChangedDTO;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import java.io.Serializable;
 import java.util.Objects;
-import javax.validation.constraints.NotNull;
 
 /**
  * @author CWDS TPT-2
@@ -15,10 +14,8 @@ public class ChangedFacilityDTO extends BaseDTO implements ChangedDTO<FacilityDT
 
   private static final long serialVersionUID = 1L;
 
-  @NotNull
   private FacilityDTO facilityDTO;
 
-  @NotNull
   private RecordChangeOperation recordChangeOperation;
 
   public ChangedFacilityDTO(FacilityDTO facilityDTO, RecordChangeOperation recordChangeOperation) {

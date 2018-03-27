@@ -34,7 +34,7 @@ import org.hibernate.annotations.NamedNativeQuery;
 @Entity
 public class CwsRecordChange extends RecordChange {
 
-  final static String CWS_CMS_INITIAL_LOAD_QUERY = "SELECT PlacementHome.IDENTIFIER AS ID" +
+  static final String CWS_CMS_INITIAL_LOAD_QUERY = "SELECT PlacementHome.IDENTIFIER AS ID" +
       ",'I' AS CHANGE_OPERATION" +
       ",PlacementHome.LST_UPD_TS AS TIME_STAMP" +
       " FROM {h-schema}PLC_HM_T PlacementHome" +
@@ -43,16 +43,16 @@ public class CwsRecordChange extends RecordChange {
   public static final String CWS_CMS_RESUME_INITIAL_LOAD_QUERY = CWS_CMS_INITIAL_LOAD_QUERY +
       " AND PlacementHome.LST_UPD_TS > :dateAfter";
 
-  final static String CWS_CMS_INCREMENTAL_LOAD_QUERY = "SELECT PlacementHome.IDENTIFIER AS ID" +
+  static final String CWS_CMS_INCREMENTAL_LOAD_QUERY = "SELECT PlacementHome.IDENTIFIER AS ID" +
       ",PlacementHome.IBMSNAP_OPERATION AS CHANGE_OPERATION" +
       ",PlacementHome.IBMSNAP_LOGMARKER AS TIME_STAMP" +
       " FROM {h-schema}PLC_HM_T PlacementHome" +
       " WHERE PlacementHome.LICENSE_NO IS NULL" +
       " AND PlacementHome.IBMSNAP_LOGMARKER > :dateAfter";
 
-  public final static String CWSCMS_INITIAL_LOAD_QUERY_NAME = "RecordChange.cwscmsInitialLoadQuery";
-  public final static String CWSCMS_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.cwscmsIncrementalLoadQuery";
-  public final static String CWSCMS_RESUME_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.cwscmsResumeInitialLoadQuery";
+  public static final String CWSCMS_INITIAL_LOAD_QUERY_NAME = "RecordChange.cwscmsInitialLoadQuery";
+  public static final String CWSCMS_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.cwscmsIncrementalLoadQuery";
+  public static final String CWSCMS_RESUME_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.cwscmsResumeInitialLoadQuery";
 
 
   @Column(name = "TIME_STAMP")

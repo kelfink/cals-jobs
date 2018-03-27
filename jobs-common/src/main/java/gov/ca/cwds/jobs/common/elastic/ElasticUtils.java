@@ -18,9 +18,11 @@ import org.slf4j.LoggerFactory;
  * @author Ievgenii Drozd
  * @version 2/27/18
  */
-public class ElasticUtils {
+public final class ElasticUtils {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticUtils.class);
+
+  private ElasticUtils() {}
 
   public static TransportClient createAndConfigureESClient(BaseJobConfiguration config) {
     TransportClient client = null;

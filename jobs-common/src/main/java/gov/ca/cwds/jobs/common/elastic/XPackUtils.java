@@ -7,7 +7,10 @@ import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
 /**
  * Created by dmitry.rudenko on 7/13/2017.
  */
-public class XPackUtils {
+public final class XPackUtils {
+
+  private XPackUtils() {
+  }
 
   public static TransportClient secureClient(String user, String password,
       Settings.Builder settings) {

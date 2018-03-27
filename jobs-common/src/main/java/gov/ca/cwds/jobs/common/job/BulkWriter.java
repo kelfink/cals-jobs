@@ -14,5 +14,5 @@ public interface BulkWriter<T> {
   default void destroy() {
   }
 
-  ;
+
 }
