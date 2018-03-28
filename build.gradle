@@ -18,8 +18,8 @@ apply plugin: 'jacoco'
 
 project.ext {
     cwdsModelVersion = '0.5.8_473-RC'
-    calsApiVersion = '0.6.2_1052-RC'
-    coreApiVersion = '1.6.1_484-RC'
+    calsApiVersion = '0.6.2_1090-RC'
+    coreApiVersion = '1.6.2_538-RC'
     testSupportVersion = '0.5.6_272-RC'
     commonsCliVersion = '1.4'
     commonsLangVersion = '3.6'
