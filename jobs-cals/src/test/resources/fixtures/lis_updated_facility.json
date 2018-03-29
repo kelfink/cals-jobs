@@ -1,55 +1,86 @@
 {
-  "id" : "193600001",
-  "dto" : {
-    "id" : "193600001",
-    "capacity_last_changed" : "2006-10-13",
-    "type" : {
-      "id" : "810",
-      "value" : "FAMILY DAY CARE"
+  "recordChangeOperation": "U",
+  "id": "193600001",
+  "dto": {
+    "href": null,
+    "id": "193600001",
+    "capacity_last_changed": "2006-10-13",
+    "type": {
+      "id": "810",
+      "value": "FAMILY DAY CARE"
     },
-    "name" : "BACKYARDIGAN FOSTER FAMILY HOME",
-    "licensee_name" : "PROMESA BEHAVIORAL HEALTH",
-    "license_type" : "A",
-    "assigned_worker" : { },
-    "district_office" : {
-      "number" : "2",
-      "name" : "BAY AREA-CC OAKLAND"
+    "name": "BACKYARDIGAN FOSTER FAMILY HOME",
+    "licensee_name": "PROMESA BEHAVIORAL HEALTH",
+    "license_type": "A",
+    "assigned_worker": {
+      "id": null,
+      "value": null
     },
-    "license_number" : "193600001",
-    "status" : {
-      "id" : "15",
-      "value" : "CLOSED, CHG LOCATION"
+    "district_office": {
+      "number": "2",
+      "name": "BAY AREA-CC OAKLAND"
     },
-    "capacity" : 14,
-    "license_effective_date" : "2004-05-10",
-    "original_application_recieved_date" : "2004-01-28",
-    "county" : {
-      "id" : "7",
-      "value" : "CONTRA COSTA"
+    "license_number": "193600001",
+    "status": {
+      "id": "15",
+      "value": "CLOSED, CHG LOCATION"
     },
-    "phones" : [ {
-      "relation" : "primary",
-      "type" : "Cell",
-      "number" : "9255220001"
-    } ],
-    "addresses" : [ {
-      "type" : "Residential",
-      "address" : {
-        "street_address" : "485 PILGRIM AVE.",
-        "city" : "MODESTO",
-        "state" : "CA",
-        "zip_code" : "95650"
+    "capacity": 14,
+    "license_effective_date": "2004-05-10",
+    "original_application_recieved_date": "2004-01-28",
+    "last_visit_date": null,
+    "last_deferred_visit_date": null,
+    "email_address": null,
+    "last_visit_reason": null,
+    "last_deferred_visit_reason": null,
+    "county": {
+      "id": "7",
+      "value": "CONTRA COSTA",
+      "lis_code": null
+    },
+    "phones": [
+      {
+        "id": null,
+        "relation": "primary",
+        "type": "Cell",
+        "number": "9255220001"
       }
-    }, {
-      "type" : "Mailing",
-      "address" : {
-        "street_address" : "485 PILGRIM AVE.",
-        "city" : "MODESTO",
-        "state" : "CA",
-        "zip_code" : "95650"
+    ],
+    "addresses": [
+      {
+        "id": null,
+        "type": "Residential",
+        "address": {
+          "id": null,
+          "longitude": null,
+          "lattitude": null,
+          "deliverable": null,
+          "street_address": "485 PILGRIM AVE.",
+          "city": "MODESTO",
+          "state": "CA",
+          "zip_code": "95650",
+          "zip_suffix_code": null
+        }
+      },
+      {
+        "id": null,
+        "type": "Mailing",
+        "address": {
+          "id": null,
+          "longitude": null,
+          "lattitude": null,
+          "deliverable": null,
+          "street_address": "485 PILGRIM AVE.",
+          "city": "MODESTO",
+          "state": "CA",
+          "zip_code": "95650",
+          "zip_suffix_code": null
+        }
       }
-    } ],
-    "facility_source" : "LIS"
-  },
-  "recordChangeOperation" : "U"
+    ],
+    "visits": null,
+    "annual_visit_year": null,
+    "prelicensing_visit_date": null,
+    "facility_source": "LIS"
+  }
 }

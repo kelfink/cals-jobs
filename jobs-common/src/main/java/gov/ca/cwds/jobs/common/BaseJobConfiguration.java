@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.LoggerFactory;
 
-public abstract class BaseJobConfiguration extends ElasticsearchConfiguration {
+public class BaseJobConfiguration extends ElasticsearchConfiguration {
 
   private static final org.slf4j.Logger LOGGER = LoggerFactory
       .getLogger(BaseJobConfiguration.class);

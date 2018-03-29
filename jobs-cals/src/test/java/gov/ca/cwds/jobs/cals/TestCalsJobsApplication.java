@@ -15,10 +15,6 @@ import gov.ca.cwds.cals.service.LisFacilityService;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.inject.AuditingModule;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.cals.facility.ChangedFacilityService;
-import gov.ca.cwds.jobs.cals.facility.inject.ChangedFacilityIdentifiersProvider;
-import gov.ca.cwds.jobs.cals.facility.inject.ChangedFacilityServiceProvider;
-import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
 import gov.ca.cwds.rest.BaseApiApplication;
 import io.dropwizard.setup.Bootstrap;
@@ -27,6 +23,8 @@ import org.hibernate.SessionFactory;
 /**
  * Created by Alexander Serbin on 1/29/2018.
  */
+
+//TODO remove after restoring RFA ES job
 public class TestCalsJobsApplication extends BaseApiApplication<TestCalsJobsConfiguration> {
 
   @Override
@@ -52,11 +50,11 @@ public class TestCalsJobsApplication extends BaseApiApplication<TestCalsJobsConf
           }
 
         });
-        bind(ChangedIdentifiersService.class).toProvider(ChangedFacilityIdentifiersProvider.class);
+        //bind(ChangedIdentifiersService.class).toProvider(ChangedFacilityIdentifiersProvider.class);
         bind(LisFacilityService.class).toProvider(LisFacilityServiceProvider.class);
         bind(FasFacilityService.class).toProvider(FasFacilityServiceProvider.class);
         bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
-        bind(ChangedFacilityService.class).toProvider(ChangedFacilityServiceProvider.class);
+        //bind(ChangedFacilityService.class).toProvider(ChangedFacilityServiceProvider.class);
         bind(FacilityParameterObjectBuilder.class);
         bindConstant().annotatedWith(LastRunDir.class).to("out");
       }

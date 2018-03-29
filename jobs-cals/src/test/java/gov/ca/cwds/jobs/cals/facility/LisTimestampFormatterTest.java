@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.cals.facility;
 
-import static gov.ca.cwds.jobs.cals.facility.recordchange.LisRecordChange.lisTimestampFormatter;
+import static gov.ca.cwds.jobs.cals.facility.lis.LisRecordChange.lisTimestampFormatter;
 import static org.junit.Assert.assertEquals;
 
 import java.time.LocalDateTime;

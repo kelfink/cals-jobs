@@ -1,0 +1,26 @@
+elasticsearch.host: localhost
+elasticsearch.port: 9300
+
+elasticsearch.additional.nodes:
+  - localhost:9300
+
+elasticsearch.cluster: elasticsearch
+elasticsearch.alias: facilities
+elasticsearch.doctype: facility
+#
+elasticsearch.xpack.user: elastic
+elasticsearch.xpack.password: changeme
+
+batchSize: 400
+elasticSearchBulkSize: 400
+readerThreadsCount: 3
+
+cmsDataSourceFactory:
+  properties:
+    hibernate.connection.driver_class: org.h2.Driver
+    hibernate.default_schema: CWSCMSRS
+    hibernate.connection.username: sa
+    hibernate.connection.password: ''
+    hibernate.connection.url: jdbc:h2:mem:CWSCMSRS;INIT=create schema if not exists CWSCMSRS\;set schema CWSCMSRS
+    #hibernate.connection.url: jdbc:h2:file:C:/data/CWSCMSRS;INIT=create schema if not exists CWSCMSRS\;set schema CWSCMSRS
+    hibernate.dialect: org.hibernate.dialect.H2Dialect

@@ -11,10 +11,10 @@ import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.cals.facility.inject.CwsCmsRsDataAccessModule;
-import gov.ca.cwds.jobs.cals.facility.inject.FasDataAccessModule;
-import gov.ca.cwds.jobs.cals.facility.inject.LisDataAccessModule;
-import gov.ca.cwds.jobs.cals.facility.inject.NsDataAccessModule;
+import gov.ca.cwds.jobs.cals.facility.cws.CwsCmsRsDataAccessModule;
+import gov.ca.cwds.jobs.cals.facility.fas.FasDataAccessModule;
+import gov.ca.cwds.jobs.cals.facility.lis.LisDataAccessModule;
+import gov.ca.cwds.jobs.cals.rfa.NsDataAccessModule;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.SessionFactoryFactory;
@@ -26,6 +26,7 @@ import org.hibernate.SessionFactory;
 /**
  * Created by Alexander Serbin on 1/30/2018.
  */
+//TODO remove after restoring RFA ES job
 public class TestDataAccessModule extends AbstractModule {
 
   private final HibernateBundle<TestCalsJobsConfiguration> fasHibernateBundle =

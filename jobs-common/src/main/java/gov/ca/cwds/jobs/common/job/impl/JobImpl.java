@@ -8,6 +8,7 @@ import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.identifier.impl.ChangedIdentifiersProvider;
 import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 import gov.ca.cwds.jobs.common.job.Job;
+import gov.ca.cwds.jobs.common.job.JobPreparator;
 import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
 import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import gov.ca.cwds.jobs.common.job.utils.TimeSpentUtil;
@@ -39,9 +40,13 @@ public class JobImpl<T> implements Job {
   @Inject
   private BatchProcessor<T> batchProcessor;
 
+  @Inject
+  private JobPreparator jobPreparator;
+
   @Override
   public void run() {
     try {
+      jobPreparator.run();
       processBatches(splitEntitiesByBatches());
       LocalDateTime now = LocalDateTime.now();
       timestampOperator.writeTimestamp(now);
