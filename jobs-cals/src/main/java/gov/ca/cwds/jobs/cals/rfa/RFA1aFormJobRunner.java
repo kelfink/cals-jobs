@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs.cals.rfa;
 
-import gov.ca.cwds.jobs.cals.rfa.inject.RFA1aJobModule;
 import gov.ca.cwds.jobs.common.job.impl.JobRunner;
 
 /**

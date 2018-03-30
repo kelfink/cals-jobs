@@ -7,6 +7,7 @@ import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.batch.BatchPreProcessor;
 import gov.ca.cwds.jobs.common.batch.BatchPreProcessorImpl;
 import gov.ca.cwds.jobs.common.config.JobOptions;
+import gov.ca.cwds.jobs.common.job.JobPreparator;
 import gov.ca.cwds.jobs.common.job.timestamp.FilesystemTimestampOperator;
 import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
 
@@ -18,6 +19,7 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
   private JobOptions jobOptions;
 
   private Class<? extends BatchPreProcessor> jobBatchPreProcessorClass = BatchPreProcessorImpl.class;
+  private Class<? extends JobPreparator> jobPreparatorClass = DefaultJobPreparator.class;
   private AbstractModule elasticSearchModule;
 
   public AbstractBaseJobModule(String[] args) {
@@ -29,6 +31,10 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
     this.jobBatchPreProcessorClass = jobBatchPreProcessorClass;
   }
 
+  public void setJobPreparatorClass(Class<? extends JobPreparator> jobPreparatorClass) {
+    this.jobPreparatorClass = jobPreparatorClass;
+  }
+
   public void setElasticSearchModule(AbstractModule elasticSearchModule) {
     this.elasticSearchModule = elasticSearchModule;
   }
@@ -38,6 +44,7 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
     bind(JobOptions.class).toInstance(jobOptions);
     bindConstant().annotatedWith(LastRunDir.class).to(jobOptions.getLastRunLoc());
     bind(TimestampOperator.class).to(FilesystemTimestampOperator.class).asEagerSingleton();
+    bind(JobPreparator.class).to(jobPreparatorClass);
     bind(BatchPreProcessor.class).to(jobBatchPreProcessorClass);
     bindConstant().annotatedWith(JobBatchSize.class)
         .to(getJobsConfiguration(jobOptions).getBatchSize());
@@ -58,6 +65,14 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
   @Inject
   public BaseJobConfiguration getBaseJobsConfiguration(JobOptions jobsOptions) {
     return getJobsConfiguration(jobsOptions);
+  }
+
+  static class DefaultJobPreparator implements JobPreparator {
+
+    @Override
+    public void run() {
+      //empty by default
+    }
   }
 
 }

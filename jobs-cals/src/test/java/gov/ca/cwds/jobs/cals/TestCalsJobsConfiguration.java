@@ -7,6 +7,8 @@ import io.dropwizard.db.DataSourceFactory;
 /**
  * Created by Alexander Serbin on 1/29/2018.
  */
+
+//TODO remove after restoring RFA ES job
 public class TestCalsJobsConfiguration extends BaseApiConfiguration {
 
   private DataSourceFactory cmsrsDataSourceFactory;

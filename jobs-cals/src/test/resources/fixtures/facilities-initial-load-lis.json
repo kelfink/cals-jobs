@@ -1,54 +1,86 @@
 {
-  "id" : "9069",
-  "dto" : {
-    "id" : "9069",
-    "capacity_last_changed" : "2006-10-13",
-    "type" : {
-      "id" : "433",
-      "value" : "FFA CERTIFIED HOME"
+  "recordChangeOperation": "U",
+  "id": "9069",
+  "dto": {
+    "href": null,
+    "id": "9069",
+    "capacity_last_changed": "2006-10-13",
+    "type": {
+      "id": "433",
+      "value": "FFA CERTIFIED HOME"
     },
-    "name" : "Cervantes, Joyce & Ronald CFH",
-    "licensee_name" : "Seneca Family Services Inc.",
-    "license_type" : "A",
-    "assigned_worker" : { },
-    "district_office" : {
-      "number" : "26",
-      "name" : "CENTRAL COAST CR/RES"
+    "name": "Cervantes, Joyce & Ronald CFH",
+    "licensee_name": "Seneca Family Services Inc.",
+    "license_type": "A",
+    "assigned_worker": {
+      "id": null,
+      "value": null
     },
-    "license_number" : "9069",
-    "status" : {
-      "id" : "12",
-      "value" : "CERTIFIED/APPROVED"
+    "district_office": {
+      "number": "26",
+      "name": "CENTRAL COAST CR/RES"
     },
-    "capacity" : 10,
-    "license_effective_date" : "2015-04-13",
-    "county" : {
-      "id" : "44",
-      "value" : "SANTA CRUZ"
+    "license_number": "9069",
+    "status": {
+      "id": "12",
+      "value": "CERTIFIED/APPROVED"
     },
-    "phones" : [ {
-      "relation" : "primary",
-      "type" : "Cell",
-      "number" : "8313368354"
-    } ],
-    "addresses" : [ {
-      "type" : "Residential",
-      "address" : {
-        "street_address" : "130 Alameda Ave",
-        "city" : "Brookdale",
-        "state" : "CA",
-        "zip_code" : "95007"
+    "capacity": 10,
+    "license_effective_date": "2015-04-13",
+    "original_application_recieved_date": null,
+    "last_visit_date": null,
+    "last_deferred_visit_date": null,
+    "email_address": null,
+    "last_visit_reason": null,
+    "last_deferred_visit_reason": null,
+    "county": {
+      "id": "44",
+      "value": "SANTA CRUZ",
+      "lis_code": null
+    },
+    "phones": [
+      {
+        "id": null,
+        "relation": "primary",
+        "type": "Cell",
+        "number": "8313368354"
       }
-    }, {
-      "type" : "Mailing",
-      "address" : {
-        "street_address" : "130 Alameda Ave",
-        "city" : "Brookdale",
-        "state" : "CA",
-        "zip_code" : "95007"
+    ],
+    "addresses": [
+      {
+        "id": null,
+        "type": "Residential",
+        "address": {
+          "id": null,
+          "longitude": null,
+          "lattitude": null,
+          "deliverable": null,
+          "street_address": "130 Alameda Ave",
+          "city": "Brookdale",
+          "state": "CA",
+          "zip_code": "95007",
+          "zip_suffix_code": null
+        }
+      },
+      {
+        "id": null,
+        "type": "Mailing",
+        "address": {
+          "id": null,
+          "longitude": null,
+          "lattitude": null,
+          "deliverable": null,
+          "street_address": "130 Alameda Ave",
+          "city": "Brookdale",
+          "state": "CA",
+          "zip_code": "95007",
+          "zip_suffix_code": null
+        }
       }
-    } ],
-    "facility_source" : "LIS"
-  },
-  "recordChangeOperation" : "U"
+    ],
+    "visits": null,
+    "annual_visit_year": null,
+    "prelicensing_visit_date": null,
+    "facility_source": "LIS"
+  }
 }
