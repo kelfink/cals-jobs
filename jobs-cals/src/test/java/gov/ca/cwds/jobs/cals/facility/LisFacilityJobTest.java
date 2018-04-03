@@ -40,6 +40,7 @@ public class LisFacilityJobTest {
       throws IOException, JSONException, InterruptedException, LiquibaseException {
     try {
       assertEquals(0, TestWriter.getItems().size());
+      lastRunDirHelper.deleteTimestampDirectory();
       runInitialLoad();
       assertEquals(230, TestWriter.getItems().size());
       assertFacility("fixtures/facilities-initial-load-lis.json", LIS_INITIAL_LOAD_FACILITY_ID);

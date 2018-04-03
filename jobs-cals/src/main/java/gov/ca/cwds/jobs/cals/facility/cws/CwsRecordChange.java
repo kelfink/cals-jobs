@@ -19,13 +19,6 @@ import org.hibernate.annotations.NamedNativeQuery;
 )
 
 @NamedNativeQuery(
-    name = CwsRecordChange.CWSCMS_RESUME_INCREMENTAL_LOAD_QUERY_NAME,
-    query = CwsRecordChange.CWS_CMS_RESUME_INITIAL_LOAD_QUERY,
-    resultClass = CwsRecordChange.class,
-    readOnly = true
-)
-
-@NamedNativeQuery(
     name = CwsRecordChange.CWSCMS_INCREMENTAL_LOAD_QUERY_NAME,
     query = CwsRecordChange.CWS_CMS_INCREMENTAL_LOAD_QUERY,
     resultClass = CwsRecordChange.class,
@@ -39,21 +32,20 @@ public class CwsRecordChange extends RecordChange {
       ",'I' AS CHANGE_OPERATION" +
       ",PlacementHome.LST_UPD_TS AS TIME_STAMP" +
       " FROM {h-schema}PLC_HM_T PlacementHome" +
-      " WHERE PlacementHome.LICENSE_NO IS NULL";
-
-  public static final String CWS_CMS_RESUME_INITIAL_LOAD_QUERY = CWS_CMS_INITIAL_LOAD_QUERY +
-      " AND PlacementHome.LST_UPD_TS > :dateAfter";
+      " WHERE PlacementHome.LICENSE_NO IS NULL" +
+      " AND PlacementHome.LST_UPD_TS > :dateAfter" +
+      " LIMIT :limit OFFSET :offset";
 
   static final String CWS_CMS_INCREMENTAL_LOAD_QUERY = "SELECT PlacementHome.IDENTIFIER AS ID" +
       ",PlacementHome.IBMSNAP_OPERATION AS CHANGE_OPERATION" +
       ",PlacementHome.IBMSNAP_LOGMARKER AS TIME_STAMP" +
       " FROM {h-schema}PLC_HM_T PlacementHome" +
       " WHERE PlacementHome.LICENSE_NO IS NULL" +
-      " AND PlacementHome.IBMSNAP_LOGMARKER > :dateAfter";
+      " AND PlacementHome.IBMSNAP_LOGMARKER > :dateAfter " +
+      " LIMIT :limit OFFSET :offset";
 
   public static final String CWSCMS_INITIAL_LOAD_QUERY_NAME = "RecordChange.cwscmsInitialLoadQuery";
   public static final String CWSCMS_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.cwscmsIncrementalLoadQuery";
-  public static final String CWSCMS_RESUME_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.cwscmsResumeInitialLoadQuery";
 
 
   @Column(name = "TIME_STAMP")

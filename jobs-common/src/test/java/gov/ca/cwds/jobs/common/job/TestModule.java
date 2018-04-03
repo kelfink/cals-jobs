@@ -3,10 +3,8 @@ package gov.ca.cwds.jobs.common.job;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
-import gov.ca.cwds.jobs.common.batch.BatchPreProcessor;
-import gov.ca.cwds.jobs.common.batch.BatchPreProcessorImpl;
 import gov.ca.cwds.jobs.common.config.JobOptions;
-import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
+import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersProvider;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
 import gov.ca.cwds.jobs.common.job.impl.BatchProcessor;
 import gov.ca.cwds.jobs.common.job.impl.JobImpl;
@@ -16,9 +14,8 @@ import gov.ca.cwds.jobs.common.job.impl.JobImpl;
  */
 public class TestModule extends AbstractBaseJobModule {
 
-  private ChangedIdentifiersService changedIdentifiersService;
   private ChangedEntityService changedEntityService;
-  private Class<? extends BatchPreProcessor> jobBatchPreProcessorClass;
+  private ChangedIdentifiersProvider changedIdentifiersProvider;
   private BulkWriter bulkWriter;
 
   public TestModule(String[] args) {
@@ -27,9 +24,7 @@ public class TestModule extends AbstractBaseJobModule {
   }
 
   private void initDefaults() {
-    changedIdentifiersService = new TestChangeIdentifiersService();
     changedEntityService = identifier -> new Object();
-    jobBatchPreProcessorClass = BatchPreProcessorImpl.class;
     setElasticSearchModule(new AbstractModule() {
       @Override
       protected void configure() {
@@ -48,9 +43,7 @@ public class TestModule extends AbstractBaseJobModule {
 
   @Override
   protected void configure() {
-    super.setJobBatchPreProcessorClass(jobBatchPreProcessorClass);
     super.configure();
-    bind(ChangedIdentifiersService.class).toInstance(changedIdentifiersService);
     bind(Job.class).to(TestJobImpl.class);
     bind(new TypeLiteral<BatchProcessor<Object>>() {
     }).to(TestBatchProcessor.class);
@@ -68,10 +61,6 @@ public class TestModule extends AbstractBaseJobModule {
 
   }
 
-  public void setChangedIdentifiersService(ChangedIdentifiersService changedIdentifiersService) {
-    this.changedIdentifiersService = changedIdentifiersService;
-  }
-
   public void setChangedEntityService(ChangedEntityService changedEntityService) {
     this.changedEntityService = changedEntityService;
   }
@@ -80,8 +69,4 @@ public class TestModule extends AbstractBaseJobModule {
     this.bulkWriter = bulkWriter;
   }
 
-  public void setJobBatchPreProcessorClass(
-      Class<? extends BatchPreProcessor> jobBatchPreProcessorClass) {
-    this.jobBatchPreProcessorClass = jobBatchPreProcessorClass;
-  }
 }
