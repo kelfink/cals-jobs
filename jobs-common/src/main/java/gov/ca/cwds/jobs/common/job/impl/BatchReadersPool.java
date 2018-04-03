@@ -35,17 +35,6 @@ public class BatchReadersPool<T> {
     this.executorService = Executors.newFixedThreadPool(readersThreadsCount);
   }
 
-  public void destroy() {
-    if (executorService != null) {
-      executorService.shutdown();
-      try {
-        executorService.awaitTermination(1, TimeUnit.MINUTES);
-      } catch (InterruptedException e) {
-        throw new JobsException("Can't properly shutdown readers pool", e);
-      }
-    }
-  }
-
   public void loadEntities(List<ChangedEntityIdentifier> changedEntityIdentifiers) {
     List<Future> futures = changedEntityIdentifiers.parallelStream().
         map(identifier -> (Runnable) () -> elasticSearchBulkCollector.addEntity(
@@ -56,6 +45,17 @@ public class BatchReadersPool<T> {
         future.get();
       } catch (InterruptedException | ExecutionException e) {
         throw new JobsException("Can't load entities", e);
+      }
+    }
+  }
+
+  public void destroy() {
+    if (executorService != null) {
+      executorService.shutdown();
+      try {
+        executorService.awaitTermination(1, TimeUnit.MINUTES);
+      } catch (InterruptedException e) {
+        throw new JobsException("Can't properly shutdown readers pool", e);
       }
     }
   }

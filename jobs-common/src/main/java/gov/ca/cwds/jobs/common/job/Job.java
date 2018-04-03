@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.common.job;
 /**
  * @author CWDS API Team
  */
+@FunctionalInterface
 public interface Job {
 
   /**

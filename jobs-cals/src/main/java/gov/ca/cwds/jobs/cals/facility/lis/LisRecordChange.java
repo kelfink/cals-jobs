@@ -15,14 +15,16 @@ import org.hibernate.annotations.NamedNativeQuery;
 
 @NamedNativeQuery(
     name = LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
-    query = LisRecordChange.LIS_BASE_QUERY,
+    query = LisRecordChange.LIS_BASE_QUERY +
+        " LIMIT :limit OFFSET :offset",
     resultClass = LisRecordChange.class,
     readOnly = true
 )
 @NamedNativeQuery(
     name = LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
     query = LisRecordChange.LIS_BASE_QUERY +
-        " WHERE system_datetime_1 > :dateAfter ",
+        " WHERE system_datetime_1 > :dateAfter " +
+        " LIMIT :limit OFFSET :offset",
     resultClass = LisRecordChange.class,
     readOnly = true
 )

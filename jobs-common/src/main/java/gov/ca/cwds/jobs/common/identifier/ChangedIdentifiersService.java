@@ -1,17 +1,20 @@
 package gov.ca.cwds.jobs.common.identifier;
 
+import gov.ca.cwds.jobs.common.batch.PageRequest;
 import java.time.LocalDateTime;
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
 public interface ChangedIdentifiersService {
 
-  Stream<ChangedEntityIdentifier> getIdentifiersForInitialLoad();
+  List<ChangedEntityIdentifier> getIdentifiersForInitialLoad(PageRequest pageRequest);
 
-  Stream<ChangedEntityIdentifier> getIdentifiersForResumingInitialLoad(LocalDateTime localDateTime);
+  List<ChangedEntityIdentifier> getIdentifiersForResumingInitialLoad(LocalDateTime localDateTime,
+      PageRequest pageRequest);
 
-  Stream<ChangedEntityIdentifier> getIdentifiersForIncrementalLoad(LocalDateTime localDateTime);
+  List<ChangedEntityIdentifier> getIdentifiersForIncrementalLoad(LocalDateTime localDateTime,
+      PageRequest pageRequest);
 
 }

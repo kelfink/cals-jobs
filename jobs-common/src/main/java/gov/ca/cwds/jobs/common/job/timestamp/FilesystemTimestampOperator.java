@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.common.job.timestamp;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.jobs.common.Constants;
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
 import gov.ca.cwds.rest.api.ApiException;
 import java.io.IOException;
@@ -47,7 +48,8 @@ public class FilesystemTimestampOperator implements TimestampOperator {
   @Override
   public LocalDateTime readTimestamp() {
     try {
-      return LocalDateTime.parse(readLastRunDateTimeString(getRunningFile()), DATE_TIME_FORMATTER);
+      return LocalDateTime
+          .parse(readLastRunDateTimeString(getRunningFile()), Constants.DATE_TIME_FORMATTER);
     } catch (IOException e) {
       throw new ApiException("Can't parse timestamp from string representation", e);
     }
@@ -63,7 +65,7 @@ public class FilesystemTimestampOperator implements TimestampOperator {
       LOG.info("Timestamp is empty for the batch and will not be recorded");
       return;
     }
-    String stringTimestamp = timestamp.format(DATE_TIME_FORMATTER);
+    String stringTimestamp = timestamp.format(Constants.DATE_TIME_FORMATTER);
     try {
       if (timeStampExists()) {
         FileUtils.forceDelete(getRunningFile().toFile());

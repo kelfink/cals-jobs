@@ -1,19 +1,19 @@
-package gov.ca.cwds.jobs.common.job.preprocessor;
+package gov.ca.cwds.jobs.common.job;
 
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
-import gov.ca.cwds.jobs.common.batch.BatchPreProcessor;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
+import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Created by Alexander Serbin on 3/7/2018.
  */
-public class BatchSavePointTestPreprocessor implements BatchPreProcessor {
+public class BatchTestSavePointBatchIterator implements JobBatchIterator {
 
   private static LocalDateTime FIRST_TIMESTAMP = null;
   public static LocalDateTime SECOND_TIMESTAMP = LocalDateTime.of(2013, 1, 1, 1, 1, 1);
@@ -22,13 +22,21 @@ public class BatchSavePointTestPreprocessor implements BatchPreProcessor {
   public static BrokenEntity BROKEN_ENTITY = new BrokenEntity("brokenId", RecordChangeOperation.I,
       THIRD_TIMESTAMP);
 
+  private LinkedList<JobBatch> batches;
+
   @Override
-  public List<JobBatch> buildJobBatches(Stream<ChangedEntityIdentifier> identifiers) {
-    return Arrays.asList(new JobBatch(Collections.emptyList(), FIRST_TIMESTAMP),
-        new JobBatch(Collections.emptyList(), SECOND_TIMESTAMP),
-        new BrokenBatch(THIRD_TIMESTAMP),
-        new JobBatch(Collections.emptyList(), FOURTH_TIMESTAMP)
-    );
+  public void init() {
+    batches = new LinkedList<>(
+        Arrays.asList(new JobBatch(Collections.emptyList(), FIRST_TIMESTAMP),
+            new JobBatch(Collections.emptyList(), SECOND_TIMESTAMP),
+            new BrokenBatch(THIRD_TIMESTAMP),
+            new JobBatch(Collections.emptyList(), FOURTH_TIMESTAMP)));
+  }
+
+  @Override
+  public List<JobBatch> getNextPortion() {
+    JobBatch nextBatch = batches.poll();
+    return nextBatch != null ? Collections.singletonList(nextBatch) : Collections.emptyList();
   }
 
   private static class BrokenBatch extends JobBatch {

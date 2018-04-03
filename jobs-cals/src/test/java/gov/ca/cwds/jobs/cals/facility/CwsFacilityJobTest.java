@@ -43,6 +43,7 @@ public class CwsFacilityJobTest {
       throws IOException, JSONException, InterruptedException, LiquibaseException {
     try {
       assertEquals(0, TestWriter.getItems().size());
+      lastRunDirHelper.deleteTimestampDirectory();
       runInitialLoad();
       assertEquals(79, TestWriter.getItems().size());
       assertFacility("fixtures/facilities-initial-load-cwscms.json",
@@ -124,7 +125,6 @@ public class CwsFacilityJobTest {
       CwsFacilityJobConfiguration configuration = getFacilityJobConfiguration();
       try {
         setUpDatabase(configuration.getCmsDataSourceFactory(), DataSourceName.CWSRS);
-        //setUpDatabase(configuration.getFasDataSourceFactory(), DataSourceName.FAS);
       } catch (LiquibaseException e) {
         e.printStackTrace();
       }

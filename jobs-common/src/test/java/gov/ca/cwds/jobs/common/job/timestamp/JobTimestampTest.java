@@ -1,21 +1,21 @@
 package gov.ca.cwds.jobs.common.job.timestamp;
 
-import static gov.ca.cwds.jobs.common.job.preprocessor.BatchSavePointTestPreprocessor.BROKEN_ENTITY;
-import static gov.ca.cwds.jobs.common.job.preprocessor.BatchSavePointTestPreprocessor.SECOND_TIMESTAMP;
-import static org.junit.Assert.assertEquals;
+import static gov.ca.cwds.jobs.common.job.BatchTestSavePointBatchIterator.BROKEN_ENTITY;
+import static gov.ca.cwds.jobs.common.job.BatchTestSavePointBatchIterator.SECOND_TIMESTAMP;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import gov.ca.cwds.jobs.common.job.BatchTestSavePointBatchIterator;
 import gov.ca.cwds.jobs.common.job.TestModule;
+import gov.ca.cwds.jobs.common.job.identifiers.EmptyTimestampBatchIdentifiersProvider;
+import gov.ca.cwds.jobs.common.job.identifiers.SingleBatchIdentifiersProvider;
 import gov.ca.cwds.jobs.common.job.impl.JobRunner;
-import gov.ca.cwds.jobs.common.job.preprocessor.BatchSavePointTestPreprocessor;
-import gov.ca.cwds.jobs.common.job.preprocessor.EmptyTimestampTestPreProcessor;
-import gov.ca.cwds.jobs.common.job.preprocessor.SingleBatchPreprocessor;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,7 +42,9 @@ public class JobTimestampTest {
   @Test
   public void test_timestamp_is_created_if_job_successful() throws IOException {
     assertFalse(timestampOperator.timeStampExists());
-    JobRunner.run(new TestModule(getModuleArgs()));
+    TestModule testModule = new TestModule(getModuleArgs());
+    testModule.setChangedIdentifiersProviderClass(SingleBatchIdentifiersProvider.class);
+    JobRunner.run(testModule);
     assertTrue(timestampOperator.timeStampExists());
     LocalDateTime timestamp = timestampOperator.readTimestamp();
     assertTrue(timestamp.until(LocalDateTime.now(), ChronoUnit.SECONDS) < 1);
@@ -69,7 +71,8 @@ public class JobTimestampTest {
   public void last_successfull_batch_save_point_test() {
     assertFalse(timestampOperator.timeStampExists());
     TestModule testModule = new TestModule(getModuleArgs());
-    testModule.setJobBatchPreProcessorClass(BatchSavePointTestPreprocessor.class);
+    testModule.setChangedIdentifiersProviderClass(SingleBatchIdentifiersProvider.class);
+    testModule.setJobBatchIteratorClass(BatchTestSavePointBatchIterator.class);
     testModule.setChangedEntityService(identifier -> {
       if (identifier == BROKEN_ENTITY) {
         return BROKEN_ENTITY;
@@ -85,14 +88,14 @@ public class JobTimestampTest {
     });
     JobRunner.run(testModule);
     assertTrue(timestampOperator.timeStampExists());
-    assertEquals(SECOND_TIMESTAMP, timestampOperator.readTimestamp());
+    Assert.assertEquals(SECOND_TIMESTAMP, timestampOperator.readTimestamp());
   }
 
   @Test
   public void test_all_timestamps_null() {
     assertFalse(timestampOperator.timeStampExists());
     TestModule testModule = new TestModule(getModuleArgs());
-    testModule.setJobBatchPreProcessorClass(EmptyTimestampTestPreProcessor.class);
+    testModule.setChangedIdentifiersProviderClass(EmptyTimestampBatchIdentifiersProvider.class);
     JobRunner.run(testModule);
     assertTrue(timestampOperator.timeStampExists());
     LocalDateTime timestamp = timestampOperator.readTimestamp();
@@ -101,9 +104,9 @@ public class JobTimestampTest {
 
   private void runCrashingJob() {
     TestModule testModule = new TestModule(getModuleArgs());
-    testModule.setJobBatchPreProcessorClass(SingleBatchPreprocessor.class);
+    testModule.setChangedIdentifiersProviderClass(SingleBatchIdentifiersProvider.class);
     testModule.setBulkWriter(items -> {
-      if (1 == 1) {
+      if (true) {
         throw new IllegalStateException();
       }
     });
