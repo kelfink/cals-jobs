@@ -40,11 +40,11 @@ node ('dora-slave'){
        sleep (60)
 	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoTestReport'
    }
-   stage('SonarQube analysis'){
-		withSonarQubeEnv('Core-SonarQube') {
-			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
-        }
-    }
+//   stage('SonarQube analysis'){
+//		withSonarQubeEnv('Core-SonarQube') {
+//			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
+//        }
+//    }
     stage ('Push to artifactory'){
         rtGradle.deployer.deployArtifacts = true
         buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
@@ -56,13 +56,6 @@ node ('dora-slave'){
  	    publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
 
 	}
-// stage('Deploy Application'){
-//	   checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/facility-jobs']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/de-ansible.git']]]
-//  sh 'ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e Job_StartScript=sealed -e JobLastRun_time=yes -e CALS_VERSION_NUMBER=$APP_VERSION -i $inventory deploy-jobs-to-rundeck.yml --vault-password-file ~/.ssh/vault.txt -vv'
-//  cleanWs()
-//  sleep (20)
-// }
-
  } catch (e)   {
 	   publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
 	   sh ('docker-compose down -v')
