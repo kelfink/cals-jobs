@@ -58,7 +58,7 @@ publishing {
         shadow(MavenPublication) {
             from components.shadow
             groupId 'gov.ca.cwds.jobs'
-            artifactId 'lis-facility-job-shadow'
+            artifactId 'jobs-facilities-lis'
         }
     }
     repositories {
