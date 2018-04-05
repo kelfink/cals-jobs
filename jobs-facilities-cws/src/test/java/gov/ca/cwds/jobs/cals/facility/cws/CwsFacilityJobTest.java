@@ -22,13 +22,11 @@ import java.util.Map;
 import liquibase.exception.LiquibaseException;
 import org.json.JSONException;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * Created by Alexander Serbin on 3/18/2018.
  */
-@Ignore
 public class CwsFacilityJobTest {
 
   private static LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("cws_job_temp");

@@ -34,11 +34,10 @@ public class JobImpl<T> implements Job {
       batchProcessor.processBatches();
       LocalDateTime now = LocalDateTime.now();
       timestampOperator.writeTimestamp(now);
-      LOGGER.info("Updating job timestamp to the current moment {}", now);
-      LOGGER.info(String
-          .format("Added %s entities to the Elastic Search index", ConsumerCounter.getCounter()));
-    } catch (RuntimeException e) {
-      LOGGER.error("ERROR: ", e.getMessage(), e);
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("Updating job timestamp to the current moment {}", now);
+        LOGGER.info("Added {} entities to the Elastic Search index", ConsumerCounter.getCounter());
+      }
     } finally {
       JobExceptionHandler.reset();
       close();

@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.cals.facility.lis;
 
 import gov.ca.cwds.jobs.cals.facility.RecordChange;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -43,6 +44,17 @@ public class LisRecordChange extends RecordChange {
       ", 'U' AS CHANGE_OPERATION" +
       ", system_datetime_1 as TIME_STAMP "
       + " FROM {h-schema}lis_fac_file";
+
+  public LisRecordChange() {
+    super();
+  }
+
+  public LisRecordChange(String id,
+      RecordChangeOperation recordChangeOperation,
+      BigInteger timestamp) {
+    super(id, recordChangeOperation);
+    this.timestamp = timestamp;
+  }
 
   @Column(name = "TIME_STAMP")
   private BigInteger timestamp;

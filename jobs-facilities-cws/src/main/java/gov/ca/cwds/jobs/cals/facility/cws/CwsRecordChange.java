@@ -1,68 +1,63 @@
 package gov.ca.cwds.jobs.cals.facility.cws;
 
 import gov.ca.cwds.jobs.cals.facility.RecordChange;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import org.hibernate.annotations.NamedNativeQuery;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 /**
  * Created by Alexander Serbin on 3/6/2018.
  */
-
-@NamedNativeQuery(
+@NamedQueries({@NamedQuery(
     name = CwsRecordChange.CWSCMS_INITIAL_LOAD_QUERY_NAME,
-    query = CwsRecordChange.CWS_CMS_INITIAL_LOAD_QUERY,
-    resultClass = CwsRecordChange.class,
-    readOnly = true
-)
-
-@NamedNativeQuery(
+    query = CwsRecordChange.CWS_CMS_INITIAL_LOAD_QUERY
+), @NamedQuery(
     name = CwsRecordChange.CWSCMS_INCREMENTAL_LOAD_QUERY_NAME,
-    query = CwsRecordChange.CWS_CMS_INCREMENTAL_LOAD_QUERY,
-    resultClass = CwsRecordChange.class,
-    readOnly = true
+    query = CwsRecordChange.CWS_CMS_INCREMENTAL_LOAD_QUERY
 )
-
+})
 @Entity
 public class CwsRecordChange extends RecordChange {
 
   static final String CWS_CMS_INITIAL_LOAD_QUERY =
-      "SELECT PlacementHome.IDENTIFIER AS ID "
-          + ",'I' AS CHANGE_OPERATION "
-          + ",PlacementHome.LST_UPD_TS AS TIME_STAMP "
-          + " FROM ("
-          + "    SELECT "
-          + "         ROW_NUMBER() OVER (ORDER BY LST_UPD_TS) AS rowNum "
-          + "         ,IDENTIFIER "
-          + "         ,LST_UPD_TS "
-          + " FROM {h-schema}PLC_HM_T "
-          + "WHERE LICENSE_NO IS NULL) AS PlacementHome "
-          + "WHERE PlacementHome.rowNum > :offset AND PlacementHome.rowNum <= (:offset + :limit) "
-          + "AND PlacementHome.LST_UPD_TS > :dateAfter";
+      "select new CwsRecordChange(home.identifier,"
+          + "home.lastUpdatedTime) "
+          + "from ReplicationPlacementHome as home "
+          + "where home.licenseNo is null "
+          + "and home.lastUpdatedTime > :dateAfter "
+          + "order by home.lastUpdatedTime";
 
   static final String CWS_CMS_INCREMENTAL_LOAD_QUERY =
-      "SELECT PlacementHome.IDENTIFIER AS ID "
-          + ",PlacementHome.IBMSNAP_OPERATION AS CHANGE_OPERATION "
-          + ",PlacementHome.IBMSNAP_LOGMARKER AS TIME_STAMP "
-          + " FROM ("
-          + "    SELECT "
-          + "         ROW_NUMBER() OVER (ORDER BY IBMSNAP_LOGMARKER) AS rowNum "
-          + "         ,IDENTIFIER "
-          + "         ,IBMSNAP_OPERATION "
-          + "         ,IBMSNAP_LOGMARKER "
-          + " FROM {h-schema}PLC_HM_T "
-          + "WHERE LICENSE_NO IS NULL) AS PlacementHome "
-          + "WHERE PlacementHome.rowNum > :offset AND PlacementHome.rowNum <= (:offset + :limit) "
-          + "AND PlacementHome.IBMSNAP_LOGMARKER > :dateAfter";
+      "select new CwsRecordChange(home.identifier,"
+          + "home.recordChangeOperation, "
+          + "home.timestamp) "
+          + " from ReplicationPlacementHome as home "
+          + " where home.licenseNo is null "
+          + " and home.timestamp > :dateAfter"
+          + " order by home.timestamp";
+
 
   public static final String CWSCMS_INITIAL_LOAD_QUERY_NAME = "RecordChange.cwscmsInitialLoadQuery";
   public static final String CWSCMS_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.cwscmsIncrementalLoadQuery";
 
+  public CwsRecordChange(String id, RecordChangeOperation recordChangeOperation,
+      LocalDateTime timestamp) {
+    super(id, recordChangeOperation);
+    this.timestamp = timestamp;
+  }
+
+  public CwsRecordChange(String id,
+      LocalDateTime timestamp) {
+    super(id, RecordChangeOperation.I);
+    this.timestamp = timestamp;
+  }
 
   @Column(name = "TIME_STAMP")
-  private LocalDateTime timestamp;
+  private transient LocalDateTime timestamp;
 
   public LocalDateTime getTimestamp() {
     return timestamp;

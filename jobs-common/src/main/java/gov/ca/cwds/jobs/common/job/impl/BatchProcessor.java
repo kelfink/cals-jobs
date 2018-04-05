@@ -5,6 +5,7 @@ import gov.ca.cwds.jobs.common.batch.JobBatch;
 import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
 import gov.ca.cwds.jobs.common.elastic.ElasticSearchBulkCollector;
 import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;
+import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
 import java.util.List;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class BatchProcessor<T> {
   }
 
   public void processBatches() {
-    //JobTimeReport jobTimeReport = new JobTimeReport(jobBatches);
+    JobTimeReport jobTimeReport = new JobTimeReport();
     List<JobBatch> portion = batchIterator.getNextPortion();
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Portion size = {}", portion.size());
@@ -44,33 +45,32 @@ public class BatchProcessor<T> {
               jobBatch.getTimestamp()));
     }
     do {
-      for (int portionBatchNumber = 0; portionBatchNumber < portion.size(); portionBatchNumber++) {
-        processBatch(portion.get(portionBatchNumber));
-        if (!JobExceptionHandler.isExceptionHappened()) {
-          timestampOperator.writeTimestamp(portion.get(portionBatchNumber).getTimestamp());
-          if (LOGGER.isInfoEnabled()) {
-//          jobTimeReport.printTimeReport(portionBatchNumber);
-          }
-          if (!portion.get(portionBatchNumber).isEmptyTimestamp()) {
-            LOGGER.info("Save point has been reached. Save point batch timestamp is " + portion
-                .get(portionBatchNumber).getTimestamp());
-          }
-        } else {
-          LOGGER.error("Exception occured during batch processing. Job has been terminated." +
-              " Batch timestamp " + portion.get(portionBatchNumber).getTimestamp()
-              + "has not been recorded");
-          throw new RuntimeException("Exception occured during batch processing");
-        }
+      for (JobBatch aPortion : portion) {
+        processBatch(aPortion);
       }
       portion = batchIterator.getNextPortion();
     } while (!portion.isEmpty());
-
-    //   jobTimeReport.printTimeSpent();
+    jobTimeReport.printTimeSpent();
   }
 
   private void processBatch(JobBatch jobBatch) {
     batchReadersPool.loadEntities(jobBatch.getChangedEntityIdentifiers());
     elasticSearchBulkCollector.flush();
+    if (!JobExceptionHandler.isExceptionHappened()) {
+      timestampOperator.writeTimestamp(jobBatch.getTimestamp());
+      if (LOGGER.isInfoEnabled()) {
+//          jobTimeReport.printTimeReport(portionBatchNumber);
+      }
+      if (!jobBatch.isEmptyTimestamp()) {
+        LOGGER.info("Save point has been reached. Save point batch timestamp is {}",
+            jobBatch.getTimestamp());
+      }
+    } else {
+      LOGGER.error("Exception occured during batch processing. Job has been terminated." +
+          " Batch timestamp {} has not been recorded", jobBatch.getTimestamp());
+      throw new JobsException("Exception occured during batch processing");
+    }
+
   }
 
   public void destroy() {
