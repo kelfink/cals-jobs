@@ -28,21 +28,34 @@ import org.hibernate.annotations.NamedNativeQuery;
 @Entity
 public class CwsRecordChange extends RecordChange {
 
-  static final String CWS_CMS_INITIAL_LOAD_QUERY = "SELECT PlacementHome.IDENTIFIER AS ID" +
-      ",'I' AS CHANGE_OPERATION" +
-      ",PlacementHome.LST_UPD_TS AS TIME_STAMP" +
-      " FROM {h-schema}PLC_HM_T PlacementHome" +
-      " WHERE PlacementHome.LICENSE_NO IS NULL" +
-      " AND PlacementHome.LST_UPD_TS > :dateAfter" +
-      " LIMIT :limit OFFSET :offset";
+  static final String CWS_CMS_INITIAL_LOAD_QUERY =
+      "SELECT PlacementHome.IDENTIFIER AS ID "
+          + ",'I' AS CHANGE_OPERATION "
+          + ",PlacementHome.LST_UPD_TS AS TIME_STAMP "
+          + " FROM ("
+          + "    SELECT "
+          + "         ROW_NUMBER() OVER (ORDER BY LST_UPD_TS) AS rowNum "
+          + "         ,IDENTIFIER "
+          + "         ,LST_UPD_TS "
+          + " FROM {h-schema}PLC_HM_T "
+          + "WHERE LICENSE_NO IS NULL) AS PlacementHome "
+          + "WHERE PlacementHome.rowNum > :offset AND PlacementHome.rowNum <= (:offset + :limit) "
+          + "AND PlacementHome.LST_UPD_TS > :dateAfter";
 
-  static final String CWS_CMS_INCREMENTAL_LOAD_QUERY = "SELECT PlacementHome.IDENTIFIER AS ID" +
-      ",PlacementHome.IBMSNAP_OPERATION AS CHANGE_OPERATION" +
-      ",PlacementHome.IBMSNAP_LOGMARKER AS TIME_STAMP" +
-      " FROM {h-schema}PLC_HM_T PlacementHome" +
-      " WHERE PlacementHome.LICENSE_NO IS NULL" +
-      " AND PlacementHome.IBMSNAP_LOGMARKER > :dateAfter " +
-      " LIMIT :limit OFFSET :offset";
+  static final String CWS_CMS_INCREMENTAL_LOAD_QUERY =
+      "SELECT PlacementHome.IDENTIFIER AS ID "
+          + ",PlacementHome.IBMSNAP_OPERATION AS CHANGE_OPERATION "
+          + ",PlacementHome.IBMSNAP_LOGMARKER AS TIME_STAMP "
+          + " FROM ("
+          + "    SELECT "
+          + "         ROW_NUMBER() OVER (ORDER BY IBMSNAP_LOGMARKER) AS rowNum "
+          + "         ,IDENTIFIER "
+          + "         ,IBMSNAP_OPERATION "
+          + "         ,IBMSNAP_LOGMARKER "
+          + " FROM {h-schema}PLC_HM_T "
+          + "WHERE LICENSE_NO IS NULL) AS PlacementHome "
+          + "WHERE PlacementHome.rowNum > :offset AND PlacementHome.rowNum <= (:offset + :limit) "
+          + "AND PlacementHome.IBMSNAP_LOGMARKER > :dateAfter";
 
   public static final String CWSCMS_INITIAL_LOAD_QUERY_NAME = "RecordChange.cwscmsInitialLoadQuery";
   public static final String CWSCMS_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.cwscmsIncrementalLoadQuery";

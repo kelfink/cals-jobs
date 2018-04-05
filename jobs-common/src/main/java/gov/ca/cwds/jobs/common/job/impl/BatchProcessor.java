@@ -37,6 +37,12 @@ public class BatchProcessor<T> {
   public void processBatches() {
     //JobTimeReport jobTimeReport = new JobTimeReport(jobBatches);
     List<JobBatch> portion = batchIterator.getNextPortion();
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Portion size = {}", portion.size());
+      portion.forEach(jobBatch ->
+          LOGGER.info("Batch size = {}, batch timestamp = {}", jobBatch.getSize(),
+              jobBatch.getTimestamp()));
+    }
     do {
       for (int portionBatchNumber = 0; portionBatchNumber < portion.size(); portionBatchNumber++) {
         processBatch(portion.get(portionBatchNumber));
