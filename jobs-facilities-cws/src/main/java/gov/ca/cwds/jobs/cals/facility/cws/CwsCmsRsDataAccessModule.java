@@ -48,6 +48,7 @@ import gov.ca.cwds.data.legacy.cms.entity.syscodes.NameType;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.State;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.VisitType;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.cals.facility.ReplicationPlacementHome;
 import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import org.hibernate.SessionFactory;
 
@@ -62,6 +63,7 @@ public class CwsCmsRsDataAccessModule extends AbstractModule {
           , Client.class
           , OutOfHomePlacement.class
           , PlacementEpisode.class
+          , ReplicationPlacementHome.class
           , PlacementHome.class
           , CountyLicenseCase.class
           , LicensingVisit.class

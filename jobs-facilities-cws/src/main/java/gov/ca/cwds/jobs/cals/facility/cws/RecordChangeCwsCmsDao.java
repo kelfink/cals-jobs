@@ -14,9 +14,6 @@ import org.hibernate.SessionFactory;
  */
 public class RecordChangeCwsCmsDao extends BaseDaoImpl<CwsRecordChange> {
 
-  private static final String LIMIT = "limit";
-  private static final String OFFSET = "offset";
-
   @Inject
   public RecordChangeCwsCmsDao(@CmsSessionFactory SessionFactory sessionFactory) {
     super(sessionFactory);
@@ -42,10 +39,10 @@ public class RecordChangeCwsCmsDao extends BaseDaoImpl<CwsRecordChange> {
   private Stream<CwsRecordChange> loadStream(LocalDateTime timeStampAfter,
       String queryName, PageRequest pageRequest) {
     QueryCreator<CwsRecordChange> queryCreator = (session, entityClass) -> session
-        .getNamedNativeQuery(queryName)
+        .getNamedQuery(queryName)
         .setParameter("dateAfter", timeStampAfter)
-        .setParameter(LIMIT, pageRequest.getLimit())
-        .setParameter(OFFSET, pageRequest.getOffset())
+        .setMaxResults(pageRequest.getLimit())
+        .setFirstResult(pageRequest.getOffset())
         .setReadOnly(true);
     return new CwsRecordChangesStreamer(this, queryCreator).createStream();
   }

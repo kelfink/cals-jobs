@@ -24,6 +24,15 @@ public class RecordChange implements PersistentObject {
   @Column(name = "CHANGE_OPERATION", updatable = false)
   private RecordChangeOperation recordChangeOperation;
 
+  public RecordChange() {
+    //default constructor
+  }
+
+  public RecordChange(String id, RecordChangeOperation recordChangeOperation) {
+    this.id = id;
+    this.recordChangeOperation = recordChangeOperation;
+  }
+
   public String getId() {
     return id;
   }
