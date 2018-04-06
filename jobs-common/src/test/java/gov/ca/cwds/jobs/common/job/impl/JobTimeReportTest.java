@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.inject.JobTimeReport;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Ignore;

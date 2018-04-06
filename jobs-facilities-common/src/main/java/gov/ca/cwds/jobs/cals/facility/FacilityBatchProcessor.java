@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.cals.facility;
 
-import gov.ca.cwds.jobs.common.job.impl.BatchProcessor;
+import gov.ca.cwds.jobs.common.inject.BatchProcessor;
 
 /**
  * Created by Alexander Serbin on 3/18/2018.

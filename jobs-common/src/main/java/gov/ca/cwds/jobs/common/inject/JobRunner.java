@@ -1,7 +1,6 @@
-package gov.ca.cwds.jobs.common.job.impl;
+package gov.ca.cwds.jobs.common.inject;
 
 import com.google.inject.Guice;
-import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
 import gov.ca.cwds.jobs.common.job.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,8 @@ public final class JobRunner {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobRunner.class);
 
-  private JobRunner() {}
+  private JobRunner() {
+  }
 
   public static void run(AbstractBaseJobModule mainModule) {
     Job job = null;

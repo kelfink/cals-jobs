@@ -5,9 +5,9 @@ import static gov.ca.cwds.cals.Constants.UnitOfWork.LIS;
 import com.google.inject.Inject;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilitiesIdentifiers;
+import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
 import io.dropwizard.hibernate.UnitOfWork;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * Created by Alexander Serbin on 3/6/2018.
  */
 
-public class LisChangedIdentifiersService implements ChangedIdentifiersService {
+public class LisChangedEntitiesIdentifiersService implements ChangedEntitiesIdentifiersService {
 
   @Inject
   private RecordChangeLisDao recordChangeLisDao;

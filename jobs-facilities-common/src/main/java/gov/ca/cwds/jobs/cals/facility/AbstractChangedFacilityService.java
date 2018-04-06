@@ -3,8 +3,8 @@ package gov.ca.cwds.jobs.cals.facility;
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
+import gov.ca.cwds.jobs.common.api.ChangedEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

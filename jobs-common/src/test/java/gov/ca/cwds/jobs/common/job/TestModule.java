@@ -3,11 +3,12 @@ package gov.ca.cwds.jobs.common.job;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
+import gov.ca.cwds.jobs.common.api.ChangedEntityService;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersProvider;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
-import gov.ca.cwds.jobs.common.job.impl.BatchProcessor;
-import gov.ca.cwds.jobs.common.job.impl.JobImpl;
+import gov.ca.cwds.jobs.common.inject.BatchProcessor;
+import gov.ca.cwds.jobs.common.inject.JobImpl;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.

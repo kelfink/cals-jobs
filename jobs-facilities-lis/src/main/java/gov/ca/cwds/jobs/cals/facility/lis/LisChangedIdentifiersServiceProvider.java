@@ -10,7 +10,7 @@ import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
  */
 
 public class LisChangedIdentifiersServiceProvider extends
-    AbstractInjectProvider<LisChangedIdentifiersService> {
+    AbstractInjectProvider<LisChangedEntitiesIdentifiersService> {
 
   @Inject
   public LisChangedIdentifiersServiceProvider(Injector injector,
@@ -19,7 +19,7 @@ public class LisChangedIdentifiersServiceProvider extends
   }
 
   @Override
-  public Class<LisChangedIdentifiersService> getServiceClass() {
-    return LisChangedIdentifiersService.class;
+  public Class<LisChangedEntitiesIdentifiersService> getServiceClass() {
+    return LisChangedEntitiesIdentifiersService.class;
   }
 }

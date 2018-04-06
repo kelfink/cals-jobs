@@ -4,15 +4,11 @@ import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifiers;
 import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 3/6/2018.
  */
 public class ChangedFacilitiesIdentifiers extends ChangedEntityIdentifiers {
-
-  private static final Logger LOG = LoggerFactory.getLogger(ChangedFacilitiesIdentifiers.class);
 
   private DataSourceName dataSourceName;
 
@@ -22,11 +18,12 @@ public class ChangedFacilitiesIdentifiers extends ChangedEntityIdentifiers {
 
   @Override
   public Stream<ChangedEntityIdentifier> newStream() {
-    printRecordsCount();
+    //printRecordsCount();
     return super.newStream();
   }
 
   public void printRecordsCount() {
+/*
     if (LOG.isInfoEnabled()) {
       String messageFormatString = "Found {} facilities from {} {} elastic search facility index";
       LOG.info(messageFormatString, toBeInserted.size(), dataSourceName.name(),
@@ -35,6 +32,7 @@ public class ChangedFacilitiesIdentifiers extends ChangedEntityIdentifiers {
       LOG.info(messageFormatString, toBeDeleted.size(), dataSourceName.name(),
           "to be deleted from");
     }
+*/
   }
 
 }

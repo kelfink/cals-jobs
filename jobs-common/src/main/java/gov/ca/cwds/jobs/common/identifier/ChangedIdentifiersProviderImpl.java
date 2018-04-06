@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.common.identifier;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.Constants;
+import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
 import java.time.LocalDateTime;
@@ -22,23 +23,26 @@ public class ChangedIdentifiersProviderImpl implements ChangedIdentifiersProvide
   private TimestampOperator timestampOperator;
 
   @Inject
-  private ChangedIdentifiersService changedIdentifiersService;
+  private ChangedEntitiesIdentifiersService changedEntitiesIdentifiersService;
 
   @Override
   public List<ChangedEntityIdentifier> getNextPage(PageRequest pageRequest) {
     if (!timestampOperator.timeStampExists()) {
       LOGGER.info("Processing initial load");
-      return changedIdentifiersService.getIdentifiersForInitialLoad(pageRequest);
+      return changedEntitiesIdentifiersService.getIdentifiersForInitialLoad(pageRequest);
     } else if (isTimestampMoreThanOneMonthOld()) {
-      LOGGER.info("Processing initial load - resuming after save point " + timestampOperator
+      LOGGER.info("Processing initial load - resuming after save point {}", timestampOperator
           .readTimestamp());
-      return changedIdentifiersService
+      return changedEntitiesIdentifiersService
           .getIdentifiersForResumingInitialLoad(timestampOperator.readTimestamp(), pageRequest);
     } else {
       LocalDateTime timestamp = timestampOperator.readTimestamp();
-      LOGGER.info("Processing incremental load after timestamp " +
-          Constants.DATE_TIME_FORMATTER.format(timestamp));
-      return changedIdentifiersService.getIdentifiersForIncrementalLoad(timestamp, pageRequest);
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("Processing incremental load after timestamp {}",
+            Constants.DATE_TIME_FORMATTER.format(timestamp));
+      }
+      return changedEntitiesIdentifiersService
+          .getIdentifiersForIncrementalLoad(timestamp, pageRequest);
     }
   }
 

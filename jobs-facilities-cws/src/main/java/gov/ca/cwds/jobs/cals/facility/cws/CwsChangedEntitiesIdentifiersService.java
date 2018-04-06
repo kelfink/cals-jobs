@@ -5,9 +5,9 @@ import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
 import com.google.inject.Inject;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilitiesIdentifiers;
+import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
 import io.dropwizard.hibernate.UnitOfWork;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
  * Created by Alexander Serbin on 3/6/2018.
  */
 
-public class CwsChangedIdentifiersService implements ChangedIdentifiersService {
+public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIdentifiersService {
 
   @Inject
   private RecordChangeCwsCmsDao recordChangeCwsCmsDao;

@@ -9,7 +9,7 @@ import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
  * Created by Alexander Serbin on 3/6/2018.
  */
 public class ChangedRFAIdentifiersProvider extends
-    AbstractInjectProvider<ChangedRFA1aFormIdentifiersService> {
+    AbstractInjectProvider<ChangedRfaFormIdentifiersService> {
 
   @Inject
   public ChangedRFAIdentifiersProvider(Injector injector,
@@ -18,7 +18,7 @@ public class ChangedRFAIdentifiersProvider extends
   }
 
   @Override
-  public Class<ChangedRFA1aFormIdentifiersService> getServiceClass() {
-    return ChangedRFA1aFormIdentifiersService.class;
+  public Class<ChangedRfaFormIdentifiersService> getServiceClass() {
+    return ChangedRfaFormIdentifiersService.class;
   }
 }

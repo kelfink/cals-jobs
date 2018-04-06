@@ -14,10 +14,10 @@ import gov.ca.cwds.cals.service.LisFacilityService;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
 import gov.ca.cwds.jobs.cals.facility.fas.FasDataAccessModule;
+import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
+import gov.ca.cwds.jobs.common.api.ChangedEntityService;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.exception.JobsException;
-import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
-import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 import gov.ca.cwds.jobs.common.job.Job;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -39,7 +39,8 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
   @Override
   protected void configure() {
     super.configure();
-    bind(ChangedIdentifiersService.class).toProvider(LisChangedIdentifiersServiceProvider.class);
+    bind(ChangedEntitiesIdentifiersService.class)
+        .toProvider(LisChangedIdentifiersServiceProvider.class);
     bind(LisFacilityService.class).toProvider(LisFacilityServiceProvider.class);
     bind(FasFacilityService.class).toProvider(FasFacilityServiceProvider.class);
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {

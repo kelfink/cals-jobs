@@ -7,11 +7,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.jobs.common.exception.JobsException;
+import gov.ca.cwds.jobs.common.inject.JobRunner;
 import gov.ca.cwds.jobs.common.job.BatchTestSavePointBatchIterator;
 import gov.ca.cwds.jobs.common.job.TestModule;
 import gov.ca.cwds.jobs.common.job.identifiers.EmptyTimestampBatchIdentifiersProvider;
 import gov.ca.cwds.jobs.common.job.identifiers.SingleBatchIdentifiersProvider;
-import gov.ca.cwds.jobs.common.job.impl.JobRunner;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -52,7 +52,8 @@ public class JobTimestampTest {
   }
 
   @Test(expected = JobsException.class)
-  public void test_timestamp_is_not_created_if_crash_happens() throws IOException {
+  public void test_timestamp_is_not_created_if_crash_happens()
+      throws IOException {
     try {
       assertFalse(timestampOperator.timeStampExists());
       runCrashingJob();
@@ -62,7 +63,8 @@ public class JobTimestampTest {
   }
 
   @Test(expected = JobsException.class)
-  public void test_timestamp_is_not_updated_if_crash_happens() throws IOException {
+  public void test_timestamp_is_not_updated_if_crash_happens()
+      throws IOException {
     LocalDateTime timestamp = LocalDateTime.of(2017, 1, 20, 5, 25);
     try {
       assertFalse(timestampOperator.timeStampExists());

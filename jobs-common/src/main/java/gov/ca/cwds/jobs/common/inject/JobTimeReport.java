@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.common.job.impl;
+package gov.ca.cwds.jobs.common.inject;
 
 import gov.ca.cwds.jobs.common.job.utils.TimeSpentUtil;
 import java.time.LocalDateTime;
@@ -38,7 +38,7 @@ public class JobTimeReport {
 //    ));
   }
 
-  float getCompletionPercent(int finishedBatchNumber) {
+  public float getCompletionPercent(int finishedBatchNumber) {
     //return ((float) finishedBatchNumber + 1) / jobBatches.size() * 100;
     return 0;
   }
