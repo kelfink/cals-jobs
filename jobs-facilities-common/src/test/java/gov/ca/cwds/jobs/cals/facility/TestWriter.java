@@ -13,7 +13,7 @@ public class TestWriter implements BulkWriter<ChangedFacilityDTO> {
 
   @Override
   public void write(List<ChangedFacilityDTO> items) {
-    TestWriter.items = items;
+    TestWriter.items.addAll(items);
   }
 
   public static void reset() {

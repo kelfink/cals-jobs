@@ -3,8 +3,8 @@ package gov.ca.cwds.jobs.cals.rfa;
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.persistence.dao.calsns.RFA1aFormsDao;
 import gov.ca.cwds.cals.service.mapper.RFA1aFormMapper;
+import gov.ca.cwds.jobs.common.api.ChangedEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 
 /**
  * Created by Alexander Serbin on 1/30/2018.

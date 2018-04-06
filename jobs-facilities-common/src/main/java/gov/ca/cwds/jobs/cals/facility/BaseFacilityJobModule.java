@@ -6,8 +6,8 @@ import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
+import gov.ca.cwds.jobs.common.inject.BatchProcessor;
 import gov.ca.cwds.jobs.common.job.BulkWriter;
-import gov.ca.cwds.jobs.common.job.impl.BatchProcessor;
 
 /**
  * Created by Alexander Serbin on 3/28/2018.

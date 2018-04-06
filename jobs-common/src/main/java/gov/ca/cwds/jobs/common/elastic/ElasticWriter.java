@@ -62,12 +62,12 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
       try {
         RecordChangeOperation recordChangeOperation = item.getRecordChangeOperation();
 
-        LOGGER.info("Preparing to delete item: ID {}", item.getId());
+        LOGGER.debug("Preparing to delete item: ID {}", item.getId());
         bulkProcessor.add(elasticsearchDao.bulkDelete(item.getId()));
 
         if (RecordChangeOperation.I == recordChangeOperation
             || RecordChangeOperation.U == recordChangeOperation) {
-          LOGGER.info("Preparing to insert item: ID {}", item.getId());
+          LOGGER.debug("Preparing to insert item: ID {}", item.getId());
           bulkProcessor.add(elasticsearchDao.bulkAdd(objectMapper, item.getId(), item.getDTO()));
         }
       } catch (JsonProcessingException e) {

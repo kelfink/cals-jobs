@@ -6,8 +6,8 @@ import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
 import gov.ca.cwds.jobs.cals.facility.AbstractChangedFacilityService;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
+import gov.ca.cwds.jobs.common.api.ChangedEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 
 /**
  * @author CWDS TPT-2

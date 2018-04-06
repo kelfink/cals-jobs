@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.cals.facility.cws;
 import com.google.inject.Inject;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
-import gov.ca.cwds.jobs.common.job.impl.JobImpl;
+import gov.ca.cwds.jobs.common.inject.JobImpl;
 import org.hibernate.SessionFactory;
 
 /**

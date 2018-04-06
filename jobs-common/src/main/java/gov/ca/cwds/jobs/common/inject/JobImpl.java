@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.common.job.impl;
+package gov.ca.cwds.jobs.common.inject;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;

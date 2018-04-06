@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.common.job.impl;
+package gov.ca.cwds.jobs.common.inject;
 
 import gov.ca.cwds.jobs.common.batch.JobBatch;
 import java.time.LocalDateTime;
@@ -14,7 +14,7 @@ public class TimeLeftEstimationProvider {
   private LocalDateTime jobStartTime;
   private int finishedBatchNumber;
 
-  TimeLeftEstimationProvider(List<JobBatch> jobBatches, LocalDateTime jobStartTime,
+  public TimeLeftEstimationProvider(List<JobBatch> jobBatches, LocalDateTime jobStartTime,
       int finishedBatchNumber) {
     this.jobBatches = jobBatches;
     this.jobStartTime = jobStartTime;

@@ -1,8 +1,8 @@
 package gov.ca.cwds.jobs.cals.rfa;
 
+import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by Alexander Serbin on 3/6/2018.
  */
-public class ChangedRFA1aFormIdentifiersService implements ChangedIdentifiersService {
+public class ChangedRfaFormIdentifiersService implements ChangedEntitiesIdentifiersService {
 
   @Override
   public List<ChangedEntityIdentifier> getIdentifiersForInitialLoad(PageRequest pageRequest) {

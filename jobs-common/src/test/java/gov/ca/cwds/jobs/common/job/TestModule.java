@@ -3,11 +3,12 @@ package gov.ca.cwds.jobs.common.job;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
+import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
+import gov.ca.cwds.jobs.common.api.ChangedEntityService;
 import gov.ca.cwds.jobs.common.config.JobOptions;
-import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersProvider;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
-import gov.ca.cwds.jobs.common.job.impl.BatchProcessor;
-import gov.ca.cwds.jobs.common.job.impl.JobImpl;
+import gov.ca.cwds.jobs.common.inject.BatchProcessor;
+import gov.ca.cwds.jobs.common.inject.JobImpl;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
@@ -15,7 +16,7 @@ import gov.ca.cwds.jobs.common.job.impl.JobImpl;
 public class TestModule extends AbstractBaseJobModule {
 
   private ChangedEntityService changedEntityService;
-  private ChangedIdentifiersProvider changedIdentifiersProvider;
+  private Class<? extends ChangedEntitiesIdentifiersService> changedEntitiesIdentifiersClass;
   private BulkWriter bulkWriter;
 
   public TestModule(String[] args) {
@@ -45,6 +46,7 @@ public class TestModule extends AbstractBaseJobModule {
   protected void configure() {
     super.configure();
     bind(Job.class).to(TestJobImpl.class);
+    bind(ChangedEntitiesIdentifiersService.class).to(changedEntitiesIdentifiersClass);
     bind(new TypeLiteral<BatchProcessor<Object>>() {
     }).to(TestBatchProcessor.class);
     bind(new TypeLiteral<ChangedEntityService<Object>>() {
@@ -63,6 +65,11 @@ public class TestModule extends AbstractBaseJobModule {
 
   public void setChangedEntityService(ChangedEntityService changedEntityService) {
     this.changedEntityService = changedEntityService;
+  }
+
+  public void setChangedEntitiesIdentifiersClass(
+      Class<? extends ChangedEntitiesIdentifiersService> changedEntitiesIdentifiersClass) {
+    this.changedEntitiesIdentifiersClass = changedEntitiesIdentifiersClass;
   }
 
   public void setBulkWriter(BulkWriter bulkWriter) {

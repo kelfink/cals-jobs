@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.inject.TimeLeftEstimationProvider;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;

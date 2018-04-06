@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.cals.rfa;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
-import gov.ca.cwds.jobs.common.job.impl.JobImpl;
+import gov.ca.cwds.jobs.common.inject.JobImpl;
 import org.hibernate.SessionFactory;
 
 /**

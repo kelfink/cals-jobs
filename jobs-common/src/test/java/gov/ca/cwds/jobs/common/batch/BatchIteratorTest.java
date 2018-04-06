@@ -3,10 +3,11 @@ package gov.ca.cwds.jobs.common.batch;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import gov.ca.cwds.jobs.common.JobMode;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
+import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersProvider;
-import gov.ca.cwds.jobs.common.job.TestChangedIdentifiersProvider;
+import gov.ca.cwds.jobs.common.job.TestChangedIdentifiersService;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,8 +22,7 @@ public class BatchIteratorTest {
   @Test
   public void noRecordsTest() {
     JobBatchIterator jobIterator = prepareBatchIterator(1,
-        new TestChangedIdentifiersProvider(Collections.emptyList()));
-    jobIterator.init();
+        new TestChangedIdentifiersService(Collections.emptyList()));
     assertTrue(jobIterator.getNextPortion().isEmpty());
   }
 
@@ -31,9 +31,8 @@ public class BatchIteratorTest {
   public void emptyTimestampsLessThenOnePage() {
     ChangedEntityIdentifier emptyTimestampIdentifier = createEmptyIdentifier();
     JobBatchIterator jobIterator = prepareBatchIterator(3,
-        new TestChangedIdentifiersProvider(Arrays.asList(emptyTimestampIdentifier,
+        new TestChangedIdentifiersService(Arrays.asList(emptyTimestampIdentifier,
             emptyTimestampIdentifier)));
-    jobIterator.init();
     List<JobBatch> batch = jobIterator.getNextPortion();
     assertEquals(1, batch.size());
     assertEquals(2, batch.get(0).getSize());
@@ -46,9 +45,8 @@ public class BatchIteratorTest {
   public void emptyTimestampsExactOnePageSize() {
     ChangedEntityIdentifier emptyTimestampIdentifier = createEmptyIdentifier();
     JobBatchIterator jobIterator = prepareBatchIterator(3,
-        new TestChangedIdentifiersProvider(Arrays.asList(emptyTimestampIdentifier,
+        new TestChangedIdentifiersService(Arrays.asList(emptyTimestampIdentifier,
             emptyTimestampIdentifier, emptyTimestampIdentifier)));
-    jobIterator.init();
     List<JobBatch> batch = jobIterator.getNextPortion();
     assertEquals(1, batch.size());
     assertEquals(3, batch.get(0).getSize());
@@ -64,7 +62,7 @@ public class BatchIteratorTest {
     LocalDateTime timestamp1 = LocalDateTime.of(2013, 5, 8, 1, 10, 25);
     LocalDateTime timestamp2 = LocalDateTime.of(2014, 6, 1, 2, 10, 13);
     JobBatchIterator jobIterator = prepareBatchIterator(3,
-        new TestChangedIdentifiersProvider(Arrays.asList(
+        new TestChangedIdentifiersService(Arrays.asList(
             emptyTimestampIdentifier,
             emptyTimestampIdentifier,
             new ChangedEntityIdentifier("testId2",
@@ -74,7 +72,6 @@ public class BatchIteratorTest {
                 RecordChangeOperation.I,
                 timestamp2)
         )));
-    jobIterator.init();
     List<JobBatch> firstBatch = jobIterator.getNextPortion();
     assertEquals(1, firstBatch.size());
     assertEquals(3, firstBatch.get(0).getSize());
@@ -94,14 +91,13 @@ public class BatchIteratorTest {
         RecordChangeOperation.I,
         timestamp);
     JobBatchIterator jobIterator = prepareBatchIterator(2,
-        new TestChangedIdentifiersProvider(Arrays.asList(
+        new TestChangedIdentifiersService(Arrays.asList(
             sameTimestampIdentifier,
             sameTimestampIdentifier,
             sameTimestampIdentifier,
             sameTimestampIdentifier,
             sameTimestampIdentifier
         )));
-    jobIterator.init();
     List<JobBatch> batch = jobIterator.getNextPortion();
     assertEquals(3, batch.size());
     assertEquals(2, batch.get(0).getSize());
@@ -119,10 +115,11 @@ public class BatchIteratorTest {
   }
 
   private JobBatchIterator prepareBatchIterator(int batchSize,
-      ChangedIdentifiersProvider identifiersProvider) {
+      ChangedEntitiesIdentifiersService identifiersProvider) {
     JobBatchIteratorImpl jobIterator = new JobBatchIteratorImpl();
-    jobIterator.setBatchSize(batchSize);
-    jobIterator.setChangedIdentifiersProvider(identifiersProvider);
+    jobIterator.setPageRequest(new PageRequest(0, batchSize));
+    jobIterator.setJobMode(JobMode.INITIAL_LOAD);
+    jobIterator.setChangedEntitiesIdentifiersService(identifiersProvider);
     return jobIterator;
   }
 

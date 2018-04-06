@@ -9,9 +9,9 @@ import gov.ca.cwds.cals.service.CwsFacilityService;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
+import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
+import gov.ca.cwds.jobs.common.api.ChangedEntityService;
 import gov.ca.cwds.jobs.common.config.JobOptions;
-import gov.ca.cwds.jobs.common.identifier.ChangedIdentifiersService;
-import gov.ca.cwds.jobs.common.job.ChangedEntityService;
 import gov.ca.cwds.jobs.common.job.Job;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
@@ -28,7 +28,8 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
   @Override
   protected void configure() {
     super.configure();
-    bind(ChangedIdentifiersService.class).toProvider(CwsChangedIdentifiersServiceProvider.class);
+    bind(ChangedEntitiesIdentifiersService.class)
+        .toProvider(CwsChangedIdentifiersServiceProvider.class);
     bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {
     }).to(CwsChangedFacilityService.class);

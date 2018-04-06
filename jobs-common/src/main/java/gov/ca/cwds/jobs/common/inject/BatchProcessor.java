@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.common.job.impl;
+package gov.ca.cwds.jobs.common.inject;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
@@ -38,19 +38,24 @@ public class BatchProcessor<T> {
   public void processBatches() {
     JobTimeReport jobTimeReport = new JobTimeReport();
     List<JobBatch> portion = batchIterator.getNextPortion();
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Portion size = {}", portion.size());
-      portion.forEach(jobBatch ->
-          LOGGER.info("Batch size = {}, batch timestamp = {}", jobBatch.getSize(),
-              jobBatch.getTimestamp()));
-    }
     do {
+      if (LOGGER.isInfoEnabled()) {
+        printPortionInformation(portion);
+      }
       for (JobBatch aPortion : portion) {
         processBatch(aPortion);
       }
       portion = batchIterator.getNextPortion();
     } while (!portion.isEmpty());
     jobTimeReport.printTimeSpent();
+  }
+
+  private void printPortionInformation(List<JobBatch> portion) {
+    LOGGER.info("New portion: {} batches", portion.size());
+    for (int i = 0; i < portion.size(); i++) {
+      LOGGER.info("Batch {} size = {}, batch timestamp = {}", i + 1, portion.get(i).getSize(),
+          portion.get(i).getTimestamp());
+    }
   }
 
   private void processBatch(JobBatch jobBatch) {

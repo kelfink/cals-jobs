@@ -7,11 +7,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.jobs.common.exception.JobsException;
+import gov.ca.cwds.jobs.common.inject.JobRunner;
 import gov.ca.cwds.jobs.common.job.BatchTestSavePointBatchIterator;
 import gov.ca.cwds.jobs.common.job.TestModule;
-import gov.ca.cwds.jobs.common.job.identifiers.EmptyTimestampBatchIdentifiersProvider;
-import gov.ca.cwds.jobs.common.job.identifiers.SingleBatchIdentifiersProvider;
-import gov.ca.cwds.jobs.common.job.impl.JobRunner;
+import gov.ca.cwds.jobs.common.job.identifiers.EmptyTimestampChangedIdentifiersService;
+import gov.ca.cwds.jobs.common.job.identifiers.SingleBatchChangedEntitiesIdentifiersService;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -44,7 +44,8 @@ public class JobTimestampTest {
   public void test_timestamp_is_created_if_job_successful() throws IOException {
     assertFalse(timestampOperator.timeStampExists());
     TestModule testModule = new TestModule(getModuleArgs());
-    testModule.setChangedIdentifiersProviderClass(SingleBatchIdentifiersProvider.class);
+    testModule
+        .setChangedEntitiesIdentifiersClass(SingleBatchChangedEntitiesIdentifiersService.class);
     JobRunner.run(testModule);
     assertTrue(timestampOperator.timeStampExists());
     LocalDateTime timestamp = timestampOperator.readTimestamp();
@@ -52,7 +53,8 @@ public class JobTimestampTest {
   }
 
   @Test(expected = JobsException.class)
-  public void test_timestamp_is_not_created_if_crash_happens() throws IOException {
+  public void test_timestamp_is_not_created_if_crash_happens()
+      throws IOException {
     try {
       assertFalse(timestampOperator.timeStampExists());
       runCrashingJob();
@@ -62,7 +64,8 @@ public class JobTimestampTest {
   }
 
   @Test(expected = JobsException.class)
-  public void test_timestamp_is_not_updated_if_crash_happens() throws IOException {
+  public void test_timestamp_is_not_updated_if_crash_happens()
+      throws IOException {
     LocalDateTime timestamp = LocalDateTime.of(2017, 1, 20, 5, 25);
     try {
       assertFalse(timestampOperator.timeStampExists());
@@ -79,7 +82,8 @@ public class JobTimestampTest {
     try {
       assertFalse(timestampOperator.timeStampExists());
       TestModule testModule = new TestModule(getModuleArgs());
-      testModule.setChangedIdentifiersProviderClass(SingleBatchIdentifiersProvider.class);
+      testModule
+          .setChangedEntitiesIdentifiersClass(SingleBatchChangedEntitiesIdentifiersService.class);
       testModule.setJobBatchIteratorClass(BatchTestSavePointBatchIterator.class);
       testModule.setChangedEntityService(identifier -> {
         if (identifier == BROKEN_ENTITY) {
@@ -105,7 +109,7 @@ public class JobTimestampTest {
   public void test_all_timestamps_null() {
     assertFalse(timestampOperator.timeStampExists());
     TestModule testModule = new TestModule(getModuleArgs());
-    testModule.setChangedIdentifiersProviderClass(EmptyTimestampBatchIdentifiersProvider.class);
+    testModule.setChangedEntitiesIdentifiersClass(EmptyTimestampChangedIdentifiersService.class);
     JobRunner.run(testModule);
     assertTrue(timestampOperator.timeStampExists());
     LocalDateTime timestamp = timestampOperator.readTimestamp();
@@ -114,7 +118,8 @@ public class JobTimestampTest {
 
   private void runCrashingJob() {
     TestModule testModule = new TestModule(getModuleArgs());
-    testModule.setChangedIdentifiersProviderClass(SingleBatchIdentifiersProvider.class);
+    testModule
+        .setChangedEntitiesIdentifiersClass(SingleBatchChangedEntitiesIdentifiersService.class);
     testModule.setBulkWriter(items -> {
       if (true) {
         throw new IllegalStateException();
