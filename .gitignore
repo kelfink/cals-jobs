@@ -5,6 +5,7 @@ build/
 .settings/
 bin/
 .idea
+*.iml
 *.env
 *.sw*
 *.time

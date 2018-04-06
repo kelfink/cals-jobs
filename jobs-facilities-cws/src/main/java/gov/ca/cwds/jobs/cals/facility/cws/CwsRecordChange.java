@@ -27,7 +27,7 @@ public class CwsRecordChange extends RecordChange {
       "select new CwsRecordChange(home.identifier,"
           + "home.lastUpdatedTime) "
           + "from ReplicationPlacementHome as home "
-          + "where home.licenseNo is null "
+          + "where home.licensrCd <> 'CL' "
           + "and home.lastUpdatedTime > :dateAfter "
           + "order by home.lastUpdatedTime";
 
@@ -36,7 +36,7 @@ public class CwsRecordChange extends RecordChange {
           + "home.recordChangeOperation, "
           + "home.timestamp) "
           + " from ReplicationPlacementHome as home "
-          + " where home.licenseNo is null "
+          + " where home.licensrCd <> 'CL' "
           + " and home.timestamp > :dateAfter"
           + " order by home.timestamp";
 
