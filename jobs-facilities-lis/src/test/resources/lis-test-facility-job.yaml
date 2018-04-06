@@ -11,8 +11,8 @@ elasticsearch.doctype: facility
 elasticsearch.xpack.user: elastic
 elasticsearch.xpack.password: changeme
 
-batchSize: 400
-elasticSearchBulkSize: 400
+batchSize: 10
+elasticSearchBulkSize: 10
 readerThreadsCount: 3
 
 lisDataSourceFactory:
