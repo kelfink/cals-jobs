@@ -23,11 +23,15 @@ import liquibase.exception.LiquibaseException;
 import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 3/18/2018.
  */
 public class CwsFacilityJobTest {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(CwsFacilityJobTest.class);
 
   private static LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("cws_job_temp");
 
@@ -44,7 +48,7 @@ public class CwsFacilityJobTest {
       Assert.assertEquals(0, TestWriter.getItems().size());
       lastRunDirHelper.deleteTimestampDirectory();
       runInitialLoad();
-      Assert.assertEquals(79, TestWriter.getItems().size());
+      Assert.assertEquals(167, TestWriter.getItems().size());
       AssertFacilityHelper.assertFacility("fixtures/facilities-initial-load-cwscms.json",
           CWSCMS_INITIAL_LOAD_FACILITY_ID);
       runIncrementalLoad();
@@ -95,7 +99,7 @@ public class CwsFacilityJobTest {
     cwsFacilityJobModule.setElasticSearchModule(new AbstractModule() {
       @Override
       protected void configure() {
-
+        // Do nothing here
       }
     });
     cwsFacilityJobModule.setFacilityElasticWriterClass(TestWriter.class);
@@ -121,14 +125,15 @@ public class CwsFacilityJobTest {
 
     @Override
     public void run() {
-      System.out.println("Setup database has been started!!!");
+      LOGGER.info("Setup database has been started!!!");
       CwsFacilityJobConfiguration configuration = getFacilityJobConfiguration();
       try {
         setUpDatabase(configuration.getCmsDataSourceFactory(), DataSourceName.CWSRS);
       } catch (LiquibaseException e) {
-        e.printStackTrace();
+        LOGGER.error(e.getMessage(),e);
       }
-      System.out.println("Setup database has been finished!!!");
+
+      LOGGER.info("Setup database has been finished!!!");
     }
   }
 

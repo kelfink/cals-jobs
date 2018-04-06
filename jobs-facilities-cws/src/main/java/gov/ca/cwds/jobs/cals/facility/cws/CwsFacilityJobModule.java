@@ -31,7 +31,6 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
     bind(ChangedEntitiesIdentifiersService.class)
         .toProvider(CwsChangedIdentifiersServiceProvider.class);
     bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
-    bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {
     }).to(CwsChangedFacilityService.class);
     bind(Job.class).to(CwsFacilityJob.class);
