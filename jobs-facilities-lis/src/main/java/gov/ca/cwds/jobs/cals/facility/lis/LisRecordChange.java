@@ -8,28 +8,21 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import org.hibernate.annotations.NamedNativeQuery;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 /**
  * Created by Alexander Serbin on 3/6/2018.
  */
-
-@NamedNativeQuery(
+@NamedQueries({@NamedQuery(
     name = LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
-    query = LisRecordChange.LIS_BASE_QUERY +
-        " LIMIT :limit OFFSET :offset",
-    resultClass = LisRecordChange.class,
-    readOnly = true
-)
-@NamedNativeQuery(
+    query = LisRecordChange.LIS_BASE_QUERY
+), @NamedQuery(
     name = LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
     query = LisRecordChange.LIS_BASE_QUERY +
-        " WHERE system_datetime_1 > :dateAfter " +
-        " LIMIT :limit OFFSET :offset",
-    resultClass = LisRecordChange.class,
-    readOnly = true
+        " WHERE system_datetime_1 > :dateAfter "
 )
-
+})
 @Entity
 public class LisRecordChange extends RecordChange {
 
@@ -39,14 +32,12 @@ public class LisRecordChange extends RecordChange {
   public static final DateTimeFormatter lisTimestampFormatter = DateTimeFormatter
       .ofPattern("yyyyMMddHHmmss");
 
-  static final String LIS_BASE_QUERY = "SELECT " +
-      "fac_nbr as ID" +
-      ", 'U' AS CHANGE_OPERATION" +
-      ", system_datetime_1 as TIME_STAMP "
-      + " FROM {h-schema}lis_fac_file";
+  static final String LIS_BASE_QUERY =
+      "select new LisRecordChange(home.facNbr, home.timestamp) " +
+          " from LisFacFile home";
 
-  public LisRecordChange() {
-    super();
+  public LisRecordChange(int id, BigInteger timestamp) {
+    this(String.valueOf(id), RecordChangeOperation.U, timestamp);
   }
 
   public LisRecordChange(String id,
