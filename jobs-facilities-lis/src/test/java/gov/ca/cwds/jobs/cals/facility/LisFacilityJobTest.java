@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import liquibase.exception.LiquibaseException;
 import org.json.JSONException;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -36,7 +35,6 @@ public class LisFacilityJobTest {
   static final String LIS_INITIAL_LOAD_FACILITY_ID = "9069";
   static final String LIS_INCREMENTAL_LOAD_UPDATED_FACILITY_ID = "193600001";
 
-  @Ignore
   @Test
   public void lisFacilityJobTest()
       throws IOException, JSONException, InterruptedException, LiquibaseException {

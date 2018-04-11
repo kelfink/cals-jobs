@@ -3,12 +3,10 @@ package gov.ca.cwds.jobs.cals.facility.cws;
 import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
 
 import com.google.inject.Inject;
-import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilitiesIdentifiers;
 import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import io.dropwizard.hibernate.UnitOfWork;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,11 +25,7 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
 
   @Override
   public List<ChangedEntityIdentifier> getIdentifiersForInitialLoad(PageRequest pageRequest) {
-    List<ChangedEntityIdentifier> identifiersList = getCwsCmsInitialLoadIdentifiers(pageRequest)
-        .collect(Collectors.toList());
-    ConsumerCounter.cwsIds.addAll(
-        identifiersList.stream().map(ChangedEntityIdentifier::getId).collect(Collectors.toSet()));
-    return identifiersList;
+    return getCwsCmsInitialLoadIdentifiers(pageRequest).collect(Collectors.toList());
   }
 
   @Override
@@ -51,8 +45,7 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
   @UnitOfWork(CMS)
   protected List<ChangedEntityIdentifier> getCwsCmsResumingInitialLoadIdentifiers(
       LocalDateTime timeStampAfter, PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(
-        DataSourceName.CWS);
+    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     recordChangeCwsCmsDao.getResumeInitialLoadStream(timeStampAfter, pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
     return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
@@ -62,23 +55,19 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
   @UnitOfWork(CMS)
   protected Stream<ChangedEntityIdentifier> getCwsCmsInitialLoadIdentifiers(
       PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(
-        DataSourceName.CWS);
+    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     recordChangeCwsCmsDao.getInitialLoadStream(pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
-        .filter(x -> !ConsumerCounter.cwsIds.contains(x.getId()));
+    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull);
   }
 
   @UnitOfWork(CMS)
   protected List<ChangedEntityIdentifier> getCwsCmsIncrementalLoadIdentifiers(
       LocalDateTime dateAfter, PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(
-        DataSourceName.CWS);
+    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     recordChangeCwsCmsDao.getIncrementalLoadStream(dateAfter, pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
     return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
-        .filter(x -> !ConsumerCounter.cwsIds.contains(x.getId()))
         .collect(Collectors.toList());
   }
 

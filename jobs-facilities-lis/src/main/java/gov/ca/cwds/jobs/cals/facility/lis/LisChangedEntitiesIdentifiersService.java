@@ -3,12 +3,10 @@ package gov.ca.cwds.jobs.cals.facility.lis;
 import static gov.ca.cwds.cals.Constants.UnitOfWork.LIS;
 
 import com.google.inject.Inject;
-import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilitiesIdentifiers;
 import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import io.dropwizard.hibernate.UnitOfWork;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -27,19 +25,11 @@ public class LisChangedEntitiesIdentifiersService implements ChangedEntitiesIden
   @UnitOfWork(LIS)
   @Override
   public List<ChangedEntityIdentifier> getIdentifiersForInitialLoad(PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(
-        DataSourceName.LIS);
+    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     recordChangeLisDao.getInitialLoadStream(pageRequest).
         map(LisRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-
-    List<ChangedEntityIdentifier> resultList = changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
-        .filter(x -> !ConsumerCounter.lisIds.contains(x.getId()))
+    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
         .collect(Collectors.toList());
-
-    ConsumerCounter.lisIds.addAll(
-        resultList.stream().map(ChangedEntityIdentifier::getId).collect(Collectors.toSet()));
-
-    return resultList;
   }
 
   @Override
@@ -58,8 +48,7 @@ public class LisChangedEntitiesIdentifiersService implements ChangedEntitiesIden
   @UnitOfWork(LIS)
   protected List<ChangedEntityIdentifier> getLisIncrementalLoadIdentifiers(
       LocalDateTime timestampAfter, PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(
-        DataSourceName.LIS);
+    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     BigInteger dateAfter = new BigInteger(
         LisRecordChange.lisTimestampFormatter.format(timestampAfter));
     recordChangeLisDao.getIncrementalLoadStream(dateAfter, pageRequest).
