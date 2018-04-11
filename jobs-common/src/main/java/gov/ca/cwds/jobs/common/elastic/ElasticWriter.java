@@ -62,10 +62,10 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
       try {
         RecordChangeOperation recordChangeOperation = item.getRecordChangeOperation();
 
-//        if (RecordChangeOperation.D == recordChangeOperation) {
+        if (RecordChangeOperation.D == recordChangeOperation) {
           LOGGER.debug("Preparing to delete item: ID {}", item.getId());
           bulkProcessor.add(elasticsearchDao.bulkDelete(item.getId()));
-//        }
+        }
 
         if (RecordChangeOperation.I == recordChangeOperation
             || RecordChangeOperation.U == recordChangeOperation) {
