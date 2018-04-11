@@ -8,6 +8,7 @@ import gov.ca.cwds.jobs.cals.facility.ChangedFacilitiesIdentifiers;
 import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import io.dropwizard.hibernate.UnitOfWork;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -30,8 +31,15 @@ public class LisChangedEntitiesIdentifiersService implements ChangedEntitiesIden
         DataSourceName.LIS);
     recordChangeLisDao.getInitialLoadStream(pageRequest).
         map(LisRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
+
+    List<ChangedEntityIdentifier> resultList = changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
+        .filter(x -> !ConsumerCounter.lisIds.contains(x.getId()))
         .collect(Collectors.toList());
+
+    ConsumerCounter.lisIds.addAll(
+        resultList.stream().map(ChangedEntityIdentifier::getId).collect(Collectors.toSet()));
+
+    return resultList;
   }
 
   @Override

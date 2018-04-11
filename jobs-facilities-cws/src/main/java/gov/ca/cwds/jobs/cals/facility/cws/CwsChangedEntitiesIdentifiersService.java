@@ -8,6 +8,7 @@ import gov.ca.cwds.jobs.cals.facility.ChangedFacilitiesIdentifiers;
 import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import io.dropwizard.hibernate.UnitOfWork;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,7 +27,11 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
 
   @Override
   public List<ChangedEntityIdentifier> getIdentifiersForInitialLoad(PageRequest pageRequest) {
-    return getCwsCmsInitialLoadIdentifiers(pageRequest).collect(Collectors.toList());
+    List<ChangedEntityIdentifier> identifiersList = getCwsCmsInitialLoadIdentifiers(pageRequest)
+        .collect(Collectors.toList());
+    ConsumerCounter.cwsIds.addAll(
+        identifiersList.stream().map(ChangedEntityIdentifier::getId).collect(Collectors.toSet()));
+    return identifiersList;
   }
 
   @Override
@@ -70,6 +75,7 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
     recordChangeCwsCmsDao.getIncrementalLoadStream(dateAfter, pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
     return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
+        .filter(x -> !ConsumerCounter.cwsIds.contains(x.getId()))
         .collect(Collectors.toList());
   }
 
