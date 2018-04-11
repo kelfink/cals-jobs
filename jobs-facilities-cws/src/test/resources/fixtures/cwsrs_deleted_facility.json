@@ -10,6 +10,7 @@
       "value": "Foster Family Home"
     },
     "name": "San Diego Placement Home 3",
+    "adoption_home_only_indicator": false,
     "licensee_name": "",
     "license_type": null,
     "assigned_worker": {
