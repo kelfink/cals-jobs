@@ -94,7 +94,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
       return changedEntitiesIdentifiersService
           .getIdentifiersForIncrementalLoad(timestampOperator.readTimestamp(), pageRequest);
     }
-    throw new IllegalStateException("Unexppected job mode");
+    throw new IllegalStateException("Unexpected job mode");
   }
 
   private List<JobBatch> calculateNextPortion(
