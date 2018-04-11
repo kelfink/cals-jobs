@@ -48,7 +48,6 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
           public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
             LOGGER.warn("Executed bulk of {} actions which are added to counter", request.numberOfActions());
             LOGGER.warn("Response from bulk: {} ", response.getItems().length);
-            ConsumerCounter.addToCounter(request.numberOfActions());
           }
 
           @Override
@@ -60,7 +59,7 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
 
   @Override
   public void write(List<T> items) {
-    items.stream().forEach(item -> {
+    items.forEach(item -> {
       try {
         RecordChangeOperation recordChangeOperation = item.getRecordChangeOperation();
 
@@ -77,6 +76,7 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
       }
     });
     bulkProcessor.flush();
+    ConsumerCounter.addToCounter(items.size());
   }
 
   @Override
