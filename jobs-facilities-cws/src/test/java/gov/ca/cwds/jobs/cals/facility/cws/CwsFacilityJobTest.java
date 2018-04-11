@@ -22,6 +22,7 @@ import java.util.Map;
 import liquibase.exception.LiquibaseException;
 import org.json.JSONException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,7 @@ public class CwsFacilityJobTest {
   static final String CWSCMS_INCREMENTAL_LOAD_UPDATED_FACILITY_ID = "AP9Ewb409u";
   static final String CWSCMS_INCREMENTAL_LOAD_DELETED_FACILITY_ID = "AyT7r860AB";
 
+  @Ignore
   @Test
   public void cwsFacilityJobTest()
       throws IOException, JSONException, InterruptedException, LiquibaseException {
