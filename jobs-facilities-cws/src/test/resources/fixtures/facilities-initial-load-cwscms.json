@@ -10,6 +10,7 @@
       "value": "County Shelter/Recving Home(Non EA/AFDC)"
     },
     "name": "Guadalupe Group Home",
+    "adoption_home_only_indicator": false,
     "licensee_name": "",
     "license_type": null,
     "assigned_worker": null,
