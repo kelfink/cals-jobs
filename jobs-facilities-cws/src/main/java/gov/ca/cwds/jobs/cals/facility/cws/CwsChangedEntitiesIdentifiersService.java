@@ -37,12 +37,14 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
   @Override
   public List<ChangedEntityIdentifier> getIdentifiersForResumingInitialLoad(
       LocalDateTime timeStampAfter, PageRequest pageRequest) {
+
     return getCwsCmsResumingInitialLoadIdentifiers(timeStampAfter, pageRequest);
   }
 
   @Override
   public List<ChangedEntityIdentifier> getIdentifiersForIncrementalLoad(LocalDateTime timestamp,
       PageRequest pageRequest) {
+
     return getCwsCmsIncrementalLoadIdentifiers(timestamp, pageRequest);
   }
 
@@ -64,7 +66,8 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
         DataSourceName.CWS);
     recordChangeCwsCmsDao.getInitialLoadStream(pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull);
+    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
+        .filter(x -> !ConsumerCounter.cwsIds.contains(x.getId()));
   }
 
   @UnitOfWork(CMS)
