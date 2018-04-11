@@ -33,8 +33,8 @@ public class LisRecordChange extends RecordChange {
       .ofPattern("yyyyMMddHHmmss");
 
   static final String LIS_BASE_QUERY =
-      "select new LisRecordChange(home.facNbr, home.timestamp) " +
-          " from LisFacFile as home";
+      "SELECT new LisRecordChange(home.facNbr, home.timestamp) " +
+          " FROM LisFacFile AS home";
 
   public LisRecordChange(int id, BigInteger timestamp) {
     this(String.valueOf(id), RecordChangeOperation.U, timestamp);

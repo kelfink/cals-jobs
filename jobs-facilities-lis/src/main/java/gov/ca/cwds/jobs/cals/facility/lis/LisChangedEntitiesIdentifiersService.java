@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 /**
  * Created by Alexander Serbin on 3/6/2018.
  */
-
 public class LisChangedEntitiesIdentifiersService implements ChangedEntitiesIdentifiersService {
 
   @Inject
@@ -60,5 +59,4 @@ public class LisChangedEntitiesIdentifiersService implements ChangedEntitiesIden
     return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
         .collect(Collectors.toList());
   }
-
 }
