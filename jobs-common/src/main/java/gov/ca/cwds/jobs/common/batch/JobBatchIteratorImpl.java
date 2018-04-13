@@ -86,6 +86,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   }
 
   private List<ChangedEntityIdentifier> getNextPage(PageRequest pageRequest) {
+    LOGGER.info("{}", pageRequest);
     if (jobMode == JobMode.INITIAL_LOAD) {
       return changedEntitiesIdentifiersService.getIdentifiersForInitialLoad(pageRequest);
     } else if (jobMode == JobMode.INITIAL_LOAD_RESUME) {

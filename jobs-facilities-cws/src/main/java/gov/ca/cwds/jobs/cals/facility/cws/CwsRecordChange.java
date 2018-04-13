@@ -29,7 +29,7 @@ public class CwsRecordChange extends RecordChange {
           + "from ReplicationPlacementHome as home "
           + "where home.licensrCd <> 'CL' "
           + "and home.lastUpdatedTime >= :dateAfter "
-          + "order by home.lastUpdatedTime";
+          + "order by home.lastUpdatedTime, home.identifier";
 
   static final String CWS_CMS_INCREMENTAL_LOAD_QUERY =
       "select new CwsRecordChange(home.identifier,"
@@ -38,7 +38,7 @@ public class CwsRecordChange extends RecordChange {
           + " from ReplicationPlacementHome as home "
           + " where home.licensrCd <> 'CL' "
           + " and home.timestamp >= :dateAfter"
-          + " order by home.timestamp";
+          + " order by home.timestamp, home.identifier";
 
 
   public static final String CWSCMS_INITIAL_LOAD_QUERY_NAME = "RecordChange.cwscmsInitialLoadQuery";

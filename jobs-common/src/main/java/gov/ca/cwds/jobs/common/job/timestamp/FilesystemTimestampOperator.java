@@ -79,5 +79,4 @@ public class FilesystemTimestampOperator implements TimestampOperator {
       throw new ApiException("Can't write timestamp ", e);
     }
   }
-
 }

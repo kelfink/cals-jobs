@@ -31,7 +31,6 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
   @Override
   public List<ChangedEntityIdentifier> getIdentifiersForResumingInitialLoad(
       LocalDateTime timeStampAfter, PageRequest pageRequest) {
-
     return getCwsCmsResumingInitialLoadIdentifiers(timeStampAfter, pageRequest);
   }
 
