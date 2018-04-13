@@ -17,7 +17,7 @@ apply plugin: 'eclipse'
 apply plugin: 'jacoco'
 
 project.ext {
-    cwdsModelVersion = '0.5.8_473-RC'
+    cwdsModelVersion = '0.6.2_504-RC'
     calsApiVersion = '0.6.3_1166-RC'
     coreApiVersion = '1.6.2_585-RC'
     testSupportVersion = '0.5.6_272-RC'

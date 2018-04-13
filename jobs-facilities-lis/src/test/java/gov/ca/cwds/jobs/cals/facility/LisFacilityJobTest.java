@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import liquibase.exception.LiquibaseException;
 import org.json.JSONException;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -32,30 +31,25 @@ import org.junit.Test;
 public class LisFacilityJobTest {
 
   private static LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("lis_job_temp");
-
-  static final String LIS_INITIAL_LOAD_FACILITY_ID = "9069";
-  static final String LIS_INCREMENTAL_LOAD_UPDATED_FACILITY_ID = "193600001";
+  private static final String LIS_INITIAL_LOAD_FACILITY_ID = "9069";
 
   @Test
-  @Ignore
-  //we've changed CALS-api version which works with different columns now, so test data needs to be
-  //updated too
   public void lisFacilityJobTest()
       throws IOException, JSONException, InterruptedException, LiquibaseException {
     try {
       assertEquals(0, TestWriter.getItems().size());
       lastRunDirHelper.deleteTimestampDirectory();
       runInitialLoad();
-      assertEquals(230, TestWriter.getItems().size());
-      assertFacility("fixtures/facilities-initial-load-lis.json", LIS_INITIAL_LOAD_FACILITY_ID);
+      assertEquals(322, TestWriter.getItems().size());
+      assertFacility("fixtures/facilities-lis.json", LIS_INITIAL_LOAD_FACILITY_ID);
       runIncrementalLoad();
       assertEquals(0, TestWriter.getItems().size());
       Thread.sleep(1000);
       addLisDataForIncrementalLoad();
       runIncrementalLoad();
       assertEquals(1, TestWriter.getItems().size());
-      assertFacility("fixtures/lis_updated_facility.json",
-          LIS_INCREMENTAL_LOAD_UPDATED_FACILITY_ID);
+      assertFacility("fixtures/facilities-lis.json",
+          LIS_INITIAL_LOAD_FACILITY_ID);
     } finally {
       lastRunDirHelper.deleteTimestampDirectory();
       TestWriter.reset();

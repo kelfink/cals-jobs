@@ -6,7 +6,7 @@
     <changeSet author="test" id="022820180258">
         <update tableName="lis_fac_file">
             <column name="system_datetime_1" value = '${now}'/>
-            <where>fac_nbr = 193600001</where>
+            <where>fac_nbr = 9069</where>
         </update>
     </changeSet>
 </databaseChangeLog>
