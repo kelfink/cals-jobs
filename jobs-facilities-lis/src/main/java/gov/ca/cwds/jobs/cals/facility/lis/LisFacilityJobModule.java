@@ -16,6 +16,7 @@ import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
 import gov.ca.cwds.jobs.cals.facility.fas.FasDataAccessModule;
 import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.api.ChangedEntityService;
+import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.job.Job;
@@ -43,6 +44,7 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
         .toProvider(LisChangedIdentifiersServiceProvider.class);
     bind(LisFacilityService.class).toProvider(LisFacilityServiceProvider.class);
     bind(FasFacilityService.class).toProvider(FasFacilityServiceProvider.class);
+    setJobBatchIteratorClass(LisBatchIterator.class);
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {
     }).to(LisChangedFacilityService.class);
     bind(Job.class).to(LisFacilityJob.class);

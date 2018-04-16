@@ -28,8 +28,7 @@ public class RecordChangeLisDao extends BaseDaoImpl<LisRecordChange> {
   public Stream<LisRecordChange> getInitialLoadStream(
       PageRequest pageRequest) {
     QueryCreator<LisRecordChange> queryCreator = buildQueryCreator(LIS_INITIAL_LOAD_QUERY_NAME,
-        pageRequest, query -> {
-        });
+        pageRequest, query -> query.setParameter("facNbr", pageRequest.getLastId()));
     return new LisRecordChangesStreamer(this, queryCreator).createStream();
   }
 
@@ -53,7 +52,7 @@ public class RecordChangeLisDao extends BaseDaoImpl<LisRecordChange> {
     Query<LisRecordChange> query = session
         .createNamedQuery(queryName, LisRecordChange.class)
         .setMaxResults(pageRequest.getLimit())
-        .setFirstResult(pageRequest.getOffset())
+//        .setFirstResult(pageRequest.getOffset())
         .setReadOnly(true);
     parametersSetter.accept(query);
     return query;

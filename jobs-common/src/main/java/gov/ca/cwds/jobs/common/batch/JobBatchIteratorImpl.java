@@ -156,4 +156,20 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   public void setJobMode(JobMode jobMode) {
     this.jobMode = jobMode;
   }
+
+  public PageRequest getPageRequest() {
+    return pageRequest;
+  }
+
+  public JobMode getJobMode() {
+    return jobMode;
+  }
+
+  public ChangedEntitiesIdentifiersService getChangedEntitiesIdentifiersService() {
+    return changedEntitiesIdentifiersService;
+  }
+
+  public TimestampOperator getTimestampOperator() {
+    return timestampOperator;
+  }
 }

@@ -16,7 +16,9 @@ import javax.persistence.NamedQuery;
  */
 @NamedQueries({@NamedQuery(
     name = LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
-    query = LisRecordChange.LIS_BASE_QUERY
+    query = LisRecordChange.LIS_BASE_QUERY +
+        " WHERE home.facNbr > :facNbr" +
+        " ORDER BY home.facNbr"
 ), @NamedQuery(
     name = LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
     query = LisRecordChange.LIS_BASE_QUERY +

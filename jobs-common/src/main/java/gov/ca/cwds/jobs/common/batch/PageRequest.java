@@ -7,6 +7,7 @@ public class PageRequest {
 
   private int limit;
   private int offset;
+  private int lastId;
 
   public PageRequest(int offset, int limit) {
     this.offset = offset;
@@ -29,4 +30,11 @@ public class PageRequest {
     offset++;
   }
 
+  public void setLastId(int lastId) {
+    this.lastId = lastId;
+  }
+
+  public int getLastId() {
+    return lastId;
+  }
 }
