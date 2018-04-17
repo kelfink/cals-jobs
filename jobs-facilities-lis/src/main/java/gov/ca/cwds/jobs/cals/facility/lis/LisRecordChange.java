@@ -20,7 +20,7 @@ import javax.persistence.NamedQuery;
 ), @NamedQuery(
     name = LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
     query = LisRecordChange.LIS_BASE_QUERY +
-        " WHERE system_datetime_1 > :dateAfter "
+    " WHERE home.timestamp >= :dateAfter "
 )
 })
 @Entity
@@ -33,8 +33,8 @@ public class LisRecordChange extends RecordChange {
       .ofPattern("yyyyMMddHHmmss");
 
   static final String LIS_BASE_QUERY =
-      "select new LisRecordChange(home.facNbr, home.timestamp) " +
-          " from LisFacFile home";
+      "SELECT new LisRecordChange(home.facNbr, home.timestamp) " +
+          " FROM LisFacFile AS home";
 
   public LisRecordChange(int id, BigInteger timestamp) {
     this(String.valueOf(id), RecordChangeOperation.U, timestamp);
@@ -65,5 +65,4 @@ public class LisRecordChange extends RecordChange {
     return new ChangedEntityIdentifier(recordChange.getId(),
         recordChange.getRecordChangeOperation(), timestamp);
   }
-
 }

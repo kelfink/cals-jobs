@@ -60,7 +60,6 @@ public class BatchProcessor<T> {
 
   private void processBatch(JobBatch jobBatch) {
     batchReadersPool.loadEntities(jobBatch.getChangedEntityIdentifiers());
-    elasticSearchBulkCollector.flush();
     if (!JobExceptionHandler.isExceptionHappened()) {
       timestampOperator.writeTimestamp(jobBatch.getTimestamp());
       if (LOGGER.isInfoEnabled()) {

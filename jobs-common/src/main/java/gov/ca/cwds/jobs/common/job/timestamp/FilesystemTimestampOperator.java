@@ -56,7 +56,9 @@ public class FilesystemTimestampOperator implements TimestampOperator {
   }
 
   private Path getRunningFile() {
-    return Paths.get(outputDir, TIMESTAMP_FILENAME).normalize().toAbsolutePath();
+    Path path = Paths.get(outputDir, TIMESTAMP_FILENAME).normalize().toAbsolutePath();
+    LOG.info("Path to the timestamp file: {}", path.toString());
+    return path;
   }
 
   @Override
@@ -79,5 +81,4 @@ public class FilesystemTimestampOperator implements TimestampOperator {
       throw new ApiException("Can't write timestamp ", e);
     }
   }
-
 }

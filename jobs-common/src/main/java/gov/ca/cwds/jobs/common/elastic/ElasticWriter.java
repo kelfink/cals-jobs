@@ -46,9 +46,7 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
 
           @Override
           public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-            LOGGER.warn("Executed bulk of {} actions which are added to counter", request.numberOfActions());
             LOGGER.warn("Response from bulk: {} ", response.getItems().length);
-            ConsumerCounter.addToCounter(request.numberOfActions());
           }
 
           @Override
@@ -60,23 +58,26 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
 
   @Override
   public void write(List<T> items) {
-    items.stream().forEach(item -> {
+    items.forEach(item -> {
       try {
         RecordChangeOperation recordChangeOperation = item.getRecordChangeOperation();
-
-        LOGGER.debug("Preparing to delete item: ID {}", item.getId());
-        bulkProcessor.add(elasticsearchDao.bulkDelete(item.getId()));
 
         if (RecordChangeOperation.I == recordChangeOperation
             || RecordChangeOperation.U == recordChangeOperation) {
           LOGGER.debug("Preparing to insert item: ID {}", item.getId());
           bulkProcessor.add(elasticsearchDao.bulkAdd(objectMapper, item.getId(), item.getDTO()));
+        } else if (RecordChangeOperation.D == recordChangeOperation) {
+          LOGGER.debug("Preparing to delete item: ID {}", item.getId());
+          bulkProcessor.add(elasticsearchDao.bulkDelete(item.getId()));
+        } else {
+          LOGGER.warn("No operation found for facility with ID: {}", item.getId());
         }
       } catch (JsonProcessingException e) {
         throw new JobsException(e);
       }
     });
     bulkProcessor.flush();
+    ConsumerCounter.addToCounter(items.size());
   }
 
   @Override

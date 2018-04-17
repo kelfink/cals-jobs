@@ -29,4 +29,11 @@ public class PageRequest {
     offset++;
   }
 
+  @Override
+  public String toString() {
+    return "PageRequest{" +
+        "limit=" + limit +
+        ", offset=" + offset +
+        '}';
+  }
 }

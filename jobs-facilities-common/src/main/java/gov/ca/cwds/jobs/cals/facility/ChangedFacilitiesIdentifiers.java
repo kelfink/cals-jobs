@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs.cals.facility;
 
-import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifiers;
 import java.util.stream.Stream;
@@ -10,11 +9,7 @@ import java.util.stream.Stream;
  */
 public class ChangedFacilitiesIdentifiers extends ChangedEntityIdentifiers {
 
-  private DataSourceName dataSourceName;
-
-  public ChangedFacilitiesIdentifiers(DataSourceName dataSourceName) {
-    this.dataSourceName = dataSourceName;
-  }
+  public ChangedFacilitiesIdentifiers() {}
 
   @Override
   public Stream<ChangedEntityIdentifier> newStream() {
