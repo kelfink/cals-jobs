@@ -117,7 +117,7 @@ public class BatchIteratorTest {
   private JobBatchIterator prepareBatchIterator(int batchSize,
       ChangedEntitiesIdentifiersService identifiersProvider) {
     JobBatchIteratorImpl jobIterator = new JobBatchIteratorImpl();
-    jobIterator.setPageRequest(new PageRequest(0, batchSize));
+    jobIterator.setBatchSize(batchSize);
     jobIterator.setJobMode(JobMode.INITIAL_LOAD);
     jobIterator.setChangedEntitiesIdentifiersService(identifiersProvider);
     return jobIterator;

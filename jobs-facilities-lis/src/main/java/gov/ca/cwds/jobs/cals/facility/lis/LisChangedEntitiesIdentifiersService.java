@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.cals.facility.lis;
 import static gov.ca.cwds.cals.Constants.UnitOfWork.LIS;
 
 import com.google.inject.Inject;
-import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilitiesIdentifiers;
 import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
 /**
  * Created by Alexander Serbin on 3/6/2018.
  */
-
 public class LisChangedEntitiesIdentifiersService implements ChangedEntitiesIdentifiersService {
 
   @Inject
@@ -27,11 +25,10 @@ public class LisChangedEntitiesIdentifiersService implements ChangedEntitiesIden
   @UnitOfWork(LIS)
   @Override
   public List<ChangedEntityIdentifier> getIdentifiersForInitialLoad(PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(
-        DataSourceName.LIS);
+    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     recordChangeLisDao.getInitialLoadStream(pageRequest).
         map(LisRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().filter(Objects::nonNull)
+    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
         .collect(Collectors.toList());
   }
 
@@ -51,14 +48,12 @@ public class LisChangedEntitiesIdentifiersService implements ChangedEntitiesIden
   @UnitOfWork(LIS)
   protected List<ChangedEntityIdentifier> getLisIncrementalLoadIdentifiers(
       LocalDateTime timestampAfter, PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(
-        DataSourceName.LIS);
+    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     BigInteger dateAfter = new BigInteger(
         LisRecordChange.lisTimestampFormatter.format(timestampAfter));
     recordChangeLisDao.getIncrementalLoadStream(dateAfter, pageRequest).
         map(LisRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().filter(Objects::nonNull)
+    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
         .collect(Collectors.toList());
   }
-
 }

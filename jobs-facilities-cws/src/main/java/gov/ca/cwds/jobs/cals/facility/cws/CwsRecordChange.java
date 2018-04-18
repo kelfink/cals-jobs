@@ -24,12 +24,12 @@ import javax.persistence.NamedQuery;
 public class CwsRecordChange extends RecordChange {
 
   static final String CWS_CMS_INITIAL_LOAD_QUERY =
-      "select new CwsRecordChange(home.identifier,"
+      "select distinct new CwsRecordChange(home.identifier,"
           + "home.lastUpdatedTime) "
           + "from ReplicationPlacementHome as home "
           + "where home.licensrCd <> 'CL' "
-          + "and home.lastUpdatedTime > :dateAfter "
-          + "order by home.lastUpdatedTime";
+          + "and home.lastUpdatedTime >= :dateAfter "
+          + "order by home.lastUpdatedTime, home.identifier";
 
   static final String CWS_CMS_INCREMENTAL_LOAD_QUERY =
       "select new CwsRecordChange(home.identifier,"
@@ -37,8 +37,8 @@ public class CwsRecordChange extends RecordChange {
           + "home.timestamp) "
           + " from ReplicationPlacementHome as home "
           + " where home.licensrCd <> 'CL' "
-          + " and home.timestamp > :dateAfter"
-          + " order by home.timestamp";
+          + " and home.timestamp >= :dateAfter"
+          + " order by home.timestamp, home.identifier";
 
 
   public static final String CWSCMS_INITIAL_LOAD_QUERY_NAME = "RecordChange.cwscmsInitialLoadQuery";

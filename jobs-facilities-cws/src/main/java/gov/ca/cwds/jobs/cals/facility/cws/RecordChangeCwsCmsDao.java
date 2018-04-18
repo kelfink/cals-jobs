@@ -36,6 +36,7 @@ public class RecordChangeCwsCmsDao extends BaseDaoImpl<CwsRecordChange> {
     return loadStream(timeStampAfter, CwsRecordChange.CWSCMS_INITIAL_LOAD_QUERY_NAME, pageRequest);
   }
 
+  @SuppressWarnings("unchecked")
   private Stream<CwsRecordChange> loadStream(LocalDateTime timeStampAfter,
       String queryName, PageRequest pageRequest) {
     QueryCreator<CwsRecordChange> queryCreator = (session, entityClass) -> session

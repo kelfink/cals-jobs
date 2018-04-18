@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.cals.facility.cws;
 import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
 
 import com.google.inject.Inject;
-import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilitiesIdentifiers;
 import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
@@ -38,38 +37,36 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
   @Override
   public List<ChangedEntityIdentifier> getIdentifiersForIncrementalLoad(LocalDateTime timestamp,
       PageRequest pageRequest) {
+
     return getCwsCmsIncrementalLoadIdentifiers(timestamp, pageRequest);
   }
 
   @UnitOfWork(CMS)
   protected List<ChangedEntityIdentifier> getCwsCmsResumingInitialLoadIdentifiers(
       LocalDateTime timeStampAfter, PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(
-        DataSourceName.CWS);
+    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     recordChangeCwsCmsDao.getResumeInitialLoadStream(timeStampAfter, pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().filter(Objects::nonNull)
+    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
         .collect(Collectors.toList());
   }
 
   @UnitOfWork(CMS)
   protected Stream<ChangedEntityIdentifier> getCwsCmsInitialLoadIdentifiers(
       PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(
-        DataSourceName.CWS);
+    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     recordChangeCwsCmsDao.getInitialLoadStream(pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().filter(Objects::nonNull);
+    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull);
   }
 
   @UnitOfWork(CMS)
   protected List<ChangedEntityIdentifier> getCwsCmsIncrementalLoadIdentifiers(
       LocalDateTime dateAfter, PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers(
-        DataSourceName.CWS);
+    ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     recordChangeCwsCmsDao.getIncrementalLoadStream(dateAfter, pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().filter(Objects::nonNull)
+    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
         .collect(Collectors.toList());
   }
 

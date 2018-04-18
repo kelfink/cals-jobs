@@ -37,4 +37,13 @@ public class PageRequest {
   public int getLastId() {
     return lastId;
   }
+
+  @Override
+  public String toString() {
+    return "PageRequest{" +
+        "limit=" + limit +
+        ", offset=" + offset +
+        ", lastId=" + lastId +
+        '}';
+  }
 }

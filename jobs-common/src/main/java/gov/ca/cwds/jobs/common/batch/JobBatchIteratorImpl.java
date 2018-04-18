@@ -12,6 +12,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +34,12 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   @Inject
   private TimestampOperator timestampOperator;
 
-  private PageRequest pageRequest;
+  private AtomicInteger nextOffset = new AtomicInteger(0);
+
   private JobMode jobMode;
 
   @Override
   public void init() {
-    pageRequest = new PageRequest(0, batchSize);
     jobMode = defineJobMode();
   }
 
@@ -73,7 +74,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
     }
     LocalDateTime lastTimeStamp = identifiers.get(identifiers.size() - 1).getTimestamp();
     if (lastTimeStamp == null) {
-      pageRequest.incrementPage();
+      nextOffset.addAndGet(batchSize);
       return Collections.singletonList(new JobBatch(identifiers));
     } else {
       return calculateNextPortion(identifiers);
@@ -81,10 +82,11 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   }
 
   private List<ChangedEntityIdentifier> getNextPage() {
-    return getNextPage(pageRequest);
+    return getNextPage(new PageRequest(nextOffset.get(), batchSize));
   }
 
   private List<ChangedEntityIdentifier> getNextPage(PageRequest pageRequest) {
+    LOGGER.info("{}", pageRequest);
     if (jobMode == JobMode.INITIAL_LOAD) {
       return changedEntitiesIdentifiersService.getIdentifiersForInitialLoad(pageRequest);
     } else if (jobMode == JobMode.INITIAL_LOAD_RESUME) {
@@ -94,7 +96,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
       return changedEntitiesIdentifiersService
           .getIdentifiersForIncrementalLoad(timestampOperator.readTimestamp(), pageRequest);
     }
-    throw new IllegalStateException("Unexppected job mode");
+    throw new IllegalStateException("Unexpected job mode");
   }
 
   private List<JobBatch> calculateNextPortion(
@@ -103,7 +105,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
     List<ChangedEntityIdentifier> nextIdentifiersPage = identifiers;
     while ((!nextIdentifiersPage.isEmpty() && getLastTimestamp(identifiers) ==
         getLastTimestamp(nextIdentifiersPage))) {
-      pageRequest.incrementPage();
+      nextOffset.addAndGet(batchSize);
       nextPortion.add(new JobBatch(nextIdentifiersPage));
       nextIdentifiersPage = getNextPage();
     }
@@ -112,7 +114,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
 
     while (!nextIdentifier.isEmpty() &&
         (nextIdentifier.get(0).getTimestamp() == getLastTimestamp(identifiers))) {
-      pageRequest.increment();
+      nextOffset.addAndGet(batchSize);
       assert nextIdentifier.size() == 1;
       nextPortion.get(nextPortion.size() - 1).getChangedEntityIdentifiers()
           .add(nextIdentifier.get(0));
@@ -123,7 +125,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   }
 
   private List<ChangedEntityIdentifier> getNextIdentifier() {
-    return getNextPage(new PageRequest(pageRequest.getOffset(), 1));
+    return getNextPage(new PageRequest(nextOffset.get(), 1));
   }
 
   private static LocalDateTime getLastTimestamp(List<ChangedEntityIdentifier> identifiers) {
@@ -147,10 +149,6 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   public void setTimestampOperator(
       TimestampOperator timestampOperator) {
     this.timestampOperator = timestampOperator;
-  }
-
-  public void setPageRequest(PageRequest pageRequest) {
-    this.pageRequest = pageRequest;
   }
 
   public void setJobMode(JobMode jobMode) {
