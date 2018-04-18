@@ -2,13 +2,16 @@ package gov.ca.cwds.jobs.cals.facility.lis;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.cals.Constants;
+import gov.ca.cwds.cals.inject.ComplaintsCollectionServiceBackedResource;
 import gov.ca.cwds.cals.inject.FasFacilityServiceProvider;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
 import gov.ca.cwds.cals.inject.LisFacilityServiceProvider;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
+import gov.ca.cwds.cals.service.ComplaintsCollectionService;
 import gov.ca.cwds.cals.service.FasFacilityService;
 import gov.ca.cwds.cals.service.LisFacilityService;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
@@ -20,6 +23,8 @@ import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.job.Job;
+import gov.ca.cwds.rest.resources.ResourceDelegate;
+import gov.ca.cwds.rest.resources.ServiceBackedResourceDelegate;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.hibernate.SessionFactory;
@@ -44,6 +49,7 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
         .toProvider(LisChangedIdentifiersServiceProvider.class);
     bind(LisFacilityService.class).toProvider(LisFacilityServiceProvider.class);
     bind(FasFacilityService.class).toProvider(FasFacilityServiceProvider.class);
+    bind(JobBatchIterator.class).to(LisBatchIterator.class);
     setJobBatchIteratorClass(LisBatchIterator.class);
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {
     }).to(LisChangedFacilityService.class);

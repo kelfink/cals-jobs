@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.common.inject;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Provides;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
@@ -46,7 +47,7 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
     bindConstant().annotatedWith(LastRunDir.class).to(jobOptions.getLastRunLoc());
     bind(TimestampOperator.class).to(FilesystemTimestampOperator.class).asEagerSingleton();
     bind(JobPreparator.class).to(jobPreparatorClass);
-    bind(JobBatchIterator.class).to(jobBatchIteratorClass);
+//    bind(JobBatchIterator.class).to(jobBatchIteratorClass);
     bindConstant().annotatedWith(JobBatchSize.class)
         .to(getJobsConfiguration(jobOptions).getBatchSize());
     bindConstant().annotatedWith(ElasticSearchBulkSize.class)
@@ -75,5 +76,10 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
       //empty by default
     }
   }
+//
+//  @Provides
+//  public JobBatchIterator provideIteratorResource(Injector injector) {
+//    return injector.getInstance(JobBatchIteratorImpl.class);
+//  }
 
 }

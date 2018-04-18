@@ -38,6 +38,10 @@ public class LisRecordChange extends RecordChange {
       "select new LisRecordChange(home.facNbr, home.timestamp) " +
           " from LisFacFile home";
 
+  public LisRecordChange() {
+    // Default constructor
+  }
+
   public LisRecordChange(int id, BigInteger timestamp) {
     this(String.valueOf(id), RecordChangeOperation.U, timestamp);
   }
