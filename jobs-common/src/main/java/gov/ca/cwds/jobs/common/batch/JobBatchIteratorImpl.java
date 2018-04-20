@@ -155,10 +155,6 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
     this.jobMode = jobMode;
   }
 
-  public PageRequest getPageRequest() {
-    return pageRequest;
-  }
-
   public JobMode getJobMode() {
     return jobMode;
   }
@@ -169,5 +165,13 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
 
   public TimestampOperator getTimestampOperator() {
     return timestampOperator;
+  }
+
+  public AtomicInteger getNextOffset() {
+    return nextOffset;
+  }
+
+  public void setNextOffset(AtomicInteger nextOffset) {
+    this.nextOffset = nextOffset;
   }
 }

@@ -52,7 +52,7 @@ public class JobTimestampTest {
     assertTrue(timestamp.until(LocalDateTime.now(), ChronoUnit.SECONDS) < 1);
   }
 
-  @Test(expected = JobsException.class)
+  @Test(expected = IllegalStateException.class)
   public void test_timestamp_is_not_created_if_crash_happens()
       throws IOException {
     try {
@@ -63,7 +63,7 @@ public class JobTimestampTest {
     }
   }
 
-  @Test(expected = JobsException.class)
+  @Test(expected = IllegalStateException.class)
   public void test_timestamp_is_not_updated_if_crash_happens()
       throws IOException {
     LocalDateTime timestamp = LocalDateTime.of(2017, 1, 20, 5, 25);

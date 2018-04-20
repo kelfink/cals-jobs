@@ -40,7 +40,7 @@ public class LisFacilityJobTest {
       assertEquals(0, TestWriter.getItems().size());
       lastRunDirHelper.deleteTimestampDirectory();
       runInitialLoad();
-      assertEquals(322, TestWriter.getItems().size());
+      assertEquals(330, TestWriter.getItems().size());
       assertFacility("fixtures/facilities-lis.json", LIS_INITIAL_LOAD_FACILITY_ID);
       runIncrementalLoad();
       assertEquals(0, TestWriter.getItems().size());

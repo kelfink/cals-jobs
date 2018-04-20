@@ -14,6 +14,12 @@ public class PageRequest {
     this.limit = limit;
   }
 
+  public PageRequest(int offset, int limit, int lastId) {
+    this.lastId = lastId;
+    this.offset = offset;
+    this.limit = limit;
+  }
+
   public int getLimit() {
     return limit;
   }

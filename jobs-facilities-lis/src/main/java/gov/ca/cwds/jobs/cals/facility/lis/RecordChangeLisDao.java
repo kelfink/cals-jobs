@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs.cals.facility.lis;
 
+import static gov.ca.cwds.jobs.cals.facility.lis.LisRecordChange.INCREMENTAL_LOAD_SQL;
+import static gov.ca.cwds.jobs.cals.facility.lis.LisRecordChange.INITIAL_LOAD_SQL;
 import static gov.ca.cwds.jobs.cals.facility.lis.LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME;
 
 import com.google.inject.Inject;
@@ -19,10 +21,6 @@ import org.hibernate.query.Query;
  */
 public class RecordChangeLisDao extends BaseDaoImpl<LisRecordChange> {
 
-  public static final String INITIAL_LOAD_SQL = "select fac_nbr as ID, 'U' as CHANGE_OPERATION, system_datetime_1 as TIME_STAMP from "
-      + "(select fac_nbr , system_datetime_1 from lis_fac_file "
-      + "where fac_nbr > :facNbr order by fac_nbr)";
-
   @Inject
   public RecordChangeLisDao(@LisSessionFactory SessionFactory sessionFactory) {
     super(sessionFactory);
@@ -38,8 +36,8 @@ public class RecordChangeLisDao extends BaseDaoImpl<LisRecordChange> {
 
   public Stream<LisRecordChange> getIncrementalLoadStream(final BigInteger dateAfter,
       PageRequest pageRequest) {
-    QueryCreator<LisRecordChange> queryCreator = buildQueryCreator(
-        LIS_INCREMENTAL_LOAD_QUERY_NAME,
+    QueryCreator<LisRecordChange> queryCreator = buildNativeQueryCreator(
+        INCREMENTAL_LOAD_SQL,
         pageRequest, query -> query.setParameter("dateAfter", dateAfter));
     return new LisRecordChangesStreamer(this, queryCreator).createStream();
   }

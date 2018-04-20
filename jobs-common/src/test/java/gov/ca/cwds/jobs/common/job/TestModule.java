@@ -5,6 +5,7 @@ import com.google.inject.TypeLiteral;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.api.ChangedEntityService;
+import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
 import gov.ca.cwds.jobs.common.inject.BatchProcessor;
@@ -49,6 +50,7 @@ public class TestModule extends AbstractBaseJobModule {
     bind(ChangedEntitiesIdentifiersService.class).to(changedEntitiesIdentifiersClass);
     bind(new TypeLiteral<BatchProcessor<Object>>() {
     }).to(TestBatchProcessor.class);
+    bind(JobBatchIterator.class).to(BatchTestSavePointBatchIterator.class);
     bind(new TypeLiteral<ChangedEntityService<Object>>() {
     }).toInstance(changedEntityService);
     bind(new TypeLiteral<BulkWriter<Object>>() {
