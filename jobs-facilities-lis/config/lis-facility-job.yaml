@@ -24,7 +24,7 @@ lisDataSourceFactory:
       hibernate.connection.username: ${DB_LIS_USER:-postgres_data}
       hibernate.connection.password: ${DB_LIS_PASSWORD:-postgres_data}
       hibernate.connection.url: ${DB_LIS_JDBC_URL:-jdbc:postgresql://192.168.99.100:5432/?currentSchema=lis}
-      hibernate.show_sql: false
+      hibernate.show_sql: true
       hibernate.format_sql: true
       hibernate.use_sql_comments: false
       hibernate.c3p0.min_size: 5
