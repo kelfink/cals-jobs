@@ -1,7 +1,6 @@
 package gov.ca.cwds.jobs.cals.facility.lis;
 
 import static gov.ca.cwds.jobs.cals.facility.lis.LisRecordChange.INCREMENTAL_LOAD_SQL;
-import static gov.ca.cwds.jobs.cals.facility.lis.LisRecordChange.INITIAL_LOAD_SQL;
 import static gov.ca.cwds.jobs.cals.facility.lis.LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME;
 
 import com.google.inject.Inject;
@@ -29,7 +28,7 @@ public class RecordChangeLisDao extends BaseDaoImpl<LisRecordChange> {
   public Stream<LisRecordChange> getInitialLoadStream(
       PageRequest pageRequest) {
 
-    QueryCreator<LisRecordChange> queryCreator = buildNativeQueryCreator(INITIAL_LOAD_SQL,
+    QueryCreator<LisRecordChange> queryCreator = buildNativeQueryCreator(LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
         pageRequest, query -> query.setParameter("facNbr", pageRequest.getLastId()));
     return new LisRecordChangesStreamer(this, queryCreator).createStream();
   }
@@ -37,16 +36,9 @@ public class RecordChangeLisDao extends BaseDaoImpl<LisRecordChange> {
   public Stream<LisRecordChange> getIncrementalLoadStream(final BigInteger dateAfter,
       PageRequest pageRequest) {
     QueryCreator<LisRecordChange> queryCreator = buildNativeQueryCreator(
-        INCREMENTAL_LOAD_SQL,
+        LIS_INCREMENTAL_LOAD_QUERY_NAME,
         pageRequest, query -> query.setParameter("dateAfter", dateAfter));
     return new LisRecordChangesStreamer(this, queryCreator).createStream();
-  }
-
-  private QueryCreator<LisRecordChange> buildQueryCreator(String queryName,
-      PageRequest pageRequest,
-      Consumer<Query<LisRecordChange>> parametersSetter) {
-    return (session, entityClass) -> prepareQuery(session, pageRequest, queryName,
-        parametersSetter);
   }
 
   private QueryCreator<LisRecordChange> buildNativeQueryCreator(String nativeQuery,
@@ -56,19 +48,9 @@ public class RecordChangeLisDao extends BaseDaoImpl<LisRecordChange> {
         parametersSetter);
   }
 
-  private Query<LisRecordChange> prepareQuery(Session session, PageRequest pageRequest,
-      String queryName, Consumer<Query<LisRecordChange>> parametersSetter) {
-    Query<LisRecordChange> query = session
-        .createNamedQuery(queryName, LisRecordChange.class)
-        .setMaxResults(pageRequest.getLimit())
-        .setReadOnly(true);
-    parametersSetter.accept(query);
-    return query;
-  }
-
   private Query<LisRecordChange> prepareNativeQuery(Session session, PageRequest pageRequest,
       String nativeQuery, Consumer<Query<LisRecordChange>> parametersSetter) {
-    Query<LisRecordChange> query = session.createNativeQuery(nativeQuery, LisRecordChange.class)
+    Query<LisRecordChange> query = session.createNamedQuery(nativeQuery, LisRecordChange.class)
         .setMaxResults(pageRequest.getLimit())
         .setReadOnly(true);
     parametersSetter.accept(query);

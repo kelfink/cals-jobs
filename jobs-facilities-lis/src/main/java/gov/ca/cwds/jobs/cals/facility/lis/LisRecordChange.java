@@ -10,25 +10,26 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import org.hibernate.annotations.NamedNativeQueries;
+import org.hibernate.annotations.NamedNativeQuery;
 
 /**
  * Created by Alexander Serbin on 3/6/2018.
  */
-@NamedQueries({@NamedQuery(
-    name = LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
-    query = LisRecordChange.LIS_BASE_QUERY +
-        " WHERE home.facNbr > :facNbr" +
-        " ORDER BY home.facNbr"
-), @NamedQuery(
-    name = LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
-    query = LisRecordChange.LIS_BASE_QUERY +
-    " WHERE home.timestamp >= :dateAfter "
-)
+@NamedNativeQueries({
+    @NamedNativeQuery(
+        name=LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
+        query = LisRecordChange.INITIAL_LOAD_SQL,
+        resultClass = LisRecordChange.class),
+    @NamedNativeQuery(
+        name=LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
+        query = LisRecordChange.INCREMENTAL_LOAD_SQL,
+        resultClass = LisRecordChange.class)
 })
 @Entity
 public class LisRecordChange extends RecordChange {
 
-  public static final String INITIAL_LOAD_SQL = "select fac_nbr as ID, 'U' as 'CHANGE_OPERATION', system_datetime_1 as 'TIME_STAMP' from "
+  public static final String INITIAL_LOAD_SQL = "select fac_nbr as ID, 'U' as CHANGE_OPERATION, system_datetime_1 as TIME_STAMP from "
       + "(select fac_nbr , system_datetime_1 from lis_fac_file "
       + "where fac_nbr > :facNbr order by fac_nbr)";
 
