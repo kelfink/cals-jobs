@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.cals.facility.lis;
 
-import static gov.ca.cwds.jobs.cals.facility.lis.LisRecordChange.INCREMENTAL_LOAD_SQL;
 import static gov.ca.cwds.jobs.cals.facility.lis.LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME;
+import static gov.ca.cwds.jobs.cals.facility.lis.LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
@@ -28,7 +28,7 @@ public class RecordChangeLisDao extends BaseDaoImpl<LisRecordChange> {
   public Stream<LisRecordChange> getInitialLoadStream(
       PageRequest pageRequest) {
 
-    QueryCreator<LisRecordChange> queryCreator = buildNativeQueryCreator(LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
+    QueryCreator<LisRecordChange> queryCreator = buildNativeQueryCreator(LIS_INITIAL_LOAD_QUERY_NAME,
         pageRequest, query -> query.setParameter("facNbr", pageRequest.getLastId()));
     return new LisRecordChangesStreamer(this, queryCreator).createStream();
   }

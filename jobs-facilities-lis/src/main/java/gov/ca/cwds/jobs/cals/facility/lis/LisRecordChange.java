@@ -8,28 +8,44 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityResult;
+import javax.persistence.FieldResult;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.SqlResultSetMapping;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 
-/**
- * Created by Alexander Serbin on 3/6/2018.
- */
+/** Created by Alexander Serbin on 3/6/2018. */
 @NamedNativeQueries({
-    @NamedNativeQuery(
-        name=LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
-        query = LisRecordChange.INITIAL_LOAD_SQL,
-        resultClass = LisRecordChange.class),
-    @NamedNativeQuery(
-        name=LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
-        query = LisRecordChange.INCREMENTAL_LOAD_SQL,
-        resultClass = LisRecordChange.class)
+  @NamedNativeQuery(
+    name = LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
+    query = LisRecordChange.INITIAL_LOAD_SQL,
+    resultSetMapping = "LisRecordChangeMapping"
+  ),
+  @NamedNativeQuery(
+    name = LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
+    query = LisRecordChange.INCREMENTAL_LOAD_SQL,
+    resultSetMapping = "LisRecordChangeMapping"
+  )
 })
+@SqlResultSetMapping(
+  name = "LisRecordChangeMapping",
+  entities = {
+    @EntityResult(
+      entityClass = LisRecordChange.class,
+      fields = {
+        @FieldResult(name = "id", column = "fac_nbr"),
+        @FieldResult(name = "recordChangeOperation", column = "op"),
+        @FieldResult(name = "timestamp", column = "system_datetime_1")
+      }
+    )
+  }
+)
 @Entity
 public class LisRecordChange extends RecordChange {
 
-  public static final String INITIAL_LOAD_SQL = "select fac_nbr as ID, 'U' as CHANGE_OPERATION, system_datetime_1 as TIME_STAMP from "
+  public static final String INITIAL_LOAD_SQL = "select fac_nbr, 'U' op, system_datetime_1 from "
       + "(select fac_nbr , system_datetime_1 from lis_fac_file "
       + "where fac_nbr > :facNbr order by fac_nbr)";
 
@@ -43,10 +59,6 @@ public class LisRecordChange extends RecordChange {
 
   public static final DateTimeFormatter lisTimestampFormatter = DateTimeFormatter
       .ofPattern("yyyyMMddHHmmss");
-
-  static final String LIS_BASE_QUERY =
-      "SELECT new LisRecordChange(home.facNbr, home.timestamp) " +
-          " FROM LisFacFile AS home";
 
   public LisRecordChange() {
     // Default constructor
