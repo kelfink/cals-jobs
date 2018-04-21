@@ -1,8 +1,9 @@
 package gov.ca.cwds.jobs.cals.facility.lis;
 
-import gov.ca.cwds.jobs.cals.facility.RecordChange;
+import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -10,8 +11,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityResult;
 import javax.persistence.FieldResult;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.SqlResultSetMapping;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
@@ -36,16 +37,15 @@ import org.hibernate.annotations.NamedNativeQuery;
       entityClass = LisRecordChange.class,
       fields = {
         @FieldResult(name = "id", column = "fac_nbr"),
-        @FieldResult(name = "recordChangeOperation", column = "op"),
         @FieldResult(name = "timestamp", column = "system_datetime_1")
       }
     )
   }
 )
 @Entity
-public class LisRecordChange extends RecordChange {
+public class LisRecordChange implements PersistentObject {
 
-  public static final String INITIAL_LOAD_SQL = "select fac_nbr, 'U' op, system_datetime_1 from "
+  public static final String INITIAL_LOAD_SQL = "select fac_nbr, system_datetime_1 from "
       + "(select fac_nbr , system_datetime_1 from lis_fac_file "
       + "where fac_nbr > :facNbr order by fac_nbr)";
 
@@ -64,19 +64,19 @@ public class LisRecordChange extends RecordChange {
     // Default constructor
   }
 
-  public LisRecordChange(int id, BigInteger timestamp) {
-    this(String.valueOf(id), RecordChangeOperation.U, timestamp);
-  }
-
   public LisRecordChange(String id,
-      RecordChangeOperation recordChangeOperation,
       BigInteger timestamp) {
-    super(id, recordChangeOperation);
+    this.id = id;
     this.timestamp = timestamp;
   }
 
   @Column(name = "TIME_STAMP")
   private BigInteger timestamp;
+
+  @Id
+  @Column(name = "ID")
+  private String id;
+
 
   public BigInteger getTimestamp() {
     return timestamp;
@@ -91,6 +91,19 @@ public class LisRecordChange extends RecordChange {
         LocalDateTime.parse(String.valueOf(recordChange.getTimestamp()),
             lisTimestampFormatter);
     return new ChangedEntityIdentifier(recordChange.getId(),
-        recordChange.getRecordChangeOperation(), timestamp);
+        RecordChangeOperation.U, timestamp);
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  @Override
+  public Serializable getPrimaryKey() {
+    return getId();
   }
 }
