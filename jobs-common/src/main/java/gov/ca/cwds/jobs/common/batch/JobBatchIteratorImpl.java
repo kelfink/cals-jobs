@@ -81,11 +81,11 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
     }
   }
 
-  private List<ChangedEntityIdentifier> getNextPage() {
+  protected List<ChangedEntityIdentifier> getNextPage() {
     return getNextPage(new PageRequest(nextOffset.get(), batchSize));
   }
 
-  private List<ChangedEntityIdentifier> getNextPage(PageRequest pageRequest) {
+  protected List<ChangedEntityIdentifier> getNextPage(PageRequest pageRequest) {
     LOGGER.info("{}", pageRequest);
     if (jobMode == JobMode.INITIAL_LOAD) {
       return changedEntitiesIdentifiersService.getIdentifiersForInitialLoad(pageRequest);

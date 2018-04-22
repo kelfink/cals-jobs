@@ -145,7 +145,7 @@ public class JobOptions {
 
           case CMD_LINE_LAST_RUN_FILE:
             lastRunLoc = opt.getValue().trim();
-            LOGGER.info("last run file = " + lastRunLoc);
+            LOGGER.info("last run file = {}", lastRunLoc);
             break;
 
           default:
@@ -178,12 +178,12 @@ public class JobOptions {
     File timeFilesDir = new File(jobOptions.getLastRunLoc());
     if (!timeFilesDir.exists()) {
       if (timeFilesDir.mkdir() && (LOGGER.isInfoEnabled())) {
-        LOGGER.info(getPathToOutputDirectory(jobOptions) + " was created in file system");
+        LOGGER.info("{} was created in file system", getPathToOutputDirectory(jobOptions));
       }
     }
 
     if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Using " + getPathToOutputDirectory(jobOptions) + " as output folder");
+      LOGGER.info("Using {} as output folder", getPathToOutputDirectory(jobOptions));
     }
     return jobOptions;
   }
