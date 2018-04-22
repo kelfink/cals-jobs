@@ -21,6 +21,7 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
   private Class<? extends JobPreparator> jobPreparatorClass = DefaultJobPreparator.class;
 
   private Class<? extends JobBatchIterator> jobBatchIteratorClass = JobBatchIteratorImpl.class;
+
   private AbstractModule elasticSearchModule;
 
   public AbstractBaseJobModule(String[] args) {
@@ -38,6 +39,10 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
   public void setJobBatchIteratorClass(
       Class<? extends JobBatchIterator> jobBatchIteratorClass) {
     this.jobBatchIteratorClass = jobBatchIteratorClass;
+  }
+
+  public Class<? extends JobBatchIterator> getJobBatchIteratorClass() {
+    return jobBatchIteratorClass;
   }
 
   @Override

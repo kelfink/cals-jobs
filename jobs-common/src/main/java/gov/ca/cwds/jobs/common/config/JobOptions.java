@@ -108,11 +108,12 @@ public class JobOptions {
    */
   protected static void printUsage() {
     try (final StringWriter sw = new StringWriter()) {
+      String equals = StringUtils.leftPad("", 90, '=');
       new HelpFormatter().printHelp(new PrintWriter(sw), 100, "Batch loader",
-          StringUtils.leftPad("", 90, '=') + "\nUSAGE: java <job class> ...\n"
-              + StringUtils.leftPad("", 90, '='),
-          buildCmdLineOptions(), 4, 8, StringUtils.leftPad("", 90, '='), true);
-      LOGGER.error(sw.toString());
+          equals + "\nUSAGE: java <job class> ...\n" + equals,
+          buildCmdLineOptions(), 4, 8, equals, true);
+      String usage = sw.toString();
+      LOGGER.error(usage);
     } catch (IOException e) {
       final String msg = "ERROR PRINTING HELP! How ironic. :-)";
       LOGGER.error(msg, e);
@@ -127,7 +128,7 @@ public class JobOptions {
    * @return JobOptions defining this job
    * @throws JobsException if unable to parse command line
    */
-  public static JobOptions parseCommandLine(String[] args) throws JobsException {
+  public static JobOptions parseCommandLine(String[] args) {
     String esConfigLoc = null;
     String lastRunLoc = null;
     try {
