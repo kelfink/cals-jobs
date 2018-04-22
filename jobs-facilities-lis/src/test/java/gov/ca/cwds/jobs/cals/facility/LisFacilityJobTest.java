@@ -10,6 +10,7 @@ import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.lis.LisFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.lis.LisFacilityJobModule;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
+import gov.ca.cwds.jobs.common.inject.BatchProcessor;
 import gov.ca.cwds.jobs.common.inject.JobRunner;
 import gov.ca.cwds.jobs.common.job.JobPreparator;
 import gov.ca.cwds.jobs.common.job.timestamp.LastRunDirHelper;
@@ -24,11 +25,15 @@ import java.util.Map;
 import liquibase.exception.LiquibaseException;
 import org.json.JSONException;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 3/18/2018.
  */
 public class LisFacilityJobTest {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(BatchProcessor.class);
 
   private static LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("lis_job_temp");
   private static final String LIS_INITIAL_LOAD_FACILITY_ID = "9069";
@@ -46,10 +51,10 @@ public class LisFacilityJobTest {
       assertEquals(0, TestWriter.getItems().size());
       Thread.sleep(1000);
       addLisDataForIncrementalLoad();
-//      runIncrementalLoad();
-//      assertEquals(1, TestWriter.getItems().size());
-//      assertFacility("fixtures/facilities-lis.json",
-//          LIS_INITIAL_LOAD_FACILITY_ID);
+      runIncrementalLoad();
+      assertEquals(1, TestWriter.getItems().size());
+      assertFacility("fixtures/facilities-lis.json",
+          LIS_INITIAL_LOAD_FACILITY_ID);
     } finally {
       lastRunDirHelper.deleteTimestampDirectory();
       TestWriter.reset();
@@ -112,15 +117,15 @@ public class LisFacilityJobTest {
 
     @Override
     public void run() {
-      System.out.println("Setup database has been started!!!");
+      LOGGER.info("Setup database has been started!!!");
       LisFacilityJobConfiguration configuration = getFacilityJobConfiguration();
       try {
         setUpDatabase(configuration.getLisDataSourceFactory(), DataSourceName.LIS);
         setUpDatabase(configuration.getFasDataSourceFactory(), DataSourceName.FAS);
       } catch (LiquibaseException e) {
-        e.printStackTrace();
+        LOGGER.error(e.getMessage(), e);
       }
-      System.out.println("Setup database has been finished!!!");
+      LOGGER.info("Setup database has been finished!!!");
     }
   }
 

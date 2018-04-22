@@ -6,7 +6,6 @@ import gov.ca.cwds.jobs.common.batch.JobBatchIteratorImpl;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -29,7 +28,8 @@ public class LisBatchIterator extends JobBatchIteratorImpl {
       return Collections.emptyList();
     }
     lastId.set(getLastId(identifiers));
-    return Collections.singletonList(new JobBatch(identifiers));
+    JobBatch jobBatch = new JobBatch(identifiers, getLastTimestamp(identifiers), lastId.get());
+    return Collections.singletonList(jobBatch);
   }
 
   private List<ChangedEntityIdentifier> getNextPage() {
@@ -49,38 +49,6 @@ public class LisBatchIterator extends JobBatchIteratorImpl {
           .getIdentifiersForIncrementalLoad(getTimestampOperator().readTimestamp(), pageRequest);
     }
     throw new IllegalStateException("Unexpected job mode");
-  }
-
-  private List<JobBatch> calculateNextPortion(
-      List<ChangedEntityIdentifier> identifiers) {
-    List<JobBatch> nextPortion = new ArrayList<>();
-    List<ChangedEntityIdentifier> nextIdentifiersPage = identifiers;
-    while ((!nextIdentifiersPage.isEmpty() && getLastId(identifiers) ==
-        getLastId(nextIdentifiersPage))) {
-      lastId.set(getLastId(identifiers));
-      nextPortion.add(new JobBatch(nextIdentifiersPage));
-      nextIdentifiersPage = getNextPage();
-    }
-
-    List<ChangedEntityIdentifier> nextIdentifier = getNextIdentifier();
-
-    while (!nextIdentifier.isEmpty() &&
-        (nextIdentifier.get(0).getTimestamp() == getLastTimestamp(identifiers))) {
-      getNextOffset().addAndGet(getBatchSize());
-      lastId.set(getLastId(identifiers));
-      assert nextIdentifier.size() == 1;
-      nextPortion.get(nextPortion.size() - 1).getChangedEntityIdentifiers()
-          .add(nextIdentifier.get(0));
-      nextIdentifier = getNextIdentifier();
-    }
-    nextPortion.get(nextPortion.size() - 1).setTimestamp(getLastTimestamp(identifiers));
-    return nextPortion;
-  }
-
-  private List<ChangedEntityIdentifier> getNextIdentifier() {
-    PageRequest pageRequest = new PageRequest(getNextOffset().get(), 1);
-    pageRequest.setLastId(lastId.get());
-    return getNextPage();
   }
 
   private static LocalDateTime getLastTimestamp(List<ChangedEntityIdentifier> identifiers) {

@@ -12,7 +12,6 @@ import javax.persistence.Entity;
 import javax.persistence.EntityResult;
 import javax.persistence.FieldResult;
 import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
 import javax.persistence.SqlResultSetMapping;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
@@ -49,7 +48,7 @@ public class LisRecordChange implements PersistentObject {
       + "(select fac_nbr , system_datetime_1 from lis_fac_file "
       + "where fac_nbr > :facNbr order by fac_nbr)";
 
-  public static final String INCREMENTAL_LOAD_SQL = "select fac_nbr as ID, 'U' as CHANGE_OPERATION, system_datetime_1 as TIME_STAMP from "
+  public static final String INCREMENTAL_LOAD_SQL = "select fac_nbr, system_datetime_1 from "
       + "(select fac_nbr , system_datetime_1 from lis_fac_file "
       + "where system_datetime_1 > :dateAfter order by system_datetime_1)";
 

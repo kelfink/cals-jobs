@@ -11,15 +11,24 @@ public class JobBatch {
 
   private List<ChangedEntityIdentifier> identifiers;
   private LocalDateTime timestamp;
+  private Integer id;
 
   public JobBatch(List<ChangedEntityIdentifier> identifiers) {
     this.identifiers = identifiers;
     this.timestamp = null;
+    this.id = null;
   }
 
   public JobBatch(List<ChangedEntityIdentifier> identifiers, LocalDateTime timestamp) {
     this.identifiers = identifiers;
     this.timestamp = timestamp;
+    this.id = null;
+  }
+
+  public JobBatch(List<ChangedEntityIdentifier> identifiers, LocalDateTime timestamp, Integer id) {
+    this.identifiers = identifiers;
+    this.timestamp = timestamp;
+    this.id = id;
   }
 
   public List<ChangedEntityIdentifier> getChangedEntityIdentifiers() {
@@ -48,6 +57,14 @@ public class JobBatch {
 
   public void calculateTimestamp() {
     timestamp = identifiers.get(identifiers.size() - 1).getTimestamp();
+  }
+
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
   }
 
   public int getSize() {
