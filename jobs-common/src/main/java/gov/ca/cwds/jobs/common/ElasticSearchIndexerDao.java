@@ -89,7 +89,7 @@ public class ElasticSearchIndexerDao implements Closeable {
    * <p> Method is intentionally synchronized to prevent race conditions and multiple attempts to
    * create the same index. </p>
    */
-  @SuppressFBWarnings("BED_BOGUS_EXCEPTION_DECLARATION")
+  @SuppressFBWarnings("findbugs:SWL_SLEEP_WITH_LOCK_HELD")
   @SuppressWarnings("squid:S2276")
   public synchronized void createIndexIfMissing() {
     final String index = config.getElasticsearchAlias();
