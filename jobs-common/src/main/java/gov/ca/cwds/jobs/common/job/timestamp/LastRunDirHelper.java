@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.common.job.timestamp;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,6 +25,7 @@ public class LastRunDirHelper {
     FileUtils.deleteDirectory(getLastRunDir().toFile());
   }
 
+  @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user
   public Path getLastRunDir() {
     return Paths.get(String.valueOf(folder)).normalize().toAbsolutePath();
   }

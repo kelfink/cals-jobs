@@ -8,7 +8,7 @@ node ('dora-slave'){
         booleanParam(defaultValue: true, description: '', name: 'USE_NEWRELIC'),
         string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
         string(defaultValue: 'development', description: '', name: 'branch'),
-        booleanParam(defaultValue: false, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
+        booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
         string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
         string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')]),
         pipelineTriggers([[$class: 'GitHubPRTrigger',
@@ -35,21 +35,18 @@ node ('dora-slave'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
    }
    stage('Tests and Coverage') {
-       sh ('docker-compose pull')
-       sh ('docker-compose up -d')
-       sleep (60)
 	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoTestReport'
    }
-//   stage('SonarQube analysis'){
-//		withSonarQubeEnv('Core-SonarQube') {
-//			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
-//        }
-//    }
     stage ('Push to artifactory'){
         rtGradle.deployer.deployArtifacts = true
         buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
         rtGradle.deployer.deployArtifacts = false
 	}
+	stage('SonarQube analysis'){
+  		withSonarQubeEnv('Core-SonarQube') {
+  			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
+          }
+      }
 	stage('Clean WorkSpace') {
 		archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
 		sh ('docker-compose down -v')

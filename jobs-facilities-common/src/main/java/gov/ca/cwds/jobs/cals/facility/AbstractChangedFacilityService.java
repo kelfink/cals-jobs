@@ -24,7 +24,7 @@ public abstract class AbstractChangedFacilityService implements
     try {
       FacilityDTO facilityDTO = loadEntityById(identifier);
       if (facilityDTO == null) {
-        LOG.error("Can't get facility by id " + identifier.getId());
+        LOG.error("Can't get facility by id {}", identifier.getId());
         throw new IllegalStateException("FacilityDTO must not be null!!!");
       } else {
         if (LOG.isInfoEnabled()) {
@@ -33,7 +33,7 @@ public abstract class AbstractChangedFacilityService implements
       }
       return new ChangedFacilityDTO(facilityDTO, identifier.getRecordChangeOperation());
     } catch (Exception e) {
-      LOG.error("Can't get facility by id " + identifier.getId(), e);
+      LOG.error("Can't get facility by id {}", identifier.getId(), e);
       throw new IllegalStateException(
           String.format("Can't get facility by id %s", identifier.getId()), e);
     }

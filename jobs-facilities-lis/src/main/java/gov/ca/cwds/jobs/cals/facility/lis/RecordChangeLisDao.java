@@ -27,33 +27,31 @@ public class RecordChangeLisDao extends BaseDaoImpl<LisRecordChange> {
 
   public Stream<LisRecordChange> getInitialLoadStream(
       PageRequest pageRequest) {
-    QueryCreator<LisRecordChange> queryCreator = buildQueryCreator(LIS_INITIAL_LOAD_QUERY_NAME,
-        pageRequest, query -> {
-        });
+
+    QueryCreator<LisRecordChange> queryCreator = buildNativeQueryCreator(LIS_INITIAL_LOAD_QUERY_NAME,
+        pageRequest, query -> query.setParameter("facNbr", pageRequest.getLastId()));
     return new LisRecordChangesStreamer(this, queryCreator).createStream();
   }
 
   public Stream<LisRecordChange> getIncrementalLoadStream(final BigInteger dateAfter,
       PageRequest pageRequest) {
-    QueryCreator<LisRecordChange> queryCreator = buildQueryCreator(
+    QueryCreator<LisRecordChange> queryCreator = buildNativeQueryCreator(
         LIS_INCREMENTAL_LOAD_QUERY_NAME,
         pageRequest, query -> query.setParameter("dateAfter", dateAfter));
     return new LisRecordChangesStreamer(this, queryCreator).createStream();
   }
 
-  private QueryCreator<LisRecordChange> buildQueryCreator(String queryName,
+  private QueryCreator<LisRecordChange> buildNativeQueryCreator(String nativeQuery,
       PageRequest pageRequest,
       Consumer<Query<LisRecordChange>> parametersSetter) {
-    return (session, entityClass) -> prepareQuery(session, pageRequest, queryName,
+    return (session, entityClass) -> prepareNativeQuery(session, pageRequest, nativeQuery,
         parametersSetter);
   }
 
-  private Query<LisRecordChange> prepareQuery(Session session, PageRequest pageRequest,
-      String queryName, Consumer<Query<LisRecordChange>> parametersSetter) {
-    Query<LisRecordChange> query = session
-        .createNamedQuery(queryName, LisRecordChange.class)
+  private Query<LisRecordChange> prepareNativeQuery(Session session, PageRequest pageRequest,
+      String nativeQuery, Consumer<Query<LisRecordChange>> parametersSetter) {
+    Query<LisRecordChange> query = session.createNamedQuery(nativeQuery, LisRecordChange.class)
         .setMaxResults(pageRequest.getLimit())
-        .setFirstResult(pageRequest.getOffset())
         .setReadOnly(true);
     parametersSetter.accept(query);
     return query;

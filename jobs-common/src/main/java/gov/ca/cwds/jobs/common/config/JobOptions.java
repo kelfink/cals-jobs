@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.common.config;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import java.io.File;
 import java.io.IOException;
@@ -108,11 +109,12 @@ public class JobOptions {
    */
   protected static void printUsage() {
     try (final StringWriter sw = new StringWriter()) {
+      String equals = StringUtils.leftPad("", 90, '=');
       new HelpFormatter().printHelp(new PrintWriter(sw), 100, "Batch loader",
-          StringUtils.leftPad("", 90, '=') + "\nUSAGE: java <job class> ...\n"
-              + StringUtils.leftPad("", 90, '='),
-          buildCmdLineOptions(), 4, 8, StringUtils.leftPad("", 90, '='), true);
-      LOGGER.error(sw.toString());
+          equals + "\nUSAGE: java <job class> ...\n" + equals,
+          buildCmdLineOptions(), 4, 8, equals, true);
+      String usage = sw.toString();
+      LOGGER.error(usage);
     } catch (IOException e) {
       final String msg = "ERROR PRINTING HELP! How ironic. :-)";
       LOGGER.error(msg, e);
@@ -127,7 +129,7 @@ public class JobOptions {
    * @return JobOptions defining this job
    * @throws JobsException if unable to parse command line
    */
-  public static JobOptions parseCommandLine(String[] args) throws JobsException {
+  public static JobOptions parseCommandLine(String[] args) {
     String esConfigLoc = null;
     String lastRunLoc = null;
     try {
@@ -145,7 +147,7 @@ public class JobOptions {
 
           case CMD_LINE_LAST_RUN_FILE:
             lastRunLoc = opt.getValue().trim();
-            LOGGER.info("last run file = " + lastRunLoc);
+            LOGGER.info("last run file = {}", lastRunLoc);
             break;
 
           default:
@@ -162,10 +164,12 @@ public class JobOptions {
     return jobOptions;
   }
 
+  @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user
   private static String getPathToOutputDirectory(JobOptions jobOptions) {
     return Paths.get(jobOptions.getLastRunLoc()).normalize().toAbsolutePath().toString();
   }
 
+  @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user
   private static JobOptions validateJobOptions(JobOptions jobOptions) {
     // check option: -c
     File configFile = new File(jobOptions.getEsConfigLoc());
@@ -178,12 +182,12 @@ public class JobOptions {
     File timeFilesDir = new File(jobOptions.getLastRunLoc());
     if (!timeFilesDir.exists()) {
       if (timeFilesDir.mkdir() && (LOGGER.isInfoEnabled())) {
-        LOGGER.info(getPathToOutputDirectory(jobOptions) + " was created in file system");
+        LOGGER.info("{} was created in file system", getPathToOutputDirectory(jobOptions));
       }
     }
 
     if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Using " + getPathToOutputDirectory(jobOptions) + " as output folder");
+      LOGGER.info("Using {} as output folder", getPathToOutputDirectory(jobOptions));
     }
     return jobOptions;
   }

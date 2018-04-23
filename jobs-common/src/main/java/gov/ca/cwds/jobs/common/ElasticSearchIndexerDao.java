@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.common;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Closeable;
 import java.io.IOException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
@@ -88,6 +89,7 @@ public class ElasticSearchIndexerDao implements Closeable {
    * <p> Method is intentionally synchronized to prevent race conditions and multiple attempts to
    * create the same index. </p>
    */
+  @SuppressWarnings({"findbugs:SWL_SLEEP_WITH_LOCK_HELD", "squid:S2276"})
   public synchronized void createIndexIfMissing() {
     final String index = config.getElasticsearchAlias();
     if (!doesIndexExist(index)) {

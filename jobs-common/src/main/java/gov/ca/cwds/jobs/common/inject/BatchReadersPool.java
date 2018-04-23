@@ -35,6 +35,9 @@ public class BatchReadersPool<T> {
 
   public void init(ElasticSearchBulkCollector<T> elasticSearchBulkCollector) {
     this.elasticSearchBulkCollector = elasticSearchBulkCollector;
+    if (this.executorService != null) {
+      this.executorService.shutdown();
+    }
     this.executorService = Executors.newFixedThreadPool(readersThreadsCount);
   }
 

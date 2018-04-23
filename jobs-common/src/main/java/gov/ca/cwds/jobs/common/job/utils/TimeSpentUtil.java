@@ -20,13 +20,13 @@ public final class TimeSpentUtil {
     long minutes = startTime.until(LocalDateTime.now(), ChronoUnit.MINUTES);
     long seconds = startTime.until(LocalDateTime.now(), ChronoUnit.SECONDS);
     long milliseconds = startTime.until(LocalDateTime.now(), ChronoUnit.MILLIS);
-    LOGGER.info(workDescription + " time spent in milliseconds - {} ms", milliseconds);
+    LOGGER.info("{} time spent in milliseconds - {} ms", workDescription, milliseconds);
     if (hours > 0) {
-      LOGGER.info(workDescription + " time spent in hours - {} hr", hours);
+      LOGGER.info("{} time spent in hours - {} hr", workDescription, hours);
     } else if (minutes > 0) {
-      LOGGER.info(workDescription + " time spent in minutes - {} min", minutes);
+      LOGGER.info("{} time spent in minutes - {} min", workDescription, minutes);
     } else if (seconds > 0) {
-      LOGGER.info(workDescription + " time spent in seconds - {} sec", seconds);
+      LOGGER.info("{} time spent in seconds - {} sec", workDescription, seconds);
     }
   }
 

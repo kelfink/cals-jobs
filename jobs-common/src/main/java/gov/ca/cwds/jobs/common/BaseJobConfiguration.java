@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.common;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchConfiguration;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.rest.api.ApiException;
@@ -50,6 +51,7 @@ public class BaseJobConfiguration extends ElasticsearchConfiguration {
     this.batchSize = batchSize;
   }
 
+  @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user
   public static <T extends BaseJobConfiguration> T getJobsConfiguration(Class<T> clazz,
       String path) {
     final String pathToConfiguration = Paths.get(path).toAbsolutePath().toString();

@@ -12,6 +12,8 @@ import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.ElasticSearchIndexerDao;
 import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.api.ChangedEntityService;
+import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
+import gov.ca.cwds.jobs.common.batch.JobBatchIteratorImpl;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.elastic.ElasticWriter;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
@@ -38,6 +40,7 @@ public class RFA1aJobModule extends AbstractBaseJobModule {
     bind(BulkWriter.class).to(RFA1aFormElasticWriter.class);
     bind(ChangedEntitiesIdentifiersService.class).toProvider(ChangedRFAIdentifiersProvider.class);
     bind(ChangedEntityService.class).toProvider(ChangedRFAServiceProvider.class);
+    bind(JobBatchIterator.class).to(JobBatchIteratorImpl.class);
     bind(RFA1aFormsCollectionService.class);
     bind(ChangedRFA1aFormsService.class);
     bind(Job.class).to(RFA1aJob.class).in(Singleton.class);

@@ -21,6 +21,7 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
   private Class<? extends JobPreparator> jobPreparatorClass = DefaultJobPreparator.class;
 
   private Class<? extends JobBatchIterator> jobBatchIteratorClass = JobBatchIteratorImpl.class;
+
   private AbstractModule elasticSearchModule;
 
   public AbstractBaseJobModule(String[] args) {
@@ -40,13 +41,16 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
     this.jobBatchIteratorClass = jobBatchIteratorClass;
   }
 
+  public Class<? extends JobBatchIterator> getJobBatchIteratorClass() {
+    return jobBatchIteratorClass;
+  }
+
   @Override
   protected void configure() {
     bind(JobOptions.class).toInstance(jobOptions);
     bindConstant().annotatedWith(LastRunDir.class).to(jobOptions.getLastRunLoc());
     bind(TimestampOperator.class).to(FilesystemTimestampOperator.class).asEagerSingleton();
     bind(JobPreparator.class).to(jobPreparatorClass);
-    bind(JobBatchIterator.class).to(jobBatchIteratorClass);
     bindConstant().annotatedWith(JobBatchSize.class)
         .to(getJobsConfiguration(jobOptions).getBatchSize());
     bindConstant().annotatedWith(ElasticSearchBulkSize.class)
@@ -75,5 +79,4 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
       //empty by default
     }
   }
-
 }

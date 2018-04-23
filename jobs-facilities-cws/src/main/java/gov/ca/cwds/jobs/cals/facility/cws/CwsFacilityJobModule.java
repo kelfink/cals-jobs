@@ -11,6 +11,8 @@ import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
 import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.api.ChangedEntityService;
+import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
+import gov.ca.cwds.jobs.common.batch.JobBatchIteratorImpl;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.job.Job;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
@@ -31,6 +33,7 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
     bind(ChangedEntitiesIdentifiersService.class)
         .toProvider(CwsChangedIdentifiersServiceProvider.class);
     bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
+    bind(JobBatchIterator.class).to(JobBatchIteratorImpl.class);
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {
     }).to(CwsChangedFacilityService.class);
     bind(Job.class).to(CwsFacilityJob.class);

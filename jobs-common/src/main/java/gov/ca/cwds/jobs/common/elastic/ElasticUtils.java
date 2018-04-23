@@ -49,10 +49,11 @@ public final class ElasticUtils {
   private static List<InetSocketTransportAddress> getValidatedESNodes(BaseJobConfiguration config) {
     List<InetSocketTransportAddress> nodesList = new LinkedList<>();
     String[] params;
-    Map<String, String> hostPortMap = new HashMap<>();
+    List<String> nodes = config.getNodes();
+    Map<String, String> hostPortMap = new HashMap<>(nodes.size());
 
     hostPortMap.put(config.getElasticsearchHost(), config.getElasticsearchPort());
-    for (String node : config.getNodes()) {
+    for (String node : nodes) {
       params = node.split(":");
       hostPortMap.put(params[0], params[1]);
     }
