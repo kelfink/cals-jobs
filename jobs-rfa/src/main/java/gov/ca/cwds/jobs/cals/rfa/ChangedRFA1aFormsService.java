@@ -11,11 +11,11 @@ import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
  */
 public class ChangedRFA1aFormsService implements ChangedEntityService<ChangedRFA1aFormDTO> {
 
-  @Inject
-  private RFA1aFormsDao dao;
-
-  @Inject
-  private RFA1aFormMapper rfa1aFormMapper;
+//  @Inject
+//  private RFA1aFormsDao dao;
+//
+//  @Inject
+//  private RFA1aFormMapper rfa1aFormMapper;
 
   @Override
   public ChangedRFA1aFormDTO loadEntity(ChangedEntityIdentifier identifier) {
