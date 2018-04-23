@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.common.config;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import java.io.File;
 import java.io.IOException;
@@ -163,10 +164,12 @@ public class JobOptions {
     return jobOptions;
   }
 
+  @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user
   private static String getPathToOutputDirectory(JobOptions jobOptions) {
     return Paths.get(jobOptions.getLastRunLoc()).normalize().toAbsolutePath().toString();
   }
 
+  @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user
   private static JobOptions validateJobOptions(JobOptions jobOptions) {
     // check option: -c
     File configFile = new File(jobOptions.getEsConfigLoc());

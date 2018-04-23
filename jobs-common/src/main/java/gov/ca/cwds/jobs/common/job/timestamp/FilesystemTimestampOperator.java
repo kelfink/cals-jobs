@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.common.job.timestamp;
 
 import com.google.inject.Inject;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.jobs.common.Constants;
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
 import gov.ca.cwds.rest.api.ApiException;
@@ -55,6 +56,7 @@ public class FilesystemTimestampOperator implements TimestampOperator {
     }
   }
 
+  @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user
   private Path getRunningFile() {
     Path path = Paths.get(outputDir, TIMESTAMP_FILENAME).normalize().toAbsolutePath();
     LOG.info("Path to the timestamp file: {}", path.toString());
