@@ -42,11 +42,18 @@ public class BatchReadersPool<T> {
   }
 
   public void loadEntities(List<ChangedEntityIdentifier> changedEntityIdentifiers) {
-    List<Future> futures = changedEntityIdentifiers.parallelStream().
-        map(identifier -> (Runnable) () -> elasticSearchBulkCollector.addEntity(
-            changedEntitiesService.loadEntity(identifier)))
-        .map(executorService::submit)
-        .collect(Collectors.toList());
+
+    List<Future> futures =
+        changedEntityIdentifiers
+            .parallelStream()
+            .map(
+                identifier ->
+                    (Runnable)
+                        () ->
+                            elasticSearchBulkCollector.addEntity(
+                                changedEntitiesService.loadEntity(identifier)))
+            .map(executorService::submit)
+            .collect(Collectors.toList());
     for (Future future : futures) {
       try {
         future.get();

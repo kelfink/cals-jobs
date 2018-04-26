@@ -6,6 +6,8 @@ import com.google.inject.TypeLiteral;
 import gov.ca.cwds.cals.Constants;
 import gov.ca.cwds.cals.inject.CwsFacilityServiceProvider;
 import gov.ca.cwds.cals.service.CwsFacilityService;
+import gov.ca.cwds.cms.data.access.mapper.CountyOwnershipMapper;
+import gov.ca.cwds.cms.data.access.mapper.ExternalInterfaceMapper;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
@@ -30,13 +32,16 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
   @Override
   protected void configure() {
     super.configure();
-    bind(ChangedEntitiesIdentifiersService.class)
-        .toProvider(CwsChangedIdentifiersServiceProvider.class);
+    bind(ChangedEntitiesIdentifiersService.class).toProvider(CwsChangedIdentifiersServiceProvider.class);
     bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
     bind(JobBatchIterator.class).to(JobBatchIteratorImpl.class);
-    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {
-    }).to(CwsChangedFacilityService.class);
+    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>(){}).to(CwsChangedFacilityService.class);
     bind(Job.class).to(CwsFacilityJob.class);
+    bind(CountyOwnershipMapper.class).to(CountyOwnershipMapper.INSTANCE.getClass())
+        .asEagerSingleton();
+    bind(ExternalInterfaceMapper.class).to(ExternalInterfaceMapper.INSTANCE.getClass())
+        .asEagerSingleton();
+
     install(new CwsCmsRsDataAccessModule());
   }
 

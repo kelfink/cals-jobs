@@ -50,7 +50,6 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
     return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
         .collect(Collectors.toList());
   }
-
   @UnitOfWork(CMS)
   protected Stream<ChangedEntityIdentifier> getCwsCmsInitialLoadIdentifiers(
       PageRequest pageRequest) {

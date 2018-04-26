@@ -3,12 +3,11 @@ package gov.ca.cwds.jobs.cals.facility.cws;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+import com.google.inject.Provides;
 import gov.ca.cwds.DataSourceName;
+import gov.ca.cwds.cms.data.access.inject.DataAccessServicesSessionFactory;
 import gov.ca.cwds.data.legacy.cms.dao.ClientDao;
 import gov.ca.cwds.data.legacy.cms.dao.CountiesDao;
-import gov.ca.cwds.data.legacy.cms.dao.PlacementHomeDao;
 import gov.ca.cwds.data.legacy.cms.entity.AddressPhoneticName;
 import gov.ca.cwds.data.legacy.cms.entity.AddressPhoneticNamePK;
 import gov.ca.cwds.data.legacy.cms.entity.BackgroundCheck;
@@ -50,12 +49,15 @@ import gov.ca.cwds.data.legacy.cms.entity.syscodes.VisitType;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ReplicationPlacementHome;
 import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
+import java.util.Optional;
 import org.hibernate.SessionFactory;
 
 /**
  * @author CWDS TPT-2
  */
 public class CwsCmsRsDataAccessModule extends AbstractModule {
+
+  private SessionFactory sessionFactory;
 
   public static final ImmutableList<Class<?>> cwsrsEntityClasses = ImmutableList.<Class<?>>builder()
       .add(
@@ -103,24 +105,29 @@ public class CwsCmsRsDataAccessModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
-        .toProvider(CwsSessionFactoryProvider.class).in(Singleton.class);
     bind(RecordChangeCwsCmsDao.class);
     bind(CountiesDao.class);
     bind(ClientDao.class);
-    bind(PlacementHomeDao.class);
   }
 
-  private static class CwsSessionFactoryProvider implements Provider<SessionFactory> {
-
-    @Inject
-    private CwsFacilityJobConfiguration facilityJobConfiguration;
-
-    @Override
-    public SessionFactory get() {
-      return SessionFactoryUtil
-          .buildSessionFactory(facilityJobConfiguration.getCmsDataSourceFactory(),
-              DataSourceName.CWSRS.name(), cwsrsEntityClasses);
-    }
+  @Inject
+  @Provides
+  @CmsSessionFactory
+  public SessionFactory cmsSessionFactory(CwsFacilityJobConfiguration facilityJobConfiguration) {
+    return getCurrentSessionFactory(facilityJobConfiguration);
   }
+
+  @Inject
+  @Provides
+  @DataAccessServicesSessionFactory
+  public SessionFactory dataAccessSessionFactory(CwsFacilityJobConfiguration facilityJobConfiguration) {
+    return getCurrentSessionFactory(facilityJobConfiguration);
+  }
+
+  private SessionFactory getCurrentSessionFactory(CwsFacilityJobConfiguration facilityJobConfiguration) {
+    return Optional.ofNullable(sessionFactory).orElseGet(() -> sessionFactory = SessionFactoryUtil
+        .buildSessionFactory(facilityJobConfiguration.getCmsDataSourceFactory(),
+            DataSourceName.CWSRS.name(), cwsrsEntityClasses));
+  }
+
 }
