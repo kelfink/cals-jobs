@@ -8,9 +8,4 @@ import gov.ca.cwds.jobs.common.inject.JobImpl;
  */
 public class CwsFacilityJob extends JobImpl<ChangedFacilityDTO> {
 
-  @Override
-  public void close() {
-    super.close();
-  }
-
 }
