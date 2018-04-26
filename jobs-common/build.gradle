@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 dependencies {
 
     compile group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
