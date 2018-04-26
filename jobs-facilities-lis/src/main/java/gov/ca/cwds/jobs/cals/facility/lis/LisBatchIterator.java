@@ -27,7 +27,7 @@ public class LisBatchIterator extends JobBatchIteratorImpl {
   }
 
   @Override
-  protected   List<ChangedEntityIdentifier> getNextPage() {
+  protected List<ChangedEntityIdentifier> getNextPage() {
     PageRequest pageRequest = new PageRequest(getNextOffset().get(), getBatchSize(), lastId.get());
     return getNextPage(pageRequest);
   }

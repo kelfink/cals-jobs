@@ -44,13 +44,11 @@ import org.hibernate.annotations.NamedNativeQuery;
 @Entity
 public class LisRecordChange implements PersistentObject {
 
-  public static final String INITIAL_LOAD_SQL = "select fac_nbr, system_datetime_1 from "
-      + "(select fac_nbr , system_datetime_1 from lis_fac_file "
-      + "where fac_nbr > :facNbr order by fac_nbr)";
+  public static final String INITIAL_LOAD_SQL = "select fac_nbr , system_datetime_1 from lis_fac_file "
+      + "where fac_nbr > :facNbr order by fac_nbr";
 
-  public static final String INCREMENTAL_LOAD_SQL = "select fac_nbr, system_datetime_1 from "
-      + "(select fac_nbr , system_datetime_1 from lis_fac_file "
-      + "where system_datetime_1 > :dateAfter order by system_datetime_1)";
+  public static final String INCREMENTAL_LOAD_SQL = "select fac_nbr , system_datetime_1 from lis_fac_file "
+      + "where system_datetime_1 > :dateAfter order by system_datetime_1";
 
 
   public static final String LIS_INITIAL_LOAD_QUERY_NAME = "RecordChange.lisInitialLoadQuery";
