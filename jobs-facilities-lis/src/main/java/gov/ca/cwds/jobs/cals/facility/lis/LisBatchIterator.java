@@ -12,8 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class LisBatchIterator extends JobBatchIteratorImpl {
 
-   private AtomicInteger lastId = new AtomicInteger(0);
-
+  private AtomicInteger lastId = new AtomicInteger(0);
 
   @Override
   public List<JobBatch> getNextPortion() {
@@ -21,8 +20,9 @@ public class LisBatchIterator extends JobBatchIteratorImpl {
     if (identifiers.isEmpty()) {
       return Collections.emptyList();
     }
+    identifiers.sort(Comparator.comparing(ChangedEntityIdentifier::getIntId));
     lastId.set(getLastId(identifiers));
-    JobBatch jobBatch = new JobBatch(identifiers, getLastTimestamp(identifiers), lastId.get());
+    JobBatch jobBatch = new JobBatch(identifiers, getLastTimestamp(identifiers));
     return Collections.singletonList(jobBatch);
   }
 
@@ -37,7 +37,6 @@ public class LisBatchIterator extends JobBatchIteratorImpl {
   }
 
   private static int getLastId(List<ChangedEntityIdentifier> identifiers) {
-    identifiers.sort(Comparator.comparing(ChangedEntityIdentifier::getId));
     return Integer.parseInt(identifiers.get(identifiers.size() - 1).getId());
   }
 

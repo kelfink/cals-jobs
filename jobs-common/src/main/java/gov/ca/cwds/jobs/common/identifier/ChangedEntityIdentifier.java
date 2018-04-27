@@ -27,6 +27,10 @@ public class ChangedEntityIdentifier {
     return id;
   }
 
+  public Integer getIntId() {
+    return Integer.parseInt(id);
+  }
+
   public void setId(String id) {
     this.id = id;
   }
@@ -55,5 +59,11 @@ public class ChangedEntityIdentifier {
   @Override
   public int hashCode() {
     return HashCodeBuilder.reflectionHashCode(this);
+  }
+
+  @Override
+  public String toString() {
+    return "id=" + id + ", recordChangeOperation=" + recordChangeOperation +
+        ", timestamp=" + timestamp + "\n";
   }
 }
