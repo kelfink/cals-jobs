@@ -10,6 +10,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  */
 public class ChangedEntityIdentifier {
 
+  private String id;
+
+  private RecordChangeOperation recordChangeOperation;
+
+  private LocalDateTime timestamp;
+
   public ChangedEntityIdentifier(String id, RecordChangeOperation recordChangeOperation,
       LocalDateTime timestamp) {
     this.id = id;
@@ -17,18 +23,12 @@ public class ChangedEntityIdentifier {
     this.timestamp = timestamp;
   }
 
-  private String id;
-
-  private RecordChangeOperation recordChangeOperation;
-
-  private LocalDateTime timestamp;
-
   public String getId() {
     return id;
   }
 
   public Integer getIntId() {
-    return Integer.parseInt(id);
+    return Integer.valueOf(id);
   }
 
   public void setId(String id) {
