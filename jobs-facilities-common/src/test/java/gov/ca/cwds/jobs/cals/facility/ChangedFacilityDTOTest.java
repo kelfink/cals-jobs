@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs.cals.facility;
 
-import static org.junit.Assert.*;
-
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import org.junit.Assert;
