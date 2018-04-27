@@ -35,7 +35,7 @@ node ('dora-slave'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
    }
    stage('Tests and Coverage') {
-	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoTestReport'
+	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoRootReport'
    }
     stage ('Push to artifactory'){
         rtGradle.deployer.deployArtifacts = true

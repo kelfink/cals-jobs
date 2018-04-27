@@ -14,7 +14,6 @@ plugins {
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
-apply plugin: 'jacoco'
 
 project.ext {
     cwdsModelVersion = '0.6.2_504-RC'
@@ -56,12 +55,17 @@ version = projectVersion
 group = commonGroupId
 
 allprojects {
+    apply plugin: 'jacoco'
     repositories {
         mavenCentral()
         mavenLocal()
         maven {
             url artifactoryRepo
         }
+    }
+
+    jacoco {
+        toolVersion = '0.7.1.201405082137'
     }
 }
 
@@ -73,6 +77,17 @@ subprojects {
         //slf4j-log4j12-1.6.1.jar
         //log4j-1.2.16.jar
         testCompile group: 'junit', name: 'junit', version: jUnitVersion
+    }
+
+    jacocoTestReport {
+        additionalSourceDirs = files(sourceSets.main.allSource.srcDirs)
+        sourceDirectories = files(sourceSets.main.allSource.srcDirs)
+        classDirectories =  files(sourceSets.main.output)
+        reports {
+            html.enabled = true
+            xml.enabled = true
+            csv.enabled = false
+        }
     }
 }
 
@@ -115,6 +130,19 @@ task libLicenseReport(dependsOn:[generateLicenseReport, libLicenceFolders,
                                  libLicenseReportFiles,savePropertyFile ] ){
 }
 
+task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+    dependsOn = subprojects.test
+    additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories =  files(subprojects.sourceSets.main.output)
+    executionData = files(subprojects.jacocoTestReport.executionData)
+    reports {
+        html.enabled = true
+        xml.enabled = true
+        csv.enabled = false
+    }
+}
+
 jacocoTestReport {
   reports {
       xml.enabled false
@@ -125,8 +153,8 @@ jacocoTestReport {
 
 sonarqube {
   properties {
-      property "sonar.jacoco.reportPath",   "${buildDir}/jacoco/test.exec"
-      property "sonar.jacoco.itReportPath", "${buildDir}/jacoco/integrationTest.exec"     
+      property "sonar.jacoco.reportPath",   "${projectDir}/build/reports/jacoco/test.exec"
+      property "sonar.jacoco.itReportPath", "${projectDir}/build/reports/jacoco/integrationTest.exec"
   }
 }
 
