@@ -13,22 +13,19 @@ import javax.persistence.EntityResult;
 import javax.persistence.FieldResult;
 import javax.persistence.Id;
 import javax.persistence.SqlResultSetMapping;
-import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
 
 /** Created by Alexander Serbin on 3/6/2018. */
-@NamedNativeQueries({
-  @NamedNativeQuery(
-    name = LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
-    query = LisRecordChange.INITIAL_LOAD_SQL,
-    resultSetMapping = "LisRecordChangeMapping"
-  ),
-  @NamedNativeQuery(
-    name = LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
-    query = LisRecordChange.INCREMENTAL_LOAD_SQL,
-    resultSetMapping = "LisRecordChangeMapping"
-  )
-})
+@NamedNativeQuery(
+  name = LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
+  query = LisRecordChange.INITIAL_LOAD_SQL,
+  resultSetMapping = "LisRecordChangeMapping"
+)
+@NamedNativeQuery(
+  name = LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
+  query = LisRecordChange.INCREMENTAL_LOAD_SQL,
+  resultSetMapping = "LisRecordChangeMapping"
+)
 @SqlResultSetMapping(
   name = "LisRecordChangeMapping",
   entities = {
@@ -57,6 +54,14 @@ public class LisRecordChange implements PersistentObject {
   public static final DateTimeFormatter lisTimestampFormatter = DateTimeFormatter
       .ofPattern("yyyyMMddHHmmss");
 
+
+  @Column(name = "TIME_STAMP")
+  private BigInteger timestamp;
+
+  @Id
+  @Column(name = "ID")
+  private String id;
+
   public LisRecordChange() {
     // Default constructor
   }
@@ -66,14 +71,6 @@ public class LisRecordChange implements PersistentObject {
     this.id = id;
     this.timestamp = timestamp;
   }
-
-  @Column(name = "TIME_STAMP")
-  private BigInteger timestamp;
-
-  @Id
-  @Column(name = "ID")
-  private String id;
-
 
   public BigInteger getTimestamp() {
     return timestamp;
