@@ -9,8 +9,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LisBatchIterator extends JobBatchIteratorImpl {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(LisBatchIterator.class);
 
   private AtomicInteger lastId = new AtomicInteger(0);
 
@@ -20,8 +25,14 @@ public class LisBatchIterator extends JobBatchIteratorImpl {
     if (identifiers.isEmpty()) {
       return Collections.emptyList();
     }
-    identifiers.sort(Comparator.comparing(ChangedEntityIdentifier::getIntId));
     lastId.set(getLastId(identifiers));
+    LOGGER.info("Next page prepared. List size: {}. Last Id: {}", identifiers.size(), lastId.get());
+    //TODO: remove after testing of bug hypothesis
+    if (identifiers.size() > getBatchSize()) {
+      identifiers = identifiers.subList(0, getBatchSize());
+      lastId.set(getLastId(identifiers));
+      LOGGER.info("Next page cut to the batch size. Adjusted list size: {}. Last Id: {}", identifiers.size(), lastId.get());
+    }
     JobBatch jobBatch = new JobBatch(identifiers, getLastTimestamp(identifiers));
     return Collections.singletonList(jobBatch);
   }
@@ -36,8 +47,9 @@ public class LisBatchIterator extends JobBatchIteratorImpl {
     return identifiers.get(identifiers.size() - 1).getTimestamp();
   }
 
-  private static int getLastId(List<ChangedEntityIdentifier> identifiers) {
-    return Integer.parseInt(identifiers.get(identifiers.size() - 1).getId());
+  protected static int getLastId(List<ChangedEntityIdentifier> identifiers) {
+    identifiers.sort(Comparator.comparing(ChangedEntityIdentifier::getIntId));
+    return identifiers.get(identifiers.size() - 1).getIntId();
   }
 
 }
