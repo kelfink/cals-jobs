@@ -48,8 +48,8 @@ project.ext {
     releaseMavenRepo = "http://sonar.dev.cwds.io:8081/artifactory/libs-release"
     artifactoryRepo = (isRelease ? releaseMavenRepo : snapshotMavenRepo)
     commonGroupId = 'gov.ca.cwds.jobs'
+    allTestCoverageFile = "$buildDir/jacoco/allTestCoverage.exec"
 }
-
 
 version = projectVersion
 group = commonGroupId
@@ -79,14 +79,9 @@ subprojects {
         testCompile group: 'junit', name: 'junit', version: jUnitVersion
     }
 
-    jacocoTestReport {
-        additionalSourceDirs = files(sourceSets.main.allSource.srcDirs)
-        sourceDirectories = files(sourceSets.main.allSource.srcDirs)
-        classDirectories =  files(sourceSets.main.output)
-        reports {
-            html.enabled = true
-            xml.enabled = true
-            csv.enabled = false
+    sonarqube {
+        properties {
+            property "sonar.jacoco.reportPaths", allTestCoverageFile
         }
     }
 }
@@ -130,32 +125,17 @@ task libLicenseReport(dependsOn:[generateLicenseReport, libLicenceFolders,
                                  libLicenseReportFiles,savePropertyFile ] ){
 }
 
-task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
-    dependsOn = subprojects.test
-    additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
-    sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
-    classDirectories =  files(subprojects.sourceSets.main.output)
-    executionData = files(subprojects.jacocoTestReport.executionData)
-    reports {
-        html.enabled = true
-        xml.enabled = true
-        csv.enabled = false
-    }
-}
-
-jacocoTestReport {
-  reports {
-      xml.enabled false
-      csv.enabled false
-      html.destination "${buildDir}/jacocoHtml"
-  }
-}
-
 sonarqube {
   properties {
-      property "sonar.jacoco.reportPath",   "${projectDir}/build/reports/jacoco/test.exec"
-      property "sonar.jacoco.itReportPath", "${projectDir}/build/reports/jacoco/integrationTest.exec"
+      property "sonar.projectKey", "cwds.ca.gov:cals-jobs"
+      property "sonar.projectName", "cals-jobs"
+      property "sonar.jacoco.reportPaths",   allTestCoverageFile
   }
+}
+
+task jacocoMergeTest(type: JacocoMerge) {
+    destinationFile = file(allTestCoverageFile)
+    executionData = project.fileTree(dir: '.', include:'**/build/jacoco/test.exec')
 }
 
 licenseReport {
