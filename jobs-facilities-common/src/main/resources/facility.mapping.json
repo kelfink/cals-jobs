@@ -3,6 +3,11 @@
     "enabled": true
   },
   "properties": {
+    "name": {
+      "type": "text",
+      "analyzer": "keyword_lowercase",
+      "fielddata": true
+    },
     "addresses": {
       "type": "nested"
     },
