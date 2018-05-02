@@ -1,4 +1,14 @@
 {
   "number_of_shards": 5,
-  "number_of_replicas": 1
+  "number_of_replicas": 1,
+  "analysis": {
+    "analyzer": {
+      "keyword_lowercase": {
+        "tokenizer": "keyword",
+        "filter": [
+          "lowercase"
+        ]
+      }
+    }
+  }
 }
