@@ -51,6 +51,7 @@ public class LisFacilityJobTest {
       Thread.sleep(1000);
       addLisDataForIncrementalLoad();
       runIncrementalLoad();
+      Thread.sleep(1000);
       assertEquals(1, TestWriter.getItems().size());
       assertFacility("fixtures/facilities-lis.json",
           LIS_INITIAL_LOAD_FACILITY_ID);
