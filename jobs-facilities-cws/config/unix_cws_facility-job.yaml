@@ -46,7 +46,7 @@ calsnsDataSourceFactory:
       hibernate.use_sql_comments: false
       hibernate.connection.username: ${DB_NS_USER:-postgres_data}
       hibernate.connection.password: ${DB_NS_PASSWORD:-postgres_data}
-      hibernate.connection.url: ${DB_NS_JDBC_URL:-jdbc:postgresql://192.168.99.100:5432/postgres_data}
+      hibernate.connection.url: ${DB_NS_JDBC_URL:-jdbc:postgresql://localhost:5432/postgres_data}
       hibernate.default_schema: ${DB_NS_DEFAULT_SCHEMA:-calsns}
       hibernate.connection.connectionTimeout: 1000000
       hibernate.connection.loginTimeout: 1000000
