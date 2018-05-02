@@ -5,8 +5,8 @@ import static gov.ca.cwds.test.support.DatabaseHelper.setUpDatabase;
 import com.google.inject.AbstractModule;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.AssertFacilityHelper;
+import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.TestWriter;
-import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.inject.JobRunner;
 import gov.ca.cwds.jobs.common.job.JobPreparator;
 import gov.ca.cwds.jobs.common.job.timestamp.LastRunDirHelper;
@@ -34,9 +34,7 @@ public class CwsFacilityJobTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(CwsFacilityJobTest.class);
 
   private static LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("cws_job_temp");
-
   static final String CWSCMS_INITIAL_LOAD_FACILITY_ID = "3w6sOO50Ki";
-
   static final String CWSCMS_INCREMENTAL_LOAD_NEW_FACILITY_ID = "AAAAAAAAAA";
   static final String CWSCMS_INCREMENTAL_LOAD_UPDATED_FACILITY_ID = "AP9Ewb409u";
   static final String CWSCMS_INCREMENTAL_LOAD_DELETED_FACILITY_ID = "AyT7r860AB";
@@ -71,9 +69,11 @@ public class CwsFacilityJobTest {
 
   private static CwsFacilityJobConfiguration getFacilityJobConfiguration() {
     CwsFacilityJobConfiguration facilityJobConfiguration =
-        BaseJobConfiguration
+        BaseFacilityJobConfiguration
             .getJobsConfiguration(CwsFacilityJobConfiguration.class, getConfigFilePath());
     DataSourceFactoryUtils.fixDatasourceFactory(facilityJobConfiguration.getCmsDataSourceFactory());
+    DataSourceFactoryUtils
+        .fixDatasourceFactory(facilityJobConfiguration.getCalsnsDataSourceFactory());
     return facilityJobConfiguration;
   }
 
@@ -128,9 +128,10 @@ public class CwsFacilityJobTest {
       LOGGER.info("Setup database has been started!!!");
       CwsFacilityJobConfiguration configuration = getFacilityJobConfiguration();
       try {
+        setUpDatabase(configuration.getCalsnsDataSourceFactory(), DataSourceName.NS);
         setUpDatabase(configuration.getCmsDataSourceFactory(), DataSourceName.CWSRS);
       } catch (LiquibaseException e) {
-        LOGGER.error(e.getMessage(),e);
+        LOGGER.error(e.getMessage(), e);
       }
 
       LOGGER.info("Setup database has been finished!!!");

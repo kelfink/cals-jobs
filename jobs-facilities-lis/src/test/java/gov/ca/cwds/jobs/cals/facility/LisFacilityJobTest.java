@@ -9,7 +9,6 @@ import com.google.inject.AbstractModule;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.lis.LisFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.lis.LisFacilityJobModule;
-import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.inject.BatchProcessor;
 import gov.ca.cwds.jobs.common.inject.JobRunner;
 import gov.ca.cwds.jobs.common.job.JobPreparator;
@@ -52,6 +51,7 @@ public class LisFacilityJobTest {
       Thread.sleep(1000);
       addLisDataForIncrementalLoad();
       runIncrementalLoad();
+      Thread.sleep(1000);
       assertEquals(1, TestWriter.getItems().size());
       assertFacility("fixtures/facilities-lis.json",
           LIS_INITIAL_LOAD_FACILITY_ID);
@@ -73,10 +73,13 @@ public class LisFacilityJobTest {
 
   private static LisFacilityJobConfiguration getFacilityJobConfiguration() {
     LisFacilityJobConfiguration facilityJobConfiguration =
-        BaseJobConfiguration
+        BaseFacilityJobConfiguration
             .getJobsConfiguration(LisFacilityJobConfiguration.class, getConfigFilePath());
+    DataSourceFactoryUtils
+        .fixDatasourceFactory(facilityJobConfiguration.getCalsnsDataSourceFactory());
     DataSourceFactoryUtils.fixDatasourceFactory(facilityJobConfiguration.getLisDataSourceFactory());
     DataSourceFactoryUtils.fixDatasourceFactory(facilityJobConfiguration.getFasDataSourceFactory());
+
     return facilityJobConfiguration;
   }
 
@@ -120,6 +123,7 @@ public class LisFacilityJobTest {
       LOGGER.info("Setup database has been started!!!");
       LisFacilityJobConfiguration configuration = getFacilityJobConfiguration();
       try {
+        setUpDatabase(configuration.getCalsnsDataSourceFactory(), DataSourceName.NS);
         setUpDatabase(configuration.getLisDataSourceFactory(), DataSourceName.LIS);
         setUpDatabase(configuration.getFasDataSourceFactory(), DataSourceName.FAS);
       } catch (LiquibaseException e) {
@@ -128,5 +132,4 @@ public class LisFacilityJobTest {
       LOGGER.info("Setup database has been finished!!!");
     }
   }
-
 }

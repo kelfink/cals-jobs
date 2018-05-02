@@ -5,12 +5,15 @@ import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.cals.Constants;
+import gov.ca.cwds.cals.Constants.UnitOfWork;
+import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.inject.FasFacilityServiceProvider;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
 import gov.ca.cwds.cals.inject.LisFacilityServiceProvider;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
 import gov.ca.cwds.cals.service.FasFacilityService;
 import gov.ca.cwds.cals.service.LisFacilityService;
+import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
 import gov.ca.cwds.jobs.cals.facility.fas.FasDataAccessModule;
@@ -62,13 +65,21 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
 
   @Provides
   @Inject
+  public BaseFacilityJobConfiguration getBaseConfiguration(JobOptions jobOptions) {
+    return getJobsConfiguration(jobOptions);
+  }
+
+  @Provides
+  @Inject
   UnitOfWorkAwareProxyFactory provideUnitOfWorkAwareProxyFactory(
       @FasSessionFactory SessionFactory fasSessionFactory,
-      @LisSessionFactory SessionFactory lisSessionFactory) {
+      @LisSessionFactory SessionFactory lisSessionFactory,
+      @CalsnsSessionFactory SessionFactory calsnsDataSourceFactory) {
     try {
       ImmutableMap<String, SessionFactory> sessionFactories = ImmutableMap.<String, SessionFactory>builder()
           .put(Constants.UnitOfWork.FAS, fasSessionFactory)
           .put(Constants.UnitOfWork.LIS, lisSessionFactory)
+          .put(UnitOfWork.CALSNS, calsnsDataSourceFactory)
           .build();
       UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory = new UnitOfWorkAwareProxyFactory();
       FieldUtils
@@ -79,5 +90,4 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
       throw new JobsException(e);
     }
   }
-
 }
