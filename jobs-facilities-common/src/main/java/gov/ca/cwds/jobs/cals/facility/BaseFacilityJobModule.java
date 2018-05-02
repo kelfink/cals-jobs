@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.cals.facility;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.cals.inject.MappingModule;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
-import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
 import gov.ca.cwds.jobs.common.inject.BatchProcessor;
@@ -35,12 +34,13 @@ public abstract class BaseFacilityJobModule extends AbstractBaseJobModule {
     }).to(FacilityBatchProcessor.class);
     bind(FacilityParameterObjectBuilder.class);
     install(new MappingModule());
+    install(new CalsnsDataAccessModule());
   }
 
-  protected <T extends BaseJobConfiguration> T getJobsConfiguration(JobOptions jobOptions,
+  protected <T extends BaseFacilityJobConfiguration> T getJobsConfiguration(JobOptions jobOptions,
       Class<T> configurationClass) {
     T facilityJobConfiguration =
-        BaseJobConfiguration.getJobsConfiguration(configurationClass,
+        BaseFacilityJobConfiguration.getJobsConfiguration(configurationClass,
             jobOptions.getEsConfigLoc());
     facilityJobConfiguration.setDocumentMapping("facility.mapping.json");
     facilityJobConfiguration.setIndexSettings("facility.settings.json");
