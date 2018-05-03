@@ -42,10 +42,12 @@ import org.hibernate.annotations.NamedNativeQuery;
 public class LisRecordChange implements PersistentObject {
 
   public static final String INITIAL_LOAD_SQL = "select fac_nbr , system_datetime_1 from lis_fac_file "
-      + "where fac_nbr > :facNbr order by fac_nbr";
+      + "where fac_nbr > :facNbr and fac_type in (400, 403, 430, 431, 433, 710, 711, 720, 721, "
+      + "722, 726, 728, 729, 730, 731, 732, 733) order by fac_nbr";
 
   public static final String INCREMENTAL_LOAD_SQL = "select fac_nbr , system_datetime_1 from lis_fac_file "
-      + "where system_datetime_1 > :dateAfter order by system_datetime_1";
+      + "where system_datetime_1 > :dateAfter and fac_type in (400, 403, 430, 431, 433, 710, 711, "
+      + "720, 721, 722, 726, 728, 729, 730, 731, 732, 733) order by system_datetime_1";
 
 
   public static final String LIS_INITIAL_LOAD_QUERY_NAME = "RecordChange.lisInitialLoadQuery";
