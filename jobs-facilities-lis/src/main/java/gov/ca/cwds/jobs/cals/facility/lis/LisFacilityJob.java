@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.cals.facility.lis;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
@@ -20,11 +21,15 @@ public class LisFacilityJob extends JobImpl<ChangedFacilityDTO> {
   @LisSessionFactory
   private SessionFactory lisSessionFactory;
 
+  @Inject
+  @CalsnsSessionFactory
+  private SessionFactory calsnsSessionFactory;
+
   @Override
   public void close() {
     super.close();
     fasSessionFactory.close();
     lisSessionFactory.close();
+    calsnsSessionFactory.close();
   }
-
 }
