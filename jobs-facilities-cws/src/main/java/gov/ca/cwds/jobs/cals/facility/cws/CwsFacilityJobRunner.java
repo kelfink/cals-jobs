@@ -10,5 +10,4 @@ public final class CwsFacilityJobRunner {
   public static void main(String[] args) {
     JobRunner.run(new CwsFacilityJobModule(args));
   }
-
 }
