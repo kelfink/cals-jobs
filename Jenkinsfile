@@ -7,7 +7,7 @@ node ('dora-slave'){
    parameters([
         booleanParam(defaultValue: true, description: '', name: 'USE_NEWRELIC'),
         string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
-        string(defaultValue: 'development', description: '', name: 'branch'),
+        string(defaultValue: 'master', description: '', name: 'branch'),
         booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
         string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
         string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')]),
@@ -37,16 +37,17 @@ node ('dora-slave'){
    stage('Tests and Coverage') {
 	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
    }
+   stage('SonarQube analysis'){
+     		withSonarQubeEnv('Core-SonarQube') {
+     			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
+             }
+   }
     stage ('Push to artifactory'){
         rtGradle.deployer.deployArtifacts = true
         buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
         rtGradle.deployer.deployArtifacts = false
 	}
-	stage('SonarQube analysis'){
-  		withSonarQubeEnv('Core-SonarQube') {
-  			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
-          }
-      }
+
 	stage('Clean WorkSpace') {
 		archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
 		sh ('docker-compose down -v')
