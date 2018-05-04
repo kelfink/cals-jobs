@@ -24,7 +24,7 @@ node ('dora-slave'){
   try {
    stage('Preparation') {
           cleanWs()
-		  git branch: '$branch', url: 'git@github.com:ca-cwds/jobs.git'
+		  git branch: '$branch', url: 'git@github.com:ca-cwds/cals-jobs.git'
 		  rtGradle.tool = "Gradle_35"
 		  rtGradle.resolver repo:'repo', server: serverArti
 		  rtGradle.deployer.mavenCompatible = true

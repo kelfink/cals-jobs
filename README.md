@@ -1,6 +1,6 @@
-## CWDS Jobs
+## CALS Jobs
 
-The CWDS Jobs project provides java based stand alone applications which are meant to be scheduled periodically.
+The CALS Jobs project provides java based stand alone applications which are meant to be scheduled periodically.
 
 ## Installation
 
@@ -15,7 +15,7 @@ Prerequisites are job dependent but typically you can expect the following to be
 
 ### Prerequisites
 
-1. Source code, available at [GitHub](https://github.com/ca-cwds/jobs)
+1. Source code, available at [GitHub](https://github.com/ca-cwds/cals-jobs)
 1. Java SE 8 development kit
 1. DB2 Database
 1. Postgres Database
