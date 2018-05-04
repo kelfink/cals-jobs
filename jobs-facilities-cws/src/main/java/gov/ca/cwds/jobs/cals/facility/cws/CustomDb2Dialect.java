@@ -15,7 +15,6 @@ public class CustomDb2Dialect extends DB2Dialect {
     @Override
     public String processSql(String sql, RowSelection selection) {
       if (LimitHelper.hasFirstRow(selection)) {
-        //nest the main query in an outer select
         return "select * from ( select inner2_.*, rownumber() over() as rownumber_ from ( "
             + sql + " fetch first " + getMaxOrLimit(selection)
             + " rows only ) as inner2_ ) as inner1_ where rownumber_ > "
@@ -39,7 +38,6 @@ public class CustomDb2Dialect extends DB2Dialect {
       return false;
     }
   };
-
 
   @Override
   public LimitHandler getLimitHandler() {
