@@ -5,7 +5,6 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
@@ -35,7 +34,6 @@ public class ElasticSearchIndexerDaoTest {
 
   private static final String ES_ALIAS = "mockESAlias";
   private static final String DOC_TYPE = "mockDockType";
-  private static final String TEST_ID = "TEST_ID";
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
@@ -121,21 +119,6 @@ public class ElasticSearchIndexerDaoTest {
 
     indexerDao.createIndexIfMissing();
   }
-
-  @Test(expected = Exception.class)
-  public void testBulkDelete() {
-    setUpClusterMock();
-    indexerDao.bulkDelete(TEST_ID);
-  }
-
-  @Test(expected = Exception.class)
-  public void testBulkAdd() throws JsonProcessingException {
-    setUpClusterMock();
-    when(clientMock.prepareIndex(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenThrow(Exception.class);
-    indexerDao.bulkAdd(Mockito.any(), Mockito.any(), Mockito.any());
-  }
-
 
   @Test
   public void testCloseClient() throws IOException {
