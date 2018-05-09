@@ -5,8 +5,13 @@
   "properties": {
     "name": {
       "type": "text",
-      "analyzer": "keyword_lowercase",
-      "fielddata": true
+      "fields": {
+        "for_sort": {
+          "type": "text",
+          "analyzer": "keyword_lowercase",
+          "fielddata": true
+        }
+      }
     },
     "addresses": {
       "type": "nested"
