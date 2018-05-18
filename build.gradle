@@ -33,7 +33,7 @@ project.ext {
     elasticsearchVersion = "5.5.2"
     dropwizardVersion = "1.1.0"
 
-    projectMajorVersion = "0.7.1"
+    projectMajorVersion = "0.7.2"
 
     isRelease = System.getProperty("Release") == "true"
     buildNumber = System.getProperty('BuildNumber')
