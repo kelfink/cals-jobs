@@ -9,8 +9,8 @@
       "id": "6",
       "value": "Foster Family Home"
     },
-    "name": "Sally Smith Foster Home",
     "adoption_home_only_indicator": false,
+    "name": "Sally Smith Foster Home",
     "licensee_name": "",
     "license_type": null,
     "assigned_worker": {
@@ -32,6 +32,8 @@
     "last_visit_date": null,
     "last_deferred_visit_date": null,
     "email_address": null,
+    "full_residential_address": "543 Mulberry Street Brawley CA",
+    "full_mailing_address": null,
     "last_visit_reason": null,
     "last_deferred_visit_reason": null,
     "county": {
@@ -50,21 +52,6 @@
           "lattitude": null,
           "deliverable": null,
           "street_address": "543 Mulberry Street",
-          "city": "Brawley",
-          "state": "CA",
-          "zip_code": null,
-          "zip_suffix_code": null
-        }
-      },
-      {
-        "id": null,
-        "type": "Mailing",
-        "address": {
-          "id": null,
-          "longitude": null,
-          "lattitude": null,
-          "deliverable": null,
-          "street_address": "3243 fdsfdsfdsfdsfd",
           "city": "Brawley",
           "state": "CA",
           "zip_code": null,
