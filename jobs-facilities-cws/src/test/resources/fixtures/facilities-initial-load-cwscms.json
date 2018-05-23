@@ -9,8 +9,8 @@
       "id": "16",
       "value": "County Shelter/Receiving Home(Non EA/AFDC)"
     },
-    "name": "Guadalupe Group Home",
     "adoption_home_only_indicator": false,
+    "name": "Guadalupe Group Home",
     "licensee_name": "",
     "license_type": null,
     "assigned_worker": null,
@@ -23,6 +23,8 @@
     "last_visit_date": null,
     "last_deferred_visit_date": null,
     "email_address": null,
+    "full_residential_address": "3775 North Market Sacramento CA 95834",
+    "full_mailing_address": null,
     "last_visit_reason": null,
     "last_deferred_visit_reason": null,
     "county": {

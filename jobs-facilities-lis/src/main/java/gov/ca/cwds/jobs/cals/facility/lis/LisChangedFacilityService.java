@@ -25,6 +25,7 @@ public class LisChangedFacilityService extends AbstractChangedFacilityService im
   @Override
   protected FacilityDTO loadEntityById(ChangedEntityIdentifier identifier) {
     return lisFacilityService.loadFacilityFromLis(
-        facilityParameterObjectBuilder.createFacilityParameterObject(identifier.getId()));
+        facilityParameterObjectBuilder.createFacilityParameterObject(identifier.getId()))
+        .orElse(null);
   }
 }
