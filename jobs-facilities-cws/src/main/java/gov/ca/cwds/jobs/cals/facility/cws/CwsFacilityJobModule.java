@@ -9,8 +9,16 @@ import gov.ca.cwds.cals.Constants.UnitOfWork;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.inject.CwsFacilityServiceProvider;
 import gov.ca.cwds.cals.service.CwsFacilityService;
+import gov.ca.cwds.cals.service.LegacyDictionariesCache;
+import gov.ca.cwds.cals.service.LegacyDictionariesCache.LegacyDictionariesCacheBuilder;
 import gov.ca.cwds.cms.data.access.mapper.CountyOwnershipMapper;
 import gov.ca.cwds.cms.data.access.mapper.ExternalInterfaceMapper;
+import gov.ca.cwds.data.legacy.cms.dao.CountiesDao;
+import gov.ca.cwds.data.legacy.cms.dao.LicenseStatusDao;
+import gov.ca.cwds.data.legacy.cms.dao.StateDao;
+import gov.ca.cwds.data.legacy.cms.entity.syscodes.County;
+import gov.ca.cwds.data.legacy.cms.entity.syscodes.LicenseStatus;
+import gov.ca.cwds.data.legacy.cms.entity.syscodes.State;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
@@ -88,5 +96,19 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
       LOG.error("Can't build UnitOfWorkAwareProxyFactory", e);
       throw new JobsException(e);
     }
+  }
+
+  @Provides
+  public LegacyDictionariesCache provideLegacyDictionariesCache(
+      CountiesDao countiesDao,
+      StateDao stateDao,
+      LicenseStatusDao licenseStatusDao
+  ) {
+    LegacyDictionariesCacheBuilder builder = new LegacyDictionariesCacheBuilder();
+    return builder
+        .add(County.class, countiesDao)
+        .add(State.class, stateDao)
+        .add(LicenseStatus.class, licenseStatusDao)
+        .build();
   }
 }
