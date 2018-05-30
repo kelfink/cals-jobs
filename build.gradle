@@ -17,8 +17,8 @@ apply plugin: 'eclipse'
 
 project.ext {
     cwdsModelVersion = '0.6.4_531-RC'
-    calsApiVersion = '0.7.2_1233-RC'
-    coreApiVersion = '1.6.3_721-RC'
+    calsApiVersion = '0.7.2_1243-RC'
+    coreApiVersion = '1.6.4_790-RC'
     testSupportVersion = '0.5.6_272-RC'
     commonsCliVersion = '1.4'
     commonsLangVersion = '3.6'
