@@ -13,7 +13,7 @@ elasticsearch.xpack.password: changeme
 
 batchSize: 10
 elasticSearchBulkSize: 10
-readerThreadsCount: 3
+readerThreadsCount: 10
 
 cmsDataSourceFactory:
   properties:

@@ -12,7 +12,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   @Inject
   private TimestampOperator timestampOperator;
 
-  private AtomicInteger nextOffset = new AtomicInteger(0);
+  private int offset = 0;
 
   private JobMode jobMode;
 
@@ -74,7 +73,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
     }
     LocalDateTime lastTimeStamp = identifiers.get(identifiers.size() - 1).getTimestamp();
     if (lastTimeStamp == null) {
-      nextOffset.addAndGet(batchSize);
+      offset += batchSize;
       return Collections.singletonList(new JobBatch(identifiers));
     } else {
       return calculateNextPortion(identifiers);
@@ -82,7 +81,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   }
 
   protected List<ChangedEntityIdentifier> getNextPage() {
-    return getNextPage(new PageRequest(nextOffset.get(), batchSize));
+    return getNextPage(new PageRequest(offset, batchSize));
   }
 
   protected List<ChangedEntityIdentifier> getNextPage(PageRequest pageRequest) {
@@ -105,7 +104,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
     List<ChangedEntityIdentifier> nextIdentifiersPage = identifiers;
     while ((!nextIdentifiersPage.isEmpty() && getLastTimestamp(identifiers) ==
         getLastTimestamp(nextIdentifiersPage))) {
-      nextOffset.addAndGet(batchSize);
+      offset += batchSize;
       nextPortion.add(new JobBatch(nextIdentifiersPage));
       nextIdentifiersPage = getNextPage();
     }
@@ -114,7 +113,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
 
     while (!nextIdentifier.isEmpty() &&
         (nextIdentifier.get(0).getTimestamp() == getLastTimestamp(identifiers))) {
-      nextOffset.addAndGet(batchSize);
+      offset += batchSize;
       assert nextIdentifier.size() == 1;
       nextPortion.get(nextPortion.size() - 1).getChangedEntityIdentifiers()
           .add(nextIdentifier.get(0));
@@ -125,7 +124,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   }
 
   private List<ChangedEntityIdentifier> getNextIdentifier() {
-    return getNextPage(new PageRequest(nextOffset.get(), 1));
+    return getNextPage(new PageRequest(offset, 1));
   }
 
   private static LocalDateTime getLastTimestamp(List<ChangedEntityIdentifier> identifiers) {
@@ -167,11 +166,11 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
     return timestampOperator;
   }
 
-  public AtomicInteger getNextOffset() {
-    return nextOffset;
+  public int getOffset() {
+    return offset;
   }
 
-  public void setNextOffset(AtomicInteger nextOffset) {
-    this.nextOffset = nextOffset;
+  public void setOffset(int offset) {
+    this.offset = offset;
   }
 }
