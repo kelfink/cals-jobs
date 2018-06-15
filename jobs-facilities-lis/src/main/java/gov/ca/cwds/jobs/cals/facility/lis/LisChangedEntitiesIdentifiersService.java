@@ -28,7 +28,7 @@ public class LisChangedEntitiesIdentifiersService implements ChangedEntitiesIden
     ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     recordChangeLisDao.getInitialLoadStream(pageRequest).
         map(LisRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
+    return changedEntityIdentifiers.newStream().filter(Objects::nonNull)
         .collect(Collectors.toList());
   }
 
@@ -53,7 +53,7 @@ public class LisChangedEntitiesIdentifiersService implements ChangedEntitiesIden
         LisRecordChange.lisTimestampFormatter.format(timestampAfter));
     recordChangeLisDao.getIncrementalLoadStream(dateAfter, pageRequest).
         map(LisRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
+    return changedEntityIdentifiers.newStream().filter(Objects::nonNull)
         .collect(Collectors.toList());
   }
 }
