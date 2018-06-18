@@ -47,7 +47,7 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
     ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     recordChangeCwsCmsDao.getResumeInitialLoadStream(timeStampAfter, pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
+    return changedEntityIdentifiers.newStream().filter(Objects::nonNull)
         .collect(Collectors.toList());
   }
 
@@ -57,7 +57,7 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
     ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     recordChangeCwsCmsDao.getInitialLoadStream(pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull);
+    return changedEntityIdentifiers.newStream().filter(Objects::nonNull);
   }
 
   @UnitOfWork(CMS)
@@ -66,7 +66,7 @@ public class CwsChangedEntitiesIdentifiersService implements ChangedEntitiesIden
     ChangedFacilitiesIdentifiers changedEntityIdentifiers = new ChangedFacilitiesIdentifiers();
     recordChangeCwsCmsDao.getIncrementalLoadStream(dateAfter, pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().distinct().filter(Objects::nonNull)
+    return changedEntityIdentifiers.newStream().filter(Objects::nonNull)
         .collect(Collectors.toList());
   }
 

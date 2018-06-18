@@ -12,7 +12,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   @Inject
   private TimestampOperator timestampOperator;
 
-  private AtomicInteger nextOffset = new AtomicInteger(0);
+  private int offset = 0;
 
   private JobMode jobMode;
 
@@ -72,9 +71,8 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
     if (identifiers.isEmpty()) {
       return Collections.emptyList();
     }
-    LocalDateTime lastTimeStamp = identifiers.get(identifiers.size() - 1).getTimestamp();
-    if (lastTimeStamp == null) {
-      nextOffset.addAndGet(batchSize);
+    if (timeStampsAreEmpty(identifiers)) {
+      offset += batchSize;
       return Collections.singletonList(new JobBatch(identifiers));
     } else {
       return calculateNextPortion(identifiers);
@@ -82,7 +80,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   }
 
   protected List<ChangedEntityIdentifier> getNextPage() {
-    return getNextPage(new PageRequest(nextOffset.get(), batchSize));
+    return getNextPage(new PageRequest(offset, batchSize));
   }
 
   protected List<ChangedEntityIdentifier> getNextPage(PageRequest pageRequest) {
@@ -101,35 +99,55 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
 
   private List<JobBatch> calculateNextPortion(
       List<ChangedEntityIdentifier> identifiers) {
+    // it can be several batches in portion when
+    // there are many entities with equal last updated timestamps
+    LocalDateTime savePoint = getLastTimestamp(identifiers);
+    List<JobBatch> batches = findBatchesPriorToBatchWithSavepoint(identifiers);
+    List<ChangedEntityIdentifier> lastIdentifiersWithSavepoint =
+        findLastIdentifiersPriorToSavepoint(savePoint);
+    batches.get(batches.size() - 1).getChangedEntityIdentifiers()
+        .addAll(lastIdentifiersWithSavepoint);
+    batches.get(batches.size() - 1).setTimestamp(savePoint);
+    return batches;
+  }
+
+  private List<ChangedEntityIdentifier> findLastIdentifiersPriorToSavepoint(LocalDateTime savePoint) {
+    List<ChangedEntityIdentifier> identifiersWithSavepoint = new ArrayList<>(batchSize);
+    ChangedEntityIdentifier nextIdentifier = getNextIdentifier();
+    while (nextIdentifier != null &&
+        (nextIdentifier.getTimestamp() == savePoint)) {
+      offset++;
+      identifiersWithSavepoint.add(nextIdentifier);
+      nextIdentifier = getNextIdentifier();
+    }
+    return identifiersWithSavepoint;
+  }
+
+  private List<JobBatch> findBatchesPriorToBatchWithSavepoint(List<ChangedEntityIdentifier> identifiers) {
     List<JobBatch> nextPortion = new ArrayList<>();
+    LocalDateTime savePoint = getLastTimestamp(identifiers);
     List<ChangedEntityIdentifier> nextIdentifiersPage = identifiers;
-    while ((!nextIdentifiersPage.isEmpty() && getLastTimestamp(identifiers) ==
+    while ((!nextIdentifiersPage.isEmpty() && savePoint ==
         getLastTimestamp(nextIdentifiersPage))) {
-      nextOffset.addAndGet(batchSize);
+      offset += batchSize;
       nextPortion.add(new JobBatch(nextIdentifiersPage));
       nextIdentifiersPage = getNextPage();
     }
-
-    List<ChangedEntityIdentifier> nextIdentifier = getNextIdentifier();
-
-    while (!nextIdentifier.isEmpty() &&
-        (nextIdentifier.get(0).getTimestamp() == getLastTimestamp(identifiers))) {
-      nextOffset.addAndGet(batchSize);
-      assert nextIdentifier.size() == 1;
-      nextPortion.get(nextPortion.size() - 1).getChangedEntityIdentifiers()
-          .add(nextIdentifier.get(0));
-      nextIdentifier = getNextIdentifier();
-    }
-    nextPortion.get(nextPortion.size() - 1).setTimestamp(getLastTimestamp(identifiers));
     return nextPortion;
   }
 
-  private List<ChangedEntityIdentifier> getNextIdentifier() {
-    return getNextPage(new PageRequest(nextOffset.get(), 1));
+  private ChangedEntityIdentifier getNextIdentifier() {
+    List<ChangedEntityIdentifier> identifiers = getNextPage(new PageRequest(offset, 1));
+    assert identifiers.size() == 1 || identifiers.isEmpty();
+    return identifiers.isEmpty() ? null : identifiers.get(0);
   }
 
   private static LocalDateTime getLastTimestamp(List<ChangedEntityIdentifier> identifiers) {
     return identifiers.get(identifiers.size() - 1).getTimestamp();
+  }
+
+  private boolean timeStampsAreEmpty(List<ChangedEntityIdentifier> identifiers) {
+    return getLastTimestamp(identifiers) == null;
   }
 
   @Override
@@ -167,11 +185,11 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
     return timestampOperator;
   }
 
-  public AtomicInteger getNextOffset() {
-    return nextOffset;
+  public int getOffset() {
+    return offset;
   }
 
-  public void setNextOffset(AtomicInteger nextOffset) {
-    this.nextOffset = nextOffset;
+  public void setOffset(int offset) {
+    this.offset = offset;
   }
 }

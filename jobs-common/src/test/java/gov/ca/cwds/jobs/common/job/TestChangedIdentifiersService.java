@@ -4,6 +4,7 @@ import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class TestChangedIdentifiersService implements ChangedEntitiesIdentifiers
     int indexTo =
         pageRequest.getOffset() + pageRequest.getLimit() > identifiers.size() ?
             identifiers.size() : pageRequest.getOffset() + pageRequest.getLimit();
-    return indexFrom < indexTo ? identifiers.subList(indexFrom, indexTo) : Collections.emptyList();
+    return indexFrom < indexTo ? new ArrayList<>(identifiers.subList(indexFrom, indexTo)) : Collections.emptyList();
   }
 
 }
