@@ -4,14 +4,14 @@ import com.google.inject.Inject;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
-import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
-import gov.ca.cwds.jobs.common.inject.JobImpl;
+import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
+import gov.ca.cwds.jobs.common.core.JobImpl;
 import org.hibernate.SessionFactory;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
-public class LisFacilityJob extends JobImpl<ChangedFacilityDTO> {
+public class LisFacilityJob extends JobImpl<ChangedFacilityDto> {
 
   @Inject
   @FasSessionFactory

@@ -15,14 +15,14 @@ import gov.ca.cwds.cals.service.FasFacilityService;
 import gov.ca.cwds.cals.service.LisFacilityService;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
-import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
+import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.cals.facility.fas.FasDataAccessModule;
-import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
-import gov.ca.cwds.jobs.common.api.ChangedEntityService;
 import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
 import gov.ca.cwds.jobs.common.config.JobOptions;
+import gov.ca.cwds.jobs.common.core.Job;
+import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.exception.JobsException;
-import gov.ca.cwds.jobs.common.job.Job;
+import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.hibernate.SessionFactory;
@@ -49,7 +49,7 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
     bind(FasFacilityService.class).toProvider(FasFacilityServiceProvider.class);
     bind(JobBatchIterator.class).to(LisBatchIterator.class);
     setJobBatchIteratorClass(LisBatchIterator.class);
-    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {
+    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {
     }).to(LisChangedFacilityService.class);
     bind(Job.class).to(LisFacilityJob.class);
     install(new LisDataAccessModule());

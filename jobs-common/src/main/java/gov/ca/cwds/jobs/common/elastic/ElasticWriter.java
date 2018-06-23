@@ -2,12 +2,11 @@ package gov.ca.cwds.jobs.common.elastic;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.ChangedDTO;
-import gov.ca.cwds.jobs.common.ElasticSearchIndexerDao;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.exception.JobsException;
-import gov.ca.cwds.jobs.common.job.BulkWriter;
-import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
+import gov.ca.cwds.jobs.common.util.ConsumerCounter;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;

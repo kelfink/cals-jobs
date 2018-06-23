@@ -26,8 +26,8 @@ public final class AssertFacilityHelper {
         JSONCompareMode.STRICT);
   }
 
-  private static ChangedFacilityDTO getFacilityById(String facilityId) {
-    Optional<ChangedFacilityDTO> optional = TestWriter.getItems().stream()
+  private static ChangedFacilityDto getFacilityById(String facilityId) {
+    Optional<ChangedFacilityDto> optional = TestWriter.getItems().stream()
         .filter(o -> facilityId.equals(o.getId())).findAny();
     assertTrue(optional.isPresent());
     return optional.orElse(null);

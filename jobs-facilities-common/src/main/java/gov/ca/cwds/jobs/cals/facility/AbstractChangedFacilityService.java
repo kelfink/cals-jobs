@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.cals.facility;
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
-import gov.ca.cwds.jobs.common.api.ChangedEntityService;
+import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * Created by Alexander Serbin on 3/28/2018.
  */
 public abstract class AbstractChangedFacilityService implements
-    ChangedEntityService<ChangedFacilityDTO> {
+    ChangedEntityService<ChangedFacilityDto> {
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractChangedFacilityService.class);
 
@@ -20,7 +20,7 @@ public abstract class AbstractChangedFacilityService implements
   private FacilityParameterObjectBuilder facilityParameterObjectBuilder;
 
   @Override
-  public ChangedFacilityDTO loadEntity(ChangedEntityIdentifier identifier) {
+  public ChangedFacilityDto loadEntity(ChangedEntityIdentifier identifier) {
     try {
       FacilityDTO facilityDTO = loadEntityById(identifier);
       if (facilityDTO == null) {
@@ -31,7 +31,7 @@ public abstract class AbstractChangedFacilityService implements
           LOG.info("Found facility by ID {}", facilityDTO.getId());
         }
       }
-      return new ChangedFacilityDTO(facilityDTO, identifier.getRecordChangeOperation());
+      return new ChangedFacilityDto(facilityDTO, identifier.getRecordChangeOperation());
     } catch (Exception e) {
       LOG.error("Can't get facility by id {}", identifier.getId(), e);
       throw new IllegalStateException(

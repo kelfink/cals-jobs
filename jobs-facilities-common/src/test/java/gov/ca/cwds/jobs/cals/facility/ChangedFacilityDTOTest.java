@@ -11,10 +11,10 @@ public class ChangedFacilityDTOTest {
   public void equals() {
     FacilityDTO facilityDTO = new FacilityDTO();
     facilityDTO.setName("Some Facility");
-    ChangedFacilityDTO changedFacilityDTO1 = new ChangedFacilityDTO(facilityDTO,
+    ChangedFacilityDto changedFacilityDTO1 = new ChangedFacilityDto(facilityDTO,
         RecordChangeOperation.U);
 
-    ChangedFacilityDTO changedFacilityDTO2 = new ChangedFacilityDTO(facilityDTO,
+    ChangedFacilityDto changedFacilityDTO2 = new ChangedFacilityDto(facilityDTO,
         RecordChangeOperation.U);
 
     Assert.assertEquals(changedFacilityDTO1, changedFacilityDTO2);
@@ -24,7 +24,7 @@ public class ChangedFacilityDTOTest {
   public void getDTO() {
     FacilityDTO facilityDTO = new FacilityDTO();
     facilityDTO.setId("FacilityId");
-    ChangedFacilityDTO changedFacilityDTO = new ChangedFacilityDTO(facilityDTO,
+    ChangedFacilityDto changedFacilityDTO = new ChangedFacilityDto(facilityDTO,
         RecordChangeOperation.U);
     Assert.assertEquals(facilityDTO, changedFacilityDTO.getDTO());
   }
@@ -34,7 +34,7 @@ public class ChangedFacilityDTOTest {
     FacilityDTO facilityDTO = new FacilityDTO();
     String facilityId = "FacilityId";
     facilityDTO.setId(facilityId);
-    ChangedFacilityDTO changedFacilityDTO = new ChangedFacilityDTO(facilityDTO,
+    ChangedFacilityDto changedFacilityDTO = new ChangedFacilityDto(facilityDTO,
         RecordChangeOperation.U);
     Assert.assertEquals(facilityId, changedFacilityDTO.getId());
   }

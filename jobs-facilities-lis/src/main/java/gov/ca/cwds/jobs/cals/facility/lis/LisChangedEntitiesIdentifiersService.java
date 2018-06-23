@@ -4,8 +4,8 @@ import static gov.ca.cwds.cals.Constants.UnitOfWork.LIS;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilitiesIdentifiers;
-import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
+import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import io.dropwizard.hibernate.UnitOfWork;
 import java.math.BigInteger;

@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.cals.facility.lis;
 
-import gov.ca.cwds.jobs.common.inject.JobRunner;
+import gov.ca.cwds.jobs.common.core.JobRunner;
 
 /**
  * @author CWDS TPT-2

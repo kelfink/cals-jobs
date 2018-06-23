@@ -1,8 +1,8 @@
 package gov.ca.cwds.jobs.cals.facility.lis;
 
 import gov.ca.cwds.jobs.common.batch.JobBatch;
-import gov.ca.cwds.jobs.common.batch.JobBatchIteratorImpl;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
+import gov.ca.cwds.jobs.common.batch.TimestampJobBatchIteratorImpl;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LisBatchIterator extends JobBatchIteratorImpl {
+public class LisBatchIterator extends TimestampJobBatchIteratorImpl {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(LisBatchIterator.class);

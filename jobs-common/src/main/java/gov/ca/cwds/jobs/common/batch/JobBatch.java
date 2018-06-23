@@ -1,65 +1,43 @@
 package gov.ca.cwds.jobs.common.batch;
 
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import java.time.LocalDateTime;
+import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import java.util.List;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
-public class JobBatch {
+public class JobBatch<S extends SavePoint> {
 
-  private List<ChangedEntityIdentifier> identifiers;
-  private LocalDateTime timestamp;
+  private List<ChangedEntityIdentifier<S>> identifiers;
 
-  public JobBatch(List<ChangedEntityIdentifier> identifiers) {
+  public JobBatch(List<ChangedEntityIdentifier<S>> identifiers) {
     this.identifiers = identifiers;
-    this.timestamp = null;
   }
 
-  public JobBatch(List<ChangedEntityIdentifier> identifiers, LocalDateTime timestamp) {
-    this.identifiers = identifiers;
-    this.timestamp = timestamp;
-  }
-
-  public List<ChangedEntityIdentifier> getChangedEntityIdentifiers() {
+  public List<ChangedEntityIdentifier<S>> getChangedEntityIdentifiers() {
     return identifiers;
   }
 
-  public void addIdentifier(ChangedEntityIdentifier identifier) {
+  public void addIdentifier(ChangedEntityIdentifier<S> identifier) {
     this.identifiers.add(identifier);
   }
 
-  public void addIdentifiers(List<ChangedEntityIdentifier> identifiers) {
+  public void addIdentifiers(List<ChangedEntityIdentifier<S>> identifiers) {
     this.identifiers.addAll(identifiers);
   }
 
-  public void setChangedEntityIdentifiers(List<ChangedEntityIdentifier> changedEntities) {
+  public void setChangedEntityIdentifiers(List<ChangedEntityIdentifier<S>> changedEntities) {
     this.identifiers = changedEntities;
-  }
-
-  public LocalDateTime getTimestamp() {
-    return timestamp;
-  }
-
-  public void setTimestamp(LocalDateTime timestamp) {
-    this.timestamp = timestamp;
-  }
-
-  public void calculateTimestamp() {
-    timestamp = identifiers.get(identifiers.size() - 1).getTimestamp();
   }
 
   public int getSize() {
     return identifiers.size();
   }
 
-  public boolean isEmptyTimestamp() {
-    return timestamp == null;
-  }
-
   @Override
   public String toString() {
-    return "batch size = " + identifiers.size() + ", timestamp is " + timestamp;
+    return "batch size = " + identifiers.size();
   }
+
 }

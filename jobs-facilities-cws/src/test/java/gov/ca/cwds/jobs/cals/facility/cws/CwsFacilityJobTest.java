@@ -7,9 +7,9 @@ import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.AssertFacilityHelper;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.TestWriter;
-import gov.ca.cwds.jobs.common.inject.JobRunner;
-import gov.ca.cwds.jobs.common.job.JobPreparator;
-import gov.ca.cwds.jobs.common.job.timestamp.LastRunDirHelper;
+import gov.ca.cwds.jobs.common.core.JobPreparator;
+import gov.ca.cwds.jobs.common.core.JobRunner;
+import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import gov.ca.cwds.jobs.utils.DataSourceFactoryUtils;
 import gov.ca.cwds.test.support.DatabaseHelper;
 import io.dropwizard.db.DataSourceFactory;
@@ -44,7 +44,7 @@ public class CwsFacilityJobTest {
       throws IOException, JSONException, InterruptedException, LiquibaseException {
     try {
       Assert.assertEquals(0, TestWriter.getItems().size());
-      lastRunDirHelper.deleteTimestampDirectory();
+      lastRunDirHelper.deleteSavePointContainerFolder();
       runInitialLoad();
       Assert.assertEquals(167, TestWriter.getItems().size());
       AssertFacilityHelper.assertFacility("fixtures/facilities-initial-load-cwscms.json",
@@ -62,7 +62,7 @@ public class CwsFacilityJobTest {
       AssertFacilityHelper.assertFacility("fixtures/cwsrs_deleted_facility.json",
           CWSCMS_INCREMENTAL_LOAD_DELETED_FACILITY_ID);
     } finally {
-      lastRunDirHelper.deleteTimestampDirectory();
+      lastRunDirHelper.deleteSavePointContainerFolder();
       TestWriter.reset();
     }
   }
@@ -113,7 +113,7 @@ public class CwsFacilityJobTest {
 
   private String[] getModuleArgs() {
     return new String[]{"-c", getConfigFilePath(), "-l",
-        lastRunDirHelper.getLastRunDir().toString()};
+        lastRunDirHelper.getSavepointContainerFolder().toString()};
   }
 
   private static String getConfigFilePath() {

@@ -22,14 +22,14 @@ import gov.ca.cwds.data.legacy.cms.entity.syscodes.State;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
-import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDTO;
-import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
-import gov.ca.cwds.jobs.common.api.ChangedEntityService;
+import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
-import gov.ca.cwds.jobs.common.batch.JobBatchIteratorImpl;
+import gov.ca.cwds.jobs.common.batch.TimestampJobBatchIteratorImpl;
 import gov.ca.cwds.jobs.common.config.JobOptions;
+import gov.ca.cwds.jobs.common.core.Job;
+import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.exception.JobsException;
-import gov.ca.cwds.jobs.common.job.Job;
+import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.hibernate.SessionFactory;
@@ -53,8 +53,8 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
     bind(ChangedEntitiesIdentifiersService.class)
         .toProvider(CwsChangedIdentifiersServiceProvider.class);
     bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
-    bind(JobBatchIterator.class).to(JobBatchIteratorImpl.class);
-    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDTO>>() {
+    bind(JobBatchIterator.class).to(TimestampJobBatchIteratorImpl.class);
+    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {
     }).to(CwsChangedFacilityService.class);
     bind(Job.class).to(CwsFacilityJob.class);
     bind(CountyOwnershipMapper.class).to(CountyOwnershipMapper.INSTANCE.getClass())

@@ -3,16 +3,15 @@ package gov.ca.cwds.jobs.cals.facility;
 import static gov.ca.cwds.jobs.cals.facility.AssertFacilityHelper.assertFacility;
 import static gov.ca.cwds.jobs.cals.facility.lis.LisRecordChange.lisTimestampFormatter;
 import static gov.ca.cwds.test.support.DatabaseHelper.setUpDatabase;
-import static org.junit.Assert.assertEquals;
 
 import com.google.inject.AbstractModule;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.lis.LisFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.lis.LisFacilityJobModule;
-import gov.ca.cwds.jobs.common.inject.BatchProcessor;
-import gov.ca.cwds.jobs.common.inject.JobRunner;
-import gov.ca.cwds.jobs.common.job.JobPreparator;
-import gov.ca.cwds.jobs.common.job.timestamp.LastRunDirHelper;
+import gov.ca.cwds.jobs.common.batch.BatchProcessor;
+import gov.ca.cwds.jobs.common.core.JobPreparator;
+import gov.ca.cwds.jobs.common.core.JobRunner;
+import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import gov.ca.cwds.jobs.utils.DataSourceFactoryUtils;
 import gov.ca.cwds.test.support.DatabaseHelper;
 import io.dropwizard.db.DataSourceFactory;
@@ -42,7 +41,7 @@ public class LisFacilityJobTest {
       throws IOException, JSONException, InterruptedException, LiquibaseException {
     try {
       assertEquals(0, TestWriter.getItems().size());
-      lastRunDirHelper.deleteTimestampDirectory();
+      lastRunDirHelper.deleteSavePointContainerFolder();
       runInitialLoad();
       assertEquals(316, TestWriter.getItems().size());
       assertFacility("fixtures/facilities-lis.json", LIS_INITIAL_LOAD_FACILITY_ID);
@@ -56,7 +55,7 @@ public class LisFacilityJobTest {
       assertFacility("fixtures/facilities-lis.json",
           LIS_INITIAL_LOAD_FACILITY_ID);
     } finally {
-      lastRunDirHelper.deleteTimestampDirectory();
+      lastRunDirHelper.deleteSavePointContainerFolder();
       TestWriter.reset();
     }
   }
@@ -108,7 +107,7 @@ public class LisFacilityJobTest {
 
   private String[] getModuleArgs() {
     return new String[]{"-c", getConfigFilePath(), "-l",
-        lastRunDirHelper.getLastRunDir().toString()};
+        lastRunDirHelper.getSavepointContainerFolder().toString()};
   }
 
   private static String getConfigFilePath() {
