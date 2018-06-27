@@ -23,7 +23,8 @@ public class TimestampSavePointService implements SavePointService<TimestampSave
 
   @Override
   public TimestampSavePoint loadSavePoint() {
-    return savePointContainerService.readSavePointContainer().getSavePoint();
+    return savePointContainerService.readSavePointContainer(TimestampSavePointContainer.class)
+        .getSavePoint();
   }
 
   @Override

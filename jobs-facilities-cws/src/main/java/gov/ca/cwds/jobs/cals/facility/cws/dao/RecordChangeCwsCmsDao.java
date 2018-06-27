@@ -1,9 +1,10 @@
-package gov.ca.cwds.jobs.cals.facility.cws;
+package gov.ca.cwds.jobs.cals.facility.cws.dao;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.stream.QueryCreator;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.cals.facility.cws.CwsRecordChange;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;

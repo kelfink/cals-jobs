@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.cals.facility.cws;
 
+import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsFacilityJobModule;
 import gov.ca.cwds.jobs.common.core.JobRunner;
 
 /**

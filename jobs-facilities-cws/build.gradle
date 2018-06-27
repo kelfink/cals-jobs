@@ -33,6 +33,8 @@ dependencies {
     }
     testCompile(group: 'gov.ca.cwds.cals', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true)
     testCompile group: 'org.skyscreamer', name: 'jsonassert', version: jsonAssertVersion
+    testCompile project(':jobs-facilities-common').sourceSets.test.output
+
 }
 
 jar {

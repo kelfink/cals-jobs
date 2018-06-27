@@ -13,7 +13,12 @@
     "name": "Guadalupe Group Home",
     "licensee_name": "",
     "license_type": null,
-    "assigned_worker": null,
+    "assigned_worker": {
+      "phones": [],
+      "email": null,
+      "full_name": "",
+      "id": null
+    },
     "district_office": null,
     "license_number": null,
     "status": null,

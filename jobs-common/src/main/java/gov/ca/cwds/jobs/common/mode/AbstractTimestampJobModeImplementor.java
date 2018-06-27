@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * Created by Alexander Serbin on 6/19/2018.
  */
 public abstract class AbstractTimestampJobModeImplementor<E> extends
-    AbstractJobModeImplementor<E, TimestampSavePoint> {
+    AbstractJobModeImplementor<E, TimestampSavePoint, DefaultJobMode> {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(AbstractTimestampJobModeImplementor.class);
@@ -41,17 +41,19 @@ public abstract class AbstractTimestampJobModeImplementor<E> extends
   private TimestampSavePointContainerService savePointContainerService;
 
   @Override
-  public void finalizeJob() {
-    if (savePointContainerService.savePointContainerExists()) {
-      TimestampSavePoint timestampSavePoint = savePointService.loadSavePoint();
-      LOGGER.info("Updating job save point to the last batch save point {}", timestampSavePoint);
-      DefaultJobMode nextJobMode = DefaultJobMode.INCREMENTAL_LOAD;
-      LOGGER.info("Updating next job mode to the {}", nextJobMode);
-      TimestampSavePointContainer savePointContainer = new TimestampSavePointContainer();
-      savePointContainer.setJobMode(nextJobMode);
-      savePointContainer.setSavePoint(timestampSavePoint);
-      savePointContainerService.writeSavePointContainer(savePointContainer);
-    }
+  public void doFinalizeJob() {
+    TimestampSavePoint timestampSavePoint = findNextModeSavePoint();
+    LOGGER.info("Updating job save point to the last batch save point {}", timestampSavePoint);
+    DefaultJobMode nextJobMode = DefaultJobMode.INCREMENTAL_LOAD;
+    LOGGER.info("Updating next job mode to the {}", nextJobMode);
+    TimestampSavePointContainer savePointContainer = new TimestampSavePointContainer();
+    savePointContainer.setJobMode(nextJobMode);
+    savePointContainer.setSavePoint(timestampSavePoint);
+    savePointContainerService.writeSavePointContainer(savePointContainer);
+  }
+
+  protected TimestampSavePoint findNextModeSavePoint() {
+    return savePointService.loadSavePoint();
   }
 
   @Override

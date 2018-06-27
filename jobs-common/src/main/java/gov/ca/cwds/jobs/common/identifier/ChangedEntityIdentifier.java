@@ -8,7 +8,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
-public class ChangedEntityIdentifier<S extends SavePoint> {
+public abstract class ChangedEntityIdentifier<S extends SavePoint> implements
+    Comparable<ChangedEntityIdentifier<S>> {
 
   private String id;
 
@@ -70,4 +71,5 @@ public class ChangedEntityIdentifier<S extends SavePoint> {
     return "id=" + id + ", recordChangeOperation=" + recordChangeOperation +
         ", savePoint=" + savePoint + "\n";
   }
+
 }

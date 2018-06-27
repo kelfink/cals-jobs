@@ -1,8 +1,7 @@
-package gov.ca.cwds.jobs.cals.facility.cws;
+package gov.ca.cwds.jobs.cals.facility.cws.service;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.service.CwsFacilityService;
-import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
 import gov.ca.cwds.jobs.cals.facility.AbstractChangedFacilityService;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
@@ -19,12 +18,8 @@ public class CwsChangedFacilityService extends AbstractChangedFacilityService im
   @Inject
   private CwsFacilityService cwsFacilityService;
 
-  @Inject
-  private FacilityParameterObjectBuilder facilityParameterObjectBuilder;
-
   @Override
   protected FacilityDTO loadEntityById(ChangedEntityIdentifier identifier) {
-    return cwsFacilityService.loadFacilityFromCwsCms(
-        facilityParameterObjectBuilder.createFacilityParameterObject(identifier.getId()));
+    return cwsFacilityService.loadFacilityFromCwsCms(identifier.getId());
   }
 }

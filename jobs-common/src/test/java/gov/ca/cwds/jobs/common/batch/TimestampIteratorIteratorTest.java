@@ -7,6 +7,7 @@ import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.TestChangedIdentifiersService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.identifier.TimestampIdentifier;
 import gov.ca.cwds.jobs.common.mode.TimestampInitialModeImplementor;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointService;
@@ -35,11 +36,11 @@ public class TimestampIteratorIteratorTest {
   public void savePointInSecondPageTest() {
     LocalDateTime timestamp = LocalDateTime.of(2013, 5, 8, 1, 10, 25);
     LocalDateTime differentTimestamp = LocalDateTime.of(2017, 6, 4, 1, 10, 22);
-    ChangedEntityIdentifier<TimestampSavePoint> sameTimestampIdentifier = new ChangedEntityIdentifier<>(
+    ChangedEntityIdentifier<TimestampSavePoint> sameTimestampIdentifier = new TimestampIdentifier(
         "testId",
         RecordChangeOperation.I,
         new TimestampSavePoint(timestamp));
-    ChangedEntityIdentifier<TimestampSavePoint> differentTimestampIdentifier = new ChangedEntityIdentifier<>(
+    ChangedEntityIdentifier<TimestampSavePoint> differentTimestampIdentifier = new TimestampIdentifier(
         "testId",
         RecordChangeOperation.I,
         new TimestampSavePoint(differentTimestamp));
@@ -107,10 +108,10 @@ public class TimestampIteratorIteratorTest {
         new TestChangedIdentifiersService(Arrays.asList(
             emptyTimestampIdentifier,
             emptyTimestampIdentifier,
-            new ChangedEntityIdentifier<>("testId2",
+            new TimestampIdentifier("testId2",
                 RecordChangeOperation.I,
                 new TimestampSavePoint(timestamp1)),
-            new ChangedEntityIdentifier<>("testId3",
+            new TimestampIdentifier("testId3",
                 RecordChangeOperation.I,
                 new TimestampSavePoint(timestamp2))
         )));
@@ -128,7 +129,7 @@ public class TimestampIteratorIteratorTest {
   @Test
   public void manyPagesOfEqualTimestamps() {
     LocalDateTime timestamp = LocalDateTime.of(2013, 5, 8, 1, 10, 25);
-    ChangedEntityIdentifier<TimestampSavePoint> sameTimestampIdentifier = new ChangedEntityIdentifier<>(
+    ChangedEntityIdentifier<TimestampSavePoint> sameTimestampIdentifier = new TimestampIdentifier(
         "testId",
         RecordChangeOperation.I,
         new TimestampSavePoint(timestamp));
@@ -149,7 +150,7 @@ public class TimestampIteratorIteratorTest {
   }
 
   private ChangedEntityIdentifier<TimestampSavePoint> createEmptyIdentifier() {
-    return new ChangedEntityIdentifier<>("testId",
+    return new TimestampIdentifier("testId",
         RecordChangeOperation.I,
         new TimestampSavePoint(null));
   }

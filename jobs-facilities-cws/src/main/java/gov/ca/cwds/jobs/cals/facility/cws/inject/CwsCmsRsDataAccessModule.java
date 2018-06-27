@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.cals.facility.cws;
+package gov.ca.cwds.jobs.cals.facility.cws.inject;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
@@ -10,6 +10,7 @@ import gov.ca.cwds.data.legacy.cms.dao.ClientDao;
 import gov.ca.cwds.data.legacy.cms.dao.CountiesDao;
 import gov.ca.cwds.data.legacy.cms.entity.AddressPhoneticName;
 import gov.ca.cwds.data.legacy.cms.entity.AddressPhoneticNamePK;
+import gov.ca.cwds.data.legacy.cms.entity.ApplicationAndLicenseStatusHistory;
 import gov.ca.cwds.data.legacy.cms.entity.BackgroundCheck;
 import gov.ca.cwds.data.legacy.cms.entity.Client;
 import gov.ca.cwds.data.legacy.cms.entity.ClientOtherEthnicity;
@@ -48,6 +49,9 @@ import gov.ca.cwds.data.legacy.cms.entity.syscodes.State;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.VisitType;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ReplicationPlacementHome;
+import gov.ca.cwds.jobs.cals.facility.cws.CwsFacilityJobConfiguration;
+import gov.ca.cwds.jobs.cals.facility.cws.CwsRecordChange;
+import gov.ca.cwds.jobs.cals.facility.cws.dao.RecordChangeCwsCmsDao;
 import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import java.util.Optional;
 import org.hibernate.SessionFactory;
@@ -101,6 +105,7 @@ public class CwsCmsRsDataAccessModule extends AbstractModule {
           , SubstituteCareProviderUc.class
           , SubCareProviderPhoneticName.class
           , NameType.class
+          , ApplicationAndLicenseStatusHistory.class
       ).build();
 
   @Override

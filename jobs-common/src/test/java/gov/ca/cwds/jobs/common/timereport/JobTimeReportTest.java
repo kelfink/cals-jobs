@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.identifier.TimestampIdentifier;
+import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Ignore;
@@ -17,7 +19,8 @@ public class JobTimeReportTest {
 
   @Test
   public void completionPercentTest() throws InterruptedException {
-    ChangedEntityIdentifier id = new ChangedEntityIdentifier("1", RecordChangeOperation.I, null);
+    ChangedEntityIdentifier id = new TimestampIdentifier("1", RecordChangeOperation.I,
+        new TimestampSavePoint(null));
     List<ChangedEntityIdentifier> list = Arrays.asList(id, id, id);
     JobTimeReport jobTimeReport = new JobTimeReport(/*
         Arrays.asList(new JobBatch(list), new JobBatch(list))*/);

@@ -5,10 +5,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.inject.Inject;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.rest.api.ApiException;
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.reflect.ParameterizedType;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Alexander Serbin on 2/5/2018.
  */
-public abstract class SavePointContainerServiceImpl<T extends SavePointContainer> implements
-    SavePointContainerService<T> {
+public abstract class SavePointContainerServiceImpl<S extends SavePoint, J extends JobMode> implements
+    SavePointContainerService<S, J> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SavePointContainerServiceImpl.class);
 
@@ -46,12 +46,9 @@ public abstract class SavePointContainerServiceImpl<T extends SavePointContainer
   }
 
   @Override
-  public T readSavePointContainer() {
+  public SavePointContainer<S, J> readSavePointContainer(
+      Class<? extends SavePointContainer<S, J>> savePointContainerClass) {
     try (Reader reader = Files.newBufferedReader(getSavePointFile())) {
-      Class<T> savePointContainerClass =
-          (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass())
-              .getActualTypeArguments()[0];
-
       return mapper.readValue(IOUtils.toString(reader), savePointContainerClass);
     } catch (IOException e) {
       LOG.error(e.getMessage(), e);
@@ -66,7 +63,7 @@ public abstract class SavePointContainerServiceImpl<T extends SavePointContainer
   }
 
   @Override
-  public void writeSavePointContainer(T savePointContainer) {
+  public void writeSavePointContainer(SavePointContainer<S, J> savePointContainer) {
     Objects.requireNonNull(savePointContainer.getJobMode());
     Objects.requireNonNull(savePointContainer.getSavePoint());
     try {

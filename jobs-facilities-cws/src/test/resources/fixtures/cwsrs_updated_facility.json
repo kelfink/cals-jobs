@@ -14,8 +14,15 @@
     "licensee_name": "",
     "license_type": null,
     "assigned_worker": {
-      "id": null,
-      "value": "North License Worker LICEN"
+      "phones": [
+        {
+          "relation": "primary",
+          "number": "1341343131"
+        }
+      ],
+      "email": "",
+      "full_name": "North License Worker LICEN",
+      "id": null
     },
     "district_office": {
       "number": "13",

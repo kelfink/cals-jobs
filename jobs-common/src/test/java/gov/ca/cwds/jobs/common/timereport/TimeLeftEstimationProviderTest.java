@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.identifier.TimestampIdentifier;
+import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +34,8 @@ public class TimeLeftEstimationProviderTest {
   }
 
   private TimeLeftEstimationProvider createEstimationProvider(int batchNumber) {
-    ChangedEntityIdentifier id = new ChangedEntityIdentifier("1", RecordChangeOperation.I, null);
+    ChangedEntityIdentifier id = new TimestampIdentifier("1", RecordChangeOperation.I,
+        new TimestampSavePoint(null));
     List<ChangedEntityIdentifier> list = Arrays.asList(id, id, id);
     return new TimeLeftEstimationProvider(
         Arrays.asList(new JobBatch(list), new JobBatch(list), new JobBatch(list)),

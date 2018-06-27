@@ -18,7 +18,6 @@ import gov.ca.cwds.jobs.common.mode.TimestampInitialResumeModeImplementor;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointService;
 
@@ -29,7 +28,6 @@ public class TestModule extends AbstractBaseJobModule {
 
   private ChangedEntityService<TestEntity> changedEntityService;
   private ChangedEntitiesIdentifiersService<TimestampSavePoint, TimestampSavePoint> changedEntitiesIdentifiers;
-  private BulkWriter<TestEntity> bulkWriter;
 
   public TestModule(String[] args) {
     super(args);
@@ -58,7 +56,7 @@ public class TestModule extends AbstractBaseJobModule {
     bind(new TypeLiteral<JobModeService<DefaultJobMode>>() {
     }).to(TimestampDefaultJobModeService.class);
     bindJobModeImplementor();
-    bind(new TypeLiteral<SavePointContainerService<TimestampSavePointContainer>>() {
+    bind(new TypeLiteral<SavePointContainerService<TimestampSavePoint, DefaultJobMode>>() {
     }).to(TimestampSavePointContainerService.class);
     bind(new TypeLiteral<SavePointService<TimestampSavePoint>>() {
     }).to(TimestampSavePointService.class);
@@ -68,7 +66,7 @@ public class TestModule extends AbstractBaseJobModule {
         new TypeLiteral<ChangedEntitiesIdentifiersService<TimestampSavePoint, TimestampSavePoint>>() {
         }).toInstance(changedEntitiesIdentifiers);
     bind(new TypeLiteral<BulkWriter<TestEntity>>() {
-    }).toInstance(bulkWriter);
+    }).to(TestEntityWriter.class);
   }
 
   private void bindJobModeImplementor() {
@@ -113,6 +111,10 @@ public class TestModule extends AbstractBaseJobModule {
 
   }
 
+  static class TestEntityWriter extends TestWriter<TestEntity> {
+
+  }
+
   public void setChangedEntityService(ChangedEntityService<TestEntity> changedEntityService) {
     this.changedEntityService = changedEntityService;
   }
@@ -120,10 +122,6 @@ public class TestModule extends AbstractBaseJobModule {
   public void setChangedEntitiesIdentifiers(
       ChangedEntitiesIdentifiersService<TimestampSavePoint, TimestampSavePoint> changedEntitiesIdentifiers) {
     this.changedEntitiesIdentifiers = changedEntitiesIdentifiers;
-  }
-
-  public void setBulkWriter(BulkWriter bulkWriter) {
-    this.bulkWriter = bulkWriter;
   }
 
 }

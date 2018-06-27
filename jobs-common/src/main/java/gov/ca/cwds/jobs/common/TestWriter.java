@@ -9,20 +9,20 @@ import java.util.List;
  */
 public class TestWriter<E> implements BulkWriter<E> {
 
-  private List<E> items = new ArrayList<>();
+  private static List items = new ArrayList<>();
 
   @Override
-  public void write(List<E> items) {
-    this.items.addAll(items);
-    ConsumerCounter.addToCounter(items.size());
+  public void write(List<E> itemsToAdd) {
+    items.addAll(itemsToAdd);
+    ConsumerCounter.addToCounter(itemsToAdd.size());
   }
 
-  public void reset() {
+  public static void reset() {
     items = new ArrayList<>();
     ConsumerCounter.reset();
   }
 
-  public List<E> getItems() {
+  public static List getItems() {
     return items;
   }
 

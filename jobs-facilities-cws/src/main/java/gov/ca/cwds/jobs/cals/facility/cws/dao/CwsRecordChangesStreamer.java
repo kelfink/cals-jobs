@@ -1,8 +1,9 @@
-package gov.ca.cwds.jobs.cals.facility.cws;
+package gov.ca.cwds.jobs.cals.facility.cws.dao;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.stream.QueryCreator;
 import gov.ca.cwds.data.stream.ScalarResultsStreamer;
+import gov.ca.cwds.jobs.cals.facility.cws.CwsRecordChange;
 
 /**
  * @author CWDS TPT-2

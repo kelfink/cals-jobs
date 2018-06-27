@@ -5,12 +5,13 @@ import gov.ca.cwds.jobs.common.api.JobModeImplementor;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 
 /**
  * Created by Alexander Serbin on 6/20/2018.
  */
-public abstract class AbstractJobModeImplementor<E, S extends SavePoint> implements
+public abstract class AbstractJobModeImplementor<E, S extends SavePoint, J extends JobMode> implements
     JobModeImplementor<E, S> {
 
   @Inject
@@ -18,6 +19,9 @@ public abstract class AbstractJobModeImplementor<E, S extends SavePoint> impleme
 
   @Inject
   private ChangedEntityService<E> changedEntityService;
+
+  @Inject
+  private SavePointContainerService<S, J> savePointContainerService;
 
   @Override
   public S loadSavePoint() {
@@ -33,5 +37,15 @@ public abstract class AbstractJobModeImplementor<E, S extends SavePoint> impleme
   public E loadEntity(ChangedEntityIdentifier identifier) {
     return changedEntityService.loadEntity(identifier);
   }
+
+  @Override
+  public final void finalizeJob() {
+    if (savePointContainerService.savePointContainerExists()) {
+      doFinalizeJob();
+    }
+  }
+
+  protected abstract void doFinalizeJob();
+
 
 }

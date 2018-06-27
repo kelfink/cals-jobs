@@ -1,8 +1,9 @@
-package gov.ca.cwds.jobs.cals.facility.cws;
+package gov.ca.cwds.jobs.cals.facility.cws.inject;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import gov.ca.cwds.cals.inject.AbstractInjectProvider;
+import gov.ca.cwds.jobs.cals.facility.cws.service.CwsChangedEntitiesIdentifiersService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 
 /**

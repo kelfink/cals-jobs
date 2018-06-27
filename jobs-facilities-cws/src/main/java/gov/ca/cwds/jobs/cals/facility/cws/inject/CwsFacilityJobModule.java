@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.cals.facility.cws;
+package gov.ca.cwds.jobs.cals.facility.cws.inject;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -23,13 +23,26 @@ import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
-import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
-import gov.ca.cwds.jobs.common.batch.TimestampJobBatchIteratorImpl;
+import gov.ca.cwds.jobs.cals.facility.cws.CwsFacilityJob;
+import gov.ca.cwds.jobs.cals.facility.cws.CwsFacilityJobConfiguration;
+import gov.ca.cwds.jobs.cals.facility.cws.mode.CwsJobIncrementalModeImplementor;
+import gov.ca.cwds.jobs.cals.facility.cws.mode.CwsJobInitialModeImplementor;
+import gov.ca.cwds.jobs.cals.facility.cws.mode.CwsJobInitialResumeModeImplementor;
+import gov.ca.cwds.jobs.cals.facility.cws.service.CwsChangedFacilityService;
+import gov.ca.cwds.jobs.cals.facility.cws.service.CwsTimestampSavePointService;
+import gov.ca.cwds.jobs.common.api.JobModeImplementor;
+import gov.ca.cwds.jobs.common.api.JobModeService;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
+import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.mode.TimestampDefaultJobModeService;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
+import gov.ca.cwds.jobs.common.savepoint.SavePointService;
+import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
+import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainerService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.hibernate.SessionFactory;
@@ -50,19 +63,50 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
   @Override
   protected void configure() {
     super.configure();
-    bind(ChangedEntitiesIdentifiersService.class)
-        .toProvider(CwsChangedIdentifiersServiceProvider.class);
+    bind(Job.class).to(CwsFacilityJob.class);
+    bind(new TypeLiteral<JobModeService<DefaultJobMode>>() {
+    }).to(TimestampDefaultJobModeService.class);
+    bindJobModeImplementor();
+    bind(new TypeLiteral<SavePointContainerService<TimestampSavePoint, DefaultJobMode>>() {
+    }).to(TimestampSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointService<TimestampSavePoint>>() {
+    }).toProvider(CwsTimestampSavePointServiceProvider.class);
+    bind(CwsTimestampSavePointService.class).toProvider(CwsTimestampSavePointServiceProvider.class);
+    bind(
+        new TypeLiteral<ChangedEntitiesIdentifiersService<TimestampSavePoint, TimestampSavePoint>>() {
+        }).toProvider(CwsChangedIdentifiersServiceProvider.class);
     bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
-    bind(JobBatchIterator.class).to(TimestampJobBatchIteratorImpl.class);
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {
     }).to(CwsChangedFacilityService.class);
-    bind(Job.class).to(CwsFacilityJob.class);
     bind(CountyOwnershipMapper.class).to(CountyOwnershipMapper.INSTANCE.getClass())
         .asEagerSingleton();
     bind(ExternalInterfaceMapper.class).to(ExternalInterfaceMapper.INSTANCE.getClass())
         .asEagerSingleton();
 
     install(new CwsCmsRsDataAccessModule());
+  }
+
+  private void bindJobModeImplementor() {
+    Class<? extends JobModeImplementor<ChangedFacilityDto, TimestampSavePoint>> clazz = null;
+
+    TimestampDefaultJobModeService timestampDefaultJobModeService =
+        new TimestampDefaultJobModeService();
+    TimestampSavePointContainerService savePointContainerService =
+        new TimestampSavePointContainerService(getJobOptions().getLastRunLoc());
+    timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);
+    switch (timestampDefaultJobModeService.getCurrentJobMode()) {
+      case INITIAL_LOAD:
+        clazz = CwsJobInitialModeImplementor.class;
+        break;
+      case INITIAL_LOAD_RESUME:
+        clazz = CwsJobInitialResumeModeImplementor.class;
+        break;
+      case INCREMENTAL_LOAD:
+        clazz = CwsJobIncrementalModeImplementor.class;
+        break;
+    }
+    bind(new TypeLiteral<JobModeImplementor<ChangedFacilityDto, TimestampSavePoint>>() {
+    }).to(clazz);
   }
 
   @Provides

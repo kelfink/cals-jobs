@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs.cals.facility;
 
-import com.google.inject.Inject;
-import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
 import gov.ca.cwds.cals.service.dto.FacilityDTO;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
@@ -15,9 +13,6 @@ public abstract class AbstractChangedFacilityService implements
     ChangedEntityService<ChangedFacilityDto> {
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractChangedFacilityService.class);
-
-  @Inject
-  private FacilityParameterObjectBuilder facilityParameterObjectBuilder;
 
   @Override
   public ChangedFacilityDto loadEntity(ChangedEntityIdentifier identifier) {

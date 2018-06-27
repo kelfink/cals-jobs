@@ -30,7 +30,7 @@ public class TimestampSavePointContainerServiceTest {
     savePointContainer.setSavePoint(new TimestampSavePoint(timestamp));
     savePointContainerService.writeSavePointContainer(savePointContainer);
     assertEquals(savePointContainer,
-        savePointContainerService.readSavePointContainer());
+        savePointContainerService.readSavePointContainer(TimestampSavePointContainer.class));
 
     assertTrue(savePointContainerService.savePointContainerExists());
   }

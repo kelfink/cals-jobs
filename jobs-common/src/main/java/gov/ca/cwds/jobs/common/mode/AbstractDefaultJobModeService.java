@@ -6,7 +6,7 @@ import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD_RESUME;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.api.JobModeService;
-import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
+import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.rest.api.ApiException;
 import java.io.IOException;
@@ -22,14 +22,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Alexander Serbin on 6/20/2018.
  */
-public abstract class AbstractDefaultJobModeService<T extends SavePointContainer> implements
+public abstract class AbstractDefaultJobModeService<S extends SavePoint> implements
     JobModeService<DefaultJobMode> {
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractDefaultJobModeService.class);
   public static final String CURRENT_JOB_MODE_IS = "Current job mode is {}";
 
   @Inject
-  private SavePointContainerService<T> savePointContainerService;
+  private SavePointContainerService<S, DefaultJobMode> savePointContainerService;
 
   @Override
   public DefaultJobMode getCurrentJobMode() {
@@ -63,7 +63,7 @@ public abstract class AbstractDefaultJobModeService<T extends SavePointContainer
   }
 
   public void setSavePointContainerService(
-      SavePointContainerService<T> savePointContainerService) {
+      SavePointContainerService<S, DefaultJobMode> savePointContainerService) {
     this.savePointContainerService = savePointContainerService;
   }
 
