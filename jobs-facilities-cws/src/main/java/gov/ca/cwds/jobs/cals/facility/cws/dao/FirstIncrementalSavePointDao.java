@@ -20,7 +20,7 @@ public class FirstIncrementalSavePointDao extends CustomDao {
   public LocalDateTime findMaxTimestamp() {
     return currentSession()
         .createNamedQuery(CwsRecordChange.CWSCMS_GET_MAX_TIMESTAMP_QUERY_NAME, LocalDateTime.class)
-        .setMaxResults(1).uniqueResult();
+        .uniqueResult();
   }
 
 }

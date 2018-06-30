@@ -1,31 +1,32 @@
-package gov.ca.cwds.jobs.common.savepoint;
+package gov.ca.cwds.jobs.cals.facility.lisfas.savepoint;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisJobModeService;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
-import gov.ca.cwds.jobs.common.mode.TimestampDefaultJobModeService;
+import gov.ca.cwds.jobs.common.savepoint.SavePointServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 6/29/2018.
  */
-public class TimestampSavePointService extends
-    SavePointServiceImpl<TimestampSavePoint, DefaultJobMode> {
+public class LisTimestampSavePointService extends
+    SavePointServiceImpl<LisTimestampSavePoint, DefaultJobMode> {
 
   private static final Logger LOGGER = LoggerFactory
-      .getLogger(TimestampSavePointService.class);
+      .getLogger(LisTimestampSavePointService.class);
 
   @Inject
-  private TimestampDefaultJobModeService jobModeService;
+  private LisJobModeService jobModeService;
 
   @Inject
-  private TimestampSavePointContainerService savePointContainerService;
+  private LisTimestampSavePointContainerService savePointContainerService;
 
   @Override
-  public void saveSavePoint(TimestampSavePoint savePoint) {
+  public void saveSavePoint(LisTimestampSavePoint savePoint) {
     if (savePoint.getTimestamp() != null) {
       DefaultJobMode jobMode = jobModeService.getCurrentJobMode();
-      TimestampSavePointContainer savePointContainer = new TimestampSavePointContainer();
+      LisTimestampSavePointContainer savePointContainer = new LisTimestampSavePointContainer();
       savePointContainer.setJobMode(jobMode);
       savePointContainer.setSavePoint(savePoint);
       savePointContainerService.writeSavePointContainer(savePointContainer);

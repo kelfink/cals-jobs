@@ -25,11 +25,11 @@ import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.cals.facility.cws.CwsFacilityJob;
 import gov.ca.cwds.jobs.cals.facility.cws.CwsFacilityJobConfiguration;
+import gov.ca.cwds.jobs.cals.facility.cws.entity.CwsChangedFacilityService;
 import gov.ca.cwds.jobs.cals.facility.cws.mode.CwsJobIncrementalModeImplementor;
 import gov.ca.cwds.jobs.cals.facility.cws.mode.CwsJobInitialModeImplementor;
 import gov.ca.cwds.jobs.cals.facility.cws.mode.CwsJobInitialResumeModeImplementor;
-import gov.ca.cwds.jobs.cals.facility.cws.service.CwsChangedFacilityService;
-import gov.ca.cwds.jobs.cals.facility.cws.service.CwsTimestampSavePointService;
+import gov.ca.cwds.jobs.cals.facility.cws.savepoint.CwsTimestampSavePointService;
 import gov.ca.cwds.jobs.common.api.JobModeImplementor;
 import gov.ca.cwds.jobs.common.api.JobModeService;
 import gov.ca.cwds.jobs.common.config.JobOptions;
@@ -69,7 +69,7 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
     bindJobModeImplementor();
     bind(new TypeLiteral<SavePointContainerService<TimestampSavePoint, DefaultJobMode>>() {
     }).to(TimestampSavePointContainerService.class);
-    bind(new TypeLiteral<SavePointService<TimestampSavePoint>>() {
+    bind(new TypeLiteral<SavePointService<TimestampSavePoint, DefaultJobMode>>() {
     }).toProvider(CwsTimestampSavePointServiceProvider.class);
     bind(CwsTimestampSavePointService.class).toProvider(CwsTimestampSavePointServiceProvider.class);
     bind(
@@ -87,7 +87,7 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
   }
 
   private void bindJobModeImplementor() {
-    Class<? extends JobModeImplementor<ChangedFacilityDto, TimestampSavePoint>> clazz = null;
+    Class<? extends JobModeImplementor<ChangedFacilityDto, TimestampSavePoint, DefaultJobMode>> clazz = null;
 
     TimestampDefaultJobModeService timestampDefaultJobModeService =
         new TimestampDefaultJobModeService();
@@ -105,8 +105,9 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
         clazz = CwsJobIncrementalModeImplementor.class;
         break;
     }
-    bind(new TypeLiteral<JobModeImplementor<ChangedFacilityDto, TimestampSavePoint>>() {
-    }).to(clazz);
+    bind(
+        new TypeLiteral<JobModeImplementor<ChangedFacilityDto, TimestampSavePoint, DefaultJobMode>>() {
+        }).to(clazz);
   }
 
   @Provides

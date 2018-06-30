@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.cals.facility.cws.service;
+package gov.ca.cwds.jobs.cals.facility.cws.savepoint;
 
 import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
 

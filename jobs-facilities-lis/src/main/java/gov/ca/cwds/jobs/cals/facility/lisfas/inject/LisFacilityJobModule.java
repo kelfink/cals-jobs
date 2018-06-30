@@ -1,4 +1,7 @@
-package gov.ca.cwds.jobs.cals.facility.lis;
+package gov.ca.cwds.jobs.cals.facility.lisfas.inject;
+
+import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD_RESUME;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -8,6 +11,7 @@ import gov.ca.cwds.cals.Constants;
 import gov.ca.cwds.cals.Constants.UnitOfWork;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.inject.FasFacilityServiceProvider;
+import gov.ca.cwds.cals.inject.FasFfaSessionFactory;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
 import gov.ca.cwds.cals.inject.LisFacilityServiceProvider;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
@@ -16,13 +20,24 @@ import gov.ca.cwds.cals.service.LisFacilityService;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
-import gov.ca.cwds.jobs.cals.facility.fas.FasDataAccessModule;
-import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
+import gov.ca.cwds.jobs.cals.facility.lisfas.LisFacilityInitialJob;
+import gov.ca.cwds.jobs.cals.facility.lisfas.LisFacilityJobConfiguration;
+import gov.ca.cwds.jobs.cals.facility.lisfas.entity.LisChangedFacilityService;
+import gov.ca.cwds.jobs.cals.facility.lisfas.identifier.LisChangedEntitiesIdentifiersService;
+import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisInitialModeImplementor;
+import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisInitialResumeModeImplementor;
+import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisJobModeService;
+import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePoint;
+import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePointContainerService;
+import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePointService;
+import gov.ca.cwds.jobs.common.api.JobModeImplementor;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.exception.JobsException;
-import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
+import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
+import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.hibernate.SessionFactory;
@@ -43,17 +58,52 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
   @Override
   protected void configure() {
     super.configure();
-    bind(ChangedEntitiesIdentifiersService.class)
+    DefaultJobMode jobMode = defineJobMode();
+    if (jobMode == INITIAL_LOAD || jobMode == INITIAL_LOAD_RESUME) {
+      configureInitialMode(jobMode);
+    } else {
+      configureIncrementalMode();
+    }
+    bind(LisChangedEntitiesIdentifiersService.class)
         .toProvider(LisChangedIdentifiersServiceProvider.class);
     bind(LisFacilityService.class).toProvider(LisFacilityServiceProvider.class);
     bind(FasFacilityService.class).toProvider(FasFacilityServiceProvider.class);
-    bind(JobBatchIterator.class).to(LisBatchIterator.class);
-    setJobBatchIteratorClass(LisBatchIterator.class);
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {
     }).to(LisChangedFacilityService.class);
-    bind(Job.class).to(LisFacilityJob.class);
     install(new LisDataAccessModule());
     install(new FasDataAccessModule());
+  }
+
+  private void configureIncrementalMode() {
+    throw new UnsupportedOperationException();
+  }
+
+  private void configureInitialMode(DefaultJobMode jobMode) {
+    bind(Job.class).to(LisFacilityInitialJob.class);
+    Class<? extends JobModeImplementor<ChangedFacilityDto, LicenseNumberSavePoint, DefaultJobMode>> jobModeImplementorClass = null;
+    if (jobMode == INITIAL_LOAD) {
+      jobModeImplementorClass = LisInitialModeImplementor.class;
+    } else {
+      jobModeImplementorClass = LisInitialResumeModeImplementor.class;
+    }
+    bind(
+        new TypeLiteral<JobModeImplementor<ChangedFacilityDto, LicenseNumberSavePoint, DefaultJobMode>>() {
+        }).to(jobModeImplementorClass);
+    bind(
+        new TypeLiteral<SavePointService<LicenseNumberSavePoint, DefaultJobMode>>() {
+        }).to(LicenseNumberSavePointService.class);
+    bind(
+        new TypeLiteral<SavePointContainerService<LicenseNumberSavePoint, DefaultJobMode>>() {
+        }).to(LicenseNumberSavePointContainerService.class);
+  }
+
+  private DefaultJobMode defineJobMode() {
+    LisJobModeService timestampDefaultJobModeService =
+        new LisJobModeService();
+    LicenseNumberSavePointContainerService savePointContainerService =
+        new LicenseNumberSavePointContainerService(getJobOptions().getLastRunLoc());
+    timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);
+    return timestampDefaultJobModeService.getCurrentJobMode();
   }
 
   @Provides
@@ -74,12 +124,14 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
   UnitOfWorkAwareProxyFactory provideUnitOfWorkAwareProxyFactory(
       @FasSessionFactory SessionFactory fasSessionFactory,
       @LisSessionFactory SessionFactory lisSessionFactory,
+      @FasFfaSessionFactory SessionFactory fasFfaSessionFactory,
       @CalsnsSessionFactory SessionFactory calsnsDataSourceFactory) {
     try {
       ImmutableMap<String, SessionFactory> sessionFactories = ImmutableMap.<String, SessionFactory>builder()
           .put(Constants.UnitOfWork.FAS, fasSessionFactory)
           .put(Constants.UnitOfWork.LIS, lisSessionFactory)
           .put(UnitOfWork.CALSNS, calsnsDataSourceFactory)
+          .put(UnitOfWork.FAS_FFA, fasFfaSessionFactory)
           .build();
       UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory = new UnitOfWorkAwareProxyFactory();
       FieldUtils
@@ -90,4 +142,5 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
       throw new JobsException(e);
     }
   }
+
 }

@@ -4,7 +4,7 @@ import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
-import gov.ca.cwds.jobs.cals.facility.cws.service.CwsTimestampSavePointService;
+import gov.ca.cwds.jobs.cals.facility.cws.savepoint.CwsTimestampSavePointService;
 import gov.ca.cwds.jobs.common.mode.TimestampInitialModeImplementor;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import io.dropwizard.hibernate.UnitOfWork;

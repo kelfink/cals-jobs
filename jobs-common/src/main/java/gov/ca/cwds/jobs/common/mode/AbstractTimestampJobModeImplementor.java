@@ -6,6 +6,7 @@ import gov.ca.cwds.jobs.common.batch.JobBatchSize;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainerService;
@@ -53,7 +54,7 @@ public abstract class AbstractTimestampJobModeImplementor<E> extends
   }
 
   protected TimestampSavePoint findNextModeSavePoint() {
-    return savePointService.loadSavePoint();
+    return savePointService.loadSavePoint(TimestampSavePointContainer.class);
   }
 
   @Override
@@ -63,8 +64,9 @@ public abstract class AbstractTimestampJobModeImplementor<E> extends
   }
 
   @Override
-  public TimestampSavePoint loadSavePoint() {
-    return savePointService.loadSavePoint();
+  public TimestampSavePoint loadSavePoint(
+      Class<? extends SavePointContainer<TimestampSavePoint, DefaultJobMode>> savePointContainerClass) {
+    return savePointService.loadSavePoint(TimestampSavePointContainer.class);
   }
 
   @Override

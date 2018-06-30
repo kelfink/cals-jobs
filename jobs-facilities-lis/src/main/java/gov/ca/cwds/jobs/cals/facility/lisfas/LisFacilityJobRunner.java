@@ -1,5 +1,6 @@
-package gov.ca.cwds.jobs.cals.facility.lis;
+package gov.ca.cwds.jobs.cals.facility.lisfas;
 
+import gov.ca.cwds.jobs.cals.facility.lisfas.inject.LisFacilityJobModule;
 import gov.ca.cwds.jobs.common.core.JobRunner;
 
 /**

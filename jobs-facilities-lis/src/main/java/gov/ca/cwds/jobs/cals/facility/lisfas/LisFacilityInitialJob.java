@@ -1,17 +1,20 @@
-package gov.ca.cwds.jobs.cals.facility.lis;
+package gov.ca.cwds.jobs.cals.facility.lisfas;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
+import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePoint;
 import gov.ca.cwds.jobs.common.core.JobImpl;
+import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import org.hibernate.SessionFactory;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
-public class LisFacilityJob extends JobImpl<ChangedFacilityDto> {
+public class LisFacilityInitialJob extends
+    JobImpl<ChangedFacilityDto, LicenseNumberSavePoint, DefaultJobMode> {
 
   @Inject
   @FasSessionFactory

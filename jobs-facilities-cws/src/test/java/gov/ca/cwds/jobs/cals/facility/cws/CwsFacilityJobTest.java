@@ -6,9 +6,11 @@ import static gov.ca.cwds.test.support.DatabaseHelper.setUpDatabase;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.inject.AbstractModule;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobConfiguration;
+import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.cals.facility.FacilityTestWriter;
 import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsFacilityJobModule;
 import gov.ca.cwds.jobs.common.TestWriter;
@@ -56,34 +58,64 @@ public class CwsFacilityJobTest {
   public void cwsFacilityJobTest()
       throws IOException, JSONException, InterruptedException, LiquibaseException {
     try {
-      LocalDateTime now = LocalDateTime.now();
-      assertEquals(0, TestWriter.getItems().size());
       lastRunDirHelper.deleteSavePointContainerFolder();
-      runInitialLoad();
-      assertEquals(167, TestWriter.getItems().size());
-      assertFacility("fixtures/facilities-initial-load-cwscms.json",
-          CWSCMS_INITIAL_LOAD_FACILITY_ID);
-
-      SavePointContainer<TimestampSavePoint, DefaultJobMode> savePointContainer = savePointContainerService
-          .readSavePointContainer(TimestampSavePointContainer.class);
-      assertTrue(savePointContainer.getSavePoint().getTimestamp().isAfter(now));
-      assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
-
-      runIncrementalLoad();
-      assertEquals(0, TestWriter.getItems().size());
-      addCwsDataForIncrementalLoad();
-      runIncrementalLoad();
-      assertEquals(3, TestWriter.getItems().size());
-      assertFacility("fixtures/cwsrs_new_facility.json",
-          CWSCMS_INCREMENTAL_LOAD_NEW_FACILITY_ID);
-      assertFacility("fixtures/cwsrs_updated_facility.json",
-          CWSCMS_INCREMENTAL_LOAD_UPDATED_FACILITY_ID);
-      assertFacility("fixtures/cwsrs_deleted_facility.json",
-          CWSCMS_INCREMENTAL_LOAD_DELETED_FACILITY_ID);
+      testInitialLoad();
+      testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD);
+      testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD_RESUME);
+      testIncrementalLoad();
     } finally {
       lastRunDirHelper.deleteSavePointContainerFolder();
       FacilityTestWriter.reset();
     }
+  }
+
+  private void testInitialResumeLoad(DefaultJobMode jobMode) {
+    SavePointContainer<TimestampSavePoint, DefaultJobMode> container = savePointContainerService
+        .readSavePointContainer(TimestampSavePointContainer.class);
+    container.setJobMode(jobMode);
+    LocalDateTime savePoint = LocalDateTime.of(2010, 01, 14, 9, 35, 17, 664000000);
+    container.getSavePoint().setTimestamp(savePoint);
+    savePointContainerService.writeSavePointContainer(container);
+    runInitialLoad();
+    assertEquals(2, TestWriter.getItems().size());
+    assertFacilityPresent("2qiZOcd04Y");
+    assertFacilityPresent("3UGSdyX0Ki");
+    assertEquals(INCREMENTAL_LOAD, savePointContainerService
+        .readSavePointContainer(TimestampSavePointContainer.class).getJobMode());
+  }
+
+  private void assertFacilityPresent(String facilityId) {
+    assertEquals(1, TestWriter.getItems().stream()
+        .filter(o -> facilityId.equals(((ChangedFacilityDto) o).getId())).count());
+  }
+
+  private void testIncrementalLoad()
+      throws LiquibaseException, JSONException, JsonProcessingException {
+    runIncrementalLoad();
+    assertEquals(0, TestWriter.getItems().size());
+    addCwsDataForIncrementalLoad();
+    runIncrementalLoad();
+    assertEquals(3, TestWriter.getItems().size());
+    assertFacility("fixtures/cwsrs_new_facility.json",
+        CWSCMS_INCREMENTAL_LOAD_NEW_FACILITY_ID);
+    assertFacility("fixtures/cwsrs_updated_facility.json",
+        CWSCMS_INCREMENTAL_LOAD_UPDATED_FACILITY_ID);
+    assertFacility("fixtures/cwsrs_deleted_facility.json",
+        CWSCMS_INCREMENTAL_LOAD_DELETED_FACILITY_ID);
+  }
+
+  private void testInitialLoad() throws IOException, JSONException {
+    LocalDateTime now = LocalDateTime.now();
+    assertEquals(0, TestWriter.getItems().size());
+    runInitialLoad();
+    assertEquals(167, TestWriter.getItems().size());
+    assertFacility("fixtures/facilities-initial-load-cwscms.json",
+        CWSCMS_INITIAL_LOAD_FACILITY_ID);
+
+    SavePointContainer<TimestampSavePoint, DefaultJobMode> savePointContainer = savePointContainerService
+        .readSavePointContainer(TimestampSavePointContainer.class);
+    assertTrue(savePointContainer.getSavePoint().getTimestamp().isAfter(now));
+    assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
   }
 
   private static CwsFacilityJobConfiguration getFacilityJobConfiguration() {

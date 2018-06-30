@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.cals.facility.lis;
+package gov.ca.cwds.jobs.cals.facility.lisfas;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobConfiguration;

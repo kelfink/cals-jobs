@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.cals.facility.cws.inject;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import gov.ca.cwds.cals.inject.AbstractInjectProvider;
-import gov.ca.cwds.jobs.cals.facility.cws.service.CwsTimestampSavePointService;
+import gov.ca.cwds.jobs.cals.facility.cws.savepoint.CwsTimestampSavePointService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 
 /**

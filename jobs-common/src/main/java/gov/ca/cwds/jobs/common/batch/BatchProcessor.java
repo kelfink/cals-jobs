@@ -5,6 +5,7 @@ import gov.ca.cwds.jobs.common.api.JobModeImplementor;
 import gov.ca.cwds.jobs.common.elastic.ElasticSearchBulkCollector;
 import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;
 import gov.ca.cwds.jobs.common.exception.JobsException;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import gov.ca.cwds.jobs.common.timereport.JobTimeReport;
 import java.util.List;
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Alexander Serbin on 4/2/2018.
  */
-public class BatchProcessor<E, S extends SavePoint> {
+public class BatchProcessor<E, S extends SavePoint, J extends JobMode> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BatchProcessor.class);
 
@@ -22,10 +23,10 @@ public class BatchProcessor<E, S extends SavePoint> {
   private ElasticSearchBulkCollector<E> elasticSearchBulkCollector;
 
   @Inject
-  private BatchReadersPool<E, S> batchReadersPool;
+  private BatchReadersPool<E, S, J> batchReadersPool;
 
   @Inject
-  private JobModeImplementor<E, S> jobModeImplementor;
+  private JobModeImplementor<E, S, J> jobModeImplementor;
 
   public void init() {
     batchReadersPool.init(elasticSearchBulkCollector);

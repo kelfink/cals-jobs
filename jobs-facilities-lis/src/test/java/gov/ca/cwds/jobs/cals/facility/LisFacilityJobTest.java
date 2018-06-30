@@ -1,25 +1,32 @@
 package gov.ca.cwds.jobs.cals.facility;
 
 import static gov.ca.cwds.jobs.cals.facility.AssertFacilityHelper.assertFacility;
-import static gov.ca.cwds.jobs.cals.facility.lis.LisRecordChange.lisTimestampFormatter;
+import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INCREMENTAL_LOAD;
 import static gov.ca.cwds.test.support.DatabaseHelper.setUpDatabase;
+import static org.junit.Assert.assertEquals;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.inject.AbstractModule;
 import gov.ca.cwds.DataSourceName;
-import gov.ca.cwds.jobs.cals.facility.lis.LisFacilityJobConfiguration;
-import gov.ca.cwds.jobs.cals.facility.lis.LisFacilityJobModule;
+import gov.ca.cwds.jobs.cals.facility.lisfas.LisFacilityJobConfiguration;
+import gov.ca.cwds.jobs.cals.facility.lisfas.inject.LisFacilityJobModule;
+import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePoint;
+import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePointContainer;
+import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePointContainerService;
+import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePoint;
+import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointContainer;
+import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointContainerService;
+import gov.ca.cwds.jobs.common.TestWriter;
 import gov.ca.cwds.jobs.common.batch.BatchProcessor;
 import gov.ca.cwds.jobs.common.core.JobPreparator;
 import gov.ca.cwds.jobs.common.core.JobRunner;
+import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
 import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import gov.ca.cwds.jobs.utils.DataSourceFactoryUtils;
-import gov.ca.cwds.test.support.DatabaseHelper;
-import io.dropwizard.db.DataSourceFactory;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import liquibase.exception.LiquibaseException;
 import org.json.JSONException;
 import org.junit.Test;
@@ -40,12 +47,12 @@ public class LisFacilityJobTest {
   public void lisFacilityJobTest()
       throws IOException, JSONException, InterruptedException, LiquibaseException {
     try {
-      assertEquals(0, TestWriter.getItems().size());
       lastRunDirHelper.deleteSavePointContainerFolder();
-      runInitialLoad();
-      assertEquals(316, TestWriter.getItems().size());
-      assertFacility("fixtures/facilities-lis.json", LIS_INITIAL_LOAD_FACILITY_ID);
-      runIncrementalLoad();
+      testInitialLoad();
+      testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD);
+      testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD_RESUME);
+
+ /*     runIncrementalLoad();
       assertEquals(0, TestWriter.getItems().size());
       Thread.sleep(1000);
       addLisDataForIncrementalLoad();
@@ -54,12 +61,59 @@ public class LisFacilityJobTest {
       assertEquals(1, TestWriter.getItems().size());
       assertFacility("fixtures/facilities-lis.json",
           LIS_INITIAL_LOAD_FACILITY_ID);
+*/
     } finally {
       lastRunDirHelper.deleteSavePointContainerFolder();
       TestWriter.reset();
     }
   }
 
+  private void testInitialResumeLoad(DefaultJobMode jobMode) {
+    LicenseNumberSavePointContainerService licenseNumberSavePointContainerService =
+        new LicenseNumberSavePointContainerService(
+            lastRunDirHelper.getSavepointContainerFolder().toString());
+    LicenseNumberSavePointContainer container = new LicenseNumberSavePointContainer();
+    container.setJobMode(jobMode);
+    container.setSavePoint(new LicenseNumberSavePoint(909045136));
+    licenseNumberSavePointContainerService.writeSavePointContainer(container);
+    runInitialLoad();
+    assertInitialLoadSuccessful();
+
+/*
+    SavePointContainer<TimestampSavePoint, DefaultJobMode> container = savePointContainerService
+        .readSavePointContainer(TimestampSavePointContainer.class);
+    container.setJobMode(jobMode);
+    LocalDateTime savePoint = LocalDateTime.of(2010, 01, 14, 9, 35, 17, 664000000);
+    container.getSavePoint().setTimestamp(savePoint);
+    savePointContainerService.writeSavePointContainer(container);
+    runInitialLoad();
+    assertEquals(2, TestWriter.getItems().size());
+    assertFacilityPresent("2qiZOcd04Y");
+    assertFacilityPresent("3UGSdyX0Ki");
+    assertEquals(INCREMENTAL_LOAD, savePointContainerService
+        .readSavePointContainer(TimestampSavePointContainer.class).getJobMode());
+*/
+  }
+
+  private void testInitialLoad() throws JSONException, JsonProcessingException {
+    runInitialLoad();
+    assertEquals(316, TestWriter.getItems().size());
+    assertFacility("fixtures/facilities-lis.json", LIS_INITIAL_LOAD_FACILITY_ID);
+    assertInitialLoadSuccessful();
+  }
+
+  private void assertInitialLoadSuccessful() {
+    LisTimestampSavePointContainerService savePointContainerService =
+        new LisTimestampSavePointContainerService(
+            lastRunDirHelper.getSavepointContainerFolder().toString());
+    SavePointContainer<LisTimestampSavePoint, DefaultJobMode> savePointContainer = savePointContainerService
+        .readSavePointContainer(LisTimestampSavePointContainer.class);
+    assertEquals(new BigInteger("20180319163643"),
+        savePointContainer.getSavePoint().getTimestamp());
+    assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
+  }
+
+/*
   private void addLisDataForIncrementalLoad() throws LiquibaseException {
     DataSourceFactory lisDataSourceFactory = getFacilityJobConfiguration()
         .getLisDataSourceFactory();
@@ -69,6 +123,7 @@ public class LisFacilityJobTest {
     parameters.put("now", lisTimestampFormatter.format(LocalDateTime.now()));
     lisDatabaseHelper.runScript("liquibase/lis_facility_incremental_load.xml", parameters, "lis");
   }
+*/
 
   private static LisFacilityJobConfiguration getFacilityJobConfiguration() {
     LisFacilityJobConfiguration facilityJobConfiguration =
@@ -83,7 +138,6 @@ public class LisFacilityJobTest {
   }
 
   private void runInitialLoad() {
-    TestWriter.reset();
     JobRunner.run(createLisFacilityJobModule());
   }
 
@@ -93,13 +147,14 @@ public class LisFacilityJobTest {
 
   private LisFacilityJobModule createLisFacilityJobModule() {
     LisFacilityJobModule lisFacilityJobModule = new LisFacilityJobModule(getModuleArgs());
+    FacilityTestWriter.reset();
+    lisFacilityJobModule.setFacilityElasticWriterClass(FacilityTestWriter.class);
     lisFacilityJobModule.setElasticSearchModule(new AbstractModule() {
       @Override
       protected void configure() {
 
       }
     });
-    lisFacilityJobModule.setFacilityElasticWriterClass(TestWriter.class);
     lisFacilityJobModule.setJobPreparatorClass(LisJobPreparator.class);
     return lisFacilityJobModule;
   }

@@ -58,7 +58,7 @@ public class TestModule extends AbstractBaseJobModule {
     bindJobModeImplementor();
     bind(new TypeLiteral<SavePointContainerService<TimestampSavePoint, DefaultJobMode>>() {
     }).to(TimestampSavePointContainerService.class);
-    bind(new TypeLiteral<SavePointService<TimestampSavePoint>>() {
+    bind(new TypeLiteral<SavePointService<TimestampSavePoint, DefaultJobMode>>() {
     }).to(TimestampSavePointService.class);
     bind(new TypeLiteral<ChangedEntityService<TestEntity>>() {
     }).toInstance(changedEntityService);
@@ -70,7 +70,7 @@ public class TestModule extends AbstractBaseJobModule {
   }
 
   private void bindJobModeImplementor() {
-    Class<? extends JobModeImplementor<TestEntity, TimestampSavePoint>> clazz = null;
+    Class<? extends JobModeImplementor<TestEntity, TimestampSavePoint, DefaultJobMode>> clazz = null;
 
     TimestampDefaultJobModeService timestampDefaultJobModeService =
         new TimestampDefaultJobModeService();
@@ -88,11 +88,11 @@ public class TestModule extends AbstractBaseJobModule {
         clazz = TestIncrementalModeImplementor.class;
         break;
     }
-    bind(new TypeLiteral<JobModeImplementor<TestEntity, TimestampSavePoint>>() {
+    bind(new TypeLiteral<JobModeImplementor<TestEntity, TimestampSavePoint, DefaultJobMode>>() {
     }).to(clazz);
   }
 
-  private static class TestJobImpl extends JobImpl<TestEntity, TimestampSavePoint> {
+  private static class TestJobImpl extends JobImpl<TestEntity, TimestampSavePoint, DefaultJobMode> {
 
   }
 

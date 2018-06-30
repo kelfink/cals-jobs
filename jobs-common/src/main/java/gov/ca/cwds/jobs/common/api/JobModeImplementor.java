@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.common.api;
 
 import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 
@@ -11,7 +12,8 @@ import gov.ca.cwds.jobs.common.savepoint.SavePointService;
  *
  * Created by Alexander Serbin on 6/19/2018.
  */
-public interface JobModeImplementor<E, S extends SavePoint> extends SavePointService<S>,
+public interface JobModeImplementor<E, S extends SavePoint, J extends JobMode> extends
+    SavePointService<S, J>,
     ChangedEntityService<E>, JobBatchIterator<S> {
 
   /**

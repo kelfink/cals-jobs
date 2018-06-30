@@ -5,6 +5,7 @@ import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
+import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainer;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ public class TimestampInitialResumeModeImplementor<E> extends
 
   @Override
   protected List<ChangedEntityIdentifier<TimestampSavePoint>> getNextPage(PageRequest pageRequest) {
-    TimestampSavePoint savePoint = loadSavePoint();
+    TimestampSavePoint savePoint = loadSavePoint(TimestampSavePointContainer.class);
     return changedEntitiesIdentifiersService
         .getIdentifiersForResumingInitialLoad(savePoint, pageRequest);
   }

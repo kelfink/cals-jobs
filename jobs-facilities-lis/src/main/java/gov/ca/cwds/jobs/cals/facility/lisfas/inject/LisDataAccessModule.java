@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.cals.facility.lis;
+package gov.ca.cwds.jobs.cals.facility.lisfas.inject;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
@@ -12,6 +12,9 @@ import gov.ca.cwds.cals.persistence.dao.lis.LisTableFileDao;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisDoFile;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisFacFile;
 import gov.ca.cwds.cals.persistence.model.lisfas.LisTableFile;
+import gov.ca.cwds.jobs.cals.facility.lisfas.LisFacilityJobConfiguration;
+import gov.ca.cwds.jobs.cals.facility.lisfas.LisRecordChange;
+import gov.ca.cwds.jobs.cals.facility.lisfas.dao.RecordChangeLisDao;
 import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import org.hibernate.SessionFactory;
 

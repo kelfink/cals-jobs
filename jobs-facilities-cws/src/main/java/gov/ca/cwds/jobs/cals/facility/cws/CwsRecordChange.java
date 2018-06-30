@@ -32,9 +32,8 @@ public class CwsRecordChange extends RecordChange {
           + " where home.licensrCd <> 'CL' ";
 
   static final String CWS_CMS_GET_MAX_TIMESTAMP_QUERY =
-      "select home.replicationLastUpdated"
-          + SHARED_PART
-          + " order by home.replicationLastUpdated desc";
+      "select max(home.replicationLastUpdated)"
+          + SHARED_PART;
 
   static final String CWS_CMS_INITIAL_LOAD_QUERY =
       "select new CwsRecordChange(home.identifier,"
