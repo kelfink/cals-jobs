@@ -1,4 +1,4 @@
-node ('dora-slave'){
+node ('tpt2-slave'){
    def artifactVersion="3.3-SNAPSHOT"
    def serverArti = Artifactory.server 'CWDS_DEV'
    def rtGradle = Artifactory.newGradleBuild()
