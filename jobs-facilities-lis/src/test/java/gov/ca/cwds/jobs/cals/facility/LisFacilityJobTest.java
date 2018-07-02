@@ -70,8 +70,7 @@ public class LisFacilityJobTest {
     assertEquals(0, TestWriter.getItems().size());
     assertInitialLoadSuccessful();
     String newTimestamp = addLisDataForIncrementalLoad();
-    //   runIncrementalLoad();
- /*
+    runIncrementalLoad();
     assertEquals(1, TestWriter.getItems().size());
     assertFacility("fixtures/facilities-lis.json",
         LIS_INITIAL_LOAD_FACILITY_ID);
@@ -85,7 +84,6 @@ public class LisFacilityJobTest {
     assertEquals(new BigInteger(newTimestamp),
         savePointContainer.getSavePoint().getTimestamp());
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
-*/
   }
 
   private void testInitialResumeLoad(DefaultJobMode jobMode) {

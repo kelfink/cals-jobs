@@ -13,6 +13,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 /**
+ * Lis Incremental Job Mode. Can be used only with CONNX version 12+ >
  * Created by Alexander Serbin on 7/1/2018.
  */
 public class LisIncrementalJobModeImplementor extends

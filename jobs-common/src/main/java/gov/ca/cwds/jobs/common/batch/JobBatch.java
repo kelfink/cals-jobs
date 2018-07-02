@@ -35,6 +35,10 @@ public class JobBatch<S extends SavePoint> {
     return identifiers.size();
   }
 
+  public boolean isEmpty() {
+    return identifiers.isEmpty();
+  }
+
   @Override
   public String toString() {
     return "batch size = " + identifiers.size();

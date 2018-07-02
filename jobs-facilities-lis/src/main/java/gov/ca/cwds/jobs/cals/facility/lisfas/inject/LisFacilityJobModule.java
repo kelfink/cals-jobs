@@ -25,7 +25,7 @@ import gov.ca.cwds.jobs.cals.facility.lisfas.LisIncrementalFacilityJob;
 import gov.ca.cwds.jobs.cals.facility.lisfas.LisInitialFacilityJob;
 import gov.ca.cwds.jobs.cals.facility.lisfas.entity.LisChangedFacilityService;
 import gov.ca.cwds.jobs.cals.facility.lisfas.identifier.LisChangedEntitiesIdentifiersService;
-import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisIncrementalJobModeImplementor;
+import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisConnx11IncrementaJobModeImplementor;
 import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisInitialModeImplementor;
 import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisInitialResumeModeImplementor;
 import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisJobModeService;
@@ -96,7 +96,7 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
     bind(Job.class).to(LisIncrementalFacilityJob.class);
     bind(
         new TypeLiteral<JobModeImplementor<ChangedFacilityDto, TimestampSavePoint<BigInteger>, DefaultJobMode>>() {
-        }).to(LisIncrementalJobModeImplementor.class);
+        }).to(LisConnx11IncrementaJobModeImplementor.class);
   }
 
   private void configureInitialMode(DefaultJobMode jobMode) {

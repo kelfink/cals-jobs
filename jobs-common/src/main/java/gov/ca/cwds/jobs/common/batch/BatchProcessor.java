@@ -35,16 +35,13 @@ public class BatchProcessor<E, S extends SavePoint, J extends JobMode> {
   public void processBatches() {
     JobTimeReport jobTimeReport = new JobTimeReport();
     List<JobBatch<S>> portion = jobModeImplementor.getNextPortion();
-    do {
+    while (!portion.isEmpty()) {
       for (JobBatch<S> aPortion : portion) {
         batchReadersPool.loadEntities(aPortion.getChangedEntityIdentifiers());
       }
-      if (!portion.isEmpty()) {
-        handleLastBatchInPortion(portion.get(portion.size() - 1));
-        portion = jobModeImplementor.getNextPortion();
-      }
-
-    } while (!portion.isEmpty());
+      handleLastBatchInPortion(portion.get(portion.size() - 1));
+      portion = jobModeImplementor.getNextPortion();
+    }
     jobModeImplementor.finalizeJob();
     jobTimeReport.printTimeSpent();
   }
