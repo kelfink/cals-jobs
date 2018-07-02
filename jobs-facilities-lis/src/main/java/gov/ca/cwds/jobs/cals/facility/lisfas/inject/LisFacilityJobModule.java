@@ -64,12 +64,7 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
   @Override
   protected void configure() {
     super.configure();
-    DefaultJobMode jobMode = defineJobMode();
-    if (jobMode == INITIAL_LOAD || jobMode == INITIAL_LOAD_RESUME) {
-      configureInitialMode(jobMode);
-    } else {
-      configureIncrementalMode();
-    }
+    configureJobModes();
     bind(
         new TypeLiteral<SavePointService<TimestampSavePoint<BigInteger>, DefaultJobMode>>() {
         }).to(LisTimestampSavePointService.class);
@@ -90,6 +85,15 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
         }).to(LicenseNumberSavePointContainerService.class);
     install(new LisDataAccessModule());
     install(new FasDataAccessModule());
+  }
+
+  private void configureJobModes() {
+    DefaultJobMode jobMode = defineJobMode();
+    if (jobMode == INITIAL_LOAD || jobMode == INITIAL_LOAD_RESUME) {
+      configureInitialMode(jobMode);
+    } else {
+      configureIncrementalMode();
+    }
   }
 
   private void configureIncrementalMode() {

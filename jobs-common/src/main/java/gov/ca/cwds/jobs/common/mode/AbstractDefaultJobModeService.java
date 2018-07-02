@@ -38,6 +38,10 @@ public abstract class AbstractDefaultJobModeService<S extends SavePoint> impleme
       LOG.info(CURRENT_JOB_MODE_IS, INITIAL_LOAD);
       return INITIAL_LOAD;
     }
+    return extractJobMode();
+  }
+
+  private DefaultJobMode extractJobMode() {
     Path pathToSavePointContainerFile = savePointContainerService.getSavePointFile();
     LOG.info("Path to the save point container file: {}", pathToSavePointContainerFile);
     try (Reader reader = Files.newBufferedReader(pathToSavePointContainerFile)) {
