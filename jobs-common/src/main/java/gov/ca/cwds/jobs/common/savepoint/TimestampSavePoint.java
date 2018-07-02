@@ -1,28 +1,28 @@
 package gov.ca.cwds.jobs.common.savepoint;
 
-import java.time.LocalDateTime;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Created by Alexander Serbin on 6/19/2018.
  */
-public class TimestampSavePoint implements SavePoint, Comparable<TimestampSavePoint> {
+public abstract class TimestampSavePoint<T> implements SavePoint,
+    Comparable<TimestampSavePoint<T>> {
 
-  private LocalDateTime timestamp;
+  private T timestamp;
 
   public TimestampSavePoint() {
   }
 
-  public TimestampSavePoint(LocalDateTime timestamp) {
+  public TimestampSavePoint(T timestamp) {
     this.timestamp = timestamp;
   }
 
-  public LocalDateTime getTimestamp() {
+  public T getTimestamp() {
     return timestamp;
   }
 
-  public void setTimestamp(LocalDateTime timestamp) {
+  public void setTimestamp(T timestamp) {
     this.timestamp = timestamp;
   }
 
@@ -39,14 +39,6 @@ public class TimestampSavePoint implements SavePoint, Comparable<TimestampSavePo
   @Override
   public String toString() {
     return timestamp != null ? timestamp.toString() : "Empty timestamp";
-  }
-
-  @Override
-  public int compareTo(TimestampSavePoint o) {
-    if (timestamp == null) {
-      return o.timestamp == null ? 0 : -1;
-    }
-    return timestamp.compareTo(o.timestamp);
   }
 
 }

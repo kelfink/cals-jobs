@@ -4,9 +4,7 @@ import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
-import gov.ca.cwds.jobs.cals.facility.cws.savepoint.CwsTimestampSavePointService;
 import gov.ca.cwds.jobs.common.mode.TimestampInitialResumeModeImplementor;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import io.dropwizard.hibernate.UnitOfWork;
 
 /**
@@ -16,12 +14,12 @@ public class CwsJobInitialResumeModeImplementor extends
     TimestampInitialResumeModeImplementor<ChangedFacilityDto> {
 
   @Inject
-  private CwsTimestampSavePointService service;
+  private CwsJobModeFinalizer jobModeFinalizer;
 
   @Override
   @UnitOfWork(CMS)
-  protected TimestampSavePoint findNextModeSavePoint() {
-    return service.findFirstIncrementalSavePoint();
+  public void doFinalizeJob() {
+    jobModeFinalizer.doFinalizeJob();
   }
 
 }

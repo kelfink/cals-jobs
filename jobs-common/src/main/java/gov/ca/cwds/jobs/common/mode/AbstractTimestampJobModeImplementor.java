@@ -7,10 +7,8 @@ import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
+import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainer;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainerService;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,8 +18,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Alexander Serbin on 6/19/2018.
  */
-public abstract class AbstractTimestampJobModeImplementor<E> extends
-    AbstractJobModeImplementor<E, TimestampSavePoint, DefaultJobMode> {
+public abstract class AbstractTimestampJobModeImplementor<E, T, J extends JobMode> extends
+    AbstractJobModeImplementor<E, TimestampSavePoint<T>, J> {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(AbstractTimestampJobModeImplementor.class);
@@ -36,26 +34,7 @@ public abstract class AbstractTimestampJobModeImplementor<E> extends
   private ChangedEntityService<E> changedEntityService;
 
   @Inject
-  private TimestampSavePointService savePointService;
-
-  @Inject
-  private TimestampSavePointContainerService savePointContainerService;
-
-  @Override
-  public void doFinalizeJob() {
-    TimestampSavePoint timestampSavePoint = findNextModeSavePoint();
-    LOGGER.info("Updating job save point to the last batch save point {}", timestampSavePoint);
-    DefaultJobMode nextJobMode = DefaultJobMode.INCREMENTAL_LOAD;
-    LOGGER.info("Updating next job mode to the {}", nextJobMode);
-    TimestampSavePointContainer savePointContainer = new TimestampSavePointContainer();
-    savePointContainer.setJobMode(nextJobMode);
-    savePointContainer.setSavePoint(timestampSavePoint);
-    savePointContainerService.writeSavePointContainer(savePointContainer);
-  }
-
-  protected TimestampSavePoint findNextModeSavePoint() {
-    return savePointService.loadSavePoint(TimestampSavePointContainer.class);
-  }
+  private SavePointService<TimestampSavePoint<T>, J> savePointService;
 
   @Override
   public E loadEntity(ChangedEntityIdentifier identifier) {
@@ -64,25 +43,25 @@ public abstract class AbstractTimestampJobModeImplementor<E> extends
   }
 
   @Override
-  public TimestampSavePoint loadSavePoint(
-      Class<? extends SavePointContainer<TimestampSavePoint, DefaultJobMode>> savePointContainerClass) {
-    return savePointService.loadSavePoint(TimestampSavePointContainer.class);
+  public TimestampSavePoint<T> loadSavePoint(
+      Class<? extends SavePointContainer<? extends TimestampSavePoint<T>, J>> savePointContainerClass) {
+    return savePointService.loadSavePoint(savePointContainerClass);
   }
 
   @Override
-  public TimestampSavePoint defineSavepoint(JobBatch<TimestampSavePoint> jobBatch) {
+  public TimestampSavePoint<T> defineSavepoint(JobBatch<TimestampSavePoint<T>> jobBatch) {
     return savePointService.defineSavepoint(jobBatch);
   }
 
   @Override
-  public void saveSavePoint(TimestampSavePoint savePoint) {
+  public void saveSavePoint(TimestampSavePoint<T> savePoint) {
     savePointService.saveSavePoint(savePoint);
   }
 
   @Override
-  public List<JobBatch<TimestampSavePoint>> getNextPortion() {
+  public List<JobBatch<TimestampSavePoint<T>>> getNextPortion() {
     LOGGER.info("Getting next portion");
-    List<ChangedEntityIdentifier<TimestampSavePoint>> identifiers = getNextPage();
+    List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers = getNextPage();
     if (identifiers.isEmpty()) {
       return Collections.emptyList();
     }
@@ -95,19 +74,20 @@ public abstract class AbstractTimestampJobModeImplementor<E> extends
     }
   }
 
-  private List<ChangedEntityIdentifier<TimestampSavePoint>> getNextPage() {
+  private List<ChangedEntityIdentifier<TimestampSavePoint<T>>> getNextPage() {
     return getNextPage(new PageRequest(offset, batchSize));
   }
 
-  protected abstract List<ChangedEntityIdentifier<TimestampSavePoint>> getNextPage(
+  protected abstract List<ChangedEntityIdentifier<TimestampSavePoint<T>>> getNextPage(
       PageRequest pageRequest);
 
-  private List<JobBatch<TimestampSavePoint>> calculateNextPortion(
-      List<ChangedEntityIdentifier<TimestampSavePoint>> identifiers) {
+  private List<JobBatch<TimestampSavePoint<T>>> calculateNextPortion(
+      List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers) {
     // it can be several batches in portion when
     // there are many entities with equal last updated timestamps
-    List<JobBatch<TimestampSavePoint>> batches = findBatchesPriorToBatchWithSavepoint(identifiers);
-    List<ChangedEntityIdentifier<TimestampSavePoint>> lastIdentifiersWithSavepoint =
+    List<JobBatch<TimestampSavePoint<T>>> batches = findBatchesPriorToBatchWithSavepoint(
+        identifiers);
+    List<ChangedEntityIdentifier<TimestampSavePoint<T>>> lastIdentifiersWithSavepoint =
         findLastIdentifiersPriorToSavepoint(getLastTimestamp(identifiers));
     batches.get(batches.size() - 1).getChangedEntityIdentifiers()
         .addAll(lastIdentifiersWithSavepoint);
@@ -116,11 +96,11 @@ public abstract class AbstractTimestampJobModeImplementor<E> extends
     return batches;
   }
 
-  private List<ChangedEntityIdentifier<TimestampSavePoint>> findLastIdentifiersPriorToSavepoint(
-      TimestampSavePoint savePoint) {
-    List<ChangedEntityIdentifier<TimestampSavePoint>> identifiersWithSavepoint = new ArrayList<>(
+  private List<ChangedEntityIdentifier<TimestampSavePoint<T>>> findLastIdentifiersPriorToSavepoint(
+      TimestampSavePoint<T> savePoint) {
+    List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiersWithSavepoint = new ArrayList<>(
         batchSize);
-    ChangedEntityIdentifier<TimestampSavePoint> nextIdentifier = getNextIdentifier();
+    ChangedEntityIdentifier<TimestampSavePoint<T>> nextIdentifier = getNextIdentifier();
     while (nextIdentifier != null &&
         (savePoint.equals(nextIdentifier.getSavePoint()))) {
       offset++;
@@ -130,11 +110,11 @@ public abstract class AbstractTimestampJobModeImplementor<E> extends
     return identifiersWithSavepoint;
   }
 
-  private List<JobBatch<TimestampSavePoint>> findBatchesPriorToBatchWithSavepoint(
-      List<ChangedEntityIdentifier<TimestampSavePoint>> identifiers) {
-    List<JobBatch<TimestampSavePoint>> nextPortion = new ArrayList<>();
-    TimestampSavePoint timestampSavePoint = getLastTimestamp(identifiers);
-    List<ChangedEntityIdentifier<TimestampSavePoint>> nextIdentifiersPage = identifiers;
+  private List<JobBatch<TimestampSavePoint<T>>> findBatchesPriorToBatchWithSavepoint(
+      List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers) {
+    List<JobBatch<TimestampSavePoint<T>>> nextPortion = new ArrayList<>();
+    TimestampSavePoint<T> timestampSavePoint = getLastTimestamp(identifiers);
+    List<ChangedEntityIdentifier<TimestampSavePoint<T>>> nextIdentifiersPage = identifiers;
     while ((!nextIdentifiersPage.isEmpty() && timestampSavePoint
         .equals(getLastTimestamp(nextIdentifiersPage)))) {
       offset += batchSize;
@@ -144,20 +124,20 @@ public abstract class AbstractTimestampJobModeImplementor<E> extends
     return nextPortion;
   }
 
-  private ChangedEntityIdentifier<TimestampSavePoint> getNextIdentifier() {
-    List<ChangedEntityIdentifier<TimestampSavePoint>> identifiers = getNextPage(
+  private ChangedEntityIdentifier<TimestampSavePoint<T>> getNextIdentifier() {
+    List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers = getNextPage(
         new PageRequest(offset, 1));
     assert identifiers.size() == 1 || identifiers.isEmpty();
     return identifiers.isEmpty() ? null : identifiers.get(0);
   }
 
-  private static TimestampSavePoint getLastTimestamp(
-      List<ChangedEntityIdentifier<TimestampSavePoint>> identifiers) {
+  private static <T> TimestampSavePoint<T> getLastTimestamp(
+      List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers) {
     return identifiers.get(identifiers.size() - 1).getSavePoint();
   }
 
   private boolean timeStampsAreEmpty(
-      List<ChangedEntityIdentifier<TimestampSavePoint>> identifiers) {
+      List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers) {
     return getLastTimestamp(identifiers) == null;
   }
 

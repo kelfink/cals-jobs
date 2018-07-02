@@ -22,15 +22,16 @@ public class TimestampSavePointContainerServiceTest {
   @Test
   public void readWriteTimestampTest() throws Exception {
     LocalDateTime timestamp = LocalDateTime.of(2018, 2, 6, 4, 14, 20, 50);
-    TimestampSavePointContainerService savePointContainerService = new TimestampSavePointContainerService(
+    LocalDateTimeSavePointContainerService savePointContainerService = new LocalDateTimeSavePointContainerService(
         lastRunDirHelper.getSavepointContainerFolder().toString());
     assertFalse(savePointContainerService.savePointContainerExists());
-    TimestampSavePointContainer savePointContainer = new TimestampSavePointContainer();
+    SavePointContainer<LocalDateTimeSavePoint, DefaultJobMode> savePointContainer =
+        new LocalDateTimeSavePointContainer();
     savePointContainer.setJobMode(DefaultJobMode.INITIAL_LOAD);
-    savePointContainer.setSavePoint(new TimestampSavePoint(timestamp));
+    savePointContainer.setSavePoint(new LocalDateTimeSavePoint(timestamp));
     savePointContainerService.writeSavePointContainer(savePointContainer);
     assertEquals(savePointContainer,
-        savePointContainerService.readSavePointContainer(TimestampSavePointContainer.class));
+        savePointContainerService.readSavePointContainer(LocalDateTimeSavePointContainer.class));
 
     assertTrue(savePointContainerService.savePointContainerExists());
   }

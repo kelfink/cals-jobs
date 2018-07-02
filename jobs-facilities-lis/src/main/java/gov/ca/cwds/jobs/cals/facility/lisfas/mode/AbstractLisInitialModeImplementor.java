@@ -5,8 +5,6 @@ import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.cals.facility.lisfas.identifier.LisChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePoint;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePointService;
-import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePoint;
-import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointContainer;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointContainerService;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
 import gov.ca.cwds.jobs.common.batch.JobBatchSize;
@@ -35,10 +33,13 @@ public abstract class AbstractLisInitialModeImplementor extends
   private LicenseNumberSavePointService savePointService;
 
   @Inject
-  protected LisChangedEntitiesIdentifiersService changedEntitiesIdentifiersService;
+  private LisChangedEntitiesIdentifiersService changedEntitiesIdentifiersService;
 
   @Inject
   private LisTimestampSavePointContainerService savePointContainerService;
+
+  @Inject
+  private LisJobModeFinalizer jobModeFinalizer;
 
   @Override
   public List<JobBatch<LicenseNumberSavePoint>> getNextPortion() {
@@ -76,16 +77,8 @@ public abstract class AbstractLisInitialModeImplementor extends
   }
 
   @Override
-  protected void doFinalizeJob() {
-    LisTimestampSavePoint lisTimestampSavePoint = new LisTimestampSavePoint(
-        changedEntitiesIdentifiersService.findMaxTimestamp());
-    LOGGER.info("Updating job save point to the last batch save point {}", lisTimestampSavePoint);
-    DefaultJobMode nextJobMode = DefaultJobMode.INCREMENTAL_LOAD;
-    LOGGER.info("Updating next job mode to the {}", nextJobMode);
-    LisTimestampSavePointContainer savePointContainer = new LisTimestampSavePointContainer();
-    savePointContainer.setJobMode(nextJobMode);
-    savePointContainer.setSavePoint(lisTimestampSavePoint);
-    savePointContainerService.writeSavePointContainer(savePointContainer);
+  public void doFinalizeJob() {
+    jobModeFinalizer.doFinalizeJob();
   }
 
 }

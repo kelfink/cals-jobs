@@ -6,21 +6,21 @@ import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 /**
  * Created by Alexander Serbin on 6/27/2018.
  */
-public class TimestampIdentifier extends ChangedEntityIdentifier<TimestampSavePoint> {
+public class TimestampIdentifier<T> extends ChangedEntityIdentifier<TimestampSavePoint<T>> {
 
   public TimestampIdentifier(String id,
-      TimestampSavePoint savePoint) {
+      TimestampSavePoint<T> savePoint) {
     super(id, savePoint);
   }
 
   public TimestampIdentifier(String id,
       RecordChangeOperation recordChangeOperation,
-      TimestampSavePoint savePoint) {
+      TimestampSavePoint<T> savePoint) {
     super(id, recordChangeOperation, savePoint);
   }
 
   @Override
-  public int compareTo(ChangedEntityIdentifier<TimestampSavePoint> o) {
+  public int compareTo(ChangedEntityIdentifier<TimestampSavePoint<T>> o) {
     return getSavePoint().compareTo(o.getSavePoint());
   }
 }

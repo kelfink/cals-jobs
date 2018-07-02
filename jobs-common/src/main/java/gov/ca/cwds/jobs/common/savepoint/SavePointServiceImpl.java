@@ -14,7 +14,8 @@ public abstract class SavePointServiceImpl<S extends SavePoint, J extends JobMod
   private SavePointContainerService<S, J> savePointContainerService;
 
   @Override
-  public S loadSavePoint(Class<? extends SavePointContainer<S, J>> savePointContainerClass) {
+  public S loadSavePoint(
+      Class<? extends SavePointContainer<? extends S, J>> savePointContainerClass) {
     return savePointContainerService.readSavePointContainer(savePointContainerClass)
         .getSavePoint();
   }

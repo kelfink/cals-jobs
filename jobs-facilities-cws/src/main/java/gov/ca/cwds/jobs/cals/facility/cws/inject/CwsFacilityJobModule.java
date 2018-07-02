@@ -38,12 +38,13 @@ import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
-import gov.ca.cwds.jobs.common.mode.TimestampDefaultJobModeService;
+import gov.ca.cwds.jobs.common.mode.LocalDateTimeDefaultJobModeService;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainerService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
+import java.time.LocalDateTime;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -65,15 +66,16 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
     super.configure();
     bind(Job.class).to(CwsFacilityJob.class);
     bind(new TypeLiteral<JobModeService<DefaultJobMode>>() {
-    }).to(TimestampDefaultJobModeService.class);
+    }).to(LocalDateTimeDefaultJobModeService.class);
     bindJobModeImplementor();
-    bind(new TypeLiteral<SavePointContainerService<TimestampSavePoint, DefaultJobMode>>() {
-    }).to(TimestampSavePointContainerService.class);
-    bind(new TypeLiteral<SavePointService<TimestampSavePoint, DefaultJobMode>>() {
+    bind(
+        new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
+        }).to(LocalDateTimeSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
     }).toProvider(CwsTimestampSavePointServiceProvider.class);
     bind(CwsTimestampSavePointService.class).toProvider(CwsTimestampSavePointServiceProvider.class);
     bind(
-        new TypeLiteral<ChangedEntitiesIdentifiersService<TimestampSavePoint, TimestampSavePoint>>() {
+        new TypeLiteral<ChangedEntitiesIdentifiersService<TimestampSavePoint<LocalDateTime>>>() {
         }).toProvider(CwsChangedIdentifiersServiceProvider.class);
     bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {
@@ -87,12 +89,12 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
   }
 
   private void bindJobModeImplementor() {
-    Class<? extends JobModeImplementor<ChangedFacilityDto, TimestampSavePoint, DefaultJobMode>> clazz = null;
+    Class<? extends JobModeImplementor<ChangedFacilityDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode>> clazz = null;
 
-    TimestampDefaultJobModeService timestampDefaultJobModeService =
-        new TimestampDefaultJobModeService();
-    TimestampSavePointContainerService savePointContainerService =
-        new TimestampSavePointContainerService(getJobOptions().getLastRunLoc());
+    LocalDateTimeDefaultJobModeService timestampDefaultJobModeService =
+        new LocalDateTimeDefaultJobModeService();
+    LocalDateTimeSavePointContainerService savePointContainerService =
+        new LocalDateTimeSavePointContainerService(getJobOptions().getLastRunLoc());
     timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);
     switch (timestampDefaultJobModeService.getCurrentJobMode()) {
       case INITIAL_LOAD:
@@ -106,7 +108,7 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
         break;
     }
     bind(
-        new TypeLiteral<JobModeImplementor<ChangedFacilityDto, TimestampSavePoint, DefaultJobMode>>() {
+        new TypeLiteral<JobModeImplementor<ChangedFacilityDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
         }).to(clazz);
   }
 

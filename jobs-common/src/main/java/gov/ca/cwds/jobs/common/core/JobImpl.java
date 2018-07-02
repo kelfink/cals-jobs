@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
+
 public class JobImpl<E, S extends SavePoint, J extends JobMode> implements Job {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobImpl.class);

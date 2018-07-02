@@ -46,8 +46,8 @@ public abstract class SavePointContainerServiceImpl<S extends SavePoint, J exten
   }
 
   @Override
-  public SavePointContainer<S, J> readSavePointContainer(
-      Class<? extends SavePointContainer<S, J>> savePointContainerClass) {
+  public SavePointContainer<? extends S, J> readSavePointContainer(
+      Class<? extends SavePointContainer<? extends S, J>> savePointContainerClass) {
     try (Reader reader = Files.newBufferedReader(getSavePointFile())) {
       return mapper.readValue(IOUtils.toString(reader), savePointContainerClass);
     } catch (IOException e) {
@@ -63,7 +63,7 @@ public abstract class SavePointContainerServiceImpl<S extends SavePoint, J exten
   }
 
   @Override
-  public void writeSavePointContainer(SavePointContainer<S, J> savePointContainer) {
+  public void writeSavePointContainer(SavePointContainer<? extends S, J> savePointContainer) {
     Objects.requireNonNull(savePointContainer.getJobMode());
     Objects.requireNonNull(savePointContainer.getSavePoint());
     try {

@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.cals.facility.cws;
 import gov.ca.cwds.jobs.cals.facility.RecordChange;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
@@ -77,13 +78,14 @@ public class CwsRecordChange extends RecordChange {
     this.timestamp = timestamp;
   }
 
-  public static ChangedEntityIdentifier<TimestampSavePoint> valueOf(CwsRecordChange recordChange) {
-    return new ChangedEntityIdentifier<TimestampSavePoint>(recordChange.getId(),
+  public static ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> valueOf(
+      CwsRecordChange recordChange) {
+    return new ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>(recordChange.getId(),
         recordChange.getRecordChangeOperation(),
-        new TimestampSavePoint(recordChange.getTimestamp())) {
+        new LocalDateTimeSavePoint(recordChange.getTimestamp())) {
 
       @Override
-      public int compareTo(ChangedEntityIdentifier<TimestampSavePoint> o) {
+      public int compareTo(ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> o) {
         return getSavePoint().compareTo(o.getSavePoint());
       }
     };

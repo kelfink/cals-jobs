@@ -5,8 +5,8 @@ import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 /**
  * Created by Alexander Serbin on 6/21/2018.
  */
-public class TimestampSavePointContainer extends
-    SavePointContainer<TimestampSavePoint, DefaultJobMode> {
+public class LocalDateTimeSavePointContainer extends
+    SavePointContainer<LocalDateTimeSavePoint, DefaultJobMode> {
 
 
 }

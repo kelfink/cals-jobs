@@ -6,6 +6,7 @@ import gov.ca.cwds.jobs.cals.facility.lisfas.identifier.LisTimestampIdentifier;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePoint;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePoint;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
+import gov.ca.cwds.jobs.common.identifier.TimestampIdentifier;
 import java.io.Serializable;
 import java.math.BigInteger;
 import javax.persistence.Column;
@@ -87,7 +88,7 @@ public class LisRecordChange implements PersistentObject {
         RecordChangeOperation.U, new LicenseNumberSavePoint(recordChange.getId()));
   }
 
-  public static LisTimestampIdentifier toLisTimestampIdentifier(
+  public static TimestampIdentifier<BigInteger> toLisTimestampIdentifier(
       LisRecordChange recordChange) {
     return new LisTimestampIdentifier(recordChange.getId(),
         RecordChangeOperation.U, new LisTimestampSavePoint(recordChange.getTimestamp()));

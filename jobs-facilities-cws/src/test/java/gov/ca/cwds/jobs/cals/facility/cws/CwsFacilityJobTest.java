@@ -17,10 +17,8 @@ import gov.ca.cwds.jobs.common.TestWriter;
 import gov.ca.cwds.jobs.common.core.JobPreparator;
 import gov.ca.cwds.jobs.common.core.JobRunner;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
-import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainer;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainerService;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import gov.ca.cwds.jobs.utils.DataSourceFactoryUtils;
 import gov.ca.cwds.test.support.DatabaseHelper;
@@ -45,8 +43,8 @@ public class CwsFacilityJobTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(CwsFacilityJobTest.class);
 
   private static LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("cws_job_temp");
-  private TimestampSavePointContainerService savePointContainerService =
-      new TimestampSavePointContainerService(
+  private LocalDateTimeSavePointContainerService savePointContainerService =
+      new LocalDateTimeSavePointContainerService(
           lastRunDirHelper.getSavepointContainerFolder().toString());
 
   private static final String CWSCMS_INITIAL_LOAD_FACILITY_ID = "3w6sOO50Ki";
@@ -70,8 +68,8 @@ public class CwsFacilityJobTest {
   }
 
   private void testInitialResumeLoad(DefaultJobMode jobMode) {
-    SavePointContainer<TimestampSavePoint, DefaultJobMode> container = savePointContainerService
-        .readSavePointContainer(TimestampSavePointContainer.class);
+    LocalDateTimeSavePointContainer container = (LocalDateTimeSavePointContainer) savePointContainerService
+        .readSavePointContainer(LocalDateTimeSavePointContainer.class);
     container.setJobMode(jobMode);
     LocalDateTime savePoint = LocalDateTime.of(2010, 01, 14, 9, 35, 17, 664000000);
     container.getSavePoint().setTimestamp(savePoint);
@@ -81,7 +79,7 @@ public class CwsFacilityJobTest {
     assertFacilityPresent("2qiZOcd04Y");
     assertFacilityPresent("3UGSdyX0Ki");
     assertEquals(INCREMENTAL_LOAD, savePointContainerService
-        .readSavePointContainer(TimestampSavePointContainer.class).getJobMode());
+        .readSavePointContainer(LocalDateTimeSavePointContainer.class).getJobMode());
   }
 
   private void assertFacilityPresent(String facilityId) {
@@ -112,8 +110,8 @@ public class CwsFacilityJobTest {
     assertFacility("fixtures/facilities-initial-load-cwscms.json",
         CWSCMS_INITIAL_LOAD_FACILITY_ID);
 
-    SavePointContainer<TimestampSavePoint, DefaultJobMode> savePointContainer = savePointContainerService
-        .readSavePointContainer(TimestampSavePointContainer.class);
+    LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
+        .readSavePointContainer(LocalDateTimeSavePointContainer.class);
     assertTrue(savePointContainer.getSavePoint().getTimestamp().isAfter(now));
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
   }

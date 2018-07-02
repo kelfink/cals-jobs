@@ -8,9 +8,8 @@ import gov.ca.cwds.jobs.cals.facility.lisfas.LisRecordChange;
 import gov.ca.cwds.jobs.cals.facility.lisfas.dao.FirstIncrementalSavePointDao;
 import gov.ca.cwds.jobs.cals.facility.lisfas.dao.RecordChangeLisDao;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePoint;
-import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePoint;
-import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import io.dropwizard.hibernate.UnitOfWork;
 import java.math.BigInteger;
 import java.util.List;
@@ -39,11 +38,11 @@ public class LisChangedEntitiesIdentifiersService {
   }
 
   @UnitOfWork(LIS)
-  public List<ChangedEntityIdentifier<LisTimestampSavePoint>> getIdentifiersForIncrementalLoad(
-      LisTimestampSavePoint savePoint, PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers<LisTimestampSavePoint> changedEntityIdentifiers =
+  public List<ChangedEntityIdentifier<TimestampSavePoint<BigInteger>>> getIdentifiersForIncrementalLoad(
+      BigInteger savePoint) {
+    ChangedFacilitiesIdentifiers<TimestampSavePoint<BigInteger>> changedEntityIdentifiers =
         new ChangedFacilitiesIdentifiers<>();
-    recordChangeLisDao.getIncrementalLoadStream(savePoint.getTimestamp()).stream().
+    recordChangeLisDao.getIncrementalLoadStream(savePoint).stream().
         map(LisRecordChange::toLisTimestampIdentifier).forEach(changedEntityIdentifiers::add);
     return changedEntityIdentifiers.newStream().filter(Objects::nonNull).sorted()
         .collect(Collectors.toList());

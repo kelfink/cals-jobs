@@ -11,6 +11,7 @@ import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import io.dropwizard.hibernate.UnitOfWork;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -21,34 +22,34 @@ import java.util.stream.Stream;
  */
 
 public class CwsChangedEntitiesIdentifiersService implements
-    ChangedEntitiesIdentifiersService<TimestampSavePoint, TimestampSavePoint> {
+    ChangedEntitiesIdentifiersService<TimestampSavePoint<LocalDateTime>> {
 
   @Inject
   private RecordChangeCwsCmsDao recordChangeCwsCmsDao;
 
   @Override
-  public List<ChangedEntityIdentifier<TimestampSavePoint>> getIdentifiersForInitialLoad(
+  public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiersForInitialLoad(
       PageRequest pageRequest) {
     return getCwsCmsInitialLoadIdentifiers(pageRequest).sorted().collect(Collectors.toList());
   }
 
   @Override
-  public List<ChangedEntityIdentifier<TimestampSavePoint>> getIdentifiersForResumingInitialLoad(
-      TimestampSavePoint timeStampAfter, PageRequest pageRequest) {
+  public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiersForResumingInitialLoad(
+      TimestampSavePoint<LocalDateTime> timeStampAfter, PageRequest pageRequest) {
     return getCwsCmsResumingInitialLoadIdentifiers(timeStampAfter, pageRequest);
   }
 
   @Override
-  public List<ChangedEntityIdentifier<TimestampSavePoint>> getIdentifiersForIncrementalLoad(
-      TimestampSavePoint savePoint,
+  public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiersForIncrementalLoad(
+      TimestampSavePoint<LocalDateTime> savePoint,
       PageRequest pageRequest) {
     return getCwsCmsIncrementalLoadIdentifiers(savePoint, pageRequest);
   }
 
   @UnitOfWork(CMS)
-  protected List<ChangedEntityIdentifier<TimestampSavePoint>> getCwsCmsResumingInitialLoadIdentifiers(
-      TimestampSavePoint timeStampAfter, PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers<TimestampSavePoint> changedEntityIdentifiers =
+  protected List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getCwsCmsResumingInitialLoadIdentifiers(
+      TimestampSavePoint<LocalDateTime> timeStampAfter, PageRequest pageRequest) {
+    ChangedFacilitiesIdentifiers<TimestampSavePoint<LocalDateTime>> changedEntityIdentifiers =
         new ChangedFacilitiesIdentifiers<>();
     recordChangeCwsCmsDao.getResumeInitialLoadStream(timeStampAfter.getTimestamp(), pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
@@ -57,9 +58,9 @@ public class CwsChangedEntitiesIdentifiersService implements
   }
 
   @UnitOfWork(CMS)
-  protected Stream<ChangedEntityIdentifier<TimestampSavePoint>> getCwsCmsInitialLoadIdentifiers(
+  protected Stream<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getCwsCmsInitialLoadIdentifiers(
       PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers<TimestampSavePoint> changedEntityIdentifiers =
+    ChangedFacilitiesIdentifiers<TimestampSavePoint<LocalDateTime>> changedEntityIdentifiers =
         new ChangedFacilitiesIdentifiers<>();
     recordChangeCwsCmsDao.getInitialLoadStream(pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
@@ -67,9 +68,9 @@ public class CwsChangedEntitiesIdentifiersService implements
   }
 
   @UnitOfWork(CMS)
-  protected List<ChangedEntityIdentifier<TimestampSavePoint>> getCwsCmsIncrementalLoadIdentifiers(
-      TimestampSavePoint dateAfter, PageRequest pageRequest) {
-    ChangedFacilitiesIdentifiers<TimestampSavePoint> changedEntityIdentifiers =
+  protected List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getCwsCmsIncrementalLoadIdentifiers(
+      TimestampSavePoint<LocalDateTime> dateAfter, PageRequest pageRequest) {
+    ChangedFacilitiesIdentifiers<TimestampSavePoint<LocalDateTime>> changedEntityIdentifiers =
         new ChangedFacilitiesIdentifiers<>();
     recordChangeCwsCmsDao.getIncrementalLoadStream(dateAfter.getTimestamp(), pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);

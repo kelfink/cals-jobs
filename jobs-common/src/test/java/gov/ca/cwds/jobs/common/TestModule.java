@@ -11,15 +11,16 @@ import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
-import gov.ca.cwds.jobs.common.mode.TimestampDefaultJobModeService;
+import gov.ca.cwds.jobs.common.mode.LocalDateTimeDefaultJobModeService;
 import gov.ca.cwds.jobs.common.mode.TimestampIncrementalModeImplementor;
 import gov.ca.cwds.jobs.common.mode.TimestampInitialModeImplementor;
 import gov.ca.cwds.jobs.common.mode.TimestampInitialResumeModeImplementor;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainerService;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointService;
+import java.time.LocalDateTime;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
@@ -27,7 +28,7 @@ import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointService;
 public class TestModule extends AbstractBaseJobModule {
 
   private ChangedEntityService<TestEntity> changedEntityService;
-  private ChangedEntitiesIdentifiersService<TimestampSavePoint, TimestampSavePoint> changedEntitiesIdentifiers;
+  private ChangedEntitiesIdentifiersService<TimestampSavePoint<LocalDateTime>> changedEntitiesIdentifiers;
 
   public TestModule(String[] args) {
     super(args);
@@ -54,28 +55,29 @@ public class TestModule extends AbstractBaseJobModule {
     super.configure();
     bind(Job.class).to(TestJobImpl.class);
     bind(new TypeLiteral<JobModeService<DefaultJobMode>>() {
-    }).to(TimestampDefaultJobModeService.class);
+    }).to(LocalDateTimeDefaultJobModeService.class);
     bindJobModeImplementor();
-    bind(new TypeLiteral<SavePointContainerService<TimestampSavePoint, DefaultJobMode>>() {
-    }).to(TimestampSavePointContainerService.class);
-    bind(new TypeLiteral<SavePointService<TimestampSavePoint, DefaultJobMode>>() {
-    }).to(TimestampSavePointService.class);
+    bind(
+        new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
+        }).to(LocalDateTimeSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
+    }).to(LocalDateTimeSavePointService.class);
     bind(new TypeLiteral<ChangedEntityService<TestEntity>>() {
     }).toInstance(changedEntityService);
     bind(
-        new TypeLiteral<ChangedEntitiesIdentifiersService<TimestampSavePoint, TimestampSavePoint>>() {
+        new TypeLiteral<ChangedEntitiesIdentifiersService<TimestampSavePoint<LocalDateTime>>>() {
         }).toInstance(changedEntitiesIdentifiers);
     bind(new TypeLiteral<BulkWriter<TestEntity>>() {
     }).to(TestEntityWriter.class);
   }
 
   private void bindJobModeImplementor() {
-    Class<? extends JobModeImplementor<TestEntity, TimestampSavePoint, DefaultJobMode>> clazz = null;
+    Class<? extends JobModeImplementor<TestEntity, TimestampSavePoint<LocalDateTime>, DefaultJobMode>> clazz = null;
 
-    TimestampDefaultJobModeService timestampDefaultJobModeService =
-        new TimestampDefaultJobModeService();
-    TimestampSavePointContainerService savePointContainerService =
-        new TimestampSavePointContainerService(getJobOptions().getLastRunLoc());
+    LocalDateTimeDefaultJobModeService timestampDefaultJobModeService =
+        new LocalDateTimeDefaultJobModeService();
+    LocalDateTimeSavePointContainerService savePointContainerService =
+        new LocalDateTimeSavePointContainerService(getJobOptions().getLastRunLoc());
     timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);
     switch (timestampDefaultJobModeService.getCurrentJobMode()) {
       case INITIAL_LOAD:
@@ -88,11 +90,13 @@ public class TestModule extends AbstractBaseJobModule {
         clazz = TestIncrementalModeImplementor.class;
         break;
     }
-    bind(new TypeLiteral<JobModeImplementor<TestEntity, TimestampSavePoint, DefaultJobMode>>() {
-    }).to(clazz);
+    bind(
+        new TypeLiteral<JobModeImplementor<TestEntity, TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
+        }).to(clazz);
   }
 
-  private static class TestJobImpl extends JobImpl<TestEntity, TimestampSavePoint, DefaultJobMode> {
+  private static class TestJobImpl extends
+      JobImpl<TestEntity, TimestampSavePoint<LocalDateTime>, DefaultJobMode> {
 
   }
 
@@ -120,7 +124,7 @@ public class TestModule extends AbstractBaseJobModule {
   }
 
   public void setChangedEntitiesIdentifiers(
-      ChangedEntitiesIdentifiersService<TimestampSavePoint, TimestampSavePoint> changedEntitiesIdentifiers) {
+      ChangedEntitiesIdentifiersService<TimestampSavePoint<LocalDateTime>> changedEntitiesIdentifiers) {
     this.changedEntitiesIdentifiers = changedEntitiesIdentifiers;
   }
 

@@ -7,13 +7,14 @@ import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.common.core.JobImpl;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
+import java.time.LocalDateTime;
 import org.hibernate.SessionFactory;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
 public class CwsFacilityJob extends
-    JobImpl<ChangedFacilityDto, TimestampSavePoint, DefaultJobMode> {
+    JobImpl<ChangedFacilityDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode> {
 
   @Inject
   @CmsSessionFactory

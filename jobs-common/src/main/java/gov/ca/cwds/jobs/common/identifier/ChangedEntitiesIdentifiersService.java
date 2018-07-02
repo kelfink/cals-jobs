@@ -11,7 +11,7 @@ import java.util.List;
  * incremental job
  * Created by Alexander Serbin on 3/5/2018.
  */
-public interface ChangedEntitiesIdentifiersService<T extends SavePoint, S extends SavePoint> {
+public interface ChangedEntitiesIdentifiersService<T extends SavePoint> {
 
   /**
    * Fetches next page of target entities' identifiers for initial load.
@@ -27,7 +27,7 @@ public interface ChangedEntitiesIdentifiersService<T extends SavePoint, S extend
   /**
    * Fetches next page of target entities' identifiers for incremental load.
    */
-  List<ChangedEntityIdentifier<S>> getIdentifiersForIncrementalLoad(S savePoint,
+  List<ChangedEntityIdentifier<T>> getIdentifiersForIncrementalLoad(T savePoint,
       PageRequest pageRequest);
 
 }

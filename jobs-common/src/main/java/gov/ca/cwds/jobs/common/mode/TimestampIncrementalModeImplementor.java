@@ -4,24 +4,31 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainer;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
  * Created by Alexander Serbin on 6/19/2018.
  */
 public class TimestampIncrementalModeImplementor<E> extends
-    AbstractTimestampJobModeImplementor<E> {
+    AbstractTimestampJobModeImplementor<E, LocalDateTime, DefaultJobMode> {
 
   @Inject
-  private ChangedEntitiesIdentifiersService<TimestampSavePoint, TimestampSavePoint> changedEntitiesIdentifiersService;
+  private ChangedEntitiesIdentifiersService<TimestampSavePoint<LocalDateTime>> changedEntitiesIdentifiersService;
 
   @Override
-  protected List<ChangedEntityIdentifier<TimestampSavePoint>> getNextPage(PageRequest pageRequest) {
-    TimestampSavePoint savePoint = loadSavePoint(TimestampSavePointContainer.class);
+  protected List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getNextPage(
+      PageRequest pageRequest) {
+    TimestampSavePoint<LocalDateTime> savePoint = loadSavePoint(
+        LocalDateTimeSavePointContainer.class);
     return changedEntitiesIdentifiersService
         .getIdentifiersForIncrementalLoad(savePoint, pageRequest);
   }
 
+  @Override
+  public void doFinalizeJob() {
+    //empty
+  }
 }

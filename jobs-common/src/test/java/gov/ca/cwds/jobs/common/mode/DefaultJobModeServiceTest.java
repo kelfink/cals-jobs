@@ -5,9 +5,9 @@ import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
 import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD_RESUME;
 import static org.junit.Assert.assertEquals;
 
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainer;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePointContainerService;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -22,12 +22,12 @@ public class DefaultJobModeServiceTest {
 
   private LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("temp");
 
-  private TimestampSavePointContainerService savePointContainerService = new TimestampSavePointContainerService(
+  private LocalDateTimeSavePointContainerService savePointContainerService = new LocalDateTimeSavePointContainerService(
       lastRunDirHelper.getSavepointContainerFolder().toString());
 
-  private TimestampSavePointContainer savePointContainer = new TimestampSavePointContainer();
+  private LocalDateTimeSavePointContainer savePointContainer = new LocalDateTimeSavePointContainer();
 
-  private TimestampDefaultJobModeService defaultJobModeService = new TimestampDefaultJobModeService();
+  private LocalDateTimeDefaultJobModeService defaultJobModeService = new LocalDateTimeDefaultJobModeService();
 
   {
     defaultJobModeService.setSavePointContainerService(savePointContainerService);
@@ -41,7 +41,7 @@ public class DefaultJobModeServiceTest {
   @Test
   public void getInitialResumeJobModeTest() throws Exception {
     savePointContainer.setJobMode(INITIAL_LOAD);
-    savePointContainer.setSavePoint(new TimestampSavePoint(LocalDateTime.of(2017, 1, 1, 5, 4)));
+    savePointContainer.setSavePoint(new LocalDateTimeSavePoint(LocalDateTime.of(2017, 1, 1, 5, 4)));
     savePointContainerService.writeSavePointContainer(savePointContainer);
     assertEquals(INITIAL_LOAD_RESUME, defaultJobModeService.getCurrentJobMode());
   }
@@ -49,7 +49,7 @@ public class DefaultJobModeServiceTest {
   @Test
   public void getIncrementalJobModeTest() throws Exception {
     savePointContainer.setJobMode(INCREMENTAL_LOAD);
-    savePointContainer.setSavePoint(new TimestampSavePoint(LocalDateTime.now()));
+    savePointContainer.setSavePoint(new LocalDateTimeSavePoint(LocalDateTime.now()));
     savePointContainerService.writeSavePointContainer(savePointContainer);
     assertEquals(INCREMENTAL_LOAD, defaultJobModeService.getCurrentJobMode());
   }

@@ -25,7 +25,8 @@ public abstract class AbstractJobModeImplementor<E, S extends SavePoint, J exten
   private SavePointContainerService<S, J> savePointContainerService;
 
   @Override
-  public S loadSavePoint(Class<? extends SavePointContainer<S, J>> savePointContainerClass) {
+  public S loadSavePoint(
+      Class<? extends SavePointContainer<? extends S, J>> savePointContainerClass) {
     return savePointService.loadSavePoint(savePointContainerClass);
   }
 
@@ -45,8 +46,5 @@ public abstract class AbstractJobModeImplementor<E, S extends SavePoint, J exten
       doFinalizeJob();
     }
   }
-
-  protected abstract void doFinalizeJob();
-
 
 }

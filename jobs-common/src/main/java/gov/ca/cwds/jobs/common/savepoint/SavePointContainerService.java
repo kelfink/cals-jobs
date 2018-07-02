@@ -12,9 +12,9 @@ public interface SavePointContainerService<S extends SavePoint, J extends JobMod
 
   boolean savePointContainerExists();
 
-  SavePointContainer<S, J> readSavePointContainer(
-      Class<? extends SavePointContainer<S, J>> savePointContainerClass);
+  SavePointContainer<? extends S, J> readSavePointContainer(
+      Class<? extends SavePointContainer<? extends S, J>> savePointContainerClass);
 
-  void writeSavePointContainer(SavePointContainer<S, J> savePointContainer);
+  void writeSavePointContainer(SavePointContainer<? extends S, J> savePointContainer);
 
 }
