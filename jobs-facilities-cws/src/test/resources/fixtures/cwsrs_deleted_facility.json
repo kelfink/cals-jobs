@@ -14,8 +14,15 @@
     "licensee_name": "",
     "license_type": null,
     "assigned_worker": {
-      "id": null,
-      "value": "Kay Riley"
+      "phones": [
+        {
+          "relation": "primary",
+          "number": "9165672956"
+        }
+      ],
+      "email": "",
+      "full_name": "Kay Riley",
+      "id": null
     },
     "district_office": {
       "number": "37",

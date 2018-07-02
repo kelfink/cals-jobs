@@ -2,18 +2,16 @@ package gov.ca.cwds.jobs.cals.facility;
 
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.cals.inject.MappingModule;
-import gov.ca.cwds.cals.service.builder.FacilityParameterObjectBuilder;
+import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
-import gov.ca.cwds.jobs.common.inject.BatchProcessor;
-import gov.ca.cwds.jobs.common.job.BulkWriter;
 
 /**
  * Created by Alexander Serbin on 3/28/2018.
  */
 public abstract class BaseFacilityJobModule extends AbstractBaseJobModule {
 
-  private Class<? extends BulkWriter<ChangedFacilityDTO>> facilityElasticWriterClass;
+  private Class<? extends BulkWriter<ChangedFacilityDto>> facilityElasticWriterClass;
 
   public BaseFacilityJobModule(String[] args) {
     super(args);
@@ -21,18 +19,15 @@ public abstract class BaseFacilityJobModule extends AbstractBaseJobModule {
   }
 
   public void setFacilityElasticWriterClass(
-      Class<? extends BulkWriter<ChangedFacilityDTO>> facilityElasticWriterClass) {
+      Class<? extends BulkWriter<ChangedFacilityDto>> facilityElasticWriterClass) {
     this.facilityElasticWriterClass = facilityElasticWriterClass;
   }
 
   @Override
   protected void configure() {
     super.configure();
-    bind(new TypeLiteral<BulkWriter<ChangedFacilityDTO>>() {
+    bind(new TypeLiteral<BulkWriter<ChangedFacilityDto>>() {
     }).to(facilityElasticWriterClass);
-    bind(new TypeLiteral<BatchProcessor<ChangedFacilityDTO>>() {
-    }).to(FacilityBatchProcessor.class);
-    bind(FacilityParameterObjectBuilder.class);
     install(new MappingModule());
     install(new CalsnsDataAccessModule());
   }

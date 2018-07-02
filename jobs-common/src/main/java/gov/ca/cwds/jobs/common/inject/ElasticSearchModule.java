@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.common.inject;
 
 import com.google.inject.AbstractModule;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
-import gov.ca.cwds.jobs.common.ElasticSearchIndexerDao;
+import gov.ca.cwds.jobs.common.elastic.ElasticSearchIndexerDao;
 import gov.ca.cwds.jobs.common.elastic.ElasticUtils;
 import org.elasticsearch.client.Client;
 

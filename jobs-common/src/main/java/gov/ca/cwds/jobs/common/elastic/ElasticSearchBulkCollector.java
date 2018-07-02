@@ -1,26 +1,26 @@
 package gov.ca.cwds.jobs.common.elastic;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.inject.ElasticSearchBulkSize;
-import gov.ca.cwds.jobs.common.job.BulkWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Must be thread-safe. Created by Alexander Serbin on 3/16/2018.
  */
-public class ElasticSearchBulkCollector<T> {
+public class ElasticSearchBulkCollector<E> {
 
   @Inject
-  private BulkWriter<T> jobWriter;
+  private BulkWriter<E> jobWriter;
 
   @Inject
   @ElasticSearchBulkSize
   private int bulkSize;
 
-  private List<T> entities = new ArrayList<>(bulkSize);
+  private List<E> entities = new ArrayList<>(bulkSize);
 
-  public synchronized void addEntity(T entity) {
+  public synchronized void addEntity(E entity) {
     entities.add(entity);
     if (entities.size() == bulkSize) {
       flush();

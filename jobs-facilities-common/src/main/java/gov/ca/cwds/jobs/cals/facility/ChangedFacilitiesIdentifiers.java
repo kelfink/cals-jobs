@@ -2,17 +2,16 @@ package gov.ca.cwds.jobs.cals.facility;
 
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifiers;
+import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import java.util.stream.Stream;
 
 /**
  * Created by Alexander Serbin on 3/6/2018.
  */
-public class ChangedFacilitiesIdentifiers extends ChangedEntityIdentifiers {
-
-  public ChangedFacilitiesIdentifiers() {}
+public class ChangedFacilitiesIdentifiers<S extends SavePoint> extends ChangedEntityIdentifiers<S> {
 
   @Override
-  public Stream<ChangedEntityIdentifier> newStream() {
+  public Stream<ChangedEntityIdentifier<S>> newStream() {
     //printRecordsCount();
     return super.newStream();
   }

@@ -1,26 +1,31 @@
 package gov.ca.cwds.jobs.common.identifier;
 
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
-import java.time.LocalDateTime;
+import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
-public class ChangedEntityIdentifier {
+public abstract class ChangedEntityIdentifier<S extends SavePoint> implements
+    Comparable<ChangedEntityIdentifier<S>> {
 
   private String id;
 
   private RecordChangeOperation recordChangeOperation;
 
-  private LocalDateTime timestamp;
+  private S savePoint;
+
+  public ChangedEntityIdentifier(String id, S savePoint) {
+    this.id = id;
+    this.savePoint = savePoint;
+  }
 
   public ChangedEntityIdentifier(String id, RecordChangeOperation recordChangeOperation,
-      LocalDateTime timestamp) {
-    this.id = id;
+      S savePoint) {
+    this(id, savePoint);
     this.recordChangeOperation = recordChangeOperation;
-    this.timestamp = timestamp;
   }
 
   public String getId() {
@@ -43,12 +48,12 @@ public class ChangedEntityIdentifier {
     this.recordChangeOperation = recordChangeOperation;
   }
 
-  public LocalDateTime getTimestamp() {
-    return timestamp;
+  public S getSavePoint() {
+    return savePoint;
   }
 
-  public void setTimestamp(LocalDateTime timestamp) {
-    this.timestamp = timestamp;
+  public void setSavePoint(S savePoint) {
+    this.savePoint = savePoint;
   }
 
   @Override
@@ -64,6 +69,7 @@ public class ChangedEntityIdentifier {
   @Override
   public String toString() {
     return "id=" + id + ", recordChangeOperation=" + recordChangeOperation +
-        ", timestamp=" + timestamp + "\n";
+        ", savePoint=" + savePoint + "\n";
   }
+
 }

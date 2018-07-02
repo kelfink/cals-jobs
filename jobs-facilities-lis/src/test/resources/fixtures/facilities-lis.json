@@ -14,8 +14,10 @@
     "licensee_name": "Seneca Family Services Inc.",
     "license_type": "A",
     "assigned_worker": {
-      "id": null,
-      "value": null
+      "phones": [],
+      "email": null,
+      "full_name": null,
+      "id": null
     },
     "district_office": {
       "number": "26",
@@ -43,7 +45,6 @@
     },
     "phones": [
       {
-        "id": null,
         "relation": "primary",
         "type": "Cell",
         "number": "8313368354"

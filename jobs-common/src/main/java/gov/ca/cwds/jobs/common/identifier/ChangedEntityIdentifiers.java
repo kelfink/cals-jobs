@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.common.identifier;
 
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
+import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import java.util.HashMap;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -9,13 +10,13 @@ import org.drools.core.util.CompositeIterator;
 /**
  * Created by Alexander Serbin on 3/6/2018.
  */
-public class ChangedEntityIdentifiers {
+public class ChangedEntityIdentifiers<S extends SavePoint> {
 
-  protected HashMap<String, ChangedEntityIdentifier> toBeDeleted = new HashMap<>();
-  protected HashMap<String, ChangedEntityIdentifier> toBeInserted = new HashMap<>();
-  protected HashMap<String, ChangedEntityIdentifier> toBeUpdated = new HashMap<>();
+  protected HashMap<String, ChangedEntityIdentifier<S>> toBeDeleted = new HashMap<>();
+  protected HashMap<String, ChangedEntityIdentifier<S>> toBeInserted = new HashMap<>();
+  protected HashMap<String, ChangedEntityIdentifier<S>> toBeUpdated = new HashMap<>();
 
-  public void add(ChangedEntityIdentifier identifier) {
+  public void add(ChangedEntityIdentifier<S> identifier) {
     if (RecordChangeOperation.D == identifier.getRecordChangeOperation()) {
       toBeDeleted.put(identifier.getId(), identifier);
     } else if (RecordChangeOperation.I == identifier.getRecordChangeOperation()) {
@@ -25,7 +26,7 @@ public class ChangedEntityIdentifiers {
     }
   }
 
-  private Iterable<ChangedEntityIdentifier> newIterable() {
+  private Iterable<ChangedEntityIdentifier<S>> newIterable() {
     compact();
     return () -> new CompositeIterator<>(
         toBeDeleted.values().iterator(),
@@ -34,7 +35,7 @@ public class ChangedEntityIdentifiers {
     );
   }
 
-  public Stream<ChangedEntityIdentifier> newStream() {
+  public Stream<ChangedEntityIdentifier<S>> newStream() {
     return StreamSupport.stream(this.newIterable().spliterator(), false);
   }
 

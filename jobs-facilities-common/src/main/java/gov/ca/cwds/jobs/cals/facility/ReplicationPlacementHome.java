@@ -25,18 +25,18 @@ public class ReplicationPlacementHome extends BasePlacementHome {
       name = "IBMSNAP_LOGMARKER",
       nullable = false
   )
-  private LocalDateTime timestamp;
+  private LocalDateTime replicationLastUpdated;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "IBMSNAP_OPERATION", updatable = false)
   private RecordChangeOperation recordChangeOperation;
 
-  public LocalDateTime getTimestamp() {
-    return timestamp;
+  public LocalDateTime getReplicationLastUpdated() {
+    return replicationLastUpdated;
   }
 
-  public void setTimestamp(LocalDateTime timestamp) {
-    this.timestamp = timestamp;
+  public void setReplicationLastUpdated(LocalDateTime replicationLastUpdated) {
+    this.replicationLastUpdated = replicationLastUpdated;
   }
 
   public RecordChangeOperation getRecordChangeOperation() {
