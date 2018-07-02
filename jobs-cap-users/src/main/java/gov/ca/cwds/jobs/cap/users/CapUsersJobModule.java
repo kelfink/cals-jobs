@@ -28,7 +28,10 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
   private PerryProperties2 perryProperties2 = new PerryProperties2();
 
   {
-    
+    cognitoProperties.setIamAccessKeyId("AKIAJHZTTS36NDBH7FHA");
+    cognitoProperties.setIamSecretKey("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");
+    cognitoProperties.setRegion("us-east-2");
+    cognitoProperties.setUserpool("us-east-2_Hp5BRwwOJ");
   }
 
   @Override
