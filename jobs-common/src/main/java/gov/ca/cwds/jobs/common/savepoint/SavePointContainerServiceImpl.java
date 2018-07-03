@@ -7,6 +7,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
 import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.rest.api.ApiException;
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -68,11 +69,12 @@ public abstract class SavePointContainerServiceImpl<S extends SavePoint, J exten
     Objects.requireNonNull(savePointContainer.getSavePoint());
     try {
       String fileContent = mapper.writeValueAsString(savePointContainer);
+      File file = getSavePointFile().toFile();
       if (savePointContainerExists()) {
-        FileUtils.forceDelete(getSavePointFile().toFile());
+        FileUtils.forceDelete(file);
       }
-      if (getSavePointFile().toFile().createNewFile()) {
-        FileUtils.writeStringToFile(getSavePointFile().toFile(), fileContent, "UTF-8");
+      if (file.createNewFile()) {
+        FileUtils.writeStringToFile(file, fileContent, "UTF-8");
         LOG.info("Save point container {}", fileContent);
         LOG.info("Save point container has been saved");
       } else {

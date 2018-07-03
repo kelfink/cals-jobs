@@ -10,48 +10,68 @@ import gov.ca.cwds.jobs.common.identifier.TimestampIdentifier;
 import java.io.Serializable;
 import java.math.BigInteger;
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
 import javax.persistence.Entity;
+import javax.persistence.EntityResult;
+import javax.persistence.FieldResult;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import javax.persistence.SqlResultSetMapping;
+import javax.persistence.SqlResultSetMappings;
+import org.hibernate.annotations.NamedNativeQuery;
 
 /**
  * Created by Alexander Serbin on 3/6/2018.
  */
-@NamedQueries({
-    @NamedQuery(
-        name = LisRecordChange.LIS_GET_MAX_TIMESTAMP_QUERY_NAME,
-        query = LisRecordChange.LIS_GET_MAX_TIMESTAMP_SQL
-    ),
-    @NamedQuery(
-        name = LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
-        query = LisRecordChange.INITIAL_LOAD_SQL
-    ),
-    @NamedQuery(
-        name = LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
-        query = LisRecordChange.INCREMENTAL_LOAD_SQL
-    )
-})
+@NamedNativeQuery(
+    name = LisRecordChange.LIS_GET_MAX_TIMESTAMP_QUERY_NAME,
+    query = LisRecordChange.LIS_GET_MAX_TIMESTAMP_SQL,
+    resultSetMapping = "LisRecordChangeMaxValue"
+)
+@NamedNativeQuery(
+    name = LisRecordChange.LIS_INITIAL_LOAD_QUERY_NAME,
+    query = LisRecordChange.INITIAL_LOAD_SQL,
+    resultSetMapping = "LisRecordChangeMapping"
+)
+@NamedNativeQuery(
+    name = LisRecordChange.LIS_INCREMENTAL_LOAD_QUERY_NAME,
+    query = LisRecordChange.INCREMENTAL_LOAD_SQL,
+    resultSetMapping = "LisRecordChangeMapping"
+)
+@SqlResultSetMappings({
+    @SqlResultSetMapping(name = "LisRecordChangeMaxValue",
+        columns = {@ColumnResult(name = "m")})
+    , @SqlResultSetMapping(
+    name = "LisRecordChangeMapping",
+    entities = {
+        @EntityResult(
+            entityClass = LisRecordChange.class,
+            fields = {
+                @FieldResult(name = "id", column = "fac_nbr"),
+                @FieldResult(name = "timestamp", column = "system_datetime_1")
+            }
+        )
+    }
+)}
+)
 @Entity
 public class LisRecordChange implements PersistentObject {
 
   private static final String SHARED_PART =
-      " from LisFacFile where facilityTypeCode in (400, 403, 430, 431, 433, 710, 711, 720, 721, "
+      " from lis_fac_file where fac_type in (400, 403, 430, 431, 433, 710, 711, 720, 721, "
           + "722, 726, 728, 729, 730, 731, 732, 733) ";
 
   public static final String LIS_GET_MAX_TIMESTAMP_SQL =
-      "select max(timestamp) "
+      "select max(system_datetime_1) as m "
           + SHARED_PART;
 
   public static final String INITIAL_LOAD_SQL =
-      "select new LisRecordChange(facNbr, timestamp) "
-          + SHARED_PART + " and facNbr > :facNbr order by facNbr";
+      "select fac_nbr, system_datetime_1 "
+          + SHARED_PART + " and fac_nbr > :facNbr order by fac_nbr";
 
   public static final String INCREMENTAL_LOAD_SQL =
-      "select new LisRecordChange(facNbr, timestamp)"
-          + SHARED_PART + " and timestamp > :dateAfter " +
-          "order by timestamp, facNbr";
-
+      "select fac_nbr, system_datetime_1 "
+          + SHARED_PART + " and system_datetime_1 > :dateAfter " +
+          "order by system_datetime_1, fac_nbr";
 
   public static final String LIS_GET_MAX_TIMESTAMP_QUERY_NAME = "RecordChange.lisGetMaxTimestamp";
   public static final String LIS_INITIAL_LOAD_QUERY_NAME = "RecordChange.lisInitialLoadQuery";

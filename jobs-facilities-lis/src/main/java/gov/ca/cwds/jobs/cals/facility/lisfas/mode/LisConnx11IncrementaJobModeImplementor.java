@@ -7,6 +7,7 @@ import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePoint;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointContainer;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointService;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
+import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.mode.AbstractJobModeImplementor;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
@@ -48,7 +49,9 @@ public class LisConnx11IncrementaJobModeImplementor extends
   @Override
   public TimestampSavePoint<BigInteger> defineSavepoint(
       JobBatch<TimestampSavePoint<BigInteger>> jobBatch) {
-    return jobBatch.getChangedEntityIdentifiers()
-        .get(jobBatch.getChangedEntityIdentifiers().size() - 1).getSavePoint();
+    List<ChangedEntityIdentifier<TimestampSavePoint<BigInteger>>> changedEntityIdentifiers =
+        jobBatch.getChangedEntityIdentifiers();
+    return changedEntityIdentifiers
+        .get(changedEntityIdentifiers.size() - 1).getSavePoint();
   }
 }
