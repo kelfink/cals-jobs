@@ -18,7 +18,7 @@ public class LisTimestampSavePoint extends TimestampSavePoint<BigInteger> {
   @Override
   public int compareTo(TimestampSavePoint<BigInteger> o) {
     if (o.getTimestamp() == null) {
-      return o.getTimestamp() == null ? 0 : -1;
+      return getTimestamp() == null ? 0 : -1;
     }
     return getTimestamp().compareTo(o.getTimestamp());
   }

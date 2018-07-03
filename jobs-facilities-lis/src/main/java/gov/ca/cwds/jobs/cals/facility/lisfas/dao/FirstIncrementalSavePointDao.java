@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
 import gov.ca.cwds.cals.service.dao.CustomDao;
 import gov.ca.cwds.jobs.cals.facility.lisfas.LisRecordChange;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import org.hibernate.SessionFactory;
 
@@ -19,8 +20,8 @@ public class FirstIncrementalSavePointDao extends CustomDao {
 
   public BigInteger findMaxTimestamp() {
     return currentSession()
-        .createNamedQuery(LisRecordChange.LIS_GET_MAX_TIMESTAMP_QUERY_NAME, BigInteger.class)
-        .uniqueResult();
+        .createNamedQuery(LisRecordChange.LIS_GET_MAX_TIMESTAMP_QUERY_NAME, BigDecimal.class)
+        .uniqueResult().toBigInteger();
   }
 
 }
