@@ -24,12 +24,12 @@ node ('dora-slave'){
   try {
    stage('Preparation') {
           cleanWs()
-		  checkout([$class: 'GitSCM', branches: [[name: '$branch']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', refspec: '$refspec', url: 'git@github.com:ca-cwds/cals-jobs.git']]])
-		  rtGradle.tool = "Gradle_35"
-		  rtGradle.resolver repo:'repo', server: serverArti
-		  rtGradle.deployer.mavenCompatible = true
-		  rtGradle.deployer.deployMavenDescriptors = true
-		  rtGradle.useWrapper = true
+	   git branch: '$branch', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/cals-jobs.git'
+	   rtGradle.tool = "Gradle_35"
+	   rtGradle.resolver repo:'repo', server: serverArti
+	   rtGradle.deployer.mavenCompatible = true
+	   rtGradle.deployer.deployMavenDescriptors = true
+	   rtGradle.useWrapper = true
    }
    stage('Build'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
