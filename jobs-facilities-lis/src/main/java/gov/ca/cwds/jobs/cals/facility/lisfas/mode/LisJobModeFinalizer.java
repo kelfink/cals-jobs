@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cals.facility.lisfas.identifier.LisChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePoint;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointContainer;
-import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointService;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
@@ -20,9 +19,6 @@ public class LisJobModeFinalizer implements JobModeFinalizer {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(LisJobModeFinalizer.class);
-
-  @Inject
-  private LisTimestampSavePointService savePointService;
 
   @Inject
   private SavePointContainerService<TimestampSavePoint<BigInteger>, DefaultJobMode> savePointContainerService;
