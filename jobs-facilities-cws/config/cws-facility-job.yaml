@@ -1,5 +1,5 @@
-batchSize: 100
-elasticSearchBulkSize: 100
+batchSize: 1000
+elasticSearchBulkSize: 1000
 readerThreadsCount: 10
 
 elasticsearch.host: ${ELASTIC_SEARCH_HOST:-localhost}
@@ -18,11 +18,11 @@ elasticsearch.xpack.password: ${ELASTIC_SEARCH_XPACK_PASSWORD:-changeme}
 
 cmsDataSourceFactory:
   properties:
-      hibernate.dialect: org.hibernate.dialect.DB2Dialect
+      hibernate.dialect: gov.ca.cwds.jobs.cals.facility.cws.CustomDb2Dialect
       hibernate.temp.use_jdbc_metadata_defaults: false
       hibernate.connection.driver_class: com.ibm.db2.jcc.DB2Driver
       hibernate.show_sql: false
-      hibernate.format_sql: true
+      hibernate.format_sql: false
       hibernate.use_sql_comments: false
       hibernate.connection.username: ${DB_CMS_USER:-db2inst1}
       hibernate.connection.password: ${DB_CMS_PASSWORD:-db2inst1-pwd}
@@ -42,7 +42,7 @@ calsnsDataSourceFactory:
       hibernate.temp.use_jdbc_metadata_defaults: false
       hibernate.connection.driver_class: org.postgresql.Driver
       hibernate.show_sql: false
-      hibernate.format_sql: true
+      hibernate.format_sql: false
       hibernate.use_sql_comments: false
       hibernate.connection.username: ${DB_NS_USER:-postgres_data}
       hibernate.connection.password: ${DB_NS_PASSWORD:-postgres_data}
