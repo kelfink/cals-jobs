@@ -40,7 +40,6 @@ public class RecordChangeLisDao extends BaseDaoImpl<LisRecordChange> {
   public List<LisRecordChange> getIncrementalLoadStream(final BigInteger dateAfter) {
     Query<LisRecordChange> query = currentSession()
         .createNamedQuery(LIS_INCREMENTAL_LOAD_QUERY_NAME, LisRecordChange.class)
-        .setMaxResults(batchSize)
         .setReadOnly(true);
     query.setParameter("dateAfter", dateAfter);
     return query.list();

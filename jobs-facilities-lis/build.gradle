@@ -40,7 +40,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'gov.ca.cwds.jobs.cals.facility.lis.LisFacilityJobRunner'
+        attributes 'Main-Class': 'gov.ca.cwds.jobs.cals.facility.lisfas.LisFacilityJobRunner'
     }
 }
 
