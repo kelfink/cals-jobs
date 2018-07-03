@@ -49,7 +49,6 @@ public abstract class AbstractLisInitialModeImplementor extends
     }
     lastId = getLastId(identifiers);
     LOGGER.info("Next page prepared. List size: {}. Last Id: {}", identifiers.size(), lastId);
-    //TODO: remove after testing of bug hypothesis
     if (identifiers.size() > batchSize) {
       identifiers = identifiers.subList(0, batchSize);
       lastId = getLastId(identifiers);
