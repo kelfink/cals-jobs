@@ -1,5 +1,5 @@
-batchSize: 500
-elasticSearchBulkSize: 500
+batchSize: 50000
+elasticSearchBulkSize: 50000
 readerThreadsCount: 10
 
 elasticsearch.host: ${ELASTIC_SEARCH_HOST:-localhost}

@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
 import gov.ca.cwds.jobs.common.batch.JobBatchSize;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
-import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
@@ -31,16 +30,7 @@ public abstract class AbstractTimestampJobModeImplementor<E, T, J extends JobMod
   private int batchSize;
 
   @Inject
-  private ChangedEntityService<E> changedEntityService;
-
-  @Inject
   private SavePointService<TimestampSavePoint<T>, J> savePointService;
-
-  @Override
-  public E loadEntity(ChangedEntityIdentifier identifier) {
-    LOGGER.info("Loading entity by identifier {}", identifier.getId());
-    return changedEntityService.loadEntity(identifier);
-  }
 
   @Override
   public TimestampSavePoint<T> loadSavePoint(
@@ -130,12 +120,14 @@ public abstract class AbstractTimestampJobModeImplementor<E, T, J extends JobMod
     return nextPortion;
   }
 
+/*
   private ChangedEntityIdentifier<TimestampSavePoint<T>> getNextIdentifier() {
     List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers = getNextPage(
         new PageRequest(offset, 1));
     assert identifiers.size() == 1 || identifiers.isEmpty();
     return identifiers.isEmpty() ? null : identifiers.get(0);
   }
+*/
 
   private static <T> TimestampSavePoint<T> getLastTimestamp(
       List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers) {
