@@ -30,7 +30,8 @@ public class CwsRecordChange extends RecordChange {
 
   private static final String SHARED_PART =
       " from ReplicationPlacementHome as home"
-          + " where home.licensrCd <> 'CL' ";
+          + " where home.licensrCd <> 'CL' "
+          + " and home.facilityType <> 1420 ";  //medical facility
 
   static final String CWS_CMS_GET_MAX_TIMESTAMP_QUERY =
       "select max(home.replicationLastUpdated)"
