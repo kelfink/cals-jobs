@@ -8,12 +8,17 @@ import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 6/20/2018.
  */
 public abstract class AbstractJobModeImplementor<E, S extends SavePoint, J extends JobMode> implements
     JobModeImplementor<E, S, J> {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(AbstractJobModeImplementor.class);
 
   @Inject
   private SavePointService<S, J> savePointService;
@@ -37,6 +42,7 @@ public abstract class AbstractJobModeImplementor<E, S extends SavePoint, J exten
 
   @Override
   public E loadEntity(ChangedEntityIdentifier identifier) {
+    LOGGER.info("Loading entity by identifier {}", identifier.getId());
     return changedEntityService.loadEntity(identifier);
   }
 
