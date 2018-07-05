@@ -23,10 +23,6 @@ public abstract class AbstractChangedFacilityService implements
       if (facilityDTO == null) {
         LOG.error("Can't get facility by id {}", facilityId);
         throw new IllegalStateException("FacilityDTO must not be null!!!");
-      } else {
-        if (LOG.isInfoEnabled()) {
-          LOG.info("Found facility by ID {}", facilityId);
-        }
       }
       return new ChangedFacilityDto(facilityDTO, identifier.getRecordChangeOperation());
     } catch (Exception e) {
