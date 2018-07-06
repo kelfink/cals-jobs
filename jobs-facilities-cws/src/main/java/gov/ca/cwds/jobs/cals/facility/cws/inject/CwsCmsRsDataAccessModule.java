@@ -50,8 +50,8 @@ import gov.ca.cwds.data.legacy.cms.entity.syscodes.VisitType;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ReplicationPlacementHome;
 import gov.ca.cwds.jobs.cals.facility.cws.CwsFacilityJobConfiguration;
-import gov.ca.cwds.jobs.cals.facility.cws.CwsRecordChange;
-import gov.ca.cwds.jobs.cals.facility.cws.dao.RecordChangeCwsCmsDao;
+import gov.ca.cwds.jobs.cals.facility.cws.dao.CwsChangedIdentifierDao;
+import gov.ca.cwds.jobs.cals.facility.cws.identifier.CwsChangedIdentifier;
 import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import java.util.Optional;
 import org.hibernate.SessionFactory;
@@ -65,7 +65,7 @@ public class CwsCmsRsDataAccessModule extends AbstractModule {
 
   public static final ImmutableList<Class<?>> cwsrsEntityClasses = ImmutableList.<Class<?>>builder()
       .add(
-          CwsRecordChange.class
+          CwsChangedIdentifier.class
           , Client.class
           , OutOfHomePlacement.class
           , PlacementEpisode.class
@@ -110,7 +110,7 @@ public class CwsCmsRsDataAccessModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(RecordChangeCwsCmsDao.class);
+    bind(CwsChangedIdentifierDao.class);
     bind(CountiesDao.class);
     bind(ClientDao.class);
   }

@@ -9,7 +9,6 @@ import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.cals.inject.FasFfaSessionFactory;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
 import gov.ca.cwds.cals.persistence.model.fas.LpaInformation;
-import gov.ca.cwds.jobs.cals.facility.RecordChange;
 import gov.ca.cwds.jobs.cals.facility.lisfas.LisFacilityJobConfiguration;
 import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import org.hibernate.SessionFactory;
@@ -21,7 +20,7 @@ public class FasDataAccessModule extends AbstractModule {
 
   public static final ImmutableList<Class<?>> fasEntityClasses = ImmutableList.<Class<?>>builder()
       .add(
-          RecordChange.class,
+//          RecordChange.class,
           LpaInformation.class
       ).build();
 
