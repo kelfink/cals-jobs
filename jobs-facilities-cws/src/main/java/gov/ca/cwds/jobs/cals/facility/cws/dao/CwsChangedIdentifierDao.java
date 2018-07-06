@@ -30,8 +30,8 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> identifiers =
         getCwsChangedIdentifiers(LocalDateTime.of(1970, 1, 1, 1, 1),
             CwsChangedIdentifier.CWSCMS_INITIAL_LOAD_QUERY_NAME, pageRequest);
-    LOGGER.info("identifiers count " + identifiers.size());
-    LOGGER.info("identifiers = " + identifiers);
+    LOGGER.info("identifiers count {}", identifiers.size());
+    LOGGER.info("identifiers = {}", identifiers);
     return identifiers;
   }
 
@@ -61,8 +61,8 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
             .setMaxResults(pageRequest.getLimit())
             .setFirstResult(pageRequest.getOffset())
             .setReadOnly(true).list();
-    LOGGER.info("identifiers count " + identifiers.size());
-    LOGGER.info("identifiers = " + identifiers);
+    LOGGER.info("identifiers count {}", identifiers.size());
+    LOGGER.info("identifiers = {}", identifiers);
 
     return identifiers;
   }
