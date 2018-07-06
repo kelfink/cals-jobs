@@ -30,7 +30,8 @@ public class CwsChangedEntitiesIdentifiersService implements
   @Override
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiersForInitialLoad(
       PageRequest pageRequest) {
-    return getCwsCmsInitialLoadIdentifiers(pageRequest).sorted().collect(Collectors.toList());
+    return getCwsCmsInitialLoadIdentifiers(pageRequest).distinct().sorted()
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -53,7 +54,7 @@ public class CwsChangedEntitiesIdentifiersService implements
         new ChangedFacilitiesIdentifiers<>();
     recordChangeCwsCmsDao.getResumeInitialLoadStream(timeStampAfter.getTimestamp(), pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().filter(Objects::nonNull).sorted()
+    return changedEntityIdentifiers.newStream().filter(Objects::nonNull).distinct().sorted()
         .collect(Collectors.toList());
   }
 
@@ -74,7 +75,7 @@ public class CwsChangedEntitiesIdentifiersService implements
         new ChangedFacilitiesIdentifiers<>();
     recordChangeCwsCmsDao.getIncrementalLoadStream(dateAfter.getTimestamp(), pageRequest).
         map(CwsRecordChange::valueOf).forEach(changedEntityIdentifiers::add);
-    return changedEntityIdentifiers.newStream().filter(Objects::nonNull).sorted()
+    return changedEntityIdentifiers.newStream().filter(Objects::nonNull).distinct().sorted()
         .collect(Collectors.toList());
   }
 
