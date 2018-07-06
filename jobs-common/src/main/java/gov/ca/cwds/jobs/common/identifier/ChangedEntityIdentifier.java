@@ -78,8 +78,7 @@ public abstract class ChangedEntityIdentifier<S extends SavePoint> implements
 
   @Override
   public String toString() {
-    return "id=" + id + ", recordChangeOperation=" + recordChangeOperation +
-        ", savePoint=" + savePoint + "\n";
+    return id;
   }
 
 }
