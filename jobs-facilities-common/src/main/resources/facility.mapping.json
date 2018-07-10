@@ -18,6 +18,16 @@
     },
     "phones": {
       "type": "nested"
+    },
+    "county": {
+      "properties": {
+        "id": {
+          "type": "byte"
+        },
+        "value": {
+          "type": "text"
+        }
+      }
     }
   }
 }
