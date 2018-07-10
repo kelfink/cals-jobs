@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.cap.users;
 
-import gov.ca.cwds.jobs.common.inject.JobRunner;
+
+import gov.ca.cwds.jobs.common.core.JobRunner;
 
 /**
  * @author CWDS TPT-3

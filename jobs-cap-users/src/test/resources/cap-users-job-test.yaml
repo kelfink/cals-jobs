@@ -15,13 +15,6 @@ batchSize: 10
 elasticSearchBulkSize: 10
 readerThreadsCount: 3
 
-cmsDataSourceFactory:
-  properties:
-    hibernate.connection.driver_class: org.h2.Driver
-    hibernate.default_schema: CWSCMS
-    hibernate.connection.username: sa
-    hibernate.connection.password: ''
-    hibernate.connection.url: jdbc:h2:mem:CWSCMS;INIT=create schema if not exists CWSCMS\;set schema CWSCMS
-    #hibernate.connection.url: jdbc:h2:file:C:/data/CWSCMSRS;INIT=create schema if not exists CWSCMSRS\;set schema CWSCMSRS
-    hibernate.dialect: org.hibernate.dialect.H2Dialect
+perryApiUrl: ${PERRY_URL:-http://localhost:18080/perry/idm/users}
+
 

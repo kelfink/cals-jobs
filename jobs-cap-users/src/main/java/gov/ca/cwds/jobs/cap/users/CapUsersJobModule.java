@@ -3,57 +3,75 @@ package gov.ca.cwds.jobs.cap.users;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
-import gov.ca.cwds.PerryProperties;
-import gov.ca.cwds.idm.CognitoProperties;
-import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.CognitoIdmService;
-import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
+import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.config.JobOptions;
+import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
-import gov.ca.cwds.jobs.common.inject.ElasticSearchBulkSize;
-import gov.ca.cwds.jobs.common.job.BulkWriter;
-import gov.ca.cwds.jobs.common.job.Job;
+import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import javax.ws.rs.client.Client;
 
+import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD_RESUME;
 
 public class CapUsersJobModule extends AbstractBaseJobModule {
+  private static final Logger LOG = LoggerFactory.getLogger(CapUsersJobModule.class);
+
+  private Class<? extends BulkWriter<ChangedUserDTO>> capElasticWriterClass;
+
+  private Class<? extends CapUsersIterator> capUsersJobBatchIterator;
+
   public CapUsersJobModule(String[] args) {
     super(args);
+    this.capElasticWriterClass = CapUsersWriter.class;
+    this.capUsersJobBatchIterator = CapUsersJobBatchIterator.class;
   }
 
-  private CognitoProperties cognitoProperties = new CognitoProperties();
+  public void setCapElasticWriterClass(
+          Class<? extends BulkWriter<ChangedUserDTO>> capUsersElasticWriterClass) {
+    this.capElasticWriterClass = capUsersElasticWriterClass;
+  }
 
-  private PerryProperties2 perryProperties2 = new PerryProperties2();
-
-  {
-    cognitoProperties.setIamAccessKeyId("AKIAJHZTTS36NDBH7FHA");
-    cognitoProperties.setIamSecretKey("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");
-    cognitoProperties.setRegion("us-east-2");
-    cognitoProperties.setUserpool("us-east-2_Hp5BRwwOJ");
+  public void setCapUsersJobBatchIterator(Class<? extends CapUsersIterator> capUsersJobBatchIterator) {
+    this.capUsersJobBatchIterator = capUsersJobBatchIterator;
   }
 
   @Override
   protected void configure() {
     super.configure();
+    configureJobModes();
 
-    bind(Job.class).to(CapUsersJob.class);
-    //bind(JobBatchIterator.class).to(CapJobBatchIteratorImpl.class);
-    bind(IdmService.class).to(CognitoIdmService.class);
-    //bind(CognitoServiceFacade.class).to(CognitoServiceFacade.class);
+    bind(new TypeLiteral<BulkWriter<ChangedUserDTO>>() {
+    }).to(capElasticWriterClass);
 
-    bind(new TypeLiteral<BulkWriter<User>>() {
-    }).to(TestCapUserWriter.class);
+    bindConstant().annotatedWith(PerryApiUrl.class)
+            .to(getJobsConfiguration(getJobOptions()).getPerryApiUrl());
 
-    bind(CognitoProperties.class).toInstance(cognitoProperties);
+    bind(CapUsersIterator.class).to(capUsersJobBatchIterator);
 
-    bind(PerryProperties.class).toInstance(perryProperties2);
+  }
 
-    install(new CwsCmsDataAccessModule());
+  private void configureJobModes() {
+    DefaultJobMode jobMode = defineJobMode();
+    if (jobMode == INITIAL_LOAD) {
+      configureInitialMode();
+    } else {
+      LOG.info("not initial mode selected");
+      throw new UnsupportedOperationException("the job mode other that INITIAL is not supported");
+    }
+  }
 
-//    bindConstant().annotatedWith(ElasticSearchBulkSize.class).to(60);
+  private void configureInitialMode() {
+    bind(Job.class).to(CapUsersInitialJob.class);
+  }
 
+  private DefaultJobMode defineJobMode() {
+    return DefaultJobMode.INITIAL_LOAD;
   }
 
 
@@ -61,8 +79,21 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
   @Override
   @Inject
   protected CapUsersJobConfiguration getJobsConfiguration(JobOptions jobsOptions) {
-    return BaseJobConfiguration.getJobsConfiguration(CapUsersJobConfiguration.class, jobsOptions.getEsConfigLoc());
+    CapUsersJobConfiguration capUsersJobConfiguration = BaseJobConfiguration.getJobsConfiguration(CapUsersJobConfiguration.class, jobsOptions.getEsConfigLoc());
+    capUsersJobConfiguration.setIndexSettings("cap.users.settings.json");
+    capUsersJobConfiguration.setDocumentMapping("cap.users.mapping.json");
+    return capUsersJobConfiguration;
 
+  }
+
+  @Provides
+  public Client provideClient() {
+    JerseyClientBuilder clientBuilder = new JerseyClientBuilder()
+            .property(ClientProperties.CONNECT_TIMEOUT, getJobsConfiguration(getJobOptions()).getJerseyClientConnectTimeout())
+            .property(ClientProperties.READ_TIMEOUT, getJobsConfiguration(getJobOptions()).getJerseyClientReadTimeout())
+            // Just ignore host verification, client will call trusted resources only
+            .hostnameVerifier((hostName, sslSession) -> true);
+    return clientBuilder.build();
   }
 }
 
