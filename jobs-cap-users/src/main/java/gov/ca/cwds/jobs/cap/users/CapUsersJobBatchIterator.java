@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class CapUsersJobBatchIterator implements CapUsersIterator {
 
   private String paginationToken;
-  private AtomicBoolean eol = new AtomicBoolean(false);
+  private boolean eol;
 
   private static final String PAGINATION_TOKEN = "paginationToken";
 
@@ -25,7 +25,7 @@ public class CapUsersJobBatchIterator implements CapUsersIterator {
   private String apiURL;
 
   public List<User> getNextPortion() {
-    if (eol.get()) {
+    if (eol) {
       return Collections.emptyList();
     }
     UsersPage page = client
@@ -36,7 +36,7 @@ public class CapUsersJobBatchIterator implements CapUsersIterator {
 
     paginationToken = page.getPaginationToken();
     if (paginationToken == null) {
-      eol.set(true);
+      eol = true;
     }
     return page.getUserList();
   }

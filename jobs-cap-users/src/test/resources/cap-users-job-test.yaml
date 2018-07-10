@@ -5,8 +5,8 @@ elasticsearch.additional.nodes:
   - localhost:9300
 
 elasticsearch.cluster: elasticsearch
-elasticsearch.alias: facilities
-elasticsearch.doctype: facility
+elasticsearch.alias: users
+elasticsearch.doctype: user
 #
 elasticsearch.xpack.user: elastic
 elasticsearch.xpack.password: changeme

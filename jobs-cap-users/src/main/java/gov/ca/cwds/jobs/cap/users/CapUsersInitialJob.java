@@ -15,7 +15,7 @@ public class CapUsersInitialJob implements Job {
   @Override
   public void run() {
     JobTimeReport jobTimeReport = new JobTimeReport();
-    LOGGER.info("Runing");
+    LOGGER.info("CapUsersInitialJob running");
     batchProcessor.processBatches();
     if (LOGGER.isInfoEnabled()) {
       jobTimeReport.printTimeSpent();
