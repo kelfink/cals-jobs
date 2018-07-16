@@ -77,15 +77,20 @@ public abstract class AbstractTimestampJobModeImplementor<E, T, J extends JobMod
     // there are many entities with equal last updated timestamps
     List<JobBatch<TimestampSavePoint<T>>> batches = findBatchesPriorToBatchWithSavepoint(
         identifiers);
+    //TODO uncomment when SEAR-319 implemented
+/*
     List<ChangedEntityIdentifier<TimestampSavePoint<T>>> lastIdentifiersWithSavepoint =
         findLastIdentifiersPriorToSavepoint(getLastTimestamp(identifiers));
+
     batches.get(batches.size() - 1).getChangedEntityIdentifiers()
         .addAll(lastIdentifiersWithSavepoint);
+*/
     LOGGER
         .info("Found batches to load {}, save point is {}", batches, getLastTimestamp(identifiers));
     return batches;
   }
 
+/*
   private List<ChangedEntityIdentifier<TimestampSavePoint<T>>> findLastIdentifiersPriorToSavepoint(
       TimestampSavePoint<T> savePoint) {
     List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiersWithSavepoint = new ArrayList<>(
@@ -99,6 +104,7 @@ public abstract class AbstractTimestampJobModeImplementor<E, T, J extends JobMod
     }
     return identifiersWithSavepoint;
   }
+*/
 
   private List<JobBatch<TimestampSavePoint<T>>> findBatchesPriorToBatchWithSavepoint(
       List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers) {
@@ -114,12 +120,14 @@ public abstract class AbstractTimestampJobModeImplementor<E, T, J extends JobMod
     return nextPortion;
   }
 
+/*
   private ChangedEntityIdentifier<TimestampSavePoint<T>> getNextIdentifier() {
     List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers = getNextPage(
         new PageRequest(offset, 1));
     assert identifiers.size() == 1 || identifiers.isEmpty();
     return identifiers.isEmpty() ? null : identifiers.get(0);
   }
+*/
 
   private static <T> TimestampSavePoint<T> getLastTimestamp(
       List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers) {
