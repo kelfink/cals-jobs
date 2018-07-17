@@ -3,6 +3,10 @@ package gov.ca.cwds.jobs.cap.users;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
+import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
+import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
+import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
+import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.config.JobOptions;
@@ -17,12 +21,11 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.Client;
 
 import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD_RESUME;
 
 public class CapUsersJobModule extends AbstractBaseJobModule {
   private static final Logger LOG = LoggerFactory.getLogger(CapUsersJobModule.class);
 
-  private Class<? extends BulkWriter<ChangedUserDTO>> capElasticWriterClass;
+  private Class<? extends BulkWriter<ChangedUserDto>> capElasticWriterClass;
 
   private Class<? extends CapUsersIterator> capUsersJobBatchIterator;
 
@@ -33,7 +36,7 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
   }
 
   public void setCapElasticWriterClass(
-          Class<? extends BulkWriter<ChangedUserDTO>> capUsersElasticWriterClass) {
+          Class<? extends BulkWriter<ChangedUserDto>> capUsersElasticWriterClass) {
     this.capElasticWriterClass = capUsersElasticWriterClass;
   }
 
@@ -46,11 +49,15 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
     super.configure();
     configureJobModes();
 
-    bind(new TypeLiteral<BulkWriter<ChangedUserDTO>>() {
+    bind(new TypeLiteral<BulkWriter<ChangedUserDto>>() {
     }).to(capElasticWriterClass);
 
     bindConstant().annotatedWith(PerryApiUrl.class)
             .to(getJobsConfiguration(getJobOptions()).getPerryApiUrl());
+    bindConstant().annotatedWith(PerryApiUser.class)
+            .to(getJobsConfiguration(getJobOptions()).getPerryApiUser());
+    bindConstant().annotatedWith(PerryApiPassword.class)
+            .to(getJobsConfiguration(getJobOptions()).getPerryApiPassword());
 
     bind(CapUsersIterator.class).to(capUsersJobBatchIterator);
 

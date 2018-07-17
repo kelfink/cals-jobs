@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.cap.users;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.elastic.ElasticSearchBulkCollector;
 import org.apache.commons.collections4.CollectionUtils;
@@ -14,7 +15,7 @@ public class CapUsersBatchProcessor {
   private CapUsersIterator capUsersJobBatchIterator;
 
   @Inject
-  private ElasticSearchBulkCollector<ChangedUserDTO> elasticSearchBulkCollector;
+  private ElasticSearchBulkCollector<ChangedUserDto> elasticSearchBulkCollector;
 
   public void processBatches() {
     List<User> portion = capUsersJobBatchIterator.getNextPortion();
@@ -26,7 +27,7 @@ public class CapUsersBatchProcessor {
   }
 
   private void loadEntities(List<User> userList) {
-    userList.forEach(e -> elasticSearchBulkCollector.addEntity(new ChangedUserDTO(e, RecordChangeOperation.I)));
+    userList.forEach(e -> elasticSearchBulkCollector.addEntity(new ChangedUserDto(e, RecordChangeOperation.I)));
   }
 
   public void destroy() {

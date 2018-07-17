@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.cap.users;
+package gov.ca.cwds.jobs.cap.users.dto;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.jobs.common.ChangedDTO;
@@ -8,14 +8,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.io.Serializable;
 
-public class ChangedUserDTO implements ChangedDTO<User>, Serializable {
+public class ChangedUserDto implements ChangedDTO<User>, Serializable {
 
   private static final long serialVersionUID = -4368941604862881357L;
 
   private User user;
   private RecordChangeOperation recordChangeOperation;
 
-  public ChangedUserDTO(User user, RecordChangeOperation recordChangeOperation) {
+  public ChangedUserDto(User user, RecordChangeOperation recordChangeOperation) {
     this.user = user;
     this.recordChangeOperation = recordChangeOperation;
   }
@@ -41,7 +41,7 @@ public class ChangedUserDTO implements ChangedDTO<User>, Serializable {
 
     if (o == null || getClass() != o.getClass()) return false;
 
-    ChangedUserDTO that = (ChangedUserDTO) o;
+    ChangedUserDto that = (ChangedUserDto) o;
 
     return new EqualsBuilder()
             .append(user, that.user)

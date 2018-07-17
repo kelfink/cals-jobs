@@ -16,5 +16,7 @@ elasticSearchBulkSize: 10
 readerThreadsCount: 3
 
 perryApiUrl: ${PERRY_URL:-http://localhost:18080/perry/idm/users}
+perryApiUser: ${PERRY_USER:-user}
+perryApiPassword: ${PERRY_PASS:-pass}
 
 
