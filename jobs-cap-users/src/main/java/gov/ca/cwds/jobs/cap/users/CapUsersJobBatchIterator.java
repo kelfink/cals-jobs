@@ -11,6 +11,7 @@ import org.apache.commons.codec.binary.Base64;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,8 +42,8 @@ public class CapUsersJobBatchIterator implements CapUsersIterator {
   @Inject
   public void init() {
     String authString = perryApiUser + ":" + perryApiPassword;
-    byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
-    String authStringEnc = new String(authEncBytes);
+    byte[] authEncBytes = Base64.encodeBase64(authString.getBytes(StandardCharsets.UTF_8));
+    String authStringEnc = new String(authEncBytes, StandardCharsets.UTF_8);
     basicAuthHeader = "Basic " + authStringEnc;
   }
 
