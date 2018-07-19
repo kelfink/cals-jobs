@@ -8,10 +8,10 @@ import java.util.List;
 public class MockedIterator implements CapUsersIterator {
   private int i = 0;
 
-  public static int LIMIT = 20;
+  public static int NUMBER_OF_USERS = 20;
 
   public List<User> getNextPortion() {
-    return i == LIMIT ? Collections.emptyList() : createUserList();
+    return i == NUMBER_OF_USERS ? Collections.emptyList() : createUserList();
   }
 
   private List<User> createUserList() {

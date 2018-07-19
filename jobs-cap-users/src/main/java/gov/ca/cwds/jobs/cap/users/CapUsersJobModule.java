@@ -13,12 +13,19 @@ import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointService;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
+import gov.ca.cwds.jobs.common.savepoint.SavePointService;
+import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Client;
+
+import java.time.LocalDateTime;
 
 import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
 
@@ -60,6 +67,10 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
             .to(getJobsConfiguration(getJobOptions()).getPerryApiPassword());
 
     bind(CapUsersIterator.class).to(capUsersJobBatchIterator);
+
+    bind(
+            new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
+            }).to(LocalDateTimeSavePointContainerService.class);
 
   }
 

@@ -12,6 +12,9 @@ public class CapUsersInitialJob implements Job {
   @Inject
   private CapUsersBatchProcessor batchProcessor;
 
+  @Inject
+  private CapUsersLocalDateTimeJobFinalizer jobModeFinalizer;
+
   @Override
   public void run() {
     JobTimeReport jobTimeReport = new JobTimeReport();
@@ -25,5 +28,6 @@ public class CapUsersInitialJob implements Job {
   @Override
   public void close() {
     batchProcessor.destroy();
+    jobModeFinalizer.doFinalizeJob();
   }
 }
