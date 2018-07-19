@@ -55,7 +55,7 @@
         }
       }
     ],
-    "visits": null,
+    "visits": [],
     "annual_visit_year": null,
     "prelicensing_visit_date": null,
     "facility_source": "CWS/CMS"
