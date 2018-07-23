@@ -30,7 +30,8 @@
     },
     "license_number": null,
     "status": {
-      "id": "0002",
+      "active" : true,
+      "id": "2",
       "value": "Pending"
     },
     "capacity": 3,

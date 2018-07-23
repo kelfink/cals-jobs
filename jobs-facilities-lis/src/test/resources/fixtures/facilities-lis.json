@@ -25,8 +25,9 @@
     },
     "license_number": "9069",
     "status": {
+      "active" : true,
       "id": "12",
-      "value": "CERTIFIED/APPROVED"
+      "value": "Certified (CFH, RFH & OSGHC)"
     },
     "capacity": 10,
     "license_effective_date": "2015-04-13",
