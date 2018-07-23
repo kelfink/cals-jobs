@@ -7,6 +7,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
+import gov.ca.cwds.cals.persistence.model.calsns.dictionaries.LicenseStatusType;
 import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
 import org.hibernate.SessionFactory;
 
@@ -17,7 +18,8 @@ public class CalsnsDataAccessModule extends AbstractModule {
 
   public static final ImmutableList<Class<?>> nsEntityClasses = ImmutableList.<Class<?>>builder()
       .add(
-          gov.ca.cwds.cals.persistence.model.calsns.dictionaries.FacilityType.class
+          gov.ca.cwds.cals.persistence.model.calsns.dictionaries.FacilityType.class,
+          LicenseStatusType.class
       ).build();
 
   @Override
