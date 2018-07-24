@@ -18,8 +18,8 @@ public abstract class AbstractChangedFacilityService implements
   public ChangedFacilityDto loadEntity(ChangedEntityIdentifier identifier) {
     String facilityId = null;
     try {
-      FacilityDTO facilityDTO = loadEntityById(identifier);
       facilityId = identifier.getId();
+      FacilityDTO facilityDTO = loadEntityById(identifier);
       if (facilityDTO == null) {
         LOG.error("Can't get facility by id {}", facilityId);
         throw new IllegalStateException("FacilityDTO must not be null!!!");
