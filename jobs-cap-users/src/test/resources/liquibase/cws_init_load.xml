@@ -1,0 +1,209 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet author="test" id="0">
+        <createTable tableName="USERID_T" schemaName="${schema.name}">
+            <column name="IDENTIFIER" type="CHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue=" " name="LOGON_ID" type="CHAR(8)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="NULL" name="END_DT" type="date"/>
+            <column defaultValue="NULL" name="END_TM" type="time"/>
+            <column name="LST_UPD_ID" type="CHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LST_UPD_TS" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="NULL" name="FKFPSTFPRT" type="CHAR(3)"/>
+            <column defaultValue="NULL" name="FKSTFPERST" type="CHAR(3)"/>
+            <column name="SYS_DMC" type="SMALLINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="CWS_OFFT" schemaName="${schema.name}">
+            <column name="IDENTIFIER" type="CHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.0" name="FAX_NO" type="DECIMAL(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue=" " name="GEO_RGNTCD" type="CHAR(2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="GVR_ENTC" type="SMALLINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="HDQRTR_IND" type="CHAR(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INACTV_IND" type="CHAR(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue=" " name="MAILST_DSC" type="CHAR(7)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.0" name="MSG_TEL_NO" type="DECIMAL(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="MSG_EXT_NO" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue=" " name="CWS_OFF_NO" type="CHAR(5)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PRM_TEL_NO" type="DECIMAL(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="PRM_EXT_NO" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LST_UPD_ID" type="CHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LST_UPD_TS" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="NULL" name="FKSTFPERST" type="CHAR(3)"/>
+            <column defaultValue=" " name="COMNT_DSC" type="CHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="AGENCY_NM" type="CHAR(45)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DPT_DIV_NM" type="CHAR(45)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CWS_OFF_NM" type="CHAR(45)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CNTY_SPFCD" type="CHAR(2)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="AGCY_CD_NO" type="SMALLINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="LOC_CNTY" type="SMALLINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue=" " name="DIR_NM_TL" type="CHAR(45)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="STFPERST">
+            <column name="IDENTIFIER" type="CHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="END_DT" type="date"/>
+            <column name="FIRST_NM" type="CHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue=" " name="JOB_TL_DSC" type="CHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LAST_NM" type="CHAR(25)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue=" " name="MID_INI_NM" type="CHAR(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue=" " name="NMPRFX_DSC" type="CHAR(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PHONE_NO" type="DECIMAL(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="TEL_EXT_NO" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="START_DT" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue=" " name="SUFX_TLDSC" type="CHAR(4)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TLCMTR_IND" type="CHAR(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LST_UPD_ID" type="CHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LST_UPD_TS" type="timestamp(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FKCWS_OFFT" type="CHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue=" " name="AVLOC_DSC" type="CHAR(160)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue=" " name="SSRS_WKRID" type="CHAR(4)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CNTY_SPFCD" type="CHAR(2)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="N" name="DTYWKR_IND" type="CHAR(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue=" " name="FKCWSADDRT" type="CHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="EMAIL_ADDR" type="CHAR(50)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="test" id="1">
+        <sql>
+            INSERT INTO ${schema.name}.USERID_T
+            (IDENTIFIER, LOGON_ID, END_DT, END_TM, LST_UPD_ID, LST_UPD_TS, FKFPSTFPRT, FKSTFPERST, SYS_DMC)
+            VALUES
+            ('AYhwFfhaah', 'RUBBLBA ', NULL, NULL, 'aah', '2017-09-28 15:31:59.214', NULL, 'aaz', 5599),
+            ('AP3WuX7aaP', 'CWSPC ', NULL, NULL, 'aaP', '2017-12-18 10:38:39.494', NULL, 'aaU', 5599),
+            ('AfXgU3ZaaP', 'ELZIELA ', NULL, NULL, 'aaP', '2017-12-20 10:54:14.966', NULL, 'aaX', 5599),
+            ('A0XG5cUaah', 'USERTF ', NULL, NULL, 'aah', '2018-01-18 16:02:41.323', NULL, '0x5', 5599),
+            ('BkQFyxJ0Wz', 'CWDS4 ', NULL, NULL, '0Wz', '2017-07-13 16:04:46.396', NULL, 'aae', 5599),
+            ('BDgzEcn0Wz', 'CWDSL ', '2017-09-22', '14:35:00', '0Wz', '2017-09-22 14:36:42.819', NULL, 'aav', 5596),
+            ('BpJPJ9paaP', 'CAPPIR ', NULL, NULL, 'aaP', '2017-12-29 15:48:43.644', NULL, 'aaY', 5599),
+            ('CEBFTdNaaP', 'DEMUNP ', NULL, NULL, 'aaP', '2017-12-20 10:45:05.434', NULL, 'aaS', 5599),
+            ('DCkO8A90Wz', 'CWDS9 ', NULL, NULL, '0Wz', '2017-07-13 16:21:27.520', NULL, 'aak', 5599),
+            ('Dcijua600E', 'STEVEI ', NULL, NULL, '00E', '2018-01-18 23:01:18.769', NULL, 'aa7', 5599),
+            ('DJwVvrqaaQ', 'KENNEB ', NULL, NULL, 'aaQ', '2018-02-06 07:04:36.471', NULL, 'abg', 5598),
+            ('Fcx1NUj0Wz', 'CWDS3 ', NULL, NULL, '0Wz', '2017-07-13 16:04:46.396', NULL, 'aao', 5599),
+            ('FJaJCoX0Ki', 'CWDSLA ', '2017-09-22', '14:31:00', '0Wz', '2017-09-22 14:33:33.066', NULL, 'aar', 5596),
+            ('FtVgCqk0Wz', 'LANETRA ', NULL, NULL, '0Wz', '2018-01-08 11:28:48.693', NULL, 'aaZ', 5599),
+            ('FwEJl3uaaP', 'TESTIB ', NULL, NULL, 'aaP', '2018-01-18 14:49:56.590', NULL, 'aa5', 5599)
+        </sql>
+    </changeSet>
+    <changeSet author="test" id="2">
+        <sql>
+            INSERT INTO ${schema.name}.CWS_OFFT
+            (IDENTIFIER, FAX_NO, GEO_RGNTCD, GVR_ENTC, HDQRTR_IND, INACTV_IND, MAILST_DSC, MSG_TEL_NO, MSG_EXT_NO, CWS_OFF_NO, PRM_TEL_NO, PRM_EXT_NO, LST_UPD_ID, LST_UPD_TS, FKSTFPERST, COMNT_DSC, AGENCY_NM, DPT_DIV_NM, CWS_OFF_NM, CNTY_SPFCD, AGCY_CD_NO, LOC_CNTY, DIR_NM_TL)
+            VALUES
+            ('BgUwJ2Uaat', 9167777777, '  ', 1084, 'N', 'N', '       ', 0, 0, '1    ', 9167777777, 777, 'aat', '2018-02-05 10:52:34.055', 'aaY', '                                                                                                                        ', 'Stan''s CWDS Agency                           ', 'Stan''s CWDS Department                       ', 'Stan''s CWDS Office                           ', '17', 0, 0, '                                             '),
+            ('TG7O51q0Ki', 0, '  ', 1095, 'N', 'N', '       ', 0, 0, '     ', 9165551234, 0, '0Ki', '2018-01-11 16:30:53.950', 'aaS', '                                                                                                                        ', 'Yee''s Agency                                 ', 'Yee''s Department                             ', 'Yee''s Office                                 ', '28', 0, 0, '                                             ');
+        </sql>
+    </changeSet>
+    <changeSet author="test" id="3">
+        <sql>
+            INSERT INTO ${schema.name}.STFPERST
+            (IDENTIFIER, END_DT, FIRST_NM, JOB_TL_DSC, LAST_NM, MID_INI_NM, NMPRFX_DSC, PHONE_NO, TEL_EXT_NO, START_DT, SUFX_TLDSC, TLCMTR_IND, LST_UPD_ID, LST_UPD_TS, FKCWS_OFFT, AVLOC_DSC, SSRS_WKRID, CNTY_SPFCD, DTYWKR_IND, FKCWSADDRT, EMAIL_ADDR)
+            VALUES
+            ('aak', NULL, 'Barney              ', '                              ', 'Rubble                   ', ' ', '      ', 5599994321, 0, '2017-08-31', '    ', 'N', '0X5', '2017-08-31 13:30:10.242', 'NpuJq9k0Wz', '                                                                                                                                                                ', '    ', '20', 'N', 'PeQHipI0Wz', NULL),
+            ('aaY', '2017-08-31', 'Fred                ', '                              ', 'Flintstone               ', ' ', '      ', 5599994321, 0, '2017-08-31', '    ', 'N', '0X5', '2017-08-31 14:29:43.690', 'BgUwJ2Uaat', '                                                                                                                                                                ', '    ', '20', 'N', 'PeQHipI0Wz', NULL),
+            ('aao', NULL, 'Fred                ', '                              ', 'Flintstone               ', ' ', '      ', 5599994321, 0, '2017-08-31', '    ', 'N', '0X5', '2017-08-31 13:36:19.210', 'NpuJq9k0Wz', '                                                                                                                                                                ', '    ', '20', 'N', 'PeQHipI0Wz', NULL),
+            ('aaS', '2017-09-22', 'Lake                ', '                              ', 'CWDS                     ', ' ', '      ', 7079983095, 0, '2017-09-21', '    ', 'N', '0Wz', '2017-09-22 14:36:42.819', 'TG7O51q0Ki', '                                                                                                                                                                ', '    ', '17', 'N', 'Oi5T1d6q38', NULL),
+            ('aaq', '2017-09-22', 'New                 ', '                              ', 'CWDS                     ', ' ', '      ', 7079982988, 0, '2017-09-21', '    ', 'N', '0Wz', '2017-09-22 14:37:25.148', 'TgvbUtm06w', '                                                                                                                                                                ', '    ', '17', 'N', 'Oi5T1d6q38', NULL),
+            ('aar', '2017-09-22', 'Lake                ', '                              ', 'CWDS                     ', ' ', '      ', 7079983095, 0, '2017-09-22', '    ', 'N', '0Wz', '2017-09-22 14:33:33.066', 'TgvbUtm06w', '                                                                                                                                                                ', '    ', '17', 'N', 'Oi5T1d6q38', NULL),
+            ('aas', NULL, 'New                 ', '                              ', 'CWDS                     ', ' ', '      ', 7079983095, 0, '2017-09-22', '    ', 'N', '0Wz', '2017-09-22 14:43:39.435', 'TgvbUtm06w', '                                                                                                                                                                ', '7880', '17', 'N', 'Oi5T1d6q38', NULL),
+            ('aat', NULL, 'Lake                ', '                              ', 'CWDS                     ', ' ', '      ', 7079984190, 0, '2017-09-22', '    ', 'N', '0Wz', '2017-09-22 14:54:09.647', 'TG7O51q0Ki', '                                                                                                                                                                ', '7332', '17', 'N', 'Oi5T1d6q38', NULL),
+            ('aau', NULL, 'Mike                ', '                              ', 'Brady                    ', ' ', '      ', 2344242424, 0, '2017-09-25', '    ', 'N', 'aas', '2017-09-25 11:15:32.505', 'TgvbUtm06w', '                                                                                                                                                                ', '891 ', '17', 'N', 'Oi5T1d6q38', NULL),
+            ('aav', NULL, 'Carol               ', '                              ', 'Brady                    ', ' ', '      ', 3243423424, 0, '2017-09-25', '    ', 'N', 'aas', '2017-09-25 11:20:40.374', 'TgvbUtm06w', '                                                                                                                                                                ', '892 ', '17', 'N', 'Oi5T1d6q38', NULL),
+            ('aaw', NULL, 'Greg                ', '                              ', 'Brady                    ', ' ', '      ', 2345665767, 0, '2017-09-25', '    ', 'N', 'aat', '2017-09-25 11:44:19.983', 'BgUwJ2Uaat', '                                                                                                                                                                ', '893 ', '17', 'N', 'Oi5T1d6q38', NULL),
+            ('aaX', NULL, 'Peter               ', '                              ', 'Brady                    ', ' ', '      ', 4534523444, 0, '2017-09-25', '    ', 'N', 'aat', '2017-09-25 11:52:03.699', 'TgvbUtm06w', '                                                                                                                                                                ', '894 ', '17', 'N', 'Oi5T1d6q38', NULL)
+        </sql>
+    </changeSet>
+</databaseChangeLog>
+

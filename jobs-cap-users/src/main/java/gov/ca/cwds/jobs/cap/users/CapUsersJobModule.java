@@ -3,36 +3,43 @@ package gov.ca.cwds.jobs.cap.users;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
+import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
-import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
+import gov.ca.cwds.jobs.cap.users.job.CapUsersIncrementalJob;
+import gov.ca.cwds.jobs.cap.users.job.CapUsersInitialJob;
+import gov.ca.cwds.jobs.cap.users.service.IdmService;
+import gov.ca.cwds.jobs.cap.users.service.IdmServiceImpl;
 import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.mode.LocalDateTimeDefaultJobModeService;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
+import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Client;
-
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
+import java.time.LocalDateTime;
 
 public class CapUsersJobModule extends AbstractBaseJobModule {
   private static final Logger LOG = LoggerFactory.getLogger(CapUsersJobModule.class);
 
   private Class<? extends BulkWriter<ChangedUserDto>> capElasticWriterClass;
 
-  private Class<? extends CapUsersIterator> capUsersJobBatchIterator;
+  private Class<? extends IdmService> idmService;
 
   public CapUsersJobModule(String[] args) {
     super(args);
     this.capElasticWriterClass = CapUsersWriter.class;
-    this.capUsersJobBatchIterator = CapUsersJobBatchIterator.class;
+    this.idmService = IdmServiceImpl.class;
   }
 
   public void setCapElasticWriterClass(
@@ -40,37 +47,46 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
     this.capElasticWriterClass = capUsersElasticWriterClass;
   }
 
-  public void setCapUsersJobBatchIterator(Class<? extends CapUsersIterator> capUsersJobBatchIterator) {
-    this.capUsersJobBatchIterator = capUsersJobBatchIterator;
+  public void setIdmService(Class<? extends IdmService> idmService) {
+    this.idmService = idmService;
   }
 
   @Override
   protected void configure() {
     super.configure();
     configureJobModes();
-
     bind(new TypeLiteral<BulkWriter<ChangedUserDto>>() {
     }).to(capElasticWriterClass);
-
     bindConstant().annotatedWith(PerryApiUrl.class)
             .to(getJobsConfiguration(getJobOptions()).getPerryApiUrl());
     bindConstant().annotatedWith(PerryApiUser.class)
             .to(getJobsConfiguration(getJobOptions()).getPerryApiUser());
     bindConstant().annotatedWith(PerryApiPassword.class)
             .to(getJobsConfiguration(getJobOptions()).getPerryApiPassword());
-
-    bind(CapUsersIterator.class).to(capUsersJobBatchIterator);
-
+    bind(IdmService.class).to(idmService);
+    bind(
+            new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
+            }).to(LocalDateTimeSavePointContainerService.class);
   }
 
   private void configureJobModes() {
-    DefaultJobMode jobMode = defineJobMode();
-    if (jobMode == INITIAL_LOAD) {
-      configureInitialMode();
-    } else {
-      LOG.info("not initial mode selected");
-      throw new UnsupportedOperationException("the job mode other that INITIAL is not supported");
+    switch (defineJobMode()) {
+      case INITIAL_LOAD:
+        configureInitialMode();
+        break;
+      case INCREMENTAL_LOAD:
+        configureIncrementalMode();
+        break;
+      default:
+        String errorMsg = "Job mode cannot be defined";
+        LOG.info(errorMsg);
+        throw new UnsupportedOperationException(errorMsg);
     }
+  }
+
+  private void configureIncrementalMode() {
+    bind(Job.class).to(CapUsersIncrementalJob.class);
+    install(new CwsCmsDataAccessModule());
   }
 
   private void configureInitialMode() {
@@ -78,7 +94,13 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
   }
 
   private DefaultJobMode defineJobMode() {
-    return DefaultJobMode.INITIAL_LOAD;
+    LocalDateTimeDefaultJobModeService timestampDefaultJobModeService =
+            new LocalDateTimeDefaultJobModeService();
+    LocalDateTimeSavePointContainerService savePointContainerService =
+            new LocalDateTimeSavePointContainerService(getJobOptions().getLastRunLoc());
+    timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);
+
+    return timestampDefaultJobModeService.getCurrentJobMode();
   }
 
 
