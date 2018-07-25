@@ -1,7 +1,6 @@
 package gov.ca.cwds.jobs.cap.users.job;
 
 import com.google.inject.Inject;
-import gov.ca.cwds.jobs.cap.users.CapUsersBatchProcessor;
 import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
@@ -17,10 +16,6 @@ import java.time.LocalDateTime;
 public abstract class AbstractCapUsersJob implements Job {
   private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCapUsersJob.class);
 
-
-  @Inject
-  CapUsersBatchProcessor batchProcessor;
-
   @Inject
   private SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode> savePointContainerService;
 
@@ -33,10 +28,6 @@ public abstract class AbstractCapUsersJob implements Job {
     }
   }
 
-  @Override
-  public void close() {
-    batchProcessor.destroy();
-  }
 
   abstract void runJob();
 

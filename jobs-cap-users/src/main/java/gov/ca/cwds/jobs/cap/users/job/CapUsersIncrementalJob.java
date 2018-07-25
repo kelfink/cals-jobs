@@ -15,12 +15,14 @@ public class CapUsersIncrementalJob extends AbstractCapUsersJob {
   @CmsSessionFactory
   private SessionFactory cmsSessionFactory;
 
+  @Inject
+  private CapUsersIncrementalUpdatesProcessor updatesProcessor;
 
   @Override
   void runJob() {
     LocalDateTime dateTimeAtStart = LocalDateTime.now();
     LOGGER.info("CapUsersIncrementalJob is running");
-    batchProcessor.processBatches();
+    updatesProcessor.processUpdates();
     LOGGER.info("finishing Incremental Cap Users Job, creating timestampSavePoint at {}", dateTimeAtStart);
     createSavePoint(dateTimeAtStart);
   }
@@ -29,5 +31,6 @@ public class CapUsersIncrementalJob extends AbstractCapUsersJob {
   public void close() {
     super.close();
     cmsSessionFactory.close();
+    updatesProcessor.destroy();
   }
 }

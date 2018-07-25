@@ -68,7 +68,7 @@ public class CapUsersJobTest {
     assertEquals(0, TestCapUserWriter.getItems().size());
     addCwsDataForIncrementalLoad(1);
     runJob();
-    assertEquals(3, TestCapUserWriter.getItems().size());
+    assertEquals(4, TestCapUserWriter.getItems().size());
     addCwsDataForIncrementalLoad(2);
     runJob();
     assertEquals(1, TestCapUserWriter.getItems().size());

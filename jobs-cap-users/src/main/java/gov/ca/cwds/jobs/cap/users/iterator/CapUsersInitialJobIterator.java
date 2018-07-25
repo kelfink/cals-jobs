@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CapUsersInitialJobBatchIterator implements CapUsersIterator {
+public class CapUsersInitialJobIterator {
 
   private String paginationToken;
   private boolean allProcessed;
@@ -36,5 +36,4 @@ public class CapUsersInitialJobBatchIterator implements CapUsersIterator {
             .map(u -> new ChangedUserDto(u, RecordChangeOperation.I))
             .collect(Collectors.toList());
   }
-
 }

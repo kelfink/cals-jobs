@@ -1,8 +1,8 @@
-package gov.ca.cwds.jobs.cap.users;
+package gov.ca.cwds.jobs.cap.users.job;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
-import gov.ca.cwds.jobs.cap.users.iterator.CapUsersIterator;
+import gov.ca.cwds.jobs.cap.users.iterator.CapUsersInitialJobIterator;
 import gov.ca.cwds.jobs.common.elastic.ElasticSearchBulkCollector;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -11,7 +11,7 @@ import java.util.List;
 public class CapUsersBatchProcessor {
 
   @Inject
-  private CapUsersIterator capUsersJobBatchIterator;
+  private CapUsersInitialJobIterator capUsersJobBatchIterator;
 
   @Inject
   private ElasticSearchBulkCollector<ChangedUserDto> elasticSearchBulkCollector;

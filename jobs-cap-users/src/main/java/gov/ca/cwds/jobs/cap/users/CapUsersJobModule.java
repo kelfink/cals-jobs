@@ -7,9 +7,6 @@ import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
-import gov.ca.cwds.jobs.cap.users.iterator.CapUsersIncrementalJobIterator;
-import gov.ca.cwds.jobs.cap.users.iterator.CapUsersInitialJobBatchIterator;
-import gov.ca.cwds.jobs.cap.users.iterator.CapUsersIterator;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersIncrementalJob;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersInitialJob;
 import gov.ca.cwds.jobs.cap.users.service.IdmService;
@@ -90,12 +87,10 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
   private void configureIncrementalMode() {
     bind(Job.class).to(CapUsersIncrementalJob.class);
     install(new CwsCmsDataAccessModule());
-    bind(CapUsersIterator.class).to(CapUsersIncrementalJobIterator.class);
   }
 
   private void configureInitialMode() {
     bind(Job.class).to(CapUsersInitialJob.class);
-    bind(CapUsersIterator.class).to(CapUsersInitialJobBatchIterator.class);
   }
 
   private DefaultJobMode defineJobMode() {
