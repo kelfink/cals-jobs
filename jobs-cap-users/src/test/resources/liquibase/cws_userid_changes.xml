@@ -1,0 +1,20 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+<changeSet author="test" id="072320180259">
+    <update tableName="USERID_T">
+        <column name="LST_UPD_TS" value = '${now}'/>
+        <where>IDENTIFIER = 'AP3WuX7aaP'</where>
+     </update>
+    <update tableName="USERID_T">
+        <column name="LST_UPD_TS" value = '${now}'/>
+        <where>IDENTIFIER = 'BkQFyxJ0Wz'</where>
+    </update>
+    <update tableName="USERID_T">
+        <column name="LST_UPD_TS" value = '${now}'/>
+        <where>IDENTIFIER = 'Fcx1NUj0Wz'</where>
+    </update>
+    </changeSet>
+</databaseChangeLog>

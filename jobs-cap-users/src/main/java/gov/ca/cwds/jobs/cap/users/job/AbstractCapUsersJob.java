@@ -1,29 +1,48 @@
-package gov.ca.cwds.jobs.cap.users;
+package gov.ca.cwds.jobs.cap.users.job;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.jobs.cap.users.CapUsersBatchProcessor;
+import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
-import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
+import gov.ca.cwds.jobs.common.timereport.JobTimeReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 
-public class CapUsersLocalDateTimeJobFinalizer implements JobModeFinalizer {
-  private static final Logger LOGGER = LoggerFactory
-          .getLogger(CapUsersLocalDateTimeJobFinalizer.class);
+public abstract class AbstractCapUsersJob implements Job {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCapUsersJob.class);
+
+
+  @Inject
+  CapUsersBatchProcessor batchProcessor;
 
   @Inject
   private SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode> savePointContainerService;
 
   @Override
-  public void doFinalizeJob() {
-    LocalDateTimeSavePoint timestampSavePoint = new LocalDateTimeSavePoint(LocalDateTime.now());
+  public void run() {
+    JobTimeReport jobTimeReport = new JobTimeReport();
+    runJob();
+    if (LOGGER.isInfoEnabled()) {
+      jobTimeReport.printTimeSpent();
+    }
+  }
+
+  @Override
+  public void close() {
+    batchProcessor.destroy();
+  }
+
+  abstract void runJob();
+
+  void createSavePoint(LocalDateTime dateTime){
+    LocalDateTimeSavePoint timestampSavePoint = new LocalDateTimeSavePoint(dateTime);
     DefaultJobMode nextJobMode = DefaultJobMode.INCREMENTAL_LOAD;
-    LOGGER.info("finalizing Initial Cap Users Job, creating timestampSavePoint at {}", timestampSavePoint);
     LocalDateTimeSavePointContainer savePointContainer = new LocalDateTimeSavePointContainer();
     savePointContainer.setJobMode(nextJobMode);
     savePointContainer.setSavePoint(timestampSavePoint);
