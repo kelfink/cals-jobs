@@ -32,5 +32,4 @@ public class CapUsersBatchProcessor {
   public void destroy() {
     elasticSearchBulkCollector.destroy();
   }
-
 }

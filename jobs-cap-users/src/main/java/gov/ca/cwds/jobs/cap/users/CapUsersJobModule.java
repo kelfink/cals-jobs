@@ -37,12 +37,12 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
 
   private Class<? extends BulkWriter<ChangedUserDto>> capElasticWriterClass;
 
-  private Class<? extends IdmService> perryService;
+  private Class<? extends IdmService> idmService;
 
   public CapUsersJobModule(String[] args) {
     super(args);
     this.capElasticWriterClass = CapUsersWriter.class;
-    this.perryService = IdmServiceImpl.class;
+    this.idmService = IdmServiceImpl.class;
   }
 
   public void setCapElasticWriterClass(
@@ -50,8 +50,8 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
     this.capElasticWriterClass = capUsersElasticWriterClass;
   }
 
-  public void setPerryService(Class<? extends IdmService> perryService) {
-    this.perryService = perryService;
+  public void setIdmService(Class<? extends IdmService> idmService) {
+    this.idmService = idmService;
   }
 
   @Override
@@ -66,7 +66,7 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
             .to(getJobsConfiguration(getJobOptions()).getPerryApiUser());
     bindConstant().annotatedWith(PerryApiPassword.class)
             .to(getJobsConfiguration(getJobOptions()).getPerryApiPassword());
-    bind(IdmService.class).to(perryService);
+    bind(IdmService.class).to(idmService);
     bind(
             new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
             }).to(LocalDateTimeSavePointContainerService.class);
@@ -81,9 +81,9 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
         configureIncrementalMode();
         break;
       default:
-        String erroeMsg = "Job mode cannot be defined";
-        LOG.info(erroeMsg);
-        throw new UnsupportedOperationException(erroeMsg);
+        String errorMsg = "Job mode cannot be defined";
+        LOG.info(errorMsg);
+        throw new UnsupportedOperationException(errorMsg);
     }
   }
 

@@ -131,7 +131,7 @@ public class CapUsersJobTest {
   private CapUsersJobModule createCapUsersJobModule() {
     CapUsersJobModule capUsersJobModule = new CapUsersJobModule(getModuleArgs());
 
-    capUsersJobModule.setPerryService(MockedIdmService.class);
+    capUsersJobModule.setIdmService(MockedIdmService.class);
     capUsersJobModule.setElasticSearchModule(new AbstractModule() {
       @Override
       protected void configure() {

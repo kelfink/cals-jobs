@@ -14,20 +14,20 @@ import java.util.stream.Collectors;
 public class CapUsersInitialJobBatchIterator implements CapUsersIterator {
 
   private String paginationToken;
-  private boolean eol;
+  private boolean allProcessed;
 
 
   @Inject
   private IdmService idmService;
 
   public List<ChangedUserDto> getNextPortion() {
-    if (eol) {
+    if (allProcessed) {
       return Collections.emptyList();
     }
     UsersPage page = idmService.getUserPage(paginationToken);
     paginationToken = page.getPaginationToken();
     if (paginationToken == null) {
-      eol = true;
+      allProcessed = true;
     }
     if (CollectionUtils.isEmpty(page.getUserList())) {
       return Collections.emptyList();

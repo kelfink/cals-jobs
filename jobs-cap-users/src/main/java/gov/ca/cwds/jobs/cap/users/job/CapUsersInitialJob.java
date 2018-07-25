@@ -11,9 +11,9 @@ public class CapUsersInitialJob extends AbstractCapUsersJob {
   @Override
   void runJob() {
     LocalDateTime dateTimeAtStart = LocalDateTime.now();
-    LOGGER.info("start Initial Cap Users Job, creating timestampSavePoint at {}", dateTimeAtStart);
-    createSavePoint(dateTimeAtStart);
     LOGGER.info("CapUsersInitialJob is running");
     batchProcessor.processBatches();
+    LOGGER.info("Initial Cap Users Job, creating timestampSavePoint at {}", dateTimeAtStart);
+    createSavePoint(dateTimeAtStart);
   }
 }
