@@ -65,12 +65,10 @@ public class IdmServiceImpl implements IdmService {
   @SuppressWarnings("unchecked")
   public List<User> getUsersByRacfIds(Set<String> racfIds) {
 
-
     Response response = client
             .target(apiURL + "/users/search")
             .request(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, basicAuthHeader)
-
             .post(Entity.entity(racfIds, MediaType.APPLICATION_JSON));
 
     return response.readEntity(new GenericType<List<User>>() {
