@@ -32,6 +32,7 @@ public class CwsChangedUsersService {
     if (CollectionUtils.isEmpty(changedRacfIds)) {
       return Collections.emptyList();
     }
+    changedRacfIds = changedRacfIds.stream().map(String::trim).collect(Collectors.toSet());
     List<User> users = idmService.getUsersByRacfIds(changedRacfIds);
     return users.stream()
             .map(e -> new ChangedUserDto(e, RecordChangeOperation.U))
